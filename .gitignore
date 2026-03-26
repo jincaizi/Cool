@@ -1,0 +1,72 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# MemoryCaptures
+Memories/
+
+# Asset meta files should not be ignored
+# *.meta
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.unitypackage
+
+# VS/MD/Consulo
+[Ee]xported[Oo]bj/
+.vs/
+*.consulo
+*.csproj
+*.unityproj
+*.sln
+*.sln.DotSettings.user
+*.suo
+*.tmp
+*.user
+*.userprefs
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+[Tt]humbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Claude Code
+.claude/
+
+# Packages
+packages.config
+App.config
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+*.nupkg
+[Pp]ackages/*
+![Pp]ackages/manifest.json
+![Pp]ackages/packages-lock.json
+**/packages/*.nupkg
+
+# Project specific
+Cool.sln.DotSettings.user

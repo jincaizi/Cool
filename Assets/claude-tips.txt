@@ -1,0 +1,110 @@
+﻿请用 C# 实现一套基于 KCP + Protobuf 的可靠 UDP 网络通信框架，包含客户端和服务端，适用于大型 MMO 游戏。代码需兼容 Unity ( .NET Standard 2.0 ) 和 .NET 服务器，具备高并发、低延迟、可扩展性。
+
+## 一、总体架构
+- 分层：传输层 (Kcp会话) -> 消息编解码 -> 消息分发与处理 -> 业务层。
+- 异步非阻塞 I/O。
+- 线程模型：
+  - 一个专用网络线程驱动 Kcp 的 Update 和接收。
+  - 工作线程池反序列化消息，放入业务处理队列。
+  - Unity 客户端：业务逻辑通过主线程调度器执行，提供 IMessageExecutor 接口。
+  - 服务器：工作线程直接执行业务逻辑。
+- 消息处理支持优先级（控制类优先，位置同步可延迟）。
+
+## 二、核心技术选型
+- KCP：使用 Kcp_CSharp_unmanaged (≥1.0.5)，纯 C#，与 C++ KCP 兼容。
+- 序列化：protobuf-net，标记 [ProtoContract]/[ProtoMember]。
+- 日志：自定义 ILogger（Log(LogLevel, Exception, string)），提供 NullLogger，不依赖三方库。
+- 内存管理：ArrayPool<byte> 复用缓冲区，序列化用 IBufferWriter<byte> (如 ArrayBufferWriter)，接收数据后立即归还。
+- 并发队列：ConcurrentQueue + SemaphoreSlim，避免 System.Threading.Channels (Unity .NET Standard 2.0)。
+
+## 三、功能详细需求
+
+### 1. 传输层 (IKcpTransport / KcpTransportBase)
+- 封装 Kcp (客户端) 和 KcpPeer (服务端)。
+- 支持可靠有序和不可靠快速路径（通过 nodelay/fastresend 或直接 UDP 发送）。
+- 参数通过 KcpOptions 统一配置。
+
+### 2. 会话管理 (KcpSession)
+- 物理会话：唯一 ID、Kcp 对象、最后活跃时间、收发计数器。
+- 逻辑会话：支持断线重连恢复状态（TryBindLogicalState/TryGetLogicalState）。
+- SendAsync(IMessage)，CloseAsync()。
+- 事件：OnMessageReceived, OnDisconnected。
+
+### 3. 消息协议与编解码
+- 帧格式：[Flag: byte] (加密/压缩标志) + [MessageID: ushort] + [Length: ushort] + [Payload: protobuf]
+- MessageID 枚举：LoginRequest=1, LoginResponse=2, Heartbeat=3, Kick=4, DisconnectRequest=5, ShutdownNotification=6。
+- MessageCodec 提供 Encode/Decode，支持加密/解压，使用 ArrayPool 和 IBufferWriter。
+- 消息类型注册表 Dictionary<ushort, Type> 自动从枚举构建。
+
+### 4. 消息分发器 (MessageDispatcher)
+- RegisterHandler<T>(Action<KcpSession, T, CancellationToken>)。
+- 优先级队列：多个 ConcurrentQueue（高、中、低），工作线程优先消费高优先级。
+- 异常捕获并记录，不影响其他消息。
+
+### 5. 心跳与超时
+- 客户端定时心跳（可配置），服务端更新会话活跃时间。
+- 服务端定期扫描，清理超时会话（默认 15 秒无数据）。
+- 心跳消息可含客户端时间戳用于 RTT。
+
+### 6. 断线重连
+- 客户端检测断开后启动指数退避重连（可配置最大次数、基础/最大延迟）。
+- 重连时携带旧 SessionId 和 Token，服务端恢复逻辑会话。
+
+### 7. 流量控制与限流
+- 服务端：单 IP 最大连接数限制（超限拒绝并发送 RateLimitExceeded）。
+- 单会话每秒消息/字节限制，超限延迟或丢弃低优先级消息。
+- 全局队列长度限制，超限丢弃低优先级消息。
+
+### 8. 性能优化
+- ArrayPool + IBufferWriter 避免分配。
+- 发送队列：业务线程序列化后放入队列，网络线程批量发送。
+- 零拷贝：高频消息可传递 ReadOnlySpan<byte>（可选）。
+
+### 9. 安全
+- 支持 AES/XOR 加密，通过 KcpOptions 配置（PSK 或握手协商）。
+- 连接令牌防伪造。
+
+### 10. 监控与统计
+- 内置计数器：收发包数、字节数、重传次数、RTT。
+- 可定期输出日志或通过事件暴露。
+
+### 11. 优雅退出
+- 服务端停止时发送 ShutdownNotification，等待 3 秒后强制关闭。
+- 客户端退出时发送 DisconnectRequest，服务端清理资源。
+
+## 四、代码文件结构（共 15 个文件）
+
+公共部分放在 `KcpNet/Common/`，客户端在 `KcpNet/Client/`，服务端在 `KcpNet/Server/`，示例在 `Examples/`。
+
+1. **KcpNet/Common/KcpOptions.cs**：所有配置参数（KCP参数、网络、心跳、重连、限流、多线程、安全）。
+2. **KcpNet/Common/IKcpTransport.cs**：传输层接口（ConnectAsync, SendAsync, ReceiveAsync, CloseAsync, 属性）。
+3. **KcpNet/Common/KcpTransportBase.cs**：抽象基类，含发送队列、网络驱动循环模板方法。
+4. **KcpNet/Common/Message.cs**：IMessage 接口，MessageID 枚举，示例消息类（LoginRequest/Response, Heartbeat, Kick, DisconnectRequest, ShutdownNotification），使用 protobuf-net 标记。
+5. **KcpNet/Common/MessageCodec.cs**：Encode/Decode 静态方法，使用 ArrayPool 和 IBufferWriter，支持加密/压缩，消息类型注册表。
+6. **KcpNet/Common/MessageDispatcher.cs**：优先级队列，注册处理器，DispatchAsync。
+7. **KcpNet/Common/KcpSession.cs**：抽象类（SessionId, RemoteEndPoint, LastActivity, Transport, SendAsync, CloseAsync, 事件，逻辑状态绑定）。
+8. **KcpNet/Client/KcpClientTransport.cs**：继承 KcpTransportBase，封装 Kcp，实现客户端连接、更新、接收。
+9. **KcpNet/Client/KcpClient.cs**：继承 KcpSession，实现 ConnectAsync, StartHeartbeat, ReconnectAsync, 处理 Kick/Shutdown, IMessageExecutor 支持。
+10. **KcpNet/Server/KcpServerTransport.cs**：继承 KcpTransportBase，封装 KcpPeer，服务端单个连接传输实现。
+11. **KcpNet/Server/KcpServerSession.cs**：继承 KcpSession，服务端会话特有（可选限流、统计）。
+12. **KcpNet/Server/KcpServer.cs**：服务端主类，StartAsync/StopAsync，使用 KcpListener，维护会话字典，IP 计数，限流，广播，超时清理。
+13. **KcpNet/Server/KcpListenerWrapper.cs**（可选）：对 KcpListener 的封装。
+14. **Examples/ClientExample.cs**：展示连接、登录、心跳、重连、高频消息、主线程调度。
+15. **Examples/ServerExample.cs**：展示启动、注册处理器、登录处理、广播、超时清理、限流、优雅停止。
+
+## 五、额外要求
+- 所有网络操作返回 Task，支持 CancellationToken。
+- 实现 IDisposable，正确释放 Kcp/KcpPeer 和 UdpClient。
+- 线程安全使用并发集合。
+- 错误处理：捕获异常记录日志，优雅关闭会话。
+- Unity 兼容：.NET Standard 2.0，不用 Channels，用 ConcurrentQueue + SemaphoreSlim，异步方法返回 Task。
+- 关键方法 XML 注释。
+- NuGet 依赖：Kcp_CSharp_unmanaged (≥1.0.5), protobuf-net, System.Buffers, System.Threading.Tasks.Extensions。
+- 可选性能基准示例。
+
+## 六、流程图（简述）
+- 网络线程：Kcp/KcpPeer.Receive → 解析帧头 → 解密/解压 → 放入 MessageDispatcher 优先级队列。
+- 工作线程：从队列取消息 → Dispatch → 找到处理器 → 按上下文（Unity 主线程或直接）执行。
+- 发送：业务调用 SendAsync → 序列化+帧头 → 加密/压缩 → 放入发送队列 → 网络线程批量发送。
+
+请生成所有文件，每个文件用 ```csharp 代码块包裹，并标注完整文件名（如 `KcpNet/Common/KcpOptions.cs`）。代码应完整、可编译、逻辑正确。

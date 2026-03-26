@@ -1,0 +1,39 @@
+﻿请用C#实现一套基于KCP+Protobuf的可靠UDP通信系统，同时提供客户端和服务端代码，适用于大型MMO游戏。
+
+技术要求：
+- 语言：C# (.NET 6/8 或 .NET Standard 2.1，确保Unity兼容)
+- KCP库使用ikcp.h, ikcp.c两个源文件
+- Protobuf库：使用protobuf-net (NuGet: protobuf-net)，消息类使用[ProtoContract]/[ProtoMember]特性
+- 异步模型：async/await, Task, CancellationToken
+- 日志：抽象接口ILogger,只需抽象接口无需具体实现
+- 内存管理：使用ArrayPool<byte>减少分配
+
+功能需求：
+1. 基础传输层：封装Kcp，提供可靠发送和接收，自动处理重传、分片。
+2. 会话管理：服务端维护多会话，客户端维护单会话。提供连接状态事件。
+3. 消息协议：格式 [MessageID: ushort][Protobuf序列化字节]。支持消息ID枚举，动态注册消息处理器。
+4. 心跳与超时：客户端定时心跳，服务端检测超时断开。
+5. 断线重连：客户端自动重连，可配置次数和间隔。
+6. 性能与安全：对象池，限制单IP连接数，封包大小限制。
+
+代码结构（请生成以下文件，每个文件完整实现）：
+- KcpNet/IKcpTransport.cs：定义传输接口
+- KcpNet/KcpTransport.cs：基于KcpSharp实现IKcpTransport
+- KcpNet/Message.cs：消息基类、MessageID枚举、示例消息（LoginRequest, LoginResponse, Heartbeat）
+- KcpNet/MessageCodec.cs：序列化/反序列化，消息ID打包解包
+- KcpNet/MessageHandler.cs：消息注册与分发
+- KcpNet/KcpSession.cs：会话封装，包含发送、接收、事件
+- KcpNet/KcpClient.cs：客户端实现（连接、心跳、重连）
+- KcpNet/KcpServer.cs：服务端实现（监听、会话管理）
+- KcpNet/KcpOptions.cs：配置类（KCP参数、心跳间隔等）
+- Examples/ClientExample.cs：客户端示例
+- Examples/ServerExample.cs：服务端示例
+
+额外要求：
+- 所有异步方法支持CancellationToken。
+- 正确处理资源释放，避免内存泄漏。
+- 使用ILogger记录关键操作和异常。
+- 代码注释清晰，说明关键部分。
+- 在文件头部注明该文件的作用
+
+请以代码块形式输出每个文件，并在每个代码块前标注文件名。
