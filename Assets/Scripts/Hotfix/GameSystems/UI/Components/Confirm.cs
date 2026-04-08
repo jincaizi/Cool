@@ -1,7 +1,5 @@
 using System;
 using DG.Tweening;
-using Hotfix.GameSystems.UI.Framework.Animation;
-using Hotfix.GameSystems.UI.Framework.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,8 +8,9 @@ namespace Hotfix.GameSystems.UI.Components
     /// <summary>
     /// Confirm dialog component.
     /// Shows modal dialog with confirm/cancel actions.
+    /// This is a standalone singleton that manages its own visibility.
     /// </summary>
-    public class Confirm : UIPanel
+    public class Confirm : MonoBehaviour
     {
         [Header("Confirm UI References")]
         [SerializeField] private Text _titleText;
@@ -20,13 +19,12 @@ namespace Hotfix.GameSystems.UI.Components
         [SerializeField] private Button _cancelButton;
         [SerializeField] private Text _confirmText;
         [SerializeField] private Text _cancelText;
+        [SerializeField] private CanvasGroup _canvasGroup;
 
         private static Confirm _instance;
         private Action _onConfirm;
         private Action _onCancel;
-
-        protected override string PrefabPath => "";
-        protected override int Layer => UIConst.Layer_Popup;
+        private bool _isShowing;
 
         public static Confirm Instance
         {
@@ -45,13 +43,7 @@ namespace Hotfix.GameSystems.UI.Components
             var go = new GameObject("Confirm");
             var confirm = go.AddComponent<Confirm>();
             confirm.CreateLayout();
-
-            confirm.BlockBack = true;
-            confirm.CloseOnClickOutside = false;
-            confirm.CanMultiOpen = false;
-            confirm._useOpenAnim = true;
-            confirm._useCloseAnim = true;
-
+            go.SetActive(false);
             return confirm;
         }
 
@@ -63,6 +55,10 @@ namespace Hotfix.GameSystems.UI.Components
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(500, 300);
+
+            // Add CanvasGroup for alpha animations
+            _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            _canvasGroup.alpha = 0f;
 
             var bg = CreateImage("Background");
             bg.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
@@ -158,6 +154,9 @@ namespace Hotfix.GameSystems.UI.Components
             return btn;
         }
 
+        /// <summary>
+        /// Show the confirm dialog with specified parameters.
+        /// </summary>
         public static void Show(
             string title,
             string message,
@@ -185,26 +184,61 @@ namespace Hotfix.GameSystems.UI.Components
             _confirmText.text = confirmText;
             _cancelText.text = cancelText;
 
-            UIManager.Instance.Open<Confirm>();
+            ShowSelf();
+        }
+
+        /// <summary>
+        /// Show the dialog using DOTween animation.
+        /// </summary>
+        private void ShowSelf()
+        {
+            if (_isShowing) return;
+            _isShowing = true;
+            gameObject.SetActive(true);
+            _canvasGroup.alpha = 0f;
+            _canvasGroup.DOFade(1f, 0.3f).SetUpdate(true);
+        }
+
+        /// <summary>
+        /// Hide the dialog using DOTween animation.
+        /// </summary>
+        private void HideSelf()
+        {
+            if (!_isShowing) return;
+            _canvasGroup.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() =>
+            {
+                gameObject.SetActive(false);
+                _isShowing = false;
+            });
         }
 
         private void OnConfirmClicked()
         {
             _onConfirm?.Invoke();
-            Close();
+            HideSelf();
+            ClearCallbacks();
         }
 
         private void OnCancelClicked()
         {
             _onCancel?.Invoke();
-            Close();
+            HideSelf();
+            ClearCallbacks();
         }
 
-        private void Close()
+        private void ClearCallbacks()
         {
-            UIManager.Instance.Close<Confirm>();
             _onConfirm = null;
             _onCancel = null;
+        }
+
+        /// <summary>
+        /// Hide the dialog programmatically.
+        /// </summary>
+        public void Hide()
+        {
+            HideSelf();
+            ClearCallbacks();
         }
     }
 }
