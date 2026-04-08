@@ -12,52 +12,43 @@ namespace KcpServer.AI.Core
     public class AiManager
     {
         private readonly Dictionary<long, AiComponent> _aiComponents = new();
+        private readonly Dictionary<int, MonsterData> _monsterConfigs = new();
         private long _nextInstanceId = 1;
         private readonly object _lock = new();
         private bool _running;
         private Task? _updateTask;
         private readonly Dictionary<long, Vector3> _lastPositions = new();
 
-        // Config
-        private readonly Dictionary<int, MonsterData> _monsterConfigs = new();
+        // Player position provider (set by integration)
+        private Func<long, IEnumerable<(long playerId, Vector3 position)>>? _playerPositionProvider;
 
         public event Action<long, Vector3, Quaternion, NpcAnimationState>? OnAiStateChanged;
 
-        public AiManager()
+        public AiManager(string? configPath = null)
         {
-            LoadMonsterConfigs();
+            LoadMonsterConfigs(configPath);
         }
 
-        private void LoadMonsterConfigs()
+        /// <summary>
+        /// Set the function to get player positions for target detection
+        /// </summary>
+        public void SetPlayerPositionProvider(Func<long, IEnumerable<(long playerId, Vector3 position)>> provider)
         {
-            var slime = new MonsterData
-            {
-                templateId = 1,
-                name = "Slime",
-                hp = 100,
-                moveSpeed = 2.0f,
-                detectionRadius = 8,
-                visionAngle = 120,
-                attackRange = 1.5f,
-                patrolRadius = 5,
-                skills = new List<string> { "Attack" }
-            };
+            _playerPositionProvider = provider;
+        }
 
-            var wolf = new MonsterData
-            {
-                templateId = 2,
-                name = "Wolf",
-                hp = 150,
-                moveSpeed = 3.5f,
-                detectionRadius = 15,
-                visionAngle = 90,
-                attackRange = 2.0f,
-                patrolRadius = 10,
-                skills = new List<string> { "Attack" }
-            };
+        private void LoadMonsterConfigs(string? configPath)
+        {
+            string path = configPath ?? "Config/monster_config.json";
+            _monsterConfigs.Clear();
 
-            _monsterConfigs[1] = slime;
-            _monsterConfigs[2] = wolf;
+            var templates = ConfigLoader.LoadMonsterTemplates(path);
+            foreach (var kvp in templates)
+            {
+                _monsterConfigs[kvp.Key] = kvp.Value;
+            }
+
+            Console.WriteLine($"Loaded {_monsterConfigs.Count} monster templates");
         }
 
         public AiComponent Spawn(int templateId, Vector3 position, Quaternion rotation)
@@ -80,6 +71,7 @@ namespace KcpServer.AI.Core
                 ai.PatrolPoints = GeneratePatrolPoints(position, ai.Blackboard.PatrolRadius);
 
                 _aiComponents[id] = ai;
+                Console.WriteLine($"Spawned AI {id} (template {templateId}) at {position}");
                 return ai;
             }
         }
@@ -88,8 +80,11 @@ namespace KcpServer.AI.Core
         {
             lock (_lock)
             {
-                _aiComponents.Remove(instanceId);
-                _lastPositions.Remove(instanceId);
+                if (_aiComponents.Remove(instanceId))
+                {
+                    _lastPositions.Remove(instanceId);
+                    Console.WriteLine($"Despawned AI {instanceId}");
+                }
             }
         }
 
@@ -97,12 +92,14 @@ namespace KcpServer.AI.Core
         {
             _running = true;
             _updateTask = Task.Run(() => UpdateLoop());
+            Console.WriteLine("AiManager started");
         }
 
         public void Stop()
         {
             _running = false;
             _updateTask?.Wait();
+            Console.WriteLine("AiManager stopped");
         }
 
         private void UpdateLoop()
@@ -121,6 +118,9 @@ namespace KcpServer.AI.Core
                 {
                     try
                     {
+                        // Target detection
+                        DetectTargets(ai);
+
                         var prevAnim = ai.CurrentAnimState;
                         ai.Update(deltaTime);
 
@@ -139,7 +139,55 @@ namespace KcpServer.AI.Core
                     }
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(100); // 10Hz
+            }
+        }
+
+        private void DetectTargets(AiComponent ai)
+        {
+            if (_playerPositionProvider == null) return;
+
+            // Get all nearby players
+            var players = _playerPositionProvider(ai.InstanceId);
+            if (players == null) return;
+
+            long? closestPlayerId = null;
+            Vector3? closestPosition = null;
+            float closestDistance = float.MaxValue;
+
+            foreach (var (playerId, position) in players)
+            {
+                if (ai.TargetDetector.CanDetectTarget(ai.Position, ai.Rotation, position))
+                {
+                    float dist = Vector3.Distance(ai.Position, position);
+                    if (dist < closestDistance)
+                    {
+                        closestDistance = dist;
+                        closestPlayerId = playerId;
+                        closestPosition = position;
+                    }
+                }
+            }
+
+            if (closestPlayerId.HasValue)
+            {
+                if (!ai.Blackboard.TargetId.HasValue || ai.Blackboard.TargetId != closestPlayerId)
+                {
+                    // New target acquired
+                    ai.SetTarget(closestPlayerId, closestPosition);
+                    Console.WriteLine($"AI {ai.InstanceId} acquired target: player {closestPlayerId}");
+                }
+                else
+                {
+                    // Update last known position
+                    ai.Blackboard.LastKnownTargetPosition = closestPosition;
+                }
+            }
+            else if (ai.Blackboard.TargetId.HasValue)
+            {
+                // Target lost
+                ai.SetTarget(null);
+                Console.WriteLine($"AI {ai.InstanceId} lost target");
             }
         }
 
@@ -182,6 +230,17 @@ namespace KcpServer.AI.Core
                     new BtAction(ai => BtActions.Return(ai, moveSystem))
                 )
             );
+        }
+
+        public int AiCount
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _aiComponents.Count;
+                }
+            }
         }
     }
 }
