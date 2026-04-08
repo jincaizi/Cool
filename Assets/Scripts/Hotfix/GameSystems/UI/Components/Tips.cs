@@ -39,6 +39,7 @@ namespace Hotfix.GameSystems.UI.Components
                 }
                 return _instance;
             }
+            private set;
         }
 
         private static Tips CreateInstance()
@@ -48,6 +49,7 @@ namespace Hotfix.GameSystems.UI.Components
             tips.CreateLayout();
 
             tips.gameObject.SetActive(false);
+            DontDestroyOnLoad(go);
             return tips;
         }
 
@@ -150,6 +152,7 @@ namespace Hotfix.GameSystems.UI.Components
         private void ShowTipsImmediate(TipsItem item)
         {
             _isShowing = true;
+            _canvasGroup?.DOKill();
             gameObject.SetActive(true);
 
             _rect.anchoredPosition = item.Position;
@@ -176,6 +179,7 @@ namespace Hotfix.GameSystems.UI.Components
         private void HideTips()
         {
             _pendingTips.Clear();
+            _canvasGroup?.DOKill();
             _canvasGroup.DOFade(0f, 0.1f).OnComplete(() =>
             {
                 gameObject.SetActive(false);
