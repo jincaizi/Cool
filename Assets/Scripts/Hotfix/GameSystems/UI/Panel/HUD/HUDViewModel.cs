@@ -12,6 +12,8 @@ namespace Hotfix.GameSystems.UI.Panel.HUD
         private int _mana;
         private int _maxMana;
         private string _playerName;
+        private float _healthPercent;
+        private float _manaPercent;
 
         public int Health
         {
@@ -20,6 +22,7 @@ namespace Hotfix.GameSystems.UI.Panel.HUD
             {
                 _health = value;
                 SetProperty("Health", value);
+                HealthPercent = MaxHealth > 0 ? (float)Health / MaxHealth : 0f;
             }
         }
 
@@ -40,6 +43,7 @@ namespace Hotfix.GameSystems.UI.Panel.HUD
             {
                 _mana = value;
                 SetProperty("Mana", value);
+                ManaPercent = MaxMana > 0 ? (float)Mana / MaxMana : 0f;
             }
         }
 
@@ -63,8 +67,17 @@ namespace Hotfix.GameSystems.UI.Panel.HUD
             }
         }
 
-        public float HealthPercent => MaxHealth > 0 ? (float)Health / MaxHealth : 0f;
-        public float ManaPercent => MaxMana > 0 ? (float)Mana / MaxMana : 0f;
+        public float HealthPercent
+        {
+            get => _healthPercent;
+            set { _healthPercent = value; SetProperty("HealthPercent", value); }
+        }
+
+        public float ManaPercent
+        {
+            get => _manaPercent;
+            set { _manaPercent = value; SetProperty("ManaPercent", value); }
+        }
 
         public override void Refresh()
         {

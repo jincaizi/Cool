@@ -38,8 +38,8 @@ namespace Hotfix.GameSystems.UI.Panel.HUD
             Bind(_viewModel);
 
             // Setup bindings
-            RegisterBinding("Health", () => _viewModel.Health, val => _healthText.text = $"{_viewModel.Health}/{_viewModel.MaxHealth}");
-            RegisterBinding("Mana", () => _viewModel.Mana, val => _manaText.text = $"{_viewModel.Mana}/{_viewModel.MaxMana}");
+            RegisterBinding("Health", () => _viewModel.Health, val => _healthText.text = $"{val}/{_viewModel.MaxHealth}");
+            RegisterBinding("Mana", () => _viewModel.Mana, val => _manaText.text = $"{val}/{_viewModel.MaxMana}");
             RegisterBinding("PlayerName", () => _viewModel.PlayerName, val => _nameText.text = _viewModel.PlayerName?.ToString() ?? "");
 
             // Subscribe to percent changes
