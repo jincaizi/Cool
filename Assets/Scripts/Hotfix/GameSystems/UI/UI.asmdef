@@ -1,0 +1,12 @@
+{
+    "name": "Hotfix.GameSystems.UI",
+    "rootNamespace": "",
+    "references": [
+        "KcpNet"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "versionDefines": [],
+    "noEngineReferences": false
+}
