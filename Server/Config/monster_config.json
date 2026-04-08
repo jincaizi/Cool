@@ -1,0 +1,26 @@
+{
+  "monsters": [
+    {
+      "templateId": 1,
+      "name": "Slime",
+      "hp": 100,
+      "moveSpeed": 2.0,
+      "detectionRadius": 8,
+      "visionAngle": 120,
+      "attackRange": 1.5,
+      "patrolRadius": 5,
+      "skills": ["Attack"]
+    },
+    {
+      "templateId": 2,
+      "name": "Wolf",
+      "hp": 150,
+      "moveSpeed": 3.5,
+      "detectionRadius": 15,
+      "visionAngle": 90,
+      "attackRange": 2.0,
+      "patrolRadius": 10,
+      "skills": ["Attack"]
+    }
+  ]
+}
