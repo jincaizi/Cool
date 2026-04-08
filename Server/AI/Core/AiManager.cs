@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using KcpServer;
 using KcpServer.Config;
+using KcpServer.AI.BehaviorTree;
+using KcpServer.AI.Movement;
 
 namespace KcpServer.AI.Core
 {
@@ -23,13 +25,11 @@ namespace KcpServer.AI.Core
 
         public AiManager()
         {
-            // Load configs
             LoadMonsterConfigs();
         }
 
         private void LoadMonsterConfigs()
         {
-            // Default configs - in production would load from JSON
             var slime = new MonsterData
             {
                 templateId = 1,
@@ -76,10 +76,7 @@ namespace KcpServer.AI.Core
                 ai.Blackboard.SpawnPosition = position;
                 ai.Blackboard.PatrolCenter = position;
 
-                // Build behavior tree
                 ai.BehaviorTree = BuildBehaviorTree(ai);
-
-                // Generate patrol points
                 ai.PatrolPoints = GeneratePatrolPoints(position, ai.Blackboard.PatrolRadius);
 
                 _aiComponents[id] = ai;
@@ -112,7 +109,7 @@ namespace KcpServer.AI.Core
         {
             while (_running)
             {
-                float deltaTime = 0.1f; // 10Hz update rate
+                float deltaTime = 0.1f;
                 List<AiComponent> ais;
 
                 lock (_lock)
@@ -127,7 +124,6 @@ namespace KcpServer.AI.Core
                         var prevAnim = ai.CurrentAnimState;
                         ai.Update(deltaTime);
 
-                        // Check if position or animation changed
                         bool posChanged = !_lastPositions.TryGetValue(ai.InstanceId, out var lastPos) ||
                                           Vector3.Distance(ai.Position, lastPos) > 0.1f;
 
@@ -143,7 +139,7 @@ namespace KcpServer.AI.Core
                     }
                 }
 
-                Thread.Sleep(100); // 10Hz
+                Thread.Sleep(100);
             }
         }
 
@@ -166,31 +162,24 @@ namespace KcpServer.AI.Core
 
         private BtNode BuildBehaviorTree(AiComponent ai)
         {
-            var moveSystem = new Movement.SimpleMoveSystem();
+            var moveSystem = new SimpleMoveSystem();
 
-            // Root: Selector
-            // ├── Sequence: 巡逻（PEACE）
-            // ├── Sequence: 追击+攻击（HOSTILE）
-            // └── Sequence: 返回
-            return new BehaviorTree.BtSelector(
-                // Patrol sequence
-                new BehaviorTree.BtSequence(
-                    new BehaviorTree.BtCondition(ai => ai.Blackboard.AlertLevel == AlertLevel.PEACE),
-                    new BehaviorTree.BtCondition(ai => !ai.Blackboard.TargetId.HasValue),
-                    new BehaviorTree.BtAction(ai => BtActions.Patrol(ai, moveSystem, ai.PatrolPoints))
+            return new BtSelector(
+                new BtSequence(
+                    new BtCondition(ai => ai.Blackboard.AlertLevel == AlertLevel.PEACE),
+                    new BtCondition(ai => !ai.Blackboard.TargetId.HasValue),
+                    new BtAction(ai => BtActions.Patrol(ai, moveSystem, ai.PatrolPoints))
                 ),
-                // Chase and Attack sequence
-                new BehaviorTree.BtSequence(
-                    new BehaviorTree.BtCondition(ai => ai.Blackboard.AlertLevel == AlertLevel.HOSTILE),
-                    new BehaviorTree.BtCondition(ai => ai.Blackboard.TargetId.HasValue),
-                    new BehaviorTree.BtAction(ai => BtActions.Chase(ai, ai.Blackboard.LastKnownTargetPosition ?? ai.Position, moveSystem)),
-                    new BehaviorTree.BtAction(ai => BtActions.Attack(ai, ai.Blackboard.LastKnownTargetPosition ?? ai.Position, ai.SkillSystem))
+                new BtSequence(
+                    new BtCondition(ai => ai.Blackboard.AlertLevel == AlertLevel.HOSTILE),
+                    new BtCondition(ai => ai.Blackboard.TargetId.HasValue),
+                    new BtAction(ai => BtActions.Chase(ai, ai.Blackboard.LastKnownTargetPosition ?? ai.Position, moveSystem)),
+                    new BtAction(ai => BtActions.Attack(ai, ai.Blackboard.LastKnownTargetPosition ?? ai.Position, ai.SkillSystem))
                 ),
-                // Return sequence
-                new BehaviorTree.BtSequence(
-                    new BehaviorTree.BtCondition(ai => !ai.Blackboard.TargetId.HasValue),
-                    new BehaviorTree.BtCondition(ai => ai.Blackboard.AlertLevel != AlertLevel.PEACE),
-                    new BehaviorTree.BtAction(ai => BtActions.Return(ai, moveSystem))
+                new BtSequence(
+                    new BtCondition(ai => !ai.Blackboard.TargetId.HasValue),
+                    new BtCondition(ai => ai.Blackboard.AlertLevel != AlertLevel.PEACE),
+                    new BtAction(ai => BtActions.Return(ai, moveSystem))
                 )
             );
         }

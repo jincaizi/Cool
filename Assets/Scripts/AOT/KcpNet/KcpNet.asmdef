@@ -1,0 +1,10 @@
+{
+    "name": "KcpNet",
+    "rootNamespace": "KcpNet",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "versionDefines": [],
+    "noEngineReferences": false
+}

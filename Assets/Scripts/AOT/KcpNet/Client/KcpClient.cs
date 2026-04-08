@@ -164,6 +164,9 @@ namespace KcpNet
                         case Heartbeat heartbeat:
                             HandleHeartbeatResponse(heartbeat);
                             break;
+                        case RemotePlayerSync remoteSync:
+                            HandleRemotePlayerSync(remoteSync);
+                            break;
                         default:
                             // 其他消息通过事件处理
                             OnMessageReceived(message);
@@ -202,6 +205,20 @@ namespace KcpNet
         {
             // 在消息执行器上下文中触发事件
             _messageExecutor.Execute(() => base.OnError(ex));
+        }
+
+        /// <summary>
+        /// 远程玩家同步回调
+        /// </summary>
+        public event Action<RemotePlayerSync>? RemotePlayerSyncReceived;
+
+        /// <summary>
+        /// 处理远程玩家同步消息
+        /// </summary>
+        private void HandleRemotePlayerSync(RemotePlayerSync remoteSync)
+        {
+            Logger.LogDebug($"Remote player sync received: playerId={remoteSync.PlayerId}");
+            RemotePlayerSyncReceived?.Invoke(remoteSync);
         }
 
         /// <inheritdoc/>

@@ -21,5 +21,20 @@ namespace KcpServer
             0 => X, 1 => Y, 2 => Z, 3 => W,
             _ => throw new IndexOutOfRangeException()
         };
+
+        public static Quaternion LookRotation(Vector3 forward)
+        {
+            float yaw = (float)Math.Atan2(forward.X, forward.Z);
+            float cy = (float)Math.Cos(yaw * 0.5f);
+            float sy = (float)Math.Sin(yaw * 0.5f);
+            return new Quaternion(0, sy, 0, cy);
+        }
+
+        public Quaternion Normalize()
+        {
+            float mag = (float)Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
+            if (mag < 0.0001f) return identity;
+            return new Quaternion(X / mag, Y / mag, Z / mag, W / mag);
+        }
     }
 }

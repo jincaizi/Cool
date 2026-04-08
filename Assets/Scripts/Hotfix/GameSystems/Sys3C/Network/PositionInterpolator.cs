@@ -15,15 +15,15 @@ namespace Hotfix.GameSystems.Sys3C.Network
             public Quaternion CurrentRotation;
             public Vector3 TargetPosition;
             public Quaternion TargetRotation;
-            public float InterpolationTime;     // 目标到达时间
             public long LastUpdateTimestamp;
-            public float NetworkLatency;        // 估算的网络延迟
         }
 
         private readonly Dictionary<long, InterpolateTarget> _targets = new Dictionary<long, InterpolateTarget>();
 
         // 插值延迟（秒），服务端广播间隔约 0.1s (10Hz)，加上延迟补偿
         private const float INTERPOLATION_DELAY = 0.1f;
+
+        private static float TicksToSeconds(long ticks) => ticks / (float)System.TimeSpan.TicksPerSecond;
 
         /// <summary>
         /// 更新目标位置（服务端广播触发）
@@ -42,18 +42,8 @@ namespace Hotfix.GameSystems.Sys3C.Network
                 _targets[playerId] = target;
             }
 
-            long now = System.DateTime.UtcNow.Ticks;
-            long elapsed = now - serverTimestamp;
-            float elapsedSeconds = elapsed / (float)System.TimeSpan.TicksPerSecond;
-
-            // 网络延迟估算（简化：使用实际经过时间作为延迟）
-            target.NetworkLatency = elapsedSeconds;
-
-            // 目标位置 = 刚刚收到的服务端位置
-            // 插值时间 = 延迟 + 一个广播间隔
             target.TargetPosition = position;
             target.TargetRotation = rotation;
-            target.InterpolationTime = elapsedSeconds + INTERPOLATION_DELAY;
             target.LastUpdateTimestamp = serverTimestamp;
         }
 
@@ -65,12 +55,7 @@ namespace Hotfix.GameSystems.Sys3C.Network
             if (!_targets.TryGetValue(playerId, out var target))
                 return (Vector3.zero, Quaternion.identity);
 
-            long now = System.DateTime.UtcNow.Ticks;
-            float t = (now - target.LastUpdateTimestamp) / (float)System.TimeSpan.TicksPerSecond;
-
-            // t 是从上一个更新到现在经过的时间
-            // 使用 t / INTERPOLATION_DELAY 作为 Lerp 参数
-            float lerpT = Mathf.Clamp01(t / INTERPOLATION_DELAY);
+            float lerpT = GetLerpT(target.LastUpdateTimestamp);
 
             return (
                 Vector3.Lerp(target.CurrentPosition, target.TargetPosition, lerpT),
@@ -86,12 +71,17 @@ namespace Hotfix.GameSystems.Sys3C.Network
             if (!_targets.TryGetValue(playerId, out var target))
                 return;
 
-            long now = System.DateTime.UtcNow.Ticks;
-            float elapsed = (now - target.LastUpdateTimestamp) / (float)System.TimeSpan.TicksPerSecond;
-            float lerpT = Mathf.Clamp01(elapsed / INTERPOLATION_DELAY);
+            float lerpT = GetLerpT(target.LastUpdateTimestamp);
 
             target.CurrentPosition = Vector3.Lerp(target.CurrentPosition, target.TargetPosition, lerpT);
             target.CurrentRotation = Quaternion.Slerp(target.CurrentRotation, target.TargetRotation, lerpT);
+        }
+
+        private float GetLerpT(long lastUpdateTimestamp)
+        {
+            long now = System.DateTime.UtcNow.Ticks;
+            float elapsed = TicksToSeconds(now - lastUpdateTimestamp);
+            return Mathf.Clamp01(elapsed / INTERPOLATION_DELAY);
         }
 
         /// <summary>

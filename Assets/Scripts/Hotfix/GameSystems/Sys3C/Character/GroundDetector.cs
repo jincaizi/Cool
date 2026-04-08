@@ -8,7 +8,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
     public class GroundDetector
     {
         private readonly Transform _transform;
-        private readonly CapsuleCollider _capsule;
+        private readonly UnityEngine.CharacterController _controller;
         private readonly LayerMask _groundLayer;
 
         // 射线检测参数
@@ -17,10 +17,10 @@ namespace Hotfix.GameSystems.Sys3C.Character
         private const float MAX_GROUND_ANGLE = 45f;
         private const float GROUND_CHECK_DISTANCE = 0.15f;
 
-        public GroundDetector(Transform transform, CapsuleCollider capsule, LayerMask groundLayer)
+        public GroundDetector(Transform transform, UnityEngine.CharacterController controller, LayerMask groundLayer)
         {
             _transform = transform;
-            _capsule = capsule;
+            _controller = controller;
             _groundLayer = groundLayer;
         }
 
@@ -29,9 +29,9 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public bool IsGrounded()
         {
-            float capsuleHeight = _capsule.height;
-            float capsuleRadius = _capsule.radius;
-            float capsuleCenterY = _capsule.center.y;
+            float capsuleHeight = _controller.height;
+            float capsuleRadius = _controller.radius;
+            float capsuleCenterY = _controller.center.y;
 
             Vector3 origin = _transform.position + Vector3.up * (capsuleRadius + GROUND_CHECK_DISTANCE);
 
@@ -79,9 +79,9 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public Vector3 GetGroundNormal()
         {
-            Vector3 origin = _transform.position + Vector3.up * (_capsule.radius + GROUND_CHECK_DISTANCE);
+            Vector3 origin = _transform.position + Vector3.up * (_controller.radius + GROUND_CHECK_DISTANCE);
 
-            if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, _capsule.height * 0.5f + GROUND_CHECK_DISTANCE, _groundLayer))
+            if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, _controller.height * 0.5f + GROUND_CHECK_DISTANCE, _groundLayer))
             {
                 return hit.normal;
             }

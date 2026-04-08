@@ -14,7 +14,7 @@ namespace Hotfix.GameSystems.Sys3C.Network
         // 偏差阈值（超过则 rubber-band）
         private const float POSITION_DEVIATION_THRESHOLD = 0.5f;
         private const float ROTATION_DEVIATION_THRESHOLD = 5f;
-        private const float RUBBER_BAND_SPEED = 10f;
+        private const int MAX_PREDICTED_FRAMES = 60;
 
         private uint _lastServerSequence;
 
@@ -23,7 +23,6 @@ namespace Hotfix.GameSystems.Sys3C.Network
             public Vector3 Position;
             public Quaternion Rotation;
             public uint Sequence;
-            public long Timestamp;
         }
 
         /// <summary>
@@ -32,7 +31,7 @@ namespace Hotfix.GameSystems.Sys3C.Network
         public void RecordPredictedFrame(uint sequence, Vector3 position, Quaternion rotation)
         {
             // 清理过期帧
-            while (_predictedFrames.Count > 60) // 最多保留60帧
+            if (_predictedFrames.Count > MAX_PREDICTED_FRAMES)
             {
                 _predictedFrames.RemoveAt(0);
             }
@@ -41,8 +40,7 @@ namespace Hotfix.GameSystems.Sys3C.Network
             {
                 Position = position,
                 Rotation = rotation,
-                Sequence = sequence,
-                Timestamp = System.DateTime.UtcNow.Ticks
+                Sequence = sequence
             };
         }
 
@@ -69,22 +67,11 @@ namespace Hotfix.GameSystems.Sys3C.Network
 
                 if (posDeviation > POSITION_DEVIATION_THRESHOLD || rotDeviation > ROTATION_DEVIATION_THRESHOLD)
                 {
-                    // 偏差过大，需要 rubber-band
-                    correctedPosition = serverPosition;
-                    correctedRotation = serverRotation;
                     return true; // 表示做了校正
                 }
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// 执行 rubber-band 拉回
-        /// </summary>
-        public Vector3 ApplyRubberBand(Vector3 currentPosition, Vector3 targetPosition, float deltaTime)
-        {
-            return Vector3.Lerp(currentPosition, targetPosition, RUBBER_BAND_SPEED * deltaTime);
         }
 
         /// <summary>

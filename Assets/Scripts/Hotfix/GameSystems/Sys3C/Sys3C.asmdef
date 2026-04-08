@@ -2,9 +2,7 @@
     "name": "Hotfix.GameSystems.Sys3C",
     "rootNamespace": "",
     "references": [
-        "Unity.Model",
-        "Unity.Entities",
-        "Unity.Burst"
+        "KcpNet"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

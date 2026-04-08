@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Hotfix.GameSystems.Sys3C.Character;
 
 namespace Hotfix.GameSystems.Sys3C.Input
 {

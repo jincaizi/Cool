@@ -1,3 +1,5 @@
+using KcpServer.AI.Core;
+
 namespace KcpServer.AI.BehaviorTree
 {
     public delegate bool ConditionDelegate(AiComponent ai);

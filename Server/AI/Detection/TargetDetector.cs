@@ -15,15 +15,12 @@ namespace KcpServer.AI.Detection
 
         public bool CanDetectTarget(Vector3 aiPosition, Quaternion aiRotation, Vector3 targetPosition)
         {
-            // Distance check
             float distance = Vector3.Distance(aiPosition, targetPosition);
             if (distance > _detectionRadius) return false;
 
-            // Vision cone check - get forward direction from rotation
             Vector3 aiForward = GetForward(aiRotation);
             Vector3 directionToTarget = targetPosition - aiPosition;
 
-            // Flatten Y for 2D angle check (we're checking horizontal vision cone)
             aiForward.Y = 0;
             directionToTarget.Y = 0;
 
@@ -38,9 +35,6 @@ namespace KcpServer.AI.Detection
 
         private static Vector3 GetForward(Quaternion rotation)
         {
-            // Convert quaternion to forward direction
-            // For a Y-axis rotation (yaw), forward is (sin(y), 0, cos(y)) where Y is yaw angle
-            // Since our Quaternion stores X,Y,Z,W directly, we compute:
             float siny = 2 * (rotation.W * rotation.Y + rotation.X * rotation.Z);
             float cosy = 1 - 2 * (rotation.X * rotation.X + rotation.Y * rotation.Y);
             return new Vector3(siny, 0, cosy);
@@ -48,13 +42,16 @@ namespace KcpServer.AI.Detection
 
         private static float AngleBetween(Vector3 a, Vector3 b)
         {
-            float dot = a.X * b.X + a.Z * b.Z; // Use XZ for horizontal
+            float dot = a.X * b.X + a.Z * b.Z;
             float det = a.X * b.Z - a.Z * b.X;
             float angle = (float)System.Math.Atan2(det, dot);
             return (float)System.Math.Abs(angle * 180.0f / System.Math.PI);
         }
     }
+}
 
+namespace KcpServer
+{
     public static class Vector3Extensions
     {
         public static Vector3 Normalize(this Vector3 v)

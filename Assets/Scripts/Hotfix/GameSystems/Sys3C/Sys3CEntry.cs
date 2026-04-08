@@ -29,7 +29,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         // 各模块实例
         private InputManager _inputManager;
-        private CharacterController _characterController;
+        private Hotfix.GameSystems.Sys3C.Character.CharacterController _characterController;
         private CharacterAnimationController _animationController;
         private ThirdPersonCameraController _cameraController;
         private NetworkBridge _networkBridge;
@@ -40,7 +40,7 @@ namespace Hotfix.GameSystems.Sys3C
         private UnityEngine.CharacterController _unityCharacterController;
         private Rigidbody _rigidbody;
         private Animator _animator;
-        private Camera _mainCamera;
+        private UnityEngine.Camera _mainCamera;
 
         private void Awake()
         {
@@ -49,8 +49,7 @@ namespace Hotfix.GameSystems.Sys3C
             _rigidbody = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
 
-            if (_mainCamera == null)
-                _mainCamera = Camera.main;
+            _mainCamera ??= UnityEngine.Camera.main;
         }
 
         private void Start()
@@ -62,7 +61,7 @@ namespace Hotfix.GameSystems.Sys3C
             _inputManager.CameraSensitivityY = _mouseSensitivityY;
 
             // 初始化角色控制器
-            _characterController = new CharacterController(
+            _characterController = new Hotfix.GameSystems.Sys3C.Character.CharacterController(
                 transform,
                 _unityCharacterController,
                 _rigidbody,
@@ -129,11 +128,6 @@ namespace Hotfix.GameSystems.Sys3C
             _cameraController?.Update();
         }
 
-        private void LateUpdate()
-        {
-            // 额外的相机插值可以在 LateUpdate 做
-        }
-
         private void FixedUpdate()
         {
             // 固定帧网络同步（10Hz）
@@ -147,7 +141,7 @@ namespace Hotfix.GameSystems.Sys3C
             }
         }
 
-        private void OnPositionSyncResponse(PositionSyncResponse response)
+        private void OnPositionSyncResponse(PositionSyncResponseData response)
         {
             // 处理服务端校验结果
             // 实际项目中需要从服务端获取权威位置，这里简化处理
@@ -156,9 +150,9 @@ namespace Hotfix.GameSystems.Sys3C
         /// <summary>
         /// 绑定网络客户端（外部调用）
         /// </summary>
-        public void BindNetworkClient(KcpNet.KcpClient kcpClient)
+        public void BindNetworkClient(INetworkClient networkClient)
         {
-            _networkBridge.Initialize(kcpClient);
+            _networkBridge.Initialize(networkClient);
         }
     }
 }

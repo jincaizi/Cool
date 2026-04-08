@@ -311,7 +311,7 @@ namespace KcpNet
 
             // 创建新会话
             var sessionId = Interlocked.Increment(ref _nextSessionId);
-            var transport = new KcpServerTransport(_listenerSocket, remoteEndPoint, _options, _logger);
+            var transport = new KcpServerTransport(_listenerSocket, remoteEndPoint, _options, _logger, sessionId);
             var session = new KcpServerSession(sessionId, remoteEndPoint, transport, _options, _logger);
 
             if (_sessions.TryAdd(sessionId, session))

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -7,53 +8,62 @@ using System.Threading.Tasks;
 namespace KcpNet
 {
     /// <summary>
-    /// 客户端KCP传输实现
+    /// 客户端KCP传输实现 (Kcp 2.7.0)
     /// </summary>
     public sealed class KcpClientTransport : KcpTransportBase
     {
         private Kcp? _kcp;
         private bool _kcpInitialized;
+        private readonly long _sessionId;
 
         /// <summary>
         /// 初始化客户端传输
         /// </summary>
         /// <param name="options">配置选项</param>
         /// <param name="logger">日志记录器</param>
-        public KcpClientTransport(KcpOptions options, ILogger logger)
+        /// <param name="sessionId">会话ID</param>
+        public KcpClientTransport(KcpOptions options, ILogger logger, long sessionId = 0)
             : base(options, logger)
         {
+            _sessionId = sessionId;
         }
 
         /// <inheritdoc/>
-        protected override async Task ConnectInternalAsync(CancellationToken cancellationToken)
+        protected override Task ConnectInternalAsync(CancellationToken cancellationToken)
         {
             if (Socket == null) throw new InvalidOperationException("Socket not initialized");
 
             // 初始化KCP
-            _kcp = new Kcp((uint)Options.SendWindowSize, (uint)Options.ReceiveWindowSize);
-            _kcp.NoDelay(Options.NoDelay ? 1 : 0, Options.Interval, Options.FastResend, Options.NoCongestionControl);
+            _kcp = new Kcp(
+                (uint)_sessionId,
+                Socket,
+                RemoteEndPoint!,
+                Options.SendWindowSize,
+                Options.ReceiveWindowSize,
+                Logger
+            );
+
+            // 配置 KCP
+            _kcp.NoDelay(
+                Options.NoDelay ? 1 : 0,
+                Options.Interval,
+                Options.FastResend,
+                Options.NoCongestionControl ? 1 : 0
+            );
             _kcp.SetMtu(Options.Mtu);
 
-            // 设置输出回调
-            _kcp.Output = (byte[] data, int length) =>
-            {
-                if (Socket != null && Socket.Connected)
-                {
-                    Socket.SendTo(data, 0, length, SocketFlags.None, RemoteEndPoint!);
-                }
-                return length;
-            };
-
             _kcpInitialized = true;
-            Logger.LogInformation("KCP initialized for client transport");
+            Logger.LogInformation($"KCP initialized for client transport (sessionId={_sessionId})");
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc/>
-        protected override async Task CloseInternalAsync(CancellationToken cancellationToken)
+        protected override Task CloseInternalAsync(CancellationToken cancellationToken)
         {
             _kcpInitialized = false;
+            _kcp?.Dispose();
             _kcp = null;
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc/>
@@ -65,7 +75,6 @@ namespace KcpNet
             try
             {
                 _kcp.Send(data, 0, data.Length);
-                _kcp.Flush();
                 await Task.CompletedTask;
             }
             catch (Exception ex)
@@ -84,32 +93,24 @@ namespace KcpNet
             try
             {
                 // 接收UDP数据
-                var buffer = new byte[Options.Mtu];
-                EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-
                 if (Socket.Available > 0)
                 {
+                    var buffer = new byte[Options.Mtu];
+                    EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     var bytesRead = Socket.ReceiveFrom(buffer, ref remoteEndPoint);
+
                     if (bytesRead > 0)
                     {
-                        var data = new byte[bytesRead];
-                        Array.Copy(buffer, 0, data, 0, bytesRead);
-
                         // 输入到KCP
-                        _kcp.Input(data, 0, data.Length);
+                        _kcp.Input(buffer, 0, bytesRead);
 
                         // 从KCP读取数据
-                        var recvSize = _kcp.PeekSize();
-                        if (recvSize > 0)
+                        var bufferWriter = new ArrayBufferWriter<byte>(65536);
+                        var recvCount = _kcp.TryRecv(bufferWriter);
+
+                        if (recvCount > 0)
                         {
-                            var recvBuffer = new byte[recvSize];
-                            var actualSize = _kcp.Recv(recvBuffer, 0, recvSize);
-                            if (actualSize > 0)
-                            {
-                                var result = new byte[actualSize];
-                                Array.Copy(recvBuffer, 0, result, 0, actualSize);
-                                return result;
-                            }
+                            return bufferWriter.WrittenSpan.ToArray();
                         }
                     }
                 }

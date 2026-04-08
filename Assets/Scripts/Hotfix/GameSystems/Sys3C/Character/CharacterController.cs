@@ -36,7 +36,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _transform = transform;
             _controller = controller;
             _rigidbody = rigidbody;
-            _groundDetector = new GroundDetector(transform, controller.capsuleCollider, groundLayer);
+            _groundDetector = new GroundDetector(transform, controller, groundLayer);
 
             _data = new CharacterData
             {

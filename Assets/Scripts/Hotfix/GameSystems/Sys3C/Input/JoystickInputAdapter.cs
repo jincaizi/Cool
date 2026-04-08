@@ -16,8 +16,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public Vector3 GetMoveInput()
         {
-            float horizontal = Input.GetAxisRaw("Horizontal_Joystick");
-            float vertical = Input.GetAxisRaw("Vertical_Joystick");
+            float horizontal = UnityEngine.Input.GetAxisRaw("Horizontal_Joystick");
+            float vertical = UnityEngine.Input.GetAxisRaw("Vertical_Joystick");
 
             Vector3 input = new Vector3(horizontal, 0f, vertical);
 
@@ -32,15 +32,15 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public Vector2 GetCameraRotationInput()
         {
-            float rotX = Input.GetAxisRaw("Mouse X_Joystick");
-            float rotY = Input.GetAxisRaw("Mouse Y_Joystick");
+            float rotX = UnityEngine.Input.GetAxisRaw("Mouse X_Joystick");
+            float rotY = UnityEngine.Input.GetAxisRaw("Mouse Y_Joystick");
 
             // 如果没有摇杆输入，尝试触摸拖拽
             if (Mathf.Abs(rotX) < DEAD_ZONE && Mathf.Abs(rotY) < DEAD_ZONE)
             {
-                if (Input.touchCount > 0)
+                if (UnityEngine.Input.touchCount > 0)
                 {
-                    Touch touch = Input.GetTouch(0);
+                    Touch touch = UnityEngine.Input.GetTouch(0);
                     if (touch.phase == TouchPhase.Moved)
                     {
                         return touch.deltaPosition / 100f;

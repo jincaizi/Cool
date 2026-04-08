@@ -56,6 +56,11 @@ namespace KcpNet
         PositionSyncResponse = 101,
 
         /// <summary>
+        /// 远程玩家位置同步
+        /// </summary>
+        RemotePlayerSync = 1000,
+
+        /// <summary>
         /// 聊天消息
         /// </summary>
         ChatMessage = 200,
@@ -292,6 +297,91 @@ namespace KcpNet
         /// </summary>
         [ProtoMember(2)]
         public long ServerTimestamp { get; set; }
+
+        /// <summary>
+        /// 权威位置X（如果客户端偏差过大）
+        /// </summary>
+        [ProtoMember(3)]
+        public float AuthoritativeX { get; set; }
+
+        /// <summary>
+        /// 权威位置Y
+        /// </summary>
+        [ProtoMember(4)]
+        public float AuthoritativeY { get; set; }
+
+        /// <summary>
+        /// 权威位置Z
+        /// </summary>
+        [ProtoMember(5)]
+        public float AuthoritativeZ { get; set; }
+
+        /// <summary>
+        /// 权威旋转角度
+        /// </summary>
+        [ProtoMember(6)]
+        public float AuthoritativeRotation { get; set; }
+
+        /// <summary>
+        /// 是否有位置校正（true则客户端需要修正到权威位置）
+        /// </summary>
+        [ProtoMember(7)]
+        public bool HasPositionCorrection { get; set; }
+    }
+
+    /// <summary>
+    /// 远程玩家位置同步 (Server -> Client)
+    /// </summary>
+    [ProtoContract]
+    public class RemotePlayerSync : IMessage
+    {
+        /// <summary>
+        /// 玩家ID
+        /// </summary>
+        [ProtoMember(1)]
+        public long PlayerId { get; set; }
+
+        /// <summary>
+        /// 位置X
+        /// </summary>
+        [ProtoMember(2)]
+        public float X { get; set; }
+
+        /// <summary>
+        /// 位置Y
+        /// </summary>
+        [ProtoMember(3)]
+        public float Y { get; set; }
+
+        /// <summary>
+        /// 位置Z
+        /// </summary>
+        [ProtoMember(4)]
+        public float Z { get; set; }
+
+        /// <summary>
+        /// 旋转角度 (Y轴)
+        /// </summary>
+        [ProtoMember(5)]
+        public float Rotation { get; set; }
+
+        /// <summary>
+        /// 移动速度
+        /// </summary>
+        [ProtoMember(6)]
+        public float Speed { get; set; }
+
+        /// <summary>
+        /// 时间戳
+        /// </summary>
+        [ProtoMember(7)]
+        public long Timestamp { get; set; }
+
+        /// <summary>
+        /// 序列号
+        /// </summary>
+        [ProtoMember(8)]
+        public uint Sequence { get; set; }
     }
 
     /// <summary>

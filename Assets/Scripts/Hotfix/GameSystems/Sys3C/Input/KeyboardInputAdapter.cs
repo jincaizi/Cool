@@ -28,8 +28,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public Vector3 GetMoveInput()
         {
-            float horizontal = Input.GetAxisRaw("Horizontal"); // A/D
-            float vertical = Input.GetAxisRaw("Vertical");   // W/S
+            float horizontal = UnityEngine.Input.GetAxisRaw("Horizontal"); // A/D
+            float vertical = UnityEngine.Input.GetAxisRaw("Vertical");   // W/S
 
             Vector3 input = new Vector3(horizontal, 0f, vertical);
 
@@ -45,8 +45,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public Vector2 GetCameraRotationInput()
         {
             // Mouse X = 水平旋转，Mouse Y = 垂直旋转
-            float mouseX = Input.GetAxisRaw("Mouse X");
-            float mouseY = Input.GetAxisRaw("Mouse Y");
+            float mouseX = UnityEngine.Input.GetAxisRaw("Mouse X");
+            float mouseY = UnityEngine.Input.GetAxisRaw("Mouse Y");
             return new Vector2(mouseX, mouseY);
         }
 
