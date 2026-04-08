@@ -1,185 +1,141 @@
-# NPC 怪物 AI 系统设计
+# NPC AI 系统设计方案
 
-**版本**: 1.0
+**版本**: 2.0
 **日期**: 2026-04-08
-**状态**: MVP
+**状态**: Approved
 
 ---
 
-## 1. 概述
+## 1. 整体架构
 
-### 1.1 目标
+### 1.1 目录结构
 
-为 MMO 游戏实现服务端 NPC 怪物 AI 系统，支持巡逻、追击、攻击行为，具备可扩展技能系统和仇恨管理。
+```
+E:\CodeForJob\
+├── Cool/                    # Unity 客户端
+│   └── Assets/Scripts/
+│       ├── AOT/            # 现有 KCP 网络
+│       └── Hotfix/         # 客户端表现层
+│           └── GameSystems/NpcMirror/  # NPC 镜像系统
+│
+└── Server/                  # 独立服务端 (.NET 控制台 + KCP)
+    └── src/
+        ├── AI/             # AI 核心
+        │   ├── Core/       # AiComponent, AiManager, AiBlackboard
+        │   ├── BehaviorTree/  # BtNode, BtSelector, BtSequence, BtCondition, BtAction
+        │   ├── Combat/     # AggroTable, DamageCalculator
+        │   ├── Detection/  # TargetDetector
+        │   ├── Movement/   # SimpleMoveSystem
+        │   └── Skill/      # SkillData, SkillSystem
+        ├── Config/         # JSON 怪物配置
+        ├── Network/        # KCP Server + 消息处理
+        └── Messages/       # 协议定义
+```
 
-### 1.2 核心原则
+### 1.2 职责划分
 
-- **服务端权威**: AI 逻辑运行在服务器，客户端只负责表现
-- **行为树驱动**: AI 决策由行为树主导，状态作为 Blackboard 变量
-- **简化实现**: MVP 聚焦核心功能，避免过度设计
-- **模块化扩展**: 各系统独立，可按需扩展
+| 层 | 职责 |
+|----|------|
+| **Server** | AI 决策、仇恨管理、技能施放、位置计算、动画状态计算、广播同步 |
+| **Client** | 接收同步数据，更新 NPC Transform 和 Animator（仅表现） |
 
 ---
 
-## 2. 整体架构
+## 2. 服务端实现
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Server                                │
-│                                                              │
-│  ┌──────────┐    ┌──────────────┐    ┌─────────────────┐   │
-│  │AiManager │───→│  AiComponent │───→│ PositionSync   │   │
-│  │(全局管理) │    │              │    │ Notification   │   │
-│  └──────────┘    │  ┌─────────┐│    └─────────────────┘   │
-│                  │  │Blackboard││                          │
-│                  │  │(运行时数据││                          │
-│                  │  └────┬────┘│                          │
-│                  │       │      │                          │
-│                  │       ▼      │                          │
-│                  │ ┌─────────┐ │    ┌─────────────────┐   │
-│                  │ │Behavior │ │    │   SkillSystem   │   │
-│                  │ │ Tree    │ │───→│   (MVP版)      │   │
-│                  │ │         │ │    └─────────────────┘   │
-│                  │ └─────────┘ │                           │
-│                  └──────────────┘                          │
-│                           │                               │
-│                           ▼                               │
-│                  ┌─────────────────┐                        │
-│                  │   MoveSystem   │                        │
-│                  │ (直接控制位置)  │                        │
-│                  └─────────────────┘                        │
-└─────────────────────────────────────────────────────────────┘
-```
+### 2.1 AI 核心 (Core)
 
-### 2.1 模块职责
-
-| 模块 | 职责 |
-|------|------|
-| **AiManager** | 全局 AI 实例管理，spawn/despawn，分配到 Room |
-| **AiComponent** | AI 实例核心，持有 Blackboard、行为树实例、技能系统 |
-| **Blackboard** | AI 运行时数据容器（目标、位置、警觉等级等） |
-| **BehaviorTree** | 行为树执行引擎，驱动 AI 决策 |
-| **SkillSystem** | 技能配置和执行（瞬时施放+冷却+伤害） |
-| **MoveSystem** | AI 移动控制，直接操作 Transform |
-
----
-
-## 3. 行为树系统
-
-### 3.1 节点类型（MVP）
-
-| 节点类型 | 说明 | 执行结果 |
-|---------|------|---------|
-| **Sequence** | 顺序执行子节点，遇到失败则停止 | 全部成功=Success |
-| **Selector** | 选择执行，遇到成功则停止 | 任意成功=Success |
-| **Condition** | 条件检查，返回 Success/Failure | - |
-| **Action** | 行为执行，支持多帧 Running | Success/Failure/Running |
-
-### 3.2 行为树结构
-
-```
-        ┌─────────────┐
-        │   Selector  │ ← 根节点
-        └──────┬──────┘
-               │
-    ┌──────────┼──────────┐
-    ▼          ▼          ▼
-┌────────┐ ┌─────────┐ ┌────────┐
-│Sequence│ │Condition│ │Sequence│
-│(巡逻)  │ │(有目标?)│ │(返回)  │
-└───┬────┘ └─────────┘ └───┬────┘
-    │                     │        │
-    ▼                     ▼        ▼
-┌────────┐          ┌────────┐ ┌────────┐
-│ Patrol │          │ Chase  │ │ Return │
-│ Action │          │ Action │ │ Action │
-└────────┘          └────────┘ └────────┘
-```
-
-### 3.3 行为树模板
-
-```csharp
-// 怪物 AI 行为树模板
-Root: Selector
-├── Sequence: 巡逻（警觉等级=PEACE）
-│   ├── Condition: AlertLevel == PEACE
-│   ├── Condition: !HasTarget
-│   └── Action: Patrol
-├── Sequence: 追击+攻击（警觉等级=HOSTILE）
-│   ├── Condition: AlertLevel == HOSTILE
-│   ├── Condition: HasTarget
-│   ├── Action: Chase
-│   └── Action: Attack (带冷却)
-└── Sequence: 返回（目标丢失）
-    ├── Condition: !HasTarget
-    ├── Condition: AlertLevel != PEACE
-    └── Action: Return
-```
-
-### 3.4 节点执行模型
-
-| 模式 | 说明 |
-|------|------|
-| **Immediate** | 一帧内完成，返回 Success 或 Failure |
-| **Running** | 需要多帧，每帧返回 Running，完成后返回 Success |
-
-Action 节点典型执行：
-1. **Chase**: Running，直到距离 < 攻击范围
-2. **Attack**: Running，直到施放完成
-3. **Patrol**: Running，直到到达下一个巡逻点
-4. **Return**: Running，直到回到出生点
-
----
-
-## 4. 警觉状态系统
-
-### 4.1 三级警觉
-
-| 等级 | 名称 | 触发条件 | AI 行为 |
-|------|------|---------|--------|
-| 0 | **PEACE** | 默认状态 | 区域巡逻 |
-| 1 | **HOSTILE** | 检测到有效目标 | 追击 + 攻击 |
-
-> **简化说明**: MVP 简化为两级（PEACE/HOSTILE），检测到目标直接进入战斗，不设置中间"警觉"状态。
-
-### 4.2 警觉等级变量
-
-警觉等级存储在 Blackboard 中：
-
+**AiBlackboard** - AI 运行时数据容器：
 ```csharp
 public class AiBlackboard
 {
     public AlertLevel AlertLevel { get; set; } = AlertLevel.PEACE;
     public long? TargetId { get; set; }
     public Vector3 SpawnPosition { get; set; }
+    public Vector3 PatrolCenter { get; set; }
     public float PatrolRadius { get; set; } = 10f;
+    public int CurrentPatrolIndex { get; set; }
 }
 ```
 
----
-
-## 5. 检测系统
-
-### 5.1 复合检测（MVP）
-
-MVP 采用两种检测，暂不包含视线 Raycast（需要场景几何数据）：
-
-| 检测类型 | 说明 | 参数 |
-|---------|------|------|
-| **距离检测** | 圆形范围内检测 | 感知半径 |
-| **视野锥检测** | 前方锥形视野 | 角度 + 距离 |
-
-### 5.2 检测实现
-
+**AiComponent** - AI 实例核心：
 ```csharp
-public bool CanDetectTarget(Vector3 aiPosition, Vector3 aiForward, Vector3 targetPosition)
+public sealed class AiComponent
 {
-    // 1. 距离检测
-    float distance = Vector3.Distance(aiPosition, targetPosition);
+    public long InstanceId { get; }
+    public int TemplateId { get; }
+    public MonsterData Config { get; }
+
+    public AiBlackboard Blackboard { get; }
+    public BehaviorTree BehaviorTree { get; }
+    public SkillSystem SkillSystem { get; }
+    public AggroTable AggroTable { get; }
+    public TargetDetector TargetDetector { get; }
+
+    public Vector3 Position { get; set; }
+    public Quaternion Rotation { get; set; }
+    public float MoveSpeed { get; set; }
+    public float VisionRadius { get; set; }
+    public float VisionAngle { get; set; }
+    public float AttackRange { get; set; }
+
+    public void Update(float deltaTime);
+    public void SetTarget(long? targetId);
+}
+```
+
+**AiManager** - 全局管理：
+- 管理所有 AiComponent 实例
+- spawn/despawn AI
+- 定时更新循环（正常 1s，战斗 0.5s）
+- 广播位置同步给客户端
+
+### 2.2 行为树 (BehaviorTree)
+
+**节点类型**：
+
+| 节点 | 说明 | 结果 |
+|------|------|------|
+| BtNode | 基类 | - |
+| BtSelector | 遇到成功停止 | 任意成功=Success |
+| BtSequence | 遇到失败停止 | 全部成功=Success |
+| BtCondition | 条件检查 | Success/Failure |
+| BtAction | 行为执行 | Success/Failure/Running |
+
+**预定义行为树模板**：
+```csharp
+// Root: Selector
+// ├── Sequence: 巡逻（PEACE）
+// │   ├── Condition: AlertLevel == PEACE
+// │   ├── Condition: !HasTarget
+// │   └── Action: Patrol
+// ├── Sequence: 追击+攻击（HOSTILE）
+// │   ├── Condition: AlertLevel == HOSTILE
+// │   ├── Condition: HasTarget
+// │   ├── Action: Chase
+// │   └── Action: Attack
+// └── Sequence: 返回
+//     ├── Condition: !HasTarget
+//     ├── Condition: AlertLevel != PEACE
+//     └── Action: Return
+```
+
+**Action 节点**：
+- `PatrolAction`: 沿巡逻点移动，到达后切换下一个
+- `ChaseAction`: 向目标移动，直到距离 < 攻击范围
+- `AttackAction`: 检测目标在攻击范围内则施放技能
+- `ReturnAction`: 返回出生点
+
+### 2.3 目标检测 (Detection)
+
+**TargetDetector** - 复合检测：
+```csharp
+public bool CanDetectTarget(Vector3 aiPos, Vector3 aiForward, Vector3 targetPos)
+{
+    float distance = Vector3.Distance(aiPos, targetPos);
     if (distance > _detectionRadius) return false;
 
-    // 2. 视野锥检测
-    Vector3 directionToTarget = (targetPosition - aiPosition).normalized;
+    Vector3 directionToTarget = (targetPos - aiPos).normalized;
     float angle = Vector3.Angle(aiForward, directionToTarget);
     if (angle > _visionAngle / 2) return false;
 
@@ -187,70 +143,16 @@ public bool CanDetectTarget(Vector3 aiPosition, Vector3 aiForward, Vector3 targe
 }
 ```
 
-### 5.3 检测频率
+- 和平状态：每 1 秒检测一次
+- 战斗状态：每 0.5 秒检测一次
 
-- **和平状态**: 每 1 秒检测一次
-- **战斗状态**: 每 0.5 秒检测一次
+### 2.4 仇恨系统 (Combat)
 
----
-
-## 6. 技能系统
-
-### 6.1 MVP 技能系统
-
-MVP 技能系统支持：
-- 瞬时施放
-- 伤害计算
-- 冷却管理
-- 范围检测
-
-### 6.2 技能配置（ScriptableObject）
-
-```csharp
-[CreateAssetMenu(fileName = "Skill_Slash", menuName = "Game/AI/Skill")]
-public class SkillSO : ScriptableObject
-{
-    public string SkillName;
-    public float Damage;
-    public float Range;           // 技能范围（米）
-    public float Cooldown;         // 冷却时间（秒）
-    public float CastTime;        // 施放时间（秒），MVP=0
-    public int Priority;          // 技能优先级
-}
-```
-
-### 6.3 技能执行流程
-
-```
-1. 检测目标在技能范围内
-2. 检查冷却是否完成
-3. 施放技能（瞬时）
-   - 计算伤害
-   - 应用效果
-4. 进入冷却
-```
-
-### 6.4 伤害计算
-
-```csharp
-public float CalculateDamage(SkillSO skill, float attackerLevel)
-{
-    // MVP: 固定伤害 = skill.Damage
-    // 后续扩展: + 攻击力加成 + 暴击
-    return skill.Damage;
-}
-```
-
----
-
-## 7. 仇恨系统
-
-### 7.1 仇恨表
-
+**AggroTable**：
 ```csharp
 public class AggroTable
 {
-    private Dictionary<long, float> _aggroEntries = new();
+    private Dictionary<long, float> _entries = new();
 
     public void AddAggro(long targetId, float amount);
     public void RemoveAggro(long targetId);
@@ -259,195 +161,175 @@ public class AggroTable
 }
 ```
 
-### 7.2 仇恨规则（MVP）
-
+仇恨规则：
 | 事件 | 仇恨变化 |
 |------|---------|
 | 造成伤害 | +伤害值 |
 | 目标脱离感知范围 | 每秒 -20% 仇恨 |
-| 目标死亡 | 清除该目标仇恨 |
+| 战斗状态 | 每秒 -5% 仇恨 |
 
-### 7.3 仇恨衰减
+### 2.5 技能系统 (Skill)
 
-- **战斗状态**: 每 1 秒衰减 5% 仇恨
-- **目标脱离**: 每 1 秒衰减 20% 仇恨
-- 仇恨值不能低于 0
-
----
-
-## 8. 移动系统
-
-### 8.1 简化移动
-
-MVP 中 AI 直接控制位置和朝向，不使用导航网格：
-
+**SkillData**（对应客户端 ScriptableObject）：
 ```csharp
-public void MoveTo(Vector3 targetPosition, float speed)
+public class SkillData
 {
-    // 1. 朝向目标
-    Vector3 direction = (targetPosition - _position).normalized;
+    public string SkillName;
+    public float Damage;
+    public float Range;       // 技能范围（米）
+    public float Cooldown;    // 冷却时间（秒）
+    public float CastTime;    // 施放时间（秒），MVP=0
+}
+```
+
+**SkillSystem**：
+- 维护技能列表和冷却状态
+- 瞬时施放
+- 伤害计算（返回伤害值，由调用方应用）
+
+### 2.6 移动系统 (Movement)
+
+**SimpleMoveSystem**：
+```csharp
+public void MoveTo(Vector3 target, float speed, float dt)
+{
+    Vector3 direction = (target - _position).normalized;
     _rotation = Quaternion.LookRotation(direction);
-
-    // 2. 移动到目标
-    _position += direction * speed * Time.deltaTime;
+    _position += direction * speed * dt;
 }
 ```
 
-### 8.2 移动参数
+参数：
+| 参数 | 默认值 |
+|------|--------|
+| MoveSpeed | 3 米/秒 |
+| RotationSpeed | 180 度/秒 |
 
-| 参数 | 说明 | 默认值 |
-|------|------|--------|
-| MoveSpeed | 移动速度（米/秒） | 3.0 |
-| RotationSpeed | 转向速度（度/秒） | 180 |
+### 2.7 怪物配置 (Config)
+
+**monster_config.json**：
+```json
+{
+  "monsters": [
+    {
+      "templateId": 1,
+      "name": "Slime",
+      "hp": 100,
+      "moveSpeed": 2.0,
+      "detectionRadius": 8,
+      "visionAngle": 120,
+      "attackRange": 1.5,
+      "patrolRadius": 5,
+      "skills": ["Attack"]
+    }
+  ]
+}
+```
 
 ---
 
-## 9. AI 组件
+## 3. 网络同步
 
-### 9.1 AiComponent 结构
+### 3.1 消息定义
+
+| 消息 | 方向 | 内容 |
+|------|------|------|
+| NpcSpawn | Server→Client | InstanceId, TemplateId, Position, Rotation |
+| NpcDespawn | Server→Client | InstanceId |
+| NpcPosSync | Server→Client | InstanceId, Position, Rotation (10Hz) |
+| NpcAnimSync | Server→Client | InstanceId, AnimationState (变化时) |
+
+**AnimationState 枚举**：
+```csharp
+public enum NpcAnimationState
+{
+    Idle,
+    Running,
+    Attack,
+    Death
+}
+```
+
+### 3.2 同步频率
+
+| 状态 | 位置同步 | AI 更新 |
+|------|---------|---------|
+| PEACE | 10Hz | 1Hz |
+| HOSTILE | 10Hz | 0.5Hz |
+
+---
+
+## 4. 客户端实现 (NpcMirror)
+
+### 4.1 目录结构
+
+```
+Assets/Scripts/Hotfix/GameSystems/NpcMirror/
+├── NpcMirrorManager.cs      # 管理所有镜像 NPC
+├── NpcMirrorComponent.cs   # 单个 NPC 镜像
+└── NpcAnimationController.cs  # 动画状态驱动
+```
+
+### 4.2 NpcMirrorComponent
 
 ```csharp
-public sealed class AiComponent
+public class NpcMirrorComponent
 {
-    public long InstanceId { get; }          // AI 实例 ID
-    public long TemplateId { get; }          // AI 模板 ID
-
-    public AiBlackboard Blackboard { get; } // 运行时数据
-    public BehaviorTree BehaviorTree { get; }// 行为树实例
-    public SkillSystem SkillSystem { get; } // 技能系统
-    public AggroTable AggroTable { get; }   // 仇恨表
-
-    public Vector3 Position { get; set; }
-    public Quaternion Rotation { get; set; }
-    public float MoveSpeed { get; set; }
+    public long InstanceId { get; }
+    public void SetPosition(Vector3 pos);
+    public void SetRotation(Quaternion rot);
+    public void SetAnimationState(NpcAnimationState state);
 }
 ```
 
-### 9.2 AI 生命周期
+职责：
+- 接收服务端同步数据
+- 更新 Transform（使用 Lerp 平滑过渡）
+- 更新 Animator 参数
 
-```
-Spawn → Init → Update(循环) → OnDeath → Despawn
-```
+### 4.3 数据接收
 
----
-
-## 10. AiManager
-
-### 10.1 职责
-
-- 管理所有 AI 实例
-- AI spawn/despawn
-- AI 更新循环（事件驱动+定时轮询）
-- 分配 AI 到 Room
-
-### 10.2 更新频率
-
-- **正常状态**: 每 1 秒更新一次
-- **战斗状态**: 每 0.5 秒更新一次
-- **事件触发**: 检测到目标时立即触发状态检查
-
-### 10.3 位置同步
-
-AI 位置通过现有的 `PositionSyncNotification` 消息同步给客户端。
+通过现有 KCP 客户端接收消息：
+- `OnNpcSpawn` → 创建 NpcMirrorComponent
+- `OnNpcDespawn` → 销毁 NpcMirrorComponent
+- `OnNpcPosSync` → 更新位置
+- `OnNpcAnimSync` → 更新动画
 
 ---
 
-## 11. 数据流
-
-### 11.1 AI 更新循环
+## 5. AI 更新循环
 
 ```
-1. 检测目标（距离+视野）
-   └─ 发现目标 → 更新 Blackboard.TargetId → AlertLevel = HOSTILE
+1. 定时触发（正常 1s，战斗 0.5s）
+   └─ 遍历所有 AiComponent
 
-2. 执行行为树
-   └─ 根节点 Tick()
+2. 检测目标
+   └─ TargetDetector.CanDetectTarget()
+   └─ 发现目标 → SetTarget() → Blackboard.TargetId → AlertLevel = HOSTILE
+
+3. 执行行为树
+   └─ Root.Tick()
        └─ Selector: 遍历子节点
            └─ Sequence: 顺序执行
-               └─ Action: 执行具体行为
+               └─ Action: 返回 Success/Failure/Running
 
-3. 应用移动
-   └─ MoveSystem 根据 Blackboard 数据移动 AI
+4. 应用移动
+   └─ SimpleMoveSystem 根据 Blackboard 数据移动
 
-4. 更新技能
-   └─ SkillSystem 更新冷却
+5. 更新技能
+   └─ SkillSystem.Update() 冷却递减
 
-5. 更新仇恨
-   └─ AggroTable 衰减仇恨
+6. 更新仇恨
+   └─ AggroTable.DecayAll()
 
-6. 同步状态
-   └─ 发送 PositionSyncNotification 给客户端
-```
-
-### 11.2 消息通知
-
-状态变化时发送简单通知：
-
-```csharp
-// 状态变化通知（客户端自行表现）
-public void NotifyStateChange(long aiInstanceId, string newState)
-{
-    // 发送 AiStateChanged 消息
-}
+7. 广播同步
+   └─ 发送 NpcPosSync (位置变化时)
+   └─ 发送 NpcAnimSync (动画状态变化时)
 ```
 
 ---
 
-## 12. 目录结构
-
-```
-Server/
-├── AI/
-│   ├── Core/
-│   │   ├── AiComponent.cs         # AI 实例核心
-│   │   ├── AiBlackboard.cs        # 运行时数据
-│   │   ├── AiManager.cs           # 全局管理器
-│   │   └── AlertLevel.cs          # 警觉等级枚举
-│   ├── BehaviorTree/
-│   │   ├── BtNode.cs              # 节点基类
-│   │   ├── BtSequence.cs          # 顺序节点
-│   │   ├── BtSelector.cs          # 选择节点
-│   │   ├── BtCondition.cs         # 条件节点
-│   │   ├── BtAction.cs            # 行为节点
-│   │   ├── BtContext.cs           # 执行上下文
-│   │   └── BtTemplate.cs          # 行为树模板
-│   ├── Skill/
-│   │   ├── SkillSO.cs             # 技能配置
-│   │   ├── SkillExecutor.cs       # 技能执行器
-│   │   └── SkillEffect.cs         # 技能效果
-│   ├── Combat/
-│   │   ├── AggroTable.cs          # 仇恨表
-│   │   └── DamageCalculator.cs    # 伤害计算
-│   ├── Detection/
-│   │   └── TargetDetector.cs      # 目标检测
-│   └── Movement/
-│       └── SimpleMoveSystem.cs    # 简化移动系统
-└── Messages/
-    └── AiMessages.cs              # AI 相关消息
-```
-
----
-
-## 13. 待扩展功能
-
-以下功能不在 MVP 范围内，后续版本扩展：
-
-| 功能 | 说明 |
-|------|------|
-| 视线检测 | 需要场景几何数据 |
-| 导航网格 | 使用 NavMeshAgent 替代直接移动 |
-| Buff/Debuff | 状态效果系统 |
-| 技能连招 | 连续施放多个技能 |
-| 仇恨衰减增益 | 更复杂的仇恨计算 |
-| AI 协作 | 喊话增援、分工战斗 |
-| 技能特效 | 视觉表现同步 |
-| 位移技能 | 冲刺、闪烁等 |
-
----
-
-## 14. 附录
-
-### 14.1 常量参考
+## 6. 常量参考
 
 | 参数 | 默认值 |
 |------|--------|
@@ -458,14 +340,17 @@ Server/
 | 巡逻半径 | 10 米 |
 | 仇恨衰减(战斗) | 5%/秒 |
 | 仇恨衰减(脱离) | 20%/秒 |
+| 位置同步频率 | 10Hz |
 
-### 14.2 行为树节点执行状态
+---
 
-```csharp
-public enum BtStatus
-{
-    Success,   // 执行成功
-    Failure,   // 执行失败
-    Running    // 执行中（需要继续）
-}
-```
+## 7. 待扩展功能
+
+| 功能 | 说明 |
+|------|------|
+| 视线检测 | 需要场景几何数据 |
+| 导航网格 | NavMeshAgent 替代直接移动 |
+| Buff/Debuff | 状态效果系统 |
+| 技能连招 | 连续施放多个技能 |
+| AI 协作 | 喊话增援 |
+| 位移技能 | 冲刺、闪烁等 |
