@@ -41,8 +41,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
             if (_animator == null) return;
 
             _animator.SetFloat(HASH_Speed, data.Velocity.magnitude, 0.1f, Time.deltaTime);
-            _animator.SetBool(HASH_IsBattle, data.IsBattle);
-            _animator.SetBool(HASH_IsMoving, data.IsMoving);
+            _animator.SetBool(HASH_IsBattle, data.IsBattle || _isInCombat);
+            _animator.SetBool(HASH_IsMoving, data.State == CharacterState.Move || data.State == CharacterState.Run);
             _animator.SetBool(HASH_IsDead, data.State == CharacterState.Death);
 
             // Sync JumpPhase

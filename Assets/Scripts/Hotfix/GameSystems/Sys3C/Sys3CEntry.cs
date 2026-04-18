@@ -30,7 +30,7 @@ namespace Hotfix.GameSystems.Sys3C
         // 各模块实例
         private InputManager _inputManager;
         private Hotfix.GameSystems.Sys3C.Character.CharacterController _characterController;
-        private CharacterAnimationController _animationController;
+        private CharacterAnimationDriver _animationDriver;
         private ThirdPersonCameraController _cameraController;
         private NetworkBridge _networkBridge;
         private NetworkPrediction _networkPrediction;
@@ -72,7 +72,13 @@ namespace Hotfix.GameSystems.Sys3C
 
             // 初始化动画控制器
             if (_animator != null)
-                _animationController = new CharacterAnimationController(_animator);
+            {
+                _animationDriver = new CharacterAnimationDriver(_animator);
+                AnimationEventHandler eventHandler = GetComponent<AnimationEventHandler>();
+                if (eventHandler == null)
+                    eventHandler = gameObject.AddComponent<AnimationEventHandler>();
+                eventHandler.SetDriver(_animationDriver);
+            }
 
             // 初始化相机控制器
             if (_mainCamera != null)
@@ -122,7 +128,7 @@ namespace Hotfix.GameSystems.Sys3C
             _characterController.Update(command);
 
             // 动画更新
-            _animationController?.Update(_characterController.Data);
+            _animationDriver?.Update(_characterController.Data);
 
             // 相机更新（相机在 LateUpdate 更新）
             _cameraController?.Update();

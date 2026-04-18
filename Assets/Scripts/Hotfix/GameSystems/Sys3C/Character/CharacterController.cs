@@ -78,7 +78,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
                         RotationSpeed * Time.deltaTime
                     );
 
-                    _data.State = CharacterState.Running;
+                    _data.State = CharacterState.Move;
                 }
                 else
                 {
@@ -91,7 +91,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 // 空中
                 _velocity.y += Gravity * Time.deltaTime;
                 _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _velocity.y, _rigidbody.velocity.z);
-                _data.State = CharacterState.Falling;
+                _data.State = CharacterState.JumpAir;
             }
 
             // 更新数据
