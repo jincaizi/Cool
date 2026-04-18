@@ -77,7 +77,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &-8821543271891234567
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -301,7 +301,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &-7789012345678901234
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -406,7 +406,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &-7345678901234567890
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -431,7 +431,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1102 &-7234567890123456789
 AnimatorState:
   serializedVersion: 6
@@ -620,7 +620,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1102 &-6678901234567890123
 AnimatorState:
   serializedVersion: 6
@@ -725,7 +725,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &-6234567890123456789
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -750,7 +750,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &-6123456789012345678
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1160,7 +1160,7 @@ AnimatorState:
   - {fileID: -3789012345678901234}
   - {fileID: -3890123456789012345}
   - {fileID: -3678901234567890123}
-  - {fileID: -4012345678901234567}
+  - {fileID: -9012345678901234567}
   m_StateMachineBehaviours: []
   m_Position: {x: 300, y: 220, z: 0}
   m_IKOnFeet: 0
@@ -1335,7 +1335,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &-3678901234567890123
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1360,7 +1360,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &-3567890123456789012
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1438,7 +1438,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &-3234567890123456789
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1451,7 +1451,7 @@ AnimatorStateTransition:
     m_ConditionEvent: IsDead
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
-  m_DstState: {fileID: -4012345678901234567}
+  m_DstState: {fileID: -8345678901234567890}
   m_Solo: 0
   m_Mute: 0
   m_IsExit: 0
@@ -1463,7 +1463,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1102 &-3123456789012345678
 AnimatorState:
   serializedVersion: 6
@@ -2035,7 +2035,7 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!1101 &-4012345678901234567
+--- !u!1101 &-9012345678901234567
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2047,7 +2047,7 @@ AnimatorStateTransition:
     m_ConditionEvent: IsDead
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
-  m_DstState: {fileID: -4012345678901234567}
+  m_DstState: {fileID: -8345678901234567890}
   m_Solo: 0
   m_Mute: 0
   m_IsExit: 0
@@ -2059,7 +2059,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1107 &-304314414807897977
 AnimatorStateMachine:
   serializedVersion: 6
