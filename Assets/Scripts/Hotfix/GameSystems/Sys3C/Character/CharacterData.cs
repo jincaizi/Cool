@@ -38,9 +38,37 @@ namespace Hotfix.GameSystems.Sys3C.Character
     /// </summary>
     public enum CharacterState
     {
-        Idle,
-        Running,
-        Falling
+        Idle = 0,
+        BattleIdle = 1,
+        Move = 2,
+        Run = 3,
+        JumpStart = 4,
+        JumpAir = 5,
+        JumpEnd = 6,
+        Death = 7
+    }
+
+    /// <summary>
+    /// 跳跃动画阶段（驱动 JumpStart → JumpAir → JumpEnd）
+    /// </summary>
+    public enum JumpPhase
+    {
+        None = 0,
+        Start = 1,
+        Air = 2,
+        End = 3
+    }
+
+    /// <summary>
+    /// 攻击连击阶段（0 = 未攻击，1-4 = 攻击索引）
+    /// </summary>
+    public enum AttackPhase
+    {
+        None = 0,
+        Attack1 = 1,
+        Attack2 = 2,
+        Attack3 = 3,
+        Attack4 = 4
     }
 
     /// <summary>
@@ -77,5 +105,25 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// 垂直速度（用于动画）
         /// </summary>
         public float VerticalVelocity;
+
+        /// <summary>
+        /// 当前跳跃阶段（Start/Air/End）
+        /// </summary>
+        public JumpPhase JumpPhase;
+
+        /// <summary>
+        /// 当前攻击阶段（None 或 Attack1-4）
+        /// </summary>
+        public AttackPhase AttackPhase;
+
+        /// <summary>
+        /// 是否处于战斗模式（任意攻击时触发）
+        /// </summary>
+        public bool IsBattle;
+
+        /// <summary>
+        /// 连击窗口是否激活——下一击输入可触发连击
+        /// </summary>
+        public bool ComboWindowActive;
     }
 }
