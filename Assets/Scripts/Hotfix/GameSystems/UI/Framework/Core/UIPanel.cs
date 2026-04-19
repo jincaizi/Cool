@@ -65,8 +65,8 @@ namespace Hotfix.GameSystems.UI.Framework.Core
             set
             {
                 _sortOrder = value;
-                if (_canvasGroup != null)
-                    _canvasGroup.sortingOrder = value;
+                if (_canvas != null)
+                    _canvas.sortingOrder = value;
             }
         }
 
@@ -87,12 +87,12 @@ namespace Hotfix.GameSystems.UI.Framework.Core
         /// <summary>
         /// Prefab path for pool loading.
         /// </summary>
-        protected abstract string PrefabPath { get; }
+        protected internal abstract string PrefabPath { get; }
 
         /// <summary>
         /// Which canvas layer this panel belongs to.
         /// </summary>
-        protected abstract int Layer { get; }
+        protected internal abstract int Layer { get; }
 
         #endregion
 
@@ -114,7 +114,7 @@ namespace Hotfix.GameSystems.UI.Framework.Core
         /// Called when panel is hidden.
         /// Override for cleanup.
         /// </summary>
-        protected virtual void OnHide() { }
+        protected internal virtual void OnHide() { }
 
         /// <summary>
         /// Called when panel is destroyed.

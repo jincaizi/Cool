@@ -2,7 +2,9 @@
     "name": "Hotfix.GameSystems.UI",
     "rootNamespace": "",
     "references": [
-        "KcpNet"
+        "KcpNet",
+        "DOTween",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

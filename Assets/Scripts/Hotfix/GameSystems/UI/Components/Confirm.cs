@@ -2,6 +2,7 @@ using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using Hotfix.GameSystems.UI.Framework.Core;
 
 namespace Hotfix.GameSystems.UI.Components
 {
@@ -62,8 +63,8 @@ namespace Hotfix.GameSystems.UI.Components
 
             var bg = CreateImage("Background");
             bg.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
-            bg.rect.StretchParent();
-            bg.rect.SetAsLastSibling();
+            bg.GetComponent<RectTransform>().StretchParent();
+            bg.GetComponent<RectTransform>().SetAsLastSibling();
 
             var content = new GameObject("Content");
             content.transform.SetParent(transform);
@@ -148,7 +149,7 @@ namespace Hotfix.GameSystems.UI.Components
             txt.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
             txt.alignment = TextAnchor.MiddleCenter;
             txt.color = Color.black;
-            var txtRect = txtObj.GetComponent<RectTransform>();
+            var txtRect = textObj.GetComponent<RectTransform>();
             txtRect.StretchParent();
 
             return btn;

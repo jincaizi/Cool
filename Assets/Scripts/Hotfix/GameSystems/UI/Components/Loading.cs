@@ -2,6 +2,8 @@ using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using Hotfix.GameSystems.UI.Framework.Core;
+using Hotfix.GameSystems.UI.Framework.Animation;
 
 namespace Hotfix.GameSystems.UI.Components
 {

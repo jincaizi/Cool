@@ -19,8 +19,8 @@ namespace Hotfix.GameSystems.UI.Panel.HUD
 
         private HUDViewModel _viewModel;
 
-        protected override string PrefabPath => "";
-        protected override int Layer => UIConst.Layer_Base;
+        protected internal override string PrefabPath => "";
+        protected internal override int Layer => UIConst.Layer_Base;
 
         protected override void Awake()
         {
@@ -30,7 +30,7 @@ namespace Hotfix.GameSystems.UI.Panel.HUD
             _viewModel = new HUDViewModel();
         }
 
-        public override void OnShow(params object[] args)
+        protected override void OnShow(params object[] args)
         {
             base.OnShow(args);
 
@@ -66,7 +66,7 @@ namespace Hotfix.GameSystems.UI.Panel.HUD
             _viewModel.PlayerName = "Player1";
         }
 
-        public override void OnHide()
+        protected internal override void OnHide()
         {
             base.OnHide();
             Unbind();

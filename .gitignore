@@ -70,3 +70,4 @@ App.config
 
 # Project specific
 Cool.sln.DotSettings.user
+.fake

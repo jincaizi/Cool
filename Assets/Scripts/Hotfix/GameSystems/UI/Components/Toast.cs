@@ -4,6 +4,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 using Hotfix.GameSystems.UI.Framework.Animation;
+using Hotfix.GameSystems.UI.Framework.Core;
 
 namespace Hotfix.GameSystems.UI.Components
 {

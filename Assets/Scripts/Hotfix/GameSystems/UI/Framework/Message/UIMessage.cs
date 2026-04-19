@@ -8,13 +8,13 @@ namespace Hotfix.GameSystems.UI.Framework.Message
     /// Separate from KCP networking messages.
     /// Used for internal UI communication.
     /// </summary>
-    public struct UIMessage
+    public struct UIMessageData
     {
         public string Type { get; set; }
         public object Body { get; set; }
         public long Timestamp { get; set; }
 
-        public UIMessage(string type, object body = null)
+        public UIMessageData(string type, object body = null)
         {
             Type = type;
             Body = body;
@@ -84,7 +84,7 @@ namespace Hotfix.GameSystems.UI.Framework.Message
         /// </summary>
         public static void Send(string messageType, object body = null)
         {
-            var msg = new UIMessage(messageType, body);
+            var msg = new UIMessageData(messageType, body);
 
             if (_subscriptions.TryGetValue(messageType, out var handlers))
             {

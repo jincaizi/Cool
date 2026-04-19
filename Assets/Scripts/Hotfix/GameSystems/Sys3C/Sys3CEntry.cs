@@ -72,13 +72,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             // 初始化动画控制器
             if (_animator != null)
-            {
                 _animationDriver = new CharacterAnimationDriver(_animator);
-                AnimationEventHandler eventHandler = GetComponent<AnimationEventHandler>();
-                if (eventHandler == null)
-                    eventHandler = gameObject.AddComponent<AnimationEventHandler>();
-                eventHandler.SetDriver(_animationDriver);
-            }
 
             // 初始化相机控制器
             if (_mainCamera != null)

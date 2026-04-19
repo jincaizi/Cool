@@ -7,7 +7,7 @@ namespace Hotfix.GameSystems.UI.Framework.Binding
     /// Base class for ViewModels in MVVM pattern.
     /// Provides indexer access and property change notification.
     /// </summary>
-    public abstract class ViewModelBase
+    public abstract class ViewModelBase : IDisposable
     {
         private readonly Dictionary<string, object> _properties = new();
         private readonly Dictionary<string, List<Action>> _changeHandlers = new();
@@ -53,7 +53,7 @@ namespace Hotfix.GameSystems.UI.Framework.Binding
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError($"NotifyChanged handler error: {e.Message}");
+                        UnityEngine.Debug.LogException(e);
                     }
                 }
             }
@@ -64,11 +64,12 @@ namespace Hotfix.GameSystems.UI.Framework.Binding
         /// </summary>
         public void Subscribe(string key, Action handler)
         {
-            if (!_changeHandlers.ContainsKey(key))
+            if (!_changeHandlers.TryGetValue(key, out var handlers))
             {
-                _changeHandlers[key] = new List<Action>();
+                handlers = new List<Action>();
+                _changeHandlers[key] = handlers;
             }
-            _changeHandlers[key].Add(handler);
+            handlers.Add(handler);
         }
 
         /// <summary>

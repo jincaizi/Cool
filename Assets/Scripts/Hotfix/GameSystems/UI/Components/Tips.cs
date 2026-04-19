@@ -4,6 +4,7 @@ using DG.Tweening;
 using Hotfix.GameSystems.UI.Framework.Animation;
 using UnityEngine;
 using UnityEngine.UI;
+using Hotfix.GameSystems.UI.Framework.Core;
 
 namespace Hotfix.GameSystems.UI.Components
 {
@@ -39,7 +40,6 @@ namespace Hotfix.GameSystems.UI.Components
                 }
                 return _instance;
             }
-            private set;
         }
 
         private static Tips CreateInstance()
