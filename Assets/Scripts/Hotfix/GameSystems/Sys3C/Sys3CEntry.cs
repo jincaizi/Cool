@@ -16,6 +16,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         [Header("Movement")]
         [SerializeField] private float _moveSpeed = 5f;
+        [SerializeField] private float _sprintSpeed = 9f;
         [SerializeField] private float _rotationSpeed = 10f;
 
         [Header("Camera")]
@@ -44,23 +45,22 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void Awake()
         {
-            // 获取组件引用
             _unityCharacterController = GetComponent<UnityEngine.CharacterController>();
             _rigidbody = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
-
             _mainCamera ??= UnityEngine.Camera.main;
         }
 
         private void Start()
         {
-            // 初始化输入管理器
+            // 输入管理器
             _inputManager = new InputManager();
             _inputManager.MoveSpeed = _moveSpeed;
+            _inputManager.SprintSpeed = _sprintSpeed;
             _inputManager.CameraSensitivityX = _mouseSensitivityX;
             _inputManager.CameraSensitivityY = _mouseSensitivityY;
 
-            // 初始化角色控制器
+            // 角色控制器
             _characterController = new Hotfix.GameSystems.Sys3C.Character.CharacterController(
                 transform,
                 _unityCharacterController,
@@ -70,11 +70,11 @@ namespace Hotfix.GameSystems.Sys3C
             _characterController.MoveSpeed = _moveSpeed;
             _characterController.RotationSpeed = _rotationSpeed;
 
-            // 初始化动画控制器
+            // 动画驱动器
             if (_animator != null)
                 _animationDriver = new CharacterAnimationDriver(_animator);
 
-            // 初始化相机控制器
+            // 相机控制器
             if (_mainCamera != null)
             {
                 _cameraController = new ThirdPersonCameraController(
@@ -88,49 +88,57 @@ namespace Hotfix.GameSystems.Sys3C
                 _cameraController.MouseSensitivityY = _mouseSensitivityY;
             }
 
-            // 初始化网络模块
+            // 网络模块
             _networkBridge = new NetworkBridge();
             _networkPrediction = new NetworkPrediction();
             _positionInterpolator = new PositionInterpolator();
-
-            // 注册网络回调
             _networkBridge.RegisterPositionSyncCallback(OnPositionSyncResponse);
         }
 
         private void Update()
         {
-            // 输入更新
             _inputManager.Update();
 
-            // 相机旋转输入
+            // 相机旋转
             Vector2 cameraInput = _inputManager.GetCameraRotationInput();
             _cameraController?.HandleRotationInput(cameraInput);
 
-            // 获取移动命令
-            Vector3 forward = transform.forward;
-            MoveCommand command = _inputManager.GetMoveCommand(forward);
+            // 相机朝向（用于计算移动方向）
+            Vector3 cameraForward = _mainCamera != null
+                ? Vector3.ProjectOnPlane(_mainCamera.transform.forward, Vector3.up).normalized
+                : Vector3.forward;
 
-            // 记录预测帧
-            uint seq = _networkPrediction.GetNextSequence();
-            _networkPrediction.RecordPredictedFrame(
-                seq,
-                _characterController.GetPredictedPosition(),
-                _characterController.GetPredictedRotation()
-            );
+            // 移动命令
+            MoveCommand command = _inputManager.GetMoveCommand(transform.forward, cameraForward);
 
-            // 角色更新
+            // === 输入事件处理 ===
+            // 跳跃
+            if (_inputManager.IsJumpPressed())
+            {
+                _animationDriver?.OnJumpStart();
+            }
+
+            // 攻击
+            if (_inputManager.IsAttackPressed())
+            {
+                _animationDriver?.OnAttack(1);
+            }
+
+            // 移动状态（同步到动画）
+            _animationDriver?.SetMoving(_inputManager.IsMoving());
+
+            // === 物理更新 ===
             _characterController.Update(command);
 
-            // 动画更新
+            // === 动画更新 ===
             _animationDriver?.Update(_characterController.Data);
 
-            // 相机更新（相机在 LateUpdate 更新）
+            // 相机更新
             _cameraController?.Update();
         }
 
         private void FixedUpdate()
         {
-            // 固定帧网络同步（10Hz）
             if (_networkBridge.IsConnected)
             {
                 _networkBridge.SendPositionSync(
@@ -143,8 +151,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void OnPositionSyncResponse(PositionSyncResponseData response)
         {
-            // 处理服务端校验结果
-            // 实际项目中需要从服务端获取权威位置，这里简化处理
+            // 服务端校验结果处理（后续实现）
         }
 
         /// <summary>

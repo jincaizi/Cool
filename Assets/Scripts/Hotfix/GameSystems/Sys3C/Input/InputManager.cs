@@ -1,89 +1,79 @@
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Character;
+using UnityInput = UnityEngine.Input;
 
 namespace Hotfix.GameSystems.Sys3C.Input
 {
     /// <summary>
-    /// 输入管理器 — 双层抽象核心
-    /// 统一所有输入适配器，输出标准化 MoveCommand
+    /// 输入管理器 — 统一所有输入适配器，输出标准化 MoveCommand
+    /// 同时提供跳跃/攻击/冲刺的即时输入检测
     /// </summary>
     public class InputManager
     {
-        private readonly List<IInputAdapter> _adapters = new List<IInputAdapter>();
-        private IInputAdapter _activeAdapter;
+        private readonly IInputAdapter _adapter;
+
+        // 移动速度
+        public float MoveSpeed { get; set; } = 5.0f;
+        public float SprintSpeed { get; set; } = 9.0f;
 
         // 相机旋转灵敏度
         public float CameraSensitivityX { get; set; } = 2.0f;
         public float CameraSensitivityY { get; set; } = 2.0f;
 
-        // 移动速度
-        public float MoveSpeed { get; set; } = 5.0f;
-
         // 当前序列号（用于网络预测）
         private uint _sequence;
 
+        // === 一次性事件（每帧只触发一次） ===
+        private bool _jumpConsumed;
+        private bool _attackConsumed;
+
         public InputManager()
         {
-            // 注册所有适配器
-            RegisterAdapter(new KeyboardInputAdapter());
-            RegisterAdapter(new JoystickInputAdapter());
-
-            // 默认使用键盘
-            _activeAdapter = _adapters[0]; // KeyboardInputAdapter
+            _adapter = new KeyboardInputAdapter();
         }
 
         /// <summary>
-        /// 注册输入适配器
+        /// 每帧更新 — 重置即时事件状态
         /// </summary>
-        public void RegisterAdapter(IInputAdapter adapter)
+        public void Update()
         {
-            if (!_adapters.Contains(adapter))
-                _adapters.Add(adapter);
-        }
-
-        /// <summary>
-        /// 切换活动适配器
-        /// </summary>
-        public void SetActiveAdapter(string adapterName)
-        {
-            foreach (var adapter in _adapters)
-            {
-                if (adapter.AdapterName == adapterName)
-                {
-                    _activeAdapter = adapter;
-                    return;
-                }
-            }
+            // 每帧重置按下状态，供下一帧消费
+            // 注意：Unity Input.GetButtonDown 在同一帧内多次调用返回相同值
         }
 
         /// <summary>
         /// 获取标准化移动命令
         /// </summary>
-        public MoveCommand GetMoveCommand(Vector3 characterForward)
+        public MoveCommand GetMoveCommand(Vector3 characterForward, Vector3 cameraForward)
         {
-            Vector3 moveInput = _activeAdapter.GetMoveInput();
+            Vector3 moveInput = _adapter.GetMoveInput();
 
-            // 将世界坐标输入转换为角色朝向相关的局部坐标
-            // 如果有输入，角色朝向跟随移动方向
-            Quaternion targetRotation = characterForward.sqrMagnitude > 0.1f
-                ? Quaternion.LookRotation(characterForward)
-                : Quaternion.identity;
+            // 冲刺倍率
+            float speed = IsSprintHeld() ? SprintSpeed : MoveSpeed;
 
-            if (moveInput.sqrMagnitude > 0.1f)
+            if (moveInput.sqrMagnitude > 0.01f)
             {
-                // 将输入从世界坐标转换到相机视角
-                // （相机朝向决定"前方向"）
-                Vector3 worldMoveDir = ConvertToWorldDirection(moveInput);
-                targetRotation = Quaternion.LookRotation(worldMoveDir);
+                // 将输入从相机视角转换为世界方向
+                Vector3 worldMoveDir = ConvertToWorldDirection(moveInput, cameraForward);
+                Quaternion targetRotation = Quaternion.LookRotation(worldMoveDir);
+
+                return new MoveCommand
+                {
+                    MoveDir = worldMoveDir,
+                    Speed = speed,
+                    Rotation = targetRotation,
+                    Timestamp = DateTime.UtcNow.Ticks,
+                    Sequence = ++_sequence
+                };
             }
 
             return new MoveCommand
             {
-                MoveDir = moveInput,
-                Speed = MoveSpeed,
-                Rotation = targetRotation,
-                Timestamp = System.DateTime.UtcNow.Ticks,
+                MoveDir = Vector3.zero,
+                Speed = 0f,
+                Rotation = Quaternion.identity,
+                Timestamp = DateTime.UtcNow.Ticks,
                 Sequence = ++_sequence
             };
         }
@@ -93,27 +83,62 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public Vector2 GetCameraRotationInput()
         {
-            return _activeAdapter.GetCameraRotationInput();
+            return _adapter.GetCameraRotationInput();
+        }
+
+        /// <summary>
+        /// 是否正在移动
+        /// </summary>
+        public bool IsMoving()
+        {
+            return _adapter.HasMoveInput();
+        }
+
+        /// <summary>
+        /// 跳跃按下（一次性事件，按住空格只触发一次跳跃）
+        /// </summary>
+        public bool IsJumpPressed()
+        {
+            bool pressed = UnityInput.GetButtonDown("Jump");
+            if (pressed && !_jumpConsumed)
+            {
+                _jumpConsumed = true;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 攻击按下（一次性事件）
+        /// </summary>
+        public bool IsAttackPressed()
+        {
+            // 鼠标左键
+            bool pressed = UnityInput.GetMouseButtonDown(0);
+            if (pressed && !_attackConsumed)
+            {
+                _attackConsumed = true;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 冲刺按住（持续状态）
+        /// </summary>
+        public bool IsSprintHeld()
+        {
+            return UnityInput.GetKey(KeyCode.LeftShift);
         }
 
         /// <summary>
         /// 将输入向量从相机视角转换为世界方向
         /// </summary>
-        private Vector3 ConvertToWorldDirection(Vector3 input)
+        private Vector3 ConvertToWorldDirection(Vector3 input, Vector3 cameraForward)
         {
-            // 简化实现：input 是相对于相机的方向
-            // 实际需要相机朝向，这里假设相机的forward是场景中的"前"
-            // 真实实现需要 Camera.main.transform.forward
-            return input;
-        }
-
-        /// <summary>
-        /// 每帧更新
-        /// </summary>
-        public void Update()
-        {
-            // 可在此处理适配器自动切换逻辑
-            // 例如：检测到触摸时切换到 JoystickInputAdapter
+            // 以相机朝向为基准计算世界方向
+            Quaternion cameraRotation = Quaternion.LookRotation(cameraForward);
+            return cameraRotation * input;
         }
     }
 }
