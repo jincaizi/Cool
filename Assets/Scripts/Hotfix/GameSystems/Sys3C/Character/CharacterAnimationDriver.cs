@@ -51,14 +51,13 @@ namespace Hotfix.GameSystems.Sys3C.Character
             // JumpStart 进入 → 驱动到 JumpAir
             _onStateEnterCallbacks[HASH_JumpStart] = () =>
             {
-                _animator.SetInteger(HASH_JumpPhase, (int)JumpPhase.Start);
-                _animator.SetInteger(HASH_State, (int)CharacterState.JumpStart);
+                _animator.SetFloat(HASH_JumpPhase, (float)JumpPhase.Start);
             };
 
     // JumpEnd 进入 → 设置落地动画
             _onStateEnterCallbacks[HASH_JumpEnd] = () =>
             {
-                _animator.SetInteger(HASH_JumpPhase, (int)JumpPhase.End);
+                _animator.SetFloat(HASH_JumpPhase, (float)JumpPhase.End);
                 _animator.SetBool(HASH_IsJumping, false);
             };
 
@@ -70,8 +69,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 Action enterCallback = () =>
                 {
                     _currentComboCount = index;
-                    _animator.SetInteger(HASH_SubState, index);
-                    _animator.SetInteger(HASH_AttackPhase, index);
+                    _animator.SetFloat(HASH_SubState, index);
+                    _animator.SetFloat(HASH_AttackPhase, index);
                     if (!_isInCombat)
                         EnterBattle();
                 };
@@ -155,7 +154,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public void OnJumpStart()
         {
             _animator.SetBool(HASH_IsJumping, true);
-            _animator.SetInteger(HASH_JumpPhase, (int)JumpPhase.Start);
+            _animator.SetFloat(HASH_JumpPhase, (float)JumpPhase.Start);
         }
 
 /// <summary>
@@ -164,7 +163,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public void OnLanding()
         {
-            _animator.SetInteger(HASH_JumpPhase, (int)JumpPhase.End);
+            _animator.SetFloat(HASH_JumpPhase, (float)JumpPhase.End);
             _animator.SetBool(HASH_IsJumping, false);
         }
 
@@ -178,8 +177,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 EnterBattle();
 
             _currentComboCount = attackIndex;
-            _animator.SetInteger(HASH_SubState, attackIndex);
-            _animator.SetInteger(HASH_AttackPhase, attackIndex);
+            _animator.SetFloat(HASH_SubState, attackIndex);
+            _animator.SetFloat(HASH_AttackPhase, attackIndex);
         }
 
         /// <summary>
@@ -191,12 +190,12 @@ namespace Hotfix.GameSystems.Sys3C.Character
         }
 
         /// <summary>
-        /// 攻击完成（CharacterStateBehaviour 自动调用）
+/// 攻击完成（CharacterStateBehaviour 自动调用）
         /// </summary>
         public void OnAttackComplete()
         {
-            _animator.SetInteger(HASH_SubState, 0);
-            _animator.SetInteger(HASH_AttackPhase, 0);
+            _animator.SetFloat(HASH_SubState, 0);
+            _animator.SetFloat(HASH_AttackPhase, 0);
         }
 
         /// <summary>
@@ -208,7 +207,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 OnAttack(_currentComboCount + 1);
         }
 
-        /// <summary>
+/// <summary>
         /// 死亡 — 停止所有状态，播放死亡动画
         /// </summary>
         public void OnDeath()
@@ -216,7 +215,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _animator.SetBool(HASH_IsDead, true);
             _animator.SetBool(HASH_IsJumping, false);
             _animator.SetBool(HASH_IsMoving, false);
-            _animator.SetInteger(HASH_State, (int)CharacterState.Death);
+            _animator.SetFloat(HASH_State, (float)CharacterState.Death);
         }
     }
 }
