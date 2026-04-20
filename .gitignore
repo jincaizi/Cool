@@ -54,6 +54,9 @@ ehthumbs.db
 # Claude Code
 .claude/
 
+# Worktrees
+.worktrees/
+
 # Packages
 packages.config
 App.config
