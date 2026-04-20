@@ -139,16 +139,17 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 _velocity.y = Mathf.Max(_velocity.y, -50f);
             }
 
-            // ========== 6. 跳跃阶段转换 ==========
+// ========== 6. 跳跃阶段转换 ==========
             if (_data.JumpPhase == JumpPhase.Start && !_data.IsGrounded)
             {
                 _data.JumpPhase = JumpPhase.Air;
             }
 
-            // ========== 7. 着地检测 ==========
-            if (_data.IsGrounded && prevJumpPhase == JumpPhase.Air && _velocity.y <= 0)
+// ========== 7. 着地检测 ==========
+            bool shouldLand = _data.IsGrounded && _velocity.y <= 0;
+            if (shouldLand && (_data.JumpPhase == JumpPhase.Air || _data.JumpPhase == JumpPhase.Start))
             {
-                // 落地！
+                UnityEngine.Debug.Log($"[Landing] IsGrounded={_data.IsGrounded}, prevJumpPhase={prevJumpPhase}, currJumpPhase={_data.JumpPhase}, velocity.y={_velocity.y:F3}");
                 _data.JumpPhase = JumpPhase.End;
                 _data.State = CharacterState.JumpEnd;
                 OnLanded?.Invoke();
