@@ -85,48 +85,52 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public void Update(MoveCommand command)
         {
             _currentCommand = command;
-
-            // 使用 GroundDetector 射线检测
-            _data.IsGrounded = _groundDetector.IsGrounded();
             _data.Position = _transform.position;
             _data.Rotation = _transform.rotation;
             _data.IsSprint = command.IsSprint;
 
-            // 判断是否在跳跃中
-            bool isInJump = _data.JumpPhase == JumpPhase.Start || _data.JumpPhase == JumpPhase.Air;
+            // 1. 先应用移动（让角色移动到新位置）
+            bool wasGrounded = _data.IsGrounded;
 
-            // 跳跃请求
+            // 计算本帧移动向量
+            Vector3 moveVelocity = command.MoveDir * command.Speed;
+            moveVelocity.y = _velocity.y;
+            _controller.Move(moveVelocity * Time.deltaTime);
+
+            // 2. 移动后再检测地面（基于新位置）
+            _data.IsGrounded = _groundDetector.IsGrounded();
+
+            // 3. 检测走下悬崖
+            if (wasGrounded && !_data.IsGrounded && !_jumpRequested && _data.JumpPhase == JumpPhase.None)
+            {
+                _velocity.y = 0f;
+            }
+
+            // 4. 处理跳跃请求
+            bool isInJump = _data.JumpPhase == JumpPhase.Start || _data.JumpPhase == JumpPhase.Air;
             if (_jumpRequested && _data.IsGrounded)
             {
                 _velocity.y = JumpForce;
                 _jumpRequested = false;
-                _data.State = CharacterState.JumpStart;
                 _data.JumpPhase = JumpPhase.Start;
-                UnityEngine.Debug.Log($"[Jump!] JumpForce={JumpForce} Gravity={Gravity} pos.y={_transform.position.y:F3}");
+                _data.State = CharacterState.JumpStart;
             }
 
-            // 重力应用 - 跳跃期间始终应用重力
-            if (isInJump)
+            // 5. 应用重力
+            if (isInJump || !_data.IsGrounded)
             {
                 _velocity.y += Gravity * Time.deltaTime;
-                // 限制下落速度，防止穿透
                 _velocity.y = Mathf.Max(_velocity.y, -50f);
             }
             else if (_data.IsGrounded)
             {
-                // 着地时保持静止
-                _velocity.y = 0;
+                _velocity.y = 0f;
             }
 
-            // 移动逻辑
+            // 6. 地面/空中状态处理
             if (_data.IsGrounded && !isInJump)
             {
                 // 地面移动
-                Vector3 moveVelocity = command.MoveDir * command.Speed;
-                moveVelocity.y = _velocity.y;
-                _controller.Move(moveVelocity * Time.deltaTime);
-
-                // 转向
                 if (command.MoveDir.sqrMagnitude > 0.01f)
                 {
                     _stateLocked = false;
@@ -145,11 +149,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
             }
             else
             {
-                // 空中移动
-                Vector3 moveVelocity = command.MoveDir * command.Speed;
-                moveVelocity.y = _velocity.y;
-                _controller.Move(moveVelocity * Time.deltaTime);
-
+                // 空中状态
                 _data.State = CharacterState.JumpAir;
                 if (_data.JumpPhase == JumpPhase.Start)
                     _data.JumpPhase = JumpPhase.Air;
