@@ -11,7 +11,7 @@ namespace Hotfix.GameSystems.Sys3C.Camera
         private readonly Transform _targetTransform;
 
         // 相机参数
-        public float Distance { get; set; } = 5.0f;         // 相机距离
+        public float Distance { get; set; } = 8.0f;         // 相机距离
         public float Height { get; set; } = 2.0f;           // 相机高度
         public float PositionDamping { get; set; } = 5.0f;  // 位置平滑
         public float RotationDamping { get; set; } = 8.0f;   // 旋转平滑

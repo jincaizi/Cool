@@ -143,16 +143,16 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 _data.State = CharacterState.JumpAir;
                 if (_data.JumpPhase == JumpPhase.Start)
                     _data.JumpPhase = JumpPhase.Air;
+            }
 
-                // 着地检测
-                if (_data.IsGrounded && _data.JumpPhase == JumpPhase.Air && _velocity.y <= 0)
-                {
-                    UnityEngine.Debug.Log($"[Landing] detected! JumpPhase=Air->End, velocity.y={_velocity.y:F3}");
-                    _data.JumpPhase = JumpPhase.End;
-                    _data.State = CharacterState.JumpEnd;
-                    _stateLocked = true;
-                    OnLanded?.Invoke();
-                }
+            // 着地检测（在状态块外面，独立检查）
+            if (_data.IsGrounded && _data.JumpPhase == JumpPhase.Air && _velocity.y <= 0)
+            {
+                UnityEngine.Debug.Log($"[Landing] detected! JumpPhase=Air->End, velocity.y={_velocity.y:F3}");
+                _data.JumpPhase = JumpPhase.End;
+                _data.State = CharacterState.JumpEnd;
+                _stateLocked = true;
+                OnLanded?.Invoke();
             }
 
             // 更新数据
