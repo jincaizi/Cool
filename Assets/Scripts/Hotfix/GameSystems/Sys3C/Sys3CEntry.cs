@@ -64,7 +64,6 @@ namespace Hotfix.GameSystems.Sys3C
             _characterController = new Hotfix.GameSystems.Sys3C.Character.CharacterController(
                 transform,
                 _unityCharacterController,
-                _rigidbody,
                 _groundLayer
             );
             _characterController.MoveSpeed = _moveSpeed;

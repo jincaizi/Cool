@@ -10,7 +10,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
     public class CharacterController
     {
         private readonly UnityEngine.CharacterController _controller;
-        private readonly Rigidbody _rigidbody;
         private readonly Transform _transform;
         private readonly GroundDetector _groundDetector;
 
@@ -42,12 +41,10 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public CharacterController(
             Transform transform,
             UnityEngine.CharacterController controller,
-            Rigidbody rigidbody,
             LayerMask groundLayer)
         {
             _transform = transform;
             _controller = controller;
-            _rigidbody = rigidbody;
 
             // 初始化地面检测器
             _groundDetector = new GroundDetector(transform, controller, groundLayer);
@@ -59,13 +56,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 State = CharacterState.Idle,
                 IsGrounded = true
             };
-
-            // 禁用 Rigidbody 的重力，使用自定义重力
-            if (_rigidbody != null)
-            {
-                _rigidbody.useGravity = false;
-                _rigidbody.isKinematic = true;
-            }
         }
 
         /// <summary>

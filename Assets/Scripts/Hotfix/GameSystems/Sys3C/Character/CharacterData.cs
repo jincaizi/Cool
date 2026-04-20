@@ -31,6 +31,11 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// 序列号
         /// </summary>
         public uint Sequence;
+
+        /// <summary>
+        /// 是否冲刺
+        /// </summary>
+        public bool IsSprint;
     }
 
     /// <summary>
@@ -125,5 +130,10 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// 连击窗口是否激活——下一击输入可触发连击
         /// </summary>
         public bool ComboWindowActive;
+
+        /// <summary>
+        /// 是否冲刺
+        /// </summary>
+        public bool IsSprint;
     }
 }
