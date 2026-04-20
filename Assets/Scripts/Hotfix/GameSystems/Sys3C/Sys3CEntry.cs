@@ -114,6 +114,7 @@ namespace Hotfix.GameSystems.Sys3C
             // 跳跃
             if (_inputManager.IsJumpPressed())
             {
+                _characterController.RequestJump();
                 _animationDriver?.OnJumpStart();
             }
 

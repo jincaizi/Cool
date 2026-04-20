@@ -54,7 +54,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 Position = transform.position,
                 Rotation = transform.rotation,
                 State = CharacterState.Idle,
-                IsGrounded = true
+                IsGrounded = true,
+                JumpPhase = JumpPhase.None
             };
         }
 
@@ -63,9 +64,22 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public void RequestJump()
         {
-            if (_data.IsGrounded)
+            if (_data.IsGrounded && _data.JumpPhase == JumpPhase.None)
             {
                 _jumpRequested = true;
+            }
+        }
+
+        /// <summary>
+        /// 中断跳跃（被攻击或其他事件打断）
+        /// </summary>
+        public void AbortJump()
+        {
+            if (_data.JumpPhase == JumpPhase.Start || _data.JumpPhase == JumpPhase.Air)
+            {
+                _data.JumpPhase = JumpPhase.None;
+                _velocity.y = 0f;
+                _jumpRequested = false;
             }
         }
 
@@ -79,26 +93,27 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.Rotation = _transform.rotation;
             _data.IsSprint = command.IsSprint;
 
-            // 1. 先应用移动（让角色移动到新位置）
+            // 记录上帧地面状态
             bool wasGrounded = _data.IsGrounded;
+            JumpPhase prevJumpPhase = _data.JumpPhase;
 
-            // 计算本帧移动向量
+            // ========== 1. 应用移动 ==========
             Vector3 moveVelocity = command.MoveDir * command.Speed;
             moveVelocity.y = _velocity.y;
             _controller.Move(moveVelocity * Time.deltaTime);
 
-            // 2. 移动后再检测地面（基于新位置）
+            // ========== 2. 检测地面（移动后） ==========
             _data.IsGrounded = _groundDetector.IsGrounded();
 
-            // 3. 检测走下悬崖
-            if (wasGrounded && !_data.IsGrounded && !_jumpRequested && _data.JumpPhase == JumpPhase.None)
+            // ========== 3. 走下悬崖检测 ==========
+            // 从地面走到空中，且不是跳跃状态
+            if (wasGrounded && !_data.IsGrounded && _data.JumpPhase == JumpPhase.None)
             {
-                _velocity.y = 0f;
+                _velocity.y = 0f;  // 重置垂直速度
             }
 
-            // 4. 处理跳跃请求
-            bool isInJump = _data.JumpPhase == JumpPhase.Start || _data.JumpPhase == JumpPhase.Air;
-            if (_jumpRequested && _data.IsGrounded)
+            // ========== 4. 跳跃请求处理 ==========
+            if (_jumpRequested && _data.IsGrounded && _data.JumpPhase == JumpPhase.None)
             {
                 _velocity.y = JumpForce;
                 _jumpRequested = false;
@@ -106,58 +121,84 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 _data.State = CharacterState.JumpStart;
             }
 
-            // 5. 应用重力
-            if (isInJump || !_data.IsGrounded)
+            // ========== 5. 应用重力 ==========
+            bool isInJump = _data.JumpPhase == JumpPhase.Start || _data.JumpPhase == JumpPhase.Air;
+            if (isInJump)
             {
                 _velocity.y += Gravity * Time.deltaTime;
-                _velocity.y = Mathf.Max(_velocity.y, -50f);
+                _velocity.y = Mathf.Max(_velocity.y, -50f);  // 限制最大下落速度
             }
             else if (_data.IsGrounded)
             {
                 _velocity.y = 0f;
             }
-
-            // 6. 地面/空中状态处理
-            if (_data.IsGrounded && !isInJump)
-            {
-                // 地面移动
-                if (command.MoveDir.sqrMagnitude > 0.01f)
-                {
-                    _stateLocked = false;
-                    Quaternion targetRot = command.Rotation;
-                    _transform.rotation = Quaternion.Slerp(
-                        _transform.rotation,
-                        targetRot,
-                        RotationSpeed * Time.deltaTime
-                    );
-                    _data.State = command.IsSprint ? CharacterState.Run : CharacterState.Move;
-                }
-                else
-                {
-                    _data.State = CharacterState.Idle;
-                }
-            }
             else
             {
-                // 空中状态
-                _data.State = CharacterState.JumpAir;
-                if (_data.JumpPhase == JumpPhase.Start)
-                    _data.JumpPhase = JumpPhase.Air;
+                // 非跳跃的空中状态（被击飞等），也应用重力
+                _velocity.y += Gravity * Time.deltaTime * 0.5f;
+                _velocity.y = Mathf.Max(_velocity.y, -50f);
             }
 
-            // 着地检测（在状态块外面，独立检查）
-            if (_data.IsGrounded && _data.JumpPhase == JumpPhase.Air && _velocity.y <= 0)
+            // ========== 6. 跳跃阶段转换 ==========
+            if (_data.JumpPhase == JumpPhase.Start && !_data.IsGrounded)
             {
-                UnityEngine.Debug.Log($"[Landing] detected! JumpPhase=Air->End, velocity.y={_velocity.y:F3}");
+                _data.JumpPhase = JumpPhase.Air;
+            }
+
+            // ========== 7. 着地检测 ==========
+            if (_data.IsGrounded && prevJumpPhase == JumpPhase.Air && _velocity.y <= 0)
+            {
+                // 落地！
                 _data.JumpPhase = JumpPhase.End;
                 _data.State = CharacterState.JumpEnd;
-                _stateLocked = true;
                 OnLanded?.Invoke();
             }
 
-            // 更新数据
+            // ========== 8. 状态处理 ==========
+            // 如果状态被锁定（JumpEnd 播放期间），不覆盖状态
+            if (!_stateLocked)
+            {
+                if (_data.IsGrounded && _data.JumpPhase == JumpPhase.None)
+                {
+                    // 地面状态
+                    if (command.MoveDir.sqrMagnitude > 0.01f)
+                    {
+                        Quaternion targetRot = command.Rotation;
+                        _transform.rotation = Quaternion.Slerp(
+                            _transform.rotation,
+                            targetRot,
+                            RotationSpeed * Time.deltaTime
+                        );
+                        _data.State = command.IsSprint ? CharacterState.Run : CharacterState.Move;
+                    }
+                    else
+                    {
+                        _data.State = CharacterState.Idle;
+                    }
+                }
+                else if (_data.JumpPhase == JumpPhase.Air)
+                {
+                    _data.State = CharacterState.JumpAir;
+                }
+                else if (_data.JumpPhase == JumpPhase.Start)
+                {
+                    _data.State = CharacterState.JumpStart;
+                }
+            }
+
+            // ========== 9. 更新数据 ==========
             _data.Velocity = _controller.velocity;
             _data.VerticalVelocity = _velocity.y;
+        }
+
+        /// <summary>
+        /// 完成跳跃（JumpEnd 动画退出时调用）
+        /// </summary>
+        public void FinishJump()
+        {
+            _stateLocked = false;
+            _data.JumpPhase = JumpPhase.None;
+            _data.State = CharacterState.Idle;
         }
 
         /// <summary>
@@ -186,21 +227,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public Quaternion GetPredictedRotation()
         {
             return _transform.rotation;
-        }
-
-        /// <summary>
-        /// 跳跃落地动画完成时调用（由 CharacterAnimationDriver 在 JumpEnd 退出时调用）
-        /// 注意：必须保持 JumpPhase > 0（设为 End=3），确保 JumpEnd→Idle 的 Animator 转换条件满足。
-        /// JumpPhase > 0 且 IsJumping=false 时，转换才能正常触发。
-        /// </summary>
-        public void FinishJump()
-        {
-            UnityEngine.Debug.Log($"[FinishJump] stateLocked=false, jumpPhase={_data.JumpPhase}, state=Idle");
-            _stateLocked = false;
-            // 保持 JumpPhase = End (3)，确保 JumpEnd→Idle 转换条件 JumpPhase > 0 始终满足
-            // IsJumping 在 JumpEnd_Enter 时已设为 false
-            _data.JumpPhase = JumpPhase.End;
-            _data.State = CharacterState.Idle;
         }
     }
 }

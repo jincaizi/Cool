@@ -55,13 +55,10 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 _animator.SetInteger(HASH_State, (int)CharacterState.JumpStart);
             };
 
-            // JumpEnd 进入 → 回到 Idle 或 BattleIdle
+    // JumpEnd 进入 → 设置落地动画
             _onStateEnterCallbacks[HASH_JumpEnd] = () =>
             {
-                _animator.SetInteger(HASH_JumpPhase, (int)JumpPhase.None);
-                _animator.SetInteger(HASH_State, _isInCombat
-                    ? (int)CharacterState.BattleIdle
-                    : (int)CharacterState.Idle);
+                _animator.SetInteger(HASH_JumpPhase, (int)JumpPhase.End);
                 _animator.SetBool(HASH_IsJumping, false);
             };
 
@@ -151,22 +148,22 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _animator.SetBool(HASH_IsMoving, moving);
         }
 
-        /// <summary>
-        /// 开始跳跃 — 驱动 JumpStart 状态
+/// <summary>
+        /// 开始跳跃 — 驱动 JumpStart 动画
+        /// 注意：物理状态由 CharacterController.RequestJump() 处理
         /// </summary>
         public void OnJumpStart()
         {
             _animator.SetBool(HASH_IsJumping, true);
-            _animator.SetInteger(HASH_State, (int)CharacterState.JumpStart);
             _animator.SetInteger(HASH_JumpPhase, (int)JumpPhase.Start);
         }
 
-        /// <summary>
+/// <summary>
         /// 落地检测时调用（CharacterController 地面检测触发）
+        /// 注意：物理状态由 CharacterController 处理，这里只驱动动画
         /// </summary>
         public void OnLanding()
         {
-            _animator.SetInteger(HASH_State, (int)CharacterState.JumpEnd);
             _animator.SetInteger(HASH_JumpPhase, (int)JumpPhase.End);
             _animator.SetBool(HASH_IsJumping, false);
         }

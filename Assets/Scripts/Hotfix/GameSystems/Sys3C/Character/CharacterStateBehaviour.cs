@@ -8,6 +8,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
     /// </summary>
     public class CharacterStateBehaviour : StateMachineBehaviour
     {
+        private static readonly int HASH_JumpEnd = Animator.StringToHash("JumpEnd");
+
         /// <summary>
         /// 进入状态时的回调
         /// </summary>
@@ -24,6 +26,13 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            // JumpEnd 动画退出时，重置跳跃状态
+            if (stateInfo.shortNameHash == HASH_JumpEnd)
+            {
+                var characterController = animator.GetComponent<CharacterController>();
+                characterController?.FinishJump();
+            }
+
             var driver = animator.GetComponent<CharacterAnimationDriver>();
             if (driver == null) return;
 
