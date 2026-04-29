@@ -1,12 +1,17 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Character
 {
     /// <summary>
-    /// 角色动画驱动器 — 通过 Animator 参数驱动角色动画状态机
-    /// 负责：跳跃三段、攻击连招、战斗状态切换、移动/奔跑状态
+    /// 角色动画驱动器 — 响应式模型
+    /// 观察 CharacterData 状态变化，自动驱动 Animator 状态机
+    /// 规则：CC 只改数据，Driver 只读数据并响应变化
+    ///
+    /// 驱动策略：
+    /// - 统一使用 State 参数 (Int) 驱动 Base Layer 状态转换
+    /// - 使用 AttackPhase 参数 (Int) + Attack Trigger 控制 Attack Layer 连击
     /// </summary>
     public class CharacterAnimationDriver
     {
@@ -14,208 +19,337 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
         // === Cached parameter hashes ===
         private static readonly int HASH_State = Animator.StringToHash("State");
-        private static readonly int HASH_SubState = Animator.StringToHash("SubState");
-        private static readonly int HASH_IsBattle = Animator.StringToHash("IsBattle");
-        private static readonly int HASH_IsMoving = Animator.StringToHash("IsMoving");
-        private static readonly int HASH_IsJumping = Animator.StringToHash("IsJumping");
-        private static readonly int HASH_IsDead = Animator.StringToHash("IsDead");
-        private static readonly int HASH_JumpPhase = Animator.StringToHash("JumpPhase");
         private static readonly int HASH_AttackPhase = Animator.StringToHash("AttackPhase");
-        private static readonly int HASH_Speed = Animator.StringToHash("Speed");
+        private static readonly int HASH_Attack = Animator.StringToHash("Attack");
 
-        // === State hashes ===
-        private static readonly int HASH_JumpStart = Animator.StringToHash("JumpStart");
-        private static readonly int HASH_JumpEnd = Animator.StringToHash("JumpEnd");
-        private static readonly int HASH_Idle = Animator.StringToHash("Idle");
-        private static readonly int HASH_BattleIdle = Animator.StringToHash("BattleIdle");
-
-        // === State → Callback mapping ===
-        private readonly Dictionary<int, Action> _onStateEnterCallbacks = new Dictionary<int, Action>();
-        private readonly Dictionary<int, Action> _onStateExitCallbacks = new Dictionary<int, Action>();
+        // === State values (必须与 Character3C.controller 中 State 参数值完全一致) ===
+        // Idle=0, BattleIdle=1, Move=2, Run=3, JumpStart=4, JumpAir=5, JumpEnd=6, Death=7
+        private const int STATE_IDLE = 0;
+        private const int STATE_BATTLE_IDLE = 1;
+        private const int STATE_MOVE = 2;
+        private const int STATE_RUN = 3;
+        private const int STATE_JUMP_START = 4;
+        private const int STATE_JUMP_AIR = 5;
+        private const int STATE_JUMP_END = 6;
+        private const int STATE_DEATH = 7;
 
         // === Phase tracking ===
-        private bool _isInCombat;
         private int _currentComboCount;
         private const int MAX_COMBO = 4;
+        private int _lastNormalAttackIndex;
+
+        // === 状态变化追踪 ===
+        private CharacterState _prevState;
+        private JumpPhase _prevJumpPhase;
+
+        // 调试：记录最近一次 SetInteger 调用的参数和帧号
+        private int _lastSetStateFrame;
+        private int _lastSetStateValue;
 
         public CharacterAnimationDriver(Animator animator)
         {
             _animator = animator ?? throw new ArgumentNullException(nameof(animator));
+            _prevState = CharacterState.Idle;
+            _prevJumpPhase = JumpPhase.None;
 
-            // 注册状态回调
-            RegisterCallbacks();
-        }
+            // 初始化 Animator 参数
+            _animator.SetInteger(HASH_State, STATE_IDLE);
+            _animator.SetInteger(HASH_AttackPhase, 0);
 
-        private void RegisterCallbacks()
-        {
-            // JumpStart 进入 → 驱动到 JumpAir
-            _onStateEnterCallbacks[HASH_JumpStart] = () =>
+            // 打印 Attack Layer 信息
+            if (_animator.layerCount >= 2)
             {
-                _animator.SetFloat(HASH_JumpPhase, (float)JumpPhase.Start);
-            };
-
-    // JumpEnd 进入 → 设置落地动画
-            _onStateEnterCallbacks[HASH_JumpEnd] = () =>
-            {
-                _animator.SetFloat(HASH_JumpPhase, (float)JumpPhase.End);
-                _animator.SetBool(HASH_IsJumping, false);
-            };
-
-            // 攻击状态进入 → 记录连击阶段
-            foreach (var attackInfo in GetAttackStateInfos())
-            {
-                int hash = attackInfo.Hash;
-                int index = attackInfo.Index;
-                Action enterCallback = () =>
+                var layer1 = _animator.GetLayerIndex("Attack Layer");
+                if (layer1 >= 0)
                 {
-                    _currentComboCount = index;
-                    _animator.SetFloat(HASH_SubState, index);
-                    _animator.SetFloat(HASH_AttackPhase, index);
-                    if (!_isInCombat)
-                        EnterBattle();
-                };
-                _onStateEnterCallbacks[hash] = enterCallback;
+                    float weight = _animator.GetLayerWeight(layer1);
+                    Debug.Log("[Driver] Attack Layer found: index=" + layer1 + ", weight=" + weight);
+
+                    // 检查 AnyState 转换
+                    AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(layer1);
+                    Debug.Log("[Driver] Attack Layer current state: " + info.fullPathHash);
+                }
+                else
+                {
+                    Debug.LogError("[Driver] Attack Layer not found! Available layers:");
+                    for (int i = 0; i < _animator.layerCount; i++)
+                    {
+                        Debug.Log("[Driver]   Layer " + i + ": " + _animator.GetLayerName(i));
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("[Driver] Animator only has " + _animator.layerCount + " layers, need at least 2!");
             }
         }
 
-        private static IEnumerable<(int Hash, int Index)> GetAttackStateInfos()
-        {
-            yield return (Animator.StringToHash("Attack1"), 1);
-            yield return (Animator.StringToHash("Attack2"), 2);
-            yield return (Animator.StringToHash("Attack3"), 3);
-            yield return (Animator.StringToHash("Attack4"), 4);
-        }
-
         /// <summary>
-        /// 每帧更新 — 驱动基础 Animator 参数
+        /// 每帧更新 — 检测 CharacterData 状态变化，响应式驱动动画
         /// </summary>
         public void Update(CharacterData data)
         {
+            if (_animator == null)
+            {
+                Debug.LogError("[Driver] _animator is null!");
+                return;
+            }
+
+            if (!_animator.isActiveAndEnabled)
+            {
+                Debug.LogWarning("[Driver] Animator not active/enabled");
+                return;
+            }
+
+            // 检查 Animator 当前状态
+            AnimatorStateInfo baseInfo = _animator.GetCurrentAnimatorStateInfo(0);
+            bool isInTransition = _animator.IsInTransition(0);
+            bool inJumpEndState = baseInfo.shortNameHash == Animator.StringToHash("JumpEnd");
+
+            // 每 60 帧打印一次完整状态
+            if (Time.frameCount % 60 == 0)
+            {
+                AnimationClip clip = baseInfo.shortNameHash != 0
+                    ? _animator.GetCurrentAnimatorClipInfo(0)?.FirstOrDefault().clip
+                    : null;
+                string clipName = clip?.name ?? "null";
+
+                int animatorState = _animator.GetInteger(HASH_State);
+                Debug.Log("[Driver] === Frame " + Time.frameCount
+                    + " | BaseStateHash=" + baseInfo.shortNameHash
+                    + ", clip=" + clipName
+                    + ", normalizedTime=" + baseInfo.normalizedTime.ToString("F2")
+                    + " | AnimatorParam State=" + animatorState
+                    + " (last SetInteger at frame " + _lastSetStateFrame + " = " + _lastSetStateValue + ")"
+                    + " | data.State=" + data.State + ", JumpPhase=" + data.JumpPhase
+                    + ", layerCount=" + _animator.layerCount);
+            }
+
+            // 1. 死亡优先级最高
+            if (data.State == CharacterState.Death && _prevState != CharacterState.Death)
+            {
+                OnDeathEntered();
+                _prevState = data.State;
+                _prevJumpPhase = data.JumpPhase;
+                return;
+            }
+
+            // 2. 跳跃阶段变化 → 驱动跳跃动画
+            if (data.JumpPhase != _prevJumpPhase)
+            {
+                Debug.Log("[Driver] JumpPhase changed: " + _prevJumpPhase + " -> " + data.JumpPhase
+                    + ", currentAnimState=" + baseInfo.shortNameHash);
+                OnJumpPhaseChanged(_prevJumpPhase, data.JumpPhase);
+                _prevJumpPhase = data.JumpPhase;
+                _prevState = data.State;
+                return;
+            }
+
+            // 3. 非跳跃期间，普通状态变化 → 驱动移动动画
+            if (data.JumpPhase == JumpPhase.None && data.State != _prevState)
+            {
+                Debug.Log("[Driver] State changed: " + _prevState + " -> " + data.State);
+                OnStateChanged(_prevState, data.State);
+            }
+
+            _prevState = data.State;
+
+            // 4. 强制同步：只在非跳跃状态下同步移动状态
+            // JumpEnd 状态的转换由动画 ExitTime 控制，避免状态冲突
+            ForceSync(data);
+        }
+
+        /// <summary>
+        /// 强制同步 Animator 参数
+        /// </summary>
+        private void ForceSync(CharacterData data)
+        {
             if (_animator == null) return;
 
-            _animator.SetFloat(HASH_Speed, data.Velocity.magnitude, 0.1f, Time.deltaTime);
-            _animator.SetBool(HASH_IsBattle, data.IsBattle || _isInCombat);
-            _animator.SetBool(HASH_IsMoving, data.State == CharacterState.Move || data.State == CharacterState.Run);
-            _animator.SetBool(HASH_IsDead, data.State == CharacterState.Death);
+            // JumpEnd 期间不强制同步，让 ExitTime 转换完成
+            if (data.JumpPhase == JumpPhase.End) return;
+
+            int targetState;
+            switch (data.JumpPhase)
+            {
+                case JumpPhase.Start:
+                    targetState = STATE_JUMP_START;
+                    break;
+                case JumpPhase.Air:
+                    targetState = STATE_JUMP_AIR;
+                    break;
+                case JumpPhase.End:
+                    targetState = STATE_JUMP_END;
+                    break;
+                default:
+                    targetState = CharacterStateToInt(data.State);
+                    break;
+            }
+
+            int currentState = _animator.GetInteger(HASH_State);
+            if (currentState != targetState || Time.frameCount % 60 == 0)
+            {
+                _animator.SetInteger(HASH_State, targetState);
+                _lastSetStateFrame = Time.frameCount;
+                _lastSetStateValue = targetState;
+                Debug.Log("[Driver] ForceSync: SetInteger(" + targetState + ") at frame " + Time.frameCount
+                    + " (prev animator State=" + currentState + ", data.State=" + data.State + ")");
+            }
         }
 
         /// <summary>
-        /// 由 CharacterStateBehaviour 在状态进入时调用
+        /// CharacterState 转换为 Animator State 参数值
         /// </summary>
-        public void OnStateEntered(int shortNameHash)
+        private int CharacterStateToInt(CharacterState state)
         {
-            if (_onStateEnterCallbacks.TryGetValue(shortNameHash, out var callback))
-                callback();
-        }
-
-        /// <summary>
-        /// 由 CharacterStateBehaviour 在状态退出时调用
-        /// </summary>
-        public void OnStateExited(int shortNameHash)
-        {
-            if (_onStateExitCallbacks.TryGetValue(shortNameHash, out var callback))
-                callback();
+            switch (state)
+            {
+                case CharacterState.Idle: return STATE_IDLE;
+                case CharacterState.BattleIdle: return STATE_BATTLE_IDLE;
+                case CharacterState.Move: return STATE_MOVE;
+                case CharacterState.Run: return STATE_RUN;
+                case CharacterState.Death: return STATE_DEATH;
+                default: return STATE_IDLE;
+            }
         }
 
         // ============================================
-        // Public API — 供外部（CharacterController、Input 等）调用
+        // 响应式状态变化处理
+        // ============================================
+
+        private void OnJumpPhaseChanged(JumpPhase from, JumpPhase to)
+        {
+            int targetState;
+            switch (to)
+            {
+                case JumpPhase.Start:
+                    targetState = STATE_JUMP_START;
+                    break;
+                case JumpPhase.Air:
+                    targetState = STATE_JUMP_AIR;
+                    break;
+                case JumpPhase.End:
+                    targetState = STATE_JUMP_END;
+                    break;
+                default:
+                    targetState = STATE_IDLE;
+                    break;
+            }
+            Debug.Log("[Driver] OnJumpPhaseChanged: " + from + " -> " + to + ", SetInteger(State, " + targetState + ")");
+            _animator.SetInteger(HASH_State, targetState);
+            _lastSetStateFrame = Time.frameCount;
+            _lastSetStateValue = targetState;
+        }
+
+        private void OnStateChanged(CharacterState from, CharacterState to)
+        {
+            int targetState;
+            switch (to)
+            {
+                case CharacterState.Idle:
+                    targetState = STATE_IDLE;
+                    break;
+                case CharacterState.BattleIdle:
+                    targetState = STATE_BATTLE_IDLE;
+                    break;
+                case CharacterState.Move:
+                    targetState = STATE_MOVE;
+                    break;
+                case CharacterState.Run:
+                    targetState = STATE_RUN;
+                    break;
+                default:
+                    targetState = STATE_IDLE;
+                    break;
+            }
+            Debug.Log("[Driver] OnStateChanged: " + from + " -> " + to + ", SetInteger(State, " + targetState + ")");
+            _animator.SetInteger(HASH_State, targetState);
+            _lastSetStateFrame = Time.frameCount;
+            _lastSetStateValue = targetState;
+        }
+
+        private void OnDeathEntered()
+        {
+            _animator.SetInteger(HASH_State, STATE_DEATH);
+        }
+
+        // ============================================
+        // 攻击/技能 — 由输入直接驱动，不经 CharacterData
         // ============================================
 
         /// <summary>
-        /// 进入战斗状态（攻击时自动调用）
+        /// 普通攻击（Attack1/Attack2 交替）
+        /// 通过 SetTrigger + SetInteger 触发 AnyState → AttackX 转换
         /// </summary>
-        public void EnterBattle()
+        public void OnNormalAttack()
         {
-            _isInCombat = true;
-            _animator.SetBool(HASH_IsBattle, true);
+            if (_animator == null)
+            {
+                Debug.LogError("[Driver] OnNormalAttack: _animator is null!");
+                return;
+            }
+            _lastNormalAttackIndex = _lastNormalAttackIndex == 1 ? 2 : 1;
+            Debug.Log("[Driver] OnNormalAttack: AttackPhase=" + _lastNormalAttackIndex);
+            _animator.SetInteger(HASH_AttackPhase, _lastNormalAttackIndex);
+            _animator.SetTrigger(HASH_Attack);
+            Debug.Log("[Driver] SetAttack done, AttackPhase=" + _animator.GetInteger(HASH_AttackPhase)
+                + ", layerCount=" + _animator.layerCount + ", baseState=" + _animator.GetCurrentAnimatorStateInfo(0).shortNameHash);
         }
 
         /// <summary>
-        /// 退出战斗状态（预留，后续扩展）
+        /// 2技能（Attack3）
         /// </summary>
-        public void ExitBattle()
+        public void OnSkill2()
         {
-            _isInCombat = false;
-            _animator.SetBool(HASH_IsBattle, false);
+            if (_animator == null)
+            {
+                Debug.LogError("[Driver] OnSkill2: _animator is null!");
+                return;
+            }
+            Debug.Log("[Driver] OnSkill2: AttackPhase=3");
+            _animator.SetInteger(HASH_AttackPhase, 3);
+            _animator.SetTrigger(HASH_Attack);
         }
 
         /// <summary>
-        /// 设置移动状态
+        /// 3技能（Attack4）
         /// </summary>
-        public void SetMoving(bool moving)
+        public void OnSkill3()
         {
-            _animator.SetBool(HASH_IsMoving, moving);
-        }
-
-/// <summary>
-        /// 开始跳跃 — 驱动 JumpStart 动画
-        /// 注意：物理状态由 CharacterController.RequestJump() 处理
-        /// </summary>
-        public void OnJumpStart()
-        {
-            _animator.SetBool(HASH_IsJumping, true);
-            _animator.SetFloat(HASH_JumpPhase, (float)JumpPhase.Start);
-        }
-
-/// <summary>
-        /// 落地检测时调用（CharacterController 地面检测触发）
-        /// 注意：物理状态由 CharacterController 处理，这里只驱动动画
-        /// </summary>
-        public void OnLanding()
-        {
-            _animator.SetFloat(HASH_JumpPhase, (float)JumpPhase.End);
-            _animator.SetBool(HASH_IsJumping, false);
+            if (_animator == null)
+            {
+                Debug.LogError("[Driver] OnSkill3: _animator is null!");
+                return;
+            }
+            Debug.Log("[Driver] OnSkill3: AttackPhase=4");
+            _animator.SetInteger(HASH_AttackPhase, 4);
+            _animator.SetTrigger(HASH_Attack);
         }
 
         /// <summary>
-        /// 开始攻击（支持地面和空中）
-        /// </summary>
-        public void OnAttack(int attackIndex)
-        {
-            if (attackIndex < 1 || attackIndex > MAX_COMBO) return;
-            if (!_isInCombat)
-                EnterBattle();
-
-            _currentComboCount = attackIndex;
-            _animator.SetFloat(HASH_SubState, attackIndex);
-            _animator.SetFloat(HASH_AttackPhase, attackIndex);
-        }
-
-        /// <summary>
-        /// 空中攻击（叠加动画）
-        /// </summary>
-        public void OnAttackInAir(int attackIndex)
-        {
-            OnAttack(attackIndex);
-        }
-
-        /// <summary>
-/// 攻击完成（CharacterStateBehaviour 自动调用）
+        /// 攻击完成
         /// </summary>
         public void OnAttackComplete()
         {
-            _animator.SetFloat(HASH_SubState, 0);
-            _animator.SetFloat(HASH_AttackPhase, 0);
+            _animator.SetInteger(HASH_AttackPhase, 0);
+            _currentComboCount = 0;
         }
 
         /// <summary>
-        /// 尝试连击下一击（在 ComboWindow 期间调用）
+        /// 尝试连击下一击
         /// </summary>
         public void TryComboNext()
         {
-            if (_currentComboCount < MAX_COMBO)
-                OnAttack(_currentComboCount + 1);
+            if (_lastNormalAttackIndex < 2)
+                OnNormalAttack();
         }
 
-/// <summary>
-        /// 死亡 — 停止所有状态，播放死亡动画
+        /// <summary>
+        /// 播放受击反应动画（外部事件驱动，不经 CharacterData）
         /// </summary>
-        public void OnDeath()
+        public void PlayHitReaction()
         {
-            _animator.SetBool(HASH_IsDead, true);
-            _animator.SetBool(HASH_IsJumping, false);
-            _animator.SetBool(HASH_IsMoving, false);
-            _animator.SetFloat(HASH_State, (float)CharacterState.Death);
+            _animator.SetInteger(HASH_State, STATE_IDLE);
         }
     }
 }

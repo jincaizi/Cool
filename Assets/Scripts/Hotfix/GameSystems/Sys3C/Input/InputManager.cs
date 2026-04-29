@@ -27,6 +27,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
         // === 一次性事件（每帧只触发一次） ===
         private bool _jumpConsumed;
         private bool _attackConsumed;
+        private bool _skill2Consumed;
+        private bool _skill3Consumed;
 
         public InputManager()
         {
@@ -38,19 +40,22 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public void Update()
         {
-            // 每帧重置按下状态，供下一帧消费
-            // 注意：Unity Input.GetButtonDown 在同一帧内多次调用返回相同值
+            // 每帧开始时重置消费标志，允许下一帧再次触发
+            _jumpConsumed = false;
+            _attackConsumed = false;
+            _skill2Consumed = false;
+            _skill3Consumed = false;
         }
 
         /// <summary>
         /// 获取标准化移动命令
         /// </summary>
-        public MoveCommand GetMoveCommand(Vector3 characterForward, Vector3 cameraForward)
+        public MoveCommand GetMoveCommand(Vector3 cameraForward)
         {
             Vector3 moveInput = _adapter.GetMoveInput();
 
-            // 冲刺倍率
-            float speed = IsSprintHeld() ? SprintSpeed : MoveSpeed;
+            bool sprintHeld = IsSprintHeld();
+            float speed = sprintHeld ? SprintSpeed : MoveSpeed;
 
             if (moveInput.sqrMagnitude > 0.01f)
             {
@@ -58,13 +63,20 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 Vector3 worldMoveDir = ConvertToWorldDirection(moveInput, cameraForward);
                 Quaternion targetRotation = Quaternion.LookRotation(worldMoveDir);
 
+                if (Time.frameCount % 30 == 0)
+                {
+                    Debug.Log("[Input] MoveInput=" + moveInput + ", worldMoveDir=" + worldMoveDir
+                        + ", sprint=" + sprintHeld);
+                }
+
                 return new MoveCommand
                 {
                     MoveDir = worldMoveDir,
                     Speed = speed,
                     Rotation = targetRotation,
                     Timestamp = DateTime.UtcNow.Ticks,
-                    Sequence = ++_sequence
+                    Sequence = ++_sequence,
+                    IsSprint = sprintHeld
                 };
             }
 
@@ -74,7 +86,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 Speed = 0f,
                 Rotation = Quaternion.identity,
                 Timestamp = DateTime.UtcNow.Ticks,
-                Sequence = ++_sequence
+                Sequence = ++_sequence,
+                IsSprint = false
             };
         }
 
@@ -129,6 +142,42 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public bool IsSprintHeld()
         {
             return UnityInput.GetKey(KeyCode.LeftShift);
+        }
+
+        /// <summary>
+        /// 2技能按下（Q键）- 普通攻击升级版
+        /// </summary>
+        public bool IsSkill2Pressed()
+        {
+            bool pressed = UnityInput.GetKeyDown(KeyCode.Q);
+            if (pressed && !_skill2Consumed)
+            {
+                _skill2Consumed = true;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 3技能按下（R键）- 大招
+        /// </summary>
+        public bool IsSkill3Pressed()
+        {
+            bool pressed = UnityInput.GetKeyDown(KeyCode.R);
+            if (pressed && !_skill3Consumed)
+            {
+                _skill3Consumed = true;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 是否正在冲刺
+        /// </summary>
+        public bool IsSprinting()
+        {
+            return IsSprintHeld() && IsMoving();
         }
 
         /// <summary>
