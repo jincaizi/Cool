@@ -42,7 +42,7 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
             }
         }
 
-        override public void OnStateExit(Animator animator, AnimatorInfo stateInfo, int layerIndex)
+        override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             if (stateInfo.shortNameHash == HASH_JumpEnd)
             {

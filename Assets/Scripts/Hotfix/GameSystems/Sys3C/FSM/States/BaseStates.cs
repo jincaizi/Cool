@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Hotfix.GameSystems.Sys3C.FSM.states
+namespace Hotfix.GameSystems.Sys3C.FSM.States
 {
     /// <summary>
     /// Idle 状态

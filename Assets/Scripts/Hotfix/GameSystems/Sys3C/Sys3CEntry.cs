@@ -16,7 +16,7 @@ namespace Hotfix.GameSystems.Sys3C
         [Header("Settings")]
         public LayerMask GroundLayer;
 
-        private CharacterController _cc;
+        private Hotfix.GameSystems.Sys3C.Character.CharacterController _cc;
         private FSMManager _fsmManager;
         private SkillRegistry _skillRegistry;
         private HitManager _hitManager;

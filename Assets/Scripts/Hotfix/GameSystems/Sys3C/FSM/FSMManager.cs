@@ -11,7 +11,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
     /// </summary>
     public class FSMManager
     {
-        private readonly CharacterController _characterController;
+        private readonly Hotfix.GameSystems.Sys3C.Character.CharacterController _characterController;
         private readonly Animator _animator;
 
         // Animator 参数哈希
@@ -31,7 +31,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public event Action OnAttackCompleted;
         public event Action OnSkillCompleted;
 
-        public FSMManager(CharacterController characterController, Animator animator)
+        public FSMManager(Hotfix.GameSystems.Sys3C.Character.CharacterController characterController, Animator animator)
         {
             _characterController = characterController;
             _animator = animator;
