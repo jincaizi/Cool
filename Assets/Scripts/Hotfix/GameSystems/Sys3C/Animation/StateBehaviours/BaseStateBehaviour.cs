@@ -1,23 +1,20 @@
+using System;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 {
-    /// <summary>
-    /// Base Layer 动画完成监听
-    /// 监听 JumpStart、JumpAir、JumpEnd 动画事件
-    /// </summary>
     public class BaseStateBehaviour : StateMachineBehaviour
     {
-        // 状态哈希
         private static readonly int HASH_JumpStart = Animator.StringToHash("JumpStart");
         private static readonly int HASH_JumpAir = Animator.StringToHash("JumpAir");
         private static readonly int HASH_JumpEnd = Animator.StringToHash("JumpEnd");
 
-        // 回调引用（由 FSMManager 设置）
-        private static System.Action<string> _onAnimationCompleted;
+        private static AnimationDriver _driver;
+        private static Action<string> _onAnimationCompleted;
 
-        public static void SetCallback(System.Action<string> callback)
+        public static void SetCallback(AnimationDriver driver, Action<string> callback)
         {
+            _driver = driver;
             _onAnimationCompleted = callback;
         }
 
@@ -31,7 +28,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // JumpEnd 动画完成检测
             if (stateInfo.shortNameHash == HASH_JumpEnd)
             {
                 if (stateInfo.normalizedTime >= 0.9f)
