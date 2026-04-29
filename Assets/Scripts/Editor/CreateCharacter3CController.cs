@@ -6,190 +6,244 @@ using UnityEngine;
 /// <summary>
 /// 菜单工具：一键生成 Character3C.controller
 /// 菜单路径：Tools → 3C → Create Character3C Controller
+///
+/// 根据新架构生成：
+/// - Layer 0: Base Layer (Override) - Idle/Move/Sprint/Jump*
+/// - Layer 1: Attack Layer (Override) - AttackIdle/Attack1/Attack2/AttackQ/AttackR
+/// - Layer 2: Hit Layer (Additive) - Hit
+///
+/// 参数：BaseState, AttackState, IsJumping, IsHit, Attack, SkillQ, SkillR, Hit
 /// </summary>
 public static class CreateCharacter3CController
 {
-    // === 动画片段 GUID ===
-    private const string GUID_IDLE = "423aabfede0896f4db862ab8e54dde30";
-    private const string GUID_BATTLE_IDLE = "0308cf4e83cf517488b60af58b290fe0";
-    private const string GUID_MOVE = "7d4f9e9da55a3bd4f958a63308a522a1";
-    private const string GUID_RUN = "5eee3d6dbfbcef04ab20b548575d7b9d";
-    private const string GUID_JUMP_START = "c2b2e4c79d87c3045838cbc5935d8a98";
-    private const string GUID_JUMP_AIR = "8be8f9bf3f16f184fb9719bd233874e6";
-    private const string GUID_JUMP_END = "8b662f6fbb996ba429182e54857361d3";
-    private const string GUID_DEATH = "5940bb0b55717a746bbbe4d3e47e7e39";
-    private const string GUID_ATTACK1 = "db509ad77f9b4f84a8eb1989f589b24c";
-    private const string GUID_ATTACK2 = "8283fadf2c89507469495f30db8680db";
-    private const string GUID_ATTACK3 = "9a6c3585df66f2e4782635fc7a23494c";
-    private const string GUID_ATTACK4 = "b267a2c210dbd1d4badc3f270df6d12d";
-
-    // === Avatar Mask GUID ===
-    private const string GUID_MASK = "acaf52b69aaad2042b776ec016c26e0e";
-
     // === 输出路径 ===
     private const string OUTPUT_PATH = "Assets/RpgDuo/Animator/Character3C.controller";
 
     // === 参数名 ===
-    private const string PARAM_STATE = "State";
-    private const string PARAM_ATTACK_PHASE = "AttackPhase";
-    private const string PARAM_JUMP = "Jump";
+    private const string PARAM_BASE_STATE = "BaseState";
+    private const string PARAM_ATTACK_STATE = "AttackState";
+    private const string PARAM_IS_JUMPING = "IsJumping";
+    private const string PARAM_IS_HIT = "IsHit";
     private const string PARAM_ATTACK = "Attack";
+    private const string PARAM_SKILL_Q = "SkillQ";
+    private const string PARAM_SKILL_R = "SkillR";
+    private const string PARAM_HIT = "Hit";
+
+    // === BaseState 枚举值 ===
+    private const int STATE_IDLE = 0;
+    private const int STATE_MOVE = 1;
+    private const int STATE_SPRINT = 2;
+    private const int STATE_JUMP_START = 3;
+    private const int STATE_JUMP_AIR = 4;
+    private const int STATE_JUMP_END = 5;
+    private const int STATE_DEATH = 6;
+
+    // === AttackState 枚举值 ===
+    private const int ATTACK_IDLE = 0;
+    private const int ATTACK_1 = 1;
+    private const int ATTACK_2 = 2;
+    private const int ATTACK_Q = 3;
+    private const int ATTACK_R = 4;
+
+    // === Layer 索引 ===
+    private const int LAYER_BASE = 0;
+    private const int LAYER_ATTACK = 1;
+    private const int LAYER_HIT = 2;
 
     [MenuItem("Tools/3C/Create Character3C Controller")]
     public static void Create()
     {
-        // 加载动画片段
-        var idle = LoadMotion(GUID_IDLE, "Idle");
-        var battleIdle = LoadMotion(GUID_BATTLE_IDLE, "BattleIdle");
-        var move = LoadMotion(GUID_MOVE, "Move");
-        var run = LoadMotion(GUID_RUN, "Run");
-        var jumpStart = LoadMotion(GUID_JUMP_START, "JumpStart");
-        var jumpAir = LoadMotion(GUID_JUMP_AIR, "JumpAir");
-        var jumpEnd = LoadMotion(GUID_JUMP_END, "JumpEnd");
-        var death = LoadMotion(GUID_DEATH, "Death");
-        var attack1 = LoadMotion(GUID_ATTACK1, "Attack1");
-        var attack2 = LoadMotion(GUID_ATTACK2, "Attack2");
-        var attack3 = LoadMotion(GUID_ATTACK3, "Attack3");
-        var attack4 = LoadMotion(GUID_ATTACK4, "Attack4");
+        Debug.Log("[CreateCharacter3CController] Starting...");
 
-        // 加载 Avatar Mask
-        var mask = AssetDatabase.LoadAssetAtPath<AvatarMask>(
-            AssetDatabase.GUIDToAssetPath(GUID_MASK));
-
-        // StateMachineBehaviour 类型（通过反射获取，因为 SMB 在 Hotfix 程序集中）
-        var smbJumpEndType = Type.GetType("Hotfix.GameSystems.Sys3C.Character.CharacterStateBehaviour, Hotfix.GameSystems.Sys3C");
-        var smbAttackType = Type.GetType("Hotfix.GameSystems.Sys3C.Character.AttackStateBehaviour, Hotfix.GameSystems.Sys3C");
+        // 删除旧文件
+        if (AssetDatabase.LoadAssetAtPath<AnimatorController>(OUTPUT_PATH) != null)
+        {
+            AssetDatabase.DeleteAsset(OUTPUT_PATH);
+            Debug.Log("[CreateCharacter3CController] Deleted old controller");
+        }
 
         // 创建 Controller
         var controller = AnimatorController.CreateAnimatorControllerAtPath(OUTPUT_PATH);
 
         // === 添加参数 ===
-        controller.AddParameter(PARAM_STATE, AnimatorControllerParameterType.Int);
-        controller.AddParameter(PARAM_ATTACK_PHASE, AnimatorControllerParameterType.Int);
-        controller.AddParameter(PARAM_JUMP, AnimatorControllerParameterType.Trigger);
+        controller.AddParameter(PARAM_BASE_STATE, AnimatorControllerParameterType.Int);
+        controller.AddParameter(PARAM_ATTACK_STATE, AnimatorControllerParameterType.Int);
+        controller.AddParameter(PARAM_IS_JUMPING, AnimatorControllerParameterType.Bool);
+        controller.AddParameter(PARAM_IS_HIT, AnimatorControllerParameterType.Bool);
         controller.AddParameter(PARAM_ATTACK, AnimatorControllerParameterType.Trigger);
+        controller.AddParameter(PARAM_SKILL_Q, AnimatorControllerParameterType.Trigger);
+        controller.AddParameter(PARAM_SKILL_R, AnimatorControllerParameterType.Trigger);
+        controller.AddParameter(PARAM_HIT, AnimatorControllerParameterType.Trigger);
 
-        // === Base Layer ===
-        var baseLayer = controller.layers[0];
-        baseLayer.name = "Base Layer";
-        baseLayer.defaultWeight = 1;
+        Debug.Log("[CreateCharacter3CController] Parameters added");
 
-        var baseSM = baseLayer.stateMachine;
-
-        var sIdle = AddState(baseSM, "Idle", idle);
-        var sBattleIdle = AddState(baseSM, "BattleIdle", battleIdle);
-        var sMove = AddState(baseSM, "Move", move);
-        var sRun = AddState(baseSM, "Run", run);
-        var sJumpStart = AddState(baseSM, "JumpStart", jumpStart);
-        var sJumpAir = AddState(baseSM, "JumpAir", jumpAir);
-        var sJumpEnd = AddState(baseSM, "JumpEnd", jumpEnd);
-        var sDeath = AddState(baseSM, "Death", death);
-
-        baseSM.defaultState = sIdle;
-
-        // 添加 SMB 到 JumpEnd
-        if (smbJumpEndType != null)
-            sJumpEnd.AddStateMachineBehaviour(smbJumpEndType);
-        else
-            Debug.LogWarning("[CreateCharacter3CController] CharacterStateBehaviour type not found, skipping SMB");
-
-        // Base Layer 转换
-        float t = 0.1f; // 过渡时间
-
-        // Idle ↔ Move, Run
-        AddIntConditionTransition(sIdle, sMove, PARAM_STATE, 2, t);
-        AddIntConditionTransition(sIdle, sRun, PARAM_STATE, 3, t);
-
-        // Move ↔ Idle, Run, JumpStart, Death
-        AddIntConditionTransition(sMove, sIdle, PARAM_STATE, 0, t);
-        AddIntConditionTransition(sMove, sRun, PARAM_STATE, 3, t);
-        AddIntConditionTransition(sMove, sJumpStart, PARAM_STATE, 4, t);
-        AddIntConditionTransition(sMove, sDeath, PARAM_STATE, 7, t);
-
-        // Run ↔ Idle, Move, JumpStart
-        AddIntConditionTransition(sRun, sIdle, PARAM_STATE, 0, t);
-        AddIntConditionTransition(sRun, sMove, PARAM_STATE, 2, t);
-        AddIntConditionTransition(sRun, sJumpStart, PARAM_STATE, 4, t);
-
-        // BattleIdle → Idle, Move, Run
-        AddIntConditionTransition(sBattleIdle, sIdle, PARAM_STATE, 0, t);
-        AddIntConditionTransition(sBattleIdle, sMove, PARAM_STATE, 2, t);
-        AddIntConditionTransition(sBattleIdle, sRun, PARAM_STATE, 3, t);
-
-        // JumpStart → JumpAir, Death
-        AddIntConditionTransition(sJumpStart, sJumpAir, PARAM_STATE, 5, t);
-        AddIntConditionTransition(sJumpStart, sDeath, PARAM_STATE, 7, t);
-
-        // JumpAir → JumpEnd, Death
-        AddIntConditionTransition(sJumpAir, sJumpEnd, PARAM_STATE, 6, t);
-        AddIntConditionTransition(sJumpAir, sDeath, PARAM_STATE, 7, t);
-
-        // JumpEnd → Idle (ExitTime)
-        AddExitTimeTransition(sJumpEnd, sIdle, 0.9f, 0.2f);
-
-        // AnyState → Death
-        AddAnyStateTransition(baseSM, sDeath, PARAM_STATE, 7, t);
-
-        // === Attack Layer ===
-        controller.AddLayer("Attack Layer");
-        var attackLayer = controller.layers[1];
-        attackLayer.defaultWeight = 1;
-        attackLayer.avatarMask = mask;
-
-        var attackSM = attackLayer.stateMachine;
-
-        var sEmpty = AddState(attackSM, "Empty", battleIdle);
-        var sAttack1 = AddState(attackSM, "Attack1", attack1);
-        var sAttack2 = AddState(attackSM, "Attack2", attack2);
-        var sAttack3 = AddState(attackSM, "Attack3", attack3);
-        var sAttack4 = AddState(attackSM, "Attack4", attack4);
-
-        attackSM.defaultState = sEmpty;
-
-        // 添加 SMB 到攻击状态
-        if (smbAttackType != null)
-        {
-            sAttack1.AddStateMachineBehaviour(smbAttackType);
-            sAttack2.AddStateMachineBehaviour(smbAttackType);
-            sAttack3.AddStateMachineBehaviour(smbAttackType);
-            sAttack4.AddStateMachineBehaviour(smbAttackType);
-        }
-        else
-        {
-            Debug.LogWarning("[CreateCharacter3CController] AttackStateBehaviour type not found, skipping SMB");
-        }
-
-        // AnyState → Attack1~4 (Trigger + AttackPhase)
-        AddAttackTransition(attackSM, sAttack1, 1);
-        AddAttackTransition(attackSM, sAttack2, 2);
-        AddAttackTransition(attackSM, sAttack3, 3);
-        AddAttackTransition(attackSM, sAttack4, 4);
-
-        // Attack1~4 → Empty (ExitTime)
-        AddExitTimeTransition(sAttack1, sEmpty, 0.9f, 0.1f);
-        AddExitTimeTransition(sAttack2, sEmpty, 0.9f, 0.1f);
-        AddExitTimeTransition(sAttack3, sEmpty, 0.9f, 0.1f);
-        AddExitTimeTransition(sAttack4, sEmpty, 0.9f, 0.1f);
+        // === 创建 Layers ===
+        CreateBaseLayer(controller);
+        CreateAttackLayer(controller);
+        CreateHitLayer(controller);
 
         // 保存
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("[CreateCharacter3CController] Done! Controller saved to " + OUTPUT_PATH);
+
+        // 选中新创建的资源
+        Selection.activeObject = AssetDatabase.LoadAssetAtPath<AnimatorController>(OUTPUT_PATH);
+    }
+
+    // ============================================
+    // Base Layer (Layer 0)
+    // ============================================
+    private static void CreateBaseLayer(AnimatorController controller)
+    {
+        var layer = controller.layers[LAYER_BASE];
+        layer.name = "Base";
+        layer.defaultWeight = 1f;
+
+        var sm = layer.stateMachine;
+
+        // 创建所有状态（动画置空，由用户手动赋值）
+        var sIdle = AddState(sm, "Idle", null);
+        var sMove = AddState(sm, "Move", null);
+        var sSprint = AddState(sm, "Sprint", null);
+        var sJumpStart = AddState(sm, "JumpStart", null);
+        var sJumpAir = AddState(sm, "JumpAir", null);
+        var sJumpEnd = AddState(sm, "JumpEnd", null);
+        var sDeath = AddState(sm, "Death", null);
+
+        // 设置默认状态
+        sm.defaultState = sIdle;
+
+        // 挂载 BaseStateBehaviour 到 JumpEnd
+        AddStateMachineBehaviour(sJumpEnd, "Hotfix.GameSystems.Sys3C.Animation.StateBehaviours.BaseStateBehaviour, Hotfix.GameSystems.Sys3C");
+
+        // === 添加转换 ===
+        float t = 0.1f; // 过渡时间
+
+        // Idle 转换
+        AddTransition(sIdle, sMove, PARAM_BASE_STATE, STATE_MOVE, t);
+        AddTransition(sIdle, sSprint, PARAM_BASE_STATE, STATE_SPRINT, t);
+        AddTransition(sIdle, sDeath, PARAM_BASE_STATE, STATE_DEATH, t);
+
+        // Move 转换
+        AddTransition(sMove, sIdle, PARAM_BASE_STATE, STATE_IDLE, t);
+        AddTransition(sMove, sSprint, PARAM_BASE_STATE, STATE_SPRINT, t);
+        AddTransition(sMove, sJumpStart, PARAM_BASE_STATE, STATE_JUMP_START, t);
+        AddTransition(sMove, sDeath, PARAM_BASE_STATE, STATE_DEATH, t);
+
+        // Sprint 转换
+        AddTransition(sSprint, sIdle, PARAM_BASE_STATE, STATE_IDLE, t);
+        AddTransition(sSprint, sMove, PARAM_BASE_STATE, STATE_MOVE, t);
+        AddTransition(sSprint, sJumpStart, PARAM_BASE_STATE, STATE_JUMP_START, t);
+        AddTransition(sSprint, sDeath, PARAM_BASE_STATE, STATE_DEATH, t);
+
+        // JumpStart → JumpAir (自动，1帧后)
+        var jumpStartToAir = AddTransition(sJumpStart, sJumpAir, t);
+        jumpStartToAir.hasExitTime = false;
+        jumpStartToAir.conditionMode = AnimatorConditionMode.Equals;
+        jumpStartToAir.AddCondition(AnimatorConditionMode.Equals, STATE_JUMP_AIR, PARAM_BASE_STATE);
+
+        // JumpAir → JumpEnd (落地检测)
+        var jumpAirToEnd = AddTransition(sJumpAir, sJumpEnd, t);
+        jumpAirToEnd.hasExitTime = false;
+        jumpAirToEnd.conditionMode = AnimatorConditionMode.Equals;
+        jumpAirToEnd.AddCondition(AnimatorConditionMode.Equals, STATE_JUMP_END, PARAM_BASE_STATE);
+
+        // JumpEnd → 返回任意状态
+        AddTransition(sJumpEnd, sIdle, PARAM_BASE_STATE, STATE_IDLE, t);
+        AddTransition(sJumpEnd, sMove, PARAM_BASE_STATE, STATE_MOVE, t);
+        AddTransition(sJumpEnd, sSprint, PARAM_BASE_STATE, STATE_SPRINT, t);
+
+        // AnyState → Death
+        AddAnyStateTransition(sm, sDeath, PARAM_BASE_STATE, STATE_DEATH, t);
+
+        Debug.Log("[CreateCharacter3CController] Base Layer created");
+    }
+
+    // ============================================
+    // Attack Layer (Layer 1)
+    // ============================================
+    private static void CreateAttackLayer(AnimatorController controller)
+    {
+        // 添加新 Layer
+        controller.AddLayer("Attack");
+        var layer = controller.layers[LAYER_ATTACK];
+        layer.name = "Attack";
+        layer.defaultWeight = 1f;
+
+        var sm = layer.stateMachine;
+
+        // 创建所有状态（动画置空）
+        var sIdle = AddState(sm, "AttackIdle", null);
+        var sAttack1 = AddState(sm, "Attack1", null);
+        var sAttack2 = AddState(sm, "Attack2", null);
+        var sAttackQ = AddState(sm, "AttackQ", null);
+        var sAttackR = AddState(sm, "AttackR", null);
+
+        sm.defaultState = sIdle;
+
+        // 挂载 AttackStateBehaviour
+        AddStateMachineBehaviour(sAttack1, "Hotfix.GameSystems.Sys3C.Animation.StateBehaviours.AttackStateBehaviour, Hotfix.GameSystems.Sys3C");
+        AddStateMachineBehaviour(sAttack2, "Hotfix.GameSystems.Sys3C.Animation.StateBehaviours.AttackStateBehaviour, Hotfix.GameSystems.Sys3C");
+
+        // === 添加转换 ===
+        float t = 0.05f;
+
+        // AttackIdle → Attack1 (Attack Trigger)
+        AddTriggerTransition(sIdle, sAttack1, PARAM_ATTACK, t);
+
+        // Attack1 → Attack2 (Attack Trigger + 连击)
+        var attack1to2 = AddTransition(sAttack1, sAttack2, t);
+        attack1to2.AddCondition(AnimatorConditionMode.If, 0, PARAM_ATTACK);
+
+        // Attack1/Attack2 → AttackIdle (动画完成)
+        AddTransition(sAttack1, sIdle, PARAM_ATTACK_STATE, ATTACK_IDLE, t);
+        AddTransition(sAttack2, sIdle, PARAM_ATTACK_STATE, ATTACK_IDLE, t);
+
+        // AttackIdle → SkillQ/SkillR
+        AddTriggerTransition(sIdle, sAttackQ, PARAM_SKILL_Q, t);
+        AddTriggerTransition(sIdle, sAttackR, PARAM_SKILL_R, t);
+
+        // SkillQ/SkillR → AttackIdle (动画完成)
+        AddTransition(sAttackQ, sIdle, PARAM_ATTACK_STATE, ATTACK_IDLE, t);
+        AddTransition(sAttackR, sIdle, PARAM_ATTACK_STATE, ATTACK_IDLE, t);
+
+        Debug.Log("[CreateCharacter3CController] Attack Layer created");
+    }
+
+    // ============================================
+    // Hit Layer (Layer 2)
+    // ============================================
+    private static void CreateHitLayer(AnimatorController controller)
+    {
+        // 添加新 Layer
+        controller.AddLayer("Hit");
+        var layer = controller.layers[LAYER_HIT];
+        layer.name = "Hit";
+        layer.defaultWeight = 0f; // 默认权重为0
+        layer.blendMode = AnimatorLayerBlendingMode.Additive; // 叠加模式
+
+        var sm = layer.stateMachine;
+
+        // 创建 Hit 状态
+        var sHit = AddState(sm, "Hit", null);
+
+        // 挂载 HitStateBehaviour
+        AddStateMachineBehaviour(sHit, "Hotfix.GameSystems.Sys3C.Animation.StateBehaviours.HitStateBehaviour, Hotfix.GameSystems.Sys3C");
+
+        // AnyState → Hit (Hit Trigger)
+        AddAnyStateTriggerTransition(sm, sHit, PARAM_HIT);
+
+        Debug.Log("[CreateCharacter3CController] Hit Layer created");
     }
 
     // ============================================
     // 辅助方法
     // ============================================
 
-    private static Motion LoadMotion(string guid, string name)
-    {
-        string path = AssetDatabase.GUIDToAssetPath(guid);
-        var clip = AssetDatabase.LoadAssetAtPath<Motion>(path);
-        if (clip == null)
-            Debug.LogWarning("[CreateCharacter3CController] Cannot load motion: " + name + " (guid=" + guid + ")");
-        return clip;
-    }
-
+    /// <summary>
+    /// 添加状态（动画为空）
+    /// </summary>
     private static AnimatorState AddState(AnimatorStateMachine sm, string name, Motion motion)
     {
         var state = sm.AddState(name);
@@ -198,36 +252,52 @@ public static class CreateCharacter3CController
     }
 
     /// <summary>
-    /// 添加 Int 条件转换（Equals 模式）
-    /// 注意：AnimatorConditionMode.Equals = 1, NotEqual = 2, Less = 3, Greater = 4
+    /// 添加 Int 条件转换
     /// </summary>
-    private static void AddIntConditionTransition(
+    private static AnimatorStateTransition AddTransition(
         AnimatorState from, AnimatorState to,
-        string paramName, int value, float transitionDuration)
+        string paramName, int value, float duration)
     {
         var transition = from.AddTransition(to);
         transition.AddCondition(AnimatorConditionMode.Equals, value, paramName);
         transition.hasExitTime = false;
-        transition.duration = transitionDuration;
+        transition.duration = duration;
         transition.offset = 0;
         transition.hasFixedDuration = true;
         transition.canTransitionToSelf = false;
+        return transition;
     }
 
     /// <summary>
-    /// 添加 ExitTime 转换（无条件）
+    /// 添加 Trigger 条件转换
     /// </summary>
-    private static void AddExitTimeTransition(
+    private static AnimatorStateTransition AddTriggerTransition(
         AnimatorState from, AnimatorState to,
-        float exitTime, float transitionDuration)
+        string triggerParam, float duration)
     {
         var transition = from.AddTransition(to);
-        transition.hasExitTime = true;
-        transition.exitTime = exitTime;
-        transition.duration = transitionDuration;
+        transition.AddCondition(AnimatorConditionMode.If, 0, triggerParam);
+        transition.hasExitTime = false;
+        transition.duration = duration;
         transition.offset = 0;
         transition.hasFixedDuration = true;
         transition.canTransitionToSelf = false;
+        return transition;
+    }
+
+    /// <summary>
+    /// 添加转换（无条件的自动转换）
+    /// </summary>
+    private static AnimatorStateTransition AddTransition(
+        AnimatorState from, AnimatorState to, float duration)
+    {
+        var transition = from.AddTransition(to);
+        transition.hasExitTime = false;
+        transition.duration = duration;
+        transition.offset = 0;
+        transition.hasFixedDuration = true;
+        transition.canTransitionToSelf = false;
+        return transition;
     }
 
     /// <summary>
@@ -235,30 +305,46 @@ public static class CreateCharacter3CController
     /// </summary>
     private static void AddAnyStateTransition(
         AnimatorStateMachine sm, AnimatorState to,
-        string paramName, int value, float transitionDuration)
+        string paramName, int value, float duration)
     {
         var transition = sm.AddAnyStateTransition(to);
         transition.AddCondition(AnimatorConditionMode.Equals, value, paramName);
         transition.hasExitTime = false;
-        transition.duration = transitionDuration;
+        transition.duration = duration;
         transition.offset = 0;
         transition.hasFixedDuration = true;
         transition.canTransitionToSelf = false;
     }
 
     /// <summary>
-    /// 添加攻击 AnyState 转换（Trigger + AttackPhase）
+    /// 添加 AnyState 转换（Trigger 条件）
     /// </summary>
-    private static void AddAttackTransition(
-        AnimatorStateMachine sm, AnimatorState to, int phase)
+    private static void AddAnyStateTriggerTransition(
+        AnimatorStateMachine sm, AnimatorState to, string triggerParam)
     {
         var transition = sm.AddAnyStateTransition(to);
-        transition.AddCondition(AnimatorConditionMode.If, 0, PARAM_ATTACK);
-        transition.AddCondition(AnimatorConditionMode.Equals, phase, PARAM_ATTACK_PHASE);
+        transition.AddCondition(AnimatorConditionMode.If, 0, triggerParam);
         transition.hasExitTime = false;
-        transition.duration = 0.1f;
+        transition.duration = 0;
         transition.offset = 0;
         transition.hasFixedDuration = true;
         transition.canTransitionToSelf = false;
+    }
+
+    /// <summary>
+    /// 通过类型名称添加 StateMachineBehaviour
+    /// </summary>
+    private static void AddStateMachineBehaviour(AnimatorState state, string typeName)
+    {
+        var type = Type.GetType(typeName);
+        if (type != null)
+        {
+            state.AddStateMachineBehaviour(type);
+            Debug.Log($"[CreateCharacter3CController] Added SMB: {typeName}");
+        }
+        else
+        {
+            Debug.LogWarning($"[CreateCharacter3CController] Type not found: {typeName}");
+        }
     }
 }
