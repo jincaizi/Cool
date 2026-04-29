@@ -1,11 +1,11 @@
 using System;
 using UnityEngine;
-using Hotfix.GameSystems.Sys3C.Input;
 
 namespace Hotfix.GameSystems.Sys3C.Character
 {
     /// <summary>
-    /// 角色控制器 — 移动/转向/物理驱动
+    /// 角色控制器 — 移动/跳跃/物理驱动
+    /// 只负责更新 CharacterData，状态变化通过事件通知
     /// </summary>
     public class CharacterController
     {
@@ -15,28 +15,23 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
         // 移动参数
         public float MoveSpeed { get; set; } = 5.0f;
+        public float SprintSpeed { get; set; } = 8.0f;
         public float RotationSpeed { get; set; } = 10.0f;
         public float Gravity { get; set; } = -30f;
         public float JumpForce { get; set; } = 12f;
 
-        // 状态
+        // 内部状态
         private CharacterData _data;
-        private MoveCommand _currentCommand;
         private Vector3 _velocity;
         private bool _jumpRequested;
 
-        /// <summary>
-        /// 锁定状态不被 Update 覆盖（JumpEnd 播放期间）
-        /// </summary>
-        private bool _stateLocked;
+        // 事件
+        public event Action OnJumpRequested;
+        public event Action OnLanded;
+        public event Action OnDeath;
 
         public CharacterData Data => _data;
-        public bool IsGrounded => _groundDetector != null ? _groundDetector.IsGrounded() : _data.IsGrounded;
-
-        /// <summary>
-        /// 着地回调（由 CharacterAnimationDriver 注册）
-        /// </summary>
-        public event Action OnLanded;
+        public bool IsGrounded => _groundDetector.IsGrounded();
 
         public CharacterController(
             Transform transform,
@@ -45,42 +40,46 @@ namespace Hotfix.GameSystems.Sys3C.Character
         {
             _transform = transform;
             _controller = controller;
-
-            // 初始化地面检测器
-            _groundDetector = new GroundDetector(transform, controller, groundLayer);
+            _groundDetector = new GroundDetector(controller);
 
             _data = new CharacterData
             {
                 Position = transform.position,
                 Rotation = transform.rotation,
-                State = CharacterState.Idle,
+                BaseState = BaseState.Idle,
                 IsGrounded = true,
-                JumpPhase = JumpPhase.None
+                IsDead = false
             };
         }
 
         /// <summary>
-        /// 请求跳跃（由外部调用）
+        /// 请求跳跃
         /// </summary>
         public void RequestJump()
         {
-            if (_data.IsGrounded && _data.JumpPhase == JumpPhase.None)
+            if (_data.IsGrounded && !_data.IsDead && _data.BaseState != BaseState.JumpStart && _data.BaseState != BaseState.JumpAir)
             {
                 _jumpRequested = true;
             }
         }
 
         /// <summary>
-        /// 中断跳跃（被攻击或其他事件打断）
+        /// 应用伤害（触发受击）
         /// </summary>
-        public void AbortJump()
+        public void ApplyHit()
         {
-            if (_data.JumpPhase == JumpPhase.Start || _data.JumpPhase == JumpPhase.Air)
-            {
-                _data.JumpPhase = JumpPhase.None;
-                _velocity.y = 0f;
-                _jumpRequested = false;
-            }
+            // Hit 由 FSM 层处理，这里仅标记
+        }
+
+        /// <summary>
+        /// 应用死亡
+        /// </summary>
+        public void ApplyDeath()
+        {
+            _data.IsDead = true;
+            _data.BaseState = BaseState.Death;
+            _velocity.y = 0f;
+            OnDeath?.Invoke();
         }
 
         /// <summary>
@@ -88,122 +87,129 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public void Update(MoveCommand command)
         {
-            _currentCommand = command;
-            _data.Position = _transform.position;
-            _data.Rotation = _transform.rotation;
-            _data.IsSprint = command.IsSprint;
+            if (_data.IsDead)
+            {
+                _data.Position = _transform.position;
+                _data.Rotation = _transform.rotation;
+                return;
+            }
 
-            // 记录上帧地面状态
             bool wasGrounded = _data.IsGrounded;
-            JumpPhase prevJumpPhase = _data.JumpPhase;
 
-            // ========== 1. 应用移动 ==========
-            Vector3 moveVelocity = command.MoveDir * command.Speed;
+            // 1. 应用水平移动
+            float currentSpeed = command.IsSprint ? SprintSpeed : MoveSpeed;
+            Vector3 moveVelocity = command.MoveDir * currentSpeed;
             moveVelocity.y = _velocity.y;
             _controller.Move(moveVelocity * Time.deltaTime);
 
-            // ========== 2. 检测地面（移动后） ==========
+            // 2. 检测地面
             _data.IsGrounded = _groundDetector.IsGrounded();
 
-            // ========== 3. 走下悬崖检测 ==========
-            // 从地面走到空中，且不是跳跃状态
-            if (wasGrounded && !_data.IsGrounded && _data.JumpPhase == JumpPhase.None)
+            // 3. 走下悬崖检测
+            if (wasGrounded && !_data.IsGrounded && _data.BaseState != BaseState.JumpStart && _data.BaseState != BaseState.JumpAir)
             {
-                _velocity.y = 0f;  // 重置垂直速度
+                _velocity.y = 0f;
             }
 
-            // ========== 4. 跳跃请求处理 ==========
-            if (_jumpRequested && _data.IsGrounded && _data.JumpPhase == JumpPhase.None)
+            // 4. 处理跳跃请求
+            if (_jumpRequested && _data.IsGrounded)
             {
                 _velocity.y = JumpForce;
                 _jumpRequested = false;
-                _data.JumpPhase = JumpPhase.Start;
-                _data.State = CharacterState.JumpStart;
+                _data.BaseState = BaseState.JumpStart;
+                OnJumpRequested?.Invoke();
             }
 
-            // ========== 5. 应用重力 ==========
-            bool isInJump = _data.JumpPhase == JumpPhase.Start || _data.JumpPhase == JumpPhase.Air;
-            if (isInJump)
+            // 5. 应用重力
+            if (_data.BaseState == BaseState.JumpStart || _data.BaseState == BaseState.JumpAir || !_data.IsGrounded)
             {
                 _velocity.y += Gravity * Time.deltaTime;
-                _velocity.y = Mathf.Max(_velocity.y, -50f);  // 限制最大下落速度
+                _velocity.y = Mathf.Max(_velocity.y, -50f);
+
+                // 额外Y轴移动
+                Vector3 yMove = Vector3.up * _velocity.y * Time.deltaTime;
+                _controller.Move(yMove);
             }
             else if (_data.IsGrounded)
             {
                 _velocity.y = 0f;
             }
-            else
-            {
-                // 非跳跃的空中状态（被击飞等），也应用重力
-                _velocity.y += Gravity * Time.deltaTime * 0.5f;
-                _velocity.y = Mathf.Max(_velocity.y, -50f);
-            }
 
-// ========== 6. 跳跃阶段转换 ==========
-            if (_data.JumpPhase == JumpPhase.Start && !_data.IsGrounded)
-            {
-                _data.JumpPhase = JumpPhase.Air;
-            }
+            // 6. 跳跃阶段转换
+            UpdateJumpPhase();
 
-// ========== 7. 着地检测 ==========
-            bool shouldLand = _data.IsGrounded && _velocity.y <= 0;
-            if (shouldLand && (_data.JumpPhase == JumpPhase.Air || _data.JumpPhase == JumpPhase.Start))
-            {
-                UnityEngine.Debug.Log($"[Landing] IsGrounded={_data.IsGrounded}, prevJumpPhase={prevJumpPhase}, currJumpPhase={_data.JumpPhase}, velocity.y={_velocity.y:F3}");
-                _data.JumpPhase = JumpPhase.End;
-                _data.State = CharacterState.JumpEnd;
-                OnLanded?.Invoke();
-            }
+            // 7. 基础移动状态（非跳跃时）
+            UpdateBaseState(command, currentSpeed);
 
-            // ========== 8. 状态处理 ==========
-            // 如果状态被锁定（JumpEnd 播放期间），不覆盖状态
-            if (!_stateLocked)
-            {
-                if (_data.IsGrounded && _data.JumpPhase == JumpPhase.None)
-                {
-                    // 地面状态
-                    if (command.MoveDir.sqrMagnitude > 0.01f)
-                    {
-                        Quaternion targetRot = command.Rotation;
-                        _transform.rotation = Quaternion.Slerp(
-                            _transform.rotation,
-                            targetRot,
-                            RotationSpeed * Time.deltaTime
-                        );
-                        _data.State = command.IsSprint ? CharacterState.Run : CharacterState.Move;
-                    }
-                    else
-                    {
-                        _data.State = CharacterState.Idle;
-                    }
-                }
-                else if (_data.JumpPhase == JumpPhase.Air)
-                {
-                    _data.State = CharacterState.JumpAir;
-                }
-                else if (_data.JumpPhase == JumpPhase.Start)
-                {
-                    _data.State = CharacterState.JumpStart;
-                }
-            }
-
-            // ========== 9. 更新数据 ==========
+            // 8. 同步数据
+            _data.Position = _transform.position;
+            _data.Rotation = _transform.rotation;
             _data.Velocity = _controller.velocity;
             _data.VerticalVelocity = _velocity.y;
+            _data.IsSprint = command.IsSprint;
+        }
+
+        private void UpdateJumpPhase()
+        {
+            if (_data.BaseState == BaseState.JumpStart)
+            {
+                // JumpStart 持续一帧后进入 JumpAir
+                _data.BaseState = BaseState.JumpAir;
+            }
+            else if (_data.BaseState == BaseState.JumpAir)
+            {
+                // 着地检测
+                if (_data.IsGrounded && _velocity.y <= 0)
+                {
+                    _data.BaseState = BaseState.JumpEnd;
+                    _velocity.y = 0f;
+                    OnLanded?.Invoke();
+                }
+            }
+        }
+
+        private void UpdateBaseState(MoveCommand command, float currentSpeed)
+        {
+            // 非跳跃期间管理基础状态
+            if (_data.BaseState == BaseState.Idle ||
+                _data.BaseState == BaseState.Move ||
+                _data.BaseState == BaseState.Sprint)
+            {
+                if (command.MoveDir.sqrMagnitude > 0.01f)
+                {
+                    // 旋转
+                    _transform.rotation = Quaternion.Slerp(
+                        _transform.rotation,
+                        command.Rotation,
+                        RotationSpeed * Time.deltaTime
+                    );
+
+                    // 更新状态
+                    if (command.IsSprint)
+                        _data.BaseState = BaseState.Sprint;
+                    else
+                        _data.BaseState = BaseState.Move;
+                }
+                else
+                {
+                    _data.BaseState = BaseState.Idle;
+                }
+            }
         }
 
         /// <summary>
-        /// 完成跳跃（JumpEnd 动画退出时调用）
+        /// 落地动画完成后调用
         /// </summary>
         public void FinishJump()
         {
-            _stateLocked = false;
-            _data.JumpPhase = JumpPhase.None;
-            _data.State = CharacterState.Idle;
+            if (_data.BaseState == BaseState.JumpEnd)
+            {
+                _data.BaseState = BaseState.Idle;
+            }
         }
 
         /// <summary>
-        /// 应用服务端权威位置（网络校验后）
+        /// 应用服务端权威位置
         /// </summary>
         public void ApplyServerPosition(Vector3 position, Quaternion rotation)
         {
@@ -215,19 +221,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
             _data.Position = position;
             _data.Rotation = rotation;
-        }
-
-        /// <summary>
-        /// 获取预测位置（用于网络同步）
-        /// </summary>
-        public Vector3 GetPredictedPosition()
-        {
-            return _transform.position;
-        }
-
-        public Quaternion GetPredictedRotation()
-        {
-            return _transform.rotation;
         }
     }
 }
