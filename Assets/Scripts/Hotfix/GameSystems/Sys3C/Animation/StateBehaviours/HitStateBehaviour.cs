@@ -1,20 +1,18 @@
+using System;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 {
-    /// <summary>
-    /// Hit Layer 动画完成监听
-    /// 监听 Hit 动画，触发返回原状态
-    /// </summary>
     public class HitStateBehaviour : StateMachineBehaviour
     {
         private static readonly int HASH_Hit = Animator.StringToHash("Hit");
 
-        // 回调引用
-        private static System.Action<string> _onAnimationCompleted;
+        private static AnimationDriver _driver;
+        private static Action<string> _onAnimationCompleted;
 
-        public static void SetCallback(System.Action<string> callback)
+        public static void SetCallback(AnimationDriver driver, Action<string> callback)
         {
+            _driver = driver;
             _onAnimationCompleted = callback;
         }
 
