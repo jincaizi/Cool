@@ -1,139 +1,87 @@
 using System;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Character;
-using Hotfix.GameSystems.Sys3C.FSM.States;
+using Hotfix.GameSystems.Sys3C.Animation;
+using Hotfix.GameSystems.Sys3C.Animation.StateBehaviours;
 
 namespace Hotfix.GameSystems.Sys3C.FSM
 {
     /// <summary>
-    /// FSM 管理器 — 统一管理 BaseFSM 和 AttackFSM
-    /// 监听 CharacterController 事件，驱动 Animator
+    /// FSM 协调者 — 管理 BaseFSM 和 AttackFSM
+    /// 只负责协调，不处理具体状态逻辑
     /// </summary>
     public class FSMManager
     {
-        private readonly Hotfix.GameSystems.Sys3C.Character.CharacterController _characterController;
-        private readonly Animator _animator;
+        private readonly CharacterController _characterController;
+        private readonly AnimationDriver _driver;
 
-        // Animator 参数哈希
-        private static readonly int HASH_BaseState = Animator.StringToHash("BaseState");
-        private static readonly int HASH_AttackState = Animator.StringToHash("AttackState");
-        private static readonly int HASH_IsJumping = Animator.StringToHash("IsJumping");
-        private static readonly int HASH_Attack = Animator.StringToHash("Attack");
-        private static readonly int HASH_SkillQ = Animator.StringToHash("SkillQ");
-        private static readonly int HASH_SkillR = Animator.StringToHash("SkillR");
+        private readonly BaseFSM _baseFSM;
+        private readonly AttackFSM _attackFSM;
+        private readonly StateTransitionTable _transitionTable;
 
-        // 当前状态
-        private BaseState _currentBaseState = BaseState.Idle;
-        private AttackState _currentAttackState = AttackState.Idle;
-
-        // 事件回调
         public event Action OnJumpEndCompleted;
         public event Action OnAttackCompleted;
         public event Action OnSkillCompleted;
 
-        public FSMManager(Hotfix.GameSystems.Sys3C.Character.CharacterController characterController, Animator animator)
+        public FSMManager(CharacterController characterController, Animator animator)
         {
             _characterController = characterController;
-            _animator = animator;
+            _driver = new AnimationDriver(animator);
 
-            // 订阅 CharacterController 事件
+            _transitionTable = new StateTransitionTable();
+            _baseFSM = new BaseFSM(_driver, _transitionTable);
+            _attackFSM = new AttackFSM(_driver);
+
             _characterController.OnJumpRequested += HandleJumpRequested;
             _characterController.OnLanded += HandleLanded;
             _characterController.OnDeath += HandleDeath;
 
-            // 初始化 Animator 参数
-            _animator.SetInteger(HASH_BaseState, (int)BaseState.Idle);
-            _animator.SetInteger(HASH_AttackState, (int)AttackState.Idle);
+            _baseFSM.OnStateChanged += HandleBaseStateChanged;
+            _attackFSM.OnAttackCompleted += () => OnAttackCompleted?.Invoke();
+            _attackFSM.OnSkillCompleted += () => OnSkillCompleted?.Invoke();
+
+            BaseStateBehaviour.SetCallback(_driver, HandleAnimationCompleted);
+            AttackStateBehaviour.SetCallback(_driver, HandleAnimationCompleted);
+            HitStateBehaviour.SetCallback(_driver, HandleHitCompleted);
+
+            Debug.Log("[FSMManager] Initialized");
         }
 
-        /// <summary>
-        /// 每帧更新
-        /// </summary>
         public void Update(float deltaTime)
-        {
-            SyncFromCharacterData();
-        }
-
-        /// <summary>
-        /// 从 CharacterData 同步状态
-        /// </summary>
-        private void SyncFromCharacterData()
         {
             var data = _characterController.Data;
 
-            // 同步 BaseState
-            if (data.BaseState != _currentBaseState)
-            {
-                _currentBaseState = data.BaseState;
-                _animator.SetInteger(HASH_BaseState, (int)_currentBaseState);
-
-                // 更新 IsJumping
-                bool isJumping = _currentBaseState == BaseState.JumpStart ||
-                                 _currentBaseState == BaseState.JumpAir ||
-                                 _currentBaseState == BaseState.JumpEnd;
-                _animator.SetBool(HASH_IsJumping, isJumping);
-            }
+            _baseFSM.Update(data, _attackFSM.CurrentState);
+            _attackFSM.Update(deltaTime);
         }
 
-        /// <summary>
-        /// 请求普通攻击
-        /// </summary>
         public void RequestNormalAttack()
         {
-            if (_currentAttackState == AttackState.Idle)
-            {
-                _currentAttackState = AttackState.Attack1;
-                _animator.SetInteger(HASH_AttackState, (int)_currentAttackState);
-                _animator.SetTrigger(HASH_Attack);
-            }
-            else if (_currentAttackState == AttackState.Attack1)
-            {
-                // 连击到 Attack2
-                _currentAttackState = AttackState.Attack2;
-                _animator.SetInteger(HASH_AttackState, (int)_currentAttackState);
-                _animator.SetTrigger(HASH_Attack);
-            }
-            // Attack2 后不能再连击，返回 AttackIdle
+            _attackFSM.RequestNormalAttack();
         }
 
-        /// <summary>
-        /// 请求技能Q
-        /// </summary>
         public void RequestSkillQ()
         {
-            if (_currentAttackState == AttackState.Idle || CanInterrupt())
-            {
-                _currentAttackState = AttackState.SkillQ;
-                _animator.SetInteger(HASH_AttackState, (int)_currentAttackState);
-                _animator.SetTrigger(HASH_SkillQ);
-            }
+            _attackFSM.RequestSkillQ();
         }
 
-        /// <summary>
-        /// 请求技能R
-        /// </summary>
         public void RequestSkillR()
         {
-            // SkillR 不可在跳跃中使用
-            if (_characterController.Data.BaseState == BaseState.JumpStart ||
-                _characterController.Data.BaseState == BaseState.JumpAir)
-            {
-                return;
-            }
-
-            if (_currentAttackState == AttackState.Idle || CanInterrupt())
-            {
-                _currentAttackState = AttackState.SkillR;
-                _animator.SetInteger(HASH_AttackState, (int)_currentAttackState);
-                _animator.SetTrigger(HASH_SkillR);
-            }
+            _attackFSM.RequestSkillR(_characterController.IsGrounded);
         }
 
-        /// <summary>
-        /// 动画完成回调（由 StateMachineBehaviour 调用）
-        /// </summary>
-        public void OnAnimationCompleted(string stateName)
+        public void TriggerHit()
         {
+            _attackFSM.ForceIdle();
+            _driver.TriggerHit();
+            _driver.SetIsHit(true);
+            _driver.SetHitLayerWeight(1f);
+        }
+
+        private void HandleAnimationCompleted(string stateName)
+        {
+            Debug.Log($"[FSMManager] AnimationCompleted: {stateName}");
+
             switch (stateName)
             {
                 case "JumpEnd":
@@ -142,30 +90,17 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     break;
                 case "Attack1":
                 case "Attack2":
-                    ReturnToAttackIdle();
-                    OnAttackCompleted?.Invoke();
-                    break;
                 case "SkillQ":
                 case "SkillR":
-                    ReturnToAttackIdle();
-                    OnSkillCompleted?.Invoke();
+                    _attackFSM.OnAnimationCompleted(stateName);
                     break;
             }
         }
 
-        private void ReturnToAttackIdle()
+        private void HandleHitCompleted()
         {
-            if (_currentAttackState != AttackState.Idle)
-            {
-                _currentAttackState = AttackState.Idle;
-                _animator.SetInteger(HASH_AttackState, (int)_currentAttackState);
-            }
-        }
-
-        private bool CanInterrupt()
-        {
-            // 某些状态可被打断
-            return _currentAttackState == AttackState.Idle;
+            _driver.SetIsHit(false);
+            _driver.SetHitLayerWeight(0f);
         }
 
         private void HandleJumpRequested()
@@ -175,13 +110,19 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         private void HandleLanded()
         {
-            // 落地由 CharacterController 检测
+            // 落地由 BaseFSM 检测
         }
 
         private void HandleDeath()
         {
-            _currentBaseState = BaseState.Death;
-            _animator.SetInteger(HASH_BaseState, (int)_currentBaseState);
+            Debug.Log("[FSMManager] HandleDeath");
+            _baseFSM.LockState(BaseState.Death);
+            _attackFSM.ForceIdle();
+        }
+
+        private void HandleBaseStateChanged(BaseState state)
+        {
+            // 可扩展：通知其他系统
         }
     }
 }
