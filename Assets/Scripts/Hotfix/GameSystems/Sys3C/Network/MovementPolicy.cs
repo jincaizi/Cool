@@ -1,3 +1,4 @@
+using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Character;
 
 namespace Hotfix.GameSystems.Sys3C.Network
@@ -16,9 +17,9 @@ namespace Hotfix.GameSystems.Sys3C.Network
     /// </summary>
     public class LocalMovementPolicy : IMovementPolicy
     {
-        private readonly CharacterController _controller;
+        private readonly Hotfix.GameSystems.Sys3C.Character.CharacterController _controller;
 
-        public LocalMovementPolicy(CharacterController controller)
+        public LocalMovementPolicy(Hotfix.GameSystems.Sys3C.Character.CharacterController controller)
         {
             _controller = controller;
         }
@@ -39,16 +40,14 @@ namespace Hotfix.GameSystems.Sys3C.Network
     /// </summary>
     public class PredictionMovementPolicy : IMovementPolicy
     {
-        private readonly CharacterController _controller;
-        private readonly NetworkPrediction _prediction;
+        private readonly Hotfix.GameSystems.Sys3C.Character.CharacterController _controller;
         private readonly NetworkBridge _bridge;
         private uint _sequence;
 
-        public PredictionMovementPolicy(CharacterController controller, NetworkBridge bridge)
+        public PredictionMovementPolicy(Hotfix.GameSystems.Sys3C.Character.CharacterController controller, NetworkBridge bridge)
         {
             _controller = controller;
             _bridge = bridge;
-            _prediction = new NetworkPrediction();
         }
 
         public void Update(MoveCommand command)
@@ -56,11 +55,8 @@ namespace Hotfix.GameSystems.Sys3C.Network
             // 执行本地物理
             _controller.Update(command);
 
-            // 记录预测帧
-            _prediction.RecordPredictedFrame(_sequence, _controller.Data.Position, _controller.Data.Rotation);
-
-            // 发送输入
-            _bridge.SendInput(command, _sequence);
+            // 发送位置同步（等AOT层实现SendPositionSync）
+            // _bridge.SendPositionSync(_controller.Data.Position, _controller.Data.Rotation, command.Speed);
 
             _sequence++;
         }

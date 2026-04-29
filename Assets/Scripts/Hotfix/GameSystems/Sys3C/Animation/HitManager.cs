@@ -27,6 +27,11 @@ namespace Hotfix.GameSystems.Sys3C.Animation
             Debug.Log("[HitManager] OnHitCompleted");
         }
 
+        public void HandleHitCompleted(string stateName)
+        {
+            OnHitCompleted();
+        }
+
         public float GetHitLayerWeight()
         {
             return _driver.GetHitLayerWeight();

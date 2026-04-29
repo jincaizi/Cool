@@ -3,13 +3,13 @@ using UnityEngine;
 namespace Hotfix.GameSystems.Sys3C.Character
 {
     /// <summary>
-    /// 地面检测器 — 使用 CharacterController.isGrounded
+    /// 地面检测器 — 使用 UnityEngine.CharacterController.isGrounded
     /// </summary>
     public class GroundDetector
     {
-        private readonly CharacterController _controller;
+        private readonly UnityEngine.CharacterController _controller;
 
-        public GroundDetector(CharacterController controller)
+        public GroundDetector(UnityEngine.CharacterController controller)
         {
             _controller = controller;
         }

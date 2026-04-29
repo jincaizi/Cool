@@ -12,7 +12,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
     /// </summary>
     public class FSMManager
     {
-        private readonly CharacterController _characterController;
+        private readonly Hotfix.GameSystems.Sys3C.Character.CharacterController _characterController;
         private readonly AnimationDriver _driver;
 
         private readonly BaseFSM _baseFSM;
@@ -23,7 +23,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public event Action OnAttackCompleted;
         public event Action OnSkillCompleted;
 
-        public FSMManager(CharacterController characterController, Animator animator)
+        public FSMManager(Hotfix.GameSystems.Sys3C.Character.CharacterController characterController, Animator animator)
         {
             _characterController = characterController;
             _driver = new AnimationDriver(animator);
@@ -97,7 +97,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             }
         }
 
-        private void HandleHitCompleted()
+        private void HandleHitCompleted(string stateName)
         {
             _driver.SetIsHit(false);
             _driver.SetHitLayerWeight(0f);

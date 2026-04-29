@@ -1,6 +1,6 @@
+using Hotfix.GameSystems.Sys3C.Character;
 using System;
 using UnityEngine;
-using Hotfix.GameSystems.Sys3C.Character;
 using UnityInput = UnityEngine.Input;
 
 namespace Hotfix.GameSystems.Sys3C.Input
@@ -9,9 +9,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
     /// 输入管理器 — 统一所有输入适配器，输出标准化 MoveCommand
     /// 同时提供跳跃/攻击/冲刺的即时输入检测
     /// </summary>
-    public class InputManager
+    public class InputManager : MonoBehaviour
     {
-        private readonly IInputAdapter _adapter;
+        private IInputAdapter _adapter;
 
         // 移动速度
         public float MoveSpeed { get; set; } = 5.0f;
@@ -21,16 +21,13 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public float CameraSensitivityX { get; set; } = 2.0f;
         public float CameraSensitivityY { get; set; } = 2.0f;
 
-        // 当前序列号（用于网络预测）
-        private uint _sequence;
-
         // === 一次性事件（每帧只触发一次） ===
         private bool _jumpConsumed;
         private bool _attackConsumed;
         private bool _skill2Consumed;
         private bool _skill3Consumed;
 
-        public InputManager()
+        private void Awake()
         {
             _adapter = new KeyboardInputAdapter();
         }
@@ -74,8 +71,6 @@ namespace Hotfix.GameSystems.Sys3C.Input
                     MoveDir = worldMoveDir,
                     Speed = speed,
                     Rotation = targetRotation,
-                    Timestamp = DateTime.UtcNow.Ticks,
-                    Sequence = ++_sequence,
                     IsSprint = sprintHeld
                 };
             }
@@ -85,8 +80,6 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 MoveDir = Vector3.zero,
                 Speed = 0f,
                 Rotation = Quaternion.identity,
-                Timestamp = DateTime.UtcNow.Ticks,
-                Sequence = ++_sequence,
                 IsSprint = false
             };
         }

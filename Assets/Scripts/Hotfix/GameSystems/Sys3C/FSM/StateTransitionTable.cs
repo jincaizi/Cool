@@ -7,7 +7,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
     /// <summary>
     /// 状态转换条件委托
     /// </summary>
-    public delegate bool TransitionCondition(CharacterData data, AttackState attackState);
+    public delegate bool TransitionCondition(CharacterData data);
 
     /// <summary>
     /// 单个转换规则
@@ -94,7 +94,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _transitions[BaseState.Death] = new List<StateTransition>();
         }
 
-        public BaseState? Evaluate(BaseState current, CharacterData data, AttackState attackState)
+        public BaseState? Evaluate(BaseState current, CharacterData data)
         {
             if (!_transitions.TryGetValue(current, out var transitions))
                 return null;
@@ -103,7 +103,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
             foreach (var t in transitions)
             {
-                if (t.Condition(data, attackState))
+                if (t.Condition(data))
                     return t.TargetState;
             }
 

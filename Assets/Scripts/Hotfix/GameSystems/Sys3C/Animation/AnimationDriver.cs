@@ -1,0 +1,159 @@
+using UnityEngine;
+using Hotfix.GameSystems.Sys3C.Character;
+
+namespace Hotfix.GameSystems.Sys3C.Animation
+{
+    /// <summary>
+    /// Animator 参数驱动 — FSM 与 Animator 之间的桥梁
+    /// 统一管理所有 Animator 参数设置
+    /// </summary>
+    public class AnimationDriver
+    {
+        private readonly Animator _animator;
+
+        // 参数哈希缓存
+        private static readonly int HASH_BaseState = Animator.StringToHash("BaseState");
+        private static readonly int HASH_AttackState = Animator.StringToHash("AttackState");
+        private static readonly int HASH_IsJumping = Animator.StringToHash("IsJumping");
+        private static readonly int HASH_IsHit = Animator.StringToHash("IsHit");
+        private static readonly int HASH_Attack = Animator.StringToHash("Attack");
+        private static readonly int HASH_SkillQ = Animator.StringToHash("SkillQ");
+        private static readonly int HASH_SkillR = Animator.StringToHash("SkillR");
+        private static readonly int HASH_Hit = Animator.StringToHash("Hit");
+
+        public AnimationDriver(Animator animator)
+        {
+            _animator = animator ?? throw new System.ArgumentNullException(nameof(animator));
+        }
+
+        /// <summary>
+        /// 设置 Base Layer 状态
+        /// </summary>
+        public void SetBaseState(BaseState state)
+        {
+            _animator.SetInteger(HASH_BaseState, (int)state);
+        }
+
+        /// <summary>
+        /// 获取当前 Base Layer 状态
+        /// </summary>
+        public BaseState GetBaseState()
+        {
+            return (BaseState)_animator.GetInteger(HASH_BaseState);
+        }
+
+        /// <summary>
+        /// 设置 Attack Layer 状态
+        /// </summary>
+        public void SetAttackState(AttackState state)
+        {
+            _animator.SetInteger(HASH_AttackState, (int)state);
+        }
+
+        /// <summary>
+        /// 获取当前 Attack Layer 状态
+        /// </summary>
+        public AttackState GetAttackState()
+        {
+            return (AttackState)_animator.GetInteger(HASH_AttackState);
+        }
+
+        /// <summary>
+        /// 设置跳跃状态
+        /// </summary>
+        public void SetIsJumping(bool isJumping)
+        {
+            _animator.SetBool(HASH_IsJumping, isJumping);
+        }
+
+        /// <summary>
+        /// 设置受击状态
+        /// </summary>
+        public void SetIsHit(bool isHit)
+        {
+            _animator.SetBool(HASH_IsHit, isHit);
+        }
+
+        /// <summary>
+        /// 触发普通攻击/连击
+        /// </summary>
+        public void TriggerAttack()
+        {
+            _animator.SetTrigger(HASH_Attack);
+        }
+
+        /// <summary>
+        /// 触发技能Q
+        /// </summary>
+        public void TriggerSkillQ()
+        {
+            _animator.SetTrigger(HASH_SkillQ);
+        }
+
+        /// <summary>
+        /// 触发技能R
+        /// </summary>
+        public void TriggerSkillR()
+        {
+            _animator.SetTrigger(HASH_SkillR);
+        }
+
+        /// <summary>
+        /// 触发受击动画
+        /// </summary>
+        public void TriggerHit()
+        {
+            _animator.SetTrigger(HASH_Hit);
+        }
+
+        /// <summary>
+        /// 重置攻击触发器（用于动画结束后清理）
+        /// </summary>
+        public void ResetAttackTrigger()
+        {
+            _animator.ResetTrigger(HASH_Attack);
+        }
+
+        /// <summary>
+        /// 重置技能Q触发器
+        /// </summary>
+        public void ResetSkillQTrigger()
+        {
+            _animator.ResetTrigger(HASH_SkillQ);
+        }
+
+        /// <summary>
+        /// 重置技能R触发器
+        /// </summary>
+        public void ResetSkillRTrigger()
+        {
+            _animator.ResetTrigger(HASH_SkillR);
+        }
+
+        /// <summary>
+        /// 重置受击触发器
+        /// </summary>
+        public void ResetHitTrigger()
+        {
+            _animator.ResetTrigger(HASH_Hit);
+        }
+
+        /// <summary>
+        /// 获取 Hit Layer 权重
+        /// </summary>
+        public float GetHitLayerWeight()
+        {
+            const int HIT_LAYER_INDEX = 2;
+            return _animator.GetLayerWeight(HIT_LAYER_INDEX);
+        }
+
+        /// <summary>
+        /// 设置 Hit Layer 权重
+        /// </summary>
+        public void SetHitLayerWeight(float weight)
+        {
+            const int HIT_LAYER_INDEX = 2;
+            _animator.SetLayerWeight(HIT_LAYER_INDEX, weight);
+        }
+    }
+}

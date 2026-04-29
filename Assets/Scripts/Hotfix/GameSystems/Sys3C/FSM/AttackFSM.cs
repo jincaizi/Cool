@@ -1,4 +1,6 @@
 using System;
+using UnityEngine;
+using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Animation;
 
 namespace Hotfix.GameSystems.Sys3C.FSM

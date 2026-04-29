@@ -5,35 +5,34 @@ namespace Hotfix.GameSystems.Sys3C.Camera
     /// <summary>
     /// 第三人称相机控制器 — 平滑跟随
     /// </summary>
-    public class ThirdPersonCameraController
+    public class ThirdPersonCameraController : MonoBehaviour
     {
-        private readonly Transform _cameraTransform;
-        private readonly Transform _targetTransform;
+        [Header("Target")]
+        public Transform Target;
 
-        // 相机参数
-        public float Distance { get; set; } = 8.0f;         // 相机距离
-        public float Height { get; set; } = 2.0f;           // 相机高度
-        public float PositionDamping { get; set; } = 5.0f;  // 位置平滑
-        public float RotationDamping { get; set; } = 8.0f;   // 旋转平滑
+        [Header("Distance & Height")]
+        public float Distance = 8.0f;
+        public float Height = 2.0f;
 
-        public float MinPitch { get; set; } = -30f;         // 最小俯仰角
-        public float MaxPitch { get; set; } = 60f;          // 最大俯仰角
-        public float MouseSensitivityX { get; set; } = 2.0f;
-        public float MouseSensitivityY { get; set; } = 2.0f;
+        [Header("Damping")]
+        public float PositionDamping = 5.0f;
+        public float RotationDamping = 8.0f;
+
+        [Header("Rotation Limits")]
+        public float MinPitch = -30f;
+        public float MaxPitch = 60f;
+        public float MouseSensitivityX = 2.0f;
+        public float MouseSensitivityY = 2.0f;
 
         // 当前旋转角度
         private float _horizontalAngle;
         private float _verticalAngle = 20f;
 
-        public ThirdPersonCameraController(Transform cameraTransform, Transform targetTransform)
+        private void Start()
         {
-            _cameraTransform = cameraTransform;
-            _targetTransform = targetTransform;
-
-            // 初始化相机角度
-            if (_targetTransform != null)
+            if (Target != null)
             {
-                _horizontalAngle = _targetTransform.eulerAngles.y;
+                _horizontalAngle = Target.eulerAngles.y;
             }
         }
 
@@ -56,24 +55,24 @@ namespace Hotfix.GameSystems.Sys3C.Camera
         /// </summary>
         public void Update()
         {
-            if (_targetTransform == null) return;
+            if (Target == null) return;
 
             // 计算目标位置（球坐标）
             Quaternion rotation = Quaternion.Euler(_verticalAngle, _horizontalAngle, 0f);
             Vector3 offset = rotation * new Vector3(0f, 0f, -Distance);
             offset.y = Height;
 
-            Vector3 targetPosition = _targetTransform.position + offset;
-            Vector3 currentPosition = _cameraTransform.position;
+            Vector3 targetPosition = Target.position + offset;
+            Vector3 currentPosition = transform.position;
 
             // 平滑跟随
-            _cameraTransform.position = Vector3.Lerp(currentPosition, targetPosition, PositionDamping * Time.deltaTime);
+            transform.position = Vector3.Lerp(currentPosition, targetPosition, PositionDamping * Time.deltaTime);
 
             // 平滑看向目标
-            Vector3 lookTarget = _targetTransform.position + Vector3.up * Height * 0.5f;
-            Quaternion targetRotation = Quaternion.LookRotation(lookTarget - _cameraTransform.position);
-            _cameraTransform.rotation = Quaternion.Slerp(
-                _cameraTransform.rotation,
+            Vector3 lookTarget = Target.position + Vector3.up * Height * 0.5f;
+            Quaternion targetRotation = Quaternion.LookRotation(lookTarget - transform.position);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
                 targetRotation,
                 RotationDamping * Time.deltaTime
             );

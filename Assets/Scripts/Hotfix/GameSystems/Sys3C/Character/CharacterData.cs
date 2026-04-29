@@ -36,6 +36,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public Vector3 Position;
         public Quaternion Rotation;
         public Vector3 Velocity;
+        public Vector3 MoveDir;
         public bool IsGrounded;
         public float VerticalVelocity;
         public BaseState BaseState;

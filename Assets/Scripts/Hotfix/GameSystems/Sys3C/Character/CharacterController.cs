@@ -145,22 +145,22 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.VerticalVelocity = _velocity.y;
             _data.IsSprint = command.IsSprint;
 
-            // 9. 网络预测
-            if (_prediction != null && _bridge != null)
-            {
-                _prediction.RecordPredictedFrame(_currentSequence, _data.Position, _data.Rotation);
-                _bridge.SendInput(command, _currentSequence);
-
-                if (_bridge.HasServerUpdate(out var seq, out var pos, out var rot))
-                {
-                    if (_prediction.ValidateAndCorrect(seq, pos, rot, out var corrected, out var correctedRot))
-                    {
-                        ApplyServerPosition(corrected.Position, correctedRot);
-                    }
-                }
-
-                _currentSequence++;
-            }
+            // 9. 网络预测（暂时禁用，等AOT层实现）
+            // if (_prediction != null && _bridge != null)
+            // {
+            //     _prediction.RecordPredictedFrame(_currentSequence, _data.Position, _data.Rotation);
+            //     _bridge.SendInput(command, _currentSequence);
+            //
+            //     if (_bridge.HasServerUpdate(out var seq, out var pos, out var rot))
+            //     {
+            //         if (_prediction.ValidateAndCorrect(seq, pos, rot, out var corrected, out var correctedRot))
+            //         {
+            //             ApplyServerPosition(corrected.Position, correctedRot);
+            //         }
+            //     }
+            //
+            //     _currentSequence++;
+            // }
         }
 
         private void UpdateJumpPhase()

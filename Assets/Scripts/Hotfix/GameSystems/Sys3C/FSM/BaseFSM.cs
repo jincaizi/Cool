@@ -34,7 +34,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 return;
             }
 
-            var target = _table.Evaluate(_currentState, data, attackState);
+            var target = _table.Evaluate(_currentState, data);
             if (target.HasValue && target.Value != _currentState)
             {
                 if (_table.CanEnter(target.Value, data))
