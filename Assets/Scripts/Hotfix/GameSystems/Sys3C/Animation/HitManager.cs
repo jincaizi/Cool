@@ -2,60 +2,39 @@ using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Animation
 {
-    /// <summary>
-    /// Hit 管理器 — 处理受击叠加层
-    /// </summary>
     public class HitManager
     {
-        private readonly Animator _animator;
-        private static readonly int HASH_Hit = Animator.StringToHash("Hit");
-        private static readonly int HASH_IsHit = Animator.StringToHash("IsHit");
-
+        private readonly AnimationDriver _driver;
         private const int HIT_LAYER_INDEX = 2;
 
-        public HitManager(Animator animator)
+        public HitManager(AnimationDriver driver)
         {
-            _animator = animator;
+            _driver = driver;
         }
 
-        /// <summary>
-        /// 触发受击动画
-        /// </summary>
         public void TriggerHit()
         {
-            _animator.SetTrigger(HASH_Hit);
-            _animator.SetBool(HASH_IsHit, true);
+            _driver.TriggerHit();
+            _driver.SetIsHit(true);
+            _driver.SetHitLayerWeight(1f);
             Debug.Log("[HitManager] TriggerHit called");
-
-            // 设置 Hit 层权重（由 StateMachineBehaviour 控制）
-            // 这里主要是通知
         }
 
-        /// <summary>
-        /// Hit 动画完成回调
-        /// </summary>
         public void OnHitCompleted()
         {
-            _animator.SetBool(HASH_IsHit, false);
+            _driver.SetIsHit(false);
+            _driver.SetHitLayerWeight(0f);
             Debug.Log("[HitManager] OnHitCompleted");
-
-            // Hit 层权重归零，状态机自动返回
         }
 
-        /// <summary>
-        /// 获取 Hit 层权重
-        /// </summary>
         public float GetHitLayerWeight()
         {
-            return _animator.GetLayerWeight(HIT_LAYER_INDEX);
+            return _driver.GetHitLayerWeight();
         }
 
-        /// <summary>
-        /// 设置 Hit 层权重
-        /// </summary>
         public void SetHitLayerWeight(float weight)
         {
-            _animator.SetLayerWeight(HIT_LAYER_INDEX, weight);
+            _driver.SetHitLayerWeight(weight);
         }
     }
 }
