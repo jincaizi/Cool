@@ -1,37 +1,36 @@
 using System;
 using UnityEngine;
+using Hotfix.GameSystems.Sys3C.Network;
 
 namespace Hotfix.GameSystems.Sys3C.Character
 {
-    /// <summary>
-    /// 角色控制器 — 移动/跳跃/物理驱动
-    /// 只负责更新 CharacterData，状态变化通过事件通知
-    /// </summary>
     public class CharacterController
     {
         private readonly UnityEngine.CharacterController _controller;
         private readonly Transform _transform;
         private readonly GroundDetector _groundDetector;
 
-        // 移动参数
         public float MoveSpeed { get; set; } = 5.0f;
         public float SprintSpeed { get; set; } = 8.0f;
         public float RotationSpeed { get; set; } = 10.0f;
         public float Gravity { get; set; } = -30f;
         public float JumpForce { get; set; } = 12f;
 
-        // 内部状态
         private CharacterData _data;
         private Vector3 _velocity;
         private bool _jumpRequested;
 
-        // 事件
         public event Action OnJumpRequested;
         public event Action OnLanded;
         public event Action OnDeath;
 
         public CharacterData Data => _data;
         public bool IsGrounded => _groundDetector.IsGrounded();
+
+        // Network integration
+        private NetworkPrediction _prediction;
+        private NetworkBridge _bridge;
+        private uint _currentSequence;
 
         public CharacterController(
             Transform transform,
@@ -48,13 +47,18 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 Rotation = transform.rotation,
                 BaseState = BaseState.Idle,
                 IsGrounded = true,
-                IsDead = false
+                IsDead = false,
+                RequestJump = false
             };
         }
 
-        /// <summary>
-        /// 请求跳跃
-        /// </summary>
+        public void InitializeNetwork(NetworkBridge bridge)
+        {
+            _bridge = bridge;
+            _prediction = new NetworkPrediction();
+            Debug.Log("[CharacterController] Network initialized");
+        }
+
         public void RequestJump()
         {
             if (_data.IsGrounded && !_data.IsDead && _data.BaseState != BaseState.JumpStart && _data.BaseState != BaseState.JumpAir)
@@ -63,17 +67,11 @@ namespace Hotfix.GameSystems.Sys3C.Character
             }
         }
 
-        /// <summary>
-        /// 应用伤害（触发受击）
-        /// </summary>
         public void ApplyHit()
         {
-            // Hit 由 FSM 层处理，这里仅标记
+            // Hit 由 FSM 层处理
         }
 
-        /// <summary>
-        /// 应用死亡
-        /// </summary>
         public void ApplyDeath()
         {
             _data.IsDead = true;
@@ -82,9 +80,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             OnDeath?.Invoke();
         }
 
-        /// <summary>
-        /// 每帧驱动
-        /// </summary>
         public void Update(MoveCommand command)
         {
             if (_data.IsDead)
@@ -93,6 +88,9 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 _data.Rotation = _transform.rotation;
                 return;
             }
+
+            // 设置 RequestJump 标记
+            _data.RequestJump = _jumpRequested;
 
             bool wasGrounded = _data.IsGrounded;
 
@@ -126,7 +124,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 _velocity.y += Gravity * Time.deltaTime;
                 _velocity.y = Mathf.Max(_velocity.y, -50f);
 
-                // 额外Y轴移动
                 Vector3 yMove = Vector3.up * _velocity.y * Time.deltaTime;
                 _controller.Move(yMove);
             }
@@ -138,7 +135,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
             // 6. 跳跃阶段转换
             UpdateJumpPhase();
 
-            // 7. 基础移动状态（非跳跃时）
+            // 7. 基础移动状态
             UpdateBaseState(command, currentSpeed);
 
             // 8. 同步数据
@@ -147,18 +144,33 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.Velocity = _controller.velocity;
             _data.VerticalVelocity = _velocity.y;
             _data.IsSprint = command.IsSprint;
+
+            // 9. 网络预测
+            if (_prediction != null && _bridge != null)
+            {
+                _prediction.RecordPredictedFrame(_currentSequence, _data.Position, _data.Rotation);
+                _bridge.SendInput(command, _currentSequence);
+
+                if (_bridge.HasServerUpdate(out var seq, out var pos, out var rot))
+                {
+                    if (_prediction.ValidateAndCorrect(seq, pos, rot, out var corrected, out var correctedRot))
+                    {
+                        ApplyServerPosition(corrected.Position, correctedRot);
+                    }
+                }
+
+                _currentSequence++;
+            }
         }
 
         private void UpdateJumpPhase()
         {
             if (_data.BaseState == BaseState.JumpStart)
             {
-                // JumpStart 持续一帧后进入 JumpAir
                 _data.BaseState = BaseState.JumpAir;
             }
             else if (_data.BaseState == BaseState.JumpAir)
             {
-                // 着地检测
                 if (_data.IsGrounded && _velocity.y <= 0)
                 {
                     _data.BaseState = BaseState.JumpEnd;
@@ -170,21 +182,18 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
         private void UpdateBaseState(MoveCommand command, float currentSpeed)
         {
-            // 非跳跃期间管理基础状态
             if (_data.BaseState == BaseState.Idle ||
                 _data.BaseState == BaseState.Move ||
                 _data.BaseState == BaseState.Sprint)
             {
                 if (command.MoveDir.sqrMagnitude > 0.01f)
                 {
-                    // 旋转
                     _transform.rotation = Quaternion.Slerp(
                         _transform.rotation,
                         command.Rotation,
                         RotationSpeed * Time.deltaTime
                     );
 
-                    // 更新状态
                     if (command.IsSprint)
                         _data.BaseState = BaseState.Sprint;
                     else
@@ -197,9 +206,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             }
         }
 
-        /// <summary>
-        /// 落地动画完成后调用
-        /// </summary>
         public void FinishJump()
         {
             if (_data.BaseState == BaseState.JumpEnd)
@@ -208,13 +214,12 @@ namespace Hotfix.GameSystems.Sys3C.Character
             }
         }
 
-        /// <summary>
-        /// 应用服务端权威位置
-        /// </summary>
         public void ApplyServerPosition(Vector3 position, Quaternion rotation)
         {
-            _transform.position = position;
-            _transform.rotation = rotation;
+            // Rubber-band 平滑校正
+            _transform.position = Vector3.Lerp(_transform.position, position, 0.5f);
+            _transform.rotation = Quaternion.Slerp(_transform.rotation, rotation, 0.5f);
+
             _controller.enabled = false;
             _controller.transform.position = position;
             _controller.enabled = true;
