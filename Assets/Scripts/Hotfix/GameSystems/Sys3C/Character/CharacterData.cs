@@ -42,6 +42,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public AttackState AttackState;
         public bool IsSprint;
         public bool IsDead;
+        public bool RequestJump;  // 新增：跳跃请求标记
     }
 
     /// <summary>
