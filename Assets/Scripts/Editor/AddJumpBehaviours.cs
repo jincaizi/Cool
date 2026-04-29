@@ -52,19 +52,34 @@ namespace Hotfix.GameSystems.Sys3C.Editor
 
         private static void ProcessChildStateMachines(AnimatorStateMachine stateMachine, string[] targetStates, ref int addedCount)
         {
-            foreach (var childSM in stateMachine.childStates)
+            // Process direct child states
+            foreach (var childState in stateMachine.states)
             {
                 foreach (var targetName in targetStates)
                 {
-                    if (childSM.state.name == targetName)
+                    if (childState.state.name == targetName)
                     {
-                        AddBehaviourToState(childSM.state, targetName + " (child)", ref addedCount);
+                        AddBehaviourToState(childState.state, targetName + " (child)", ref addedCount);
                     }
                 }
             }
 
+            // Process child state machines
             foreach (var childSM in stateMachine.stateMachines)
             {
+                // Check states in child state machine
+                foreach (var state in childSM.stateMachine.states)
+                {
+                    foreach (var targetName in targetStates)
+                    {
+                        if (state.state.name == targetName)
+                        {
+                            AddBehaviourToState(state.state, targetName + " (nested)", ref addedCount);
+                        }
+                    }
+                }
+
+                // Recurse into grandchildren
                 ProcessChildStateMachines(childSM.stateMachine, targetStates, ref addedCount);
             }
         }
