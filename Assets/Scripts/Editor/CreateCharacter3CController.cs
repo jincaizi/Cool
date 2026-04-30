@@ -140,13 +140,11 @@ public static class CreateCharacter3CController
         // JumpStart → JumpAir (自动，1帧后)
         var jumpStartToAir = AddTransition(sJumpStart, sJumpAir, t);
         jumpStartToAir.hasExitTime = false;
-        jumpStartToAir.conditionMode = AnimatorConditionMode.Equals;
         jumpStartToAir.AddCondition(AnimatorConditionMode.Equals, STATE_JUMP_AIR, PARAM_BASE_STATE);
 
         // JumpAir → JumpEnd (落地检测)
         var jumpAirToEnd = AddTransition(sJumpAir, sJumpEnd, t);
         jumpAirToEnd.hasExitTime = false;
-        jumpAirToEnd.conditionMode = AnimatorConditionMode.Equals;
         jumpAirToEnd.AddCondition(AnimatorConditionMode.Equals, STATE_JUMP_END, PARAM_BASE_STATE);
 
         // JumpEnd → 返回任意状态
@@ -221,7 +219,7 @@ public static class CreateCharacter3CController
         var layer = controller.layers[LAYER_HIT];
         layer.name = "Hit";
         layer.defaultWeight = 0f; // 默认权重为0
-        layer.blendMode = AnimatorLayerBlendingMode.Additive; // 叠加模式
+        layer.blendingMode = AnimatorLayerBlendingMode.Additive; // 叠加模式
 
         var sm = layer.stateMachine;
 

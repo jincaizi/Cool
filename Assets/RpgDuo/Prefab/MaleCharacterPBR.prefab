@@ -2405,7 +2405,7 @@ Animator:
   m_GameObject: {fileID: 8189980434977739222}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 0308cf4e83cf517488b60af58b290fe0, type: 3}
-  m_Controller: {fileID: 9100000, guid: e66495f46762195458a121968319e488, type: 2}
+  m_Controller: {fileID: 9100000, guid: fb7ffdef9e2b35b4fb1a13cffcebbfa8, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2428,17 +2428,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6db81cadee4802242ab0aad4b50156cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _groundLayer:
+  CharacterController: {fileID: 4734815638318692212}
+  Animator: {fileID: 9036980633323257398}
+  GroundLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
-  _moveSpeed: 4
-  _sprintSpeed: 7
-  _rotationSpeed: 8
-  _cameraDistance: 8
-  _cameraHeight: 2
-  _cameraDamping: 5
-  _mouseSensitivityX: 2
-  _mouseSensitivityY: 2
+    m_Bits: 0
 --- !u!143 &4734815638318692212
 CharacterController:
   m_ObjectHideFlags: 0

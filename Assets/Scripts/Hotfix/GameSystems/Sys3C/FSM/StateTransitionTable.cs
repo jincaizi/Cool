@@ -94,9 +94,12 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _transitions[BaseState.Death] = new List<StateTransition>();
         }
 
-        public BaseState? Evaluate(BaseState current, CharacterData data)
+        public BaseState? Evaluate(BaseState currentFSMState, CharacterData data)
         {
-            if (!_transitions.TryGetValue(current, out var transitions))
+            // 使用 CharacterData.BaseState 作为当前状态，而不是 FSM 内部状态
+            BaseState currentDataState = data.BaseState;
+
+            if (!_transitions.TryGetValue(currentDataState, out var transitions))
                 return null;
 
             transitions.Sort((a, b) => b.Priority.CompareTo(a.Priority));
@@ -107,7 +110,8 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     return t.TargetState;
             }
 
-            return null;
+            // 如果没有匹配的条件，保持当前状态
+            return currentDataState;
         }
 
         public bool CanEnter(BaseState target, CharacterData data)

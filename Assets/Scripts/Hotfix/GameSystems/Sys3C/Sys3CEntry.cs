@@ -45,6 +45,11 @@ namespace Hotfix.GameSystems.Sys3C
 
             // 获取相机
             _camera = FindObjectOfType<ThirdPersonCameraController>();
+            if (_camera != null && _cc != null)
+            {
+                _camera.Target = transform;
+                Debug.Log("[Sys3CEntry] Camera target set");
+            }
 
             // 注册默认技能
             RegisterDefaultSkills();
@@ -73,6 +78,12 @@ namespace Hotfix.GameSystems.Sys3C
             _cc.Update(command);
             _fsmManager.Update(Time.deltaTime);
             _skillRegistry.Update(Time.deltaTime);
+
+            // 更新相机
+            if (_camera != null)
+            {
+                _camera.Update();
+            }
         }
 
         private void HandleInput()

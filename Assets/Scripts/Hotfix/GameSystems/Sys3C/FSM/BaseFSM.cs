@@ -34,7 +34,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 return;
             }
 
-            var target = _table.Evaluate(_currentState, data);
+            // 使用 CharacterData.BaseState 作为当前状态
+            var currentDataState = data.BaseState;
+
+            var target = _table.Evaluate(currentDataState, data);
             if (target.HasValue && target.Value != _currentState)
             {
                 if (_table.CanEnter(target.Value, data))

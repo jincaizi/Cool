@@ -144,6 +144,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.Velocity = _controller.velocity;
             _data.VerticalVelocity = _velocity.y;
             _data.IsSprint = command.IsSprint;
+            _data.MoveDir = command.MoveDir;
 
             // 9. 网络预测（暂时禁用，等AOT层实现）
             // if (_prediction != null && _bridge != null)
