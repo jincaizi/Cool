@@ -26,13 +26,26 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void Start()
         {
+            // 验证组件引用
+            if (CharacterController == null)
+            {
+                Debug.LogError("[Sys3CEntry] CharacterController is null!");
+                return;
+            }
+            if (Animator == null)
+            {
+                Debug.LogError("[Sys3CEntry] Animator is null!");
+                return;
+            }
+
             // 初始化组件
             _cc = new Hotfix.GameSystems.Sys3C.Character.CharacterController(transform, CharacterController, GroundLayer);
 
-            // 创建 AnimationDriver
+            // 创建 AnimationDriver（引用同一个实例，供 FSMManager 和 StateBehaviour 使用）
             var animationDriver = new Animation.AnimationDriver(Animator);
 
-            _fsmManager = new FSMManager(_cc, Animator);
+            // 初始化 FSMManager（传入同一个 animationDriver 实例）
+            _fsmManager = new FSMManager(_cc, Animator, animationDriver);
             _skillRegistry = new SkillRegistry();
             _hitManager = new HitManager(animationDriver);
 
@@ -48,16 +61,13 @@ namespace Hotfix.GameSystems.Sys3C
             if (_camera != null && _cc != null)
             {
                 _camera.Target = transform;
-                Debug.Log("[Sys3CEntry] Camera target set");
+                // 立即同步相机位置，避免初始偏移
+                _camera.SnapToTarget();
+                Debug.Log("[Sys3CEntry] Camera target set and snapped");
             }
 
             // 注册默认技能
             RegisterDefaultSkills();
-
-            // 设置 StateMachineBehaviour 回调
-            Animation.StateBehaviours.BaseStateBehaviour.SetCallback(animationDriver, HandleAnimationCallback);
-            Animation.StateBehaviours.AttackStateBehaviour.SetCallback(animationDriver, HandleAnimationCallback);
-            Animation.StateBehaviours.HitStateBehaviour.SetCallback(animationDriver, HandleHitAnimationCallback);
 
             Debug.Log("[Sys3CEntry] Initialized");
         }

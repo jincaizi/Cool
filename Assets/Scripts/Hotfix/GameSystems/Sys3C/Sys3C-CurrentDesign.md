@@ -1,211 +1,230 @@
-# 3C 系统现有功能总结
+# 3C 系统当前设计文档
 
-> 用于重构参考，记录当前已实现的功能、数据结构和模块职责。
-
----
-
-## 1. FSM 状态机
-
-### 1.1 Animator 参数
-
-| 参数名 | 类型 | 用途 |
-|--------|------|------|
-| State | Int | 驱动 Base Layer 状态转换 |
-| AttackPhase | Int | 驱动 Attack Layer 连击 |
-| Jump | Trigger | (已弃用，保留) |
-| Attack | Trigger | (已弃用，保留) |
-
-### 1.2 Base Layer 状态
-
-| State 值 | 状态名 | 动画 | fileID |
-|-----------|--------|------|--------|
-| 0 | Idle | guid:423aaf... | -1001 |
-| 1 | BattleIdle | guid:0308cf... | -1002 |
-| 2 | Move | guid:7d4f9e... | -1003 |
-| 3 | Run | guid:5eee3d... | -1004 |
-| 4 | JumpStart | guid:c2b2e4... | -1005 |
-| 5 | JumpAir | guid:8be8f9... | -1006 |
-| 6 | JumpEnd | guid:8b662f... | -1007 |
-| 7 | Death | guid:5940bb... | -1008 |
-
-Base Layer 的 Default State = Idle。
-
-### 1.3 Base Layer 转换关系
-
-```
-                    ┌──────────────────────────────────────────┐
-                    │            AnyState → Death              │
-                    │            条件: State == 7               │
-                    └──────────────────────────────────────────┘
-                                     │ (任意状态可被打断)
-
-  ┌────────┐   State==2   ┌────────┐   State==3   ┌────────┐
-  │  Idle  │ ───────────→ │  Move  │ ───────────→ │  Run   │
-  │  (0)   │ ←─────────── │  (2)   │ ←─────────── │  (3)   │
-  └────────┘   State==0   └────────┘   State==2   └────────┘
-       │                     │                     │
-       │ State==3            │ State==4            │ State==4
-       ↓                     ↓                     ↓
-  ┌────────┐            ┌───────────┐         ┌───────────┐
-  │  Run   │            │ JumpStart │         │ JumpStart │
-  └────────┘            │   (4)     │         │   (4)     │
-                        └───────────┘         └───────────┘
-                             │
-                   [代码: Start→Air 同帧]
-                             ↓
-                        ┌───────────┐
-                        │  JumpAir  │
-                        │   (5)     │
-                        └───────────┘
-                             │
-                   [代码: 着地检测]
-                             ↓
-                        ┌───────────┐
-                        │  JumpEnd  │ ──→ [SMB: normalizedTime≥0.9]
-                        │   (6)     │         → FinishJump() → Idle
-                        └───────────┘
-```
-
-#### 转换条件明细
-
-| 起始状态 | 目标状态 | 条件 | fileID |
-|----------|----------|------|--------|
-| Idle | Move | State == 2 | -3019 |
-| Idle | Run | State == 3 | -3020 |
-| Move | Idle | State == 0 | -3006 |
-| Move | Run | State == 3 | -3007 |
-| Move | JumpStart | State == 4 | -3011 |
-| Move | Death | State == 7 | -3012 |
-| Run | Idle | State == 0 | -3008 |
-| Run | Move | State == 2 | -3021 |
-| Run | JumpStart | State == 4 | -3022 |
-| BattleIdle | Idle | State == 0 | -3013 |
-| BattleIdle | Move | State == 2 | -3015 |
-| BattleIdle | Run | State == 3 | -3016 |
-| JumpStart | JumpAir | State == 5 | -3004 |
-| JumpStart | Death | State == 7 | -3005 |
-| JumpAir | JumpEnd | State == 6 | -3002 |
-| JumpAir | Death | State == 7 | -3003 |
-| JumpEnd | Idle | ExitTime=0.9, 无条件 | -3001 |
-| AnyState | Death | State == 7 | -4001 |
-
-#### 已知问题
-- JumpStart→JumpAir (-3004) 和 JumpEnd→Idle (-3001) 被 Unity 忽略（"doesn't have an Exit Time or any condition"）
-- 当前代码用 `Animator.Play()` 绕过这些转换
-
-### 1.4 Attack Layer 状态
-
-| AttackPhase 值 | 状态名 | 动画 | fileID |
-|-----------------|--------|------|--------|
-| - | Empty | BattleIdle (guid:0308cf...) | -101 |
-| 1 | Attack1 | guid:db509a... | -102 |
-| 2 | Attack2 | guid:8283fa... | -103 |
-| 3 | Attack3 | guid:9a6c35... | -104 |
-| 4 | Attack4 | guid:b267a2... | -105 |
-
-- Avatar Mask: AnimLayer.mask（仅上半身，腿部/脚部禁用）
-- BlendingMode: 0 (Override)
-- DefaultWeight: 1
-- Default State: Empty
-
-### 1.5 Attack Layer 转换关系
-
-```
-  AnyState ──→ Attack1  条件: Attack(Trigger) && AttackPhase==1
-  AnyState ──→ Attack2  条件: Attack(Trigger) && AttackPhase==2
-  AnyState ──→ Attack3  条件: Attack(Trigger) && AttackPhase==3
-  AnyState ──→ Attack4  条件: Attack(Trigger) && AttackPhase==4
-
-  Attack1/2/3/4 ──→ Empty  条件: ExitTime=0.9, 无条件
-```
-
-#### 已知问题
-- AnyState 转换依赖 Attack Trigger，但代码已改用 `Animator.Play()` 直接进入
-- 当前实际流程: `Animator.Play("AttackX", 1, 0f)` 跳过 AnyState 转换
-
-### 1.6 StateMachineBehaviour
-
-| 类 | 挂载位置 | 触发条件 | 事件 |
-|----|----------|----------|------|
-| CharacterStateBehaviour | JumpEnd | normalizedTime ≥ 0.9 | OnJumpEndCompletedEvent → FinishJump() |
-| AttackStateBehaviour | Attack1/2/3/4 | normalizedTime ≥ 0.8 | OnAttackCompletedEvent(int) → TryComboNext() |
+> **状态:** 已实现
+> **更新时间:** 2026-05-04
+> **架构:** 双 FSM 架构 (BaseFSM + AttackFSM)
 
 ---
 
-## 2. 技能/攻击系统
+## 1. 系统概览
 
-### 2.1 输入映射
-
-| 按键 | 方法 | 行为 |
-|------|------|------|
-| 鼠标左键 | IsAttackPressed() | 普通攻击 (Attack1/Attack2 交替) |
-| Q | IsSkill2Pressed() | 技能2 (Attack3)，需 JumpPhase==Air 或 None |
-| R | IsSkill3Pressed() | 技能3 (Attack4)，需 JumpPhase==None |
-| Space | IsJumpPressed() | 跳跃 |
-| Shift(按住) | IsSprintHeld() | 冲刺 |
-
-### 2.2 攻击流程
+### 1.1 架构演进
 
 ```
-鼠标左键 → OnNormalAttack()
-  ├── _lastNormalAttackIndex = 1↔2 交替
-  ├── SetInteger(AttackPhase, index)
-  └── Play("Attack1"/"Attack2", layer=1, 0f)
+旧架构 (已废弃):
+  CharacterData → Animator 参数 → Animator Controller 转换
 
-Q键 → OnSkill2()
-  ├── SetInteger(AttackPhase, 3)
-  └── Play("Attack3", layer=1, 0f)
-
-R键 → OnSkill3()
-  ├── SetInteger(AttackPhase, 4)
-  └── Play("Attack4", layer=1, 0f)
-
-AttackStateBehaviour (normalizedTime≥0.8) → OnAttackCompletedEvent(index)
-  └── Sys3CEntry → TryComboNext() → OnNormalAttack() (仅普通攻击连击)
+新架构 (当前):
+  CharacterData → FSMManager → BaseFSM + AttackFSM → AnimationDriver → Animator
 ```
 
-### 2.3 技能限制条件
+### 1.2 核心模块
 
-- Skill2 (Q): JumpPhase 必须为 Air 或 None
-- Skill3 (R): JumpPhase 必须为 None
-- 普通攻击: 无限制
+| 模块 | 职责 |
+|------|------|
+| **FSMManager** | FSM 协调者，管理 BaseFSM 和 AttackFSM |
+| **BaseFSM** | 基础移动状态机 (Idle/Move/Sprint/Jump/Death) |
+| **AttackFSM** | 攻击状态机 (普攻连击/技能) |
+| **StateTransitionTable** | 外部化状态转换规则 |
+| **CharacterController** | 物理/移动/状态控制 |
+| **AnimationDriver** | Animator 参数驱动 |
+| **ThirdPersonCameraController** | 第三人称相机 |
+| **NetworkPrediction** | 客户端预测 (待集成) |
 
 ---
 
-## 3. 相机系统
+## 2. FSM 架构
 
-### 3.1 ThirdPersonCameraController
+### 2.1 BaseFSM — 基础状态机
 
-纯 C# 类（非 MonoBehaviour），由 Sys3CEntry 在 Update() 中调用。
+管理角色移动和跳跃，驱动 Base Layer 动画。
 
-#### 参数
+#### 状态定义 (BaseState)
 
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| Distance | 5.0f (Entry设为5) | 相机与角色距离 |
-| Height | 2.0f | 相机高度偏移 |
-| PositionDamping | 5.0f | 位置跟随平滑系数 |
-| RotationDamping | 8.0f | 旋转跟随平滑系数 |
-| MinPitch | -30f | 最小俯仰角 |
-| MaxPitch | 60f | 最大俯仰角 |
-| MouseSensitivityX | 2.0f | 水平旋转灵敏度 |
-| MouseSensitivityY | 2.0f | 垂直旋转灵敏度 |
+| 值 | 状态 | 描述 |
+|----|------|------|
+| 0 | Idle | 静止 |
+| 1 | Move | 行走 |
+| 2 | Sprint | 冲刺 |
+| 3 | JumpStart | 跳跃起跳 |
+| 4 | JumpAir | 空中 |
+| 5 | JumpEnd | 跳跃落地 |
+| 6 | Death | 死亡 |
 
-#### 工作原理
+#### 状态转换规则 (StateTransitionTable)
 
-1. **输入**: 鼠标移动 → `HandleRotationInput(Vector2)` → 更新 `_horizontalAngle` / `_verticalAngle`
-2. **位置计算**: 球坐标 → `Quaternion.Euler(pitch, yaw, 0) * (0, 0, -Distance)` + Height 偏移
-3. **平滑跟随**: `Vector3.Lerp(当前位置, 目标位置, damping * deltaTime)`
-4. **看向目标**: `Quaternion.Slerp(当前旋转, LookRotation(目标-相机), damping * deltaTime)`
-5. **LookAt 偏移**: 角色位置 + `Vector3.up * Height * 0.5`
+```
+Idle:
+  → Move     [MoveDir.sqrMagnitude > 0.01f, priority=1]
+  → Sprint   [MoveDir.sqrMagnitude > 0.01f && IsSprint, priority=2]
+  → JumpStart [RequestJump, priority=10]
+  → Death    [IsDead, priority=100]
+
+Move:
+  → Idle     [MoveDir.sqrMagnitude < 0.01f, priority=1]
+  → Sprint   [IsSprint, priority=2]
+  → JumpStart [RequestJump, priority=10]
+  → Death    [IsDead, priority=100]
+
+Sprint:
+  → Idle     [MoveDir.sqrMagnitude < 0.01f, priority=1]
+  → Move     [!IsSprint, priority=2]
+  → JumpStart [RequestJump, priority=10]
+  → Death    [IsDead, priority=100]
+
+JumpStart:
+  → JumpAir  [Always, priority=0]  // 动画播放时自动转换
+  → Death    [IsDead, priority=100]
+
+JumpAir:
+  → JumpEnd  [IsGrounded && Velocity.y <= 0, priority=0]  // 落地检测
+  → Death    [IsDead, priority=100]
+
+JumpEnd:
+  → Idle     [Always, priority=1]
+  → Move     [MoveDir.sqrMagnitude > 0.01f, priority=2]
+  → Sprint   [MoveDir.sqrMagnitude > 0.01f && IsSprint, priority=3]
+
+Death:
+  (无转换)
+```
+
+#### BaseFSM 特性
+
+- **状态锁定:** `LockState()` 可锁定状态，阻止自动转换
+- **强制同步:** 锁定时强制同步到 Animator
+- **事件:** `OnStateChanged` 状态变化通知
+
+### 2.2 AttackFSM — 攻击状态机
+
+管理普通攻击连击和技能释放，驱动 Attack Layer 动画。
+
+#### 状态定义 (AttackState)
+
+| 值 | 状态 | 描述 |
+|----|------|------|
+| 0 | Idle | 空闲 |
+| 1 | Attack1 | 普通攻击第一击 |
+| 2 | Attack2 | 普通攻击第二击 (连击) |
+| 3 | SkillQ | 技能Q (空中可用) |
+| 4 | SkillR | 技能R (仅地面) |
+
+#### 攻击流程
+
+```
+普通攻击 (鼠标左键):
+  Attack1 → (5帧后可连击) → Attack2 → Idle
+
+技能Q (Q键):
+  Idle/Attack1/Attack2 → SkillQ → Idle
+
+技能R (R键, 仅地面):
+  Idle/Attack1/Attack2 → SkillR → Idle
+```
+
+#### AttackFSM 特性
+
+- **连击窗口:** 5帧后可输入下一击
+- **技能可中断:** 普攻可被技能Q/R中断
+- **事件:** `OnAttackCompleted`, `OnSkillCompleted`, `OnSkillOrAttackEnded`
+
+### 2.3 输入映射
+
+| 按键 | 输入方法 | 行为 |
+|------|----------|------|
+| 鼠标左键 | RequestNormalAttack() | 普通攻击 (Attack1↔Attack2 交替) |
+| Q | RequestSkillQ() | ���能Q，可空中释放 |
+| R | RequestSkillR() | 技能R，仅地面 |
+| Space | RequestJump() | 跳跃 |
+| Shift (按住) | IsSprint | 冲刺 |
 
 ---
 
-## 4. 角色控制器
+## 3. 数据结构
 
-### 4.1 CharacterController（物理/移动）
+### 3.1 CharacterData
 
-纯 C# 类，驱动 CharacterData 更新。
+```csharp
+struct CharacterData
+{
+    Vector3 Position;
+    Quaternion Rotation;
+    Vector3 Velocity;
+    Vector3 MoveDir;           // 世界空间移动方向
+    bool IsGrounded;          // 是否着地
+    float VerticalVelocity;   // 垂直速度
+    BaseState BaseState;      // 基础状态
+    AttackState AttackState;  // 攻击状态
+    bool IsSprint;            // 冲刺中
+    bool IsDead;              // 死亡标记
+    bool RequestJump;         // 跳跃请求
+}
+```
+
+### 3.2 MoveCommand
+
+```csharp
+struct MoveCommand
+{
+    Vector3 MoveDir;      // 世界空间方向
+    float Speed;          // 当前速度
+    Quaternion Rotation;  // 目标朝向
+    bool IsSprint;        // 冲刺标记
+}
+```
+
+---
+
+## 4. 动画系统
+
+### 4.1 AnimationDriver
+
+统一管理 Animator 参数，是 FSM 与 Animator 之间的桥梁。
+
+#### 参数定义
+
+| 参数 | 类型 | 驱动对象 |
+|------|------|----------|
+| BaseState | Int | Base Layer 状态 |
+| AttackState | Int | Attack Layer 状态 |
+| IsJumping | Bool | 跳跃中标记 |
+| IsHit | Bool | 受击标记 |
+| Attack | Trigger | 触发普攻 |
+| SkillQ | Trigger | 触发技能Q |
+| SkillR | Trigger | 触发技能R |
+| Hit | Trigger | 触发受击 |
+
+#### 动画层
+
+| 层索引 | 层名 | Avatar Mask | 说明 |
+|--------|------|-------------|------|
+| 0 | Base | - | 移动/跳跃动画 |
+| 1 | Attack | AnimLayer.mask | 上半身普攻/技能 |
+| 2 | Hit | - | 受击动画 |
+
+### 4.2 StateMachineBehaviour
+
+| 类 | 挂载 | 触发条件 | 回调 |
+|----|------|----------|------|
+| BaseStateBehaviour | JumpEnd | normalizedTime ≥ 0.9 | OnAnimationCompleted("JumpEnd") |
+| AttackStateBehaviour | Attack1/2, SkillQ/R | normalizedTime ≥ 0.8 | OnAnimationCompleted(stateName) |
+| HitStateBehaviour | Hit | - | OnHitCompleted |
+
+### 4.3 动画播放策略
+
+| 场景 | 方式 |
+|------|------|
+| 基础状态变化 | `SetInteger(BaseState, value)` → Animator Controller 转换 |
+| 跳跃阶段变化 | `SetInteger(BaseState, value)` → 触发 Base Layer 转换 |
+| 攻击/技能 | `SetInteger(AttackState, value)` → 触发 Attack Layer 转换 |
+
+---
+
+## 5. 角色控制器
+
+### 5.1 CharacterController
+
+纯 C# 类，处理物理和状态控制。
 
 #### 参数
 
@@ -217,130 +236,161 @@ AttackStateBehaviour (normalizedTime≥0.8) → OnAttackCompletedEvent(index)
 | Gravity | -30f | 重力加速度 |
 | JumpForce | 12f | 跳跃初速度 |
 
-#### Update() 每帧流程
-
-```
-1. 应用水平移动 (MoveCommand.MoveDir × Speed)
-2. 检测地面 (GroundDetector → CharacterController.isGrounded)
-3. 走下悬崖检测 (wasGrounded && !isGrounded → velocity.y = 0)
-4. JumpPhase.Start → Air (同帧转换)
-5. 空中物理 (velocity.y += Gravity * dt)
-6. 着地检测 (isGrounded && velocity.y ≤ 0 → JumpPhase.End, _stateLocked=true)
-6.5 跳跃安全超时 (_stateLocked > 3秒 → 强制 FinishJump())
-7. 非锁定状态 → 更新移动/静止状态
-8. 同步数据到 CharacterData
-```
-
-#### 关键状态控制
-
-| 方法 | 作用 |
-|------|------|
-| RequestJump() | 跳跃: JumpPhase→Start, velocity.y=JumpForce |
-| FinishJump() | 跳跃结束: JumpPhase→None, _stateLocked=false |
-| AbortJump() | 中断跳跃: 重置为 Idle |
-| ApplyDeath() | 死亡: State→Death, 清除跳跃状态 |
-
-### 4.2 GroundDetector
-
-- 直接使用 `CharacterController.isGrounded`
-- 依赖 Unity 的 `Move()` 调用后更新
-
-### 4.3 CharacterData（数据结构）
-
-```csharp
-struct CharacterData {
-    Vector3 Position;
-    Quaternion Rotation;
-    Vector3 Velocity;
-    CharacterState State;        // enum: Idle=0 ~ Death=7
-    bool IsGrounded;
-    float VerticalVelocity;
-    JumpPhase JumpPhase;         // enum: None=0, Start=1, Air=2, End=3
-    bool ComboWindowActive;
-    bool IsSprint;
-}
-```
-
-### 4.4 CharacterAnimationDriver（动画驱动）
-
-纯 C# 类，响应式读取 CharacterData，驱动 Animator。
-
-#### 驱动策略
-
-| 场景 | 驱动方式 |
-|------|----------|
-| 跳跃阶段变化 | `Animator.Play("JumpX", 0, 0f)` 直接进入 |
-| 普通状态变化 | `SetInteger(State, value)` 通过转换 |
-| 攻击/技能 | `Animator.Play("AttackX", 1, 0f)` 直接进入 |
-| ForceSync 安全网 | 每帧检查 Animator 状态，不匹配时用 Play 强制修正 |
-
 #### Update() 流程
 
 ```
-1. 死亡检测 (State==Death 且非上帧) → 最高优先级
-2. JumpPhase 变化 → OnJumpPhaseChanged() → Animator.Play()
-3. 非跳跃 + State 变化 → OnStateChanged() → SetInteger()
-4. ForceSync() — 每帧强制同步 Animator 参数
+1. 死亡检测 → 返回
+2. 眩晕检测 → 只处理重力
+3. 设置 RequestJump 标记
+4. 应用水平移动 (MoveCommand.MoveDir × Speed)
+5. 地面检测
+6. 走下悬崖检测 (wasGrounded && !isGrounded → velocity.y = 0)
+7. 跳跃请求处理
+8. 重力应用
+9. 跳跃阶段转换 (Start→Air→End)
+10. 基础状态更新 (Idle/Move/Sprint)
+11. 数据同步到 CharacterData
+12. 护盾/状态更新
+```
+
+#### 适配器模式
+
+CharacterController 通过适配器集成其他系统：
+
+| 适配器 | 职责 |
+|--------|------|
+| CharacterStatsAdapter | 属性系统 (血量等) |
+| ShieldSystemAdapter | 护盾系统 |
+| PhysicsSystemAdapter | 物理系统 |
+| StatusControllerAdapter | 状态系统 (眩晕等) |
+
+#### 公共方法
+
+| 方法 | 说明 |
+|------|------|
+| RequestJump() | 请求跳跃 |
+| FinishJump() | 完成跳跃 |
+| ApplyDeath() | 应用死亡 |
+| TakeDamage(damage, type) | 应用伤害 |
+| Heal(amount) | 治疗 |
+| LockRotation | 技能期间锁定旋转 |
+
+---
+
+## 6. 相机系统
+
+### 6.1 ThirdPersonCameraController
+
+纯 C# 类，非 MonoBehaviour。
+
+#### 参数
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| Distance | 5.0f | 相机距离 |
+| Height | 2.0f | 高度偏移 |
+| PositionDamping | 5.0f | 位置平滑系数 |
+| RotationDamping | 8.0f | 旋转平滑系数 |
+| MinPitch | -30f | 最小俯仰角 |
+| MaxPitch | 60f | 最大俯仰角 |
+| MouseSensitivityX/Y | 2.0f | 鼠标灵敏度 |
+
+#### 工作原理
+
+1. 鼠标移动 → HandleRotationInput() → 更新角度
+2. 球坐标计算目标位置
+3. Lerp 平滑跟随
+4. Slerp 平滑看向角色
+
+---
+
+## 7. 输入系统
+
+### 7.1 架构
+
+```
+InputManager
+  ├── KeyboardInputAdapter (WASD + 鼠标)
+  └── JoystickInputAdapter (手柄，未使用)
+
+  ├── GetMoveCommand(cameraForward) → MoveCommand
+  ├── GetCameraRotationInput() → Vector2
+  └── 单帧事件: IsJumpPressed / IsNormalAttackPressed / IsSkillQPressed / IsSkillRPressed
+```
+
+### 7.2 输入转换
+
+```
+WASD → GetAxisRaw → 标准化 Vector3
+     → ConvertToWorldDirection(cameraForward)
+     → 输出世界空间 MoveDir + Rotation
 ```
 
 ---
 
-## 5. 输入系统
+## 8. 网络同步
 
-### 5.1 架构
+### 8.1 NetworkPrediction
 
-```
-IInputAdapter (接口)
-  ├── KeyboardInputAdapter  (WASD + 鼠标)
-  └── JoystickInputAdapter  (手柄，文件存在但未使用)
-
-InputManager
-  ├── 持有 IInputAdapter 实例
-  ├── GetMoveCommand(cameraForward) → MoveCommand
-  ├── GetCameraRotationInput() → Vector2
-  └── 单帧事件: IsJumpPressed / IsAttackPressed / IsSkill2Pressed / IsSkill3Pressed
-```
-
-### 5.2 MoveCommand
+客户端预测与服务端校验。
 
 ```csharp
-struct MoveCommand {
-    Vector3 MoveDir;      // 世界空间方向（已转换）
-    float Speed;
-    Quaternion Rotation;  // 目标朝向
-    long Timestamp;       // 网络预测用
-    uint Sequence;        // 序列号
-    bool IsSprint;
+class NetworkPrediction
+{
+    // 预测帧记录
+    void RecordPredictedFrame(sequence, position, rotation)
+
+    // 服务端校验
+    bool ValidateAndCorrect(serverSeq, serverPos, serverRot,
+                            out correctedPos, out correctedRot)
 }
 ```
 
-### 5.3 输入转换
+### 8.2 MovementPolicy
 
+移动策略接口，支持本地和网络模式。
+
+```csharp
+interface IMovementPolicy
+{
+    void Update(MoveCommand command);
+    void ApplyServerCorrection(position, rotation);
+}
+
+// 本地模式
+class LocalMovementPolicy : IMovementPolicy
+
+// 预测模式
+class PredictionMovementPolicy : IMovementPolicy
 ```
-WASD → GetAxisRaw(Horizontal/Vertical) → 标准化 Vector3
-     → ConvertToWorldDirection(input, cameraForward)
-     → 以相机水平朝向为基准旋转输入方向
-     → 输出世界空间 MoveDir + 目标 Rotation
-```
+
+### 8.3 NetworkBridge
+
+网络桥接，待与 AOT 层 KCP 集成。
 
 ---
 
-## 6. 模块关系图
+## 9. 模块关系图
 
 ```
-Sys3CEntry (MonoBehaviour, 绑定在角色 GameObject)
+Sys3CEntry
   │
-  ├── InputManager ──→ MoveCommand + 事件检测
+  ├── InputManager ──→ MoveCommand
   │     └── KeyboardInputAdapter
   │
-  ├── CharacterController ──→ CharacterData (物理/状态)
-  │     └── GroundDetector
+  ├── CharacterController ──→ CharacterData
+  │     ├── GroundDetector
+  │     └── 适配器 (Stats/Shield/Physics/Status)
   │
-  ├── CharacterAnimationDriver ──→ Animator (读 Data, 驱动动画)
+  ├── FSMManager ──→ BaseFSM + AttackFSM
+  │     └── StateTransitionTable
   │
-  ├── ThirdPersonCameraController ──→ Camera Transform
+  ├── AnimationDriver ──→ Animator
   │
-  └── NetworkBridge / NetworkPrediction / PositionInterpolator (预留)
+  ├── ThirdPersonCameraController ──→ Camera
+  │
+  └── MovementPolicy (Local/Prediction)
+        └── NetworkBridge (待集成)
 ```
 
 ### 数据流
@@ -349,45 +399,95 @@ Sys3CEntry (MonoBehaviour, 绑定在角色 GameObject)
 每帧:
   InputManager.Update()
     ↓
-  相机旋转输入 → CameraController.HandleRotationInput()
+  MoveCommand → MovementPolicy.Update()
     ↓
-  MoveCommand → CharacterController.Update(command) → CharacterData 更新
+  CharacterController.Update(command) → CharacterData 更新
     ↓
-  CharacterData → CharacterAnimationDriver.Update(data) → Animator 更新
+  FSMManager.Update() → BaseFSM + AttackFSM
     ↓
-  CameraController.Update() → 相机位置/旋转更新
-```
-
-### 事件流
-
-```
-CharacterStateBehaviour.OnJumpEndCompletedEvent
-  → Sys3CEntry.OnJumpEndCompletedHandler()
-  → CharacterController.FinishJump()
-
-AttackStateBehaviour.OnAttackCompletedEvent
-  → Sys3CEntry.OnAttackCompletedHandler()
-  → CharacterAnimationDriver.TryComboNext()
-
-CharacterController.OnLanded
-  → Sys3CEntry.OnCharacterLanded() (预留特效/音效)
+  AnimationDriver.SetXxx() → Animator 参数更新
+    ↓
+  CameraController.Update() → 相机跟随
 ```
 
 ---
 
-## 7. 文件清单
+## 10. 文件清单
 
 | 文件 | 类型 | 职责 |
 |------|------|------|
+| **FSM** | | |
+| FSMManager.cs | 协调者 | 管理 BaseFSM + AttackFSM |
+| BaseFSM.cs | 状态机 | 基础移动/跳跃状态管理 |
+| AttackFSM.cs | 状态机 | 攻击/技能状态管理 |
+| StateTransitionTable.cs | 配置 | 外部化状态转换规则 |
+| States/IState.cs | 接口 | 状态接口定义 |
+| States/BaseStates.cs | 实现 | 基础状态类 (预留) |
+| **Character** | | |
+| CharacterController.cs | 控制器 | 物理/移动/状态控制 |
+| CharacterData.cs | 数据 | 角色数据结构 |
+| CharacterAdapters.cs | 适配器 | 属性/护盾/物理/状态适配 |
+| GroundDetector.cs | 组件 | 地面检测 |
+| **Animation** | | |
+| AnimationDriver.cs | 驱动 | Animator 参数管理 |
+| StateBehaviours/BaseStateBehaviour.cs | SMB | 跳跃完成检测 |
+| StateBehaviours/AttackStateBehaviour.cs | SMB | 攻击完成检测 |
+| StateBehaviours/HitStateBehaviour.cs | SMB | 受击完成检测 |
+| HitManager.cs | 管理 | 受击管理 |
+| **Input** | | |
+| InputManager.cs | 管理器 | 输入管理/命令转换 |
+| KeyboardInputAdapter.cs | 适配器 | 键盘输入 |
+| JoystickInputAdapter.cs | 适配器 | 手柄输入 |
+| **Network** | | |
+| NetworkPrediction.cs | 预测 | 客户端预测 |
+| NetworkBridge.cs | 桥接 | 网络桥接 (待集成) |
+| PositionInterpolator.cs | 插值 | 位置插值 |
+| MovementPolicy.cs | 策略 | 移动策略接口 |
+| **Camera** | | |
+| ThirdPersonCameraController.cs | 控制器 | 第三人称相机 |
+| **Skill** | | |
+| SkillConfig.cs | 配置 | 技能配置 |
+| SkillDefs.cs | 定义 | 技能定义 |
+| SkillRegistry.cs | 注册 | 技能注册表 |
+| SkillCoordinatorBridge.cs | 桥接 | 技能协调桥接 |
+| BuffData.cs | 数据 | Buff 数据 |
+| **Entry** | | |
 | Sys3CEntry.cs | MonoBehaviour | 入口，绑定所有模块 |
-| CharacterController.cs | 纯 C# | 物理/移动/状态控制 |
-| CharacterAnimationDriver.cs | 纯 C# | 响应式动画驱动 |
-| CharacterData.cs | 数据定义 | CharacterState/JumpPhase/CharacterData/MoveCommand |
-| CharacterStateBehaviour.cs | StateMachineBehaviour | JumpEnd 完成检测 |
-| AttackStateBehaviour.cs | StateMachineBehaviour | 攻击完成检测 |
-| GroundDetector.cs | 纯 C# | 地面检测 |
-| InputManager.cs | 纯 C# | 输入管理/命令转换 |
-| KeyboardInputAdapter.cs | 纯 C# | 键盘输入适配器 |
-| ThirdPersonCameraController.cs | 纯 C# | 第三人称相机 |
-| Character3C.controller | Animator Controller | FSM 定义 |
-| AnimLayer.mask | Avatar Mask | 攻击层上半身遮罩 |
+
+---
+
+## 11. 与设计文档差异
+
+### 11.1 已实现 vs 原始设计
+
+| 设计项 | 状态 | 说明 |
+|--------|------|------|
+| 状态机架构 | ✅ | 从 Animator 参数改为双 FSM |
+| 状态转换表 | ✅ | 外部化转换规则 |
+| 攻击连击 | ✅ | AttackFSM 实现 |
+| 跳跃系统 | ✅ | 完整实现 |
+| 适配器模式 | ✅ | CharacterController 集成其他系统 |
+| 相机跟随 | ✅ | ThirdPersonCameraController |
+| 网络预测 | ⚠️ | 框架就绪，待 AOT 集成 |
+| 其他玩家插值 | ⚠️ | PositionInterpolator 就绪 |
+
+### 11.2 待集成项
+
+- AOT 层 KCP 网络集成
+- 其他玩家位置同步
+- 碰撞/受击反馈 (HitManager 框架)
+
+---
+
+## 12. 附录：Animator Controller 参数
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| BaseState | Int | 基础状态 (0-6) |
+| AttackState | Int | 攻击状态 (0-4) |
+| IsJumping | Bool | 跳跃中标记 |
+| IsHit | Bool | 受击中标记 |
+| Attack | Trigger | 普攻触发 |
+| SkillQ | Trigger | 技能Q触发 |
+| SkillR | Trigger | 技能R触发 |
+| Hit | Trigger | 受击触发 |

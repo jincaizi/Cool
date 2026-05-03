@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Network;
+using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Sys3C.Character
 {
@@ -24,8 +25,80 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public event Action OnLanded;
         public event Action OnDeath;
 
+        /// <summary>
+        /// 锁定旋转（技能播放时使用）
+        /// </summary>
+        public bool LockRotation { get; set; }
+
         public CharacterData Data => _data;
         public bool IsGrounded => _groundDetector.IsGrounded();
+        public Transform Transform => _transform;
+
+        // 适配器引用
+        private CharacterStatsAdapter _statsAdapter;
+        private ShieldSystemAdapter _shieldSystemAdapter;
+        private PhysicsSystemAdapter _physicsSystemAdapter;
+        private StatusControllerAdapter _statusControllerAdapter;
+
+        /// <summary>
+        /// 角色属性适配器
+        /// </summary>
+        public CharacterStatsAdapter StatsAdapter
+        {
+            get
+            {
+                if (_statsAdapter == null)
+                    _statsAdapter = new CharacterStatsAdapter();
+                return _statsAdapter;
+            }
+        }
+
+        /// <summary>
+        /// 护盾系统适配器
+        /// </summary>
+        public ShieldSystemAdapter ShieldSystemAdapter
+        {
+            get
+            {
+                if (_shieldSystemAdapter == null)
+                    _shieldSystemAdapter = new ShieldSystemAdapter();
+                return _shieldSystemAdapter;
+            }
+        }
+
+        /// <summary>
+        /// 物理系统适配器
+        /// </summary>
+        public PhysicsSystemAdapter PhysicsSystemAdapter
+        {
+            get
+            {
+                if (_physicsSystemAdapter == null)
+                    _physicsSystemAdapter = new PhysicsSystemAdapter(this);
+                return _physicsSystemAdapter;
+            }
+        }
+
+        /// <summary>
+        /// 状态控制器适配器
+        /// </summary>
+        public StatusControllerAdapter StatusControllerAdapter
+        {
+            get
+            {
+                if (_statusControllerAdapter == null)
+                    _statusControllerAdapter = new StatusControllerAdapter();
+                return _statusControllerAdapter;
+            }
+        }
+
+        /// <summary>
+        /// 设置基础状态
+        /// </summary>
+        public void SetBaseState(BaseState state)
+        {
+            _data.BaseState = state;
+        }
 
         // Network integration
         private NetworkPrediction _prediction;
@@ -89,6 +162,20 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 return;
             }
 
+            // 检查眩晕状态
+            if (StatusControllerAdapter.IsStunned)
+            {
+                // 眩晕中只处理重力
+                _velocity.y += Gravity * Time.deltaTime;
+                _velocity.y = Mathf.Max(_velocity.y, -50f);
+                Vector3 yMove = Vector3.up * _velocity.y * Time.deltaTime;
+                _controller.Move(yMove);
+
+                _data.Position = _transform.position;
+                _data.Rotation = _transform.rotation;
+                return;
+            }
+
             // 设置 RequestJump 标记
             _data.RequestJump = _jumpRequested;
 
@@ -114,7 +201,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
             {
                 _velocity.y = JumpForce;
                 _jumpRequested = false;
-                _data.BaseState = BaseState.JumpStart;
+                SetBaseState(BaseState.JumpStart);
                 OnJumpRequested?.Invoke();
             }
 
@@ -146,7 +233,11 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.IsSprint = command.IsSprint;
             _data.MoveDir = command.MoveDir;
 
-            // 9. 网络预测（暂时禁用，等AOT层实现）
+            // 9. 更新护盾和状态
+            _shieldSystemAdapter?.Update(Time.deltaTime);
+            _statusControllerAdapter?.Update(Time.deltaTime);
+
+            // 10. 网络预测（暂时禁用，等AOT层实现）
             // if (_prediction != null && _bridge != null)
             // {
             //     _prediction.RecordPredictedFrame(_currentSequence, _data.Position, _data.Rotation);
@@ -168,13 +259,13 @@ namespace Hotfix.GameSystems.Sys3C.Character
         {
             if (_data.BaseState == BaseState.JumpStart)
             {
-                _data.BaseState = BaseState.JumpAir;
+                SetBaseState(BaseState.JumpAir);
             }
             else if (_data.BaseState == BaseState.JumpAir)
             {
                 if (_data.IsGrounded && _velocity.y <= 0)
                 {
-                    _data.BaseState = BaseState.JumpEnd;
+                    SetBaseState(BaseState.JumpEnd);
                     _velocity.y = 0f;
                     OnLanded?.Invoke();
                 }
@@ -189,11 +280,15 @@ namespace Hotfix.GameSystems.Sys3C.Character
             {
                 if (command.MoveDir.sqrMagnitude > 0.01f)
                 {
-                    _transform.rotation = Quaternion.Slerp(
-                        _transform.rotation,
-                        command.Rotation,
-                        RotationSpeed * Time.deltaTime
-                    );
+                    // 技能播放期间不更新朝向，让角色保持动画朝向
+                    if (!LockRotation)
+                    {
+                        _transform.rotation = Quaternion.Slerp(
+                            _transform.rotation,
+                            command.Rotation,
+                            RotationSpeed * Time.deltaTime
+                        );
+                    }
 
                     if (command.IsSprint)
                         _data.BaseState = BaseState.Sprint;
@@ -227,6 +322,45 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
             _data.Position = position;
             _data.Rotation = rotation;
+        }
+
+        /// <summary>
+        /// 应用伤害
+        /// </summary>
+        public void TakeDamage(float damage, DamageType damageType)
+        {
+            // 先检查护盾
+            float actualDamage = damage;
+            if (_shieldSystemAdapter != null)
+            {
+                float absorbed = _shieldSystemAdapter.AbsorbDamage(damage);
+                actualDamage = damage - absorbed;
+            }
+
+            // 应用伤害到属性
+            if (actualDamage > 0)
+            {
+                float currentHealth = StatsAdapter.GetAttribute(AttributeType.Health);
+                StatsAdapter.SetBaseAttribute(AttributeType.Health, Mathf.Max(0, currentHealth - actualDamage));
+
+                Debug.Log($"[CharacterController] TakeDamage: {actualDamage} (absorbed: {damage - actualDamage})");
+
+                // 检查死亡
+                if (StatsAdapter.GetAttribute(AttributeType.Health) <= 0)
+                {
+                    ApplyDeath();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 治疗
+        /// </summary>
+        public void Heal(float amount)
+        {
+            float currentHealth = StatsAdapter.GetAttribute(AttributeType.Health);
+            float maxHealth = StatsAdapter.GetMaxHealth();
+            StatsAdapter.SetBaseAttribute(AttributeType.Health, Mathf.Min(maxHealth, currentHealth + amount));
         }
     }
 }

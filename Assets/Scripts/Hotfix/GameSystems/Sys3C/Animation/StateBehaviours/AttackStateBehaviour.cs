@@ -44,27 +44,17 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
                 Debug.Log("[AttackBehaviour] Combo unlocked at frame " + _framesInState);
             }
 
-            if (stateInfo.shortNameHash == HASH_Attack1)
-            {
-                if (stateInfo.normalizedTime >= 0.9f)
-                {
-                    Debug.Log("[AttackBehaviour] Attack1 completed");
-                    _onAnimationCompleted?.Invoke("Attack1");
-                }
-            }
-            else if (stateInfo.shortNameHash == HASH_Attack2)
-            {
-                if (stateInfo.normalizedTime >= 0.9f)
-                {
-                    Debug.Log("[AttackBehaviour] Attack2 completed");
-                    _onAnimationCompleted?.Invoke("Attack2");
-                }
-            }
+            // 不在这里触发完成回调，让OnStateExit来处理
         }
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            Debug.Log("[AttackBehaviour] " + stateInfo.shortNameHash + " exited");
+            // 只在真正离开攻击状态时触发完成回调
+            if (stateInfo.shortNameHash == HASH_Attack1 || stateInfo.shortNameHash == HASH_Attack2)
+            {
+                Debug.Log("[AttackBehaviour] " + stateInfo.shortNameHash + " exited");
+                _onAnimationCompleted?.Invoke(stateInfo.shortNameHash == HASH_Attack1 ? "Attack1" : "Attack2");
+            }
         }
     }
 }

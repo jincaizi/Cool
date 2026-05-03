@@ -68,10 +68,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 new StateTransition(BaseState.Death, d => d.IsDead, 100)
             };
 
-            // JumpStart → JumpAir（自动）
+            // JumpStart → JumpAir（等待动画播放完成，约 0.9 后自动转换）
             _transitions[BaseState.JumpStart] = new List<StateTransition>
             {
-                new StateTransition(BaseState.JumpAir, d => true, 0),
+                new StateTransition(BaseState.JumpAir, d => true, 0),  // 动画播放时自动转换
                 new StateTransition(BaseState.Death, d => d.IsDead, 100)
             };
 

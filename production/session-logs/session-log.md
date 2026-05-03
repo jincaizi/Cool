@@ -508,3 +508,1384 @@ f5cc113 docs: add 3C system completion implementation plan
 Assets/RpgDuo/Animator/Character3C.controller
 ---
 
+## Session End: 20260430_083755
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+---
+
+## Session End: 20260430_085343
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_090443
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_091213
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_092139
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_092340
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_092653
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_092857
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_093518
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_102114
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+99d3367 refactor(editor): rewrite CreateCharacter3CController for new FSM architecture
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_143038
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_144913
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_145215
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_145514
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_155258
+### Commits
+86e000a fix(3c): camera follow and movement state sync
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_164336
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260430_165326
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260502_045544
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260502_045746
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260503_205643
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260503_205934
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260503_220910
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260503_223624
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_012146
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_012551
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_012954
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_013731
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_014142
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_014314
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_014724
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_015153
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_015412
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_015918
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_020044
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_020252
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_020340
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_020442
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_020557
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_020738
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_021205
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_021628
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_032858
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_041351
+### Commits
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_043539
+### Commits
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_045523
+### Commits
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Plugins/NuGet/Microsoft.CodeAnalysis.Analyzers.3.3.4.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.6.1.0/McpPlugin.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll
+Assets/Plugins/NuGet/com.IvanMurzak.McpPlugin.Common.6.1.0/McpPlugin.Common.dll.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0.meta
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll
+Assets/Plugins/NuGet/com.IvanMurzak.ReflectorNet.5.0.0/ReflectorNet.dll.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-claude-gen.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-pre.md.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+

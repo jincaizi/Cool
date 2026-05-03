@@ -23,10 +23,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public event Action OnAttackCompleted;
         public event Action OnSkillCompleted;
 
-        public FSMManager(Hotfix.GameSystems.Sys3C.Character.CharacterController characterController, Animator animator)
+        public FSMManager(Hotfix.GameSystems.Sys3C.Character.CharacterController characterController, Animator animator, AnimationDriver driver)
         {
             _characterController = characterController;
-            _driver = new AnimationDriver(animator);
+            _driver = driver;
 
             _transitionTable = new StateTransitionTable();
             _baseFSM = new BaseFSM(_driver, _transitionTable);
@@ -39,6 +39,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _baseFSM.OnStateChanged += HandleBaseStateChanged;
             _attackFSM.OnAttackCompleted += () => OnAttackCompleted?.Invoke();
             _attackFSM.OnSkillCompleted += () => OnSkillCompleted?.Invoke();
+            _attackFSM.OnSkillOrAttackEnded += UnlockRotation;
 
             BaseStateBehaviour.SetCallback(_driver, HandleAnimationCompleted);
             AttackStateBehaviour.SetCallback(_driver, HandleAnimationCompleted);
@@ -62,12 +63,36 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public void RequestSkillQ()
         {
+            _characterController.LockRotation = true;
             _attackFSM.RequestSkillQ();
         }
 
         public void RequestSkillR()
         {
+            _characterController.LockRotation = true;
             _attackFSM.RequestSkillR(_characterController.IsGrounded);
+        }
+
+        /// <summary>
+        /// 解锁角色旋转（技能结束后调用）
+        /// </summary>
+        public void UnlockRotation()
+        {
+            _characterController.LockRotation = false;
+        }
+
+        /// <summary>
+        /// 获取 AttackFSM 的技能可用性
+        /// </summary>
+        public bool CanPlaySkill => _attackFSM.CanPlaySkill;
+
+        /// <summary>
+        /// 通知技能层需要朝向相机方向（由 CharacterController 调用）
+        /// </summary>
+        public void UpdateSkillRotation(Vector3 cameraForward)
+        {
+            // 当处于攻击/技能状态时，不允许角色旋转
+            // 角色应该在技能动画播放期间保持朝向
         }
 
         public void TriggerHit()
@@ -76,6 +101,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _driver.TriggerHit();
             _driver.SetIsHit(true);
             _driver.SetHitLayerWeight(1f);
+        }
+
+        public void DebugLogStates()
+        {
+            Debug.Log($"[FSMManager] Debug: BaseState={_baseFSM.CurrentState}, AttackState={_attackFSM.CurrentState}");
         }
 
         private void HandleAnimationCompleted(string stateName)
@@ -92,6 +122,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 case "Attack2":
                 case "SkillQ":
                 case "SkillR":
+                    // 先重置所有 trigger，再调用 OnAnimationCompleted
+                    // 这样可以防止 trigger 仍然激活导致动画循环播放
+                    _driver.ResetAttackTrigger();
+                    _driver.ResetSkillQTrigger();
+                    _driver.ResetSkillRTrigger();
                     _attackFSM.OnAnimationCompleted(stateName);
                     break;
             }

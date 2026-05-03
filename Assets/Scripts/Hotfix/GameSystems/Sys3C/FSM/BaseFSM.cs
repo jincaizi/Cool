@@ -37,7 +37,14 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             // 使用 CharacterData.BaseState 作为当前状态
             var currentDataState = data.BaseState;
 
-            var target = _table.Evaluate(currentDataState, data);
+            // 同步内部状态到 data.BaseState
+            if (_currentState != currentDataState && currentDataState != BaseState.Idle)
+            {
+                // 外部修改了 BaseState（如跳跃），同步到内部状态
+                TransitionTo(currentDataState);
+            }
+
+            var target = _table.Evaluate(_currentState, data);
             if (target.HasValue && target.Value != _currentState)
             {
                 if (_table.CanEnter(target.Value, data))
@@ -86,6 +93,13 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
             OnStateChanged?.Invoke(target);
             UnityEngine.Debug.Log($"[BaseFSM] Transition: {_currentState}");
+        }
+
+        public void DebugSetState(BaseState state)
+        {
+            UnityEngine.Debug.Log($"[BaseFSM] DebugSetState: {state}");
+            _currentState = state;
+            _driver.SetBaseState(state);
         }
     }
 }

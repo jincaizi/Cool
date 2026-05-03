@@ -20,8 +20,14 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public event Action OnAttackCompleted;
         public event Action OnSkillCompleted;
+        public event Action OnSkillOrAttackEnded;
 
         public AttackState CurrentState => _currentState;
+
+        /// <summary>
+        /// 技能是否可以播放（不打断当前攻击）
+        /// </summary>
+        public bool CanPlaySkill => _currentState == AttackState.Idle;
 
         public AttackFSM(AnimationDriver driver)
         {
@@ -70,9 +76,12 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public void RequestSkillQ()
         {
-            if (_currentState == AttackState.Idle || CanInterrupt())
+            if (_currentState == AttackState.Idle || _currentState == AttackState.Attack1 || _currentState == AttackState.Attack2)
             {
                 _currentState = AttackState.SkillQ;
+                _comboCount = 0;
+                _framesInState = 0;
+                _comboUnlocked = false;
                 _driver.SetAttackState(_currentState);
                 _driver.TriggerSkillQ();
                 Debug.Log("[AttackFSM] RequestSkillQ");
@@ -83,9 +92,13 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         {
             if (!isGrounded) return;
 
-            if (_currentState == AttackState.Idle || CanInterrupt())
+            // 允许从普攻连击切换到技能R
+            if (_currentState == AttackState.Idle || _currentState == AttackState.Attack1 || _currentState == AttackState.Attack2)
             {
                 _currentState = AttackState.SkillR;
+                _comboCount = 0;
+                _framesInState = 0;
+                _comboUnlocked = false;
                 _driver.SetAttackState(_currentState);
                 _driver.TriggerSkillR();
                 Debug.Log("[AttackFSM] RequestSkillR");
@@ -100,11 +113,13 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 case "Attack2":
                     ReturnToIdle();
                     OnAttackCompleted?.Invoke();
+                    OnSkillOrAttackEnded?.Invoke();
                     break;
                 case "SkillQ":
                 case "SkillR":
                     ReturnToIdle();
                     OnSkillCompleted?.Invoke();
+                    OnSkillOrAttackEnded?.Invoke();
                     break;
             }
         }

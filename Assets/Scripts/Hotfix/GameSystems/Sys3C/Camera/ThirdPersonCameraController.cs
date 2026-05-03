@@ -28,11 +28,29 @@ namespace Hotfix.GameSystems.Sys3C.Camera
         private float _horizontalAngle;
         private float _verticalAngle = 20f;
 
+        private bool _anglesInitialized;
+
         private void Start()
         {
+            // 延迟初始化角度，等待 Target 被设置
+            _anglesInitialized = false;
+            _verticalAngle = 20f;
+        }
+
+        private void EnsureAnglesInitialized()
+        {
+            if (_anglesInitialized) return;
+
             if (Target != null)
             {
                 _horizontalAngle = Target.eulerAngles.y;
+                _anglesInitialized = true;
+            }
+            else
+            {
+                // 使用相机自身的旋转作为初始角度
+                _horizontalAngle = transform.eulerAngles.y;
+                _anglesInitialized = true;
             }
         }
 
@@ -56,6 +74,9 @@ namespace Hotfix.GameSystems.Sys3C.Camera
         public void Update()
         {
             if (Target == null) return;
+
+            // 确保角度已初始化
+            EnsureAnglesInitialized();
 
             // 计算目标位置（球坐标）
             Quaternion rotation = Quaternion.Euler(_verticalAngle, _horizontalAngle, 0f);
@@ -84,6 +105,27 @@ namespace Hotfix.GameSystems.Sys3C.Camera
         public Quaternion GetRotation()
         {
             return Quaternion.Euler(_verticalAngle, _horizontalAngle, 0f);
+        }
+
+        /// <summary>
+        /// 立即将相机对齐到目标位置（无平滑）
+        /// </summary>
+        public void SnapToTarget()
+        {
+            if (Target == null) return;
+
+            EnsureAnglesInitialized();
+
+            // 立即设置相机位置
+            Quaternion rotation = Quaternion.Euler(_verticalAngle, _horizontalAngle, 0f);
+            Vector3 offset = rotation * new Vector3(0f, 0f, -Distance);
+            offset.y = Height;
+
+            transform.position = Target.position + offset;
+
+            // 立即看向目标
+            Vector3 lookTarget = Target.position + Vector3.up * Height * 0.5f;
+            transform.rotation = Quaternion.LookRotation(lookTarget - transform.position);
         }
     }
 }

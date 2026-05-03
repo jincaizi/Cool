@@ -1,0 +1,10 @@
+{
+    "name": "Hotfix.GameSystems.Skills",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "versionDefines": [],
+    "noEngineReferences": false
+}

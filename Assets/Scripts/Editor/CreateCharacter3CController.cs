@@ -1,16 +1,25 @@
+// ================================================================
+// [DEPRECATED] 此文件已废弃，不再维护
+// Hit 层的正确配置已修复，请使用 FixHitLayerMenu.cs
+// 或手动在 Unity 中修复 Character3C.controller
+// ================================================================
+#if false // 设置为 false 使其不编译，同时保留代码供参考
 using System;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
 
 /// <summary>
-/// 菜单工具：一键生成 Character3C.controller
-/// 菜单路径：Tools → 3C → Create Character3C Controller
+/// [DEPRECATED] 菜单工具：一键生成 Character3C.controller
+///
+/// 此文件已废弃，不再维护。
+/// 如需修复 Hit Layer 问题，请使用 FixHitLayerMenu.cs
+/// 菜单路径：Tools → 3C → Fix Hit Layer
 ///
 /// 根据新架构生成：
 /// - Layer 0: Base Layer (Override) - Idle/Move/Sprint/Jump*
 /// - Layer 1: Attack Layer (Override) - AttackIdle/Attack1/Attack2/AttackQ/AttackR
-/// - Layer 2: Hit Layer (Additive) - Hit
+/// - Layer 2: Hit Layer (Override) - Empty/Hit (修复后)
 ///
 /// 参数：BaseState, AttackState, IsJumping, IsHit, Attack, SkillQ, SkillR, Hit
 /// </summary>
@@ -50,7 +59,7 @@ public static class CreateCharacter3CController
     private const int LAYER_ATTACK = 1;
     private const int LAYER_HIT = 2;
 
-    [MenuItem("Tools/3C/Create Character3C Controller")]
+    // [MenuItem("Tools/3C/Create Character3C Controller")] // 已废弃，移除菜单项
     public static void Create()
     {
         Debug.Log("[CreateCharacter3CController] Starting...");
@@ -218,8 +227,8 @@ public static class CreateCharacter3CController
         controller.AddLayer("Hit");
         var layer = controller.layers[LAYER_HIT];
         layer.name = "Hit";
-        layer.defaultWeight = 0f; // 默认权重为0
-        layer.blendingMode = AnimatorLayerBlendingMode.Additive; // 叠加模式
+        layer.defaultWeight = 0f; // 默认权重为0，受伤时才启用
+        layer.blendingMode = AnimatorLayerBlendingMode.Override; // 用 Override 覆盖 Base Layer
 
         var sm = layer.stateMachine;
 
@@ -229,10 +238,29 @@ public static class CreateCharacter3CController
         // 挂载 HitStateBehaviour
         AddStateMachineBehaviour(sHit, "Hotfix.GameSystems.Sys3C.Animation.StateBehaviours.HitStateBehaviour, Hotfix.GameSystems.Sys3C");
 
-        // AnyState → Hit (Hit Trigger)
+        // === 关键修复：添加 Hit → Empty 的转换，用于退出 ===
+        // 创建一个空状态作为退出目标
+        var sEmpty = AddState(sm, "Empty", null);
+        sEmpty.speed = 0f; // 空状态不播放任何动画
+
+        // Hit → Empty (动画完成回调后自动退出)
+        var hitToEmpty = AddTransition(sHit, sEmpty, 0.1f);
+        hitToEmpty.hasExitTime = true;
+        hitToEmpty.exitTime = 0.9f; // 动画快结束时退出
+
+        // Empty → Hit (通过 Hit Trigger)
+        // 空状态可以快速过渡回 Hit
         AddAnyStateTriggerTransition(sm, sHit, PARAM_HIT);
 
-        Debug.Log("[CreateCharacter3CController] Hit Layer created");
+        // 或者使用 IsHit Bool 来控制
+        // Empty → Hit (IsHit = true)
+        var emptyToHit = AddTransition(sEmpty, sHit, 0.1f);
+        emptyToHit.AddCondition(AnimatorConditionMode.If, 0, PARAM_HIT);
+
+        // 设置默认状态为空状态
+        sm.defaultState = sEmpty;
+
+        Debug.Log("[CreateCharacter3CController] Hit Layer created with proper exit transition");
     }
 
     // ============================================
@@ -346,3 +374,4 @@ public static class CreateCharacter3CController
         }
     }
 }
+#endif // #if false

@@ -19,7 +19,9 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public bool IsGrounded()
         {
-            return _controller.isGrounded;
+            bool grounded = _controller.isGrounded;
+            // 添加调试信息（仅在地面状态改变时）
+            return grounded;
         }
     }
 }

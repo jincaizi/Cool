@@ -1,19 +1,32 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Skills.Definition;
 
 namespace Hotfix.GameSystems.Sys3C.Skill
 {
     /// <summary>
     /// 技能注册表 — 管理技能配置和CD
+    /// 同时支持旧的SkillConfig和新技能系统的SkillData
     /// </summary>
     public class SkillRegistry
     {
+        // 旧系统
         private readonly Dictionary<string, SkillConfig> _skills = new Dictionary<string, SkillConfig>();
         private readonly Dictionary<string, float> _cooldowns = new Dictionary<string, float>();
 
+        // 新技能系统
+        private readonly Dictionary<int, SkillData> _skillDataMap = new Dictionary<int, SkillData>();
+
         /// <summary>
-        /// 注册技能配置
+        /// 技能数量
+        /// </summary>
+        public int SkillCount => _skillDataMap.Count + _skills.Count;
+
+        /// <summary>
+        /// 注册技能配置（旧系统）
         /// </summary>
         public void Register(SkillConfig config)
         {
@@ -40,7 +53,90 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         }
 
         /// <summary>
-        /// 检查技能是否可用
+        /// 注册新技能系统的SkillData
+        /// </summary>
+        public void RegisterSkillData(SkillData data)
+        {
+            if (data == null)
+            {
+                Debug.LogError("[SkillRegistry] Null SkillData");
+                return;
+            }
+
+            _skillDataMap[data.SkillId] = data;
+            Debug.Log($"[SkillRegistry] Registered SkillData: {data.SkillId} ({data.SkillName})");
+        }
+
+        /// <summary>
+        /// 注册多个SkillData
+        /// </summary>
+        public void RegisterSkillDataRange(IEnumerable<SkillData> skillDataList)
+        {
+            foreach (var data in skillDataList)
+            {
+                RegisterSkillData(data);
+            }
+        }
+
+        /// <summary>
+        /// 获取所有SkillData
+        /// </summary>
+        public IEnumerable<SkillData> GetAllSkills()
+        {
+            return _skillDataMap.Values;
+        }
+
+        /// <summary>
+        /// 获取指定ID的SkillData
+        /// </summary>
+        public SkillData GetSkillData(int skillId)
+        {
+            return _skillDataMap.TryGetValue(skillId, out var data) ? data : null;
+        }
+
+        /// <summary>
+        /// 获取基础攻击1的技能ID
+        /// </summary>
+        public int GetBasicAttack1Id()
+        {
+            foreach (var kvp in _skillDataMap)
+            {
+                if (kvp.Value.SkillType == Hotfix.GameSystems.Skills.Definition.SkillType.BasicAttack)
+                    return kvp.Key;
+            }
+            return 10001; // 默认值
+        }
+
+        /// <summary>
+        /// 获取技能Q的ID
+        /// </summary>
+        public int GetSkillQId()
+        {
+            foreach (var kvp in _skillDataMap)
+            {
+                if (kvp.Value.SkillType == Hotfix.GameSystems.Skills.Definition.SkillType.Special &&
+                    kvp.Key.ToString().EndsWith("001")) // SkillQ
+                    return kvp.Key;
+            }
+            return 20001; // 默认值
+        }
+
+        /// <summary>
+        /// 获取技能R的ID
+        /// </summary>
+        public int GetSkillRId()
+        {
+            foreach (var kvp in _skillDataMap)
+            {
+                if (kvp.Value.SkillType == Hotfix.GameSystems.Skills.Definition.SkillType.Special &&
+                    kvp.Key.ToString().EndsWith("002")) // SkillR
+                    return kvp.Key;
+            }
+            return 20002; // 默认值
+        }
+
+        /// <summary>
+        /// 检查技能是否可用（旧系统）
         /// </summary>
         public bool CanUse(string skillId, bool isGrounded)
         {
@@ -68,7 +164,7 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         }
 
         /// <summary>
-        /// 使用技能（开始CD）
+        /// 使用技能（旧系统 - 开始CD）
         /// </summary>
         public void Use(string skillId)
         {
@@ -87,7 +183,7 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         }
 
         /// <summary>
-        /// 获取技能配置
+        /// 获取技能配置（旧系统）
         /// </summary>
         public SkillConfig GetConfig(string skillId)
         {
@@ -107,11 +203,12 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         /// </summary>
         public void Update(float deltaTime)
         {
-            foreach (var key in _cooldowns.Keys)
+            // 更新旧系统CD
+            foreach (var skillId in _cooldowns.Keys.ToList())
             {
-                if (_cooldowns[key] > 0)
+                if (_cooldowns[skillId] > 0)
                 {
-                    _cooldowns[key] = Mathf.Max(0, _cooldowns[key] - deltaTime);
+                    _cooldowns[skillId] = Mathf.Max(0, _cooldowns[skillId] - deltaTime);
                 }
             }
         }
