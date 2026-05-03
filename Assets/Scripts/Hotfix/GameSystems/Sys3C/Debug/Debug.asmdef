@@ -1,0 +1,17 @@
+{
+    "name": "Hotfix.GameSystems.Sys3C.Debug",
+    "rootNamespace": "Hotfix.GameSystems.Sys3C.Debug",
+    "references": [
+        "Hotfix.GameSystems.Sys3C",
+        "Hotfix.GameSystems.Sys3C.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
