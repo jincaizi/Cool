@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Runtime;
+using SkillCoordinatorRuntime = Hotfix.GameSystems.Skills.Runtime.SkillCoordinator;
 
 namespace Hotfix.GameSystems.Sys3C.Network
 {
@@ -35,7 +36,7 @@ namespace Hotfix.GameSystems.Sys3C.Network
     /// </summary>
     public class SkillSyncComponent
     {
-        private SkillCoordinator _skillCoordinator;
+        private SkillCoordinatorRuntime _skillCoordinator;
         private INetworkClient _networkClient;
         private long _playerId;
         private float _lastSyncTime;

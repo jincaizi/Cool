@@ -1,5 +1,4 @@
 using UnityEngine;
-using Hotfix.GameSystems.Sys3C.FSM;
 
 namespace Hotfix.GameSystems.Sys3C.Core
 {
@@ -51,7 +50,7 @@ namespace Hotfix.GameSystems.Sys3C.Core
         /// <summary>
         /// 处理伤害
         /// </summary>
-        void HandleDamage(Core.Events.DamageEvent damage);
+        void HandleDamage(Events.DamageEvent damage);
 
         /// <summary>
         /// 处理死亡
@@ -77,10 +76,5 @@ namespace Hotfix.GameSystems.Sys3C.Core
         /// 获取当前状态
         /// </summary>
         string GetCurrentState(LayerType layer);
-
-        /// <summary>
-        /// 获取 HitFSM
-        /// </summary>
-        HitFSM HitFSM { get; }
     }
 }

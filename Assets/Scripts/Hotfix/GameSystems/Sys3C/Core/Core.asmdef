@@ -1,9 +1,7 @@
 {
     "name": "Hotfix.GameSystems.Sys3C.Core",
     "rootNamespace": "Hotfix.GameSystems.Sys3C.Core",
-    "references": [
-        "Hotfix.GameSystems.Sys3C"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Hotfix.GameSystems.Bag.Core;
 
 namespace Hotfix.GameSystems.Bag.Data
 {

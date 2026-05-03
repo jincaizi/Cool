@@ -68,7 +68,10 @@ namespace Hotfix.GameSystems.Sys3C.Skill
 
             // 创建Buff效果
             var effect = new BuffEffectData();
-            effect.Initialize(id, attribute, value, ModifierType.Flat);
+            effect.SetEffectId = id;
+            effect.SetAttributeToModify = attribute;
+            effect.SetValue = value;
+            effect.SetModifierType = ModifierType.Flat;
             buff._effect = effect;
 
             return buff;

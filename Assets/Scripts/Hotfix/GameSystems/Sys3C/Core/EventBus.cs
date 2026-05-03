@@ -109,7 +109,7 @@ namespace Hotfix.GameSystems.Sys3C.Core
                 {
                     try
                     {
-                        callback?.Invoke(evt);
+                        ((Action<IEvent>)callback)?.Invoke(evt);
                     }
                     catch (Exception ex)
                     {

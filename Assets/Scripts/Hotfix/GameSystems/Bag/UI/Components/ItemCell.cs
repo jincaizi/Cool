@@ -46,7 +46,7 @@ namespace Hotfix.GameSystems.Bag.UI.Components
 
             _emptyBg?.SetActive(false);
             _itemBg?.SetActive(true);
-            _lockIcon?.SetActive(item.IsLocked);
+            _lockIcon?.gameObject.SetActive(item.IsLocked);
 
             // 设置数量
             if (_countText != null)
@@ -78,7 +78,7 @@ namespace Hotfix.GameSystems.Bag.UI.Components
             CurrentItem = null;
             _emptyBg?.SetActive(true);
             _itemBg?.SetActive(false);
-            _lockIcon?.SetActive(false);
+            _lockIcon?.gameObject.SetActive(false);
 
             if (_countText != null)
                 _countText.gameObject.SetActive(false);

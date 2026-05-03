@@ -3,6 +3,7 @@ using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Character;
+using Core = Hotfix.GameSystems.Sys3C.Core;
 
 namespace Hotfix.GameSystems.Sys3C.FSM
 {
@@ -241,7 +242,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             TransitionTo(HitState.Death);
 
             // 发送死亡事件
-            EventBus.Emit(new DeathEvent());
+            Core.EventBus.Emit(new DeathEvent());
         }
 
         /// <summary>

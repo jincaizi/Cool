@@ -4,8 +4,7 @@
     "references": [
         "KcpNet",
         "Hotfix.GameSystems.Skills",
-        "Hotfix.GameSystems.Sys3C.Core",
-        "Hotfix.GameSystems.Sys3C.Debug"
+        "Hotfix.GameSystems.Sys3C.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

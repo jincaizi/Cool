@@ -4,9 +4,12 @@ using System.Linq;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
+using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Sys3C.Skill
 {
+    using Definition = Hotfix.GameSystems.Skills.Definition;
+
     /// <summary>
     /// 技能注册表 — 管理技能配置和CD
     /// 同时支持旧的SkillConfig和新技能系统的SkillData

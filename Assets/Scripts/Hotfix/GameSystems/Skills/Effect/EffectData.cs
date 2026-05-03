@@ -41,6 +41,7 @@ namespace Hotfix.GameSystems.Skills.Effect
 
         [SerializeField] protected string _effectId;
         public string EffectId => _effectId;
+        public string SetEffectId { set => _effectId = value; }
 
         [SerializeField] protected float _duration;
         public float Duration => _duration;

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using UnityInput = UnityEngine.Input;
 
 namespace Hotfix.GameSystems.Sys3C.Debug
 {
@@ -54,7 +55,7 @@ namespace Hotfix.GameSystems.Sys3C.Debug
         private void Update()
         {
             // 快捷键切换
-            if (Input.GetKeyDown(_toggleKey))
+            if (UnityInput.GetKeyDown(_toggleKey))
             {
                 Toggle();
             }
@@ -132,21 +133,19 @@ namespace Hotfix.GameSystems.Sys3C.Debug
             // 更新层状态
             if (_baseLayerText != null)
             {
-                var baseState = _coordinator.GetCurrentState(LayerType.Base);
-                var isLocked = _coordinator.IsLayerLocked(LayerType.Base);
-                _baseLayerText.text = $"Base: {baseState} {(isLocked ? "[LOCKED]" : "")}";
+                var baseState = _coordinator.ActiveLayer == LayerType.Base ? "Active" : "Inactive";
+                _baseLayerText.text = $"Base: {baseState}";
             }
 
             if (_attackLayerText != null)
             {
-                var attackState = _coordinator.GetCurrentState(LayerType.Attack);
-                var isLocked = _coordinator.IsLayerLocked(LayerType.Attack);
-                _attackLayerText.text = $"Attack: {attackState} {(isLocked ? "[LOCKED]" : "")}";
+                var attackState = _coordinator.ActiveLayer == LayerType.Attack ? "Active" : "Inactive";
+                _attackLayerText.text = $"Attack: {attackState}";
             }
 
             if (_hitLayerText != null)
             {
-                var hitState = _coordinator.GetCurrentState(LayerType.Hit);
+                var hitState = _coordinator.ActiveLayer == LayerType.Hit ? "Active" : "Inactive";
                 _hitLayerText.text = $"Hit: {hitState}";
             }
         }

@@ -1889,3 +1889,297 @@ production/session-logs/compaction-log.txt
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260504_050541
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+---
+
+## Session End: 20260504_052237
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_052523
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_053334
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_054058
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_054242
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_054627
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_055311
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_055957
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_060330
+### Commits
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_061303
+### Commits
+102b4e5 feat(3c-fsm): complete HitFSM, StateCoordinator improvements and refactoring
+84a3810 feat: add Bag system, FSMConfig, IStateCoordinator and DeathEvents
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260504_070436
+### Commits
+102b4e5 feat(3c-fsm): complete HitFSM, StateCoordinator improvements and refactoring
+84a3810 feat: add Bag system, FSMConfig, IStateCoordinator and DeathEvents
+d4dcd6d chore: merge all working changes
+a20d8a9 fix(3c-core): update StateCoordinator with HitFSM type
+0c515f5 feat(3c-hit): add HitFSM placeholder
+1a15190 feat(3c-debug): add DebugWindowManager
+46a2d70 feat(3c-debug): add StateLogger
+3231801 feat(3c-debug): add Debug module asmdef
+62b48f6 feat(3c-core): add StateCoordinator
+5ed225e feat(3c-core): add StatePriority
+32fcbe0 feat(3c-core): add EventBus implementation
+4bc759a feat(3c-core): add event type definitions
+bde6508 feat(3c-core): add IEvent interface and enums
+293213b feat(3c-core): add Core module asmdef
+f9c3086 docs: add 3C Core Module design spec
+### Uncommitted Changes
+Assets/Scripts/Editor/SkillConfigGenerator.cs
+Assets/Scripts/Hotfix/GameSystems/Bag/Core/Events/IBagEvent.cs
+Assets/Scripts/Hotfix/GameSystems/Bag/Data/ItemTemplate.cs
+Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/BagManager.cs
+Assets/Scripts/Hotfix/GameSystems/Bag/UI/BagPanel.cs
+Assets/Scripts/Hotfix/GameSystems/Bag/UI/Components/ItemCell.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Core.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/EventBus.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/IStateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/DebugWindowManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/StateLogger.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/BuffData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C.asmdef
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/fantasySpider/Materials/ground.mat
+Assets/fantasySpider/Materials/spider_01.mat
+Assets/fantasySpider/Materials/spider_black.mat
+Assets/fantasySpider/Materials/spider_black_Std.mat
+Assets/fantasySpider/fantasySpider.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+

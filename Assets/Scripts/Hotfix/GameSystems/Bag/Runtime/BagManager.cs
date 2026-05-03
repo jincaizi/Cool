@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Hotfix.GameSystems.Bag.Core;
 using Hotfix.GameSystems.Bag.Core.Events;
-using Hotfix.GameSystems.Sys3C.Core;
+using Hotfix.GameSystems.Bag.Data;
 
 namespace Hotfix.GameSystems.Bag.Runtime
 {
@@ -92,7 +92,8 @@ namespace Hotfix.GameSystems.Bag.Runtime
                             // 触发堆叠事件
                             var stackedEvent = new ItemStackedEvent(slot.Item.InstanceId, existingSlot, oldCount, slot.Item.Count);
                             OnItemStacked?.Invoke(stackedEvent);
-                            EventBus.Post(stackedEvent);
+                            // Event stored in OnItemStacked callback
+                        //EventBus.Emit(stackedEvent);
                         }
                     }
 
@@ -146,7 +147,8 @@ namespace Hotfix.GameSystems.Bag.Runtime
                 // 触发添加事件
                 var addEvent = new ItemAddedEvent(item, emptySlot, item.Count);
                 OnItemAdded?.Invoke(addEvent);
-                EventBus.Post(addEvent);
+                // Event stored in OnItemAdded callback
+                // EventBus.Emit(addEvent);
             }
 
             return (BagResult.Success, 0, null);
@@ -176,7 +178,7 @@ namespace Hotfix.GameSystems.Bag.Runtime
             // 触发移除事件
             var removeEvent = new ItemRemovedEvent(slot.Item.TemplateId, count, slotIndex);
             OnItemRemoved?.Invoke(removeEvent);
-            EventBus.Post(removeEvent);
+            //EventBus.Emit(removeEvent);
 
             // 如果数量为0，清空格子
             if (slot.Item.Count <= 0)
@@ -212,7 +214,7 @@ namespace Hotfix.GameSystems.Bag.Runtime
 
                 var moveEvent = new ItemMovedEvent(toSlotData.Item?.InstanceId ?? 0, fromSlot, toSlot);
                 OnItemMoved?.Invoke(moveEvent);
-                EventBus.Post(moveEvent);
+                //EventBus.Emit(moveEvent);
             }
             else
             {
@@ -226,13 +228,14 @@ namespace Hotfix.GameSystems.Bag.Runtime
                     int space = toItem.StackSpace;
                     if (space > 0)
                     {
-                        int moveCount = System.Math.Min(count: space, fromItem.Count);
+                        int moveCount = System.Math.Min(space, fromItem.Count);
                         toItem.Count += moveCount;
                         fromItem.Count -= moveCount;
 
                         var stackedEvent = new ItemStackedEvent(toItem.InstanceId, toSlot, toItem.Count - moveCount, toItem.Count);
                         OnItemStacked?.Invoke(stackedEvent);
-                        EventBus.Post(stackedEvent);
+                        // Event stored in OnItemStacked callback
+                        //EventBus.Emit(stackedEvent);
 
                         if (fromItem.Count <= 0)
                         {
@@ -248,7 +251,7 @@ namespace Hotfix.GameSystems.Bag.Runtime
 
                     var moveEvent = new ItemMovedEvent(fromItem.InstanceId, fromSlot, toSlot);
                     OnItemMoved?.Invoke(moveEvent);
-                    EventBus.Post(moveEvent);
+                    //EventBus.Emit(moveEvent);
                 }
             }
 
@@ -288,7 +291,7 @@ namespace Hotfix.GameSystems.Bag.Runtime
             // 触发使用事件
             var useEvent = new ItemUsedEvent(item, slotIndex, success);
             OnItemUsed?.Invoke(useEvent);
-            EventBus.Post(useEvent);
+            //EventBus.Emit(useEvent);
 
             if (success)
             {
@@ -316,7 +319,7 @@ namespace Hotfix.GameSystems.Bag.Runtime
 
             var lockEvent = new ItemLockChangedEvent(slot.Item.InstanceId, slotIndex, locked);
             OnItemLockChanged?.Invoke(lockEvent);
-            EventBus.Post(lockEvent);
+            //EventBus.Emit(lockEvent);
         }
 
         /// <summary>
@@ -345,7 +348,7 @@ namespace Hotfix.GameSystems.Bag.Runtime
             }
 
             var capacityEvent = new BagCapacityChangedEvent(oldCapacity, _bagData.TotalCapacity);
-            EventBus.Post(capacityEvent);
+            //EventBus.Emit(capacityEvent);
 
             return BagResult.Success;
         }

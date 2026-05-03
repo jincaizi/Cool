@@ -61,7 +61,7 @@ namespace Hotfix.GameSystems.Sys3C.Editor
                     }
                     currentPath = folderPath;
                 }
-                Debug.Log("[SkillConfigGenerator] Created folder: " + SKILLS_PATH);
+                UnityEngine.Debug.Log("[SkillConfigGenerator] Created folder: " + SKILLS_PATH);
             }
 
             // 创建 NormalAttack1
@@ -114,7 +114,7 @@ namespace Hotfix.GameSystems.Sys3C.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("[SkillConfigGenerator] All skill configs generated!");
+            UnityEngine.Debug.Log("[SkillConfigGenerator] All skill configs generated!");
             EditorUtility.DisplayDialog("完成", "所有技能配置已生成！", "确定");
         }
 
@@ -134,7 +134,7 @@ namespace Hotfix.GameSystems.Sys3C.Editor
             Skill.SkillConfig existing = AssetDatabase.LoadAssetAtPath<Skill.SkillConfig>(path);
             if (existing != null)
             {
-                Debug.Log($"[SkillConfigGenerator] Skill already exists: {skillId}, updating...");
+                UnityEngine.Debug.Log($"[SkillConfigGenerator] Skill already exists: {skillId}, updating...");
 
                 existing.SkillName = skillName;
                 existing.SkillId = skillId;
@@ -161,7 +161,7 @@ namespace Hotfix.GameSystems.Sys3C.Editor
             config.ComboFrameLock = comboFrameLock;
 
             AssetDatabase.CreateAsset(config, path);
-            Debug.Log($"[SkillConfigGenerator] Created: {path}");
+            UnityEngine.Debug.Log($"[SkillConfigGenerator] Created: {path}");
         }
 
         private static void DisplayExistingSkills()

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Effect;
+using Hotfix.GameSystems.Skills.Definition;
 
 namespace Hotfix.GameSystems.Sys3C.Character
 {

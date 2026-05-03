@@ -3,15 +3,15 @@ using UnityEngine.UI;
 using Hotfix.GameSystems.Bag.Runtime;
 using Hotfix.GameSystems.Bag.Data;
 using Hotfix.GameSystems.Bag.Core;
+using Hotfix.GameSystems.Bag.Core.Events;
 using Hotfix.GameSystems.Bag.UI.Components;
-using Hotfix.GameSystems.Sys3C.UI.Framework;
 
 namespace Hotfix.GameSystems.Bag.UI
 {
     /// <summary>
     /// 背包面板
     /// </summary>
-    public class BagPanel : UIPanel
+    public class BagPanel : MonoBehaviour
     {
         [Header("Bag Settings")]
         [SerializeField] private int _rowCount = BagData.DefaultRowCount;
@@ -33,10 +33,8 @@ namespace Hotfix.GameSystems.Bag.UI
         private ItemData _draggingItem;
         private int _draggingSlotIndex = -1;
 
-        protected override void OnAwake()
+        private void Awake()
         {
-            base.OnAwake();
-
             // 初始化格子
             InitializeGrid();
 
@@ -44,16 +42,14 @@ namespace Hotfix.GameSystems.Bag.UI
             RegisterEvents();
         }
 
-        protected override void OnShow()
+        private void OnEnable()
         {
-            base.OnShow();
             RefreshAllCells();
             UpdateSlotCount();
         }
 
-        protected override void OnHide()
+        private void OnDisable()
         {
-            base.OnHide();
             _tooltip?.Hide();
         }
 
@@ -231,12 +227,24 @@ namespace Hotfix.GameSystems.Bag.UI
 
         // ==================== 快捷键 ====================
 
-        protected override void Update()
-        {
-            base.Update();
+        private bool IsVisible => gameObject.activeSelf;
 
+        private void Show()
+        {
+            gameObject.SetActive(true);
+            RefreshAllCells();
+            UpdateSlotCount();
+        }
+
+        private void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
+        private void Update()
+        {
             // B键打开/关闭背包
-            if (Input.GetKeyDown(KeyCode.B))
+            if (UnityEngine.Input.GetKeyDown(KeyCode.B))
             {
                 if (IsVisible)
                     Hide();
@@ -245,7 +253,7 @@ namespace Hotfix.GameSystems.Bag.UI
             }
 
             // ESC关闭
-            if (Input.GetKeyDown(KeyCode.Escape) && IsVisible)
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Escape) && IsVisible)
             {
                 Hide();
             }

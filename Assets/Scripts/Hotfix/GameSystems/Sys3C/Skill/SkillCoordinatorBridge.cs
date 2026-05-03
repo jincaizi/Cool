@@ -4,11 +4,12 @@ using UnityEngine;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
-using Hotfix.GameSystems.Skills.Runtime;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.FSM;
 using Hotfix.GameSystems.Sys3C.Skill;
 using CharacterController = Hotfix.GameSystems.Sys3C.Character.CharacterController;
+using SkillCoordinatorRuntime = Hotfix.GameSystems.Skills.Runtime.SkillCoordinator;
+using SkillInput = global::Hotfix.GameSystems.Skills.Runtime.SkillInput;
 
 namespace Hotfix.GameSystems.Sys3C.Skill
 {
@@ -19,7 +20,7 @@ namespace Hotfix.GameSystems.Sys3C.Skill
     public class SkillCoordinatorBridge : IEffectTarget
     {
         private readonly CharacterController _characterController;
-        private readonly SkillCoordinator _skillCoordinator;
+        private readonly SkillCoordinatorRuntime _skillCoordinator;
         private readonly SkillRegistry _skillRegistry;
 
         // Buff系统
@@ -38,7 +39,7 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         Transform IEffectTarget.transform => _characterController.Transform;
 
         // 属性
-        public SkillCoordinator Coordinator => _skillCoordinator;
+        public SkillCoordinatorRuntime Coordinator => _skillCoordinator;
         public BuffHandler BuffHandler => _buffHandler;
         public bool IsCasting => _skillCoordinator.IsCasting;
         public bool IsSkillActive => _skillCoordinator.IsSkillActive;
@@ -49,7 +50,7 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         {
             _characterController = characterController;
             _skillRegistry = skillRegistry;
-            _skillCoordinator = new SkillCoordinator(this);
+            _skillCoordinator = new SkillCoordinatorRuntime(this);
             _buffHandler = new BuffHandler(this);
 
             // 注册所有技能

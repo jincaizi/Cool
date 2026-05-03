@@ -88,7 +88,7 @@ namespace Hotfix.GameSystems.Sys3C.Debug
         public static void Clear()
         {
             _logs.Clear();
-            Debug.Log("[StateLogger] Cleared");
+            UnityEngine.Debug.Log("[StateLogger] Cleared");
         }
 
         /// <summary>
@@ -103,11 +103,11 @@ namespace Hotfix.GameSystems.Sys3C.Debug
                 {
                     writer.WriteLine(log.ToString());
                 }
-                Debug.Log($"[StateLogger] Dumped {_logs.Count} entries to {path}");
+                UnityEngine.Debug.Log($"[StateLogger] Dumped {_logs.Count} entries to {path}");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[StateLogger] Failed to dump to file: {ex.Message}");
+                UnityEngine.Debug.LogError($"[StateLogger] Failed to dump to file: {ex.Message}");
             }
         }
 
@@ -126,7 +126,7 @@ namespace Hotfix.GameSystems.Sys3C.Debug
 
             _fileWriter = new StreamWriter(_logFilePath);
             _fileWriter.WriteLine("Timestamp,Level,Category,Message");
-            Debug.Log($"[StateLogger] Started file logging: {_logFilePath}");
+            UnityEngine.Debug.Log($"[StateLogger] Started file logging: {_logFilePath}");
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Hotfix.GameSystems.Sys3C.Debug
         {
             _fileWriter?.Close();
             _fileWriter = null;
-            Debug.Log("[StateLogger] Stopped file logging");
+            UnityEngine.Debug.Log("[StateLogger] Stopped file logging");
         }
 
         private static void AddLog(StateLogEntry entry)
@@ -154,16 +154,16 @@ namespace Hotfix.GameSystems.Sys3C.Debug
             switch (entry.Level)
             {
                 case LogLevel.Debug:
-                    Debug.Log(logMessage);
+                    UnityEngine.Debug.Log(logMessage);
                     break;
                 case LogLevel.Info:
-                    Debug.Log(logMessage);
+                    UnityEngine.Debug.Log(logMessage);
                     break;
                 case LogLevel.Warning:
-                    Debug.LogWarning(logMessage);
+                    UnityEngine.Debug.LogWarning(logMessage);
                     break;
                 case LogLevel.Error:
-                    Debug.LogError(logMessage);
+                    UnityEngine.Debug.LogError(logMessage);
                     break;
             }
 

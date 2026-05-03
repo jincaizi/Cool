@@ -42,8 +42,8 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _characterController = characterController;
             _driver = driver;
 
-            _transitionTable = new StateTransitionTable();
-            _baseFSM = new BaseFSM(_driver, _transitionTable);
+            var transitionTable = new StateTransitionTable();
+            _baseFSM = new BaseFSM(_driver, transitionTable);
             _attackFSM = new AttackFSM(_driver);
             _hitFSM = new HitFSM(_driver);
 
@@ -273,7 +273,5 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         {
             // 可扩展：通知其他系统
         }
-
-        private class StateTransitionTable { }
     }
 }
