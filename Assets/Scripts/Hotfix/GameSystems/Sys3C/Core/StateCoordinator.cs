@@ -13,7 +13,7 @@ namespace Hotfix.GameSystems.Sys3C.Core
     {
         private readonly BaseFSM _baseFSM;
         private readonly AttackFSM _attackFSM;
-        private object _hitFSM; // 暂时为 null，等 HitFSM 实现后完善
+        private HitFSM _hitFSM;
 
         private LayerType _activeLayer = LayerType.Base;
         private LayerType _lockedLayer = LayerType.Base;
@@ -32,7 +32,7 @@ namespace Hotfix.GameSystems.Sys3C.Core
         /// <summary>
         /// 初始化协调器
         /// </summary>
-        public void Initialize(object hitFSM)
+        public void Initialize(HitFSM hitFSM)
         {
             _hitFSM = hitFSM;
 
@@ -154,7 +154,7 @@ namespace Hotfix.GameSystems.Sys3C.Core
             if (layer == LayerType.Attack)
                 return (T)(object)_attackFSM.CurrentState;
             if (layer == LayerType.Hit && _hitFSM != null)
-                return default; // HitFSM 还未实现
+                return (T)(object)_hitFSM.CurrentState;
 
             return default;
         }
