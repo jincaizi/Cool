@@ -29,6 +29,17 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         /// </summary>
         public bool CanPlaySkill => _currentState == AttackState.Idle;
 
+        /// <summary>
+        /// 是否有霸体（某些技能有霸体帧）
+        /// </summary>
+        public bool HasSuperArmor => _currentState == AttackState.SkillR;
+
+        /// <summary>
+        /// 当前霸体剩余时间（秒）
+        /// </summary>
+        private float _superArmorTime = 0f;
+        public float SuperArmorRemaining => _superArmorTime;
+
         public AttackFSM(AnimationDriver driver)
         {
             _driver = driver;
@@ -37,6 +48,13 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public void Update(float deltaTime)
         {
+            // 更新霸体计时器
+            if (_superArmorTime > 0)
+            {
+                _superArmorTime -= deltaTime;
+                if (_superArmorTime < 0) _superArmorTime = 0;
+            }
+
             if (_currentState == AttackState.Idle)
             {
                 _comboCount = 0;
@@ -101,8 +119,20 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 _comboUnlocked = false;
                 _driver.SetAttackState(_currentState);
                 _driver.TriggerSkillR();
+
+                // 技能R有霸体
+                _superArmorTime = 0.5f;
+
                 Debug.Log("[AttackFSM] RequestSkillR");
             }
+        }
+
+        /// <summary>
+        /// 请求霸体（用于特定技能）
+        /// </summary>
+        public void RequestSuperArmor(float duration)
+        {
+            _superArmorTime = Mathf.Max(_superArmorTime, duration);
         }
 
         public void OnAnimationCompleted(string stateName)

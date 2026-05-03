@@ -43,7 +43,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public AttackState AttackState;
         public bool IsSprint;
         public bool IsDead;
-        public bool RequestJump;  // 新增：跳跃请求标记
+        public bool RequestJump;       // 跳跃请求标记
+        public bool HasLeftGround;     // 是否已离地（用于受击判定：地面受击 vs 空中受击）
     }
 
     /// <summary>

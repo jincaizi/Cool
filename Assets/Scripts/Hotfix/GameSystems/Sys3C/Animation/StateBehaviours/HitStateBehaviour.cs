@@ -1,11 +1,20 @@
 using System;
 using UnityEngine;
+using Hotfix.GameSystems.Sys3C.FSM;
 
 namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 {
     public class HitStateBehaviour : StateMachineBehaviour
     {
+        // 动画状态名称对应
         private static readonly int HASH_Hit = Animator.StringToHash("Hit");
+        private static readonly int HASH_Knockback = Animator.StringToHash("Knockback");
+        private static readonly int HASH_Launched = Animator.StringToHash("Launched");
+        private static readonly int HASH_Dizzy = Animator.StringToHash("Dizzy");
+        private static readonly int HASH_Down = Animator.StringToHash("Down");
+        private static readonly int HASH_GetUp = Animator.StringToHash("GetUp");
+        private static readonly int HASH_Death = Animator.StringToHash("Death");
+
         private static AnimationDriver _driver;
         private static Action<string> _onAnimationCompleted;
 
@@ -23,26 +32,32 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if (stateInfo.shortNameHash == HASH_Hit)
+            var stateName = stateInfo.shortNameHash;
+
+            if (stateName == HASH_Hit || stateName == HASH_Knockback ||
+                stateName == HASH_Launched || stateName == HASH_Dizzy ||
+                stateName == HASH_Down || stateName == HASH_GetUp ||
+                stateName == HASH_Death)
             {
                 _hasTriggeredHitComplete = false;
                 _lastNormalizedTime = 0f;
-                Debug.Log("[HitBehaviour] Hit entered");
+                Debug.Log($"[HitBehaviour] State entered: {stateInfo.shortName}");
             }
         }
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if (stateInfo.shortNameHash == HASH_Hit && !_hasTriggeredHitComplete)
+            var stateName = stateInfo.shortNameHash;
+
+            // 检查是否是受击相关状态
+            if (IsHitState(stateName) && !_hasTriggeredHitComplete)
             {
-                // 检测 normalizedTime 从低到高跨过 0.9 的那一刻
-                // 对于循环动画，normalizedTime 会从 0 变到 1 然后重置
-                // 我们只在 normalizedTime >= 0.9 且比上一帧高的时候触发
+                // 检测动画播放到末尾（normalizedTime >= 0.9）
                 if (stateInfo.normalizedTime >= 0.9f && stateInfo.normalizedTime > _lastNormalizedTime)
                 {
                     _hasTriggeredHitComplete = true;
-                    Debug.Log("[HitBehaviour] Hit completed, normalizedTime: " + stateInfo.normalizedTime);
-                    _onAnimationCompleted?.Invoke("Hit");
+                    Debug.Log($"[HitBehaviour] State completed: {stateInfo.shortName}");
+                    _onAnimationCompleted?.Invoke(stateInfo.shortName);
                 }
                 _lastNormalizedTime = stateInfo.normalizedTime;
             }
@@ -50,9 +65,19 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // Hit 动画结束后清理
-            _hasTriggeredHitComplete = false;
-            _lastNormalizedTime = 0f;
+            // 动画结束后清理
+            if (IsHitState(stateInfo.shortNameHash))
+            {
+                _hasTriggeredHitComplete = false;
+                _lastNormalizedTime = 0f;
+            }
+        }
+
+        private static bool IsHitState(int hash)
+        {
+            return hash == HASH_Hit || hash == HASH_Knockback ||
+                   hash == HASH_Launched || hash == HASH_Dizzy ||
+                   hash == HASH_Down || hash == HASH_GetUp;
         }
     }
 }

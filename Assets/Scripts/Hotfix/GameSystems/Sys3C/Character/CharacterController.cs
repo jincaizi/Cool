@@ -20,9 +20,11 @@ namespace Hotfix.GameSystems.Sys3C.Character
         private CharacterData _data;
         private Vector3 _velocity;
         private bool _jumpRequested;
+        private float _leftGroundTriggerTime = -1f; // LeftGround 事件触发时间
 
         public event Action OnJumpRequested;
         public event Action OnLanded;
+        public event Action OnLeftGround;  // 离开地面事件（用于受击判定）
         public event Action OnDeath;
 
         /// <summary>
@@ -39,6 +41,17 @@ namespace Hotfix.GameSystems.Sys3C.Character
         private ShieldSystemAdapter _shieldSystemAdapter;
         private PhysicsSystemAdapter _physicsSystemAdapter;
         private StatusControllerAdapter _statusControllerAdapter;
+
+        // StateCoordinator 引用（用于获取击退位移）
+        private Core.StateCoordinator _stateCoordinator;
+
+        /// <summary>
+        /// 设置状态协调器引用
+        /// </summary>
+        public void SetStateCoordinator(Core.StateCoordinator coordinator)
+        {
+            _stateCoordinator = coordinator;
+        }
 
         /// <summary>
         /// 角色属性适配器
@@ -155,62 +168,155 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
         public void Update(MoveCommand command)
         {
+            // 死亡状态：只同步位置
             if (_data.IsDead)
             {
-                _data.Position = _transform.position;
-                _data.Rotation = _transform.rotation;
+                SyncPositionAndRotation();
                 return;
             }
 
-            // 检查眩晕状态
+            // 眩晕状态：只处理重力
             if (StatusControllerAdapter.IsStunned)
             {
-                // 眩晕中只处理重力
-                _velocity.y += Gravity * Time.deltaTime;
-                _velocity.y = Mathf.Max(_velocity.y, -50f);
-                Vector3 yMove = Vector3.up * _velocity.y * Time.deltaTime;
-                _controller.Move(yMove);
-
-                _data.Position = _transform.position;
-                _data.Rotation = _transform.rotation;
+                UpdateStunnedGravity();
+                SyncPositionAndRotation();
                 return;
             }
 
-            // 设置 RequestJump 标记
+            // 设置跳跃请求标记
             _data.RequestJump = _jumpRequested;
 
             bool wasGrounded = _data.IsGrounded;
 
-            // 1. 应用水平移动
+            // 应用水平移动
+            ApplyHorizontalMovement(command);
+
+            // 检测地面状态
+            UpdateGroundDetection(wasGrounded);
+
+            // 处理跳跃请求
+            ProcessJumpRequest();
+
+            // 处理 LeftGround 触发
+            ProcessLeftGroundTrigger();
+
+            // 应用重力
+            ApplyGravity();
+
+            // 更新跳跃阶段
+            UpdateJumpPhase();
+
+            // 更新基础移动状态
+            UpdateBaseState(command);
+
+            // 同步数据
+            SyncDataAfterUpdate(command);
+
+            // 应用受击位移（击退/浮空）
+            ApplyHitDisplacement();
+        }
+
+        /// <summary>
+        /// 死亡状态处理：只同步位置
+        /// </summary>
+        private void SyncPositionAndRotation()
+        {
+            _data.Position = _transform.position;
+            _data.Rotation = _transform.rotation;
+        }
+
+        /// <summary>
+        /// 眩晕状态：只处理重力
+        /// </summary>
+        private void UpdateStunnedGravity()
+        {
+            _velocity.y += Gravity * Time.deltaTime;
+            _velocity.y = Mathf.Max(_velocity.y, -50f);
+            Vector3 yMove = Vector3.up * _velocity.y * Time.deltaTime;
+            _controller.Move(yMove);
+        }
+
+        /// <summary>
+        /// 应用水平移动
+        /// </summary>
+        private void ApplyHorizontalMovement(MoveCommand command)
+        {
             float currentSpeed = command.IsSprint ? SprintSpeed : MoveSpeed;
             Vector3 moveVelocity = command.MoveDir * currentSpeed;
             moveVelocity.y = _velocity.y;
             _controller.Move(moveVelocity * Time.deltaTime);
+        }
 
-            // 2. 检测地面
+        /// <summary>
+        /// 更新地面检测
+        /// </summary>
+        private void UpdateGroundDetection(bool wasGrounded)
+        {
             _data.IsGrounded = _groundDetector.IsGrounded();
 
-            // 3. 走下悬崖检测
-            if (wasGrounded && !_data.IsGrounded && _data.BaseState != BaseState.JumpStart && _data.BaseState != BaseState.JumpAir)
+            // 走下悬崖检测
+            if (wasGrounded && !_data.IsGrounded &&
+                _data.BaseState != BaseState.JumpStart &&
+                _data.BaseState != BaseState.JumpAir)
             {
                 _velocity.y = 0f;
             }
+        }
 
-            // 4. 处理跳跃请求
+        /// <summary>
+        /// 处理跳跃请求
+        /// </summary>
+        private void ProcessJumpRequest()
+        {
             if (_jumpRequested && _data.IsGrounded)
             {
                 _velocity.y = JumpForce;
                 _jumpRequested = false;
                 SetBaseState(BaseState.JumpStart);
                 OnJumpRequested?.Invoke();
+
+                // 延迟触发 LeftGround 事件（用于受击判定）
+                _leftGroundTriggerTime = Time.time + 0.1f;
+            }
+        }
+
+        /// <summary>
+        /// 处理 LeftGround 触发检测
+        /// </summary>
+        private void ProcessLeftGroundTrigger()
+        {
+            if (_leftGroundTriggerTime > 0 && Time.time >= _leftGroundTriggerTime)
+            {
+                if (_data.BaseState == BaseState.JumpStart || _data.BaseState == BaseState.JumpAir)
+                {
+                    _data.IsGrounded = false;
+                    _data.HasLeftGround = true;
+                    OnLeftGround?.Invoke();
+                    Debug.Log("[CharacterController] LeftGround event triggered");
+                }
+                _leftGroundTriggerTime = -1f;
             }
 
-            // 5. 应用重力
-            if (_data.BaseState == BaseState.JumpStart || _data.BaseState == BaseState.JumpAir || !_data.IsGrounded)
+            // 落地时重置 HasLeftGround
+            if (_data.IsGrounded && _data.HasLeftGround)
+            {
+                _data.HasLeftGround = false;
+            }
+        }
+
+        /// <summary>
+        /// 应用重力
+        /// </summary>
+        private void ApplyGravity()
+        {
+            bool isInAir = _data.BaseState == BaseState.JumpStart ||
+                          _data.BaseState == BaseState.JumpAir ||
+                          !_data.IsGrounded;
+
+            if (isInAir)
             {
                 _velocity.y += Gravity * Time.deltaTime;
                 _velocity.y = Mathf.Max(_velocity.y, -50f);
-
                 Vector3 yMove = Vector3.up * _velocity.y * Time.deltaTime;
                 _controller.Move(yMove);
             }
@@ -218,14 +324,13 @@ namespace Hotfix.GameSystems.Sys3C.Character
             {
                 _velocity.y = 0f;
             }
+        }
 
-            // 6. 跳跃阶段转换
-            UpdateJumpPhase();
-
-            // 7. 基础移动状态
-            UpdateBaseState(command, currentSpeed);
-
-            // 8. 同步数据
+        /// <summary>
+        /// 同步数据到 _data
+        /// </summary>
+        private void SyncDataAfterUpdate(MoveCommand command)
+        {
             _data.Position = _transform.position;
             _data.Rotation = _transform.rotation;
             _data.Velocity = _controller.velocity;
@@ -233,26 +338,24 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.IsSprint = command.IsSprint;
             _data.MoveDir = command.MoveDir;
 
-            // 9. 更新护盾和状态
+            // 更新护盾和状态
             _shieldSystemAdapter?.Update(Time.deltaTime);
             _statusControllerAdapter?.Update(Time.deltaTime);
+        }
 
-            // 10. 网络预测（暂时禁用，等AOT层实现）
-            // if (_prediction != null && _bridge != null)
-            // {
-            //     _prediction.RecordPredictedFrame(_currentSequence, _data.Position, _data.Rotation);
-            //     _bridge.SendInput(command, _currentSequence);
-            //
-            //     if (_bridge.HasServerUpdate(out var seq, out var pos, out var rot))
-            //     {
-            //         if (_prediction.ValidateAndCorrect(seq, pos, rot, out var corrected, out var correctedRot))
-            //         {
-            //             ApplyServerPosition(corrected.Position, correctedRot);
-            //         }
-            //     }
-            //
-            //     _currentSequence++;
-            // }
+        /// <summary>
+        /// 应用受击位移
+        /// </summary>
+        private void ApplyHitDisplacement()
+        {
+            if (_stateCoordinator == null) return;
+
+            var displacement = _stateCoordinator.GetKnockbackDisplacement();
+            if (displacement.sqrMagnitude > 0.001f)
+            {
+                _controller.Move(displacement);
+                _data.Position = _transform.position;
+            }
         }
 
         private void UpdateJumpPhase()
@@ -272,7 +375,10 @@ namespace Hotfix.GameSystems.Sys3C.Character
             }
         }
 
-        private void UpdateBaseState(MoveCommand command, float currentSpeed)
+        /// <summary>
+        /// 更新基础移动状态
+        /// </summary>
+        private void UpdateBaseState(MoveCommand command)
         {
             if (_data.BaseState == BaseState.Idle ||
                 _data.BaseState == BaseState.Move ||

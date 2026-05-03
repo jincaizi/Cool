@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Hotfix.GameSystems.Sys3C.Core.Events
 {
     /// <summary>
@@ -9,6 +11,10 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
         public int TargetId;
         public float Damage;
         public bool IsCritical;
+        public Vector3 HitDirection;
+        public float KnockbackForce;
+        public float LaunchForce;
+        public float StunDuration;
 
         public DamageEvent(int sourceId, int targetId, float damage, bool isCritical = false)
         {
@@ -16,6 +22,10 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
             TargetId = targetId;
             Damage = damage;
             IsCritical = isCritical;
+            HitDirection = Vector3.back;
+            KnockbackForce = 0f;
+            LaunchForce = 0f;
+            StunDuration = 0f;
         }
     }
 
@@ -31,21 +41,6 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
         {
             KnockbackForce = knockbackForce;
             HasSuperArmor = hasSuperArmor;
-        }
-    }
-
-    /// <summary>
-    /// 死亡事件
-    /// </summary>
-    public struct DeathEvent : IEvent
-    {
-        public int EntityId;
-        public int KillerId;
-
-        public DeathEvent(int entityId, int killerId = 0)
-        {
-            EntityId = entityId;
-            KillerId = killerId;
         }
     }
 }

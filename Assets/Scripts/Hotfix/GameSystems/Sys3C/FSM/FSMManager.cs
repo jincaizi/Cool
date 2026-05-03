@@ -3,12 +3,13 @@ using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Animation.StateBehaviours;
+using Hotfix.GameSystems.Sys3C.Core;
 
 namespace Hotfix.GameSystems.Sys3C.FSM
 {
     /// <summary>
-    /// FSM 协调者 — 管理 BaseFSM 和 AttackFSM
-    /// 只负责协调，不处理具体状态逻辑
+    /// FSM 协调者 — 管理 BaseFSM、AttackFSM 和 HitFSM
+    /// 通过 StateCoordinator 进行层间协调
     /// </summary>
     public class FSMManager
     {
@@ -17,11 +18,24 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         private readonly BaseFSM _baseFSM;
         private readonly AttackFSM _attackFSM;
-        private readonly StateTransitionTable _transitionTable;
+        private readonly HitFSM _hitFSM;
+        private readonly StateCoordinator _stateCoordinator;
 
         public event Action OnJumpEndCompleted;
         public event Action OnAttackCompleted;
         public event Action OnSkillCompleted;
+        public event Action OnHitCompleted;
+        public event Action OnDeath;
+
+        /// <summary>
+        /// 获取 StateCoordinator（供其他系统使用）
+        /// </summary>
+        public StateCoordinator Coordinator => _stateCoordinator;
+
+        /// <summary>
+        /// 获取 HitFSM
+        /// </summary>
+        public HitFSM HitFSM => _hitFSM;
 
         public FSMManager(Hotfix.GameSystems.Sys3C.Character.CharacterController characterController, Animator animator, AnimationDriver driver)
         {
@@ -31,21 +45,37 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _transitionTable = new StateTransitionTable();
             _baseFSM = new BaseFSM(_driver, _transitionTable);
             _attackFSM = new AttackFSM(_driver);
+            _hitFSM = new HitFSM(_driver);
 
+            // 创建 StateCoordinator 并初始化
+            _stateCoordinator = new StateCoordinator(_baseFSM, _attackFSM, _hitFSM);
+            _stateCoordinator.Initialize();
+
+            // 设置 CharacterController 的 StateCoordinator 引用
+            _characterController.SetStateCoordinator(_stateCoordinator);
+
+            // 订阅 CharacterController 事件
             _characterController.OnJumpRequested += HandleJumpRequested;
             _characterController.OnLanded += HandleLanded;
+            _characterController.OnLeftGround += HandleLeftGround;
             _characterController.OnDeath += HandleDeath;
 
+            // 订阅 FSM 事件
             _baseFSM.OnStateChanged += HandleBaseStateChanged;
             _attackFSM.OnAttackCompleted += () => OnAttackCompleted?.Invoke();
             _attackFSM.OnSkillCompleted += () => OnSkillCompleted?.Invoke();
             _attackFSM.OnSkillOrAttackEnded += UnlockRotation;
 
+            // 订阅 HitFSM 事件
+            _hitFSM.OnHitComplete += HandleHitComplete;
+            _hitFSM.OnDeathComplete += HandleDeathComplete;
+
+            // 设置 Animation Callbacks
             BaseStateBehaviour.SetCallback(_driver, HandleAnimationCompleted);
             AttackStateBehaviour.SetCallback(_driver, HandleAnimationCompleted);
-            HitStateBehaviour.SetCallback(_driver, HandleHitCompleted);
+            HitStateBehaviour.SetCallback(_driver, HandleHitAnimationCompleted);
 
-            Debug.Log("[FSMManager] Initialized");
+            Debug.Log("[FSMManager] Initialized with StateCoordinator");
         }
 
         public void Update(float deltaTime)
@@ -54,6 +84,64 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
             _baseFSM.Update(data, _attackFSM.CurrentState);
             _attackFSM.Update(deltaTime);
+            _stateCoordinator.Update(deltaTime);
+        }
+
+        /// <summary>
+        /// 请求普通攻击
+        /// </summary>
+        public bool TryAttack()
+        {
+            return _stateCoordinator.TryRequestAttack();
+        }
+
+        /// <summary>
+        /// 请求技能
+        /// </summary>
+        public bool TrySkill(int skillId, string skillName)
+        {
+            return _stateCoordinator.TryRequestSkill(skillId, skillName);
+        }
+
+        /// <summary>
+        /// 请求跳跃
+        /// </summary>
+        public bool TryJump()
+        {
+            return _stateCoordinator.TryRequestJump();
+        }
+
+        /// <summary>
+        /// 处理伤害（供外部系统调用）
+        /// </summary>
+        public void HandleDamage(int sourceId, float damage, Vector3 hitDirection,
+            float knockbackForce = 0, float launchForce = 0, float stunDuration = 0, bool isCritical = false)
+        {
+            var damageEvent = new Core.Events.DamageEvent(sourceId, 0, damage, isCritical)
+            {
+                HitDirection = hitDirection,
+                KnockbackForce = knockbackForce,
+                LaunchForce = launchForce,
+                StunDuration = stunDuration
+            };
+
+            _stateCoordinator.HandleDamage(damageEvent);
+        }
+
+        /// <summary>
+        /// 请求死亡
+        /// </summary>
+        public void RequestDeath()
+        {
+            _stateCoordinator.HandleDeath();
+        }
+
+        /// <summary>
+        /// 请求复活
+        /// </summary>
+        public void RequestResurrect()
+        {
+            _stateCoordinator.HandleResurrect();
         }
 
         public void RequestNormalAttack()
@@ -95,17 +183,24 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             // 角色应该在技能动画播放期间保持朝向
         }
 
-        public void TriggerHit()
+        /// <summary>
+        /// 手动触发受击（用于测试或 AI）
+        /// </summary>
+        public void TriggerHit(float knockbackForce = 0f)
         {
-            _attackFSM.ForceIdle();
-            _driver.TriggerHit();
-            _driver.SetIsHit(true);
-            _driver.SetHitLayerWeight(1f);
+            var hitData = new HitData
+            {
+                Damage = 10,
+                KnockbackForce = knockbackForce,
+                HitDirection = Vector3.back
+            };
+            _hitFSM.EnterHit(hitData);
+            _stateCoordinator.SetActiveLayer(LayerType.Hit);
         }
 
         public void DebugLogStates()
         {
-            Debug.Log($"[FSMManager] Debug: BaseState={_baseFSM.CurrentState}, AttackState={_attackFSM.CurrentState}");
+            Debug.Log($"[FSMManager] {_stateCoordinator.GetActiveStateDescription()}");
         }
 
         private void HandleAnimationCompleted(string stateName)
@@ -132,10 +227,24 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             }
         }
 
-        private void HandleHitCompleted(string stateName)
+        private void HandleHitAnimationCompleted(string stateName)
         {
+            Debug.Log($"[FSMManager] HitAnimationCompleted: {stateName}");
+            _hitFSM.OnAnimationEnd(stateName);
+        }
+
+        private void HandleHitComplete()
+        {
+            Debug.Log("[FSMManager] Hit complete");
             _driver.SetIsHit(false);
             _driver.SetHitLayerWeight(0f);
+            OnHitCompleted?.Invoke();
+        }
+
+        private void HandleDeathComplete()
+        {
+            Debug.Log("[FSMManager] Death complete, ready for resurrect");
+            OnDeath?.Invoke();
         }
 
         private void HandleJumpRequested()
@@ -148,16 +257,23 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             // 落地由 BaseFSM 检测
         }
 
+        private void HandleLeftGround()
+        {
+            Debug.Log("[FSMManager] LeftGround - character has left the ground");
+            // 可以在这里通知其他系统（如 AI、任务系统等）
+        }
+
         private void HandleDeath()
         {
             Debug.Log("[FSMManager] HandleDeath");
-            _baseFSM.LockState(BaseState.Death);
-            _attackFSM.ForceIdle();
+            _stateCoordinator.HandleDeath();
         }
 
         private void HandleBaseStateChanged(BaseState state)
         {
             // 可扩展：通知其他系统
         }
+
+        private class StateTransitionTable { }
     }
 }

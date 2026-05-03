@@ -5,6 +5,8 @@ using Hotfix.GameSystems.Sys3C.Skill;
 using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Camera;
+using Hotfix.GameSystems.Bag;
+using Hotfix.GameSystems.Bag.Runtime;
 
 namespace Hotfix.GameSystems.Sys3C
 {
@@ -26,6 +28,9 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void Start()
         {
+            // 初始化背包系统
+            InitBagSystem();
+
             // 验证组件引用
             if (CharacterController == null)
             {
@@ -72,8 +77,36 @@ namespace Hotfix.GameSystems.Sys3C
             Debug.Log("[Sys3CEntry] Initialized");
         }
 
+        private void InitBagSystem()
+        {
+            BagManager.Instance.Initialize();
+            ItemFactory.RegisterTestTemplates();
+            Debug.Log("[Bag] Bag system initialized");
+        }
+
         private void Update()
         {
+            // 测试：按1添加物品
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                BagManager.Instance.AddItem(10001, 1); // 生命药水
+                Debug.Log("[Bag] Added health potion");
+            }
+
+            // 测试：按2添加装备
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                BagManager.Instance.AddItem(20001, 1); // 铁剑
+                Debug.Log("[Bag] Added weapon");
+            }
+
+            // 测试：按3添加材料
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                BagManager.Instance.AddItem(30001, 10); // 铁矿石
+                Debug.Log("[Bag] Added materials");
+            }
+
             // 每帧更新输入管理器
             _inputManager.Update();
 
