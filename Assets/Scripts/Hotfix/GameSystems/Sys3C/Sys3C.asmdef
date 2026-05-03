@@ -2,7 +2,9 @@
     "name": "Hotfix.GameSystems.Sys3C",
     "rootNamespace": "",
     "references": [
-        "KcpNet"
+        "KcpNet",
+        "Hotfix.GameSystems.Skills",
+        "Hotfix.GameSystems.Sys3C.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
