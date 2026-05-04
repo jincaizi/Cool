@@ -25,7 +25,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
         Attack1 = 1,
         Attack2 = 2,
         SkillQ = 3,
-        SkillR = 4
+        SkillR_Start = 4,  // 新增：技能R起手阶段
+        SkillR_Loop = 5    // 新增：技能R持续循环阶段
     }
 
     /// <summary>
