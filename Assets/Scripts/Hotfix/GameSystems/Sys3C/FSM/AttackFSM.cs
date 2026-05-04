@@ -18,6 +18,15 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         private int _framesInState;
         private bool _comboUnlocked;
 
+        // 技能状态超时保护
+        private float _skillStateTimer;
+        private const float SKILL_TIMEOUT = 3f; // 技能最大持续时间
+
+        // 技能R持续状态
+        private float _skillRDuration;  // 当前持续时间
+        private float _skillRMaxDuration = 3f;  // 最大持续时间（可配置）
+        private bool _isSkillRActive;  // 是否正在持续技能中
+
         public event Action OnAttackCompleted;
         public event Action OnSkillCompleted;
         public event Action OnSkillOrAttackEnded;
@@ -55,11 +64,36 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 if (_superArmorTime < 0) _superArmorTime = 0;
             }
 
+            // 更新技能状态计时器
+            if (_currentState == AttackState.SkillQ || _currentState == AttackState.SkillR_Start || _currentState == AttackState.SkillR_Loop)
+            {
+                _skillStateTimer += deltaTime;
+                if (_skillStateTimer >= SKILL_TIMEOUT)
+                {
+                    Debug.LogWarning("[AttackFSM] Skill state timeout, forcing return to idle");
+                    ReturnToIdle();
+                }
+            }
+
+            // 更新技能R持续时间检测
+            if (_isSkillRActive && _currentState == AttackState.SkillR_Loop)
+            {
+                _skillRDuration += deltaTime;
+                if (_skillRMaxDuration > 0 && _skillRDuration >= _skillRMaxDuration)
+                {
+                    Debug.Log($"[AttackFSM] SkillR duration reached max ({_skillRMaxDuration}s), canceling");
+                    CancelSkillR();
+                }
+            }
+
             if (_currentState == AttackState.Idle)
             {
                 _comboCount = 0;
                 _framesInState = 0;
                 _comboUnlocked = false;
+                _skillStateTimer = 0f;
+                _skillRDuration = 0f;
+                _isSkillRActive = false;
             }
             else
             {
@@ -94,6 +128,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public void RequestSkillQ()
         {
+            Debug.Log($"[AttackFSM] RequestSkillQ called, current state: {_currentState}");
             if (_currentState == AttackState.Idle || _currentState == AttackState.Attack1 || _currentState == AttackState.Attack2)
             {
                 _currentState = AttackState.SkillQ;
@@ -102,28 +137,35 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 _comboUnlocked = false;
                 _driver.SetAttackState(_currentState);
                 _driver.TriggerSkillQ();
-                Debug.Log("[AttackFSM] RequestSkillQ");
+                Debug.Log("[AttackFSM] RequestSkillQ: changed to SkillQ");
+            }
+            else
+            {
+                Debug.Log("[AttackFSM] RequestSkillQ blocked, current state is not Attack1/2");
             }
         }
 
         public void RequestSkillR(bool isGrounded)
         {
+            Debug.Log($"[AttackFSM] RequestSkillR called, current state: {_currentState}, isGrounded: {isGrounded}");
             if (!isGrounded) return;
 
-            // 允许从普攻连击切换到技能R
             if (_currentState == AttackState.Idle || _currentState == AttackState.Attack1 || _currentState == AttackState.Attack2)
             {
-                _currentState = AttackState.SkillR;
+                _currentState = AttackState.SkillR_Start;
                 _comboCount = 0;
                 _framesInState = 0;
                 _comboUnlocked = false;
+                _isSkillRActive = true;
+                _skillRDuration = 0f;
                 _driver.SetAttackState(_currentState);
                 _driver.TriggerSkillR();
 
-                // 技能R有霸体
-                _superArmorTime = 0.5f;
-
-                Debug.Log("[AttackFSM] RequestSkillR");
+                Debug.Log("[AttackFSM] RequestSkillR: changed to SkillR_Start");
+            }
+            else
+            {
+                Debug.Log("[AttackFSM] RequestSkillR blocked, current state is not Idle/Attack1/2");
             }
         }
 
@@ -133,6 +175,44 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public void RequestSuperArmor(float duration)
         {
             _superArmorTime = Mathf.Max(_superArmorTime, duration);
+        }
+
+        /// <summary>
+        /// 设置技能R的最大持续时间
+        /// </summary>
+        public void SetSkillRMaxDuration(float duration)
+        {
+            _skillRMaxDuration = duration;
+        }
+
+        /// <summary>
+        /// 取消技能R（松开按键或超时）
+        /// </summary>
+        public void CancelSkillR()
+        {
+            if (_currentState == AttackState.SkillR_Start || _currentState == AttackState.SkillR_Loop)
+            {
+                Debug.Log("[AttackFSM] CancelSkillR called");
+                _isSkillRActive = false;
+                _skillRDuration = 0f;
+                ReturnToIdle();
+                OnSkillCompleted?.Invoke();
+                OnSkillOrAttackEnded?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// SkillR起手动画完成，进入循环阶段
+        /// </summary>
+        public void OnSkillRStartCompleted()
+        {
+            if (_currentState == AttackState.SkillR_Start && _isSkillRActive)
+            {
+                Debug.Log("[AttackFSM] SkillR_Start completed, entering SkillR_Loop");
+                _currentState = AttackState.SkillR_Loop;
+                _driver.SetAttackState(_currentState);
+                // SkillR_Loop动画会循环播放
+            }
         }
 
         public void OnAnimationCompleted(string stateName)
@@ -145,11 +225,17 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     OnAttackCompleted?.Invoke();
                     OnSkillOrAttackEnded?.Invoke();
                     break;
-                case "SkillQ":
-                case "SkillR":
+                case "AttackQ":  // 动画状态在Animator中叫 AttackQ
                     ReturnToIdle();
                     OnSkillCompleted?.Invoke();
                     OnSkillOrAttackEnded?.Invoke();
+                    break;
+                case "SkillR_Start":
+                    // 起手动画完成，进入循环阶段
+                    OnSkillRStartCompleted();
+                    break;
+                case "SkillR_Loop":
+                    // Loop状态下不应触发完成，除非被取消
                     break;
             }
         }
