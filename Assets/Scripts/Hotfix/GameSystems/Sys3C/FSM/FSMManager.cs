@@ -162,6 +162,14 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         }
 
         /// <summary>
+        /// 取消技能R（由Sys3CEntry调用）
+        /// </summary>
+        public void CancelSkillR()
+        {
+            _attackFSM.CancelSkillR();
+        }
+
+        /// <summary>
         /// 解锁角色旋转（技能结束后调用）
         /// </summary>
         public void UnlockRotation()
@@ -205,7 +213,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         private void HandleAnimationCompleted(string stateName)
         {
-            Debug.Log($"[FSMManager] AnimationCompleted: {stateName}");
+            Debug.Log($"[FSMManager] AnimationCompleted: {stateName}, AttackFSM state: {_attackFSM.CurrentState}");
 
             switch (stateName)
             {
@@ -215,14 +223,22 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     break;
                 case "Attack1":
                 case "Attack2":
-                case "SkillQ":
-                case "SkillR":
-                    // 先重置所有 trigger，再调用 OnAnimationCompleted
-                    // 这样可以防止 trigger 仍然激活导致动画循环播放
+                case "AttackQ":  // SkillQ 动画状态在Animator中叫 AttackQ
+                    // 重要：先调用 FSM 的 OnAnimationCompleted 将状态重置为 Idle
+                    // 这确保即使 OnStateExit 中的条件检查失败，FSM 状态也能正确恢复
+                    _attackFSM.OnAnimationCompleted(stateName);
+
+                    Debug.Log($"[FSMManager] After OnAnimationCompleted, AttackFSM state: {_attackFSM.CurrentState}");
+
+                    // 然后重置所有 triggers（防止下一帧动画循环播放）
                     _driver.ResetAttackTrigger();
                     _driver.ResetSkillQTrigger();
                     _driver.ResetSkillRTrigger();
+                    break;
+                case "SkillR_Start":
                     _attackFSM.OnAnimationCompleted(stateName);
+                    Debug.Log($"[FSMManager] After OnAnimationCompleted, AttackFSM state: {_attackFSM.CurrentState}");
+                    // 不重置SkillR trigger，保持状态
                     break;
             }
         }
