@@ -7,6 +7,9 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
     {
         private static readonly int HASH_Attack1 = Animator.StringToHash("Attack1");
         private static readonly int HASH_Attack2 = Animator.StringToHash("Attack2");
+        private static readonly int HASH_SkillQ = Animator.StringToHash("AttackQ");  // SkillQ在Animator中叫AttackQ
+        private static readonly int HASH_SkillR_Start = Animator.StringToHash("SkillR_Start");  // 新增
+        private static readonly int HASH_SkillR_Loop = Animator.StringToHash("SkillR_Loop");      // 新增
 
         private const int COMBO_FRAME_LOCK = 5;
         private const float COMBO_WINDOW_START = 0.3f;
@@ -24,36 +27,78 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
             _onAnimationCompleted = callback;
         }
 
+        private bool IsAttackState(AnimatorStateInfo stateInfo)
+        {
+            var hash = stateInfo.shortNameHash;
+            return hash == HASH_Attack1 || hash == HASH_Attack2 ||
+                   hash == HASH_SkillQ ||
+                   hash == HASH_SkillR_Start || hash == HASH_SkillR_Loop;
+        }
+
+        private string GetStateName(AnimatorStateInfo stateInfo)
+        {
+            var hash = stateInfo.shortNameHash;
+            if (hash == HASH_Attack1) return "Attack1";
+            if (hash == HASH_Attack2) return "Attack2";
+            if (hash == HASH_SkillQ) return "AttackQ";
+            if (hash == HASH_SkillR_Start) return "SkillR_Start";
+            if (hash == HASH_SkillR_Loop) return "SkillR_Loop";
+            return "Unknown";
+        }
+
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if (stateInfo.shortNameHash == HASH_Attack1 || stateInfo.shortNameHash == HASH_Attack2)
+            Debug.Log("[AttackBehaviour] OnStateEnter: hash=" + stateInfo.shortNameHash +
+                        ", name=" + stateInfo.shortNameHash.ToString() +
+                        ", HASH_SkillQ=" + HASH_SkillQ);
+
+            if (IsAttackState(stateInfo))
             {
                 _framesInState = 0;
                 _comboUnlocked = false;
-                Debug.Log("[AttackBehaviour] " + stateInfo.shortNameHash + " entered");
+                Debug.Log("[AttackBehaviour] " + GetStateName(stateInfo) + " entered");
             }
         }
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            _framesInState++;
-
-            if (!_comboUnlocked && _framesInState >= COMBO_FRAME_LOCK)
+            // 只对 Attack1/Attack2 处理连击逻辑
+            var hash = stateInfo.shortNameHash;
+            if (hash == HASH_Attack1 || hash == HASH_Attack2)
             {
-                _comboUnlocked = true;
-                Debug.Log("[AttackBehaviour] Combo unlocked at frame " + _framesInState);
+                _framesInState++;
+
+                if (!_comboUnlocked && _framesInState >= COMBO_FRAME_LOCK)
+                {
+                    _comboUnlocked = true;
+                    Debug.Log("[AttackBehaviour] Combo unlocked at frame " + _framesInState);
+                }
             }
 
-            // 不在这里触发完成回调，让OnStateExit来处理
+            // 检查动画是否接近完成（normalizedTime >= 0.95），防止循环播放问题
+            // SkillR_Loop是循环动画，不触发完成回调
+            if (IsAttackState(stateInfo) && stateInfo.normalizedTime >= 0.95f && stateInfo.normalizedTime < 1.1f)
+            {
+                var hash = stateInfo.shortNameHash;
+                if (hash == HASH_SkillR_Loop) return;  // SkillR_Loop不触发完成回调
+
+                string stateName = GetStateName(stateInfo);
+                Debug.Log($"[AttackBehaviour] {stateName} near completion, normalizedTime={stateInfo.normalizedTime}");
+
+                if (_onAnimationCompleted != null)
+                {
+                    _onAnimationCompleted.Invoke(stateName);
+                }
+            }
         }
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // 只在真正离开攻击状态时触发完成回调
-            if (stateInfo.shortNameHash == HASH_Attack1 || stateInfo.shortNameHash == HASH_Attack2)
+            // 处理所有攻击状态（普攻+技能）的退出
+            if (IsAttackState(stateInfo))
             {
-                Debug.Log("[AttackBehaviour] " + stateInfo.shortNameHash + " exited");
-                _onAnimationCompleted?.Invoke(stateInfo.shortNameHash == HASH_Attack1 ? "Attack1" : "Attack2");
+                Debug.Log("[AttackBehaviour] " + GetStateName(stateInfo) + " exited");
+                _onAnimationCompleted?.Invoke(GetStateName(stateInfo));
             }
         }
     }
