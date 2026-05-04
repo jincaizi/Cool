@@ -166,6 +166,14 @@ namespace Hotfix.GameSystems.Sys3C.Input
         }
 
         /// <summary>
+        /// 3技能释放（R键松开）- 用于持续技能取消
+        /// </summary>
+        public bool IsSkill3Released()
+        {
+            return UnityInput.GetKeyUp(KeyCode.R);
+        }
+
+        /// <summary>
         /// 是否正在冲刺
         /// </summary>
         public bool IsSprinting()
