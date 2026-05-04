@@ -21,6 +21,9 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         [Header("Usage Condition")]
         public bool CanUseInAir = true;    // 是否可空中使用
 
+        [Header("Duration Skill")]
+        public float MaxDuration = 3f;     // 最大持续时长（秒），0表示无限制
+
         [Header("Combo")]
         public float ComboWindowStart;     // 连击窗口开始（normalizedTime）
         public float ComboWindowEnd;       // 连击窗口结束（normalizedTime）
