@@ -122,6 +122,18 @@ namespace Hotfix.GameSystems.Sys3C
             {
                 TryUseSkill(SkillDefs.SkillR);
             }
+
+            // 技能R松开检测 - 取消持续技能
+            if (_inputManager.IsSkill3Released())
+            {
+                // 检查当前是否在SkillR_Loop状态
+                var state = _fsmManager.Coordinator?.GetActiveState();
+                if (state != null && state.Contains("SkillR_Loop"))
+                {
+                    Debug.Log("[Sys3CEntry] R key released, canceling SkillR");
+                    _fsmManager.CancelSkillR();
+                }
+            }
         }
 
         private void TryUseSkill(string skillId)
@@ -147,6 +159,17 @@ namespace Hotfix.GameSystems.Sys3C
             // 从 Resources 加载技能配置
             var configs = Resources.LoadAll<Skill.SkillConfig>("Skills");
             _skillRegistry.RegisterRange(configs);
+
+            // 设置技能R的最大持续时间
+            foreach (var config in configs)
+            {
+                if (config.SkillId == SkillDefs.SkillR)
+                {
+                    _fsmManager.SetSkillRMaxDuration(config.MaxDuration);
+                    Debug.Log($"[Sys3CEntry] SkillR MaxDuration set to {config.MaxDuration}s");
+                    break;
+                }
+            }
 
             Debug.Log("[Sys3CEntry] Registered " + configs.Length + " skills");
         }
