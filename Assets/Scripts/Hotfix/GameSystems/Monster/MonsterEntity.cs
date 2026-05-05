@@ -37,6 +37,8 @@ namespace Hotfix.GameSystems.Monster
             _movement = new MonsterMovement(NavAgent, transform, config);
             _ai = new MonsterAI(_movement, _stats, Animator, transform, config, spawnPoint);
 
+            HitZone.Init(this);
+
             _stats.OnDeath += HandleDeath;
             _stats.OnHPChanged += (cur, max) => { /* HUD update hook */ };
 
@@ -46,6 +48,14 @@ namespace Hotfix.GameSystems.Monster
                 if (AttackHitbox != null && config.AttackDamage != null)
                     AttackHitbox.Activate(config.AttackDamage);
             };
+        }
+
+        public void TakeDamageFromHitbox(AttackHitboxData hitboxData, Vector3 hitDirection)
+        {
+            if (_stats.IsDead || hitboxData == null || hitboxData.DamageData == null) return;
+
+            _stats.TakeDamage(hitboxData.DamageData);
+            _ai.NotifyHit(hitboxData.DamageData, hitDirection);
         }
 
         private void Update()
@@ -66,7 +76,6 @@ namespace Hotfix.GameSystems.Monster
         {
             _ai.EnterDeath();
             NavAgent.enabled = false;
-            EventBus.Emit(new MonsterDeathEvent(_config.MonsterId, transform.position, null));
         }
 
         private IEnumerator DeathSequence()

@@ -1,33 +1,39 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Hotfix.GameSystems.Monster;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Combat
 {
-    public class PlayerHitZone : MonoBehaviour, IMonsterDamageHandler
+    public class PlayerHitZone : MonoBehaviour
     {
         private Sys3C.FSM.FSMManager _fsmManager;
-
-        GameObject IMonsterDamageHandler.TargetGameObject => gameObject;
-        Transform IMonsterDamageHandler.TargetTransform => transform;
+        private readonly HashSet<MonsterAttackHitbox> _hitSources = new();
 
         public void Init(Sys3C.FSM.FSMManager fsmManager)
         {
             _fsmManager = fsmManager;
         }
 
-        void IMonsterDamageHandler.OnMonsterAttackHit(DamageData damageData, Vector3 hitDirection)
+        private void OnTriggerStay(Collider other)
         {
+            var hitbox = other.GetComponent<MonsterAttackHitbox>();
+            if (hitbox == null || !hitbox.IsActive || _hitSources.Contains(hitbox)) return;
+
+            _hitSources.Add(hitbox);
+
             if (_fsmManager == null) return;
 
+            var damageData = hitbox.CurrentDamageData;
             float damage = damageData != null
                 ? damageData.CalculateFinalDamage(null)
                 : 10f;
 
+            Vector3 hitDir = (transform.position - hitbox.transform.position).normalized;
             _fsmManager.HandleDamage(
                 sourceId: -1,
                 damage: damage,
-                hitDirection: hitDirection,
+                hitDirection: hitDir,
                 knockbackForce: 1f,
                 launchForce: 0,
                 stunDuration: 0,

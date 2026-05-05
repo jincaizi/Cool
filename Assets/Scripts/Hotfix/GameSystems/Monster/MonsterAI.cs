@@ -215,7 +215,7 @@ namespace Hotfix.GameSystems.Monster
 
         private void ReturnToSpawn()
         {
-            Target = null;
+            _target = null;
             _movement.ReturnToSpawn(_spawnPoint);
             TransitionTo(MonsterAIState.Idle);
         }
