@@ -32,6 +32,11 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public bool LockRotation { get; set; }
 
+        /// <summary>
+        /// 锁定移动（突进时使用）
+        /// </summary>
+        public bool LockMovement { get; set; }
+
         public CharacterData Data => _data;
         public bool IsGrounded => _groundDetector.IsGrounded();
         public Transform Transform => _transform;
@@ -241,6 +246,12 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         private void ApplyHorizontalMovement(MoveCommand command)
         {
+            // 突进时不允许普通移动
+            if (LockMovement)
+            {
+                return;
+            }
+
             float currentSpeed = command.IsSprint ? SprintSpeed : MoveSpeed;
             Vector3 moveVelocity = command.MoveDir * currentSpeed;
             moveVelocity.y = _velocity.y;
