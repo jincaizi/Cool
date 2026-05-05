@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Animation;
+using Hotfix.GameSystems.Sys3C.Skill;
 
 namespace Hotfix.GameSystems.Sys3C.FSM
 {
@@ -12,11 +13,17 @@ namespace Hotfix.GameSystems.Sys3C.FSM
     {
         private readonly AnimationDriver _driver;
 
+        private SkillDashComponent _dashComponent;
+
         private AttackState _currentState;
 
         private int _comboCount;
         private int _framesInState;
         private bool _comboUnlocked;
+
+        // SkillQ 突进参数
+        private const float SKILLQ_DASH_DISTANCE = 3f;
+        private const float SKILLQ_DASH_DURATION = 0.3f;
 
         // 技能状态超时保护
         private float _skillStateTimer;
@@ -41,7 +48,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         /// <summary>
         /// 是否有霸体（某些技能有霸体帧）
         /// </summary>
-        public bool HasSuperArmor => _currentState == AttackState.SkillR;
+        public bool HasSuperArmor => _currentState == AttackState.SkillR_Start;
 
         /// <summary>
         /// 当前霸体剩余时间（秒）
@@ -258,6 +265,25 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         private bool CanInterrupt()
         {
             return _currentState == AttackState.Idle;
+        }
+
+        /// <summary>
+        /// 设置突进组件（由FSMManager调用）
+        /// </summary>
+        public void SetDashComponent(SkillDashComponent dashComponent)
+        {
+            _dashComponent = dashComponent;
+        }
+
+        /// <summary>
+        /// 开始SkillQ突进（由FSMManager调用，传入角色朝向）
+        /// </summary>
+        public void StartSkillQDash(Vector3 forwardDirection)
+        {
+            if (_currentState == AttackState.SkillQ && _dashComponent != null)
+            {
+                _dashComponent.StartDash(forwardDirection, SKILLQ_DASH_DISTANCE, SKILLQ_DASH_DURATION);
+            }
         }
     }
 }
