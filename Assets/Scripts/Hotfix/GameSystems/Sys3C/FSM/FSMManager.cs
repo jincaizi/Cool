@@ -20,6 +20,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         private readonly AttackFSM _attackFSM;
         private readonly HitFSM _hitFSM;
         private readonly StateCoordinator _stateCoordinator;
+        private readonly Skill.SkillDashComponent _dashComponent;
 
         public event Action OnJumpEndCompleted;
         public event Action OnAttackCompleted;
@@ -50,6 +51,15 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             // 创建 StateCoordinator 并初始化
             _stateCoordinator = new StateCoordinator(_baseFSM, _attackFSM, _hitFSM);
             _stateCoordinator.Initialize();
+
+            // 初始化 SkillDashComponent
+            var unityController = characterController.GetType()
+                .GetField("_controller", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.GetValue(characterController) as UnityEngine.CharacterController;
+            _dashComponent = new Skill.SkillDashComponent(unityController, characterController.Transform);
+
+            // 传递 dashComponent 给 AttackFSM
+            _attackFSM.SetDashComponent(_dashComponent);
 
             // 设置 CharacterController 的 StateCoordinator 引用
             _characterController.SetStateCoordinator(_stateCoordinator);
@@ -85,6 +95,12 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _baseFSM.Update(data, _attackFSM.CurrentState);
             _attackFSM.Update(deltaTime);
             _stateCoordinator.Update(deltaTime);
+
+            // 更新 SkillQ 突进
+            if (_attackFSM.CurrentState == AttackState.SkillQ && _dashComponent.IsDashing)
+            {
+                _dashComponent.Update();
+            }
         }
 
         /// <summary>
@@ -152,13 +168,26 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public void RequestSkillQ()
         {
             _characterController.LockRotation = true;
+            _characterController.LockMovement = true;  // 锁定移动，防止普通移动干扰突进
             _attackFSM.RequestSkillQ();
+
+            // 启动突进，方向为角色正前方
+            Vector3 forward = _characterController.Transform.forward;
+            _attackFSM.StartSkillQDash(forward);
         }
 
         public void RequestSkillR()
         {
             _characterController.LockRotation = true;
             _attackFSM.RequestSkillR(_characterController.IsGrounded);
+        }
+
+        /// <summary>
+        /// 设置技能R的最大持续时间
+        /// </summary>
+        public void SetSkillRMaxDuration(float duration)
+        {
+            _attackFSM.SetSkillRMaxDuration(duration);
         }
 
         /// <summary>
@@ -234,6 +263,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     _driver.ResetAttackTrigger();
                     _driver.ResetSkillQTrigger();
                     _driver.ResetSkillRTrigger();
+
+                    // 恢复移动锁定
+                    _characterController.LockMovement = false;
+                    _characterController.LockRotation = false;
                     break;
                 case "SkillR_Start":
                     _attackFSM.OnAnimationCompleted(stateName);
