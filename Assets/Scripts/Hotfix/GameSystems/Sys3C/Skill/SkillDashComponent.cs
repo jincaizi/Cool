@@ -44,11 +44,25 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         /// <param name="duration">突进持续时间（秒）</param>
         public void StartDash(Vector3 direction, float distance, float duration)
         {
+            // 参数校验
+            float effectiveDuration = duration - STARTUP_TIME - RECOVERY_TIME;
+            if (effectiveDuration <= 0 || distance <= 0)
+            {
+                Debug.LogWarning($"[SkillDashComponent] Invalid dash params: duration={duration}, distance={distance}");
+                return;
+            }
+
+            if (direction.sqrMagnitude < 0.01f)
+            {
+                Debug.LogWarning("[SkillDashComponent] Dash direction is zero, skipping");
+                return;
+            }
+
             _isDashing = true;
             _dashTimer = 0f;
             _dashDuration = duration;
             _dashDirection = direction.normalized;
-            _dashSpeed = distance / (duration - STARTUP_TIME - RECOVERY_TIME);
+            _dashSpeed = distance / effectiveDuration;
 
             Debug.Log($"[SkillDashComponent] StartDash: dir={direction}, distance={distance}, duration={duration}, speed={_dashSpeed}");
         }
