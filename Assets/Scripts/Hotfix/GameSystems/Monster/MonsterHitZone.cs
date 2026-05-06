@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Hotfix.GameSystems.Combat;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -8,7 +8,7 @@ namespace Hotfix.GameSystems.Monster
     public class MonsterHitZone : MonoBehaviour
     {
         private MonsterEntity _owner;
-        private readonly HashSet<AttackHitbox> _hitSources = new();
+        private readonly HashSet<IAttackHitbox> _hitSources = new();
 
         private void Awake()
         {
@@ -23,7 +23,7 @@ namespace Hotfix.GameSystems.Monster
 
         private void OnTriggerStay(Collider other)
         {
-            var hitbox = other.GetComponent<AttackHitbox>();
+            var hitbox = other.GetComponent<IAttackHitbox>();
             if (hitbox == null || !hitbox.IsActive || _hitSources.Contains(hitbox)) return;
 
             _hitSources.Add(hitbox);
