@@ -17,7 +17,7 @@ namespace Hotfix.GameSystems.Sys3C
         {
             if (_config == null) return;
 
-            var shape = AttackShapeFactory.Create(_config.AttackShape, PhysicsRegistry.Instance);
+            var shape = AttackShapeFactory.Create(_config.AttackShape, PhysicsRegistry.Instance, EntityType.Monster);
             var targets = shape.Resolve(transform.position, forward, targetMask);
 
             if (targets.Count == 0)
