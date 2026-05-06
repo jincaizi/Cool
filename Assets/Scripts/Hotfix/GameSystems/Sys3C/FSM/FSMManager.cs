@@ -96,11 +96,31 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _attackFSM.Update(deltaTime);
             _stateCoordinator.Update(deltaTime);
 
+            // 更新 Blend 参数（驱动 Locomotion Blend Tree）
+            UpdateBlendParameter(data);
+
             // 更新 SkillQ 突进
             if (_attackFSM.CurrentState == AttackState.SkillQ && _dashComponent.IsDashing)
             {
                 _dashComponent.Update();
             }
+        }
+
+        /// <summary>
+        /// 更新 Blend 参数，用于 Blend Tree 动画混合
+        /// </summary>
+        private void UpdateBlendParameter(CharacterData data)
+        {
+            // 当处于 Locomotion 相关状态时，根据移动速度更新 Blend
+            // 包括：Idle(0), Move(1), Sprint(2), Locomotion(7)
+            if (data.BaseState == BaseState.Idle ||
+                data.BaseState == BaseState.Move ||
+                data.BaseState == BaseState.Sprint ||
+                data.BaseState == BaseState.Locomotion)
+            {
+                _driver.SetBlend(data.MovementSpeed);
+            }
+            // 跳跃/死亡时保持 Blend=0（由 BaseFSM.TransitionTo 设置）
         }
 
         /// <summary>
@@ -195,6 +215,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         /// </summary>
         public void CancelSkillR()
         {
+            // 安全冗余：直接解锁旋转和移动（即使 AttackFSM.CancelSkillR 不触发事件）
+            _characterController.LockRotation = false;
+            _characterController.LockMovement = false;
+
             _attackFSM.CancelSkillR();
         }
 
@@ -210,6 +234,13 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         /// 获取 AttackFSM 的技能可用性
         /// </summary>
         public bool CanPlaySkill => _attackFSM.CanPlaySkill;
+
+        /// <summary>
+        /// 当前是否处于 SkillR 状态（Start 或 Loop）
+        /// </summary>
+        public bool IsInSkillRState =>
+            _attackFSM.CurrentState == AttackState.SkillR_Start ||
+            _attackFSM.CurrentState == AttackState.SkillR_Loop;
 
         /// <summary>
         /// 通知技能层需要朝向相机方向（由 CharacterController 调用）
@@ -237,13 +268,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public void DebugLogStates()
         {
-            Debug.Log($"[FSMManager] {_stateCoordinator.GetActiveStateDescription()}");
         }
 
         private void HandleAnimationCompleted(string stateName)
         {
-            Debug.Log($"[FSMManager] AnimationCompleted: {stateName}, AttackFSM state: {_attackFSM.CurrentState}");
-
             switch (stateName)
             {
                 case "JumpEnd":
@@ -257,9 +285,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     // 这确保即使 OnStateExit 中的条件检查失败，FSM 状态也能正确恢复
                     _attackFSM.OnAnimationCompleted(stateName);
 
-                    Debug.Log($"[FSMManager] After OnAnimationCompleted, AttackFSM state: {_attackFSM.CurrentState}");
-
-                    // 然后重置所有 triggers（防止下一帧动画循环播放）
+                    // 重置所有 triggers（防止下一帧动画循环播放）
                     _driver.ResetAttackTrigger();
                     _driver.ResetSkillQTrigger();
                     _driver.ResetSkillRTrigger();
@@ -270,21 +296,19 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     break;
                 case "SkillR_Start":
                     _attackFSM.OnAnimationCompleted(stateName);
-                    Debug.Log($"[FSMManager] After OnAnimationCompleted, AttackFSM state: {_attackFSM.CurrentState}");
                     // 不重置SkillR trigger，保持状态
+                    // 注意：LockRotation 在 R 键释放时由 CancelSkillR -> OnSkillOrAttackEnded -> UnlockRotation 解锁
                     break;
             }
         }
 
         private void HandleHitAnimationCompleted(string stateName)
         {
-            Debug.Log($"[FSMManager] HitAnimationCompleted: {stateName}");
             _hitFSM.OnAnimationEnd(stateName);
         }
 
         private void HandleHitComplete()
         {
-            Debug.Log("[FSMManager] Hit complete");
             _driver.SetIsHit(false);
             _driver.SetHitLayerWeight(0f);
             OnHitCompleted?.Invoke();
@@ -292,7 +316,6 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         private void HandleDeathComplete()
         {
-            Debug.Log("[FSMManager] Death complete, ready for resurrect");
             OnDeath?.Invoke();
         }
 
@@ -308,13 +331,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         private void HandleLeftGround()
         {
-            Debug.Log("[FSMManager] LeftGround - character has left the ground");
             // 可以在这里通知其他系统（如 AI、任务系统等）
         }
 
         private void HandleDeath()
         {
-            Debug.Log("[FSMManager] HandleDeath");
             _stateCoordinator.HandleDeath();
         }
 

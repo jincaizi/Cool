@@ -1,0 +1,17 @@
+{
+    "name": "Hotfix.GameSystems.Monster",
+    "rootNamespace": "Hotfix.GameSystems.Monster",
+    "references": [
+        "Hotfix.GameSystems.Sys3C.Core",
+        "Hotfix.GameSystems.Combat"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

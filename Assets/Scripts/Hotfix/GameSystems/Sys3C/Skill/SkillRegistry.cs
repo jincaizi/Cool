@@ -35,13 +35,11 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         {
             if (config == null || string.IsNullOrEmpty(config.SkillId))
             {
-                Debug.LogError("[SkillRegistry] Invalid skill config");
                 return;
             }
 
             _skills[config.SkillId] = config;
             _cooldowns[config.SkillId] = 0f;
-            Debug.Log("[SkillRegistry] Registered skill: " + config.SkillId);
         }
 
         /// <summary>
@@ -62,12 +60,10 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         {
             if (data == null)
             {
-                Debug.LogError("[SkillRegistry] Null SkillData");
                 return;
             }
 
             _skillDataMap[data.SkillId] = data;
-            Debug.Log($"[SkillRegistry] Registered SkillData: {data.SkillId} ({data.SkillName})");
         }
 
         /// <summary>
@@ -145,21 +141,18 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         {
             if (!_skills.TryGetValue(skillId, out var config))
             {
-                Debug.LogWarning("[SkillRegistry] Skill not found: " + skillId);
                 return false;
             }
 
             // 检查CD
             if (_cooldowns[skillId] > 0)
             {
-                Debug.Log("[SkillRegistry] Skill on cooldown: " + skillId + ", remaining: " + _cooldowns[skillId]);
                 return false;
             }
 
             // 检查空中使用
             if (!isGrounded && !config.CanUseInAir)
             {
-                Debug.Log("[SkillRegistry] Skill cannot be used in air: " + skillId);
                 return false;
             }
 
@@ -173,7 +166,6 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         {
             if (!_skills.ContainsKey(skillId))
             {
-                Debug.LogError("[SkillRegistry] Skill not registered: " + skillId);
                 return;
             }
 
@@ -181,7 +173,6 @@ namespace Hotfix.GameSystems.Sys3C.Skill
             if (config.Cooldown > 0)
             {
                 _cooldowns[skillId] = config.Cooldown;
-                Debug.Log("[SkillRegistry] Used skill " + skillId + ", CD: " + config.Cooldown + "s");
             }
         }
 

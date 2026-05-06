@@ -41,7 +41,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
             {
                 _hasTriggeredHitComplete = false;
                 _lastNormalizedTime = 0f;
-                Debug.Log($"[HitBehaviour] State entered: {GetStateName(stateHash)}");
             }
         }
 
@@ -56,7 +55,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
                 if (stateInfo.normalizedTime >= 0.9f && stateInfo.normalizedTime > _lastNormalizedTime)
                 {
                     _hasTriggeredHitComplete = true;
-                    Debug.Log($"[HitBehaviour] State completed: {GetStateName(stateHash)}");
                     _onAnimationCompleted?.Invoke(GetStateName(stateHash));
                 }
                 _lastNormalizedTime = stateInfo.normalizedTime;

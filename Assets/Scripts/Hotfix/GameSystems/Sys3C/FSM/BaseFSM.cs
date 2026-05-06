@@ -34,20 +34,35 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 return;
             }
 
-            // 使用 CharacterData.BaseState 作为当前状态
-            var currentDataState = data.BaseState;
+            // 使用内部 _currentState 而不是 data.BaseState 来评估转换
+            // 这样避免外部修改 data.BaseState 导致的震荡
 
-            // 同步内部状态到 data.BaseState
-            if (_currentState != currentDataState && currentDataState != BaseState.Idle)
-            {
-                // 外部修改了 BaseState（如跳跃），同步到内部状态
-                TransitionTo(currentDataState);
-            }
+            // 如果当前处于攻击/技能状态，限制 BaseLayer 转换
+            // 只允许跳跃相关转换，不允许 Idle/Move 之间的切换
+            bool isInAttackState = attackState != AttackState.Idle;
 
             var target = _table.Evaluate(_currentState, data);
             if (target.HasValue && target.Value != _currentState)
             {
-                if (_table.CanEnter(target.Value, data))
+                // 检查是否可以转换
+                bool canTransition = _table.CanEnter(target.Value, data);
+
+                // 如果处于攻击状态，只允许跳跃转换
+                // 只允许跳跃转换，不允许 Locomotion 状态切换
+                if (isInAttackState)
+                {
+                    // 允许 JumpStart/JumpAir/JumpEnd 转换
+                    // 不允许 Idle/Move/Sprint/Locomotion 之间的切换
+                    if (target.Value == BaseState.Idle ||
+                        target.Value == BaseState.Move ||
+                        target.Value == BaseState.Sprint ||
+                        target.Value == BaseState.Locomotion)
+                    {
+                        canTransition = false;
+                    }
+                }
+
+                if (canTransition)
                 {
                     TransitionTo(target.Value);
                 }
@@ -61,7 +76,6 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 _currentState = target;
                 _driver.SetBaseState(target);
                 OnStateChanged?.Invoke(target);
-                UnityEngine.Debug.Log($"[BaseFSM] ForceState: {_currentState}");
             }
         }
 
@@ -91,13 +105,17 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                           || target == BaseState.JumpEnd;
             _driver.SetIsJumping(isJumping);
 
+            // 跳跃时将 Blend 设置为 0（停止 Locomotion 动画）
+            if (isJumping)
+            {
+                _driver.SetBlend(0f);
+            }
+
             OnStateChanged?.Invoke(target);
-            UnityEngine.Debug.Log($"[BaseFSM] Transition: {_currentState}");
         }
 
         public void DebugSetState(BaseState state)
         {
-            UnityEngine.Debug.Log($"[BaseFSM] DebugSetState: {state}");
             _currentState = state;
             _driver.SetBaseState(state);
         }

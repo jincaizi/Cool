@@ -138,7 +138,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             }
 
             OnShieldAdded?.Invoke(id, amount);
-            Debug.Log($"[ShieldSystem] AddShield: {id} +{amount}");
         }
 
         public void RemoveShield(string id)
@@ -146,7 +145,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             if (_activeShields.Remove(id))
             {
                 OnShieldRemoved?.Invoke(id);
-                Debug.Log($"[ShieldSystem] RemoveShield: {id}");
             }
         }
 
@@ -252,7 +250,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
         public void ApplyKnockback(Vector3 direction, float force)
         {
-            Debug.Log($"[PhysicsSystem] ApplyKnockback: dir={direction}, force={force}");
             // TODO: 实现击退效果
             // 可以设置角色的速度或者通知 CharacterController 应用特殊移动
         }
@@ -262,7 +259,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public void ApplyLaunch(Vector3 direction, float force, float upwardForce)
         {
-            Debug.Log($"[PhysicsSystem] ApplyLaunch: dir={direction}, force={force}, upward={upwardForce}");
             // TODO: 实现击飞效果
         }
     }
@@ -290,7 +286,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _stunDuration = Mathf.Max(_stunDuration, duration);
             _isStunned = true;
             OnStunAdded?.Invoke();
-            Debug.Log($"[StatusController] AddStun: {duration}s");
         }
 
         public void RemoveStun()
@@ -298,7 +293,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _stunDuration = 0f;
             _isStunned = false;
             OnStunRemoved?.Invoke();
-            Debug.Log($"[StatusController] RemoveStun");
         }
 
         public void AddSilence(float duration)
@@ -306,7 +300,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _silenceDuration = Mathf.Max(_silenceDuration, duration);
             _isSilenced = true;
             OnSilenceAdded?.Invoke();
-            Debug.Log($"[StatusController] AddSilence: {duration}s");
         }
 
         public void RemoveSilence()

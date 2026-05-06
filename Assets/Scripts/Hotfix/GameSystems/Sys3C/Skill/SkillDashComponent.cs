@@ -48,13 +48,11 @@ namespace Hotfix.GameSystems.Sys3C.Skill
             float effectiveDuration = duration - STARTUP_TIME - RECOVERY_TIME;
             if (effectiveDuration <= 0 || distance <= 0)
             {
-                Debug.LogWarning($"[SkillDashComponent] Invalid dash params: duration={duration}, distance={distance}");
                 return;
             }
 
             if (direction.sqrMagnitude < 0.01f)
             {
-                Debug.LogWarning("[SkillDashComponent] Dash direction is zero, skipping");
                 return;
             }
 
@@ -63,8 +61,6 @@ namespace Hotfix.GameSystems.Sys3C.Skill
             _dashDuration = duration;
             _dashDirection = direction.normalized;
             _dashSpeed = distance / effectiveDuration;
-
-            Debug.Log($"[SkillDashComponent] StartDash: dir={direction}, distance={distance}, duration={duration}, speed={_dashSpeed}");
         }
 
         /// <summary>
@@ -74,7 +70,6 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         {
             if (_isDashing)
             {
-                Debug.Log("[SkillDashComponent] StopDash");
                 _isDashing = false;
                 _dashTimer = 0f;
             }

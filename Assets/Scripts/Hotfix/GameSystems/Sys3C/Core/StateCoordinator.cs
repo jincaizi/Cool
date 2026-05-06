@@ -157,7 +157,6 @@ namespace Hotfix.GameSystems.Sys3C.Core
             var armorProp = _attackFSM?.GetType().GetProperty("SuperArmorRemaining");
             if ((float)(armorProp?.GetValue(_attackFSM) ?? 0f) > 0)
             {
-                Debug.Log("[StateCoordinator] Damage blocked by super armor");
                 return;
             }
 
@@ -236,6 +235,26 @@ namespace Hotfix.GameSystems.Sys3C.Core
             var attackState = _attackFSM?.GetType().GetProperty("CurrentState")?.GetValue(_attackFSM)?.ToString() ?? "null";
             var hitState = _hitFSM?.GetType().GetProperty("CurrentState")?.GetValue(_hitFSM)?.ToString() ?? "null";
             return $"[Layer: {_activeLayer}] Base={baseState}, Attack={attackState}, Hit={hitState}";
+        }
+
+        /// <summary>
+        /// 获取当前活跃层的状态名称
+        /// </summary>
+        public string GetActiveState()
+        {
+            if (_activeLayer == LayerType.Attack)
+            {
+                return _attackFSM?.GetType().GetProperty("CurrentState")?.GetValue(_attackFSM)?.ToString() ?? "null";
+            }
+            else if (_activeLayer == LayerType.Base)
+            {
+                return _baseFSM?.GetType().GetProperty("CurrentState")?.GetValue(_baseFSM)?.ToString() ?? "null";
+            }
+            else if (_activeLayer == LayerType.Hit)
+            {
+                return _hitFSM?.GetType().GetProperty("CurrentState")?.GetValue(_hitFSM)?.ToString() ?? "null";
+            }
+            return "Unknown";
         }
 
         /// <summary>

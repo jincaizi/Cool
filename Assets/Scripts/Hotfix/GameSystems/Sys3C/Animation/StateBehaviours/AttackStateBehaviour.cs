@@ -37,41 +37,34 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         private string GetStateName(AnimatorStateInfo stateInfo)
         {
-            var hash = stateInfo.shortNameHash;
-            if (hash == HASH_Attack1) return "Attack1";
-            if (hash == HASH_Attack2) return "Attack2";
-            if (hash == HASH_SkillQ) return "AttackQ";
-            if (hash == HASH_SkillR_Start) return "SkillR_Start";
-            if (hash == HASH_SkillR_Loop) return "SkillR_Loop";
+            var stateHash = stateInfo.shortNameHash;
+            if (stateHash == HASH_Attack1) return "Attack1";
+            if (stateHash == HASH_Attack2) return "Attack2";
+            if (stateHash == HASH_SkillQ) return "AttackQ";
+            if (stateHash == HASH_SkillR_Start) return "SkillR_Start";
+            if (stateHash == HASH_SkillR_Loop) return "SkillR_Loop";
             return "Unknown";
         }
 
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            Debug.Log("[AttackBehaviour] OnStateEnter: hash=" + stateInfo.shortNameHash +
-                        ", name=" + stateInfo.shortNameHash.ToString() +
-                        ", HASH_SkillQ=" + HASH_SkillQ);
-
             if (IsAttackState(stateInfo))
             {
                 _framesInState = 0;
                 _comboUnlocked = false;
-                Debug.Log("[AttackBehaviour] " + GetStateName(stateInfo) + " entered");
             }
         }
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             // 只对 Attack1/Attack2 处理连击逻辑
-            var hash = stateInfo.shortNameHash;
-            if (hash == HASH_Attack1 || hash == HASH_Attack2)
+            if (stateInfo.shortNameHash == HASH_Attack1 || stateInfo.shortNameHash == HASH_Attack2)
             {
                 _framesInState++;
 
                 if (!_comboUnlocked && _framesInState >= COMBO_FRAME_LOCK)
                 {
                     _comboUnlocked = true;
-                    Debug.Log("[AttackBehaviour] Combo unlocked at frame " + _framesInState);
                 }
             }
 
@@ -79,25 +72,19 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
             // SkillR_Loop是循环动画，不触发完成回调
             if (IsAttackState(stateInfo) && stateInfo.normalizedTime >= 0.95f && stateInfo.normalizedTime < 1.1f)
             {
-                var hash = stateInfo.shortNameHash;
-                if (hash == HASH_SkillR_Loop) return;  // SkillR_Loop不触发完成回调
-
-                string stateName = GetStateName(stateInfo);
-                Debug.Log($"[AttackBehaviour] {stateName} near completion, normalizedTime={stateInfo.normalizedTime}");
+                if (stateInfo.shortNameHash == HASH_SkillR_Loop) return;
 
                 if (_onAnimationCompleted != null)
                 {
-                    _onAnimationCompleted.Invoke(stateName);
+                    _onAnimationCompleted.Invoke(GetStateName(stateInfo));
                 }
             }
         }
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // 处理所有攻击状态（普攻+技能）的退出
             if (IsAttackState(stateInfo))
             {
-                Debug.Log("[AttackBehaviour] " + GetStateName(stateInfo) + " exited");
                 _onAnimationCompleted?.Invoke(GetStateName(stateInfo));
             }
         }

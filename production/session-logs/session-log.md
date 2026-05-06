@@ -2183,3 +2183,9533 @@ production/session-logs/compaction-log.txt
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260504_153118
+### Uncommitted Changes
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+production/session-logs/agent-audit.log
+---
+
+## Session End: 20260504_153908
+### Uncommitted Changes
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_023945
+### Uncommitted Changes
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_025639
+### Uncommitted Changes
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_030503
+### Uncommitted Changes
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_031211
+### Uncommitted Changes
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_031701
+### Uncommitted Changes
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_032237
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_033054
+### Uncommitted Changes
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_033455
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_033920
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_034407
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_034809
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_040806
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_041007
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_041204
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_041413
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_041509
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_041739
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_041927
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_042148
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_042354
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_043728
+### Commits
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_045635
+### Commits
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_050704
+### Commits
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_050912
+### Commits
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_051000
+### Commits
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_051053
+### Commits
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_051405
+### Commits
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_113731
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_114945
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_120503
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_121010
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_121952
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+31e848f feat(InputManager): add IsSkill3Released() method for duration skill cancellation
+627ad4a feat(skill): add MaxDuration field to SkillConfig for duration skill support
+e864183 更新 AttackState 枚举：SkillR 拆分为 SkillR_Start 和 SkillR_Loop
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_122939
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+56bcb0f 更新Sys3CEntry：添加R键释放检测和MaxDuration配置读取
+ceac090 Update FSMManager: add CancelSkillR and handle SkillR_Start animation
+9da696d feat(AttackFSM): add SkillR duration state management
+4660645 更新AttackStateBehaviour支持SkillR_Start和SkillR_Loop状态
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_132558
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+### Uncommitted Changes
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_135112
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_172035
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_175251
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_180103
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_182932
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_185517
+### Commits
+519eaf3 feat(FSMManager): init SkillDashComponent and coordinate dash movement
+2f14bcc feat(AttackFSM): integrate SkillDashComponent for SkillQ dash
+39fbccd feat(CharacterController): add LockMovement for skill dash
+439e9af fix(SkillDashComponent): add parameter validation for dash
+0475498 feat(SkillDashComponent): add dash movement component
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_204427
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_204526
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260505_204703
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_022322
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_022414
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_022454
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_022539
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_022611
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_022709
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_022906
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_023205
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_023543
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_023928
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_024329
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_024706
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_024829
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_025149
+### Commits
+cf1becf docs(spec): add monster combat system design
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_025506
+### Commits
+cf1becf docs(spec): add monster combat system design
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_030408
+### Commits
+f0d8a4e docs(plan): add monster combat system implementation plan
+cf1becf docs(spec): add monster combat system design
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_034252
+### Commits
+2d0aa61 fix(monster): fix review issues - recursion, GetComponent, double event
+7a918bf feat(monster): add MonsterSpawner with respawn support
+60967d2 feat(combat): add PlayerHitZone for monster-to-player damage
+69e3f74 feat(monster): add MonsterHitZone, MonsterAttackHitbox, and MonsterEntity
+bba1b77 feat(combat): add AttackHitboxData and AttackHitbox
+7b1ed01 feat(monster): add MonsterAI 6-state FSM
+23d1467 feat(monster): add MonsterMovement with NavMeshAgent
+07033c3 feat(monster): add MonsterStats with damage calculation
+9fe1396 feat(monster): add MonsterConfig ScriptableObject
+9c54c40 feat(monster): add MonsterEvents and MonsterLootTable
+85d40d3 feat(combat): add IDamageable shared interface
+f0d8a4e docs(plan): add monster combat system implementation plan
+cf1becf docs(spec): add monster combat system design
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_040519
+### Commits
+2d0aa61 fix(monster): fix review issues - recursion, GetComponent, double event
+7a918bf feat(monster): add MonsterSpawner with respawn support
+60967d2 feat(combat): add PlayerHitZone for monster-to-player damage
+69e3f74 feat(monster): add MonsterHitZone, MonsterAttackHitbox, and MonsterEntity
+bba1b77 feat(combat): add AttackHitboxData and AttackHitbox
+7b1ed01 feat(monster): add MonsterAI 6-state FSM
+23d1467 feat(monster): add MonsterMovement with NavMeshAgent
+07033c3 feat(monster): add MonsterStats with damage calculation
+9fe1396 feat(monster): add MonsterConfig ScriptableObject
+9c54c40 feat(monster): add MonsterEvents and MonsterLootTable
+85d40d3 feat(combat): add IDamageable shared interface
+f0d8a4e docs(plan): add monster combat system implementation plan
+cf1becf docs(spec): add monster combat system design
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_102153
+### Commits
+2d0aa61 fix(monster): fix review issues - recursion, GetComponent, double event
+7a918bf feat(monster): add MonsterSpawner with respawn support
+60967d2 feat(combat): add PlayerHitZone for monster-to-player damage
+69e3f74 feat(monster): add MonsterHitZone, MonsterAttackHitbox, and MonsterEntity
+bba1b77 feat(combat): add AttackHitboxData and AttackHitbox
+7b1ed01 feat(monster): add MonsterAI 6-state FSM
+23d1467 feat(monster): add MonsterMovement with NavMeshAgent
+07033c3 feat(monster): add MonsterStats with damage calculation
+9fe1396 feat(monster): add MonsterConfig ScriptableObject
+9c54c40 feat(monster): add MonsterEvents and MonsterLootTable
+85d40d3 feat(combat): add IDamageable shared interface
+f0d8a4e docs(plan): add monster combat system implementation plan
+cf1becf docs(spec): add monster combat system design
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_103112
+### Commits
+2d0aa61 fix(monster): fix review issues - recursion, GetComponent, double event
+7a918bf feat(monster): add MonsterSpawner with respawn support
+60967d2 feat(combat): add PlayerHitZone for monster-to-player damage
+69e3f74 feat(monster): add MonsterHitZone, MonsterAttackHitbox, and MonsterEntity
+bba1b77 feat(combat): add AttackHitboxData and AttackHitbox
+7b1ed01 feat(monster): add MonsterAI 6-state FSM
+23d1467 feat(monster): add MonsterMovement with NavMeshAgent
+07033c3 feat(monster): add MonsterStats with damage calculation
+9fe1396 feat(monster): add MonsterConfig ScriptableObject
+9c54c40 feat(monster): add MonsterEvents and MonsterLootTable
+85d40d3 feat(combat): add IDamageable shared interface
+f0d8a4e docs(plan): add monster combat system implementation plan
+cf1becf docs(spec): add monster combat system design
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_112636
+### Commits
+2d0aa61 fix(monster): fix review issues - recursion, GetComponent, double event
+7a918bf feat(monster): add MonsterSpawner with respawn support
+60967d2 feat(combat): add PlayerHitZone for monster-to-player damage
+69e3f74 feat(monster): add MonsterHitZone, MonsterAttackHitbox, and MonsterEntity
+bba1b77 feat(combat): add AttackHitboxData and AttackHitbox
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_114105
+### Commits
+2d0aa61 fix(monster): fix review issues - recursion, GetComponent, double event
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_114401
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_114818
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_115107
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_115135
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_115259
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_115355
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_115558
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_115739
+### Uncommitted Changes
+Assets/Monstor/Materials.meta
+Assets/Monstor/Materials/Material Variations.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Red Eyes.mat.meta
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat
+Assets/Monstor/Materials/Material Variations/Mini Simple Characters Mat Yellow Bones.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat primary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat secondary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat
+Assets/Monstor/Materials/Mini Simple Characters Demo Mat tertiary.mat.meta
+Assets/Monstor/Materials/Mini Simple Characters_texture.png
+Assets/Monstor/Materials/Mini Simple Characters_texture.png.meta
+Assets/Monstor/Models.meta
+Assets/Monstor/Models/Animations.meta
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller
+Assets/Monstor/Models/Animations/Mini simple Characters Animation Controller Demo.controller.meta
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx
+Assets/Monstor/Models/Animations/mini simple characters animations.fbx.meta
+Assets/Monstor/Models/mini simple skeleton demo.fbx
+Assets/Monstor/Models/mini simple skeleton demo.fbx.meta
+Assets/Monstor/Models/shield_wood.fbx
+Assets/Monstor/Models/shield_wood.fbx.meta
+Assets/Monstor/Models/sword_wood.fbx
+Assets/Monstor/Models/sword_wood.fbx.meta
+Assets/Monstor/Prefabs.meta
+Assets/Monstor/Prefabs/Characters.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_01.prefab.meta
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab
+Assets/Monstor/Prefabs/Characters/mini simple skeleton demo_02.prefab.meta
+Assets/Monstor/Prefabs/Props.meta
+Assets/Monstor/Prefabs/Props/shield_wood.prefab
+Assets/Monstor/Prefabs/Props/shield_wood.prefab.meta
+Assets/Monstor/Prefabs/Props/sword_wood.prefab
+Assets/Monstor/Prefabs/Props/sword_wood.prefab.meta
+Assets/Monstor/Readme.meta
+Assets/Monstor/Readme/Icons.meta
+Assets/Monstor/Readme/Icons/Help_Icon.png
+Assets/Monstor/Readme/Icons/Help_Icon.png.meta
+Assets/Monstor/Readme/Icons/Readme_Builder.png
+Assets/Monstor/Readme/Icons/Readme_Builder.png.meta
+Assets/Monstor/Readme/Scripts.meta
+Assets/Monstor/Readme/Scripts/Editor.meta
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs
+Assets/Monstor/Readme/Scripts/Editor/ReadmeEditor.cs.meta
+Assets/Monstor/Readme/Scripts/Readme.cs
+Assets/Monstor/Readme/Scripts/Readme.cs.meta
+Assets/Monstor/Scenes.meta
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity
+Assets/Monstor/Scenes/Mini Simple Characters Skeleton Demo Scene.unity.meta
+Assets/RPG Monster DUO PBR Polyart.meta
+Assets/RPG Monster DUO PBR Polyart/Animations.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/RPG Monster DUO PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Animators.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/Slime.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller
+Assets/RPG Monster DUO PBR Polyart/Animators/TurtleShell.controller.meta
+Assets/RPG Monster DUO PBR Polyart/Materials.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PBRDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/PolyartDefault.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Skybox_Mat.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat
+Assets/RPG Monster DUO PBR Polyart/Materials/Stage.mat.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimeMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/SlimePolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/StageMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx
+Assets/RPG Monster DUO PBR Polyart/Meshes/TurtleShellPolyartMesh.fbx.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/SlimePBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PBRDefault/TurtleShellPBR.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/SlimePolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab
+Assets/RPG Monster DUO PBR Polyart/Prefabs/PolyartDefault/TurtleShellPolyart.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting
+Assets/RPG Monster DUO PBR Polyart/Scenes/New Lighting Settings.lighting.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/LightingData.asset.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab
+Assets/RPG Monster DUO PBR Polyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity
+Assets/RPG Monster DUO PBR Polyart/Scenes/Polyart.unity.meta
+Assets/RPG Monster DUO PBR Polyart/Textures.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Albedo.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Emission.png.meta
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png
+Assets/RPG Monster DUO PBR Polyart/Textures/Metallic-Smoothness.png.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack03_SwordAndShiled.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/Attack04_Start_SwordAndShield.fbx.meta
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask
+Assets/RpgDuo/Animation/SwordAndShield/AvatarMask.mask.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/Editor/CreateCharacter3CController.cs
+Assets/Scripts/Editor/CreateCharacter3CController.cs.meta
+Assets/Scripts/Editor/FixHitLayerMenu.cs
+Assets/Scripts/Editor/FixHitLayerMenu.cs.meta
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+CLAUDE.md
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+

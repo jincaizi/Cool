@@ -63,13 +63,10 @@ namespace Hotfix.GameSystems.Sys3C
                 _camera.Target = transform;
                 // 立即同步相机位置，避免初始偏移
                 _camera.SnapToTarget();
-                Debug.Log("[Sys3CEntry] Camera target set and snapped");
             }
 
             // 注册默认技能
             RegisterDefaultSkills();
-
-            Debug.Log("[Sys3CEntry] Initialized");
         }
 
         private void Update()
@@ -126,11 +123,8 @@ namespace Hotfix.GameSystems.Sys3C
             // 技能R松开检测 - 取消持续技能
             if (_inputManager.IsSkill3Released())
             {
-                // 检查当前是否在SkillR_Loop状态
-                var state = _fsmManager.Coordinator?.GetActiveState();
-                if (state != null && state.Contains("SkillR_Loop"))
+                if (_fsmManager.IsInSkillRState)
                 {
-                    Debug.Log("[Sys3CEntry] R key released, canceling SkillR");
                     _fsmManager.CancelSkillR();
                 }
             }
@@ -166,22 +160,17 @@ namespace Hotfix.GameSystems.Sys3C
                 if (config.SkillId == SkillDefs.SkillR)
                 {
                     _fsmManager.SetSkillRMaxDuration(config.MaxDuration);
-                    Debug.Log($"[Sys3CEntry] SkillR MaxDuration set to {config.MaxDuration}s");
                     break;
                 }
             }
-
-            Debug.Log("[Sys3CEntry] Registered " + configs.Length + " skills");
         }
 
         private void HandleAnimationCallback(string stateName)
         {
-            Debug.Log("[Sys3CEntry] AnimationCompleted: " + stateName);
         }
 
         private void HandleHitAnimationCallback(string stateName)
         {
-            Debug.Log("[Sys3CEntry] HitAnimationCompleted: " + stateName);
             _hitManager.HandleHitCompleted(stateName);
         }
     }

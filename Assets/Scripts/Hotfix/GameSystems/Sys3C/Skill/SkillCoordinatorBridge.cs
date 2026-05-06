@@ -62,8 +62,6 @@ namespace Hotfix.GameSystems.Sys3C.Skill
 
             _skillCoordinator.OnSkillActivated += (skillData) =>
                 OnSkillActivated?.Invoke(skillData);
-
-            Debug.Log($"[SkillCoordinatorBridge] Initialized with {_skillRegistry.SkillCount} skills");
         }
 
         private void RegisterAllSkills()
@@ -165,7 +163,6 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         public void ApplyDamageTo(IEffectTarget target, float damage, DamageType damageType)
         {
             // TODO: 调用战斗系统处理伤害
-            Debug.Log($"[SkillCoordinatorBridge] ApplyDamage: {damage} ({damageType}) to target");
         }
 
         /// <summary>
@@ -173,7 +170,6 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         /// </summary>
         public void Heal(float amount)
         {
-            Debug.Log($"[SkillCoordinatorBridge] Heal: {amount}");
             // TODO: 修改角色生命值
         }
 

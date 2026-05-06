@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4181ed7593b64e14baffb981a971546f, type: 3}
+  m_Name: DuoMonsterConfig
+  m_EditorClassIdentifier: 
+  MonsterId: 
+  DisplayName: 
+  Prefab: {fileID: 0}
+  MaxHP: 100
+  AttackPower: 20
+  Defense: 10
+  MoveSpeed: 3.5
+  DetectRange: 10
+  LeaveRange: 15
+  AttackRange: 2
+  AttackCooldown: 1.5
+  PatrolRadius: 5
+  IdleDuration: 2
+  AttackDamage:
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
+  KnockbackForce: 0
+  HitStunDuration: 0.3
+  LootTable: {fileID: 0}
+  DeathDestroyDelay: 3

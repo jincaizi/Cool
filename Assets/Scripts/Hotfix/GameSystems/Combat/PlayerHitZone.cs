@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Hotfix.GameSystems.Monster;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Combat
@@ -8,7 +8,7 @@ namespace Hotfix.GameSystems.Combat
     public class PlayerHitZone : MonoBehaviour
     {
         private Sys3C.FSM.FSMManager _fsmManager;
-        private readonly HashSet<MonsterAttackHitbox> _hitSources = new();
+        private readonly HashSet<IAttackHitbox> _hitSources = new();
 
         public void Init(Sys3C.FSM.FSMManager fsmManager)
         {
@@ -17,14 +17,14 @@ namespace Hotfix.GameSystems.Combat
 
         private void OnTriggerStay(Collider other)
         {
-            var hitbox = other.GetComponent<MonsterAttackHitbox>();
+            var hitbox = other.GetComponent<IAttackHitbox>();
             if (hitbox == null || !hitbox.IsActive || _hitSources.Contains(hitbox)) return;
 
             _hitSources.Add(hitbox);
 
             if (_fsmManager == null) return;
 
-            var damageData = hitbox.CurrentDamageData;
+            var damageData = hitbox.CurrentData;
             float damage = damageData != null
                 ? damageData.CalculateFinalDamage(null)
                 : 10f;

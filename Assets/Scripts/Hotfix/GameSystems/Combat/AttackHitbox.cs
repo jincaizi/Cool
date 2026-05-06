@@ -1,14 +1,17 @@
 using UnityEngine;
 
-namespace Hotfix.GameSystems.Combat
+namespace Hotfix.GameSystems.Sys3C.Core.Combat
 {
-    public class AttackHitbox : MonoBehaviour
+    public class AttackHitbox : MonoBehaviour, IAttackHitbox
     {
         public bool IsActive { get; private set; }
         public AttackHitboxData CurrentData { get; private set; }
 
+        private Collider _collider;
+
         private void Awake()
         {
+            _collider = GetComponent<Collider>();
             gameObject.SetActive(false);
         }
 
@@ -23,6 +26,18 @@ namespace Hotfix.GameSystems.Combat
         {
             IsActive = false;
             gameObject.SetActive(false);
+        }
+
+        public void TriggerHit()
+        {
+            // 命中触发逻辑，根据需求实现
+        }
+
+        public Bounds GetBounds()
+        {
+            if (_collider != null)
+                return _collider.bounds;
+            return new Bounds(transform.position, Vector3.zero);
         }
     }
 }

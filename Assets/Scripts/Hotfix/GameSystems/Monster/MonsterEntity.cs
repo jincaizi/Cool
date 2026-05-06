@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using Hotfix.GameSystems.Combat;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Sys3C.Core;
 

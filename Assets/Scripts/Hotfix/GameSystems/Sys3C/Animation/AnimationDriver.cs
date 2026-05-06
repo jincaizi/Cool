@@ -23,6 +23,7 @@ namespace Hotfix.GameSystems.Sys3C.Animation
         private static readonly int HASH_SkillR = Animator.StringToHash("SkillR");
         private static readonly int HASH_Hit = Animator.StringToHash("Hit");
         private static readonly int HASH_Death = Animator.StringToHash("Death");
+        private static readonly int HASH_Blend = Animator.StringToHash("Blend");
 
         // Layer indices
         private const int BASE_LAYER_INDEX = 0;
@@ -32,6 +33,11 @@ namespace Hotfix.GameSystems.Sys3C.Animation
         public AnimationDriver(Animator animator)
         {
             _animator = animator ?? throw new System.ArgumentNullException(nameof(animator));
+
+            // 初始化层权重：Attack 和 Hit 层默认关闭
+            // Base Layer 的 Locomotion Blend Tree 需要独立驱动腿部动画
+            _animator.SetLayerWeight(ATTACK_LAYER_INDEX, 0f);
+            _animator.SetLayerWeight(HIT_LAYER_INDEX, 0f);
         }
 
         /// <summary>
@@ -64,6 +70,23 @@ namespace Hotfix.GameSystems.Sys3C.Animation
         public FSM.HitState GetHitState()
         {
             return (FSM.HitState)_animator.GetInteger(HASH_HitState);
+        }
+
+        /// <summary>
+        /// 设置 Blend 参数（驱动 Blend Tree 动画混合）
+        /// </summary>
+        /// <param name="blend">混合值：0=Idle, 0.5=Walk, 1=Run/Sprint</param>
+        public void SetBlend(float blend)
+        {
+            _animator.SetFloat(HASH_Blend, blend);
+        }
+
+        /// <summary>
+        /// 获取当前 Blend 值
+        /// </summary>
+        public float GetBlend()
+        {
+            return _animator.GetFloat(HASH_Blend);
         }
 
         /// <summary>
@@ -183,11 +206,18 @@ namespace Hotfix.GameSystems.Sys3C.Animation
         }
 
         /// <summary>
+        /// 设置 Attack Layer 权重
+        /// </summary>
+        public void SetAttackLayerWeight(float weight)
+        {
+            _animator.SetLayerWeight(ATTACK_LAYER_INDEX, weight);
+        }
+
+        /// <summary>
         /// 获取 Hit Layer 权重
         /// </summary>
         public float GetHitLayerWeight()
         {
-            const int HIT_LAYER_INDEX = 2;
             return _animator.GetLayerWeight(HIT_LAYER_INDEX);
         }
 
@@ -196,7 +226,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation
         /// </summary>
         public void SetHitLayerWeight(float weight)
         {
-            const int HIT_LAYER_INDEX = 2;
             _animator.SetLayerWeight(HIT_LAYER_INDEX, weight);
         }
     }

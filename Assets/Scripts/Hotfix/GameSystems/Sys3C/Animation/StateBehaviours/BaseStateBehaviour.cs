@@ -20,10 +20,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if (stateInfo.shortNameHash == HASH_JumpEnd)
-            {
-                Debug.Log("[BaseBehaviour] JumpEnd entered");
-            }
         }
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -32,7 +28,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
             {
                 if (stateInfo.normalizedTime >= 0.9f)
                 {
-                    Debug.Log("[BaseBehaviour] JumpEnd completed, normalizedTime=" + stateInfo.normalizedTime);
                     _onAnimationCompleted?.Invoke("JumpEnd");
                 }
             }
@@ -40,10 +35,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if (stateInfo.shortNameHash == HASH_JumpEnd)
-            {
-                Debug.Log("[BaseBehaviour] JumpEnd exited");
-            }
         }
     }
 }

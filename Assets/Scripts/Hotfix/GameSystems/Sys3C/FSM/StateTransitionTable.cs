@@ -41,29 +41,34 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         private void Initialize()
         {
-            // Idle
+            // ========== Locomotion 状态（Idle/Move/Sprint 的统一入口）==========
+            // BaseState = 0, 1, 2 都进入 Locomotion，Blend 参数控制动画
+            // 注意：使用 BaseState 值作为条件，而不是立即无条件转换
             _transitions[BaseState.Idle] = new List<StateTransition>
             {
-                new StateTransition(BaseState.Move, d => d.MoveDir.sqrMagnitude > 0.01f, 1),
-                new StateTransition(BaseState.Sprint, d => d.MoveDir.sqrMagnitude > 0.01f && d.IsSprint, 2),
+                new StateTransition(BaseState.Locomotion, d => true, 0),  // 进入 Locomotion
                 new StateTransition(BaseState.JumpStart, d => d.RequestJump, 10),
                 new StateTransition(BaseState.Death, d => d.IsDead, 100)
             };
 
-            // Move
             _transitions[BaseState.Move] = new List<StateTransition>
             {
-                new StateTransition(BaseState.Idle, d => d.MoveDir.sqrMagnitude < 0.01f, 1),
-                new StateTransition(BaseState.Sprint, d => d.IsSprint, 2),
+                new StateTransition(BaseState.Locomotion, d => true, 0),  // 进入 Locomotion
                 new StateTransition(BaseState.JumpStart, d => d.RequestJump, 10),
                 new StateTransition(BaseState.Death, d => d.IsDead, 100)
             };
 
-            // Sprint
             _transitions[BaseState.Sprint] = new List<StateTransition>
             {
-                new StateTransition(BaseState.Idle, d => d.MoveDir.sqrMagnitude < 0.01f, 1),
-                new StateTransition(BaseState.Move, d => !d.IsSprint, 2),
+                new StateTransition(BaseState.Locomotion, d => true, 0),  // 进入 Locomotion
+                new StateTransition(BaseState.JumpStart, d => d.RequestJump, 10),
+                new StateTransition(BaseState.Death, d => d.IsDead, 100)
+            };
+
+            // ========== Locomotion 状态（Blend Tree）==========
+            // 保持 Locomotion 状态，Blend 参数由代码控制
+            _transitions[BaseState.Locomotion] = new List<StateTransition>
+            {
                 new StateTransition(BaseState.JumpStart, d => d.RequestJump, 10),
                 new StateTransition(BaseState.Death, d => d.IsDead, 100)
             };
@@ -82,12 +87,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 new StateTransition(BaseState.Death, d => d.IsDead, 100)
             };
 
-            // JumpEnd
+            // JumpEnd → Locomotion（落地后返回 Locomotion 状态）
             _transitions[BaseState.JumpEnd] = new List<StateTransition>
             {
-                new StateTransition(BaseState.Idle, d => true, 1),
-                new StateTransition(BaseState.Move, d => d.MoveDir.sqrMagnitude > 0.01f, 2),
-                new StateTransition(BaseState.Sprint, d => d.MoveDir.sqrMagnitude > 0.01f && d.IsSprint, 3)
+                new StateTransition(BaseState.Locomotion, d => true, 1)
             };
 
             // Death
@@ -96,10 +99,9 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public BaseState? Evaluate(BaseState currentFSMState, CharacterData data)
         {
-            // 使用 CharacterData.BaseState 作为当前状态，而不是 FSM 内部状态
-            BaseState currentDataState = data.BaseState;
-
-            if (!_transitions.TryGetValue(currentDataState, out var transitions))
+            // 使用 FSM 内部状态 currentFSMState 来评估转换
+            // 不依赖 data.BaseState，避免外部修改导致的震荡
+            if (!_transitions.TryGetValue(currentFSMState, out var transitions))
                 return null;
 
             transitions.Sort((a, b) => b.Priority.CompareTo(a.Priority));
@@ -111,7 +113,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             }
 
             // 如果没有匹配的条件，保持当前状态
-            return currentDataState;
+            return currentFSMState;
         }
 
         public bool CanEnter(BaseState target, CharacterData data)
@@ -122,6 +124,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 case BaseState.Move:
                 case BaseState.Sprint:
                     return data.IsGrounded && !data.IsDead;
+
+                case BaseState.Locomotion:
+                    // Locomotion 可以从任何状态进入（除了死亡）
+                    return !data.IsDead;
 
                 case BaseState.JumpStart:
                     return data.IsGrounded && !data.IsDead && data.RequestJump;

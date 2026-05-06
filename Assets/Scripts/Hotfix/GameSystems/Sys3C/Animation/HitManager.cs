@@ -17,14 +17,12 @@ namespace Hotfix.GameSystems.Sys3C.Animation
             _driver.TriggerHit();
             _driver.SetIsHit(true);
             _driver.SetHitLayerWeight(1f);
-            Debug.Log("[HitManager] TriggerHit called");
         }
 
         public void OnHitCompleted()
         {
             _driver.SetIsHit(false);
             _driver.SetHitLayerWeight(0f);
-            Debug.Log("[HitManager] OnHitCompleted");
         }
 
         public void HandleHitCompleted(string stateName)

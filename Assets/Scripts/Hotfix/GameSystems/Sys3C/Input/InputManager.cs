@@ -60,12 +60,6 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 Vector3 worldMoveDir = ConvertToWorldDirection(moveInput, cameraForward);
                 Quaternion targetRotation = Quaternion.LookRotation(worldMoveDir);
 
-                if (Time.frameCount % 30 == 0)
-                {
-                    Debug.Log("[Input] MoveInput=" + moveInput + ", worldMoveDir=" + worldMoveDir
-                        + ", sprint=" + sprintHeld);
-                }
-
                 return new MoveCommand
                 {
                     MoveDir = worldMoveDir,

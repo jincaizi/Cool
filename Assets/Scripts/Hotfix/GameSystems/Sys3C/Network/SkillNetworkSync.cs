@@ -125,7 +125,6 @@ namespace Hotfix.GameSystems.Sys3C.Network
         {
             // 通过 NetworkClient 发送
             // 这里需要实际的序列化实现
-            Debug.Log($"[SkillSync] Sending sync: SkillId={message.ActiveSkills[0].SkillId}, State={message.ActiveSkills[0].SubState}");
         }
 
         /// <summary>
@@ -161,7 +160,6 @@ namespace Hotfix.GameSystems.Sys3C.Network
             if (remoteState.SkillId == 0)
             {
                 // 远程技能结束
-                Debug.Log($"[SkillSync] Remote skill ended");
                 return;
             }
 
@@ -169,7 +167,6 @@ namespace Hotfix.GameSystems.Sys3C.Network
             if (_currentRemoteState.SkillId != remoteState.SkillId ||
                 _currentRemoteState.SubState != remoteState.SubState)
             {
-                Debug.Log($"[SkillSync] Remote state changed: SkillId={remoteState.SkillId}, State={remoteState.SubState}");
                 OnRemoteSkillStateChanged?.Invoke(remoteState.SkillId, remoteState.SubState);
             }
 
@@ -182,7 +179,6 @@ namespace Hotfix.GameSystems.Sys3C.Network
         /// </summary>
         public void RequestServerInterrupt(InterruptionSource source)
         {
-            Debug.Log($"[SkillSync] RequestServerInterrupt: {source}");
             // 发送中断请求到服务器
             // 服务器处理后广播给其他客户端
         }
@@ -270,7 +266,6 @@ namespace Hotfix.GameSystems.Sys3C.Network
                 TargetEntityId = targetEntityId
             };
 
-            Debug.Log($"[SkillEvent] Send: SkillId={skillId}, Type={eventType}");
             // 通过网络发送消息
         }
 
@@ -281,7 +276,6 @@ namespace Hotfix.GameSystems.Sys3C.Network
         {
             if (message.PlayerId == _playerId) return;
 
-            Debug.Log($"[SkillEvent] Received: SkillId={message.SkillId}, Type={message.EventType}");
             _eventQueue.Enqueue(message);
         }
 
@@ -334,7 +328,6 @@ namespace Hotfix.GameSystems.Sys3C.Network
         {
             _syncComponent.OnRemoteSkillStateChanged += (skillId, subState) =>
             {
-                Debug.Log($"[SkillNetworkManager] Remote skill changed: {skillId} -> {subState}");
             };
         }
 

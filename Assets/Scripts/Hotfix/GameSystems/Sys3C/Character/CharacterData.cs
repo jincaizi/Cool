@@ -10,6 +10,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         Idle = 0,
         Move = 1,
         Sprint = 2,
+        Locomotion = 7,  // 新增：Blend Tree 统一入口状态
         JumpStart = 3,
         JumpAir = 4,
         JumpEnd = 5,
@@ -46,6 +47,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public bool IsDead;
         public bool RequestJump;       // 跳跃请求标记
         public bool HasLeftGround;     // 是否已离地（用于受击判定：地面受击 vs 空中受击）
+        public float MovementSpeed;    // 当前移动速度（0-1，用于 Blend Tree）
+        public float MoveMagnitude;    // 移动方向幅度（用于 Blend Tree）
     }
 
     /// <summary>

@@ -2432,7 +2432,7 @@ MonoBehaviour:
   Animator: {fileID: 9036980633323257398}
   GroundLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
 --- !u!143 &4734815638318692212
 CharacterController:
   m_ObjectHideFlags: 0

@@ -77,8 +77,9 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 _skillStateTimer += deltaTime;
                 if (_skillStateTimer >= SKILL_TIMEOUT)
                 {
-                    Debug.LogWarning("[AttackFSM] Skill state timeout, forcing return to idle");
                     ReturnToIdle();
+                    OnSkillCompleted?.Invoke();
+                    OnSkillOrAttackEnded?.Invoke();
                 }
             }
 
@@ -88,7 +89,6 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 _skillRDuration += deltaTime;
                 if (_skillRMaxDuration > 0 && _skillRDuration >= _skillRMaxDuration)
                 {
-                    Debug.Log($"[AttackFSM] SkillR duration reached max ({_skillRMaxDuration}s), canceling");
                     CancelSkillR();
                 }
             }
@@ -120,22 +120,21 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 _currentState = AttackState.Attack1;
                 _comboCount = 1;
                 _driver.SetAttackState(_currentState);
+                _driver.SetAttackLayerWeight(1f);
                 _driver.TriggerAttack();
-                Debug.Log("[AttackFSM] RequestAttack: Attack1");
             }
             else if (_currentState == AttackState.Attack1 && _comboUnlocked)
             {
                 _currentState = AttackState.Attack2;
                 _comboCount = 2;
                 _driver.SetAttackState(_currentState);
+                _driver.SetAttackLayerWeight(1f);
                 _driver.TriggerAttack();
-                Debug.Log("[AttackFSM] RequestAttack: Attack2");
             }
         }
 
         public void RequestSkillQ()
         {
-            Debug.Log($"[AttackFSM] RequestSkillQ called, current state: {_currentState}");
             if (_currentState == AttackState.Idle || _currentState == AttackState.Attack1 || _currentState == AttackState.Attack2)
             {
                 _currentState = AttackState.SkillQ;
@@ -143,18 +142,13 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 _framesInState = 0;
                 _comboUnlocked = false;
                 _driver.SetAttackState(_currentState);
+                _driver.SetAttackLayerWeight(1f);
                 _driver.TriggerSkillQ();
-                Debug.Log("[AttackFSM] RequestSkillQ: changed to SkillQ");
-            }
-            else
-            {
-                Debug.Log("[AttackFSM] RequestSkillQ blocked, current state is not Attack1/2");
             }
         }
 
         public void RequestSkillR(bool isGrounded)
         {
-            Debug.Log($"[AttackFSM] RequestSkillR called, current state: {_currentState}, isGrounded: {isGrounded}");
             if (!isGrounded) return;
 
             if (_currentState == AttackState.Idle || _currentState == AttackState.Attack1 || _currentState == AttackState.Attack2)
@@ -166,13 +160,8 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 _isSkillRActive = true;
                 _skillRDuration = 0f;
                 _driver.SetAttackState(_currentState);
+                _driver.SetAttackLayerWeight(1f);
                 _driver.TriggerSkillR();
-
-                Debug.Log("[AttackFSM] RequestSkillR: changed to SkillR_Start");
-            }
-            else
-            {
-                Debug.Log("[AttackFSM] RequestSkillR blocked, current state is not Idle/Attack1/2");
             }
         }
 
@@ -199,7 +188,6 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         {
             if (_currentState == AttackState.SkillR_Start || _currentState == AttackState.SkillR_Loop)
             {
-                Debug.Log("[AttackFSM] CancelSkillR called");
                 _isSkillRActive = false;
                 _skillRDuration = 0f;
                 ReturnToIdle();
@@ -215,10 +203,9 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         {
             if (_currentState == AttackState.SkillR_Start && _isSkillRActive)
             {
-                Debug.Log("[AttackFSM] SkillR_Start completed, entering SkillR_Loop");
                 _currentState = AttackState.SkillR_Loop;
                 _driver.SetAttackState(_currentState);
-                // SkillR_Loop动画会循环播放
+                _driver.SetAttackLayerWeight(1f);
             }
         }
 
@@ -253,7 +240,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             {
                 _currentState = AttackState.Idle;
                 _driver.SetAttackState(_currentState);
-                Debug.Log("[AttackFSM] ReturnToIdle");
+                _driver.SetAttackLayerWeight(0f);
             }
         }
 

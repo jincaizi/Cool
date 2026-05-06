@@ -97,8 +97,6 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         /// </summary>
         public void OnAnimationEnd(string stateName)
         {
-            Debug.Log($"[HitFSM] AnimationEnd: {stateName}");
-
             // 根据动画名称处理
             switch (stateName)
             {
@@ -375,7 +373,6 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     break;
             }
 
-            Debug.Log($"[HitFSM] {previous} -> {target} (duration: {_stateTimer}s)");
             OnStateChanged?.Invoke(target);
         }
 

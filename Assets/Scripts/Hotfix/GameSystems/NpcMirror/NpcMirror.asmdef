@@ -1,0 +1,14 @@
+{
+    "name": "Hotfix.GameSystems.NpcMirror",
+    "rootNamespace": "Hotfix.GameSystems.NpcMirror",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

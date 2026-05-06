@@ -147,7 +147,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
         {
             _bridge = bridge;
             _prediction = new NetworkPrediction();
-            Debug.Log("[CharacterController] Network initialized");
         }
 
         public void RequestJump()
@@ -303,7 +302,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
                     _data.IsGrounded = false;
                     _data.HasLeftGround = true;
                     OnLeftGround?.Invoke();
-                    Debug.Log("[CharacterController] LeftGround event triggered");
                 }
                 _leftGroundTriggerTime = -1f;
             }
@@ -348,6 +346,27 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.VerticalVelocity = _velocity.y;
             _data.IsSprint = command.IsSprint;
             _data.MoveDir = command.MoveDir;
+
+            // 计算移动幅度（用于 Blend Tree）
+            _data.MoveMagnitude = command.MoveDir.magnitude;
+
+            // 计算移动速度（0-1，用于 Blend Tree 混合）
+            // Blend Tree 阈值：0=Idle, 0.5=Walk/Move, 1=Sprint
+            if (command.MoveDir.sqrMagnitude < 0.01f)
+            {
+                // 不移动
+                _data.MovementSpeed = 0f;
+            }
+            else if (command.IsSprint)
+            {
+                // 冲刺：Blend = 1.0
+                _data.MovementSpeed = 1f;
+            }
+            else
+            {
+                // 普通移动/Walk：Blend = 0.5
+                _data.MovementSpeed = 0.5f;
+            }
 
             // 更新护盾和状态
             _shieldSystemAdapter?.Update(Time.deltaTime);
@@ -459,8 +478,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             {
                 float currentHealth = StatsAdapter.GetAttribute(AttributeType.Health);
                 StatsAdapter.SetBaseAttribute(AttributeType.Health, Mathf.Max(0, currentHealth - actualDamage));
-
-                Debug.Log($"[CharacterController] TakeDamage: {actualDamage} (absorbed: {damage - actualDamage})");
 
                 // 检查死亡
                 if (StatsAdapter.GetAttribute(AttributeType.Health) <= 0)
