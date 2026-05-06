@@ -1,5 +1,5 @@
 using UnityEngine;
-using Hotfix.GameSystems.Skills.Effect;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -7,63 +7,97 @@ namespace Hotfix.GameSystems.Monster
     public class MonsterConfig : ScriptableObject
     {
         [Header("Basic")]
-        [Tooltip("怪物的唯一标识符，用于生成和寻路")]
+        [Tooltip("怪物的唯一标识符")]
         public string MonsterId;
-
-        [Tooltip("怪物在UI中显示的名称")]
+        [Tooltip("怪物显示名称")]
         public string DisplayName;
-
-        [Tooltip("怪物预制体，必须包含 Animator、NavMeshAgent 等组件")]
+        [Tooltip("怪物预制体")]
         public GameObject Prefab;
 
         [Header("Stats")]
         [Tooltip("最大生命值")]
         public float MaxHP = 100;
-
-        [Tooltip("基础攻击力")]
+        [Tooltip("攻击力")]
         public float AttackPower = 20;
-
-        [Tooltip("防御力，用于减伤计算")]
+        [Tooltip("防御力")]
         public float Defense = 10;
-
-        [Tooltip("移动速度 (NavMeshAgent.speed)")]
+        [Tooltip("移动速度")]
         public float MoveSpeed = 3.5f;
 
         [Header("AI Ranges")]
-        [Tooltip("检测范围，超过此距离开始追踪玩家")]
+        [Tooltip("检测玩家的范围")]
         public float DetectRange = 10f;
-
-        [Tooltip("脱离战斗范围，超过此距离停止追踪")]
+        [Tooltip("脱离战斗的范围")]
         public float LeaveRange = 15f;
-
-        [Tooltip("攻击距离，接近此距离时发动攻击")]
+        [Tooltip("攻击距离")]
         public float AttackRange = 2f;
-
-        [Tooltip("攻击冷却时间 (秒)")]
+        [Tooltip("攻击冷却时间(秒)")]
         public float AttackCooldown = 1.5f;
 
         [Header("Patrol")]
-        [Tooltip("巡逻半径，idle状态下的随机移动范围")]
+        [Tooltip("巡逻半径")]
         public float PatrolRadius = 5f;
-
-        [Tooltip("idle状态持续时间 (秒)")]
+        [Tooltip("Idle状态持续时间(秒)")]
         public float IdleDuration = 2f;
 
-        [Header("Combat")]
-        [Tooltip("每次攻击的伤害数据，包含伤害值、暴击率等")]
-        public DamageData AttackDamage;
+        [Header("Attack")]
+        [Tooltip("可用攻击动画数量")]
+        public int AttackAnimCount = 1;
+        [Tooltip("各攻击动画的随机权重")]
+        public float[] AttackWeights = { 1f };
+        [Tooltip("攻击动画速度")]
+        public float AttackAnimSpeed = 1f;
 
-        [Tooltip("命中时的击退力")]
-        public float KnockbackForce;
+        [Header("Attack Shape")]
+        [Tooltip("攻击判定形状配置")]
+        public AttackShapeConfig AttackShape;
 
-        [Tooltip("命中后硬直持续时间 (秒)")]
-        public float HitStunDuration = 0.3f;
+        [Header("Attack Effects")]
+        [Tooltip("每个攻击变体的效果列表")]
+        public AttackEffectConfig[] AttackEffects;
+
+        [Header("Defend")]
+        [Tooltip("是否启用防御行为(TurtleShell)")]
+        public bool EnableDefend;
+        [Tooltip("HP低于此比例触发防御")]
+        public float DefendHPThreshold = 0.5f;
+        [Tooltip("追击超过此时间触发防御(秒)")]
+        public float DefendChaseTimeThreshold = 3f;
+        [Tooltip("防御持续时间(秒)")]
+        public float DefendDuration = 2f;
+        [Tooltip("正面减伤比例(0-1)")]
+        public float DefendDamageReduction = 0.8f;
+        [Tooltip("有效防御角度")]
+        public float DefendAngle = 180f;
+        [Tooltip("格挡N次后触发反击")]
+        public int DefendBlockCountToCounter = 2;
+        [Tooltip("反击伤害倍率")]
+        public float DefendCounterDamageMultiplier = 1.5f;
+        [Tooltip("防御冷却时间(秒)")]
+        public float DefendCooldown = 8f;
+
+        [Header("Taunt")]
+        [Tooltip("是否启用嘲讽行为(Slime)")]
+        public bool EnableTaunt;
+        [Tooltip("攻击落空后触发嘲讽的概率")]
+        public float TauntChance = 0.6f;
+        [Tooltip("嘲讽动画持续时间(秒)")]
+        public float TauntDuration = 1.5f;
+
+        [Header("Alert")]
+        [Tooltip("警戒感知距离")]
+        public float AlertRange = 15f;
+
+        [Header("Movement")]
+        [Tooltip("追击时使用跑步动画")]
+        public bool ChaseAnimIsRun = true;
+        [Tooltip("转身速度")]
+        public float RotationSpeed = 10f;
 
         [Header("Loot & Death")]
-        [Tooltip("掉落表，决定死亡后掉落哪些物品")]
+        [Tooltip("掉落表")]
         public MonsterLootTable LootTable;
-
-        [Tooltip("死亡动画完成后销毁延迟 (秒)")]
+        [Tooltip("死亡后销毁延迟(秒)")]
         public float DeathDestroyDelay = 3f;
     }
 }
