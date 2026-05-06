@@ -3,8 +3,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
-using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Sys3C.Core;
+using Hotfix.GameSystems.Combat;
+using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -13,8 +14,8 @@ namespace Hotfix.GameSystems.Monster
         [Header("Components")]
         public Animator Animator;
         public NavMeshAgent NavAgent;
-        public MonsterHitZone HitZone;
-        public MonsterAttackHitbox AttackHitbox;
+        public HitZone HitZone;
+        public AttackHitbox AttackHitbox;
 
         private MonsterConfig _config;
         private MonsterStats _stats;
@@ -40,22 +41,22 @@ namespace Hotfix.GameSystems.Monster
             HitZone.Init(this);
 
             _stats.OnDeath += HandleDeath;
-            _stats.OnHPChanged += (cur, max) => { /* HUD update hook */ };
+            _stats.OnHPChanged += (cur, max) => { };
 
             _ai.OnDeathComplete += () => StartCoroutine(DeathSequence());
-            _ai.OnAttackFrame += () =>
+            _ai.OnAttackHitboxActivate += (effect) =>
             {
-                if (AttackHitbox != null && config.AttackDamage != null)
-                    AttackHitbox.Activate(config.AttackDamage);
+                if (AttackHitbox != null && effect != null)
+                {
+                    AttackHitbox.Activate(effect);
+                    HitZone.ResetHits();
+                }
             };
-        }
-
-        public void TakeDamageFromHitbox(AttackHitboxData hitboxData, Vector3 hitDirection)
-        {
-            if (_stats.IsDead || hitboxData == null || hitboxData.DamageData == null) return;
-
-            _stats.TakeDamage(hitboxData.DamageData);
-            _ai.NotifyHit(hitboxData.DamageData, hitDirection);
+            _ai.OnAttackHitboxDeactivate += () =>
+            {
+                if (AttackHitbox != null)
+                    AttackHitbox.Deactivate();
+            };
         }
 
         private void Update()
@@ -67,7 +68,6 @@ namespace Hotfix.GameSystems.Monster
         void IDamageable.TakeDamage(DamageData data, Vector3 hitDirection)
         {
             if (_stats.IsDead) return;
-
             _stats.TakeDamage(data);
             _ai.NotifyHit(data, hitDirection);
         }
