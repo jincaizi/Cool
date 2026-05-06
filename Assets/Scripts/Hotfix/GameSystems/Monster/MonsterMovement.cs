@@ -7,6 +7,7 @@ namespace Hotfix.GameSystems.Monster
     {
         private readonly NavMeshAgent _agent;
         private readonly Transform _self;
+        private readonly MonsterConfig _config;
 
         public bool HasReachedDestination =>
             !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.1f;
@@ -15,6 +16,7 @@ namespace Hotfix.GameSystems.Monster
         {
             _agent = agent;
             _self = self;
+            _config = config;
             _agent.speed = config.MoveSpeed;
             _agent.stoppingDistance = config.AttackRange * 0.8f;
         }
@@ -57,7 +59,7 @@ namespace Hotfix.GameSystems.Monster
                 _self.rotation = Quaternion.Slerp(
                     _self.rotation,
                     Quaternion.LookRotation(dir),
-                    10f * Time.deltaTime);
+                    _config.RotationSpeed * Time.deltaTime);
             }
         }
     }

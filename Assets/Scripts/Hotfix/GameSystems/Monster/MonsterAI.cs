@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Monster
@@ -15,7 +16,7 @@ namespace Hotfix.GameSystems.Monster
         Death = 5,
         Defend = 6,
         Taunt = 7,
-        Alert = 8
+        Alert = 8,
     }
 
     public class MonsterAI
@@ -32,7 +33,16 @@ namespace Hotfix.GameSystems.Monster
         private float _stateTimer;
         private float _attackCooldown;
         private int _patrolIndex;
+        private int _currentAttackIndex;
+        private bool _attackHitTarget;
+        private float _defendChaseTimer;
+
         private readonly List<Vector3> _patrolPoints = new();
+
+        private DefendBehaviour _defend;
+        private TauntBehaviour _taunt;
+        private AlertBehaviour _alert;
+        private IAttackShape _attackShape;
 
         private Transform _target;
         public Transform Target
@@ -49,13 +59,18 @@ namespace Hotfix.GameSystems.Monster
         public MonsterAIState CurrentState => _state;
 
         public event Action OnDeathComplete;
-        public event Action OnAttackFrame;
+        public event Action<AttackEffectConfig> OnAttackHitboxActivate;
+        public event Action OnAttackHitboxDeactivate;
         public event Action<MonsterAIState, MonsterAIState> OnStateChanged;
 
-        private static readonly int HASH_State = Animator.StringToHash("AIState");
+        private static readonly int HASH_AIState = Animator.StringToHash("AIState");
         private static readonly int HASH_Attack = Animator.StringToHash("Attack");
+        private static readonly int HASH_AttackIndex = Animator.StringToHash("AttackIndex");
         private static readonly int HASH_Hit = Animator.StringToHash("Hit");
         private static readonly int HASH_Death = Animator.StringToHash("Death");
+        private static readonly int HASH_Taunt = Animator.StringToHash("Taunt");
+        private static readonly int HASH_Defend = Animator.StringToHash("IsDefending");
+        private static readonly int HASH_Speed = Animator.StringToHash("Speed");
 
         public MonsterAI(
             MonsterMovement movement, MonsterStats stats, Animator animator,
@@ -71,6 +86,16 @@ namespace Hotfix.GameSystems.Monster
             _state = MonsterAIState.Idle;
             _stateTimer = config.IdleDuration;
             GeneratePatrolPoints();
+            BuildBehaviours();
+        }
+
+        private void BuildBehaviours()
+        {
+            if (_config.EnableDefend)
+                _defend = new DefendBehaviour();
+            if (_config.EnableTaunt)
+                _taunt = new TauntBehaviour();
+            _alert = new AlertBehaviour();
         }
 
         public void Update(float deltaTime)
@@ -80,6 +105,9 @@ namespace Hotfix.GameSystems.Monster
             _attackCooldown -= deltaTime;
             _stateTimer -= deltaTime;
 
+            if (_state == MonsterAIState.Chase)
+                _defendChaseTimer += deltaTime;
+
             EvaluateTransitions();
             ExecuteState(deltaTime);
         }
@@ -88,10 +116,30 @@ namespace Hotfix.GameSystems.Monster
         {
             if (_state == MonsterAIState.Death) return;
 
+            if (_state == MonsterAIState.Defend && _defend != null)
+            {
+                Vector3 dirToAttacker = hitDirection;
+                float angle = Vector3.Angle(_self.forward, -dirToAttacker);
+                if (angle < _config.DefendAngle * 0.5f)
+                {
+                    var ctx = BuildContext();
+                    ctx.DefendBlockCount++;
+                }
+            }
+
             _preHitState = _state == MonsterAIState.Hit ? _preHitState : _state;
-            _stateTimer = _config.HitStunDuration;
-            TransitionTo(MonsterAIState.Hit);
-            _animator.SetTrigger(HASH_Hit);
+
+            if (_state == MonsterAIState.Defend)
+            {
+                _animator.SetTrigger(HASH_Hit);
+            }
+            else
+            {
+                _stateTimer = 0.3f;
+                TransitionTo(MonsterAIState.Hit);
+                _animator.SetTrigger(HASH_Hit);
+            }
+
             _movement.Stop();
         }
 
@@ -107,6 +155,19 @@ namespace Hotfix.GameSystems.Monster
             float distToTarget = Target != null
                 ? Vector3.Distance(_self.position, Target.position)
                 : float.MaxValue;
+
+            if (_state != MonsterAIState.Defend
+                && _state != MonsterAIState.Taunt
+                && _state != MonsterAIState.Alert
+                && _state != MonsterAIState.Hit
+                && _state != MonsterAIState.Death)
+            {
+                if (_defend != null && _defend.CanEnter(BuildContext()))
+                {
+                    TransitionTo(MonsterAIState.Defend);
+                    return;
+                }
+            }
 
             switch (_state)
             {
@@ -134,10 +195,37 @@ namespace Hotfix.GameSystems.Monster
                     break;
 
                 case MonsterAIState.Attack:
-                    if (distToTarget > _config.LeaveRange)
-                        ReturnToSpawn();
-                    else if (distToTarget > _config.AttackRange)
-                        TransitionTo(MonsterAIState.Chase);
+                    if (_stateTimer <= 0)
+                    {
+                        if (_taunt != null && _taunt.CanEnter(BuildContext()))
+                            TransitionTo(MonsterAIState.Taunt);
+                        else
+                            TransitionTo(MonsterAIState.Chase);
+                    }
+                    break;
+
+                case MonsterAIState.Defend:
+                    if (_stateTimer <= 0)
+                    {
+                        if (_defend != null && _defend.IsCounterReady)
+                            TransitionTo(MonsterAIState.Attack);
+                        else if (distToTarget < _config.AttackRange && _attackCooldown <= 0)
+                            TransitionTo(MonsterAIState.Attack);
+                        else
+                            TransitionTo(MonsterAIState.Chase);
+                    }
+                    break;
+
+                case MonsterAIState.Taunt:
+                    if (_stateTimer <= 0)
+                    {
+                        if (distToTarget < _config.AttackRange)
+                            TransitionTo(MonsterAIState.Attack);
+                        else if (Target != null)
+                            TransitionTo(MonsterAIState.Chase);
+                        else
+                            TransitionTo(MonsterAIState.Idle);
+                    }
                     break;
 
                 case MonsterAIState.Hit:
@@ -153,18 +241,29 @@ namespace Hotfix.GameSystems.Monster
         {
             switch (_state)
             {
+                case MonsterAIState.Idle:
+                    _movement.Stop();
+                    break;
+                case MonsterAIState.Patrol:
+                    break;
                 case MonsterAIState.Chase:
                     if (Target != null)
                     {
                         _movement.Chase(Target);
                         _movement.LookAt(Target.position);
+                        _animator.SetFloat(HASH_Speed, _config.ChaseAnimIsRun ? 2f : 1f);
                     }
                     break;
-
                 case MonsterAIState.Attack:
                     _movement.Stop();
                     if (Target != null)
                         _movement.LookAt(Target.position);
+                    break;
+                case MonsterAIState.Defend:
+                    break;
+                case MonsterAIState.Taunt:
+                    break;
+                case MonsterAIState.Hit:
                     break;
             }
         }
@@ -173,32 +272,133 @@ namespace Hotfix.GameSystems.Monster
         {
             if (_state == newState) return;
 
+            ExitBehaviourForState(_state);
+
             var old = _state;
             _state = newState;
-            _animator.SetInteger(HASH_State, (int)newState);
+            _animator.SetInteger(HASH_AIState, (int)newState);
             OnStateChanged?.Invoke(old, newState);
 
             switch (newState)
             {
                 case MonsterAIState.Idle:
                     _stateTimer = _config.IdleDuration;
+                    _animator.SetFloat(HASH_Speed, 0);
                     break;
 
                 case MonsterAIState.Patrol:
                     _movement.PatrolTo(_patrolPoints[_patrolIndex]);
                     _patrolIndex = (_patrolIndex + 1) % _patrolPoints.Count;
+                    _animator.SetFloat(HASH_Speed, 1f);
                     break;
 
                 case MonsterAIState.Chase:
+                    _defendChaseTimer = 0;
                     _movement.Resume();
+                    _animator.SetFloat(HASH_Speed, 2f);
                     break;
 
                 case MonsterAIState.Attack:
                     _attackCooldown = _config.AttackCooldown;
+                    _stateTimer = 0.5f;
+                    _currentAttackIndex = PickAttackIndex();
+                    _animator.SetInteger(HASH_AttackIndex, _currentAttackIndex);
                     _animator.SetTrigger(HASH_Attack);
-                    OnAttackFrame?.Invoke();
+
+                    var effect = GetCurrentEffect();
+                    _attackHitTarget = ResolveAttack(effect);
+                    OnAttackHitboxActivate?.Invoke(effect);
+                    break;
+
+                case MonsterAIState.Defend:
+                    _stateTimer = _config.DefendDuration;
+                    EnterBehaviourForState(MonsterAIState.Defend);
+                    break;
+
+                case MonsterAIState.Taunt:
+                    _stateTimer = _config.TauntDuration;
+                    EnterBehaviourForState(MonsterAIState.Taunt);
+                    break;
+
+                case MonsterAIState.Alert:
+                    EnterBehaviourForState(MonsterAIState.Alert);
                     break;
             }
+        }
+
+        private bool ResolveAttack(AttackEffectConfig effect)
+        {
+            if (effect == null) return false;
+            int mask = LayerMask.GetMask("Character");
+            var shape = AttackShapeFactory.Create(_config.AttackShape);
+            var targets = shape.Resolve(_self.position, _self.forward, mask);
+            foreach (var t in targets)
+            {
+                Vector3 dir = (t.Transform.position - _self.position).normalized;
+                t.TakeDamage(effect.Damage, dir);
+            }
+            return targets.Count > 0;
+        }
+
+        private int PickAttackIndex()
+        {
+            if (_config.AttackAnimCount <= 1) return 0;
+            if (_config.AttackWeights == null || _config.AttackWeights.Length == 0) return 0;
+            float roll = UnityEngine.Random.value;
+            float cumulative = 0;
+            for (int i = 0; i < _config.AttackWeights.Length && i < _config.AttackAnimCount; i++)
+            {
+                cumulative += _config.AttackWeights[i];
+                if (roll <= cumulative) return i;
+            }
+            return 0;
+        }
+
+        private AttackEffectConfig GetCurrentEffect()
+        {
+            if (_config.AttackEffects == null || _config.AttackEffects.Length == 0)
+                return new AttackEffectConfig
+                {
+                    Damage = DamageData.CreateDefault(_config.AttackPower),
+                };
+            int idx = Mathf.Min(_currentAttackIndex, _config.AttackEffects.Length - 1);
+            return _config.AttackEffects[idx];
+        }
+
+        private MonsterAIContext BuildContext()
+        {
+            return new MonsterAIContext
+            {
+                Self = _self,
+                Target = _target,
+                Animator = _animator,
+                Stats = _stats,
+                Movement = _movement,
+                Config = _config,
+                DeltaTime = Time.deltaTime,
+                StateTimer = _stateTimer,
+                CurrentAttackIndex = _currentAttackIndex,
+                AttackHitTarget = _attackHitTarget,
+                AttackShape = _attackShape,
+                DefendBlockCount = 0,
+                DefendChaseTimer = _defendChaseTimer,
+            };
+        }
+
+        private void EnterBehaviourForState(MonsterAIState state)
+        {
+            var ctx = BuildContext();
+            if (state == MonsterAIState.Defend) _defend?.Enter(ctx);
+            if (state == MonsterAIState.Taunt) _taunt?.Enter(ctx);
+            if (state == MonsterAIState.Alert) _alert?.Enter(ctx);
+        }
+
+        private void ExitBehaviourForState(MonsterAIState state)
+        {
+            var ctx = BuildContext();
+            if (state == MonsterAIState.Defend) _defend?.Exit(ctx);
+            if (state == MonsterAIState.Taunt) _taunt?.Exit(ctx);
+            if (state == MonsterAIState.Alert) _alert?.Exit(ctx);
         }
 
         private void RecoverFromHit()
@@ -227,7 +427,6 @@ namespace Hotfix.GameSystems.Monster
         {
             _patrolPoints.Clear();
             if (_config.PatrolRadius <= 0) return;
-
             for (int i = 0; i < 3; i++)
             {
                 float angle = (360f / 3) * i * Mathf.Deg2Rad;
