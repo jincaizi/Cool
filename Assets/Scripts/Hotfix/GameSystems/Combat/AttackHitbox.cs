@@ -17,11 +17,23 @@ namespace Hotfix.GameSystems.Combat
             gameObject.SetActive(false);
         }
 
-        public void Activate(DamageData damageData)
+        public void Activate(AttackEffectConfig effectConfig)
         {
-            CurrentData = new AttackHitboxData { DamageData = damageData };
+            var dmg = effectConfig?.Damage ?? DamageData.CreateDefault(10f);
+            CurrentData = new AttackHitboxData
+            {
+                DamageData = dmg,
+                KnockbackForce = effectConfig?.KnockbackForce ?? 0,
+                LaunchForce = effectConfig?.LaunchForce ?? 0,
+                StunDuration = effectConfig?.StunDuration ?? 0,
+            };
             IsActive = true;
             gameObject.SetActive(true);
+        }
+
+        public void Activate(DamageData damageData)
+        {
+            Activate(new AttackEffectConfig { Damage = damageData });
         }
 
         public void Deactivate()
@@ -30,10 +42,7 @@ namespace Hotfix.GameSystems.Combat
             gameObject.SetActive(false);
         }
 
-        public void TriggerHit()
-        {
-            // 命中触发逻辑，根据需求实现
-        }
+        public void TriggerHit() { }
 
         public Bounds GetBounds()
         {
