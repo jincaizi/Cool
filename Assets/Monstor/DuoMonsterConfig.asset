@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4181ed7593b64e14baffb981a971546f, type: 3}
   m_Name: DuoMonsterConfig
   m_EditorClassIdentifier: 
-  MonsterId: 
-  DisplayName: 
+  MonsterId: 1001
+  DisplayName: DuoMon
   Prefab: {fileID: 0}
   MaxHP: 100
   AttackPower: 20
@@ -25,19 +25,31 @@ MonoBehaviour:
   AttackCooldown: 1.5
   PatrolRadius: 5
   IdleDuration: 2
-  AttackDamage:
-    _baseDamage: 0
-    _attackRatio: 1
-    _scalingAttribute: 0
-    _damageType: 0
-    _criticalRateBonus: 0
-    _criticalDamageBonus: 0
-    _isTrueDamage: 0
-    _armorPenetration: 0
-    _isDOT: 0
-    _tickInterval: 1
-    _totalTicks: 5
-  KnockbackForce: 0
-  HitStunDuration: 0.3
+  AttackAnimCount: 1
+  AttackWeights:
+  - 1
+  AttackAnimSpeed: 1
+  AttackShape:
+    Type: 0
+    Range: 0
+    Angle: 0
+    Width: 0
+    StopAtFirst: 0
+  AttackEffects: []
+  EnableDefend: 0
+  DefendHPThreshold: 0.5
+  DefendChaseTimeThreshold: 3
+  DefendDuration: 2
+  DefendDamageReduction: 0.8
+  DefendAngle: 180
+  DefendBlockCountToCounter: 2
+  DefendCounterDamageMultiplier: 1.5
+  DefendCooldown: 8
+  EnableTaunt: 0
+  TauntChance: 0.6
+  TauntDuration: 1.5
+  AlertRange: 15
+  ChaseAnimIsRun: 1
+  RotationSpeed: 10
   LootTable: {fileID: 0}
   DeathDestroyDelay: 3

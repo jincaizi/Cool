@@ -72,6 +72,10 @@ namespace Hotfix.GameSystems.Monster
         private static readonly int HASH_Defend = Animator.StringToHash("IsDefending");
         private static readonly int HASH_Speed = Animator.StringToHash("Speed");
 
+        private readonly float _idleDuration;
+        private readonly float _attackCooldownBase;
+        private readonly float _patrolRadius;
+
         public MonsterAI(
             MonsterMovement movement, MonsterStats stats, Animator animator,
             Transform self, MonsterConfig config, Vector3 spawnPoint)
@@ -83,10 +87,20 @@ namespace Hotfix.GameSystems.Monster
             _config = config;
             _spawnPoint = spawnPoint;
 
+            _idleDuration = RandomRange(config.IdleDuration, config.IdleDurationVariance);
+            _attackCooldownBase = RandomRange(config.AttackCooldown, config.AttackCooldownVariance);
+            _patrolRadius = RandomRange(config.PatrolRadius, config.PatrolRadiusVariance);
+
             _state = MonsterAIState.Idle;
-            _stateTimer = config.IdleDuration;
+            _stateTimer = _idleDuration;
             GeneratePatrolPoints();
             BuildBehaviours();
+        }
+
+        private static float RandomRange(float baseValue, float variance)
+        {
+            if (variance <= 0) return baseValue;
+            return baseValue + UnityEngine.Random.Range(-variance, variance);
         }
 
         private void BuildBehaviours()
@@ -117,16 +131,10 @@ namespace Hotfix.GameSystems.Monster
         {
             if (_target != null) return;
 
-            var sysEntry = Object.FindObjectOfType<Hotfix.GameSystems.Sys3C.Sys3CEntry>();
-            if (sysEntry != null)
-            {
-                float dist = Vector3.Distance(_self.position, sysEntry.transform.position);
-                if (dist < _config.DetectRange)
-                {
-                    _target = sysEntry.transform;
-                    return;
-                }
-            }
+            var players = Hotfix.GameSystems.Sys3C.Core.Combat.PhysicsRegistry.Instance.FindNearby(
+                _self.position, _config.DetectRange, EntityType.Player);
+            if (players.Count > 0)
+                _target = players[0];
         }
 
         public void NotifyHit(DamageData damageData, Vector3 hitDirection)
@@ -299,7 +307,7 @@ namespace Hotfix.GameSystems.Monster
             switch (newState)
             {
                 case MonsterAIState.Idle:
-                    _stateTimer = _config.IdleDuration;
+                    _stateTimer = _idleDuration;
                     _animator.SetFloat(HASH_Speed, 0);
                     break;
 
@@ -316,7 +324,7 @@ namespace Hotfix.GameSystems.Monster
                     break;
 
                 case MonsterAIState.Attack:
-                    _attackCooldown = _config.AttackCooldown;
+                    _attackCooldown = _attackCooldownBase;
                     _stateTimer = 0.5f;
                     _currentAttackIndex = PickAttackIndex();
                     _animator.SetInteger(HASH_AttackIndex, _currentAttackIndex);
@@ -443,11 +451,11 @@ namespace Hotfix.GameSystems.Monster
         private void GeneratePatrolPoints()
         {
             _patrolPoints.Clear();
-            if (_config.PatrolRadius <= 0) return;
+            if (_patrolRadius <= 0) return;
             for (int i = 0; i < 3; i++)
             {
                 float angle = (360f / 3) * i * Mathf.Deg2Rad;
-                var offset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * _config.PatrolRadius;
+                var offset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * _patrolRadius;
                 _patrolPoints.Add(_spawnPoint + offset);
             }
         }

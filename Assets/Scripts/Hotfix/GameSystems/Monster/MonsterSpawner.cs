@@ -52,12 +52,23 @@ namespace Hotfix.GameSystems.Monster
 
         private void SpawnGroupInternal(SpawnGroup group)
         {
+            var config = group.Config;
             for (int i = 0; i < group.Count; i++)
             {
-                Vector3 pos = transform.position
-                    + UnityEngine.Random.insideUnitSphere * group.SpawnRadius;
-                pos.y = transform.position.y;
-                Spawn(group.Config, pos);
+                Vector3 pos;
+                if (config != null && config.SpawnMode == SpawnMode.FixedPoints
+                    && config.FixedSpawnPositions != null && config.FixedSpawnPositions.Length > 0)
+                {
+                    int idx = i % config.FixedSpawnPositions.Length;
+                    pos = transform.position + config.FixedSpawnPositions[idx];
+                }
+                else
+                {
+                    pos = transform.position
+                        + UnityEngine.Random.insideUnitSphere * group.SpawnRadius;
+                    pos.y = transform.position.y;
+                }
+                Spawn(config, pos);
             }
         }
 

@@ -33,12 +33,18 @@ namespace Hotfix.GameSystems.Monster
         public float AttackRange = 2f;
         [Tooltip("攻击冷却时间(秒)")]
         public float AttackCooldown = 1.5f;
+        [Tooltip("攻击冷却随机变化量")]
+        public float AttackCooldownVariance = 0.3f;
 
         [Header("Patrol")]
         [Tooltip("巡逻半径")]
         public float PatrolRadius = 5f;
+        [Tooltip("巡逻半径随机变化量")]
+        public float PatrolRadiusVariance = 1f;
         [Tooltip("Idle状态持续时间(秒)")]
         public float IdleDuration = 2f;
+        [Tooltip("Idle持续时间随机变化量")]
+        public float IdleDurationVariance = 0.5f;
 
         [Header("Attack")]
         [Tooltip("可用攻击动画数量")]
@@ -94,10 +100,22 @@ namespace Hotfix.GameSystems.Monster
         [Tooltip("转身速度")]
         public float RotationSpeed = 10f;
 
+        [Header("Spawn")]
+        [Tooltip("刷新模式: RandomArea=区域内随机, FixedPoints=固定点位")]
+        public SpawnMode SpawnMode;
+        [Tooltip("固定刷新点位(仅 FixedPoints 模式)")]
+        public Vector3[] FixedSpawnPositions;
+
         [Header("Loot & Death")]
         [Tooltip("掉落表")]
         public MonsterLootTable LootTable;
         [Tooltip("死亡后销毁延迟(秒)")]
         public float DeathDestroyDelay = 3f;
+    }
+
+    public enum SpawnMode
+    {
+        RandomArea = 0,
+        FixedPoints = 1,
     }
 }

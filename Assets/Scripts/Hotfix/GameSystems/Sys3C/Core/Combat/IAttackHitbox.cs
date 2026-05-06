@@ -19,6 +19,11 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         AttackHitboxData CurrentData { get; }
 
         /// <summary>
+        /// 实例 ID，用于 HitZone 去重
+        /// </summary>
+        int GetInstanceID();
+
+        /// <summary>
         /// 激活攻击碰撞箱
         /// </summary>
         void Activate(DamageData damageData);

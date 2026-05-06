@@ -5,6 +5,7 @@ using Hotfix.GameSystems.Sys3C.Skill;
 using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Camera;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Sys3C
 {
@@ -27,6 +28,8 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void Start()
         {
+            PhysicsRegistry.Instance.Register(transform, EntityType.Player);
+
             // 验证组件引用
             if (CharacterController == null)
             {
@@ -180,6 +183,11 @@ namespace Hotfix.GameSystems.Sys3C
         private void HandleHitAnimationCallback(string stateName)
         {
             _hitManager.HandleHitCompleted(stateName);
+        }
+
+        private void OnDestroy()
+        {
+            PhysicsRegistry.Instance.Unregister(transform);
         }
     }
 }

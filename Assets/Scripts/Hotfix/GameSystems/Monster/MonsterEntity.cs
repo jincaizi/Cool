@@ -42,6 +42,8 @@ namespace Hotfix.GameSystems.Monster
             _config = config;
             _spawnPoint = spawnPoint;
 
+            PhysicsRegistry.Instance.Register(transform, EntityType.Monster);
+
             _stats = new MonsterStats(config);
             _movement = new MonsterMovement(NavAgent, transform, config);
             _ai = new MonsterAI(_movement, _stats, Animator, transform, config, spawnPoint);
@@ -71,6 +73,11 @@ namespace Hotfix.GameSystems.Monster
         {
             if (_stats == null || _stats.IsDead || _ai == null) return;
             _ai.Update(Time.deltaTime);
+        }
+
+        private void OnDestroy()
+        {
+            PhysicsRegistry.Instance.Unregister(transform);
         }
 
         void IDamageable.TakeDamage(DamageData data, Vector3 hitDirection)
