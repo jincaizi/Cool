@@ -19,22 +19,22 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         {
             var results = new List<IDamageable>();
 
+            // Registry path
             if (_registry != null)
             {
-                foreach (var et in new[] { EntityType.Player, EntityType.Monster })
+                var entityType = ResolveEntityType(targetMask);
+                var entities = _registry.FindNearby(origin, _radius, entityType);
+                foreach (var entity in entities)
                 {
-                    var entities = _registry.FindNearby(origin, _radius, et);
-                    foreach (var entity in entities)
-                    {
-                        var target = entity.GetComponentInParent<IDamageable>();
-                        if (target == null || !target.IsAlive) continue;
-                        if (results.Contains(target)) continue;
-                        results.Add(target);
-                    }
+                    var target = entity.GetComponentInParent<IDamageable>();
+                    if (target == null || !target.IsAlive) continue;
+                    if (results.Contains(target)) continue;
+                    results.Add(target);
                 }
                 return results;
             }
 
+            // Fallback: Physics
             var buffer = new Collider[32];
             int count = Physics.OverlapSphereNonAlloc(origin, _radius, buffer, targetMask);
             for (int i = 0; i < count; i++)
@@ -45,6 +45,17 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
                 results.Add(target);
             }
             return results;
+        }
+
+        private static EntityType ResolveEntityType(LayerMask mask)
+        {
+            int charLayer = LayerMask.NameToLayer("Character");
+            int monLayer = LayerMask.NameToLayer("Monster");
+            if (charLayer >= 0 && (mask.value & (1 << charLayer)) != 0)
+                return EntityType.Player;
+            if (monLayer >= 0 && (mask.value & (1 << monLayer)) != 0)
+                return EntityType.Monster;
+            return EntityType.Monster;
         }
     }
 }

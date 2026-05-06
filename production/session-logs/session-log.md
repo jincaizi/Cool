@@ -13271,3 +13271,76 @@ production/session-logs/agent-audit.log
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260507_022935
+### Commits
+437f26a feat: add IEntityRegistry/IHiDetector interfaces, PhysicsRegistry, spawn modes, AI variance, collision fix
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+---
+
+## Session End: 20260507_024411
+### Commits
+adac336 fix: search both Player and Monster types in shapes, use registered entities for FindNearby, add attack hit/miss feedback
+437f26a feat: add IEntityRegistry/IHiDetector interfaces, PhysicsRegistry, spawn modes, AI variance, collision fix
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_032503
+### Commits
+21620cd fix: pass PhysicsRegistry.Instance to AttackShapeFactory so shapes use registered entities instead of Physics
+adac336 fix: search both Player and Monster types in shapes, use registered entities for FindNearby, add attack hit/miss feedback
+437f26a feat: add IEntityRegistry/IHiDetector interfaces, PhysicsRegistry, spawn modes, AI variance, collision fix
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+

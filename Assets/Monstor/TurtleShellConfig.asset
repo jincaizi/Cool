@@ -23,8 +23,11 @@ MonoBehaviour:
   LeaveRange: 12
   AttackRange: 2
   AttackCooldown: 2
+  AttackCooldownVariance: 0.3
   PatrolRadius: 3
+  PatrolRadiusVariance: 1
   IdleDuration: 3
+  IdleDurationVariance: 0.5
   AttackAnimCount: 2
   AttackWeights:
   - 0.5
@@ -36,7 +39,43 @@ MonoBehaviour:
     Angle: 0
     Width: 0
     StopAtFirst: 0
-  AttackEffects: []
+  AttackEffects:
+  - Damage:
+      _baseDamage: 20
+      _attackRatio: 1
+      _scalingAttribute: 0
+      _damageType: 0
+      _criticalRateBonus: 0
+      _criticalDamageBonus: 0
+      _isTrueDamage: 0
+      _armorPenetration: 0
+      _isDOT: 0
+      _tickInterval: 1
+      _totalTicks: 5
+    KnockbackForce: 3
+    LaunchForce: 0
+    StunDuration: 0
+    Status: 0
+    StatusDuration: 0
+    StatusValue: 0
+  - Damage:
+      _baseDamage: 35
+      _attackRatio: 1
+      _scalingAttribute: 0
+      _damageType: 0
+      _criticalRateBonus: 0
+      _criticalDamageBonus: 0
+      _isTrueDamage: 0
+      _armorPenetration: 0
+      _isDOT: 0
+      _tickInterval: 1
+      _totalTicks: 5
+    KnockbackForce: 8
+    LaunchForce: 0
+    StunDuration: 0
+    Status: 0
+    StatusDuration: 0
+    StatusValue: 0
   EnableDefend: 1
   DefendHPThreshold: 0.5
   DefendChaseTimeThreshold: 3
@@ -52,5 +91,7 @@ MonoBehaviour:
   AlertRange: 12
   ChaseAnimIsRun: 0
   RotationSpeed: 5
+  SpawnMode: 0
+  FixedSpawnPositions: []
   LootTable: {fileID: 0}
   DeathDestroyDelay: 3
