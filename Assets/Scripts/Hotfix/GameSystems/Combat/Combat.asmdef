@@ -2,7 +2,9 @@
     "name": "Hotfix.GameSystems.Combat",
     "rootNamespace": "Hotfix.GameSystems.Combat",
     "references": [
-        "Hotfix.GameSystems.Sys3C.Core"
+        "Hotfix.GameSystems.Sys3C.Core",
+        "Hotfix.GameSystems.Sys3C",
+        "Hotfix.GameSystems.Skills"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -27,7 +27,7 @@ namespace Hotfix.GameSystems.Monster
             if (hitbox == null || !hitbox.IsActive || _hitSources.Contains(hitbox)) return;
 
             _hitSources.Add(hitbox);
-            Vector3 dir = (transform.position - hitbox.transform.position).normalized;
+            Vector3 dir = (transform.position - hitbox.GetBounds().center).normalized;
             _owner?.TakeDamageFromHitbox(hitbox.CurrentData, dir);
         }
     }

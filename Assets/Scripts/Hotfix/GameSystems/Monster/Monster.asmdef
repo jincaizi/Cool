@@ -3,7 +3,9 @@
     "rootNamespace": "Hotfix.GameSystems.Monster",
     "references": [
         "Hotfix.GameSystems.Sys3C.Core",
-        "Hotfix.GameSystems.Combat"
+        "Hotfix.GameSystems.Sys3C",
+        "Hotfix.GameSystems.Combat",
+        "Hotfix.GameSystems.Skills"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

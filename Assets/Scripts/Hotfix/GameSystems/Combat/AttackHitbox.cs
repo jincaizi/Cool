@@ -1,4 +1,6 @@
 using UnityEngine;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Combat
 {
@@ -15,9 +17,9 @@ namespace Hotfix.GameSystems.Combat
             gameObject.SetActive(false);
         }
 
-        public void Activate(AttackHitboxData data)
+        public void Activate(DamageData damageData)
         {
-            CurrentData = data;
+            CurrentData = new AttackHitboxData { DamageData = damageData };
             IsActive = true;
             gameObject.SetActive(true);
         }

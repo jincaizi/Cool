@@ -24,12 +24,12 @@ namespace Hotfix.GameSystems.Combat
 
             if (_fsmManager == null) return;
 
-            var damageData = hitbox.CurrentData;
-            float damage = damageData != null
-                ? damageData.CalculateFinalDamage(null)
+            var hitboxData = hitbox.CurrentData;
+            float damage = hitboxData != null && hitboxData.DamageData != null
+                ? hitboxData.DamageData.CalculateFinalDamage(null)
                 : 10f;
 
-            Vector3 hitDir = (transform.position - hitbox.transform.position).normalized;
+            Vector3 hitDir = (transform.position - hitbox.GetBounds().center).normalized;
             _fsmManager.HandleDamage(
                 sourceId: -1,
                 damage: damage,

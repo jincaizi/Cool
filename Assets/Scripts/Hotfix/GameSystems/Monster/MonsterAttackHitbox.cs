@@ -1,5 +1,6 @@
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -13,10 +14,10 @@ namespace Hotfix.GameSystems.Monster
             gameObject.SetActive(false);
         }
 
-        public void Activate(AttackHitboxData data)
+        public void Activate(DamageData damageData)
         {
             IsActive = true;
-            CurrentData = data;
+            CurrentData = new AttackHitboxData { DamageData = damageData };
             gameObject.SetActive(true);
         }
 

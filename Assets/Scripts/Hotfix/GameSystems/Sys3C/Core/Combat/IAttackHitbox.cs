@@ -1,4 +1,5 @@
 using UnityEngine;
+using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Sys3C.Core.Combat
 {
@@ -20,7 +21,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         /// <summary>
         /// 激活攻击碰撞箱
         /// </summary>
-        void Activate(AttackHitboxData data);
+        void Activate(DamageData damageData);
 
         /// <summary>
         /// 停用攻击碰撞箱
