@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d21fb3a5598ad1544b43d2f7308ba4d8, type: 3}
+  m_Name: SwordShieldConfig
+  m_EditorClassIdentifier: 
+  WeaponId: sword_shield
+  WeaponType: 0
+  AttackShape:
+    Type: 0
+    Range: 2
+    Angle: 120
+    Width: 0
+    StopAtFirst: 0
+  Effects: []
+  AttackSpeed: 1
+  SkillIds:
+  - skill_q
+  - skill_r
