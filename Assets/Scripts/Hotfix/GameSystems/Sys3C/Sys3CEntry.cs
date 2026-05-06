@@ -6,11 +6,18 @@ using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Camera;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Sys3C
 {
-    public class Sys3CEntry : MonoBehaviour
+    public class Sys3CEntry : MonoBehaviour, IDamageable
     {
+        [Header("Health")]
+        [SerializeField] private float _maxHP = 100f;
+        private float _currentHP;
+
+        bool IDamageable.IsAlive => _currentHP > 0;
+        Transform IDamageable.Transform => transform;
         [Header("References")]
         public UnityEngine.CharacterController CharacterController;
         public Animator Animator;
@@ -28,6 +35,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void Start()
         {
+            _currentHP = _maxHP;
             PhysicsRegistry.Instance.Register(transform, EntityType.Player);
 
             // 验证组件引用
@@ -183,6 +191,23 @@ namespace Hotfix.GameSystems.Sys3C
         private void HandleHitAnimationCallback(string stateName)
         {
             _hitManager.HandleHitCompleted(stateName);
+        }
+
+        void IDamageable.TakeDamage(DamageData data, Vector3 hitDirection)
+        {
+            if (_currentHP <= 0) return;
+
+            float damage = data != null ? data.BaseDamage : 10f;
+            _currentHP -= damage;
+            Debug.Log($"[Player] Took {damage} damage, HP: {_currentHP}/{_maxHP}");
+
+            _fsmManager.HandleDamage(sourceId: -1, damage: damage, hitDirection: hitDirection);
+
+            if (_currentHP <= 0)
+            {
+                _currentHP = 0;
+                Debug.Log("[Player] Died!");
+            }
         }
 
         private void OnDestroy()
