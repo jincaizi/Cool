@@ -355,7 +355,7 @@ namespace Hotfix.GameSystems.Monster
         {
             if (effect == null) return false;
             int mask = LayerMask.GetMask("Character");
-            var shape = AttackShapeFactory.Create(_config.AttackShape);
+            var shape = AttackShapeFactory.Create(_config.AttackShape, PhysicsRegistry.Instance);
             var targets = shape.Resolve(_self.position, _self.forward, mask);
             foreach (var t in targets)
             {
