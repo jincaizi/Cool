@@ -108,8 +108,25 @@ namespace Hotfix.GameSystems.Monster
             if (_state == MonsterAIState.Chase)
                 _defendChaseTimer += deltaTime;
 
+            TryFindTarget();
             EvaluateTransitions();
             ExecuteState(deltaTime);
+        }
+
+        private void TryFindTarget()
+        {
+            if (_target != null) return;
+
+            var sysEntry = Object.FindObjectOfType<Hotfix.GameSystems.Sys3C.Sys3CEntry>();
+            if (sysEntry != null)
+            {
+                float dist = Vector3.Distance(_self.position, sysEntry.transform.position);
+                if (dist < _config.DetectRange)
+                {
+                    _target = sysEntry.transform;
+                    return;
+                }
+            }
         }
 
         public void NotifyHit(DamageData damageData, Vector3 hitDirection)

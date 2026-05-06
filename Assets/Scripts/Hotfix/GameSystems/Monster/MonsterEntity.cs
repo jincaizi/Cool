@@ -29,6 +29,14 @@ namespace Hotfix.GameSystems.Monster
         public event Action OnDeathComplete;
         public event Action<LootResult[]> OnLootDrop;
 
+        private void Awake()
+        {
+            if (Animator == null) Animator = GetComponent<Animator>();
+            if (NavAgent == null) NavAgent = GetComponent<NavMeshAgent>();
+            if (HitZone == null) HitZone = GetComponent<HitZone>();
+            if (AttackHitbox == null) AttackHitbox = GetComponentInChildren<AttackHitbox>();
+        }
+
         public void Init(MonsterConfig config, Vector3 spawnPoint)
         {
             _config = config;
@@ -38,7 +46,7 @@ namespace Hotfix.GameSystems.Monster
             _movement = new MonsterMovement(NavAgent, transform, config);
             _ai = new MonsterAI(_movement, _stats, Animator, transform, config, spawnPoint);
 
-            HitZone.Init(this);
+            if (HitZone != null) HitZone.Init(this);
 
             _stats.OnDeath += HandleDeath;
             _stats.OnHPChanged += (cur, max) => { };
@@ -61,7 +69,7 @@ namespace Hotfix.GameSystems.Monster
 
         private void Update()
         {
-            if (_stats == null || _stats.IsDead) return;
+            if (_stats == null || _stats.IsDead || _ai == null) return;
             _ai.Update(Time.deltaTime);
         }
 
@@ -75,7 +83,7 @@ namespace Hotfix.GameSystems.Monster
         private void HandleDeath()
         {
             _ai.EnterDeath();
-            NavAgent.enabled = false;
+            if (NavAgent != null) NavAgent.enabled = false;
         }
 
         private IEnumerator DeathSequence()

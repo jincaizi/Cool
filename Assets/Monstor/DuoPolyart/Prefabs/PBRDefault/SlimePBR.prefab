@@ -428,6 +428,7 @@ GameObject:
   - component: {fileID: 2010444499148047322}
   - component: {fileID: 9170806231475748602}
   - component: {fileID: 4378633705917624418}
+  - component: {fileID: 9087129187535332608}
   m_Layer: 0
   m_Name: SlimePBR
   m_TagString: Untagged
@@ -508,8 +509,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4d20cb5fe42d4c4d959a23e281f3b13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Animator: {fileID: 0}
-  NavAgent: {fileID: 0}
+  Animator: {fileID: 95457531584545886}
+  NavAgent: {fileID: 5219225006912764772}
   HitZone: {fileID: 0}
   AttackHitbox: {fileID: 0}
 --- !u!136 &9170806231475748602
@@ -547,6 +548,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd98010ad7b0a4e4f935cd6baa52bb95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!136 &9087129187535332608
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931298151966786}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &501719361074203905
 GameObject:
   m_ObjectHideFlags: 0
