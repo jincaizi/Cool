@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Hotfix.GameSystems.Sys3C.Core.Combat
+namespace Hotfix.GameSystems.Combat
 {
     public class AttackHitbox : MonoBehaviour, IAttackHitbox
     {
