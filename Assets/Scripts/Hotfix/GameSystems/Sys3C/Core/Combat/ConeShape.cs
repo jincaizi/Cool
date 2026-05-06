@@ -22,23 +22,25 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             var results = new List<IDamageable>();
             float halfAngle = _angle * 0.5f;
 
-            // Use registry if available, fall back to Physics
             if (_registry != null)
             {
-                var entities = _registry.FindNearby(origin, _range, EntityType.Player);
-                foreach (var entity in entities)
+                foreach (var et in new[] { EntityType.Player, EntityType.Monster })
                 {
-                    Vector3 dir = entity.position - origin;
-                    float dist = dir.magnitude;
-                    if (dist > _range) continue;
+                    var entities = _registry.FindNearby(origin, _range, et);
+                    foreach (var entity in entities)
+                    {
+                        Vector3 dir = entity.position - origin;
+                        float dist = dir.magnitude;
+                        if (dist > _range) continue;
 
-                    float angleToTarget = Vector3.Angle(forward, dir.normalized);
-                    if (angleToTarget > halfAngle) continue;
+                        float angleToTarget = Vector3.Angle(forward, dir.normalized);
+                        if (angleToTarget > halfAngle) continue;
 
-                    var target = entity.GetComponentInParent<IDamageable>();
-                    if (target == null || !target.IsAlive) continue;
-                    if (results.Contains(target)) continue;
-                    results.Add(target);
+                        var target = entity.GetComponentInParent<IDamageable>();
+                        if (target == null || !target.IsAlive) continue;
+                        if (results.Contains(target)) continue;
+                        results.Add(target);
+                    }
                 }
                 return results;
             }

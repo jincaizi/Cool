@@ -1,0 +1,152 @@
+<h2>武器/技能扩展性分析</h2>
+<p class="subtitle">当前架构能支撑到什么程度？差什么？</p>
+
+<div class="section">
+  <h3>当前架构 vs 未来需求 对照</h3>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:8px;text-align:left;">需求</th><th style="padding:8px;text-align:left;">当前有什么</th><th style="padding:8px;text-align:center;">状态</th><th style="padding:8px;text-align:left;">差什么</th></tr>
+    <tr>
+      <td style="padding:6px;">剑盾近战攻击</td>
+      <td style="padding:6px;font-size:11px;">AttackFSM (Attack1/Attack2/SkillQ/SkillR)<br>SkillRegistry + SkillConfig<br>角色 Animator 有 Attack 层</td>
+      <td style="padding:6px;text-align:center;color:#fa0;">⚠ 骨架有</td>
+      <td style="padding:6px;font-size:11px;">攻击"打到谁"没有武器概念<br>攻击范围/角度/伤害硬编码<br>没有 IWeapon 抽象层</td>
+    </tr>
+    <tr style="background:#2a2a2a;">
+      <td style="padding:6px;">远程武器（弓）</td>
+      <td style="padding:6px;font-size:11px;">无</td>
+      <td style="padding:6px;text-align:center;color:#e55;">✗ 完全缺失</td>
+      <td style="padding:6px;font-size:11px;">弹道系统<br>射击动画 + 瞄准<br>远程命中检测（射线 vs 弹道飞行）</td>
+    </tr>
+    <tr>
+      <td style="padding:6px;">武器切换</td>
+      <td style="padding:6px;font-size:11px;">无</td>
+      <td style="padding:6px;text-align:center;color:#e55;">✗ 完全缺失</td>
+      <td style="padding:6px;font-size:11px;">装备槽位系统<br>武器 ScriptableObject 配置<br>切换时重新绑定攻击参数</td>
+    </tr>
+    <tr style="background:#2a2a2a;">
+      <td style="padding:6px;">技能扩展（不同武器不同技能）</td>
+      <td style="padding:6px;font-size:11px;">SkillConfig (ScriptableObject)<br>SkillRegistry（全局注册）</td>
+      <td style="padding:6px;text-align:center;color:#fa0;">⚠ 部分</td>
+      <td style="padding:6px;font-size:11px;">武器-技能关联（剑技/弓技分离）<br>技能释放方式与武器类型绑定<br>远程技能需要瞄准/目标选择</td>
+    </tr>
+    <tr>
+      <td style="padding:6px;">攻击效果（毒/减速/击飞）</td>
+      <td style="padding:6px;font-size:11px;">DamageData 只有伤害+暴击</td>
+      <td style="padding:6px;text-align:center;color:#e55;">✗ 缺</td>
+      <td style="padding:6px;font-size:11px;">AttackEffectConfig（上轮设计已有）</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>核心缺口：缺少"武器"这一抽象层</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">现状：攻击逻辑直接绑在角色身上</div>
+  <div class="mockup-body">
+    <pre style="font-size:11px;line-height:1.5;margin:0;color:#e55;">
+Sys3CEntry
+  └─ AttackFSM         ← 攻击状态机
+  └─ SkillRegistry     ← 技能注册
+  └─ ???               ← 攻击怎么打？范围多少？伤害多少？没有抽象！
+
+// 所有角色的攻击逻辑都硬编码在 FSMManager / AttackFSM 里
+// 换武器 = 改代码
+// 加远程 = 重构整个攻击系统</pre>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top:12px;">
+  <div class="mockup-header">目标：武器作为中间抽象层</div>
+  <div class="mockup-body">
+    <pre style="font-size:11px;line-height:1.5;margin:0;color:#5e5;">
+                    ┌──────────────────┐
+                    │   WeaponConfig   │  ScriptableObject
+                    │  (武器资产)       │
+                    ├──────────────────┤
+                    │ WeaponType:      │  Melee / Ranged
+                    │ AttackRange      │
+                    │ AttackAngle      │
+                    │ AttackSpeed      │
+                    │ DamageData       │
+                    │ AttackEffects[]  │
+                    │ ComboChain       │  Attack1→Attack2→...
+                    │ SkillIds[]       │  关联技能列表
+                    └────────┬─────────┘
+                             │ 驱动
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+      ┌─────────────┐ ┌──────────┐ ┌──────────────┐
+      │ MeleeWeapon │ │BowWeapon │ │ StaffWeapon   │
+      │ (剑/盾/斧)  │ │ (弓)     │ │ (法杖,未来)   │
+      ├─────────────┤ ├──────────┤ ├──────────────┤
+      │ AttackResolver│ │Launch()  │ │Channel()     │
+      │ .FindNearest │ │ → 弹道飞行│ │ → 持续施法   │
+      │ ()           │ │ → 命中回调│ │ → 范围AOE    │
+      └─────────────┘ └──────────┘ └──────────────┘
+              │              │              │
+              └──────────────┼──────────────┘
+                             │ 统一接口
+                             ▼
+                    ┌──────────────────┐
+                    │    IWeapon       │
+                    ├──────────────────┤
+                    │ Attack()         │
+                    │ CanAttack()      │
+                    │ GetWeaponType()  │
+                    │ GetConfig()      │
+                    └──────────────────┘</pre>
+  </div>
+</div>
+
+<div class="section">
+  <h3>建议分两步走</h3>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">第一步：当前阶段（只做剑盾近战）</div>
+    <div class="mockup-body" style="font-size:12px;">
+      <p>不过度设计，但留好扩展点</p>
+      <ul>
+        <li>创建 <code>IWeapon</code> 接口</li>
+        <li>做一个 <code>MeleeWeapon</code> 实现</li>
+        <li><code>CharacterAttackHandler</code> 通过 IWeapon 调用攻击</li>
+        <li><code>WeaponConfig</code> ScriptableObject 配攻击参数</li>
+        <li>剑盾就是第一个 WeaponConfig 资产</li>
+      </ul>
+      <p style="color:#888;font-size:11px;">投入：接口+2个类+1个SO<br>收益：后续加武器类型零重构</p>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">第二步：未来扩展（远程/技能）</div>
+    <div class="mockup-body" style="font-size:12px;">
+      <p>加武器类型时只需实现 IWeapon</p>
+      <ul>
+        <li><code>RangedWeapon : IWeapon</code> → 弹道 + 瞄准</li>
+        <li><code>Projectile</code> → 飞行物体，命中时调 IDamageable</li>
+        <li>WeaponConfig. 关联技能 ID</li>
+        <li>武器切换 = 换 WeaponConfig + 重绑定动画层</li>
+      </ul>
+      <p style="color:#888;font-size:11px;">现有 IWeapon/IDamageable/HitZone/AttackResolver<br>全部可直接复用</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>当前项目需要新增的文件</h3>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:6px;">文件</th><th style="padding:6px;">类型</th><th style="padding:6px;">作用</th></tr>
+    <tr><td style="padding:6px;">IWeapon.cs</td><td style="padding:6px;">接口</td><td style="padding:6px;">统一武器攻击入口</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">WeaponConfig.cs</td><td style="padding:6px;">SO</td><td style="padding:6px;">武器数值配置（范围/伤害/连招/关联技能）</td></tr>
+    <tr><td style="padding:6px;">MeleeWeapon.cs</td><td style="padding:6px;">MonoBehaviour</td><td style="padding:6px;">近战武器实现，挂载到武器 GameObject</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">CharacterAttackHandler.cs</td><td style="padding:6px;">MonoBehaviour</td><td style="padding:6px;">角色攻击入口，持有 IWeapon，响应 FSM 攻击帧</td></tr>
+    <tr><td style="padding:6px;">HitZone.cs</td><td style="padding:6px;">MonoBehaviour</td><td style="padding:6px;">通用受击组件（替换 MonsterHitZone）</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">AttackResolver.cs</td><td style="padding:6px;">静态工具</td><td style="padding:6px;">扇形检测，NonAlloc，返回 IDamageable</td></tr>
+    <tr><td style="padding:6px;">IAIBehaviour.cs</td><td style="padding:6px;">接口</td><td style="padding:6px;">AI 行为策略</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">DefendBehaviour.cs</td><td style="padding:6px;">类</td><td style="padding:6px;">TurtleShell 防御行为</td></tr>
+    <tr><td style="padding:6px;">TauntBehaviour.cs</td><td style="padding:6px;">类</td><td style="padding:6px;">Slime 嘲讽行为</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">AttackEffectConfig.cs</td><td style="padding:6px;">Serializable</td><td style="padding:6px;">攻击效果配置</td></tr>
+  </table>
+</div>

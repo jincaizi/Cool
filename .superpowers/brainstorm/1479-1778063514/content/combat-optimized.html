@@ -1,0 +1,225 @@
+<h2>战斗管道优化方案</h2>
+<p class="subtitle">当前设计的 4 个问题 → 4 项优化</p>
+
+<div class="section">
+  <h3>问题 → 优化对照</h3>
+  <table style="width:100%;font-size:13px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:8px;text-align:left;">维度</th><th style="padding:8px;text-align:left;">当前问题</th><th style="padding:8px;text-align:left;">优化方案</th></tr>
+    <tr>
+      <td style="padding:8px;vertical-align:top;"><strong>可读性</strong></td>
+      <td style="padding:8px;">MonsterHitZone / CharacterHitZone 代码几乎相同；攻击检测逻辑散落在 Handler 里</td>
+      <td style="padding:8px;color:#7bf;">统一 <code>HitZone</code> 组件 + 提取 <code>AttackResolver</code> 静态工具类</td>
+    </tr>
+    <tr style="background:#2a2a2a;">
+      <td style="padding:8px;vertical-align:top;"><strong>性能</strong></td>
+      <td style="padding:8px;">Physics.OverlapSphere 每帧分配数组；OnTriggerStay 空跑；无对象池</td>
+      <td style="padding:8px;color:#7bf;">NonAlloc API + 攻击帧才检测 + Monobehaviour 去重改用 instanceID 比较</td>
+    </tr>
+    <tr>
+      <td style="padding:8px;vertical-align:top;"><strong>可维护性</strong></td>
+      <td style="padding:8px;">MonsterAI FSM switch 随状态增长；Defend/Taunt/Alert 逻辑混在主类中</td>
+      <td style="padding:8px;color:#7bf;">AI 行为用策略模式，每个特殊行为独立类，MonsterAI 按配置组合</td>
+    </tr>
+    <tr style="background:#2a2a2a;">
+      <td style="padding:8px;vertical-align:top;"><strong>可扩展性</strong></td>
+      <td style="padding:8px;">DamageData 只管伤害，无法挂载额外效果（毒、减速、击飞）；新攻击类型需改接口</td>
+      <td style="padding:8px;color:#7bf;">引入 <code>AttackEffect[]</code> 效果管线，一次攻击可附加多种效果</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>优化 1：统一 HitZone + AttackResolver</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">之前 vs 之后</div>
+  <div class="mockup-body">
+    <div class="split">
+      <div>
+        <p style="color:#e55;font-size:12px;margin:0;">❌ 之前（两份重复代码）</p>
+        <pre style="font-size:10px;line-height:1.4;margin:4px 0;color:#ccc;">
+// MonsterHitZone.cs — 30行
+class MonsterHitZone : MonoBehaviour {
+    HashSet&lt;IAttackHitbox&gt; _hitSources;
+    OnTriggerStay(Collider other) {
+        var hitbox = other.GetComponent&lt;IAttackHitbox&gt;();
+        if (hitbox == null || !hitbox.IsActive || _hitSources.Contains(hitbox)) return;
+        _hitSources.Add(hitbox);
+        _owner?.TakeDamageFromHitbox(...);
+    }
+}
+
+// CharacterHitZone.cs — 同样30行 (复制粘贴!)
+class CharacterHitZone : MonoBehaviour {
+    // 完全一样的逻辑... 只是回调不同
+}</pre>
+      </div>
+      <div>
+        <p style="color:#5e5;font-size:12px;margin:0;">✅ 之后（统一组件）</p>
+        <pre style="font-size:10px;line-height:1.4;margin:4px 0;color:#ccc;">
+// HitZone.cs — 通用受击组件，角色和怪物共用
+[RequireComponent(typeof(Collider))]
+class HitZone : MonoBehaviour {
+    IDamageable _owner;
+    HashSet&lt;int&gt; _hitInstanceIds; // 用 instanceID 去重
+
+    public void Init(IDamageable owner) { _owner = owner; }
+
+    void OnTriggerStay(Collider other) {
+        var hitbox = other.GetComponent&lt;IAttackHitbox&gt;();
+        if (hitbox == null || !hitbox.IsActive) return;
+        if (!_hitInstanceIds.Add(hitbox.GetInstanceID())) return; // 已有
+        _owner.TakeDamage(hitbox.CurrentData.DamageData,
+            (transform.position - hitbox.GetBounds().center).normalized);
+    }
+}</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top:12px;">
+  <div class="mockup-header">AttackResolver — 静态工具类，角色和怪物攻击都用它</div>
+  <div class="mockup-body">
+    <pre style="font-size:12px;line-height:1.5;margin:0;color:#aad;">
+// 攻击检测统一入口，NonAlloc 无 GC
+public static class AttackResolver
+{
+    static readonly Collider[] _buffer = new Collider[16]; // 复用缓冲区
+
+    /// 在前方扇形区域内查找最近的可伤害目标
+    public static IDamageable FindNearestTarget(
+        Vector3 origin, Vector3 forward, float range, float angle, LayerMask mask)
+    {
+        int count = Physics.OverlapSphereNonAlloc(origin, range, _buffer, mask);
+        IDamageable best = null;
+        float bestDist = float.MaxValue;
+
+        for (int i = 0; i < count; i++)
+        {
+            var col = _buffer[i];
+            Vector3 dir = col.bounds.center - origin;
+            float dist = dir.magnitude;
+            if (dist > range) continue;
+
+            float angleToTarget = Vector3.Angle(forward, dir);
+            if (angleToTarget > angle * 0.5f) continue;
+
+            var target = col.GetComponentInParent&lt;IDamageable&gt;();
+            if (target == null || !target.IsAlive) continue;
+
+            if (dist < bestDist) { best = target; bestDist = dist; }
+        }
+        return best;
+    }
+}</pre>
+  </div>
+</div>
+
+<div class="section">
+  <h3>优化 2：AI 行为策略化</h3>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">之前：FSM Switch 膨胀</div>
+    <div class="mockup-body">
+      <pre style="font-size:10px;line-height:1.3;margin:0;color:#e55;">
+// MonsterAI 越来越胖
+class MonsterAI {
+    void EvaluateTransitions() {
+        switch (_state) {
+            case Idle: ...
+            case Patrol: ...
+            case Chase: ...
+            case Attack: ...
+            case Hit: ...
+            case Death: ...
+            case Defend:     // 新增
+                if (timer <= 0 && blocks >= N)
+                    CounterAttack();  // 逻辑散落
+            case Taunt:      // 新增
+                ...
+            case Alert:      // 新增
+                ...
+        }
+    }
+    // 250+ lines and growing...
+}</pre>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">之后：组合策略</div>
+    <div class="mockup-body">
+      <pre style="font-size:10px;line-height:1.3;margin:0;color:#5e5;">
+// 每个特殊行为是一个独立策略
+interface IAIBehaviour {
+    bool CanEnter(MonsterAIContext ctx);
+    void Enter(MonsterAIContext ctx);
+    void Update(MonsterAIContext ctx, float dt);
+    void Exit(MonsterAIContext ctx);
+    MonsterAIState StateType { get; }
+}
+
+// MonsterAI 只负责核心 FSM + 组合行为
+class MonsterAI {
+    List&lt;IAIBehaviour&gt; _behaviours; // 从 Config 构建
+
+    void EvaluateTransitions() {
+        // 核心状态（Idle/Patrol/Chase/Attack/Hit/Death）不变
+        HandleCoreTransitions();
+    }
+
+    // 行为在 MonsterAI.Init() 中按 Config 注册
+    // config.EnableDefend → add DefendBehaviour
+    // config.EnableTaunt  → add TauntBehaviour
+    // 新增行为 = 新增一个 IAIBehaviour 实现类
+}</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>优化 3：AttackEffect 管线</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body">
+    <pre style="font-size:12px;line-height:1.6;margin:0;color:#aad;">
+// 替代 DamageData 的单维模型，支持一次攻击挂载多种效果
+[Serializable]
+public class AttackEffectConfig
+{
+    public DamageData Damage;           // 基础伤害
+    public float KnockbackForce;       // 击退
+    public float StunDuration;         // 眩晕
+    public StatusEffectType Status;    // 状态效果 (Poison/Bleed/Slow/None)
+    public float StatusDuration;
+    public float StatusValue;          // 效果数值 (如减速30%)
+}
+
+// MonsterConfig 中
+public AttackEffectConfig[] AttackEffects; // 每个攻击对应一组效果
+
+// 使用时
+foreach (var effect in config.AttackEffects)
+{
+    target.ApplyDamage(effect.Damage);
+    target.ApplyKnockback(effect.KnockbackForce);
+    target.ApplyStatus(effect.Status, effect.StatusDuration, effect.StatusValue);
+}</pre>
+  </div>
+</div>
+
+<div class="section">
+  <h3>优化前后对比</h3>
+  <table style="width:100%;font-size:13px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:6px;">指标</th><th style="padding:6px;">之前</th><th style="padding:6px;color:#5e5;">之后</th></tr>
+    <tr><td style="padding:6px;">HitZone 组件</td><td style="padding:6px;">2个（重复代码）</td><td style="padding:6px;color:#5e5;">1个通用 HitZone</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">攻击检测 GC</td><td style="padding:6px;">每次 ~80B</td><td style="padding:6px;color:#5e5;">0（NonAlloc + 复用 buffer）</td></tr>
+    <tr><td style="padding:6px;">MonsterAI 行数</td><td style="padding:6px;">~300+</td><td style="padding:6px;color:#5e5;">~150 核心 + 每行为 ~40</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">新增怪物行为</td><td style="padding:6px;">改 FSM switch + 加枚举</td><td style="padding:6px;color:#5e5;">实现 IAIBehaviour + 注册</td></tr>
+    <tr><td style="padding:6px;">攻击附加效果</td><td style="padding:6px;">改 DamageData 类</td><td style="padding:6px;color:#5e5;">加 AttackEffect 条目</td></tr>
+  </table>
+</div>

@@ -1,0 +1,92 @@
+<h2>怪物 AI 行为 & Animator 设计</h2>
+<p class="subtitle">基于现有 MonsterAI FSM，扩展差异化行为</p>
+
+<div class="section">
+  <h3>Slime — 高速攻击型</h3>
+  <div class="mockup">
+    <div class="mockup-body">
+      <table style="width:100%;font-size:13px;border-collapse:collapse;">
+        <tr style="background:#333;"><th style="padding:6px;text-align:left;">AI 状态</th><th style="padding:6px;text-align:left;">行为</th><th style="padding:6px;text-align:left;">动画</th><th style="padding:6px;text-align:left;">Animator 参数</th></tr>
+        <tr><td style="padding:6px;">Idle</td><td style="padding:6px;">原地等待 2s</td><td style="padding:6px;">IdleNormal</td><td style="padding:6px;">AIState=0</td></tr>
+        <tr style="background:#2a2a2a;"><td style="padding:6px;">Patrol</td><td style="padding:6px;">巡逻点间走动</td><td style="padding:6px;">Walk + 方向混合</td><td style="padding:6px;">AIState=1</td></tr>
+        <tr><td style="padding:6px;">Chase</td><td style="padding:6px;">追击玩家</td><td style="padding:6px;">Run</td><td style="padding:6px;">AIState=2</td></tr>
+        <tr style="background:#2a2a2a;"><td style="padding:6px;">Attack</td><td style="padding:6px;">Attack01 (快) / Attack02 (慢重击)</td><td style="padding:6px;">Attack01 / Attack02</td><td style="padding:6px;">AIState=3 + Attack trigger</td></tr>
+        <tr><td style="padding:6px;">Hit</td><td style="padding:6px;">受击硬直</td><td style="padding:6px;">GetHit</td><td style="padding:6px;">Hit trigger</td></tr>
+        <tr style="background:#2a2a2a;"><td style="padding:6px;">Death</td><td style="padding:6px;">死亡→销毁</td><td style="padding:6px;">Die</td><td style="padding:6px;">Death trigger</td></tr>
+        <tr><td style="padding:6px;"><strong>Taunt (新)</strong></td><td style="padding:6px;">攻击落空后嘲讽</td><td style="padding:6px;">Taunt</td><td style="padding:6px;">Taunt trigger</td></tr>
+      </table>
+    </div>
+  </div>
+  <br>
+  <p><strong>Slime 特有逻辑：</strong>攻击时随机选 Attack01(70%) / Attack02(30%)。攻击后如果玩家不在攻击范围内→触发 Taunt。SenseSomething 动画在 Idle 状态下，检测到玩家但距离不够时播放。</p>
+</div>
+
+<div class="section">
+  <h3>TurtleShell — 防御反击型</h3>
+  <div class="mockup">
+    <div class="mockup-body">
+      <table style="width:100%;font-size:13px;border-collapse:collapse;">
+        <tr style="background:#333;"><th style="padding:6px;text-align:left;">AI 状态</th><th style="padding:6px;text-align:left;">行为</th><th style="padding:6px;text-align:left;">动画</th><th style="padding:6px;text-align:left;">Animator 参数</th></tr>
+        <tr><td style="padding:6px;">Idle/Patrol/Chase</td><td style="padding:6px;">同 Slime，速度慢</td><td style="padding:6px;">Idle/Walk/Run</td><td style="padding:6px;">AIState=0/1/2</td></tr>
+        <tr style="background:#2a2a2a;"><td style="padding:6px;">Attack</td><td style="padding:6px;">Attack01 (旋转) / Attack02 (头槌)</td><td style="padding:6px;">Attack01 / Attack02</td><td style="padding:6px;">AIState=3 + Attack trigger</td></tr>
+        <tr><td style="padding:6px;"><strong>Defend (新)</strong></td><td style="padding:6px;">举壳防御，正面减伤80%</td><td style="padding:6px;">Defend (循环)</td><td style="padding:6px;">AIState=7 + IsDefending=true</td></tr>
+        <tr style="background:#2a2a2a;"><td style="padding:6px;">Hit</td><td style="padding:6px;">受击，防御中→DefendHit</td><td style="padding:6px;">GetHit / DefendHit</td><td style="padding:6px;">Hit trigger</td></tr>
+        <tr><td style="padding:6px;">Death</td><td style="padding:6px;">死亡→销毁</td><td style="padding:6px;">Die</td><td style="padding:6px;">Death trigger</td></tr>
+      </table>
+    </div>
+  </div>
+  <br>
+  <p><strong>TurtleShell 特有逻辑：</strong>HP < 50% 或进入 Chase 后 3s → 进入 Defend 状态。Defend 持续 2s，期间正面 180° 减伤 80%。被击中 N 次后→反击（Attack02 + 50% 伤害加成）。Defend 后进入攻击。</p>
+</div>
+
+<div class="section">
+  <h3>Animator Controller 结构</h3>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Slime Animator (Base Layer)</div>
+    <div class="mockup-body">
+      <pre style="font-size:11px;line-height:1.5;margin:0;color:#ccc;">
+  Any State ──Death trigger──▶ Die
+  Any State ──Hit trigger────▶ GetHit
+  Any State ──Taunt trigger──▶ Taunt
+
+  IdleNormal ◀──▶ Walk (BlendTree: Fwd/Back/Left/Right)
+       │              ▲
+       │ (AIState↓)   │ (AIState↑)
+       ▼              │
+  IdleBattle ───────▶ Run
+       │
+       │ Attack trigger
+       ▼
+  Attack01 ◀──▶ Attack02
+       │              │
+       └──── Exit ────┘ → 返回 IdleBattle
+      </pre>
+      <p style="font-size:11px;color:#888;margin:8px 0 0;">参数：AIState(int), Attack(trigger), Hit(trigger), Death(trigger), Taunt(trigger), Speed(float, 用于 BlendTree)</p>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">TurtleShell Animator (Base Layer)</div>
+    <div class="mockup-body">
+      <pre style="font-size:11px;line-height:1.5;margin:0;color:#ccc;">
+  Any State ──Death trigger──▶ Die
+  Any State ──Hit trigger────▶ GetHit
+  Any State ──IsDefending────▶ Defend (loop)
+       │
+  Defend ──Hit trigger────▶ DefendHit → Defend
+
+  IdleNormal ◀──▶ Walk (BlendTree)
+       │              ▲
+       ▼              │
+  IdleBattle ───────▶ Run
+       │
+       │ Attack trigger
+       ▼
+  Attack01 ◀──▶ Attack02
+      </pre>
+      <p style="font-size:11px;color:#888;margin:8px 0 0;">参数：AIState(int), Attack(trigger), Hit(trigger), Death(trigger), IsDefending(bool), Speed(float)</p>
+    </div>
+  </div>
+</div>

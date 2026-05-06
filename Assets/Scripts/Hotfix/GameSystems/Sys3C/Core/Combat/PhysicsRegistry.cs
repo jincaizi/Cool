@@ -30,10 +30,24 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         public IReadOnlyList<Transform> FindNearby(Vector3 center, float radius, EntityType type)
         {
             var results = new List<Transform>();
+
+            // Primary: check registered entities by distance (no Physics dependency)
+            if (!_entities.TryGetValue(type, out var set)) return results;
+            if (set != null && set.Count > 0)
+            {
+                foreach (var t in set)
+                {
+                    if (t == null) continue;
+                    if (Vector3.Distance(center, t.position) <= radius)
+                        results.Add(t);
+                }
+                return results;
+            }
+
+            // Fallback: Physics (for unregistered entities)
             int mask = type == EntityType.Player
                 ? LayerMask.GetMask("Character")
                 : LayerMask.GetMask("Monster");
-
             int count = Physics.OverlapSphereNonAlloc(center, radius, _buffer, mask);
             for (int i = 0; i < count; i++)
             {

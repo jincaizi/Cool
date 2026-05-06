@@ -11713,3 +11713,1561 @@ production/session-logs/compaction-log.txt
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260506_132507
+### Commits
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+---
+
+## Session End: 20260506_133727
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_135641
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_170401
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_172750
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_175437
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_183220
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_183614
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_183914
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_184119
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_184338
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_184833
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_185039
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_190021
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_190655
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_191248
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_191721
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_192329
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_200537
+### Commits
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+c8b3f99 fix(combat): align AttackHitbox namespace with assembly root
+0c8c749 chore: verify assembly dependencies
+6f4e11e refactor(monster): implement IAttackHitbox interface
+831ee76 feat(combat): add Combat.asmdef assembly definition
+cad2478 feat(core): add Skills reference for DamageData dependency
+6fda939 fix(core): complete IAttackHitbox and AttackHitboxData API per spec
+868dfd3 feat(core): add Combat shared interfaces to Core layer
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_212200
+### Commits
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+356c9a3 docs: add Tooltip attributes to MonsterConfig fields
+6d00656 fix: update Combat/Monster asmdef references and interface signatures
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260506_221808
+### Commits
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_001409
+### Commits
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_002016
+### Commits
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_004742
+### Commits
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_011842
+### Commits
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_012233
+### Commits
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_013000
+### Commits
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_013634
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_014601
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_014806
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_015229
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_015333
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_015430
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_021537
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_021652
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_021905
+### Commits
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+Assets/Monstor/DuoMonsterConfig.asset
+Assets/Monstor/DuoPolyart/Animators/Slime.controller.meta
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller.meta
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting
+Assets/Monstor/DuoPolyart/Scenes/New Lighting Settings.lighting.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity
+Assets/Monstor/DuoPolyart/Scenes/PBR.unity.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Directional Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset
+Assets/Monstor/DuoPolyart/Scenes/PBR/LightingData.asset.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Main Camera.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr
+Assets/Monstor/DuoPolyart/Scenes/PBR/ReflectionProbe-0.exr.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/StageMesh.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab
+Assets/Monstor/DuoPolyart/Scenes/PBR/Sub Light.prefab.meta
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity
+Assets/Monstor/DuoPolyart/Scenes/Polyart.unity.meta
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/NavMeshAreas.asset
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+

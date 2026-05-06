@@ -21,13 +21,16 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
 
             if (_registry != null)
             {
-                var entities = _registry.FindNearby(origin, _radius, EntityType.Player);
-                foreach (var entity in entities)
+                foreach (var et in new[] { EntityType.Player, EntityType.Monster })
                 {
-                    var target = entity.GetComponentInParent<IDamageable>();
-                    if (target == null || !target.IsAlive) continue;
-                    if (results.Contains(target)) continue;
-                    results.Add(target);
+                    var entities = _registry.FindNearby(origin, _radius, et);
+                    foreach (var entity in entities)
+                    {
+                        var target = entity.GetComponentInParent<IDamageable>();
+                        if (target == null || !target.IsAlive) continue;
+                        if (results.Contains(target)) continue;
+                        results.Add(target);
+                    }
                 }
                 return results;
             }

@@ -20,6 +20,12 @@ namespace Hotfix.GameSystems.Sys3C
             var shape = AttackShapeFactory.Create(_config.AttackShape);
             var targets = shape.Resolve(transform.position, forward, targetMask);
 
+            if (targets.Count == 0)
+            {
+                Debug.Log("[Attack] Miss - no target in range");
+                return;
+            }
+
             if (_config.Effects == null || _config.Effects.Length == 0) return;
 
             foreach (var t in targets)
@@ -28,6 +34,7 @@ namespace Hotfix.GameSystems.Sys3C
                 {
                     Vector3 dir = (t.Transform.position - transform.position).normalized;
                     t.TakeDamage(e.Damage, dir);
+                    Debug.Log($"[Attack] Hit {t.Transform.name} for {e.Damage.BaseDamage} damage");
                 }
             }
 

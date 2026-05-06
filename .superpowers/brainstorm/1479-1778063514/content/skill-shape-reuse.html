@@ -1,0 +1,187 @@
+<h2>技能 × AttackShape 复用设计</h2>
+<p class="subtitle">AttackShape 只管"打中谁"，技能负责"何时打、怎么动、打几次"</p>
+
+<div class="section">
+  <h3>一个技能 = Shape + 执行模式 + 移动行为</h3>
+  <div class="mockup">
+    <div class="mockup-body">
+      <pre style="font-size:11px;line-height:1.6;margin:0;color:#ccc;">
+  ┌──────────────────────────────────────────────────────┐
+  │                    SkillConfig                       │
+  ├──────────────────────────────────────────────────────┤
+  │  AttackShape        ← 复用！打到谁                    │
+  │  AttackEffects[]    ← 复用！打中后的效果               │
+  │  ExecutePattern     ← 技能专属：执行模式               │
+  │  MoveBehaviour      ← 技能专属：释放时怎么动           │
+  │  TargetingMode      ← 技能专属：怎么选目标             │
+  └──────────────────────────────────────────────────────┘
+      </pre>
+    </div>
+  </div>
+
+  <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:12px;">
+    <tr style="background:#333;"><th style="padding:6px;text-align:left;">维度</th><th style="padding:6px;text-align:left;">选项</th><th style="padding:6px;text-align:left;">示例</th></tr>
+    <tr>
+      <td style="padding:6px;vertical-align:top;"><strong>ExecutePattern</strong><br>执行模式</td>
+      <td style="padding:6px;font-size:11px;">
+        Instant — 单次判定<br>
+        Pulse — 持续期间每N秒判定一次<br>
+        Channel — 蓄力后释放（蓄力期间可打断）<br>
+        Combo — 多段依次执行
+      </td>
+      <td style="padding:6px;font-size:11px;">
+        普攻=Instant<br>
+        R技能=Pulse (每0.5s一次)<br>
+        蓄力斩=Channel<br>
+        三连击=Combo
+      </td>
+    </tr>
+    <tr style="background:#2a2a2a;">
+      <td style="padding:6px;vertical-align:top;"><strong>MoveBehaviour</strong><br>移动行为</td>
+      <td style="padding:6px;font-size:11px;">
+        Root — 原地不动<br>
+        Free — 可自由移动<br>
+        Dash — 强制位移（方向距离）
+      </td>
+      <td style="padding:6px;font-size:11px;">
+        普攻=Root<br>
+        R技能=Free<br>
+        Q技能=Dash
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:6px;vertical-align:top;"><strong>TargetingMode</strong><br>目标选择</td>
+      <td style="padding:6px;font-size:11px;">
+        Forward — 角色前方<br>
+        Self — 自身为中心<br>
+        Target — 锁定目标<br>
+        Ground — 地面位置
+      </td>
+      <td style="padding:6px;font-size:11px;">
+        普攻=Forward<br>
+        R技能=Self<br>
+        Q技能=Forward<br>
+        火球=Target
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>现有技能映射</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">Skill Q — 向前突刺</div>
+      <div class="mockup-body" style="font-size:12px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:4px;">AttackShape</td><td style="padding:4px;color:#5e5;">RectShape (length=3, width=1.5)</td></tr>
+          <tr><td style="padding:4px;">ExecutePattern</td><td style="padding:4px;color:#5e5;">Pulse (突进期间每0.1s判定)</td></tr>
+          <tr><td style="padding:4px;">MoveBehaviour</td><td style="padding:4px;color:#5e5;">Dash (向前3m，0.3s)</td></tr>
+          <tr><td style="padding:4px;">TargetingMode</td><td style="padding:4px;color:#5e5;">Forward</td></tr>
+        </table>
+        <p style="font-size:10px;color:#888;margin:8px 0 0;">
+          现有 SkillDashComponent 管移动。<br>
+          加 RectShape 管命中判定。<br>
+          两者并行，不冲突。
+        </p>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">Skill R — 挥剑旋转</div>
+      <div class="mockup-body" style="font-size:12px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:4px;">AttackShape</td><td style="padding:4px;color:#5e5;">CircleShape (radius=3)</td></tr>
+          <tr><td style="padding:4px;">ExecutePattern</td><td style="padding:4px;color:#5e5;">Pulse (持续3s，每0.5s判定)</td></tr>
+          <tr><td style="padding:4px;">MoveBehaviour</td><td style="padding:4px;color:#5e5;">Free (旋转期间可走路)</td></tr>
+          <tr><td style="padding:4px;">TargetingMode</td><td style="padding:4px;color:#5e5;">Self</td></tr>
+        </table>
+        <p style="font-size:10px;color:#888;margin:8px 0 0;">
+          目前 AttackFSM 管状态。<br>
+          加 CircleShape 管范围判定。<br>
+          Pulse 模式替代手写循环逻辑。
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Shape 复用全景</h3>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:6px;">AttackShape</th><th style="padding:6px;">普攻</th><th style="padding:6px;">技能</th><th style="padding:6px;">怪物攻击</th></tr>
+    <tr>
+      <td style="padding:6px;">ConeShape</td>
+      <td style="padding:6px;font-size:11px;">剑横扫、斧下劈</td>
+      <td style="padding:6px;font-size:11px;">剑气（前方扇形远程）</td>
+      <td style="padding:6px;font-size:11px;">Slime咬、龙爪挥击</td>
+    </tr>
+    <tr style="background:#2a2a2a;">
+      <td style="padding:6px;">CircleShape</td>
+      <td style="padding:6px;">—</td>
+      <td style="padding:6px;font-size:11px;color:#5e5;">Skill R 旋转斩<br>旋风斩、冰环</td>
+      <td style="padding:6px;font-size:11px;color:#5e5;">TurtleShell 旋转<br>Boss 践踏</td>
+    </tr>
+    <tr>
+      <td style="padding:6px;">RectShape</td>
+      <td style="padding:6px;">枪突刺</td>
+      <td style="padding:6px;font-size:11px;color:#5e5;">Skill Q 突刺<br>冲锋、穿透箭</td>
+      <td style="padding:6px;font-size:11px;">Boss 冲撞、龙车</td>
+    </tr>
+    <tr style="background:#2a2a2a;">
+      <td style="padding:6px;">RayShape</td>
+      <td style="padding:6px;">弓普攻（未来）</td>
+      <td style="padding:6px;font-size:11px;">狙击、连锁闪电</td>
+      <td style="padding:6px;font-size:11px;">Boss 激光、喷吐</td>
+    </tr>
+  </table>
+  <p style="font-size:12px;color:#5e5;margin-top:8px;">
+    ✅ 同一个 CircleShape 类 → TurtleShell 旋转攻击 + 角色 Skill R + 未来 Boss 践踏<br>
+    ✅ 同一个 RectShape 类 → 角色 Skill Q 突刺 + 未来 Boss 冲撞<br>
+    ✅ 新增技能只需在 SkillConfig 里选 Shape + 配参数，不写新代码
+  </p>
+</div>
+
+<div class="section">
+  <h3>SkillConfig 扩展示例</h3>
+  <div class="mockup">
+    <div class="mockup-body">
+      <pre style="font-size:11px;line-height:1.5;margin:0;color:#aad;">
+// 现有 SkillConfig 新增字段
+public class SkillConfig : ScriptableObject
+{
+    public string SkillId;
+    public float Cooldown;
+    public float MaxDuration;
+    public AnimationClip Anim;
+
+    // === 新增：攻击相关（复用 AttackShape 体系）===
+    public AttackShapeConfig AttackShape;     // 选 Cone / Circle / Rect / Ray
+    public AttackEffectConfig[] Effects;      // 命中效果
+    public ExecutePattern Pattern;            // Instant / Pulse / Channel / Combo
+    public MoveBehaviour MoveLock;            // Root / Free / Dash
+    public TargetingMode Targeting;           // Forward / Self / Target / Ground
+
+    // Dash 参数（MoveLock==Dash 时生效）
+    public float DashDistance;
+    public float DashDuration;
+
+    // Pulse 参数（Pattern==Pulse 时生效）
+    public float PulseInterval;              // 多少秒判定一次
+    public float PulseDuration;              // 持续多久
+}</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>总结：Shape 对重构工作量的影响</h3>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:6px;">场景</th><th style="padding:6px;">不用 Shape</th><th style="padding:6px;color:#5e5;">用 Shape 体系</th></tr>
+    <tr><td style="padding:6px;">新增近战武器（斧）</td><td style="padding:6px;">配 ConeShape 参数即可</td><td style="padding:6px;color:#5e5;">同上，零额外工作</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">新增远程武器（弓）</td><td style="padding:6px;">写整套射线检测 + 弹道系统</td><td style="padding:6px;color:#5e5;">实现 RayShape + 配参数，~40行</td></tr>
+    <tr><td style="padding:6px;">新增技能（地裂斩）</td><td style="padding:6px;">手写 RectShape 等价逻辑</td><td style="padding:6px;color:#5e5;">SkillConfig 配 RectShape，0行</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">新增怪物（Boss）</td><td style="padding:6px;">每种攻击形状手写检测</td><td style="padding:6px;color:#5e5;">MonsterConfig 选 Shape，0行</td></tr>
+    <tr><td style="padding:6px;">Skill Q 命中判定</td><td style="padding:6px;">SkillDashComponent 自带碰撞</td><td style="padding:6px;color:#5e5;">保持现有 Dash 移动，命中改用 RectShape</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">Skill R 范围判定</td><td style="padding:6px;">手写 OverlapSphere + 间隔循环</td><td style="padding:6px;color:#5e5;">CircleShape + Pulse 模式，0行手写</td></tr>
+  </table>
+</div>

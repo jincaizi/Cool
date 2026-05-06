@@ -1,0 +1,176 @@
+<h2>攻击范围设计 — 面向扩展重构</h2>
+<p class="subtitle">核心思路：把"攻击形状"从角色/怪物身上剥离，变成可插拔的独立抽象</p>
+
+<div class="section">
+  <h3>当前设计的问题</h3>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:6px;text-align:left;">组件</th><th style="padding:6px;text-align:left;">当前攻击方式</th><th style="padding:6px;text-align:left;">无法支持</th></tr>
+    <tr>
+      <td style="padding:6px;">CharacterAttackHandler</td>
+      <td style="padding:6px;">前方扇形检测（硬编码）</td>
+      <td style="padding:6px;color:#e55;">弓的射线/弹道、法杖的圆形AOE、枪的直线穿透</td>
+    </tr>
+    <tr style="background:#2a2a2a;">
+      <td style="padding:6px;">MonsterAttackHitbox</td>
+      <td style="padding:6px;">触发碰撞器（Collider Trigger）</td>
+      <td style="padding:6px;color:#e55;">怪物远程喷吐、地面预警圈、冲锋路径检测</td>
+    </tr>
+    <tr>
+      <td style="padding:6px;">AttackResolver</td>
+      <td style="padding:6px;">OverlapSphere + 角度过滤</td>
+      <td style="padding:6px;color:#e55;">只有扇形，没有圆形/矩形/射线/弹道</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>核心抽象：AttackShape</h3>
+  <p style="font-size:12px;">角色攻击和怪物攻击都用同一套 AttackShape。区别只在于触发时机和参数来源。</p>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">IAttackShape 接口 + 内置实现</div>
+  <div class="mockup-body">
+    <pre style="font-size:11px;line-height:1.5;margin:0;color:#aad;">
+// 攻击形状接口 — 只管"在空间中找出被打到的目标"
+public interface IAttackShape
+{
+    /// 执行攻击检测，返回所有命中的 IDamageable
+    IReadOnlyList&lt;IDamageable&gt; Resolve(
+        Vector3 origin, Vector3 forward, LayerMask targetMask);
+}
+
+// 四种内置实现覆盖所有场景
+public class ConeShape : IAttackShape        // 扇形 — 剑横扫、斧劈砍
+{
+    public float Range;
+    public float Angle;     // 扇形角度
+}
+
+public class CircleShape : IAttackShape      // 圆形 — 旋风斩、怪物践踏
+{
+    public float Radius;
+}
+
+public class RectShape : IAttackShape        // 矩形 — 冲锋、长枪突刺
+{
+    public float Length;
+    public float Width;
+}
+
+public class RayShape : IAttackShape         // 射线/弹道 — 弓、枪、怪物喷吐
+{
+    public float MaxRange;
+    public float Width;     // 0=精准射线, >0=弹道宽度
+    public bool StopAtFirstHit;
+}</pre>
+  </div>
+</div>
+
+<div class="section">
+  <h3>映射表：每个场景用哪个 Shape</h3>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:6px;">场景</th><th style="padding:6px;">AttackShape</th><th style="padding:6px;">参数示例</th></tr>
+    <tr><td style="padding:6px;">剑普攻</td><td style="padding:6px;">ConeShape</td><td style="padding:6px;font-size:11px;">range=2, angle=120°</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">剑技能Q（冲刺斩）</td><td style="padding:6px;">RectShape</td><td style="padding:6px;font-size:11px;">length=3, width=1.5</td></tr>
+    <tr><td style="padding:6px;">盾牌猛击</td><td style="padding:6px;">ConeShape</td><td style="padding:6px;font-size:11px;">range=1.5, angle=90°</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">弓普攻（未来）</td><td style="padding:6px;">RayShape</td><td style="padding:6px;font-size:11px;">maxRange=30, width=0, stopAtFirstHit=true</td></tr>
+    <tr><td style="padding:6px;">法杖火球（未来）</td><td style="padding:6px;">CircleShape</td><td style="padding:6px;font-size:11px;">radius=3（弹道终点爆炸）</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">Slime 普攻</td><td style="padding:6px;">ConeShape</td><td style="padding:6px;font-size:11px;">range=1.5, angle=100°</td></tr>
+    <tr><td style="padding:6px;">TurtleShell 旋转攻击</td><td style="padding:6px;">CircleShape</td><td style="padding:6px;font-size:11px;">radius=2</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">Boss 喷吐（未来）</td><td style="padding:6px;">RayShape</td><td style="padding:6px;font-size:11px;">maxRange=15, width=1.5, stopAtFirstHit=false</td></tr>
+    <tr><td style="padding:6px;">Boss 冲锋（未来）</td><td style="padding:6px;">RectShape</td><td style="padding:6px;font-size:11px;">length=8, width=3</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>统一后的攻击流程</h3>
+  <div class="mockup">
+    <div class="mockup-body">
+      <pre style="font-size:11px;line-height:1.6;margin:0;color:#ccc;">
+  ┌─────────────────────────────────────────────────────────┐
+  │           动画帧触发 (角色 和 怪物 走同一条管道)          │
+  │                                                         │
+  │  武器配置 / 怪物Config                                   │
+  │       │                                                 │
+  │       ▼ 读取 AttackShape + AttackEffects                 │
+  │  shape.Resolve(origin, forward, targetMask)             │
+  │       │                                                 │
+  │       ▼ 返回 IDamageable[]                               │
+  │  foreach target:                                        │
+  │      foreach effect in AttackEffects:                   │
+  │          target.ApplyDamage(effect.Damage)              │
+  │          target.ApplyKnockback(effect.KnockbackForce)   │
+  │          target.ApplyStatus(effect.Status)              │
+  │                                                         │
+  └─────────────────────────────────────────────────────────┘
+
+  关键点：
+  · 角色用 IWeapon.Shape，怪物用 MonsterConfig.AttackShape
+  · 同一套 IAttackShape 实现，不存在"角色版"和"怪物版"
+  · 新增攻击类型 = 新增一个 IAttackShape 实现（或调现有参数）
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>和之前设计的关系</h3>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">之前：AttackResolver 硬编码扇形</div>
+    <div class="mockup-body" style="font-size:11px;">
+      <pre style="margin:0;color:#e55;">
+// 只能做扇形
+AttackResolver.FindNearestTarget(
+    origin, forward, range, angle, mask);
+
+// 要做圆形AOE？
+// → 改 AttackResolver 加方法
+// 要射线？
+// → 再加方法，类越来越胖</pre>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">现在：AttackShape 多态</div>
+    <div class="mockup-body" style="font-size:11px;">
+      <pre style="margin:0;color:#5e5;">
+// 统一入口，行为由 shape 决定
+var hits = weaponConfig.AttackShape
+    .Resolve(origin, forward, targetMask);
+
+// 所有形状共用一个接口
+// 加新形状 = 新建一个类
+// 无需改现有代码</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Config 结构更新</h3>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:6px;">配置</th><th style="padding:6px;">新增字段</th><th style="padding:6px;">类型</th></tr>
+    <tr><td style="padding:6px;">WeaponConfig</td><td style="padding:6px;">AttackShape</td><td style="padding:6px;">AttackShapeConfig（可序列化）</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">WeaponConfig</td><td style="padding:6px;">AttackEffects</td><td style="padding:6px;">AttackEffectConfig[]</td></tr>
+    <tr><td style="padding:6px;">WeaponConfig</td><td style="padding:6px;">WeaponType</td><td style="padding:6px;">enum { Melee, Ranged }</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;">MonsterConfig</td><td style="padding:6px;">AttackShape</td><td style="padding:6px;">AttackShapeConfig</td></tr>
+    <tr><td style="padding:6px;">MonsterConfig</td><td style="padding:6px;">AttackEffects</td><td style="padding:6px;">AttackEffectConfig[]（替换单个 AttackDamage）</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>当前阶段实际要写的代码</h3>
+  <p style="font-size:12px;">虽然是面向未来的设计，但当前只实现必要部分：</p>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="background:#333;"><th style="padding:6px;">文件</th><th style="padding:6px;">说明</th></tr>
+    <tr><td style="padding:6px;color:#5e5;">IAttackShape.cs</td><td style="padding:6px;">接口定义</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;color:#5e5;">ConeShape.cs</td><td style="padding:6px;">扇形实现（当前就用这个）</td></tr>
+    <tr><td style="padding:6px;color:#5e5;">CircleShape.cs</td><td style="padding:6px;">圆形实现（TurtleShell 旋转攻击用）</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;color:#5e5;">AttackShapeConfig.cs</td><td style="padding:6px;">可序列化配置，存 type + 参数，运行时创建 IAttackShape</td></tr>
+    <tr><td style="padding:6px;color:#5e5;">AttackEffectConfig.cs</td><td style="padding:6px;">攻击效果（伤害+击退+状态）</td></tr>
+    <tr style="background:#2a2a2a;"><td style="padding:6px;color:#888;">RectShape.cs</td><td style="padding:6px;color:#888;">矩形（当前不写，需要时加）</td></tr>
+    <tr><td style="padding:6px;color:#888;">RayShape.cs</td><td style="padding:6px;color:#888;">射线/弹道（加远程武器时写）</td></tr>
+  </table>
+</div>

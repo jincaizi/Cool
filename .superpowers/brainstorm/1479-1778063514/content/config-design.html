@@ -1,0 +1,113 @@
+<h2>MonsterConfig 扩展设计</h2>
+<p class="subtitle">所有行为差异都通过 ScriptableObject 配置，MonsterAI 读取配置执行</p>
+
+<div class="mockup">
+  <div class="mockup-header">MonsterConfig 新增 Section</div>
+  <div class="mockup-body" style="font-size:13px;">
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#222;"><th style="padding:8px;text-align:left;">Section</th><th style="padding:8px;text-align:left;">字段</th><th style="padding:8px;text-align:left;">类型</th><th style="padding:8px;text-align:left;">说明</th><th style="padding:8px;text-align:left;">Slime 示例</th><th style="padding:8px;text-align:left;">TurtleShell 示例</th></tr>
+
+      <tr><td colspan="6" style="padding:8px;background:#333;font-weight:bold;">[Attack] 攻击行为</td></tr>
+      <tr><td style="padding:6px;"></td><td style="padding:6px;">AttackAnimCount</td><td style="padding:6px;">int</td><td style="padding:6px;">可用攻击动画数量</td><td style="padding:6px;">2</td><td style="padding:6px;">2</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>AttackDamageList</td><td>DamageData[]</td><td>每个攻击的伤害数据</td><td>[快咬, 重砸]</td><td>[旋转, 头槌]</td></tr>
+      <tr><td></td><td>AttackWeights</td><td>float[]</td><td>每个攻击的随机权重</td><td>[0.7, 0.3]</td><td>[0.5, 0.5]</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>AttackAnimSpeed</td><td>float</td><td>攻击动画播放速度</td><td>1.2</td><td>1.0</td></tr>
+
+      <tr><td colspan="6" style="padding:8px;background:#333;font-weight:bold;">[Defend] 防御行为 (TurtleShell 专用)</td></tr>
+      <tr><td style="padding:6px;"></td><td style="padding:6px;">EnableDefend</td><td style="padding:6px;">bool</td><td style="padding:6px;">是否启用防御</td><td style="padding:6px;">false</td><td style="padding:6px;">true</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>DefendHPThreshold</td><td>float (0-1)</td><td>HP低于此比例触发防御</td><td>—</td><td>0.5</td></tr>
+      <tr><td></td><td>DefendDuration</td><td>float</td><td>防御持续时间(秒)</td><td>—</td><td>2.0</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>DefendDamageReduction</td><td>float (0-1)</td><td>正面减伤比例</td><td>—</td><td>0.8</td></tr>
+      <tr><td></td><td>DefendAngle</td><td>float (度)</td><td>有效防御角度</td><td>—</td><td>180</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>DefendBlockCountToCounter</td><td>int</td><td>格挡N次后反击</td><td>—</td><td>2</td></tr>
+      <tr><td></td><td>DefendCounterDamageMultiplier</td><td>float</td><td>反击伤害倍率</td><td>—</td><td>1.5</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>DefendCooldown</td><td>float</td><td>防御冷却(秒)</td><td>—</td><td>8.0</td></tr>
+
+      <tr><td colspan="6" style="padding:8px;background:#333;font-weight:bold;">[Taunt] 嘲讽行为 (Slime 专用)</td></tr>
+      <tr><td style="padding:6px;"></td><td style="padding:6px;">EnableTaunt</td><td style="padding:6px;">bool</td><td style="padding:6px;">攻击落空后是否嘲讽</td><td style="padding:6px;">true</td><td style="padding:6px;">false</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>TauntChance</td><td>float (0-1)</td><td>攻击落空后触发嘲讽概率</td><td>0.6</td><td>—</td></tr>
+      <tr><td></td><td>TauntDuration</td><td>float</td><td>嘲讽动画持续时间</td><td>1.5</td><td>—</td></tr>
+
+      <tr><td colspan="6" style="padding:8px;background:#333;font-weight:bold;">[Alert] 警戒行为</td></tr>
+      <tr><td style="padding:6px;"></td><td style="padding:6px;">AlertRange</td><td style="padding:6px;">float</td><td style="padding:6px;">警戒感知距离(>DetectRange)</td><td style="padding:6px;">15</td><td style="padding:6px;">12</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>AlertAnim</td><td>string</td><td>警戒动画名(SenseSomething)</td><td>SenseSomething</td><td>SenseSomething</td></tr>
+
+      <tr><td colspan="6" style="padding:8px;background:#333;font-weight:bold;">[Movement] 移动风格</td></tr>
+      <tr><td style="padding:6px;"></td><td style="padding:6px;">UseDirectionalMovement</td><td style="padding:6px;">bool</td><td style="padding:6px;">是否用方向BlendTree</td><td style="padding:6px;">true</td><td style="padding:6px;">true</td></tr>
+      <tr style="background:#2a2a2a;"><td></td><td>ChaseAnimIsRun</td><td>bool</td><td>追击用Run还是Walk</td><td>true (Run)</td><td>false (Walk)</td></tr>
+      <tr><td></td><td>RotationSpeed</td><td>float</td><td>转身速度</td><td>15</td><td>5</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h3>MonsterAI 改造要点</h3>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Attack 行为：配置驱动</div>
+    <div class="mockup-body" style="font-size:12px;">
+      <pre style="margin:0;color:#aad;">
+// MonsterAI.TransitionTo(Attack) 中
+if (_config.AttackAnimCount > 1)
+{
+    // 按 AttackWeights 权重随机选择攻击
+    int index = WeightedRandom(_config.AttackWeights);
+    _currentAttackIndex = index;
+    _animator.SetInteger("AttackIndex", index);
+    var dmg = _config.AttackDamageList[index];
+    OnAttackFrame?.Invoke(dmg);
+}
+else
+{
+    _animator.SetTrigger(HASH_Attack);
+    OnAttackFrame?.Invoke(_config.AttackDamage);
+}
+_animator.SetTrigger(HASH_Attack);</pre>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">Defend 行为：配置驱动</div>
+    <div class="mockup-body" style="font-size:12px;">
+      <pre style="margin:0;color:#aad;">
+// MonsterAI.EvaluateTransitions() 中
+if (_config.EnableDefend &&
+    _stats.HP / _stats.MaxHP < _config.DefendHPThreshold
+    && _defendCooldown <= 0)
+{
+    TransitionTo(MonsterAIState.Defend);
+}
+
+// ExecuteState(Defend) 中
+if (_stateTimer <= 0)
+{
+    if (_defendBlockCount >= _config.DefendBlockCountToCounter)
+    {
+        // 触发反击
+        _counterAttackActive = true;
+        TransitionTo(MonsterAIState.Attack);
+    }
+    else
+        TransitionTo(MonsterAIState.Chase);
+}</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>MonsterAI 新增状态</h3>
+  <pre style="background:#222;padding:12px;border-radius:6px;font-size:13px;color:#ccc;">
+public enum MonsterAIState
+{
+    Idle    = 0,
+    Patrol  = 1,
+    Chase   = 2,
+    Attack  = 3,
+    Hit     = 4,
+    Death   = 5,
+    Defend  = 6,   // 新增：防御状态
+    Taunt   = 7,   // 新增：嘲讽状态 (Slime)
+    Alert   = 8,   // 新增：警戒状态
+}</pre>
+</div>

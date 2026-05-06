@@ -1,0 +1,93 @@
+<h2>Monster Behavioral Identities</h2>
+<p class="subtitle">Based on available animations — click to select your direction</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Slime — Aggressive Swarm Tactics</div>
+    <div class="mockup-body">
+      <div style="background:#2a2a2a;padding:16px;border-radius:8px;">
+        <h3 style="color:#7bf;margin:0 0 8px;">Slime FSM</h3>
+        <pre style="font-size:12px;line-height:1.6;margin:0;color:#ccc;">
+Idle ──timeout──▶ Patrol ──detects player──▶ Chase
+  ▲                  ▲                          │
+  │                  │              ┌───────────┤
+  │                  │              │           │
+  └─return to spawn─┘              ▼           ▼
+                               Attack1 ◀──▶ Attack2
+                                  │           │
+                                  ▼           ▼
+                         [on cooldown]   SenseSomething
+                              │         (Taunt if player dodges)
+                              ▼
+                            Repeat
+        </pre>
+      </div>
+      <ul style="margin:12px 0 0;padding:0 16px;font-size:13px;">
+        <li>Fast, aggressive, low HP</li>
+        <li>Two attack variants (Attack01=quick bite, Attack02=leap slam)</li>
+        <li>After missed attack → Taunt animation</li>
+        <li>SenseSomething = wiggle + alert when player nearby but out of range</li>
+        <li>"Annoying" — designed to swarm in groups</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">TurtleShell — Defensive Tank</div>
+    <div class="mockup-body">
+      <div style="background:#2a2a2a;padding:16px;border-radius:8px;">
+        <h3 style="color:#7bf;margin:0 0 8px;">TurtleShell FSM</h3>
+        <pre style="font-size:12px;line-height:1.6;margin:0;color:#ccc;">
+Idle ──timeout──▶ Patrol ──detects player──▶ Chase
+  ▲                  ▲                          │
+  │                  │              ┌───────────┤
+  │                  │              │           │
+  └─return to spawn─┘              ▼           ▼
+                               Attack1      Defend
+                                  │           │
+                                  │    ┌──────┤
+                                  │    │      │
+                                  ▼    ▼      ▼
+                              Attack2  DefendHit  Counter
+                                        (block)   (after N blocks)
+        </pre>
+      </div>
+      <ul style="margin:12px 0 0;padding:0 16px;font-size:13px;">
+        <li>Slow, high HP, high defense</li>
+        <li>Attack01=spin attack, Attack02=headbutt</li>
+        <li>Defend = raise shell, block frontal damage</li>
+        <li>DefendHit = recoil animation when hit while defending</li>
+        <li>After 2-3 blocks → counter-attack with bonus damage</li>
+        <li>"Wall" — designed to hold ground alone</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Key Design Decisions</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Both designs as shown</h3>
+      <p>Slime gets Taunt/SenseSomething flavor + 2 attack variants. TurtleShell gets Defend/DefendHit/Counter mechanic.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Simpler — single Attack, no Counter</h3>
+      <p>Keep it lean. Slime uses only Attack01. TurtleShell defends but no counter mechanic. Faster to implement.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Give Slime a unique mechanic too</h3>
+      <p>Slime could leave a slowing trail, split into a smaller slime on death, or have a charge-up leap. Match TurtleShell's complexity.</p>
+    </div>
+  </div>
+</div>
