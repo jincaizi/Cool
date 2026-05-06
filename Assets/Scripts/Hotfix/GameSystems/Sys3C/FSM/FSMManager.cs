@@ -24,6 +24,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public event Action OnJumpEndCompleted;
         public event Action OnAttackCompleted;
+        public event Action OnAttackActivated;
         public event Action OnSkillCompleted;
         public event Action OnHitCompleted;
         public event Action OnDeath;
@@ -183,6 +184,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public void RequestNormalAttack()
         {
             _attackFSM.RequestNormalAttack();
+            OnAttackActivated?.Invoke();
         }
 
         public void RequestSkillQ()

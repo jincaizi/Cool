@@ -23,6 +23,7 @@ namespace Hotfix.GameSystems.Sys3C
         private HitManager _hitManager;
         private InputManager _inputManager;
         private ThirdPersonCameraController _camera;
+        private CharacterAttackHandler _attackHandler;
 
         private void Start()
         {
@@ -64,6 +65,13 @@ namespace Hotfix.GameSystems.Sys3C
                 // 立即同步相机位置，避免初始偏移
                 _camera.SnapToTarget();
             }
+
+            // 初始化攻击处理器
+            _attackHandler = GetComponent<CharacterAttackHandler>();
+            if (_attackHandler == null)
+                _attackHandler = gameObject.AddComponent<CharacterAttackHandler>();
+
+            _fsmManager.OnAttackActivated += () => _attackHandler?.OnAttackActivated();
 
             // 注册默认技能
             RegisterDefaultSkills();
