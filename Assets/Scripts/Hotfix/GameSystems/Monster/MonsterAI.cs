@@ -12,7 +12,10 @@ namespace Hotfix.GameSystems.Monster
         Chase = 2,
         Attack = 3,
         Hit = 4,
-        Death = 5
+        Death = 5,
+        Defend = 6,
+        Taunt = 7,
+        Alert = 8
     }
 
     public class MonsterAI
