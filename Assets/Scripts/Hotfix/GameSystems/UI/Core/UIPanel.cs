@@ -21,14 +21,14 @@ namespace Hotfix.GameSystems.UI
             Animation = GetComponent<UIAnimation>();
         }
 
-        protected virtual void OnPreShow() { }
-        protected virtual Sequence PlayShowAnimation()
+        internal virtual void OnPreShow() { }
+        internal virtual Sequence PlayShowAnimation()
         {
             return Animation != null ? Animation.PlayShow() : null;
         }
-        protected virtual void OnShow() { }
-        protected virtual void OnHide() { }
-        protected virtual Sequence PlayHideAnimation()
+        internal virtual void OnShow() { }
+        internal virtual void OnHide() { }
+        internal virtual Sequence PlayHideAnimation()
         {
             return Animation != null ? Animation.PlayHide() : null;
         }

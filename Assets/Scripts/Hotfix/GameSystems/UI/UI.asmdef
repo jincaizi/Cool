@@ -3,7 +3,8 @@
     "rootNamespace": "Hotfix.GameSystems.UI",
     "references": [
         "Core",
-        "UniTask"
+        "UniTask",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
