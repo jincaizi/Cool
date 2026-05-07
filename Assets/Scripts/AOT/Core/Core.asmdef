@@ -3,6 +3,7 @@
     "rootNamespace": "Core",
     "references": [
         "UniTask",
+        "Unity.Addressables",
         "Unity.ResourceManager"
     ],
     "includePlatforms": [],
