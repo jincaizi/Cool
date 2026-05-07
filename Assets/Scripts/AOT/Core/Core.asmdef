@@ -2,7 +2,8 @@
     "name": "Core",
     "rootNamespace": "Core",
     "references": [
-        "UniTask"
+        "UniTask",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
