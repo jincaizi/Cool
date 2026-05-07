@@ -97,8 +97,9 @@ namespace Hotfix.GameSystems.UI
         {
             if (_stack.Count == 0) return;
 
-            var panel = _stack.Pop();
+            var panel = _stack.Peek();
             await HidePanelAsync(panel);
+            _stack.Pop();
 
             // Resume underlying panel
             if (_stack.Count > 0)
@@ -109,7 +110,7 @@ namespace Hotfix.GameSystems.UI
             }
         }
 
-        public async void PopTo(string panelId)
+        public async UniTask PopTo(string panelId)
         {
             while (_stack.Count > 0 && _stack.Peek().PanelId != panelId)
             {
