@@ -35,7 +35,7 @@ namespace Hotfix.GameSystems.Nameplate
         private void OnSkillActivated(SkillActivatedEvent e)
         {
             FloatingTextPool.Instance?.Spawn(
-                e.CasterPosition + Vector3.up * 2.5f,
+                Vector3.zero,
                 e.SkillName,
                 FloatingTextPresets.SkillName
             );

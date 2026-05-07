@@ -61,18 +61,4 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
         }
     }
 
-    /// <summary>
-    /// 技能激活事件（给浮字系统显示技能名）
-    /// </summary>
-    public struct SkillActivatedEvent : IEvent
-    {
-        public Vector3 CasterPosition;
-        public string SkillName;
-
-        public SkillActivatedEvent(Vector3 casterPos, string skillName)
-        {
-            CasterPosition = casterPos;
-            SkillName = skillName;
-        }
-    }
 }
