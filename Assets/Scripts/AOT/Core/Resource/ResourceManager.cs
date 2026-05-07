@@ -15,6 +15,7 @@ namespace Core.Resource
         internal static ResourceManager Instance => _instance ?? (_instance = new ResourceManager());
 
         private readonly Dictionary<string, HandleEntry> _handles = new Dictionary<string, HandleEntry>();
+        private readonly Dictionary<string, SceneInstance> _scenes = new Dictionary<string, SceneInstance>();
 
         private ResourceManager() { }
 
@@ -142,12 +143,18 @@ namespace Core.Resource
             if (handle.Status != AsyncOperationStatus.Succeeded)
                 throw new ResourceLoadException(key,
                     new Exception($"Scene load failed with status: {handle.Status}"));
+
+            _scenes[key] = handle.Result;
         }
 
-        internal async UniTask UnloadSceneAsync(SceneInstance sceneInstance)
+        internal async UniTask UnloadSceneAsync(string key)
         {
+            if (!_scenes.TryGetValue(key, out var sceneInstance))
+                return;
+
             var handle = Addressables.UnloadSceneAsync(sceneInstance);
             await handle.Task;
+            _scenes.Remove(key);
         }
 
         // ===== Debug =====
