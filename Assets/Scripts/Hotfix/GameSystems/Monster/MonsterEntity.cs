@@ -6,10 +6,11 @@ using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Combat;
 using Hotfix.GameSystems.Skills.Effect;
+using Hotfix.GameSystems.Sys3C.Core.Events;
 
 namespace Hotfix.GameSystems.Monster
 {
-    public class MonsterEntity : MonoBehaviour, IDamageable
+    public class MonsterEntity : MonoBehaviour, IDamageable, ITargetable
     {
         [Header("Components")]
         public Animator Animator;
@@ -51,7 +52,15 @@ namespace Hotfix.GameSystems.Monster
             if (HitZone != null) HitZone.Init(this);
 
             _stats.OnDeath += HandleDeath;
-            _stats.OnHPChanged += (cur, max) => { };
+            _stats.OnHPChanged += (cur, max) =>
+            {
+                var t = (ITargetable)this;
+                t.OnHPChanged?.Invoke(
+                    max > 0 ? cur / max : 0f,
+                    Mathf.CeilToInt(cur),
+                    Mathf.CeilToInt(max));
+            };
+            _stats.OnDeath += () => ((ITargetable)this).OnDeath?.Invoke();
 
             _ai.OnDeathComplete += () => StartCoroutine(DeathSequence());
             _ai.OnAttackHitboxActivate += (effect) =>
@@ -85,6 +94,13 @@ namespace Hotfix.GameSystems.Monster
             if (_stats.IsDead) return;
             _stats.TakeDamage(data);
             _ai.NotifyHit(data, hitDirection);
+
+            // Emit monster damage event for floating text
+            EventBus.Emit(new MonsterTakeDamageEvent(
+                transform.position + Vector3.up * 2f,
+                Mathf.CeilToInt(data.BaseDamage),
+                data.IsCritical
+            ));
         }
 
         private void HandleDeath()
@@ -107,5 +123,17 @@ namespace Hotfix.GameSystems.Monster
             OnDeathComplete?.Invoke();
             Destroy(gameObject);
         }
+
+        // ===== ITargetable =====
+
+        string ITargetable.DisplayName => _config != null ? _config.DisplayName : name;
+        int ITargetable.Level => 1;
+        Sprite ITargetable.Portrait => null;
+        float ITargetable.HPPercent => _stats != null ? _stats.HP / _stats.MaxHP : 0f;
+        int ITargetable.CurrentHP => _stats != null ? Mathf.CeilToInt(_stats.HP) : 0;
+        int ITargetable.MaxHP => _stats != null ? Mathf.CeilToInt(_stats.MaxHP) : 0;
+        Vector3 ITargetable.WorldPosition => transform.position;
+        event Action<float, int, int> ITargetable.OnHPChanged;
+        event Action ITargetable.OnDeath;
     }
 }
