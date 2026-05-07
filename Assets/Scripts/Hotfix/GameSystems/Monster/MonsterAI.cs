@@ -364,7 +364,7 @@ namespace Hotfix.GameSystems.Monster
                 Vector3 dir = (t.Transform.position - _self.position).normalized;
                 t.TakeDamage(effect.Damage, dir);
             }
-            return targets.Count > 0;
+            return _hitBuffer.Count > 0;
         }
 
         private int PickAttackIndex()
