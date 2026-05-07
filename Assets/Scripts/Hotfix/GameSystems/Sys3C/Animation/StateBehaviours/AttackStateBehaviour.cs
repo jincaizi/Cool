@@ -11,13 +11,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
         private static readonly int HASH_SkillR_Start = Animator.StringToHash("SkillR_Start");  // 新增
         private static readonly int HASH_SkillR_Loop = Animator.StringToHash("SkillR_Loop");      // 新增
 
-        private const int COMBO_FRAME_LOCK = 5;
-        private const float COMBO_WINDOW_START = 0.3f;
-        private const float COMBO_WINDOW_END = 0.8f;
-
-        private int _framesInState;
-        private bool _comboUnlocked;
-
         private static AnimationDriver _driver;
         private static Action<string> _onAnimationCompleted;
 
@@ -48,26 +41,10 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if (IsAttackState(stateInfo))
-            {
-                _framesInState = 0;
-                _comboUnlocked = false;
-            }
         }
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // 只对 Attack1/Attack2 处理连击逻辑
-            if (stateInfo.shortNameHash == HASH_Attack1 || stateInfo.shortNameHash == HASH_Attack2)
-            {
-                _framesInState++;
-
-                if (!_comboUnlocked && _framesInState >= COMBO_FRAME_LOCK)
-                {
-                    _comboUnlocked = true;
-                }
-            }
-
             // 检查动画是否接近完成（normalizedTime >= 0.95），防止循环播放问题
             // SkillR_Loop是循环动画，不触发完成回调
             if (IsAttackState(stateInfo) && stateInfo.normalizedTime >= 0.95f && stateInfo.normalizedTime < 1.1f)
