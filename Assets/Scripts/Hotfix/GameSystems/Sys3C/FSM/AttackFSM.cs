@@ -17,9 +17,14 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         private AttackState _currentState;
 
-        private int _comboCount;
-        private int _framesInState;
-        private bool _comboUnlocked;
+        // Combo window timing
+        private float _attackAnimStartTime;
+        private float _attackAnimDuration;
+        private bool _inputBuffered;
+        private bool _comboWindowOpen;
+
+        private const float COMBO_LOCK_RATIO = 0.2f;
+        private const float COMBO_WINDOW_END_RATIO = 0.85f;
 
         // SkillQ 突进参数
         private const float SKILLQ_DASH_DISTANCE = 3f;
@@ -95,42 +100,80 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
             if (_currentState == AttackState.Idle)
             {
-                _comboCount = 0;
-                _framesInState = 0;
-                _comboUnlocked = false;
+                _attackAnimStartTime = 0f;
+                _attackAnimDuration = 0f;
+                _inputBuffered = false;
+                _comboWindowOpen = false;
                 _skillStateTimer = 0f;
                 _skillRDuration = 0f;
                 _isSkillRActive = false;
             }
-            else
+            else if (_currentState == AttackState.Attack1)
             {
-                _framesInState++;
-
-                if (!_comboUnlocked && _framesInState >= 5)
+                // Lazy-init duration on first frame after transition
+                if (_attackAnimDuration <= 0f)
                 {
-                    _comboUnlocked = true;
+                    _attackAnimDuration = _driver.GetAttackLayerClipLength();
+                }
+
+                if (_attackAnimDuration > 0f)
+                {
+                    float elapsed = Time.time - _attackAnimStartTime;
+                    float normalizedTime = elapsed / _attackAnimDuration;
+
+                    if (normalizedTime < COMBO_LOCK_RATIO)
+                    {
+                        _comboWindowOpen = false;
+                    }
+                    else if (normalizedTime < COMBO_WINDOW_END_RATIO)
+                    {
+                        _comboWindowOpen = true;
+                        if (_inputBuffered)
+                        {
+                            EnterAttack(AttackState.Attack2);
+                        }
+                    }
+                    else
+                    {
+                        _comboWindowOpen = false;
+                    }
                 }
             }
         }
 
         public void RequestNormalAttack()
         {
-            if (_currentState == AttackState.Idle)
+            switch (_currentState)
             {
-                _currentState = AttackState.Attack1;
-                _comboCount = 1;
-                _driver.SetAttackState(_currentState);
-                _driver.SetAttackLayerWeight(1f);
-                _driver.TriggerAttack();
+                case AttackState.Idle:
+                    EnterAttack(AttackState.Attack1);
+                    break;
+                case AttackState.Attack1:
+                    if (_comboWindowOpen)
+                    {
+                        EnterAttack(AttackState.Attack2);
+                    }
+                    else if (!_comboWindowOpen && !_inputBuffered)
+                    {
+                        _inputBuffered = true;
+                    }
+                    break;
+                case AttackState.Attack2:
+                    // End of combo, input ignored
+                    break;
             }
-            else if (_currentState == AttackState.Attack1 && _comboUnlocked)
-            {
-                _currentState = AttackState.Attack2;
-                _comboCount = 2;
-                _driver.SetAttackState(_currentState);
-                _driver.SetAttackLayerWeight(1f);
-                _driver.TriggerAttack();
-            }
+        }
+
+        private void EnterAttack(AttackState state)
+        {
+            _currentState = state;
+            _attackAnimStartTime = Time.time;
+            _attackAnimDuration = 0f;
+            _inputBuffered = false;
+            _comboWindowOpen = false;
+            _driver.SetAttackState(_currentState);
+            _driver.SetAttackLayerWeight(1f);
+            _driver.TriggerAttack();
         }
 
         public void RequestSkillQ()
@@ -138,9 +181,8 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             if (_currentState == AttackState.Idle || _currentState == AttackState.Attack1 || _currentState == AttackState.Attack2)
             {
                 _currentState = AttackState.SkillQ;
-                _comboCount = 0;
-                _framesInState = 0;
-                _comboUnlocked = false;
+                _inputBuffered = false;
+                _comboWindowOpen = false;
                 _driver.SetAttackState(_currentState);
                 _driver.SetAttackLayerWeight(1f);
                 _driver.TriggerSkillQ();
@@ -154,9 +196,8 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             if (_currentState == AttackState.Idle || _currentState == AttackState.Attack1 || _currentState == AttackState.Attack2)
             {
                 _currentState = AttackState.SkillR_Start;
-                _comboCount = 0;
-                _framesInState = 0;
-                _comboUnlocked = false;
+                _inputBuffered = false;
+                _comboWindowOpen = false;
                 _isSkillRActive = true;
                 _skillRDuration = 0f;
                 _driver.SetAttackState(_currentState);
@@ -209,29 +250,37 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             }
         }
 
-        public void OnAnimationCompleted(string stateName)
+        public bool OnAnimationCompleted(string stateName)
         {
             switch (stateName)
             {
                 case "Attack1":
+                    // Guard: only reset if still in Attack1 (not chained to Attack2)
+                    if (_currentState == AttackState.Attack1)
+                    {
+                        ReturnToIdle();
+                        OnAttackCompleted?.Invoke();
+                        OnSkillOrAttackEnded?.Invoke();
+                        return true;
+                    }
+                    return false;
                 case "Attack2":
                     ReturnToIdle();
                     OnAttackCompleted?.Invoke();
                     OnSkillOrAttackEnded?.Invoke();
-                    break;
-                case "AttackQ":  // 动画状态在Animator中叫 AttackQ
+                    return true;
+                case "AttackQ":
                     ReturnToIdle();
                     OnSkillCompleted?.Invoke();
                     OnSkillOrAttackEnded?.Invoke();
-                    break;
+                    return true;
                 case "SkillR_Start":
-                    // 起手动画完成，进入循环阶段
                     OnSkillRStartCompleted();
-                    break;
+                    return true;
                 case "SkillR_Loop":
-                    // Loop状态下不应触发完成，除非被取消
-                    break;
+                    return false;
             }
+            return false;
         }
 
         public void ReturnToIdle()
