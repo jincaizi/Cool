@@ -134,7 +134,7 @@ namespace Hotfix.GameSystems.Monster
             var players = Hotfix.GameSystems.Sys3C.Core.Combat.PhysicsRegistry.Instance.FindNearby(
                 _self.position, _config.DetectRange, EntityType.Player);
             if (players.Count > 0)
-                _target = players[0];
+                _target = players[0].Transform;
         }
 
         public void NotifyHit(DamageData damageData, Vector3 hitDirection)
