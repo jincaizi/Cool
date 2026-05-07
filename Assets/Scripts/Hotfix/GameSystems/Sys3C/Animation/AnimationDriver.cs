@@ -228,5 +228,15 @@ namespace Hotfix.GameSystems.Sys3C.Animation
         {
             _animator.SetLayerWeight(HIT_LAYER_INDEX, weight);
         }
+
+        /// <summary>
+        /// Get the length (seconds) of the current animation clip on the Attack layer.
+        /// Returns 0 if no clip is playing.
+        /// </summary>
+        public float GetAttackLayerClipLength()
+        {
+            var stateInfo = _animator.GetCurrentAnimatorStateInfo(ATTACK_LAYER_INDEX);
+            return stateInfo.length;
+        }
     }
 }
