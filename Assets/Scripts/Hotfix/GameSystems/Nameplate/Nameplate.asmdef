@@ -1,0 +1,20 @@
+{
+    "name": "Hotfix.GameSystems.Nameplate",
+    "rootNamespace": "Hotfix.GameSystems.Nameplate",
+    "references": [
+        "Core",
+        "UniTask",
+        "DOTween.Modules",
+        "Hotfix.GameSystems.UI",
+        "Hotfix.GameSystems.Skills"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
