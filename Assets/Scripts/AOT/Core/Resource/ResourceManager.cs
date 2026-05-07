@@ -37,6 +37,9 @@ namespace Core.Resource
         {
             if (_handles.TryGetValue(key, out var entry))
             {
+                if (!typeof(T).IsAssignableFrom(entry.AssetType))
+                    throw new ResourceLoadException(key,
+                        new InvalidCastException($"Asset '{key}' was loaded as {entry.AssetType.Name}, cannot return as {typeof(T).Name}"));
                 entry.RefCount++;
                 return (T)entry.Handle.Result;
             }
@@ -83,13 +86,16 @@ namespace Core.Resource
         {
             if (_handles.TryGetValue(key, out var entry))
             {
+                if (!typeof(T).IsAssignableFrom(entry.AssetType))
+                    throw new ResourceLoadException(key,
+                        new InvalidCastException($"Asset '{key}' was loaded as {entry.AssetType.Name}, cannot return as {typeof(T).Name}"));
                 entry.RefCount++;
                 return (T)entry.Handle.Result;
             }
 
+            var handle = Addressables.LoadAssetAsync<T>(key);
             try
             {
-                var handle = Addressables.LoadAssetAsync<T>(key);
                 handle.WaitForCompletion();
 
                 if (handle.Status == AsyncOperationStatus.Succeeded)
@@ -98,6 +104,7 @@ namespace Core.Resource
                     return handle.Result;
                 }
 
+                Addressables.Release(handle);
                 throw new ResourceLoadException(key,
                     new Exception($"Addressables load failed with status: {handle.Status}"));
             }
@@ -107,6 +114,7 @@ namespace Core.Resource
             }
             catch (Exception e)
             {
+                Addressables.Release(handle);
                 throw new ResourceLoadException(key, e);
             }
         }
@@ -144,6 +152,10 @@ namespace Core.Resource
                 throw new ResourceLoadException(key,
                     new Exception($"Scene load failed with status: {handle.Status}"));
 
+            if (_scenes.ContainsKey(key))
+                throw new ResourceLoadException(key,
+                    new InvalidOperationException($"Scene '{key}' is already loaded. Unload it first."));
+
             _scenes[key] = handle.Result;
         }
 
@@ -152,9 +164,9 @@ namespace Core.Resource
             if (!_scenes.TryGetValue(key, out var sceneInstance))
                 return;
 
+            _scenes.Remove(key);
             var handle = Addressables.UnloadSceneAsync(sceneInstance);
             await handle.Task;
-            _scenes.Remove(key);
         }
 
         // ===== Debug =====
