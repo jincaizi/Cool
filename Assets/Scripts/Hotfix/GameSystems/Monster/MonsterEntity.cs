@@ -97,8 +97,7 @@ namespace Hotfix.GameSystems.Monster
             // Emit monster damage event for floating text
             EventBus.Emit(new MonsterTakeDamageEvent(
                 transform.position + Vector3.up * 2f,
-                Mathf.CeilToInt(data.BaseDamage),
-                data.IsCritical
+                Mathf.CeilToInt(data.BaseDamage)
             ));
         }
 
