@@ -4,8 +4,6 @@ using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
 using UnityEngine;
-using Hotfix.GameSystems.Sys3C.Core;
-using Hotfix.GameSystems.Sys3C.Core.Events;
 
 namespace Hotfix.GameSystems.Skills.Runtime
 {
@@ -168,12 +166,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             // 检测目标
             var targets = DetectTargets();
-
-            // Emit skill name for floating text on first hitbox frame
-            if (frameIndex == 0)
-            {
-                EventBus.Emit(new SkillActivatedEvent(_skillData.SkillId, _skillData.SkillName ?? _skillData.name));
-            }
 
             foreach (var target in targets)
             {
