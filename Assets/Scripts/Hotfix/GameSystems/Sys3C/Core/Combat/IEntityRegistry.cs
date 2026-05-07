@@ -11,8 +11,8 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
 
     public interface IEntityRegistry
     {
-        void Register(Transform entity, EntityType type);
-        void Unregister(Transform entity);
-        IReadOnlyList<Transform> FindNearby(Vector3 center, float radius, EntityType type);
+        void Register(IDamageable entity, EntityType type);
+        void Unregister(IDamageable entity);
+        IReadOnlyList<IDamageable> FindNearby(Vector3 center, float radius, EntityType type);
     }
 }
