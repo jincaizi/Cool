@@ -15,6 +15,8 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         };
 
         private static readonly Collider[] _buffer = new Collider[64];
+        private static readonly int _maskCharacter = LayerMask.GetMask("Character");
+        private static readonly int _maskMonster = LayerMask.GetMask("Monster");
 
         public static Collider[] SharedBuffer => _buffer;
 
@@ -34,12 +36,12 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             var results = new List<IDamageable>();
             var dedup = new HashSet<IDamageable>();
 
-            int mask = type == EntityType.Player
-                ? LayerMask.GetMask("Character")
-                : LayerMask.GetMask("Monster");
+            int mask = type == EntityType.Player ? _maskCharacter : _maskMonster;
 
             // Primary: Physics (PhysX spatial acceleration)
             int count = Physics.OverlapSphereNonAlloc(center, radius, _buffer, mask);
+            if (count >= _buffer.Length)
+                Debug.LogWarning($"[PhysicsRegistry] OverlapSphere buffer overflow ({count} hits, buffer size {_buffer.Length})");
             for (int i = 0; i < count; i++)
             {
                 var target = _buffer[i].GetComponentInParent<IDamageable>();
