@@ -283,18 +283,18 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 case "Attack1":
                 case "Attack2":
                 case "AttackQ":  // SkillQ 动画状态在Animator中叫 AttackQ
-                    // 重要：先调用 FSM 的 OnAnimationCompleted 将状态重置为 Idle
-                    // 这确保即使 OnStateExit 中的条件检查失败，FSM 状态也能正确恢复
-                    _attackFSM.OnAnimationCompleted(stateName);
-
-                    // 重置所有 triggers（防止下一帧动画循环播放）
-                    _driver.ResetAttackTrigger();
-                    _driver.ResetSkillQTrigger();
-                    _driver.ResetSkillRTrigger();
-
-                    // 恢复移动锁定
-                    _characterController.LockMovement = false;
-                    _characterController.LockRotation = false;
+                    // 先调用 FSM 的 OnAnimationCompleted 将状态重置为 Idle
+                    // 只有 handled=true 时才重置 trigger 并解锁移动
+                    // 当 Attack1 chaining 到 Attack2 时返回 false，跳过重置以保持连击
+                    bool handled = _attackFSM.OnAnimationCompleted(stateName);
+                    if (handled)
+                    {
+                        _driver.ResetAttackTrigger();
+                        _driver.ResetSkillQTrigger();
+                        _driver.ResetSkillRTrigger();
+                        _characterController.LockMovement = false;
+                        _characterController.LockRotation = false;
+                    }
                     break;
                 case "SkillR_Start":
                     _attackFSM.OnAnimationCompleted(stateName);
