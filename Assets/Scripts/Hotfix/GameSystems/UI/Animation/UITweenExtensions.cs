@@ -13,7 +13,7 @@ namespace Hotfix.GameSystems.UI
         }
 
         /// <summary>Shake position — error / invalid input feedback</summary>
-        public static Tweener Shake(this Transform target, float strength = 10f, float duration = 0.3f)
+        public static Tweener Shake(this RectTransform target, float strength = 10f, float duration = 0.3f)
         {
             return target.DOShakeAnchorPos(duration, strength, 20, 90f, false, true);
         }

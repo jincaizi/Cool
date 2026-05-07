@@ -199,9 +199,11 @@ namespace Hotfix.GameSystems.UI
 
         private static async UniTask WaitForSequence(DG.Tweening.Sequence seq)
         {
-            var tcs = new UniTaskCompletionSource();
-            seq.OnKill(() => tcs.TrySetResult());
-            await tcs.Task;
+            if (seq == null) return;
+            while (seq.IsPlaying())
+            {
+                await UniTask.Yield(PlayerLoopTiming.Update);
+            }
         }
     }
 }
