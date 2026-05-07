@@ -9,67 +9,70 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         public static Color MissColor = Color.green;
         private const int ARC_SEGMENTS = 24;
 
-        public static void DrawCone(Vector3 origin, Vector3 forward, float range, float angle)
+        public static void DrawCone(Vector3 origin, Vector3 forward, float range, float angle, float duration = 0f)
         {
             if (!Enabled) return;
             float halfAngle = angle * 0.5f;
-            Gizmos.color = MissColor;
-            DrawArc(origin, forward, range, -halfAngle, halfAngle);
+            DrawArc(origin, forward, range, -halfAngle, halfAngle, MissColor, duration);
             Vector3 left = Quaternion.Euler(0, -halfAngle, 0) * forward * range;
             Vector3 right = Quaternion.Euler(0, halfAngle, 0) * forward * range;
-            Gizmos.DrawLine(origin, origin + left);
-            Gizmos.DrawLine(origin, origin + right);
+            Debug.DrawLine(origin, origin + left, MissColor, duration);
+            Debug.DrawLine(origin, origin + right, MissColor, duration);
         }
 
         public static void DrawSector(Vector3 origin, Vector3 forward, float range,
-            float angleStart, float angleEnd)
+            float angleStart, float angleEnd, float duration = 0f)
         {
             if (!Enabled) return;
-            Gizmos.color = MissColor;
-            DrawArc(origin, forward, range, angleStart, angleEnd);
+            DrawArc(origin, forward, range, angleStart, angleEnd, MissColor, duration);
             Vector3 startDir = Quaternion.Euler(0, angleStart, 0) * forward * range;
             Vector3 endDir = Quaternion.Euler(0, angleEnd, 0) * forward * range;
-            Gizmos.DrawLine(origin, origin + startDir);
-            Gizmos.DrawLine(origin, origin + endDir);
+            Debug.DrawLine(origin, origin + startDir, MissColor, duration);
+            Debug.DrawLine(origin, origin + endDir, MissColor, duration);
         }
 
-        public static void DrawCircle(Vector3 origin, float radius)
+        public static void DrawCircle(Vector3 origin, float radius, float duration = 0f)
         {
             if (!Enabled) return;
-            Gizmos.color = MissColor;
             Vector3 prev = origin + Vector3.forward * radius;
             for (int i = 1; i <= ARC_SEGMENTS; i++)
             {
                 float angle = i * 360f / ARC_SEGMENTS * Mathf.Deg2Rad;
                 Vector3 next = origin + new Vector3(
                     Mathf.Sin(angle) * radius, 0, Mathf.Cos(angle) * radius);
-                Gizmos.DrawLine(prev, next);
+                Debug.DrawLine(prev, next, MissColor, duration);
                 prev = next;
             }
         }
 
-        public static void DrawRect(Vector3 origin, Vector3 forward, float range, float width)
+        public static void DrawRect(Vector3 origin, Vector3 forward, float range, float width, float duration = 0f)
         {
             if (!Enabled) return;
-            Gizmos.color = MissColor;
             Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
             Vector3 farCenter = origin + forward * range;
             Vector3 halfW = right * (width * 0.5f);
-            Gizmos.DrawLine(origin - halfW, origin + halfW);
-            Gizmos.DrawLine(farCenter - halfW, farCenter + halfW);
-            Gizmos.DrawLine(origin - halfW, farCenter - halfW);
-            Gizmos.DrawLine(origin + halfW, farCenter + halfW);
+            Debug.DrawLine(origin - halfW, origin + halfW, MissColor, duration);
+            Debug.DrawLine(farCenter - halfW, farCenter + halfW, MissColor, duration);
+            Debug.DrawLine(origin - halfW, farCenter - halfW, MissColor, duration);
+            Debug.DrawLine(origin + halfW, farCenter + halfW, MissColor, duration);
         }
 
-        public static void DrawHit(Vector3 position)
+        public static void DrawHit(Vector3 position, float duration = 0f)
         {
             if (!Enabled) return;
-            Gizmos.color = HitColor;
-            Gizmos.DrawWireSphere(position, 0.3f);
+            float r = 0.3f;
+            Vector3 prev = position + Vector3.forward * r;
+            for (int i = 1; i <= 8; i++)
+            {
+                float angle = i * 360f / 8 * Mathf.Deg2Rad;
+                Vector3 next = position + new Vector3(Mathf.Sin(angle) * r, 0, Mathf.Cos(angle) * r);
+                Debug.DrawLine(prev, next, HitColor, duration);
+                prev = next;
+            }
         }
 
         private static void DrawArc(Vector3 origin, Vector3 forward, float radius,
-            float startAngle, float endAngle)
+            float startAngle, float endAngle, Color color, float duration)
         {
             float span = endAngle - startAngle;
             int steps = Mathf.Max(2, Mathf.RoundToInt(ARC_SEGMENTS * (span / 360f)));
@@ -78,7 +81,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             {
                 float angle = startAngle + (i / (float)steps) * span;
                 Vector3 next = origin + Quaternion.Euler(0, angle, 0) * forward * radius;
-                Gizmos.DrawLine(prev, next);
+                Debug.DrawLine(prev, next, color, duration);
                 prev = next;
             }
         }

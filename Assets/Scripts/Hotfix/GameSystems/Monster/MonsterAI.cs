@@ -45,6 +45,7 @@ namespace Hotfix.GameSystems.Monster
         private IAttackShape _attackShape;
 
         private Transform _target;
+        private readonly List<Hotfix.GameSystems.Sys3C.Core.Combat.IDamageable> _hitBuffer = new List<Hotfix.GameSystems.Sys3C.Core.Combat.IDamageable>(8);
         public Transform Target
         {
             get => _target;
@@ -356,8 +357,9 @@ namespace Hotfix.GameSystems.Monster
             if (effect == null) return false;
             int mask = LayerMask.GetMask("Character");
             var shape = AttackShapeFactory.Create(_config.AttackShape, PhysicsRegistry.Instance, EntityType.Player);
-            var targets = shape.Resolve(_self.position, _self.forward, mask);
-            foreach (var t in targets)
+            _hitBuffer.Clear();
+            shape.ResolveNonAlloc(_self.position, _self.forward, mask, _hitBuffer);
+            foreach (var t in _hitBuffer)
             {
                 Vector3 dir = (t.Transform.position - _self.position).normalized;
                 t.TakeDamage(effect.Damage, dir);

@@ -43,13 +43,13 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
 
             if (candidates != null)
             {
+                Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
                 foreach (var target in candidates)
                 {
                     Vector3 toTarget = target.Transform.position - origin;
                     float alongForward = Vector3.Dot(forward, toTarget);
                     if (alongForward < 0 || alongForward > _range) continue;
 
-                    Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
                     float lateralOffset = Mathf.Abs(Vector3.Dot(right, toTarget));
                     if (lateralOffset > _halfWidth) continue;
 
@@ -63,6 +63,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             var buffer = PhysicsRegistry.SharedBuffer;
             int count = Physics.OverlapSphereNonAlloc(origin, checkRadius, buffer, targetMask);
             Vector3 rightDir = Vector3.Cross(Vector3.up, forward).normalized;
+            var dedup = new HashSet<IDamageable>();
             for (int i = 0; i < count; i++)
             {
                 var col = buffer[i];
@@ -72,7 +73,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
                 float lateralOffset = Mathf.Abs(Vector3.Dot(rightDir, toTarget));
                 if (lateralOffset > _halfWidth) continue;
                 var target = col.GetComponentInParent<IDamageable>();
-                if (target != null && target.IsAlive)
+                if (target != null && target.IsAlive && dedup.Add(target))
                 {
                     results.Add(target);
                     if (_stopAtFirst) return;

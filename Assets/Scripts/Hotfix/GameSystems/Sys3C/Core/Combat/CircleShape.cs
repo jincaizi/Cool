@@ -40,11 +40,12 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
 
             // Fallback: direct Physics
             var buffer = PhysicsRegistry.SharedBuffer;
+            var dedup = new HashSet<IDamageable>();
             int count = Physics.OverlapSphereNonAlloc(origin, _radius, buffer, targetMask);
             for (int i = 0; i < count; i++)
             {
                 var target = buffer[i].GetComponentInParent<IDamageable>();
-                if (target != null && target.IsAlive)
+                if (target != null && target.IsAlive && dedup.Add(target))
                     results.Add(target);
             }
         }
