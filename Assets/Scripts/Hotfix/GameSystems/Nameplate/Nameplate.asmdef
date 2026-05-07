@@ -5,7 +5,8 @@
         "Core",
         "UniTask",
         "DOTween.Modules",
-        "Hotfix.GameSystems.Sys3C.Core"
+        "Hotfix.GameSystems.Sys3C.Core",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

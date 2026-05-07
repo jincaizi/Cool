@@ -60,9 +60,8 @@ namespace Hotfix.GameSystems.UI
             UIManager.Instance?.HideAlwaysAsync(PanelId);
         }
 
-        protected override void OnDestroy()
+        private new void OnDestroy()
         {
-            base.OnDestroy();
             Clear();
         }
     }

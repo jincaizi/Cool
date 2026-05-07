@@ -54,13 +54,12 @@ namespace Hotfix.GameSystems.Monster
             _stats.OnDeath += HandleDeath;
             _stats.OnHPChanged += (cur, max) =>
             {
-                var t = (ITargetable)this;
-                t.OnHPChanged?.Invoke(
+                _onHPChanged?.Invoke(
                     max > 0 ? cur / max : 0f,
                     Mathf.CeilToInt(cur),
                     Mathf.CeilToInt(max));
             };
-            _stats.OnDeath += () => ((ITargetable)this).OnDeath?.Invoke();
+            _stats.OnDeath += () => _onDeath?.Invoke();
 
             _ai.OnDeathComplete += () => StartCoroutine(DeathSequence());
             _ai.OnAttackHitboxActivate += (effect) =>
@@ -126,6 +125,20 @@ namespace Hotfix.GameSystems.Monster
 
         // ===== ITargetable =====
 
+        private event Action<float, int, int> _onHPChanged;
+        private event Action _onDeath;
+
+        event Action<float, int, int> ITargetable.OnHPChanged
+        {
+            add { _onHPChanged += value; }
+            remove { _onHPChanged -= value; }
+        }
+        event Action ITargetable.OnDeath
+        {
+            add { _onDeath += value; }
+            remove { _onDeath -= value; }
+        }
+
         string ITargetable.DisplayName => _config != null ? _config.DisplayName : name;
         int ITargetable.Level => 1;
         Sprite ITargetable.Portrait => null;
@@ -133,7 +146,5 @@ namespace Hotfix.GameSystems.Monster
         int ITargetable.CurrentHP => _stats != null ? Mathf.CeilToInt(_stats.HP) : 0;
         int ITargetable.MaxHP => _stats != null ? Mathf.CeilToInt(_stats.MaxHP) : 0;
         Vector3 ITargetable.WorldPosition => transform.position;
-        event Action<float, int, int> ITargetable.OnHPChanged;
-        event Action ITargetable.OnDeath;
     }
 }
