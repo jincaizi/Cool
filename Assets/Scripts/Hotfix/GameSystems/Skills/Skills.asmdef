@@ -1,10 +1,16 @@
 {
     "name": "Hotfix.GameSystems.Skills",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "Hotfix.GameSystems.Sys3C.Core"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

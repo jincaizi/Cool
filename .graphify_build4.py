@@ -1,0 +1,49 @@
+import json
+from pathlib import Path
+
+# Build graph
+from graphify.build import build_from_json
+from graphify.cluster import cluster, score_all
+from graphify.analyze import god_nodes, surprising_connections, suggest_questions
+from graphify.report import generate
+from graphify.export import to_json
+
+extraction = json.loads(Path('E:/CodeForJob/Cool/.graphify_extract.json').read_text())
+detection  = json.loads(Path('E:/CodeForJob/Cool/.graphify_detect.json').read_text())
+
+G = build_from_json(extraction)
+print(f"Graph built: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
+
+communities = cluster(G)
+print(f"Clustered: {len(communities)} communities")
+
+cohesion = score_all(G, communities)
+gods = god_nodes(G)
+surprises = surprising_connections(G, communities)
+labels = {cid: 'Community ' + str(cid) for cid in communities}
+questions = suggest_questions(G, communities, labels)
+
+report = generate(G, communities, cohesion, labels, gods, surprises, detection, {'input': 0, 'output': 0}, 'Assets/Scripts', suggested_questions=questions)
+
+with open('E:/CodeForJob/Cool/graphify-out/GRAPH_REPORT.md', 'w', encoding='utf-8') as f:
+    f.write(report)
+to_json(G, communities, 'E:/CodeForJob/Cool/graphify-out/graph.json')
+
+analysis = {
+    'communities': {str(k): v for k, v in communities.items()},
+    'cohesion': {str(k): v for k, v in cohesion.items()},
+    'gods': gods,
+    'surprises': surprises,
+    'questions': questions,
+}
+with open('E:/CodeForJob/Cool/.graphify_analysis.json', 'w', encoding='utf-8') as f:
+    json.dump(analysis, f, indent=2, ensure_ascii=False)
+with open('E:/CodeForJob/Cool/.graphify_labels.json', 'w', encoding='utf-8') as f:
+    json.dump({str(k): v for k, v in labels.items()}, f)
+
+print(f"Graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges, {len(communities)} communities")
+print("God nodes:")
+for g in gods[:10]:
+    print(f"  {g['label']} (degree {g['degree']})")
+print(f"Surprising connections: {len(surprises)} found")
+print("Report and graph saved.")

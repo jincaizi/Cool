@@ -1,0 +1,83 @@
+<h2>UIPanel Base Class & Lifecycle</h2>
+<p class="subtitle">所有 UI 面板的基类，定义生命周期、显隐模式、动画钩子</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">UIPanel Core</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.6">
+      <span style="color:#c586c0">public abstract class</span> <span style="color:#4ec9b0">UIPanel</span> : MonoBehaviour<br>
+      {<br>
+      &nbsp;&nbsp;<span style="color:#888">// Layer this panel belongs to</span><br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public abstract</span> <span style="color:#4ec9b0">LayerType</span> Layer { <span style="color:#c586c0">get</span>; }<br>
+      <br>
+      &nbsp;&nbsp;<span style="color:#888">// Show/hide performance mode</span><br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public abstract</span> <span style="color:#4ec9b0">VisibilityMode</span> Mode { <span style="color:#c586c0">get</span>; }<br>
+      <br>
+      &nbsp;&nbsp;<span style="color:#888">// Unique panel ID</span><br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public abstract string</span> PanelId { <span style="color:#c586c0">get</span>; }<br>
+      <br>
+      &nbsp;&nbsp;<span style="color:#888">// Lazy-loaded component refs</span><br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public</span> Canvas <span style="color:#dcdcaa">Canvas</span> { <span style="color:#c586c0">get</span>; <span style="color:#c586c0">private set</span>; }<br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public</span> CanvasGroup <span style="color:#dcdcaa">CanvasGroup</span> { <span style="color:#c586c0">get</span>; <span style="color:#c586c0">private set</span>; }<br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public</span> UIAnimation <span style="color:#dcdcaa">Animation</span> { <span style="color:#c586c0">get</span>; <span style="color:#c586c0">private set</span>; }<br>
+      <br>
+      &nbsp;&nbsp;<span style="color:#888">// State</span><br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public bool</span> IsVisible { <span style="color:#c586c0">get</span>; <span style="color:#c586c0">private set</span>; }<br>
+      }<br>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Lifecycle (Show → Hide)</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.6">
+      <div style="border-left:3px solid #4ec9b0;padding-left:8px;margin:4px 0">
+        <span style="color:#4ec9b0">OnPreShow()</span><br>
+        <span style="color:#888;font-size:11px">刷新数据、绑定 Model</span>
+      </div>
+      <div style="border-left:3px solid #569cd6;padding-left:8px;margin:4px 0">
+        <span style="color:#569cd6">PlayShowAnimation()</span><br>
+        <span style="color:#888;font-size:11px">入场动画（DOTween）</span>
+      </div>
+      <div style="border-left:3px solid #4ec9b0;padding-left:8px;margin:4px 0">
+        <span style="color:#4ec9b0">OnShow()</span><br>
+        <span style="color:#888;font-size:11px">动画完成后回调</span>
+      </div>
+      <div style="border-left:3px solid #888;padding-left:8px;margin:12px 0 4px">
+        <span style="color:#888">... is visible ...</span>
+      </div>
+      <div style="border-left:3px solid #e5c07b;padding-left:8px;margin:4px 0">
+        <span style="color:#e5c07b">OnPreHide()</span><br>
+        <span style="color:#888;font-size:11px">准备隐藏</span>
+      </div>
+      <div style="border-left:3px solid #f48771;padding-left:8px;margin:4px 0">
+        <span style="color:#f48771">PlayHideAnimation()</span><br>
+        <span style="color:#888;font-size:11px">出场动画（DOTween）</span>
+      </div>
+      <div style="border-left:3px solid #e5c07b;padding-left:8px;margin:4px 0">
+        <span style="color:#e5c07b">OnHide()</span><br>
+        <span style="color:#888;font-size:11px">动画完成后，UIManager 执行 SetActive/canvas.enabled/alpha</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Show Flow (with Animation)</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px">
+    <span style="color:#888">// UIManager.Show(panel):</span><br>
+    1. Set visibility ON (SetActive / Canvas.enabled / CanvasGroup)<br>
+    2. <span style="color:#dcdcaa">OnPreShow</span>() → panel refreshes data<br>
+    3. <span style="color:#dcdcaa">PlayShowAnimation</span>() → DOTween sequence<br>
+    4. <span style="color:#888">await animation</span><br>
+    5. <span style="color:#dcdcaa">OnShow</span>() → <span style="color:#888">callback after animation</span><br>
+    6. IsVisible = <span style="color:#569cd6">true</span><br>
+    <br>
+    <span style="color:#888">// UIManager.Hide(panel):</span><br>
+    1. <span style="color:#dcdcaa">OnPreHide</span>()<br>
+    2. <span style="color:#dcdcaa">PlayHideAnimation</span>() → DOTween sequence<br>
+    3. <span style="color:#888">await animation</span><br>
+    4. <span style="color:#dcdcaa">OnHide</span>()<br>
+    5. Apply visibility OFF per panel.Mode<br>
+    6. IsVisible = <span style="color:#569cd6">false</span>
+  </div>
+</div>

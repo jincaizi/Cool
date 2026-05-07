@@ -4,7 +4,8 @@
     "references": [
         "Core",
         "UniTask",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "Hotfix.GameSystems.Sys3C"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

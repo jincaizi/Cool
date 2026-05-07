@@ -1,0 +1,85 @@
+<h2>FloatingText — Object Pool & Animation System</h2>
+<p class="subtitle">预建50个TMP对象 / Screen Space Canvas投影 / DOTween动画 / 零GC</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Pool Design</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.6">
+      <span style="color:#4ec9b0">FloatingTextPool</span><br>
+      ├── Queue&lt;TextMeshProUGUI&gt; <span style="color:#888">_pool (50 items)</span><br>
+      ├── Transform <span style="color:#888">_canvasTransform (Screen Space)</span><br>
+      ├── Canvas <span style="color:#888">_floatingCanvas (独立Canvas, sort=4500)</span><br>
+      │<br>
+      ├── <span style="color:#dcdcaa">Spawn</span>(worldPos, text, config)<br>
+      │   └── Dequeue → Set text/color/pos → Play anim → Enqueue<br>
+      └── <span style="color:#dcdcaa">PreWarm</span>(count) <span style="color:#888">// init 50</span>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">FloatingTextConfig (Presets)</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.6">
+      <table style="width:100%;border-collapse:collapse">
+        <tr style="border-bottom:1px solid #444">
+          <th style="text-align:left;padding:4px">Preset</th>
+          <th style="text-align:left;padding:4px">Color</th>
+          <th style="text-align:left;padding:4px">Size</th>
+          <th style="text-align:left;padding:4px">Animation</th>
+        </tr>
+        <tr style="border-bottom:1px solid #333">
+          <td style="padding:4px"><span style="color:#f48771">Damage</span></td>
+          <td style="padding:4px">#FF4444</td>
+          <td style="padding:4px">36</td>
+          <td style="padding:4px">↑50px + fade out, 1s</td>
+        </tr>
+        <tr style="border-bottom:1px solid #333">
+          <td style="padding:4px"><span style="color:#e5c07b">CritDamage</span></td>
+          <td style="padding:4px">#FF8800</td>
+          <td style="padding:4px">42</td>
+          <td style="padding:4px">↑70px + punch scale, 1.2s</td>
+        </tr>
+        <tr style="border-bottom:1px solid #333">
+          <td style="padding:4px"><span style="color:#4ec9b0">Heal</span></td>
+          <td style="padding:4px">#44FF44</td>
+          <td style="padding:4px">32</td>
+          <td style="padding:4px">↑40px + fade out, 1s</td>
+        </tr>
+        <tr style="border-bottom:1px solid #333">
+          <td style="padding:4px"><span style="color:#569cd6">SkillName</span></td>
+          <td style="padding:4px">#FFD700</td>
+          <td style="padding:4px">28</td>
+          <td style="padding:4px">scale 0.8→1.2→1 + fade, 1.5s</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Lifecycle (per spawn)</h3>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.8">
+    1. <span style="color:#dcdcaa">Dequeue</span> from pool (if empty, drop oldest active)
+    2. <span style="color:#569cd6">Set</span> text + color + fontSize from config
+    3. <span style="color:#569cd6">Position</span>: Camera.WorldToScreenPoint(worldPos + offsetY)
+    4. <span style="color:#e5c07b">Play</span> DOTween Sequence (move up + fade out + scale)
+    5. <span style="color:#888">await</span> sequence completion
+    6. <span style="color:#dcdcaa">Enqueue</span> back to pool, reset alpha/scale
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Damage Event Hook</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.6">
+    <span style="color:#888">// EventBus listener in FloatingTextPool or a bridge component</span><br>
+    EventBus.<span style="color:#dcdcaa">Subscribe</span>&lt;DamageEvent&gt;(e => {<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">var</span> cfg = e.IsCritical ? CritDamage : Damage;<br>
+    &nbsp;&nbsp;pool.<span style="color:#dcdcaa">Spawn</span>(e.TargetPosition, $"-{e.Damage}", cfg);<br>
+    });<br>
+    <br>
+    <span style="color:#888">// Skill name trigger (from SkillCoordinator or SkillExecutor)</span><br>
+    pool.<span style="color:#dcdcaa">Spawn</span>(casterPos, skillName, SkillNamePreset);<br>
+    <br>
+    <span style="color:#888">// Also need to handle monster damage (currently no DamageEvent emits)</span><br>
+    <span style="color:#888">// → add MonsterTakeDamageEvent to EventBus in MonsterEntity.TakeDamage()</span>
+  </div>
+</div>

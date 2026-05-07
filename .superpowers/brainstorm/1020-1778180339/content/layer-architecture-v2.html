@@ -1,0 +1,71 @@
+<h2>5-Layer Canvas Architecture (Updated)</h2>
+<p class="subtitle">Top 层新增 Network 类型面板，用于断线重连等全局系统提示</p>
+
+<div class="mockup">
+  <div class="mockup-header">Canvas Layer Stack (从下到上)</div>
+  <div class="mockup-body">
+    <div style="background:#3a3a5c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center;opacity:0.7">
+      Layer 5: Guide — 新手引导蒙版/高亮 (sort=5000, Overlay)
+    </div>
+    <div style="background:#4a4a6c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center;opacity:0.75">
+      Layer 4: Top — Loading遮罩 / <span style="color:#f48771;font-weight:bold">重连提示</span> / Toast消息 (sort=4000, Overlay)
+    </div>
+    <div style="background:#5a5a7c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center;opacity:0.82">
+      Layer 3: Popup — 确认框 / Tips / 弹窗 (sort=3000, Stack)
+    </div>
+    <div style="background:#6a6a8c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center;opacity:0.9">
+      Layer 2: Main — 背包 / 技能 / 角色信息 / 设置 (sort=2000, Stack)
+    </div>
+    <div style="background:#7a7a9c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center">
+      Layer 1: Base — HUD / 摇杆 / 常驻信息栏 (sort=1000, Always)
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Top 层职责（Updated）</h3>
+  <div class="options">
+    <div class="option" data-choice="loading">
+      <div class="content">
+        <h3>Loading 遮罩</h3>
+        <p>场景切换、资源加载中的全屏遮罩</p>
+      </div>
+    </div>
+    <div class="option" data-choice="reconnect">
+      <div class="content">
+        <h3 style="color:#f48771">Network Reconnect</h3>
+        <p>断线重连按钮/状态提示，全局可见</p>
+      </div>
+    </div>
+    <div class="option" data-choice="toast">
+      <div class="content">
+        <h3>Toast 消息</h3>
+        <p>系统通知、错误提示、浮动消息</p>
+      </div>
+    </div>
+    <div class="option" data-choice="sys">
+      <div class="content">
+        <h3>System Overlay</h3>
+        <p>其他全局系统级提示</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Overlay vs Stack Behavior</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:8px">
+    <span style="color:#4ec9b0">Overlay (Guide / Top):</span><br>
+    Open("ReconnectBtn") → 直接显示，栈不变<br>
+    Open("Toast_X") → 直接显示，栈不变<br>
+    Close("ReconnectBtn") → 直接隐藏<br>
+    <br>
+    <span style="color:#569cd6">Stack (Main / Popup):</span><br>
+    Push("BagPanel") → 入栈<br>
+    Push("ConfirmDialog") → 入栈，BagPanel 被遮挡<br>
+    Pop() → 出栈，恢复 BagPanel<br>
+    <br>
+    <span style="color:#dcdcaa">Always (Base):</span><br>
+    HUD 始终显示，不受栈和 Overlay 影响
+  </div>
+</div>

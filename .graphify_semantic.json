@@ -1,0 +1,3788 @@
+{
+  "nodes": [
+    {
+      "id": "KcpClient",
+      "label": "KcpClient - KCP\u5ba2\u6237\u7aef\u9ad8\u5c42\u4f1a\u8bdd\u7ba1\u7406",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpServer",
+      "label": "KcpServer - KCP\u670d\u52a1\u5668\u7ba1\u7406",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpSession",
+      "label": "KcpSession - \u62bd\u8c61\u4f1a\u8bdd\u57fa\u7c7b",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpServerSession",
+      "label": "KcpServerSession - \u670d\u52a1\u7aef\u4f1a\u8bdd\uff08\u5e26\u901f\u7387\u9650\u5236\uff09",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServerSession.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpTransportBase",
+      "label": "KcpTransportBase - \u4f20\u8f93\u5c42\u62bd\u8c61\u57fa\u7c7b",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpTransportBase.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpClientTransport",
+      "label": "KcpClientTransport - \u5ba2\u6237\u7aef\u4f20\u8f93\u5b9e\u73b0",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Client/KcpClientTransport.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpServerTransport",
+      "label": "KcpServerTransport - \u670d\u52a1\u7aef\u4f20\u8f93\u5b9e\u73b0",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServerTransport.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "Kcp",
+      "label": "Kcp - KCP\u534f\u8bae\u5305\u88c5\u5668 (Kcp 2.7.0)",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Kcp.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "MessageDispatcher",
+      "label": "MessageDispatcher - \u4f18\u5148\u7ea7\u6d88\u606f\u5206\u53d1\u5668",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageDispatcher.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "MessageCodec",
+      "label": "MessageCodec - Protobuf\u6d88\u606f\u7f16\u89e3\u7801\u5668",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageCodec.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "MessageTypeRegistry",
+      "label": "MessageTypeRegistry - \u6d88\u606f\u7c7b\u578b\u6ce8\u518c\u8868",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageCodec.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpListenerWrapper",
+      "label": "KcpListenerWrapper - UDP\u76d1\u542c\u5668\u5305\u88c5",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpListenerWrapper.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpOptions",
+      "label": "KcpOptions - KCP\u914d\u7f6e\u9009\u9879",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpOptions.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SessionStatistics",
+      "label": "SessionStatistics - \u4f1a\u8bdd\u7edf\u8ba1\u4fe1\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ServerStatistics",
+      "label": "ServerStatistics - \u670d\u52a1\u5668\u7edf\u8ba1\u4fe1\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "RateLimiter",
+      "label": "RateLimiter - \u901f\u7387\u9650\u5236\u5668",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServerSession.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IKcpTransport",
+      "label": "IKcpTransport - \u4f20\u8f93\u5c42\u63a5\u53e3",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/IKcpTransport.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ILogger",
+      "label": "ILogger - \u65e5\u5fd7\u8bb0\u5f55\u5668\u63a5\u53e3",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/ILogger.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IMessageExecutor",
+      "label": "IMessageExecutor - \u6d88\u606f\u6267\u884c\u5668\u63a5\u53e3",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/IMessageExecutor.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IMessage",
+      "label": "IMessage - \u6d88\u606f\u57fa\u63a5\u53e3",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ConsoleLogger",
+      "label": "ConsoleLogger - \u63a7\u5236\u53f0\u65e5\u5fd7\u8bb0\u5f55\u5668",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/ILogger.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "NullLogger",
+      "label": "NullLogger - \u7a7a\u65e5\u5fd7\u8bb0\u5f55\u5668",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/ILogger.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DirectMessageExecutor",
+      "label": "DirectMessageExecutor - \u76f4\u63a5\u6267\u884c\u5668",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/IMessageExecutor.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "UnityMainThreadExecutor",
+      "label": "UnityMainThreadExecutor - Unity\u4e3b\u7ebf\u7a0b\u6267\u884c\u5668",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Examples/UnityMainThreadExecutor.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "LoginRequest",
+      "label": "LoginRequest - \u767b\u5f55\u8bf7\u6c42\u6d88\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "LoginResponse",
+      "label": "LoginResponse - \u767b\u5f55\u54cd\u5e94\u6d88\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "Heartbeat",
+      "label": "Heartbeat - \u5fc3\u8df3\u6d88\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "Kick",
+      "label": "Kick - \u8e22\u51fa\u6d88\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DisconnectRequest",
+      "label": "DisconnectRequest - \u65ad\u5f00\u8fde\u63a5\u8bf7\u6c42",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ShutdownNotification",
+      "label": "ShutdownNotification - \u5173\u95ed\u901a\u77e5\u6d88\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "PositionSyncRequest",
+      "label": "PositionSyncRequest - \u4f4d\u7f6e\u540c\u6b65\u8bf7\u6c42",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "PositionSyncResponse",
+      "label": "PositionSyncResponse - \u4f4d\u7f6e\u540c\u6b65\u54cd\u5e94",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "RemotePlayerSync",
+      "label": "RemotePlayerSync - \u8fdc\u7a0b\u73a9\u5bb6\u4f4d\u7f6e\u540c\u6b65",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ChatMessage",
+      "label": "ChatMessage - \u804a\u5929\u6d88\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "BroadcastMessage",
+      "label": "BroadcastMessage - \u5e7f\u64ad\u6d88\u606f",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ClientExample",
+      "label": "ClientExample - KCP\u5ba2\u6237\u7aef\u4f7f\u7528\u793a\u4f8b",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Examples/ClientExample.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ServerExample",
+      "label": "ServerExample - KCP\u670d\u52a1\u5668\u4f7f\u7528\u793a\u4f8b",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Examples/ServerExample.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "KcpTransportState",
+      "label": "KcpTransportState - \u4f20\u8f93\u5c42\u72b6\u6001\u679a\u4e3e",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/IKcpTransport.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "MessageFlags",
+      "label": "MessageFlags - \u6d88\u606f\u6807\u5fd7\u4f4d\u679a\u4e3e",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageCodec.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "MessagePriority",
+      "label": "MessagePriority - \u6d88\u606f\u4f18\u5148\u7ea7\u679a\u4e3e",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageDispatcher.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SkillConfigGenerator",
+      "label": "SkillConfigGenerator - \u6280\u80fd\u914d\u7f6e\u7f16\u8f91\u5668\u5de5\u5177",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Editor/SkillConfigGenerator.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ItemAddedEvent",
+      "label": "ItemAddedEvent - \u7269\u54c1\u6dfb\u52a0\u4e8b\u4ef6\uff08Bag\u7cfb\u7edf\uff09",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Core/Events/BagEvents.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ItemRemovedEvent",
+      "label": "ItemRemovedEvent - \u7269\u54c1\u79fb\u9664\u4e8b\u4ef6",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Core/Events/BagEvents.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ItemMovedEvent",
+      "label": "ItemMovedEvent - \u7269\u54c1\u79fb\u52a8\u4e8b\u4ef6",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Core/Events/BagEvents.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ItemType",
+      "label": "ItemType - \u7269\u54c1\u7c7b\u578b\u679a\u4e3e\uff08Bag\u7cfb\u7edf\uff09",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Core/Enums.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IBagEvent",
+      "label": "IBagEvent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Core/Events/IBagEvent.cs",
+      "source_location": null
+    },
+    {
+      "id": "BagData",
+      "label": "BagData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/BagData.cs",
+      "source_location": null
+    },
+    {
+      "id": "BagSlotData",
+      "label": "BagSlotData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/BagSlotData.cs",
+      "source_location": null
+    },
+    {
+      "id": "ItemData",
+      "label": "ItemData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/ItemData.cs",
+      "source_location": null
+    },
+    {
+      "id": "ItemTemplate",
+      "label": "ItemTemplate",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/ItemTemplate.cs",
+      "source_location": null
+    },
+    {
+      "id": "ItemTemplateRegistry",
+      "label": "ItemTemplateRegistry",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/ItemTemplate.cs",
+      "source_location": null
+    },
+    {
+      "id": "BagManager",
+      "label": "BagManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/BagManager.cs",
+      "source_location": null
+    },
+    {
+      "id": "ItemFactory",
+      "label": "ItemFactory",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/ItemFactory.cs",
+      "source_location": null
+    },
+    {
+      "id": "BagPanel",
+      "label": "BagPanel",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/BagPanel.cs",
+      "source_location": null
+    },
+    {
+      "id": "ItemCell",
+      "label": "ItemCell",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/Components/ItemCell.cs",
+      "source_location": null
+    },
+    {
+      "id": "ItemTooltip",
+      "label": "ItemTooltip",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/Components/ItemTooltip.cs",
+      "source_location": null
+    },
+    {
+      "id": "AttackHitbox",
+      "label": "AttackHitbox",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/AttackHitbox.cs",
+      "source_location": null
+    },
+    {
+      "id": "HitZone",
+      "label": "HitZone",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/HitZone.cs",
+      "source_location": null
+    },
+    {
+      "id": "PlayerHitZone",
+      "label": "PlayerHitZone",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/PlayerHitZone.cs",
+      "source_location": null
+    },
+    {
+      "id": "IAIBehaviour",
+      "label": "IAIBehaviour",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/IAIBehaviour.cs",
+      "source_location": null
+    },
+    {
+      "id": "AlertBehaviour",
+      "label": "AlertBehaviour",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/AlertBehaviour.cs",
+      "source_location": null
+    },
+    {
+      "id": "DefendBehaviour",
+      "label": "DefendBehaviour",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/DefendBehaviour.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterAI",
+      "label": "MonsterAI",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterAIContext",
+      "label": "MonsterAIContext",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAIContext.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterConfig",
+      "label": "MonsterConfig",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterEntity",
+      "label": "MonsterEntity",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterDeathEvent",
+      "label": "MonsterDeathEvent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEvents.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterSpawnEvent",
+      "label": "MonsterSpawnEvent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEvents.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterLootTable",
+      "label": "MonsterLootTable",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterLootTable.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterMovement",
+      "label": "MonsterMovement",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs",
+      "source_location": null
+    },
+    {
+      "id": "MonsterSpawner",
+      "label": "MonsterSpawner",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterSpawner.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "MonsterStats",
+      "label": "MonsterStats",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterStats.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "TauntBehaviour",
+      "label": "TauntBehaviour",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/TauntBehaviour.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "NpcMirrorManager",
+      "label": "NpcMirrorManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/NpcMirror/NpcMirrorManager.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "NpcMirrorComponent",
+      "label": "NpcMirrorComponent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/NpcMirror/NpcMirrorComponent.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "NpcAnimationController",
+      "label": "NpcAnimationController",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/NpcMirror/NpcAnimationController.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "NpcMessages",
+      "label": "NpcMessages",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/NpcMirror/NpcMessages.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SkillData",
+      "label": "SkillData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "BasicAttackData",
+      "label": "BasicAttackData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SpecialSkillData",
+      "label": "SpecialSkillData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DamageData",
+      "label": "DamageData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Data/DamageData.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "EffectData",
+      "label": "EffectData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IEffectTarget",
+      "label": "IEffectTarget",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SkillCoordinator",
+      "label": "SkillCoordinator",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SkillExecutor",
+      "label": "SkillExecutor",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SkillStateMachine",
+      "label": "SkillStateMachine",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillStateMachine.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SkillInputBuffer",
+      "label": "SkillInputBuffer",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillInputBuffer.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SkillInterruptionMatrix",
+      "label": "SkillInterruptionMatrix",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillInterruptionMatrix.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "CooldownManager",
+      "label": "CooldownManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/CooldownManager.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "CharacterAttackHandler",
+      "label": "CharacterAttackHandler",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/CharacterAttackHandler.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "MeleeWeapon",
+      "label": "MeleeWeapon",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/MeleeWeapon.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "Sys3CEntry",
+      "label": "Sys3CEntry",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AnimationDriver",
+      "label": "AnimationDriver",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "HitManager",
+      "label": "HitManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AttackStateBehaviour",
+      "label": "AttackStateBehaviour",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "BaseStateBehaviour",
+      "label": "BaseStateBehaviour",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "HitStateBehaviour",
+      "label": "HitStateBehaviour",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ThirdPersonCameraController",
+      "label": "ThirdPersonCameraController",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "CharacterController",
+      "label": "CharacterController",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "CharacterData",
+      "label": "CharacterData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterData.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "GroundDetector",
+      "label": "GroundDetector",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "CharacterStatsAdapter",
+      "label": "CharacterStatsAdapter",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ShieldSystemAdapter",
+      "label": "ShieldSystemAdapter",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "PhysicsSystemAdapter",
+      "label": "PhysicsSystemAdapter",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "StatusControllerAdapter",
+      "label": "StatusControllerAdapter",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterAdapters.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "FSMConfig",
+      "label": "FSMConfig",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "StateCoordinator",
+      "label": "StateCoordinator",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "EventBus",
+      "label": "EventBus",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/EventBus.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "StatePriority",
+      "label": "StatePriority",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StatePriority.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "LayerType",
+      "label": "LayerType",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Enums.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IBaseFSM",
+      "label": "IBaseFSM",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/IFSM.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IAttackFSM",
+      "label": "IAttackFSM",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/IFSM.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IHitFSM",
+      "label": "IHitFSM",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/IHitFSM.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IStateCoordinator",
+      "label": "IStateCoordinator",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/IStateCoordinator.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AttackEffectConfig",
+      "label": "AttackEffectConfig",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AttackHitboxData",
+      "label": "AttackHitboxData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackHitboxData.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AttackShapeConfig",
+      "label": "AttackShapeConfig",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AttackShapeFactory",
+      "label": "AttackShapeFactory",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeFactory.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AttackShapeGizmos",
+      "label": "AttackShapeGizmos",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeGizmos.cs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "IAttackShape",
+      "label": "IAttackShape Interface",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackShape.cs",
+      "source_location": null
+    },
+    {
+      "id": "CircleShape",
+      "label": "CircleShape",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/CircleShape.cs",
+      "source_location": null
+    },
+    {
+      "id": "ConeShape",
+      "label": "ConeShape",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs",
+      "source_location": null
+    },
+    {
+      "id": "RectShape",
+      "label": "RectShape",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/RectShape.cs",
+      "source_location": null
+    },
+    {
+      "id": "SectorShape",
+      "label": "SectorShape",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/SectorShape.cs",
+      "source_location": null
+    },
+    {
+      "id": "IEntityRegistry",
+      "label": "IEntityRegistry Interface",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IEntityRegistry.cs",
+      "source_location": null
+    },
+    {
+      "id": "PhysicsRegistry",
+      "label": "PhysicsRegistry",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/PhysicsRegistry.cs",
+      "source_location": null
+    },
+    {
+      "id": "IDamageable",
+      "label": "IDamageable Interface",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IDamageable.cs",
+      "source_location": null
+    },
+    {
+      "id": "IAttackHitbox",
+      "label": "IAttackHitbox Interface",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IAttackHitbox.cs",
+      "source_location": null
+    },
+    {
+      "id": "IWeapon",
+      "label": "IWeapon Interface",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IWeapon.cs",
+      "source_location": null
+    },
+    {
+      "id": "WeaponConfig",
+      "label": "WeaponConfig",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/WeaponConfig.cs",
+      "source_location": null
+    },
+    {
+      "id": "IEvent",
+      "label": "IEvent Interface",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/IEvent.cs",
+      "source_location": null
+    },
+    {
+      "id": "DamageEvent",
+      "label": "DamageEvent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs",
+      "source_location": null
+    },
+    {
+      "id": "DeathEvent",
+      "label": "DeathEvent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DeathEvents.cs",
+      "source_location": null
+    },
+    {
+      "id": "JumpEvent",
+      "label": "JumpEvent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/MovementEvents.cs",
+      "source_location": null
+    },
+    {
+      "id": "SkillActivatedEvent",
+      "label": "SkillActivatedEvent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/SkillEvents.cs",
+      "source_location": null
+    },
+    {
+      "id": "StateChangedEvent",
+      "label": "StateChangedEvent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/StateEvents.cs",
+      "source_location": null
+    },
+    {
+      "id": "DebugWindowManager",
+      "label": "DebugWindowManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/DebugWindowManager.cs",
+      "source_location": null
+    },
+    {
+      "id": "StateLogger",
+      "label": "StateLogger",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/StateLogger.cs",
+      "source_location": null
+    },
+    {
+      "id": "BaseFSM",
+      "label": "BaseFSM",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs",
+      "source_location": null
+    },
+    {
+      "id": "AttackFSM",
+      "label": "AttackFSM",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs",
+      "source_location": null
+    },
+    {
+      "id": "FSMManager",
+      "label": "FSMManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs",
+      "source_location": null
+    },
+    {
+      "id": "HitFSM",
+      "label": "HitFSM",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs",
+      "source_location": null
+    },
+    {
+      "id": "StateTransitionTable",
+      "label": "StateTransitionTable",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs",
+      "source_location": null
+    },
+    {
+      "id": "IState",
+      "label": "IState",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/IState.cs",
+      "source_location": null
+    },
+    {
+      "id": "Attack1State",
+      "label": "Attack1State",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/AttackStates.cs",
+      "source_location": null
+    },
+    {
+      "id": "Attack2State",
+      "label": "Attack2State",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/AttackStates.cs",
+      "source_location": null
+    },
+    {
+      "id": "SkillQState",
+      "label": "SkillQState",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/AttackStates.cs",
+      "source_location": null
+    },
+    {
+      "id": "IdleState",
+      "label": "IdleState",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/BaseStates.cs",
+      "source_location": null
+    },
+    {
+      "id": "MoveState",
+      "label": "MoveState",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/BaseStates.cs",
+      "source_location": null
+    },
+    {
+      "id": "JumpStartState",
+      "label": "JumpStartState",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/BaseStates.cs",
+      "source_location": null
+    },
+    {
+      "id": "InputManager",
+      "label": "InputManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs",
+      "source_location": null
+    },
+    {
+      "id": "IInputAdapter",
+      "label": "IInputAdapter",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/KeyboardInputAdapter.cs",
+      "source_location": null
+    },
+    {
+      "id": "KeyboardInputAdapter",
+      "label": "KeyboardInputAdapter",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/KeyboardInputAdapter.cs",
+      "source_location": null
+    },
+    {
+      "id": "JoystickInputAdapter",
+      "label": "JoystickInputAdapter",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/JoystickInputAdapter.cs",
+      "source_location": null
+    },
+    {
+      "id": "NetworkBridge",
+      "label": "NetworkBridge",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetworkBridge.cs",
+      "source_location": null
+    },
+    {
+      "id": "INetworkClient",
+      "label": "INetworkClient",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetworkBridge.cs",
+      "source_location": null
+    },
+    {
+      "id": "NetworkPrediction",
+      "label": "NetworkPrediction",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetworkPrediction.cs",
+      "source_location": null
+    },
+    {
+      "id": "PositionInterpolator",
+      "label": "PositionInterpolator",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/PositionInterpolator.cs",
+      "source_location": null
+    },
+    {
+      "id": "IMovementPolicy",
+      "label": "IMovementPolicy",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/MovementPolicy.cs",
+      "source_location": null
+    },
+    {
+      "id": "LocalMovementPolicy",
+      "label": "LocalMovementPolicy",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/MovementPolicy.cs",
+      "source_location": null
+    },
+    {
+      "id": "PredictionMovementPolicy",
+      "label": "PredictionMovementPolicy",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/MovementPolicy.cs",
+      "source_location": null
+    },
+    {
+      "id": "SkillNetworkManager",
+      "label": "SkillNetworkManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs",
+      "source_location": null
+    },
+    {
+      "id": "SkillDashComponent",
+      "label": "SkillDashComponent",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDashComponent.cs",
+      "source_location": null
+    },
+    {
+      "id": "SkillCoordinatorBridge",
+      "label": "SkillCoordinatorBridge",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs",
+      "source_location": null
+    },
+    {
+      "id": "BuffHandler",
+      "label": "BuffHandler",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs",
+      "source_location": null
+    },
+    {
+      "id": "BuffData",
+      "label": "BuffData",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/BuffData.cs",
+      "source_location": null
+    },
+    {
+      "id": "SkillRegistry",
+      "label": "SkillRegistry",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIManager",
+      "label": "UIManager",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIPool",
+      "label": "UIPool",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs",
+      "source_location": null
+    },
+    {
+      "id": "Confirm",
+      "label": "Confirm",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs",
+      "source_location": null
+    },
+    {
+      "id": "Loading",
+      "label": "Loading",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs",
+      "source_location": null
+    },
+    {
+      "id": "Toast",
+      "label": "Toast Notification Component",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs",
+      "source_location": null
+    },
+    {
+      "id": "Tips",
+      "label": "Floating Tips Component",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIAnimation",
+      "label": "UI Animation Extensions",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIDataBinding",
+      "label": "Data Binding System",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs",
+      "source_location": null
+    },
+    {
+      "id": "ViewModelBase",
+      "label": "MVVM ViewModel Base Class",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs",
+      "source_location": null
+    },
+    {
+      "id": "RectTransformExtensions",
+      "label": "RectTransform Extension Methods",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIConst",
+      "label": "UI Layer Constants",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIManager",
+      "label": "UI Panel Manager Singleton",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIPanel",
+      "label": "UI Panel Base Class",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIPool",
+      "label": "UI Panel Object Pool",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs",
+      "source_location": null
+    },
+    {
+      "id": "UIMessage",
+      "label": "Pub/Sub Message System",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs",
+      "source_location": null
+    },
+    {
+      "id": "HUDPanel",
+      "label": "HUD Panel Example",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs",
+      "source_location": null
+    },
+    {
+      "id": "HUDViewModel",
+      "label": "HUD ViewModel",
+      "file_type": "code",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs",
+      "source_location": null
+    },
+    {
+      "id": "FSMManager",
+      "label": "FSM Manager",
+      "file_type": "rationale",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md",
+      "source_location": null
+    },
+    {
+      "id": "BaseFSM",
+      "label": "Base State Machine",
+      "file_type": "rationale",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md",
+      "source_location": null
+    },
+    {
+      "id": "AttackFSM",
+      "label": "Attack State Machine",
+      "file_type": "rationale",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md",
+      "source_location": null
+    },
+    {
+      "id": "CharacterController",
+      "label": "Character Physics Controller",
+      "file_type": "rationale",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md",
+      "source_location": null
+    },
+    {
+      "id": "HybridCLR_AOT_Architecture",
+      "label": "HybridCLR AOT Assembly Architecture",
+      "file_type": "rationale",
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/docs/HYBRIDCLR_AOT_ASSEMBLIES.md",
+      "source_location": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "KcpClient",
+      "target": "KcpSession",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs",
+      "source_location": "line 11",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpServer",
+      "target": "MessageDispatcher",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs",
+      "source_location": "line 19",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpServer",
+      "target": "KcpServerSession",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs",
+      "source_location": "line 315",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpServer",
+      "target": "KcpListenerWrapper",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs",
+      "source_location": "line 24",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpServerSession",
+      "target": "KcpSession",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServerSession.cs",
+      "source_location": "line 11",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpServerSession",
+      "target": "RateLimiter",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServerSession.cs",
+      "source_location": "line 30",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpClientTransport",
+      "target": "KcpTransportBase",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Client/KcpClientTransport.cs",
+      "source_location": "line 13",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpClientTransport",
+      "target": "Kcp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Client/KcpClientTransport.cs",
+      "source_location": "line 37",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpServerTransport",
+      "target": "KcpTransportBase",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServerTransport.cs",
+      "source_location": "line 13",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpServerTransport",
+      "target": "Kcp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServerTransport.cs",
+      "source_location": "line 52",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpTransportBase",
+      "target": "IKcpTransport",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpTransportBase.cs",
+      "source_location": "line 15",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpTransportBase",
+      "target": "KcpClientTransport",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpTransportBase.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "KcpTransportBase",
+      "target": "KcpServerTransport",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpTransportBase.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "KcpSession",
+      "target": "IKcpTransport",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs",
+      "source_location": "line 129",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpSession",
+      "target": "MessageCodec",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs",
+      "source_location": "line 200",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpSession",
+      "target": "MessageTypeRegistry",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs",
+      "source_location": "line 194",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpClient",
+      "target": "IMessageExecutor",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs",
+      "source_location": "line 13",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpClient",
+      "target": "Heartbeat",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs",
+      "source_location": "line 243",
+      "weight": 1.0
+    },
+    {
+      "source": "MessageDispatcher",
+      "target": "MessageCodec",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageDispatcher.cs",
+      "source_location": "line 190",
+      "weight": 1.0
+    },
+    {
+      "source": "MessageDispatcher",
+      "target": "KcpSession",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageDispatcher.cs",
+      "source_location": "line 36",
+      "weight": 1.0
+    },
+    {
+      "source": "MessageCodec",
+      "target": "MessageTypeRegistry",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageCodec.cs",
+      "source_location": "line 158",
+      "weight": 1.0
+    },
+    {
+      "source": "MessageCodec",
+      "target": "IMessage",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageCodec.cs",
+      "source_location": "line 9",
+      "weight": 1.0
+    },
+    {
+      "source": "MessageTypeRegistry",
+      "target": "IMessage",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/MessageCodec.cs",
+      "source_location": "line 268",
+      "weight": 1.0
+    },
+    {
+      "source": "Kcp",
+      "target": "ILogger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Kcp.cs",
+      "source_location": "line 81",
+      "weight": 1.0
+    },
+    {
+      "source": "Kcp",
+      "target": "NullLogger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Kcp.cs",
+      "source_location": "line 96",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpTransportBase",
+      "target": "ILogger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpTransportBase.cs",
+      "source_location": "line 21",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpServer",
+      "target": "ILogger",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs",
+      "source_location": "line 18",
+      "weight": 1.0
+    },
+    {
+      "source": "ClientExample",
+      "target": "KcpClient",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Examples/ClientExample.cs",
+      "source_location": "line 92",
+      "weight": 1.0
+    },
+    {
+      "source": "ClientExample",
+      "target": "KcpClientTransport",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Examples/ClientExample.cs",
+      "source_location": "line 83",
+      "weight": 1.0
+    },
+    {
+      "source": "ClientExample",
+      "target": "DirectMessageExecutor",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Examples/ClientExample.cs",
+      "source_location": "line 68",
+      "weight": 1.0
+    },
+    {
+      "source": "ServerExample",
+      "target": "KcpServer",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Examples/ServerExample.cs",
+      "source_location": "line 57",
+      "weight": 1.0
+    },
+    {
+      "source": "ServerExample",
+      "target": "MessageDispatcher",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Examples/ServerExample.cs",
+      "source_location": "line 116",
+      "weight": 1.0
+    },
+    {
+      "source": "ServerExample",
+      "target": "LoginRequest",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Examples/ServerExample.cs",
+      "source_location": "line 125",
+      "weight": 1.0
+    },
+    {
+      "source": "ServerExample",
+      "target": "LoginResponse",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Examples/ServerExample.cs",
+      "source_location": "line 137",
+      "weight": 1.0
+    },
+    {
+      "source": "UnityMainThreadExecutor",
+      "target": "IMessageExecutor",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Examples/UnityMainThreadExecutor.cs",
+      "source_location": "line 11",
+      "weight": 1.0
+    },
+    {
+      "source": "DirectMessageExecutor",
+      "target": "IMessageExecutor",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/IMessageExecutor.cs",
+      "source_location": "line 27",
+      "weight": 1.0
+    },
+    {
+      "source": "ConsoleLogger",
+      "target": "ILogger",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/ILogger.cs",
+      "source_location": "line 161",
+      "weight": 1.0
+    },
+    {
+      "source": "NullLogger",
+      "target": "ILogger",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/ILogger.cs",
+      "source_location": "line 94",
+      "weight": 1.0
+    },
+    {
+      "source": "LoginRequest",
+      "target": "IMessage",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": "line 80",
+      "weight": 1.0
+    },
+    {
+      "source": "LoginResponse",
+      "target": "IMessage",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": "line 111",
+      "weight": 1.0
+    },
+    {
+      "source": "Heartbeat",
+      "target": "IMessage",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": "line 148",
+      "weight": 1.0
+    },
+    {
+      "source": "Kick",
+      "target": "IMessage",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": "line 167",
+      "weight": 1.0
+    },
+    {
+      "source": "PositionSyncRequest",
+      "target": "IMessage",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": "line 238",
+      "weight": 1.0
+    },
+    {
+      "source": "RemotePlayerSync",
+      "target": "IMessage",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": "line 336",
+      "weight": 1.0
+    },
+    {
+      "source": "ChatMessage",
+      "target": "IMessage",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/Message.cs",
+      "source_location": "line 391",
+      "weight": 1.0
+    },
+    {
+      "source": "KcpOptions",
+      "target": "KcpTransportBase",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpOptions.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "KcpOptions",
+      "target": "MessageDispatcher",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpOptions.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SessionStatistics",
+      "target": "KcpSession",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "KcpClient",
+      "target": "SessionStatistics",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ServerStatistics",
+      "target": "KcpServer",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillConfigGenerator",
+      "target": "SkillConfigGenerator",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "Assets/Scripts/Editor/SkillConfigGenerator.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagManager",
+      "target": "BagData",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/BagManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagManager",
+      "target": "ItemTemplateRegistry",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/BagManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagManager",
+      "target": "ItemData",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/BagManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ItemFactory",
+      "target": "ItemData",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/ItemFactory.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ItemFactory",
+      "target": "ItemTemplateRegistry",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/ItemFactory.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ItemFactory",
+      "target": "ItemTemplate",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Runtime/ItemFactory.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ItemData",
+      "target": "ItemTemplate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/ItemData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ItemData",
+      "target": "ItemTemplateRegistry",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/ItemData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagData",
+      "target": "BagSlotData",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/BagData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagSlotData",
+      "target": "ItemData",
+      "relation": "holds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/Data/BagSlotData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagPanel",
+      "target": "BagManager",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/BagPanel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagPanel",
+      "target": "ItemCell",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/BagPanel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagPanel",
+      "target": "ItemTooltip",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/BagPanel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BagPanel",
+      "target": "BagData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/BagPanel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ItemCell",
+      "target": "ItemData",
+      "relation": "displays",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/Components/ItemCell.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ItemTooltip",
+      "target": "ItemData",
+      "relation": "displays",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/Components/ItemTooltip.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ItemTooltip",
+      "target": "ItemTemplate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Bag/UI/Components/ItemTooltip.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AttackHitbox",
+      "target": "AttackEffectConfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/AttackHitbox.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AttackHitbox",
+      "target": "IAttackHitbox",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/AttackHitbox.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HitZone",
+      "target": "IAttackHitbox",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/HitZone.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HitZone",
+      "target": "IDamageable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/HitZone.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "PlayerHitZone",
+      "target": "IAttackHitbox",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/PlayerHitZone.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "PlayerHitZone",
+      "target": "FSMManager",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/PlayerHitZone.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "PlayerHitZone",
+      "target": "DamageData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Combat/PlayerHitZone.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "MonsterConfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "MonsterAI",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "MonsterMovement",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "HitZone",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "AttackHitbox",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "IDamageable",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "MonsterLootTable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "PhysicsRegistry",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterEntity",
+      "target": "MonsterDeathEvent",
+      "relation": "emits",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterAI",
+      "target": "MonsterAIContext",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterAI",
+      "target": "MonsterMovement",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterAI",
+      "target": "MonsterConfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterAI",
+      "target": "DefendBehaviour",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterAI",
+      "target": "AlertBehaviour",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterAI",
+      "target": "PhysicsRegistry",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterAI",
+      "target": "AttackShapeFactory",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterAI",
+      "target": "IAttackShape",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAI.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AlertBehaviour",
+      "target": "IAIBehaviour",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/AlertBehaviour.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AlertBehaviour",
+      "target": "MonsterAIContext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/AlertBehaviour.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DefendBehaviour",
+      "target": "IAIBehaviour",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/DefendBehaviour.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DefendBehaviour",
+      "target": "MonsterAIContext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/DefendBehaviour.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DefendBehaviour",
+      "target": "MonsterStats",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/DefendBehaviour.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterMovement",
+      "target": "NavMeshAgent",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterMovement",
+      "target": "MonsterConfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterConfig",
+      "target": "MonsterLootTable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterConfig",
+      "target": "AttackEffectConfig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterConfig",
+      "target": "AttackShapeConfig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterLootTable",
+      "target": "LootEntry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterLootTable.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterLootTable",
+      "target": "LootResult",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterLootTable.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterDeathEvent",
+      "target": "LootResult",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEvents.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillData",
+      "target": "DamageData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillData",
+      "target": "EffectData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BasicAttackData",
+      "target": "SkillData",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SpecialSkillData",
+      "target": "SkillData",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillExecutor",
+      "target": "IEffectTarget",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillExecutor",
+      "target": "SkillStateMachine",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillExecutor",
+      "target": "SkillInterruptionMatrix",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillExecutor",
+      "target": "EffectData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillExecutor",
+      "target": "DamageData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillCoordinator",
+      "target": "SkillExecutor",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillCoordinator",
+      "target": "CooldownManager",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillCoordinator",
+      "target": "SkillInputBuffer",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillCoordinator",
+      "target": "SkillInterruptionMatrix",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillStateMachine",
+      "target": "SkillData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillStateMachine.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "EffectData",
+      "target": "IEffectTarget",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "NpcMirrorManager",
+      "target": "NpcMirrorComponent",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/NpcMirror/NpcMirrorManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "NpcMirrorComponent",
+      "target": "NpcAnimationController",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/NpcMirror/NpcMirrorComponent.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "Sys3CEntry",
+      "target": "CharacterAttackHandler",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CharacterAttackHandler",
+      "target": "IWeapon",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/CharacterAttackHandler.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MeleeWeapon",
+      "target": "IWeapon",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/MeleeWeapon.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MeleeWeapon",
+      "target": "IDamageable",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/MeleeWeapon.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "Sys3CEntry",
+      "target": "IDamageable",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MonsterStats",
+      "target": "DamageData",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Monster/MonsterStats.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AttackStateBehaviour",
+      "target": "AnimationDriver",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/AttackStateBehaviour.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HitStateBehaviour",
+      "target": "AnimationDriver",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/HitStateBehaviour.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BaseStateBehaviour",
+      "target": "AnimationDriver",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/StateBehaviours/BaseStateBehaviour.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HitManager",
+      "target": "AnimationDriver",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CharacterController",
+      "target": "GroundDetector",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CharacterController",
+      "target": "StateCoordinator",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "StateCoordinator",
+      "target": "EventBus",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "StateCoordinator",
+      "target": "IStateCoordinator",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "StateCoordinator",
+      "target": "LayerType",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StateCoordinator.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "StatePriority",
+      "target": "LayerType",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/StatePriority.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CharacterController",
+      "target": "CharacterData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CharacterController",
+      "target": "NetworkBridge",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CharacterController",
+      "target": "NetworkPrediction",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AttackShapeFactory",
+      "target": "AttackShapeConfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeFactory.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AttackEffectConfig",
+      "target": "DamageData",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ThirdPersonCameraController",
+      "target": "CharacterController",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CircleShape",
+      "target": "IAttackShape",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/CircleShape.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ConeShape",
+      "target": "IAttackShape",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/ConeShape.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "RectShape",
+      "target": "IAttackShape",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/RectShape.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SectorShape",
+      "target": "IAttackShape",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/SectorShape.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "PhysicsRegistry",
+      "target": "IEntityRegistry",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/PhysicsRegistry.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "PhysicsRegistry",
+      "target": "IDamageable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/PhysicsRegistry.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DamageEvent",
+      "target": "IEvent",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DeathEvent",
+      "target": "IEvent",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DeathEvents.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "JumpEvent",
+      "target": "IEvent",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/MovementEvents.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillActivatedEvent",
+      "target": "IEvent",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/SkillEvents.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "StateChangedEvent",
+      "target": "IEvent",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/StateEvents.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DebugWindowManager",
+      "target": "StateChangedEvent",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/DebugWindowManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DebugWindowManager",
+      "target": "SkillActivatedEvent",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/DebugWindowManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DebugWindowManager",
+      "target": "DamageEvent",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/DebugWindowManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DebugWindowManager",
+      "target": "StateLogger",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/DebugWindowManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DebugWindowManager",
+      "target": "EventBus",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Debug/DebugWindowManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BaseFSM",
+      "target": "AnimationDriver",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BaseFSM",
+      "target": "StateTransitionTable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AttackFSM",
+      "target": "AnimationDriver",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AttackFSM",
+      "target": "SkillDashComponent",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "FSMManager",
+      "target": "StateTransitionTable",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "FSMManager",
+      "target": "HitFSM",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "FSMManager",
+      "target": "SkillDashComponent",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "FSMManager",
+      "target": "InputManager",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HitFSM",
+      "target": "IState",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "StateTransitionTable",
+      "target": "IState",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/StateTransitionTable.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "IdleState",
+      "target": "IState",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/BaseStates.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "MoveState",
+      "target": "IState",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/BaseStates.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "JumpStartState",
+      "target": "IState",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/BaseStates.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "Attack1State",
+      "target": "IState",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/AttackStates.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "Attack2State",
+      "target": "IState",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/AttackStates.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillQState",
+      "target": "IState",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/States/AttackStates.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "InputManager",
+      "target": "IInputAdapter",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "InputManager",
+      "target": "KeyboardInputAdapter",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "KeyboardInputAdapter",
+      "target": "IInputAdapter",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/KeyboardInputAdapter.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "JoystickInputAdapter",
+      "target": "IInputAdapter",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/JoystickInputAdapter.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "NetworkBridge",
+      "target": "INetworkClient",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetworkBridge.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "LocalMovementPolicy",
+      "target": "IMovementPolicy",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/MovementPolicy.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "PredictionMovementPolicy",
+      "target": "IMovementPolicy",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/MovementPolicy.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "PredictionMovementPolicy",
+      "target": "NetworkBridge",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/MovementPolicy.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillNetworkManager",
+      "target": "NetworkBridge",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillCoordinatorBridge",
+      "target": "BuffHandler",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BuffHandler",
+      "target": "BuffData",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "SkillRegistry",
+      "target": "BuffData",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIManager",
+      "target": "UIPool",
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "Confirm",
+      "target": "Loading",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "Toast",
+      "target": "RectTransformExtensions",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "Toast",
+      "target": "UIAnimation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "Tips",
+      "target": "RectTransformExtensions",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIDataBinding",
+      "target": "ViewModelBase",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIPanel",
+      "target": "UIDataBinding",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIPanel",
+      "target": "UIAnimation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIManager",
+      "target": "UIPanel",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIManager",
+      "target": "UIConst",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIPool",
+      "target": "UIPanel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HUDPanel",
+      "target": "UIPanel",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HUDPanel",
+      "target": "HUDViewModel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HUDViewModel",
+      "target": "ViewModelBase",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIMessage",
+      "target": "ViewModelBase",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "UIManager",
+      "target": "UIMessage",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "FSMManager",
+      "target": "BaseFSM",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "FSMManager",
+      "target": "AttackFSM",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CharacterController",
+      "target": "FSMManager",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "HybridCLR_AOT_Architecture",
+      "target": "CharacterController",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "Assets/Scripts/Hotfix/GameSystems/docs/HYBRIDCLR_AOT_ASSEMBLIES.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

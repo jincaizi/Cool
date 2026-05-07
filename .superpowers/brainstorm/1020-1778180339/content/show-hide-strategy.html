@@ -1,0 +1,81 @@
+<h2>Show/Hide Performance Strategy</h2>
+<p class="subtitle">混合策略 — UIPanel 声明 VisibilityMode，UIManager 自动处理</p>
+
+<div class="mockup">
+  <div class="mockup-header">Three Visibility Modes (UIPanel.VisibilityMode)</div>
+  <div class="mockup-body" style="font-size:12px;padding:12px">
+    <table style="width:100%;border-collapse:collapse">
+      <tr style="border-bottom:1px solid #444">
+        <th style="text-align:left;padding:6px">Mode</th>
+        <th style="text-align:left;padding:6px">Mechanism</th>
+        <th style="text-align:left;padding:6px">Performance</th>
+        <th style="text-align:left;padding:6px">Use Case</th>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:6px;color:#f48771">ToggleActive</td>
+        <td style="padding:6px">SetActive(true/false)</td>
+        <td style="padding:6px">★☆☆☆ Show<br>★★★★ Hide (完全释放)</td>
+        <td style="padding:6px">低频面板：背包、技能、设置</td>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:6px;color:#e5c07b">CanvasSwitch</td>
+        <td style="padding:6px">Canvas.enabled</td>
+        <td style="padding:6px">★★★★ Show<br>★★★☆ Hide (保留树)</td>
+        <td style="padding:6px">中频面板：HUD 子模块、弹窗</td>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:6px;color:#4ec9b0">CanvasGroup</td>
+        <td style="padding:6px">alpha=0 + blocksRaycasts=false</td>
+        <td style="padding:6px">★★★★★ Show<br>★★☆☆ Hide (仍在渲染)</td>
+        <td style="padding:6px">高频切换：Tips、Toast、HUD 元素</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h3>UIPanel Declaration</h3>
+  <div class="mockup">
+    <div class="mockup-header">Each Panel declares its preferred mode</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px">
+      <span style="color:#c586c0">public class</span> <span style="color:#4ec9b0">BagPanel</span> : UIPanel<br>
+      {<br>
+      &nbsp;&nbsp;<span style="color:#888">// Low-frequency = SetActive for full release</span><br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public override</span> <span style="color:#4ec9b0">VisibilityMode</span> Mode => <span style="color:#4ec9b0">VisibilityMode</span>.ToggleActive;<br>
+      }<br>
+      <br>
+      <span style="color:#c586c0">public class</span> <span style="color:#4ec9b0">HUDHealthBar</span> : UIPanel<br>
+      {<br>
+      &nbsp;&nbsp;<span style="color:#888">// High-frequency = CanvasGroup for instant toggle</span><br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public override</span> <span style="color:#4ec9b0">VisibilityMode</span> Mode => <span style="color:#4ec9b0">VisibilityMode</span>.CanvasGroup;<br>
+      }<br>
+      <br>
+      <span style="color:#c586c0">public class</span> <span style="color:#4ec9b0">ConfirmDialog</span> : UIPanel<br>
+      {<br>
+      &nbsp;&nbsp;<span style="color:#888">// Medium-frequency = Canvas.enabled</span><br>
+      &nbsp;&nbsp;<span style="color:#c586c0">public override</span> <span style="color:#4ec9b0">VisibilityMode</span> Mode => <span style="color:#4ec9b0">VisibilityMode</span>.CanvasSwitch;<br>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>UIManager Show/Hide Logic</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px">
+      <span style="color:#c586c0">internal void</span> <span style="color:#dcdcaa">Show</span>(UIPanel panel)<br>
+      {<br>
+      &nbsp;&nbsp;<span style="color:#c586c0">switch</span> (panel.Mode)<br>
+      &nbsp;&nbsp;{<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#c586c0">case</span> ToggleActive: panel.gameObject.<span style="color:#dcdcaa">SetActive</span>(<span style="color:#569cd6">true</span>); <span style="color:#c586c0">break</span>;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#c586c0">case</span> CanvasSwitch: panel.<span style="color:#4ec9b0">Canvas</span>.enabled = <span style="color:#569cd6">true</span>; <span style="color:#c586c0">break</span>;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#c586c0">case</span> CanvasGroup: panel.<span style="color:#4ec9b0">CanvasGroup</span>.alpha = <span style="color:#b5cea8">1</span>; panel.<span style="color:#4ec9b0">CanvasGroup</span>.blocksRaycasts = <span style="color:#569cd6">true</span>; <span style="color:#c586c0">break</span>;<br>
+      &nbsp;&nbsp;}<br>
+      &nbsp;&nbsp;panel.<span style="color:#dcdcaa">OnShow</span>();<br>
+      }<br>
+      <br>
+      <span style="color:#888">// For ToggleActive mode, UIManager calls OnHide() → play exit anim → SetActive(false)</span><br>
+      <span style="color:#888">// For CanvasSwitch/CanvasGroup, UIManager just calls OnHide() + plays exit anim + disables Canvas/CanvasGroup</span>
+    </div>
+  </div>
+</div>

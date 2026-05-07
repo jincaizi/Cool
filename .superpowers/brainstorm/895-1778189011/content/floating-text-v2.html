@@ -1,0 +1,83 @@
+<h2>FloatingText — Object Pool & Animation System (Updated)</h2>
+<p class="subtitle">初始10个 / 用尽时+10扩容 / Screen Space Canvas投影 / DOTween / 零泄漏</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Pool Design</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.6">
+      <span style="color:#4ec9b0">FloatingTextPool</span><br>
+      ├── Stack&lt;TextMeshProUGUI&gt; <span style="color:#888">_free (idle pool)</span><br>
+      ├── HashSet&lt;TextMeshProUGUI&gt; <span style="color:#888">_active (in use)</span><br>
+      ├── int <span style="color:#888">_growSize = 10</span><br>
+      │<br>
+      ├── <span style="color:#dcdcaa">PreWarm</span>(10) <span style="color:#888">// init 10</span><br>
+      ├── <span style="color:#dcdcaa">Spawn</span>(pos, text, cfg)<br>
+      │   ├── _free.Count == 0 → <span style="color:#e5c07b">Grow</span>(10) instantiates 10 new<br>
+      │   ├── Pop from _free, add to _active<br>
+      │   ├── Set text/color/size/pos<br>
+      │   ├── Play DOTween → on complete → Enqueue<br>
+      │   └── return<br>
+      └── <span style="color:#dcdcaa">Enqueue</span>(tmp) <span style="color:#888">// back to _free</span>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Grow Strategy</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.6">
+      <span style="color:#888">Start: 0 items</span><br>
+      <span style="color:#4ec9b0">PreWarm(10)</span> → 10 in _free pool<br>
+      <br>
+      First 10 spawns → instant, no allocation<br>
+      11th spawn → _free empty<br>
+      → <span style="color:#e5c07b">Grow(10)</span>: Instantiate 10 new TMP<br>
+      → use 1, 9 in _free<br>
+      <br>
+      <span style="color:#888;font-size:11px">Max capacity: unbounded (but practically ~30-40 for 100-monster scenarios)</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>FloatingTextConfig (Presets)</h3>
+  <div class="mockup-body" style="font-size:12px;padding:12px">
+    <table style="width:100%;border-collapse:collapse">
+      <tr style="border-bottom:1px solid #444">
+        <th style="text-align:left;padding:4px">Preset</th>
+        <th style="text-align:left;padding:4px">Color</th>
+        <th style="text-align:left;padding:4px">Size</th>
+        <th style="text-align:left;padding:4px">Animation</th>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:4px"><span style="color:#f48771">Damage</span></td>
+        <td style="padding:4px">#FF4444</td><td style="padding:4px">36</td>
+        <td style="padding:4px">↑50px + fade out, 1s</td>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:4px"><span style="color:#e5c07b">CritDamage</span></td>
+        <td style="padding:4px">#FF8800</td><td style="padding:4px">42</td>
+        <td style="padding:4px">↑70px + punch scale, 1.2s</td>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:4px"><span style="color:#4ec9b0">Heal</span></td>
+        <td style="padding:4px">#44FF44</td><td style="padding:4px">32</td>
+        <td style="padding:4px">↑40px + fade out, 1s</td>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:4px"><span style="color:#569cd6">SkillName</span></td>
+        <td style="padding:4px">#FFD700</td><td style="padding:4px">28</td>
+        <td style="padding:4px">scale 0.8→1.2→1 + fade, 1.5s</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Spawn Lifecycle</h3>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.8">
+    1. <span style="color:#dcdcaa">Pop</span> TMP from _free stack (Grow if empty)<br>
+    2. <span style="color:#569cd6">Set</span> text, color, fontSize from FloatingTextConfig<br>
+    3. <span style="color:#569cd6">Position</span>: Camera.main.WorldToScreenPoint(worldPos + offsetY)<br>
+    4. <span style="color:#e5c07b">Play</span> DOTween Sequence per config<br>
+    5. <span style="color:#888">OnComplete</span> → reset alpha/scale → push back to _free stack<br>
+  </div>
+</div>

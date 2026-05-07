@@ -1,0 +1,90 @@
+<h2>UIAnimation — DOTween Animation System</h2>
+<p class="subtitle">组件化设计 / Sequence Builder / 预设动画 / 状态机扩展</p>
+
+<div class="section">
+  <h3>UIAnimation Component (attached to UIPanel GameObject)</h3>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.6">
+    <span style="color:#c586c0">public class</span> <span style="color:#4ec9b0">UIAnimation</span> : MonoBehaviour<br>
+    {<br>
+    &nbsp;&nbsp;<span style="color:#888">// Preset animations (configured in Inspector or code)</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public</span> UIAnimPreset ShowPreset;&nbsp;&nbsp;<span style="color:#888">// fade-in + scale:0.9→1.0</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public</span> UIAnimPreset HidePreset;&nbsp;&nbsp;<span style="color:#888">// fade-out + scale:1.0→0.95</span><br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// Build custom sequences</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public</span> SequenceBuilder <span style="color:#dcdcaa">Build</span>() → <span style="color:#c586c0">new</span> SequenceBuilder(transform);<br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// Play presets (called by UIManager)</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public</span> Sequence <span style="color:#dcdcaa">PlayShow</span>();<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public</span> Sequence <span style="color:#dcdcaa">PlayHide</span>();<br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// Direct tween helpers</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public</span> Tweener <span style="color:#dcdcaa">FadeIn</span>(<span style="color:#c586c0">float</span> duration = <span style="color:#b5cea8">0.3f</span>);<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public</span> Tweener <span style="color:#dcdcaa">ScaleIn</span>(<span style="color:#c586c0">float</span> duration = <span style="color:#b5cea8">0.3f</span>);<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public</span> Tweener <span style="color:#dcdcaa">SlideIn</span>(Direction dir, <span style="color:#c586c0">float</span> duration = <span style="color:#b5cea8">0.3f</span>);<br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// Kill all running tweens on this object</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public void</span> <span style="color:#dcdcaa">KillAll</span>();<br>
+    }
+  </div>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">UIAnimPreset (Inspector Config)</div>
+    <div class="mockup-body" style="font-size:11px;padding:8px;line-height:1.6">
+      <table style="width:100%;border-collapse:collapse">
+        <tr style="border-bottom:1px solid #444"><th style="text-align:left;padding:4px">Field</th><th style="text-align:left;padding:4px">Example</th></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Fade</td><td style="padding:4px;color:#4ec9b0">alpha 0→1 / 1→0</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Scale</td><td style="padding:4px;color:#4ec9b0">0.9→1.0 / 1.0→0.95</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Slide</td><td style="padding:4px;color:#4ec9b0">LeftToRight / TopToBottom</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Duration</td><td style="padding:4px;color:#4ec9b0">0.3s</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Ease</td><td style="padding:4px;color:#4ec9b0">OutBack / OutCubic</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Delay</td><td style="padding:4px;color:#4ec9b0">0s</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">SequenceBuilder (Fluent API)</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:10px;padding:8px;line-height:1.5">
+      <span style="color:#c586c0">var</span> seq = anim.<span style="color:#dcdcaa">Build</span>()<br>
+      &nbsp;&nbsp;.<span style="color:#dcdcaa">FadeIn</span>(<span style="color:#b5cea8">0.2f</span>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// alpha 0→1</span><br>
+      &nbsp;&nbsp;.<span style="color:#dcdcaa">Join</span>(<span style="color:#c586c0">() =></span> anim.<span style="color:#dcdcaa">ScaleIn</span>(<span style="color:#b5cea8">0.3f</span>))&nbsp;<span style="color:#888">// + scale 0.9→1</span><br>
+      &nbsp;&nbsp;.<span style="color:#dcdcaa">Then</span>(<span style="color:#c586c0">() =></span> icon.<span style="color:#dcdcaa">Punch</span>())&nbsp;&nbsp;<span style="color:#888">// then icon bounce</span><br>
+      &nbsp;&nbsp;.<span style="color:#dcdcaa">Delay</span>(<span style="color:#b5cea8">0.1f</span>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// small pause</span><br>
+      &nbsp;&nbsp;.<span style="color:#dcdcaa">Then</span>(<span style="color:#c586c0">() =></span> text.<span style="color:#dcdcaa">CountUp</span>(<span style="color:#b5cea8">100</span>))&nbsp;<span style="color:#888">// numeric count</span><br>
+      &nbsp;&nbsp;.<span style="color:#dcdcaa">Play</span>();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// → Sequence</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Tween Extension Methods (static helpers)</h3>
+  <div class="mockup-body" style="font-size:11px;padding:8px;line-height:1.6">
+    <table style="width:100%;border-collapse:collapse">
+      <tr style="border-bottom:1px solid #444">
+        <th style="text-align:left;padding:4px">Extension</th><th style="text-align:left;padding:4px">Target</th><th style="text-align:left;padding:4px">Use Case</th>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:4px;color:#4ec9b0">Punch()</td>
+        <td style="padding:4px">Transform</td>
+        <td style="padding:4px">Icon click bounce / hit feedback</td>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:4px;color:#4ec9b0">Shake()</td>
+        <td style="padding:4px">Transform</td>
+        <td style="padding:4px">Error / invalid input</td>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:4px;color:#4ec9b0">CountUp()</td>
+        <td style="padding:4px">Text</td>
+        <td style="padding:4px">Score / damage numbers</td>
+      </tr>
+      <tr style="border-bottom:1px solid #333">
+        <td style="padding:4px;color:#4ec9b0">Flash()</td>
+        <td style="padding:4px">Graphic</td>
+        <td style="padding:4px">Highlight / on-hit flash</td>
+      </tr>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,97 @@
+<h2>UIManager — Panel Management</h2>
+<p class="subtitle">单例 / 5 层 Canvas 管理 / Stack + Overlay / 异步动画协调</p>
+
+<div class="section">
+  <h3>Core API</h3>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.6">
+    <span style="color:#888">// Registration (called once on init)</span><br>
+    <span style="color:#c586c0">public void</span> <span style="color:#dcdcaa">Register</span>(UIPanel panel);<br>
+    <br>
+    <span style="color:#888">// Stack panels (Main / Popup layers)</span><br>
+    <span style="color:#c586c0">public async</span> UniTask <span style="color:#dcdcaa">PushAsync</span>(<span style="color:#c586c0">string</span> panelId);&nbsp;&nbsp;<span style="color:#888">// show + push to stack</span><br>
+    <span style="color:#c586c0">public async</span> UniTask <span style="color:#dcdcaa">PopAsync</span>();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// hide top + pop from stack</span><br>
+    <span style="color:#c586c0">public void</span> <span style="color:#dcdcaa">PopTo</span>(<span style="color:#c586c0">string</span> panelId);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// pop until panelId is top</span><br>
+    <br>
+    <span style="color:#888">// Overlay panels (Top / Guide layers)</span><br>
+    <span style="color:#c586c0">public async</span> UniTask <span style="color:#dcdcaa">OpenAsync</span>(<span style="color:#c586c0">string</span> panelId);<br>
+    <span style="color:#c586c0">public async</span> UniTask <span style="color:#dcdcaa">CloseAsync</span>(<span style="color:#c586c0">string</span> panelId);<br>
+    <br>
+    <span style="color:#888">// Always panels (Base layer — HUD etc)</span><br>
+    <span style="color:#c586c0">public async</span> UniTask <span style="color:#dcdcaa">ShowAlwaysAsync</span>(<span style="color:#c586c0">string</span> panelId);<br>
+    <span style="color:#c586c0">public async</span> UniTask <span style="color:#dcdcaa">HideAlwaysAsync</span>(<span style="color:#c586c0">string</span> panelId);<br>
+  </div>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Stack Behavior</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:11px;padding:10px;line-height:1.6">
+      <span style="color:#888">Push("BagPanel"):</span><br>
+      → BagPanel.OnPreShow()<br>
+      → BagPanel.PlayShowAnimation()<br>
+      → BagPanel.OnShow()<br>
+      → stack: [BagPanel]<br>
+      <br>
+      <span style="color:#888">Push("ItemDetail"):</span><br>
+      → BagPanel.OnHide() (pause events)<br>
+      → ItemDetail.OnPreShow()<br>
+      → ItemDetail.PlayShowAnimation()<br>
+      → ItemDetail.OnShow()<br>
+      → stack: [BagPanel, ItemDetail]<br>
+      <br>
+      <span style="color:#888">Pop():</span><br>
+      → ItemDetail.OnHide() (stop events)<br>
+      → ItemDetail.PlayHideAnimation() (visual out)<br>
+      → ItemDetail visibility OFF<br>
+      → BagPanel.OnShow() (resume events)<br>
+      → stack: [BagPanel]
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Overlay Behavior</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:11px;padding:10px;line-height:1.6">
+      <span style="color:#888">Open("ReconnectBtn"):</span><br>
+      → OnPreShow → ShowAnim → OnShow<br>
+      → stack: unaffected<br>
+      → overlay: [ReconnectBtn]<br>
+      <br>
+      <span style="color:#888">Open("Loading"):</span><br>
+      → OnPreShow → ShowAnim → OnShow<br>
+      → stack: unaffected<br>
+      → overlay: [ReconnectBtn, Loading]<br>
+      <br>
+      <span style="color:#888">Close("ReconnectBtn"):</span><br>
+      → OnHide → HideAnim → vis OFF<br>
+      → overlay: [Loading]<br>
+      <br>
+      <span style="color:#888">Note:</span><br>
+      Overlay panels are managed <span style="color:#f48771">independently</span><br>
+      Multiple overlays can display at once<br>
+      Order is by Canvas sort (Top=4000, Guide=5000)
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Internal Structure</h3>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.6">
+    <span style="color:#c586c0">public class</span> <span style="color:#4ec9b0">UIManager</span> : MonoBehaviour<br>
+    {<br>
+    &nbsp;&nbsp;<span style="color:#888">// Singleton</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public static</span> UIManager Instance { <span style="color:#c586c0">get</span>; <span style="color:#c586c0">private set</span>; }<br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// 5 Canvas roots (created on init)</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">private</span> Canvas[] _layers = <span style="color:#c586c0">new</span> Canvas[<span style="color:#b5cea8">5</span>];<br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// Panel registry: all registered panels by ID</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">private</span> Dictionary&lt;<span style="color:#c586c0">string</span>, UIPanel&gt; _registry;<br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// Stack for Main/Popup layers</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">private</span> Stack&lt;UIPanel&gt; _stack;<br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// Active overlays</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">private</span> HashSet&lt;UIPanel&gt; _activeOverlays;<br>
+    }
+  </div>
+</div>

@@ -1,0 +1,78 @@
+<h2>UIPanel Lifecycle (Final)</h2>
+<p class="subtitle">Show 和 Hide 对称：Prepare → Animate → Callback → Visibility</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Show Flow</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.8">
+      <div style="padding:3px 8px;margin:2px 0">
+        1. Visibility ON <span style="color:#888;font-size:11px">(per panel.Mode)</span>
+      </div>
+      <div style="border-left:3px solid #4ec9b0;padding:3px 8px;margin:2px 0">
+        2. <span style="color:#4ec9b0">OnPreShow()</span><br>
+        <span style="color:#888;font-size:11px">准备数据，绑定 Model，刷新 UI</span>
+      </div>
+      <div style="border-left:3px solid #569cd6;padding:3px 8px;margin:2px 0">
+        3. <span style="color:#569cd6">PlayShowAnimation()</span><br>
+        <span style="color:#888;font-size:11px">入场动画 (DOTween Sequence)</span>
+      </div>
+      <div style="border-left:3px solid #4ec9b0;padding:3px 8px;margin:2px 0">
+        4. <span style="color:#4ec9b0">OnShow()</span><br>
+        <span style="color:#888;font-size:11px">注册事件/监听，启动逻辑</span>
+      </div>
+      <div style="padding:3px 8px;margin:2px 0">
+        5. IsVisible = true
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Hide Flow</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.8">
+      <div style="border-left:3px solid #e5c07b;padding:3px 8px;margin:2px 0">
+        1. <span style="color:#e5c07b">PlayHideAnimation()</span><br>
+        <span style="color:#888;font-size:11px">出场动画 (DOTween Sequence)</span>
+      </div>
+      <div style="border-left:3px solid #f48771;padding:3px 8px;margin:2px 0">
+        2. <span style="color:#f48771">OnHide()</span><br>
+        <span style="color:#888;font-size:11px">注销事件，清理引用</span>
+      </div>
+      <div style="padding:3px 8px;margin:2px 0">
+        3. Visibility OFF <span style="color:#888;font-size:11px">(per panel.Mode)</span>
+      </div>
+      <div style="padding:3px 8px;margin:2px 0">
+        4. IsVisible = false
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Symmetry</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px">
+    <span style="color:#569cd6">Show:</span> Prepare data → Animate IN → Events ON → Visible<br>
+    <span style="color:#f48771">Hide:</span> Animate OUT → Events OFF → Invisible<br>
+    <br>
+    <span style="color:#888">// During show animation, data is populated but events not yet registered</span><br>
+    <span style="color:#888">// During hide animation, events are still active so the panel is functional until visually gone</span><br>
+    <span style="color:#888">// After hide animation, events are cleaned up, then visibility is turned off</span>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">UIPanel Code</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px">
+    <span style="color:#c586c0">public abstract class</span> <span style="color:#4ec9b0">UIPanel</span> : MonoBehaviour<br>
+    {<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public abstract</span> <span style="color:#4ec9b0">LayerType</span> Layer { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public abstract</span> <span style="color:#4ec9b0">VisibilityMode</span> Mode { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public abstract string</span> PanelId { <span style="color:#c586c0">get</span>; }<br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual void</span> <span style="color:#dcdcaa">OnPreShow</span>() { }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// prepare data</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual</span> Sequence <span style="color:#dcdcaa">PlayShowAnimation</span>() { <span style="color:#c586c0">return null</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual void</span> <span style="color:#dcdcaa">OnShow</span>() { }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// register events</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual</span> Sequence <span style="color:#dcdcaa">PlayHideAnimation</span>() { <span style="color:#c586c0">return null</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual void</span> <span style="color:#dcdcaa">OnHide</span>() { }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// unregister events</span><br>
+    }
+  </div>
+</div>

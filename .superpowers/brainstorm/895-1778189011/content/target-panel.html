@@ -1,0 +1,81 @@
+<h2>Target Panel — Locked Target HUD</h2>
+<p class="subtitle">Screen Space UI 面板 / 仅显示当前目标 / 头像+大血条+名字</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Target Panel Layout</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.6">
+      <div style="background:#2a2a3c;padding:12px;border-radius:8px;width:220px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div class="placeholder" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center">Icon</div>
+          <div>
+            <div style="color:#fff;font-weight:bold;font-size:14px">Slime King</div>
+            <div style="color:#888;font-size:11px">Lv.15 Elite</div>
+          </div>
+        </div>
+        <div style="height:8px;background:#333;border-radius:4px;margin:4px 0">
+          <div style="height:100%;width:65%;background:#e74c3c;border-radius:4px"></div>
+        </div>
+        <div style="color:#aaa;font-size:11px;text-align:right">650/1000 HP</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">UIPanel Integration</div>
+    <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.6">
+      <span style="color:#569cd6">TargetPanel : UIPanel</span><br>
+      ├── Layer = <span style="color:#888">Base (1000, 常驻HUD区域)</span><br>
+      ├── Mode = <span style="color:#888">CanvasGroup (快速切换)</span><br>
+      │<br>
+      ├── <span style="color:#c586c0">Image</span> _portrait<br>
+      ├── <span style="color:#c586c0">TMP_Text</span> _name / _level<br>
+      ├── <span style="color:#c586c0">Slider</span> _hpBar<br>
+      ├── <span style="color:#c586c0">TMP_Text</span> _hpText<br>
+      │<br>
+      └── <span style="color:#dcdcaa">Bind</span>(ITargetable target)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;target.OnHPChanged += RefreshHP<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;target.OnDeath += Clear<br>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Select / Deselect Flow</h3>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.8">
+    <span style="color:#888">// Player clicks/tabs to target a monster</span><br>
+    <span style="color:#569cd6">SelectTarget</span>(monster) →<br>
+    &nbsp;&nbsp;1. <span style="color:#dcdcaa">UIManager.ShowAlwaysAsync</span>("TargetPanel")<br>
+    &nbsp;&nbsp;2. TargetPanel.<span style="color:#dcdcaa">Bind</span>(monster)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;→ set portrait, name, level<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;→ subscribe monster.OnHPChanged<br>
+    <br>
+    <span style="color:#888">// Target dies or player deselects</span><br>
+    <span style="color:#f48771">ClearTarget</span>() →<br>
+    &nbsp;&nbsp;1. TargetPanel.<span style="color:#dcdcaa">Clear</span>()<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;→ unsubscribe events<br>
+    &nbsp;&nbsp;2. <span style="color:#dcdcaa">UIManager.HideAlwaysAsync</span>("TargetPanel")<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;→ play hide animation → CanvasGroup off<br>
+  </div>
+</div>
+
+<div class="section">
+  <h3>ITargetable Interface</h3>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px;line-height:1.6">
+    <span style="color:#c586c0">public interface</span> <span style="color:#4ec9b0">ITargetable</span><br>
+    {<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">string</span> DisplayName { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">int</span> Level { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">Sprite</span> Portrait { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">float</span> HPPercent { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">int</span> CurrentHP { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">int</span> MaxHP { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">Vector3</span> WorldPosition { <span style="color:#c586c0">get</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">event</span> Action&lt;<span style="color:#c586c0">float</span>, <span style="color:#c586c0">int</span>, <span style="color:#c586c0">int</span>&gt; OnHPChanged;<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">event</span> Action OnDeath;<br>
+    }<br>
+    <br>
+    <span style="color:#888">// MonsterEntity and Player both implement ITargetable</span><br>
+    <span style="color:#888">// TargetPanel binds to ITargetable, not concrete types</span>
+  </div>
+</div>

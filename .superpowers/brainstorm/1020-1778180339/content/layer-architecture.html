@@ -1,0 +1,76 @@
+<h2>5-Layer Canvas Architecture</h2>
+<p class="subtitle">每个 Layer 对应一个独立 Canvas，由 UIManager 统一管理</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Canvas Layer Stack (从下到上)</div>
+    <div class="mockup-body">
+      <div style="background:#3a3a5c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center;opacity:0.7">
+        Layer 5: Guide — 新手引导蒙版/高亮 (sort=5000)
+      </div>
+      <div style="background:#4a4a6c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center;opacity:0.75">
+        Layer 4: Top — Loading遮罩 / Toast消息 (sort=4000)
+      </div>
+      <div style="background:#5a5a7c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center;opacity:0.82">
+        Layer 3: Popup — 确认框 / Tips / 弹窗 (sort=3000)
+      </div>
+      <div style="background:#6a6a8c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center;opacity:0.9">
+        Layer 2: Main — 背包 / 技能 / 角色信息 / 设置 (sort=2000)
+      </div>
+      <div style="background:#7a7a9c;color:#fff;padding:8px 12px;margin:4px 0;border-radius:4px;font-size:13px;text-align:center">
+        Layer 1: Base — HUD / 摇杆 / 常驻信息栏 (sort=1000)
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Layer Properties (UIConst.LayerType)</div>
+    <div class="mockup-body">
+      <table style="width:100%;font-size:12px;border-collapse:collapse">
+        <tr style="border-bottom:1px solid #444">
+          <th style="text-align:left;padding:4px">Layer</th>
+          <th style="text-align:left;padding:4px">Canvas Sort</th>
+          <th style="text-align:left;padding:4px">Type</th>
+        </tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Guide</td><td style="padding:4px">5000</td><td style="padding:4px;color:#4ec9b0">Overlay</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Top</td><td style="padding:4px">4000</td><td style="padding:4px;color:#4ec9b0">Overlay</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Popup</td><td style="padding:4px">3000</td><td style="padding:4px;color:#569cd6">Stack</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Main</td><td style="padding:4px">2000</td><td style="padding:4px;color:#569cd6">Stack</td></tr>
+        <tr style="border-bottom:1px solid #333"><td style="padding:4px">Base</td><td style="padding:4px">1000</td><td style="padding:4px;color:#dcdcaa">Always</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Layer Behavior</h3>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Overlay (Guide / Top)</h4>
+      <ul>
+        <li>不受面板栈控制</li>
+        <li>UIManager 按 ID 独立 Show/Hide</li>
+        <li>多个 Overlay 可同时显示</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Stack (Main / Popup)</h4>
+      <ul>
+        <li>走栈式管理，Push/Pop</li>
+        <li>打开新面板会遮挡下层</li>
+        <li>返回操作自动 Pop 栈顶</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">UIManager Stack Logic</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:8px">
+    Push("BagPanel") → Stack: [BagPanel]<br>
+    Push("ItemDetail") → Stack: [BagPanel, ItemDetail]<br>
+    Pop() → Stack: [BagPanel]  (ItemDetail closes with exit anim)<br>
+    <br>
+    <span style="color:#888">Overlay panels (Toast, Loading, Guide) are NOT pushed to stack</span>
+  </div>
+</div>

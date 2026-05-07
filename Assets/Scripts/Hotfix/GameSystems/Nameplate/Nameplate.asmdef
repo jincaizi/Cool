@@ -5,8 +5,7 @@
         "Core",
         "UniTask",
         "DOTween.Modules",
-        "Hotfix.GameSystems.UI",
-        "Hotfix.GameSystems.Skills"
+        "Hotfix.GameSystems.Sys3C.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

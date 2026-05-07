@@ -1,0 +1,69 @@
+<h2>UIPanel Base Class & Lifecycle (Revised)</h2>
+<p class="subtitle">移除 OnPreHide，精简为 5 个钩子</p>
+
+<div class="mockup">
+  <div class="mockup-header">Lifecycle (Show → Hide)</div>
+  <div class="mockup-body" style="font-size:12px;padding:12px;line-height:1.6">
+    <div style="border-left:3px solid #4ec9b0;padding-left:8px;margin:4px 0">
+      <span style="color:#4ec9b0">OnPreShow()</span> <span style="color:#888;font-size:11px">— 构建/刷新数据，绑定 Model 引用</span>
+    </div>
+    <div style="border-left:3px solid #569cd6;padding-left:8px;margin:4px 0">
+      <span style="color:#569cd6">PlayShowAnimation()</span> <span style="color:#888;font-size:11px">— 返回 DOTween Sequence，入场动画</span>
+    </div>
+    <div style="border-left:3px solid #4ec9b0;padding-left:8px;margin:4px 0">
+      <span style="color:#4ec9b0">OnShow()</span> <span style="color:#888;font-size:11px">— 动画完成后，注册事件/启动协程</span>
+    </div>
+    <div style="border-left:3px solid #888;padding-left:8px;margin:8px 0 4px">
+      <span style="color:#888">... panel is visible ...</span>
+    </div>
+    <div style="border-left:3px solid #e5c07b;padding-left:8px;margin:4px 0">
+      <span style="color:#e5c07b">PlayHideAnimation()</span> <span style="color:#888;font-size:11px">— 返回 DOTween Sequence，出场动画</span>
+    </div>
+    <div style="border-left:3px solid #f48771;padding-left:8px;margin:4px 0">
+      <span style="color:#f48771">OnHide()</span> <span style="color:#888;font-size:11px">— 注销事件/清理引用，之后 UIManager 执行显隐</span>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Show Flow</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px">
+    1. Set visibility ON (per panel.Mode)<br>
+    2. <span style="color:#dcdcaa">OnPreShow</span>() → refresh data<br>
+    3. <span style="color:#dcdcaa">PlayShowAnimation</span>() → DOTween sequence<br>
+    4. <span style="color:#888">await sequence</span><br>
+    5. <span style="color:#dcdcaa">OnShow</span>() → register events<br>
+    6. IsVisible = <span style="color:#569cd6">true</span>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top:8px">
+  <div class="mockup-header">Hide Flow</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px">
+    <span style="color:#888">// Caller cleans up before calling UIManager.Hide() if needed</span><br>
+    1. <span style="color:#dcdcaa">OnHide</span>() → unregister events, clear refs<br>
+    2. <span style="color:#dcdcaa">PlayHideAnimation</span>() → DOTween sequence<br>
+    3. <span style="color:#888">await sequence</span><br>
+    4. Set visibility OFF (per panel.Mode)<br>
+    5. IsVisible = <span style="color:#569cd6">false</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>UIPanel Abstract Members</h3>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:12px">
+    <span style="color:#c586c0">public abstract class</span> <span style="color:#4ec9b0">UIPanel</span> : MonoBehaviour<br>
+    {<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public abstract</span> <span style="color:#4ec9b0">LayerType</span> Layer { <span style="color:#c586c0">get</span>; }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// Base/Main/Popup/Top/Guide</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public abstract</span> <span style="color:#4ec9b0">VisibilityMode</span> Mode { <span style="color:#c586c0">get</span>; }&nbsp;&nbsp;<span style="color:#888">// ToggleActive/CanvasSwitch/CanvasGroup</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">public abstract string</span> PanelId { <span style="color:#c586c0">get</span>; }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888">// Unique ID, e.g. "BagPanel"</span><br>
+    <br>
+    &nbsp;&nbsp;<span style="color:#888">// Virtual lifecycle hooks (override as needed)</span><br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual void</span> <span style="color:#dcdcaa">OnPreShow</span>() { }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual</span> Sequence <span style="color:#dcdcaa">PlayShowAnimation</span>() { <span style="color:#c586c0">return null</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual void</span> <span style="color:#dcdcaa">OnShow</span>() { }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual</span> Sequence <span style="color:#dcdcaa">PlayHideAnimation</span>() { <span style="color:#c586c0">return null</span>; }<br>
+    &nbsp;&nbsp;<span style="color:#c586c0">protected virtual void</span> <span style="color:#dcdcaa">OnHide</span>() { }<br>
+    }
+  </div>
+</div>

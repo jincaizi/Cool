@@ -13344,3 +13344,4654 @@ d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone an
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260507_033358
+### Commits
+8b7905c fix: resolve EntityType from LayerMask, populate AttackEffects in config assets, restructure Cone/CircleShape
+21620cd fix: pass PhysicsRegistry.Instance to AttackShapeFactory so shapes use registered entities instead of Physics
+adac336 fix: search both Player and Monster types in shapes, use registered entities for FindNearby, add attack hit/miss feedback
+437f26a feat: add IEntityRegistry/IHiDetector interfaces, PhysicsRegistry, spawn modes, AI variance, collision fix
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+---
+
+## Session End: 20260507_040638
+### Commits
+8c1eb59 fix: pass EntityType via constructor instead of LayerMask lookup; monster targets Player, player targets Monster
+8b7905c fix: resolve EntityType from LayerMask, populate AttackEffects in config assets, restructure Cone/CircleShape
+21620cd fix: pass PhysicsRegistry.Instance to AttackShapeFactory so shapes use registered entities instead of Physics
+adac336 fix: search both Player and Monster types in shapes, use registered entities for FindNearby, add attack hit/miss feedback
+437f26a feat: add IEntityRegistry/IHiDetector interfaces, PhysicsRegistry, spawn modes, AI variance, collision fix
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_040851
+### Commits
+c13b308 feat: implement IDamageable on Sys3CEntry so monsters can damage the player
+8c1eb59 fix: pass EntityType via constructor instead of LayerMask lookup; monster targets Player, player targets Monster
+8b7905c fix: resolve EntityType from LayerMask, populate AttackEffects in config assets, restructure Cone/CircleShape
+21620cd fix: pass PhysicsRegistry.Instance to AttackShapeFactory so shapes use registered entities instead of Physics
+adac336 fix: search both Player and Monster types in shapes, use registered entities for FindNearby, add attack hit/miss feedback
+437f26a feat: add IEntityRegistry/IHiDetector interfaces, PhysicsRegistry, spawn modes, AI variance, collision fix
+c92ddaa fix: add player detection, collision blocking, null guards for prefab components
+d491755 feat: setup DemoDay scene with spawners, create all config assets
+1aa7f00 feat: assemble TurtleShellPBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+43545ea feat: assemble SlimePBR prefab with NavMeshAgent, HitZone, MonsterEntity, AttackHitbox
+bc4efab feat: create TurtleShell Animator Controller
+dca48ab feat: create Slime Animator Controller
+12ef281 feat: integrate CharacterAttackHandler into Sys3CEntry, extend SkillConfig
+df214c9 feat: add MeleeWeapon and CharacterAttackHandler
+34ce1b2 feat: add IWeapon interface and WeaponConfig
+0c9678c refactor: MonsterAI with IAIBehaviour composition, AttackShape integration
+da146da feat: add DefendBehaviour, TauntBehaviour, AlertBehaviour
+0de1234 feat: add IAIBehaviour interface and MonsterAIContext
+87bb9e1 refactor: adapt MonsterEntity to use Combat.HitZone and Combat.AttackHitbox
+3bebded feat: extend MonsterConfig with AttackShape, Defend, Taunt, Alert, Movement sections
+d16b012 feat: add unified HitZone, extend AttackHitbox, remove MonsterHitZone and MonsterAttackHitbox
+751dfa4 feat: add ConeShape, CircleShape and AttackShapeFactory
+27b5272 feat: add IAttackShape interface, AttackShapeConfig and AttackEffectConfig
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_144813
+### Uncommitted Changes
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_145208
+### Uncommitted Changes
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_185338
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_185730
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_185930
+### Commits
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_190614
+### Commits
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_194240
+### Commits
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_202711
+### Commits
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_203325
+### Commits
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_203736
+### Commits
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_204736
+### Commits
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_205212
+### Commits
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_221927
+### Commits
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_222444
+### Commits
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_230145
+### Commits
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_230616
+### Commits
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_231846
+### Commits
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260507_232813
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_002747
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_010652
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_013142
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_013721
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_014134
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_014214
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_015201
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_015540
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_015838
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_020000
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_020218
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_020314
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_020738
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_021050
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_021343
+### Commits
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_021544
+### Commits
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_022004
+### Commits
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_024739
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_024852
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_024925
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_025827
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+fa0cc0c docs: add combo attack window design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_025932
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_030100
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_030211
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_030315
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+c5a43d4 docs: add combo attack window implementation plan
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_030653
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_030737
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_030941
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+0541187 feat: add GetAttackLayerClipLength() to AnimationDriver
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_031119
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_031648
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+7fe5533 feat: replace frame-based combo with time-based window + input buffer; fix OnAnimationCompleted chain reset bug
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_031935
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_032302
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+0284424 fix: skip trigger reset when OnAnimationCompleted was ignored (mid-chain)
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_032529
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+cffed77 cleanup: remove dead combo tracking from AttackStateBehaviour (now in AttackFSM)
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_033133
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_033924
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_034245
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_034557
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_035019
+### Commits
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_035505
+### Commits
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_040050
+### Commits
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Confirm.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Loading.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Tips.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Toast.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Components/Unity-MCP-Server.sln.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Animation/UIAnimation.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/UIDataBinding.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Binding/ViewModelBase.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/RectTransformExtensions.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIConst.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIManager.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Core/UIPool.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Framework/Message/UIMessage.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDPanel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef
+Assets/Scripts/Hotfix/GameSystems/UI/UI.asmdef.meta
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/UIEntry.cs.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_042102
+### Commits
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_042733
+### Commits
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_043210
+### Commits
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_044353
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_044710
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_045546
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_050543
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_050732
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_051021
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_051121
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_051414
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_051543
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_051851
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_052201
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_052437
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_052633
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_052845
+### Commits
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_053216
+### Commits
+ba6ea7f docs: add nameplate and floating text system design
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_054850
+### Commits
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Animators/Slime.controller
+Assets/Monstor/DuoPolyart/Animators/TurtleShell.controller
+Assets/RpgDuo/Animator/RootMotion.controller
+Assets/RpgDuo/Animator/RootMotion.controller.meta
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller
+Assets/RpgDuo/Animator/SwordAndShieldStance.controller.meta
+Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
