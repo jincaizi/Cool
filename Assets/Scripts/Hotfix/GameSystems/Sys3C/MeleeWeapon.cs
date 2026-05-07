@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 
@@ -7,6 +8,7 @@ namespace Hotfix.GameSystems.Sys3C
     {
         [SerializeField] private WeaponConfig _config;
         private float _attackCooldownTimer;
+        private readonly List<IDamageable> _hitBuffer = new List<IDamageable>(16);
 
         public WeaponConfig Config => _config;
         public WeaponType WeaponType => WeaponType.Melee;
@@ -18,9 +20,10 @@ namespace Hotfix.GameSystems.Sys3C
             if (_config == null) return;
 
             var shape = AttackShapeFactory.Create(_config.AttackShape, PhysicsRegistry.Instance, EntityType.Monster);
-            var targets = shape.Resolve(transform.position, forward, targetMask);
+            _hitBuffer.Clear();
+            shape.ResolveNonAlloc(transform.position, forward, targetMask, _hitBuffer);
 
-            if (targets.Count == 0)
+            if (_hitBuffer.Count == 0)
             {
                 Debug.Log("[Attack] Miss - no target in range");
                 return;
@@ -28,7 +31,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             if (_config.Effects == null || _config.Effects.Length == 0) return;
 
-            foreach (var t in targets)
+            foreach (var t in _hitBuffer)
             {
                 foreach (var e in _config.Effects)
                 {

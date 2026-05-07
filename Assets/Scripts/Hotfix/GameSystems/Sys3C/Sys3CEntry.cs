@@ -36,7 +36,7 @@ namespace Hotfix.GameSystems.Sys3C
         private void Start()
         {
             _currentHP = _maxHP;
-            PhysicsRegistry.Instance.Register(transform, EntityType.Player);
+            PhysicsRegistry.Instance.Register(this, EntityType.Player);
 
             // 验证组件引用
             if (CharacterController == null)
@@ -212,7 +212,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void OnDestroy()
         {
-            PhysicsRegistry.Instance.Unregister(transform);
+            PhysicsRegistry.Instance.Unregister(this);
         }
     }
 }

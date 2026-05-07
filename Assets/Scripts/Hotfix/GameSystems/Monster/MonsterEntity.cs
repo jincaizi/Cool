@@ -42,7 +42,7 @@ namespace Hotfix.GameSystems.Monster
             _config = config;
             _spawnPoint = spawnPoint;
 
-            PhysicsRegistry.Instance.Register(transform, EntityType.Monster);
+            PhysicsRegistry.Instance.Register(this, EntityType.Monster);
 
             _stats = new MonsterStats(config);
             _movement = new MonsterMovement(NavAgent, transform, config);
@@ -77,7 +77,7 @@ namespace Hotfix.GameSystems.Monster
 
         private void OnDestroy()
         {
-            PhysicsRegistry.Instance.Unregister(transform);
+            PhysicsRegistry.Instance.Unregister(this);
         }
 
         void IDamageable.TakeDamage(DamageData data, Vector3 hitDirection)
