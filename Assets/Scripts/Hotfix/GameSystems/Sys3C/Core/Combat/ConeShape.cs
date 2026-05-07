@@ -6,14 +6,14 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
     public class ConeShape : IAttackShape
     {
         private readonly float _range;
-        private readonly float _angle;
+        private readonly float _halfAngleCos;
         private readonly IEntityRegistry _registry;
         private readonly EntityType _targetType;
 
         public ConeShape(float range, float angle, IEntityRegistry registry = null, EntityType targetType = EntityType.Monster)
         {
             _range = range;
-            _angle = angle;
+            _halfAngleCos = Mathf.Cos(angle * 0.5f * Mathf.Deg2Rad);
             _registry = registry;
             _targetType = targetType;
         }
@@ -22,48 +22,42 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             Vector3 origin, Vector3 forward, LayerMask targetMask)
         {
             var results = new List<IDamageable>();
-            float halfAngle = _angle * 0.5f;
+            ResolveNonAlloc(origin, forward, targetMask, results);
+            return results;
+        }
+
+        public void ResolveNonAlloc(
+            Vector3 origin, Vector3 forward, LayerMask targetMask,
+            List<IDamageable> results)
+        {
+            results.Clear();
+            var dedup = new HashSet<IDamageable>();
 
             if (_registry != null)
             {
-                var entities = _registry.FindNearby(origin, _range, _targetType);
-                foreach (var entity in entities)
+                var candidates = _registry.FindNearby(origin, _range, _targetType);
+                foreach (var target in candidates)
                 {
-                    Vector3 dir = entity.position - origin;
-                    float dist = dir.magnitude;
-                    if (dist > _range) continue;
-
-                    float angleToTarget = Vector3.Angle(forward, dir.normalized);
-                    if (angleToTarget > halfAngle) continue;
-
-                    var target = entity.GetComponentInParent<IDamageable>();
-                    if (target == null || !target.IsAlive) continue;
-                    if (results.Contains(target)) continue;
+                    if (!dedup.Add(target)) continue;
+                    Vector3 dir = target.Transform.position - origin;
+                    if (Vector3.Dot(forward, dir.normalized) < _halfAngleCos) continue;
                     results.Add(target);
                 }
-                return results;
+                return;
             }
 
-            // Fallback: Physics
-            var buffer = new Collider[32];
+            // Fallback: direct Physics (no registry)
+            var buffer = PhysicsRegistry.SharedBuffer;
             int count = Physics.OverlapSphereNonAlloc(origin, _range, buffer, targetMask);
             for (int i = 0; i < count; i++)
             {
                 var col = buffer[i];
                 Vector3 dir = col.bounds.center - origin;
-                float dist = dir.magnitude;
-                if (dist > _range) continue;
-
-                float angleToTarget = Vector3.Angle(forward, dir.normalized);
-                if (angleToTarget > halfAngle) continue;
-
+                if (Vector3.Dot(forward, dir.normalized) < _halfAngleCos) continue;
                 var target = col.GetComponentInParent<IDamageable>();
-                if (target == null || !target.IsAlive) continue;
-                if (results.Contains(target)) continue;
-
-                results.Add(target);
+                if (target != null && target.IsAlive && dedup.Add(target))
+                    results.Add(target);
             }
-            return results;
         }
     }
 }

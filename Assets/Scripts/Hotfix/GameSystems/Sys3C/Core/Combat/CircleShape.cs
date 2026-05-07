@@ -20,30 +20,33 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             Vector3 origin, Vector3 forward, LayerMask targetMask)
         {
             var results = new List<IDamageable>();
+            ResolveNonAlloc(origin, forward, targetMask, results);
+            return results;
+        }
+
+        public void ResolveNonAlloc(
+            Vector3 origin, Vector3 forward, LayerMask targetMask,
+            List<IDamageable> results)
+        {
+            results.Clear();
 
             if (_registry != null)
             {
-                var entities = _registry.FindNearby(origin, _radius, _targetType);
-                foreach (var entity in entities)
-                {
-                    var target = entity.GetComponentInParent<IDamageable>();
-                    if (target == null || !target.IsAlive) continue;
-                    if (results.Contains(target)) continue;
+                var candidates = _registry.FindNearby(origin, _radius, _targetType);
+                foreach (var target in candidates)
                     results.Add(target);
-                }
-                return results;
+                return;
             }
 
-            var buffer = new Collider[32];
+            // Fallback: direct Physics
+            var buffer = PhysicsRegistry.SharedBuffer;
             int count = Physics.OverlapSphereNonAlloc(origin, _radius, buffer, targetMask);
             for (int i = 0; i < count; i++)
             {
                 var target = buffer[i].GetComponentInParent<IDamageable>();
-                if (target == null || !target.IsAlive) continue;
-                if (results.Contains(target)) continue;
-                results.Add(target);
+                if (target != null && target.IsAlive)
+                    results.Add(target);
             }
-            return results;
         }
     }
 }
