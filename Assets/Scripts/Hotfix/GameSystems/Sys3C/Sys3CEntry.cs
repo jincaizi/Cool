@@ -6,7 +6,8 @@ using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Camera;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
-using Hotfix.GameSystems.Skills.Effect;
+using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Skills.Runtime;
 
 namespace Hotfix.GameSystems.Sys3C
 {
@@ -18,6 +19,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         bool IDamageable.IsAlive => _currentHP > 0;
         Transform IDamageable.Transform => transform;
+
         [Header("References")]
         public UnityEngine.CharacterController CharacterController;
         public Animator Animator;
@@ -25,10 +27,13 @@ namespace Hotfix.GameSystems.Sys3C
         [Header("Settings")]
         public LayerMask GroundLayer;
 
+        [Header("Skills")]
+        [SerializeField] private SkillData[] _characterSkills;
+
         private Hotfix.GameSystems.Sys3C.Character.CharacterController _cc;
         private FSMManager _fsmManager;
-        private SkillRegistry _skillRegistry;
-        private HitManager _hitManager;
+        private SkillCoordinator _skillCoordinator;
+        private SkillDashComponent _dashComponent;
         private InputManager _inputManager;
         private ThirdPersonCameraController _camera;
         private CharacterAttackHandler _attackHandler;
@@ -38,7 +43,6 @@ namespace Hotfix.GameSystems.Sys3C
             _currentHP = _maxHP;
             PhysicsRegistry.Instance.Register(this, EntityType.Player);
 
-            // 验证组件引用
             if (CharacterController == null)
             {
                 Debug.LogError("[Sys3CEntry] CharacterController is null!");
@@ -50,147 +54,140 @@ namespace Hotfix.GameSystems.Sys3C
                 return;
             }
 
-            // 初始化组件
-            _cc = new Hotfix.GameSystems.Sys3C.Character.CharacterController(transform, CharacterController, GroundLayer);
+            _cc = new Hotfix.GameSystems.Sys3C.Character.CharacterController(
+                transform, CharacterController, GroundLayer);
 
-            // 创建 AnimationDriver（引用同一个实例，供 FSMManager 和 StateBehaviour 使用）
-            var animationDriver = new Animation.AnimationDriver(Animator);
+            _fsmManager = new FSMManager(_cc, Animator);
 
-            // 初始化 FSMManager（传入同一个 animationDriver 实例）
-            _fsmManager = new FSMManager(_cc, Animator, animationDriver);
-            _skillRegistry = new SkillRegistry();
-            _hitManager = new HitManager(animationDriver);
+            _dashComponent = new SkillDashComponent(CharacterController, transform);
 
-            // 初始化输入
-            _inputManager = GetComponent<InputManager>();
-            if (_inputManager == null)
+            _skillCoordinator = new SkillCoordinator(null);
+            _skillCoordinator.SetDashComponent(_dashComponent);
+
+            foreach (var skill in _characterSkills)
             {
-                _inputManager = gameObject.AddComponent<InputManager>();
+                if (skill != null)
+                    _skillCoordinator.RegisterSkill(skill);
             }
 
-            // 获取相机
+            _inputManager = GetComponent<InputManager>();
+            if (_inputManager == null)
+                _inputManager = gameObject.AddComponent<InputManager>();
+
             _camera = FindObjectOfType<ThirdPersonCameraController>();
             if (_camera != null && _cc != null)
             {
                 _camera.Target = transform;
-                // 立即同步相机位置，避免初始偏移
                 _camera.SnapToTarget();
             }
 
-            // 初始化攻击处理器
             _attackHandler = GetComponent<CharacterAttackHandler>();
             if (_attackHandler == null)
                 _attackHandler = gameObject.AddComponent<CharacterAttackHandler>();
-
-            _fsmManager.OnAttackActivated += () => _attackHandler?.OnAttackActivated();
-
-            // 注册默认技能
-            RegisterDefaultSkills();
         }
 
         private void Update()
         {
-
-            // 每帧更新输入管理器
             _inputManager.Update();
-
-            // 处理输入
             HandleInput();
 
-            // 读取输入获取移动命令
             Vector3 cameraForward = _camera != null ? _camera.transform.forward : Vector3.forward;
             var command = _inputManager.GetMoveCommand(cameraForward);
 
-            // 更新各系统
             _cc.Update(command);
             _fsmManager.Update(Time.deltaTime);
-            _skillRegistry.Update(Time.deltaTime);
+            _skillCoordinator.Update(Time.deltaTime);
+            _dashComponent.Update();
 
-            // 更新相机
             if (_camera != null)
-            {
                 _camera.Update();
-            }
         }
 
         private void HandleInput()
         {
-            // 跳跃
             if (_inputManager.IsJumpPressed())
             {
                 _cc.RequestJump();
             }
 
-            // 攻击
             if (_inputManager.IsAttackPressed())
             {
-                _fsmManager.RequestNormalAttack();
+                int attackId = GetBasicAttackSkillId();
+                if (attackId > 0)
+                {
+                    var input = SkillInput.BasicAttack(attackId, transform.forward);
+                    _skillCoordinator.HandleBasicAttackInput(input);
+                    _fsmManager.Coordinator.SetAttackLayerActive();
+                }
             }
 
-            // 技能Q（普通攻击升级）
             if (_inputManager.IsSkill2Pressed())
             {
-                TryUseSkill(SkillDefs.SkillQ);
+                int skillQId = GetSkillQId();
+                if (skillQId > 0)
+                {
+                    var input = SkillInput.SkillToPosition(skillQId, transform.position + transform.forward * 5f);
+                    _skillCoordinator.HandleInput(input);
+                    _fsmManager.Coordinator.SetAttackLayerActive();
+                    _cc.LockRotation = true;
+                    _cc.LockMovement = true;
+                }
             }
 
-            // 技能R（大招）
             if (_inputManager.IsSkill3Pressed())
             {
-                TryUseSkill(SkillDefs.SkillR);
+                int skillRId = GetSkillRId();
+                if (skillRId > 0)
+                {
+                    var input = SkillInput.SkillToPosition(skillRId, transform.position + transform.forward * 5f);
+                    _skillCoordinator.HandleInput(input);
+                    _fsmManager.Coordinator.SetAttackLayerActive();
+                    _cc.LockRotation = true;
+                }
             }
 
-            // 技能R松开检测 - 取消持续技能
             if (_inputManager.IsSkill3Released())
             {
-                if (_fsmManager.IsInSkillRState)
+                if (_skillCoordinator.CurrentSkill != null &&
+                    _skillCoordinator.CurrentSkill.CurrentSubState == Skills.Definition.SkillSubState.Charging)
                 {
-                    _fsmManager.CancelSkillR();
+                    _skillCoordinator.CurrentSkill.ReleaseCharge();
                 }
             }
         }
 
-        private void TryUseSkill(string skillId)
+        private int GetBasicAttackSkillId()
         {
-            if (_skillRegistry.CanUse(skillId, _cc.IsGrounded))
+            foreach (var skill in _characterSkills)
             {
-                _skillRegistry.Use(skillId);
-
-                switch (skillId)
-                {
-                    case SkillDefs.SkillQ:
-                        _fsmManager.RequestSkillQ();
-                        break;
-                    case SkillDefs.SkillR:
-                        _fsmManager.RequestSkillR();
-                        break;
-                }
+                if (skill != null && skill.SkillType == Skills.Definition.SkillType.BasicAttack)
+                    return skill.SkillId;
             }
+            return 0;
         }
 
-        private void RegisterDefaultSkills()
+        private int GetSkillQId()
         {
-            // 从 Resources 加载技能配置
-            var configs = Resources.LoadAll<Skill.SkillConfig>("Skills");
-            _skillRegistry.RegisterRange(configs);
-
-            // 设置技能R的最大持续时间
-            foreach (var config in configs)
+            foreach (var skill in _characterSkills)
             {
-                if (config.SkillId == SkillDefs.SkillR)
+                if (skill != null && skill.SkillType == Skills.Definition.SkillType.Special)
+                    return skill.SkillId;
+            }
+            return 0;
+        }
+
+        private int GetSkillRId()
+        {
+            bool foundFirst = false;
+            foreach (var skill in _characterSkills)
+            {
+                if (skill != null && skill.SkillType == Skills.Definition.SkillType.Special)
                 {
-                    _fsmManager.SetSkillRMaxDuration(config.MaxDuration);
-                    break;
+                    if (!foundFirst) { foundFirst = true; continue; }
+                    return skill.SkillId;
                 }
             }
-        }
-
-        private void HandleAnimationCallback(string stateName)
-        {
-        }
-
-        private void HandleHitAnimationCallback(string stateName)
-        {
-            _hitManager.HandleHitCompleted(stateName);
+            return 0;
         }
 
         void IDamageable.TakeDamage(DamageData data, Vector3 hitDirection)
