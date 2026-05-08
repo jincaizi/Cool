@@ -133,13 +133,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public float GetChargeProgress()
         {
             if (CurrentSubState != SkillSubState.Charging)
-            {
                 return CurrentSubState == SkillSubState.Completed ? 1f : 0f;
-            }
 
-            float chargeTime = _stateMachine.ElapsedTime;
-            float maxTime = _skillData.MaxChargeTime;
-            return Mathf.Clamp01(chargeTime / maxTime);
+            var charged = _skillData as ChargedSkillData;
+            if (charged == null) return 1f;
+            return Mathf.Clamp01(_stateMachine.ElapsedTime / charged.MaxChargeTime);
         }
 
         /// <summary>
@@ -148,12 +146,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public float GetChannelProgress()
         {
             if (CurrentSubState != SkillSubState.Channeling)
-            {
                 return CurrentSubState == SkillSubState.Completed ? 1f : 0f;
-            }
 
-            float elapsed = _stateMachine.ElapsedTime - _skillData.CastTime;
-            return Mathf.Clamp01(elapsed / _skillData.ChannelDuration);
+            var channeled = _skillData as ChanneledSkillData;
+            if (channeled == null) return 1f;
+            float elapsed = _stateMachine.ElapsedTime - channeled.CastTime;
+            return Mathf.Clamp01(elapsed / channeled.ChannelDuration);
         }
 
         /// <summary>
@@ -162,11 +160,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public float GetCastProgress()
         {
             if (CurrentSubState != SkillSubState.Casting)
-            {
                 return CurrentSubState == SkillSubState.Completed ? 1f : 0f;
-            }
 
-            return Mathf.Clamp01(_stateMachine.ElapsedTime / _skillData.CastTime);
+            var channeled = _skillData as ChanneledSkillData;
+            float castTime = channeled?.CastTime ?? 0f;
+            if (castTime <= 0) return 1f;
+            return Mathf.Clamp01(_stateMachine.ElapsedTime / castTime);
         }
 
         private void OnHitboxTriggered(int frameIndex)
@@ -217,144 +216,121 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
         }
 
+        private ShapeBlock GetShape()
+        {
+            return (_skillData as ComboSkillData)?.Shape
+                ?? (_skillData as InstantSkillData)?.Shape
+                ?? (_skillData as ChargedSkillData)?.Shape
+                ?? (_skillData as ChanneledSkillData)?.Shape;
+        }
+
         private List<IEffectTarget> DetectTargets()
         {
             var targets = new List<IEffectTarget>();
+            ShapeBlock shape = GetShape();
+            if (shape == null) return targets;
 
-            if (_skillData.AreaRadius > 0)
-            {
-                // AOE检测
-                DetectAOETargets(targets);
-            }
+            if (shape.AreaRadius > 0)
+                DetectAOETargets(targets, shape);
             else
-            {
-                // 单体检测
-                DetectSingleTarget(targets);
-            }
-
+                DetectSingleTarget(targets, shape);
             return targets;
         }
 
-        private void DetectAOETargets(List<IEffectTarget> targets)
+        private void DetectSingleTarget(List<IEffectTarget> targets, ShapeBlock shape)
         {
-            Vector3 center = _targetPosition;
-            if (_targetCharacter != null)
+            if (_targetCharacter != null && _targetCharacter != _owner)
             {
-                center = _targetCharacter.transform.position;
-            }
-
-            // 扇形检测
-            if (_skillData.Angle < 360f)
-            {
-                DetectConeTargets(center, targets);
+                float distance = Vector3.Distance(_owner.transform.position, _targetCharacter.transform.position);
+                if (distance <= shape.Range)
+                    targets.Add(_targetCharacter);
             }
             else
             {
-                // 圆形检测
-                var colliders = Physics.OverlapSphere(center, _skillData.AreaRadius, _skillData.TargetMask);
-                foreach (var collider in colliders)
+                Ray ray = new Ray(_owner.transform.position, _owner.transform.forward);
+                if (Physics.Raycast(ray, out var hit, shape.Range, shape.TargetMask))
                 {
-                    if (collider.TryGetComponent(out IEffectTarget target) && target != _owner)
-                    {
+                    if (hit.collider.TryGetComponent(out IEffectTarget target) && target != _owner)
                         targets.Add(target);
-                    }
                 }
             }
         }
 
-        private void DetectConeTargets(Vector3 center, List<IEffectTarget> targets)
+        private void DetectAOETargets(List<IEffectTarget> targets, ShapeBlock shape)
+        {
+            Vector3 center = _targetCharacter != null
+                ? _targetCharacter.transform.position : _targetPosition;
+
+            if (shape.TargetType == TargetType.AOE_Cone)
+                DetectConeTargets(center, targets, shape);
+            else
+            {
+                var colliders = Physics.OverlapSphere(center, shape.AreaRadius, shape.TargetMask);
+                foreach (var collider in colliders)
+                {
+                    if (collider.TryGetComponent(out IEffectTarget target) && target != _owner)
+                        targets.Add(target);
+                }
+            }
+        }
+
+        private void DetectConeTargets(Vector3 center, List<IEffectTarget> targets, ShapeBlock shape)
         {
             Vector3 ownerPos = _owner.transform.position;
             Vector3 directionToCenter = (center - ownerPos).normalized;
-            float halfAngle = _skillData.Angle / 2f;
-
-            var colliders = Physics.OverlapSphere(ownerPos, _skillData.Range, _skillData.TargetMask);
+            float halfAngle = shape.Angle / 2f;
+            var colliders = Physics.OverlapSphere(ownerPos, shape.Range, shape.TargetMask);
             foreach (var collider in colliders)
             {
                 if (collider.TryGetComponent(out IEffectTarget target) && target != _owner)
                 {
                     Vector3 dirToTarget = (target.transform.position - ownerPos).normalized;
                     float angle = Vector3.Angle(directionToCenter, dirToTarget);
-
                     if (angle <= halfAngle)
-                    {
                         targets.Add(target);
-                    }
-                }
-            }
-        }
-
-        private void DetectSingleTarget(List<IEffectTarget> targets)
-        {
-            if (_targetCharacter != null && _targetCharacter != _owner)
-            {
-                // 检查距离
-                float distance = Vector3.Distance(_owner.transform.position, _targetCharacter.transform.position);
-                if (distance <= _skillData.Range)
-                {
-                    targets.Add(_targetCharacter);
-                }
-            }
-            else
-            {
-                // 朝前方射线检测
-                Ray ray = new Ray(_owner.transform.position, _owner.transform.forward);
-                if (Physics.Raycast(ray, out var hit, _skillData.Range, _skillData.TargetMask))
-                {
-                    if (hit.collider.TryGetComponent(out IEffectTarget target) && target != _owner)
-                    {
-                        targets.Add(target);
-                    }
                 }
             }
         }
 
         private void ApplyDamage(IEffectTarget target, int frameIndex)
         {
-            if (_skillData.Damage == null) return;
+            var damageBlock = _skillData.Damage;
+            if (damageBlock == null) return;
 
-            // 计算伤害
-            float damage = _skillData.Damage.CalculateFinalDamage(_owner.Stats);
+            float damage = damageBlock.CalculateFinalDamage(_owner.Stats);
 
-            // 蓄力缩放
             if (CurrentSubState == SkillSubState.Charging || CurrentSubState == SkillSubState.Execution)
-            {
-                float chargeScale = 1f + GetChargeProgress() * 0.5f; // 蓄力增加50%伤害
-                damage *= chargeScale;
-            }
+                damage *= 1f + GetChargeProgress() * 0.5f;
 
-            // 应用伤害 - 通过接口或直接调用目标方法
-            // 这里需要伤害系统支持，暂时通过接口
-            target.Heal(-damage); // 简化：直接调用Heal作为伤害
+            target.Heal(-damage);
         }
 
         private void ApplyEffects(IEffectTarget target)
         {
-            if (_skillData.ApplyEffects?.Effects == null) return;
+            EffectBlock effect = (_skillData as InstantSkillData)?.Effect
+                ?? (_skillData as ChargedSkillData)?.Effect
+                ?? (_skillData as ChanneledSkillData)?.Effect
+                ?? (_skillData as ProjectileSkillData)?.Effect;
 
-            foreach (var effectData in _skillData.ApplyEffects.Effects)
-            {
-                if (effectData != null)
-                {
-                    effectData.Apply(_owner, target);
-                }
-            }
+            if (effect?.ApplyEffects == null) return;
+            foreach (var effectData in effect.ApplyEffects)
+                effectData?.Apply(_owner, target);
         }
 
         private void PlayHitEffects()
         {
-            // 播放命中特效
-            if (_skillData.ReleaseVFX != null)
-            {
-                // 实例化特效
-                UnityEngine.Object.Instantiate(_skillData.ReleaseVFX, _targetPosition, Quaternion.identity);
-            }
+            PresentationBlock pres = GetPresentation();
+            if (pres?.ReleaseVFX != null)
+                Object.Instantiate(pres.ReleaseVFX, _targetPosition, Quaternion.identity);
+        }
 
-            // 播放命中音效
-            if (_skillData.CastSFX != null)
-            {
-                // AudioSource.PlayClipAtPoint(_skillData.CastSFX, _targetPosition);
-            }
+        private PresentationBlock GetPresentation()
+        {
+            return (_skillData as ComboSkillData)?.Presentation
+                ?? (_skillData as InstantSkillData)?.Presentation
+                ?? (_skillData as ChargedSkillData)?.Presentation
+                ?? (_skillData as ChanneledSkillData)?.Presentation
+                ?? (_skillData as ProjectileSkillData)?.Presentation;
         }
     }
 }
