@@ -2,80 +2,85 @@ using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Data
 {
-    /// <summary>
-    /// 普攻技能数据 - 包含连段系统配置
-    /// </summary>
     [CreateAssetMenu(fileName = "BasicAttack", menuName = "Game/Skills/Basic Attack")]
     public class BasicAttackData : SkillData
     {
         [Header("=== Combo System ===")]
-        [SerializeField] private int _comboIndex;            // 第几段普攻
+        [Tooltip("Which hit in the combo chain this represents (1 = first hit, 2 = second, etc.)")]
+        [SerializeField] private int _comboIndex;
         public int ComboIndex => _comboIndex;
 
-        [SerializeField] private float _comboWindow = 0.5f;         // 连段窗口时间
+        [Tooltip("Time window in seconds after this hit lands during which the next combo input is accepted")]
+        [SerializeField] private float _comboWindow = 0.5f;
         public float ComboWindow => _comboWindow;
 
-        [SerializeField] private float _comboResetTime = 3f;        // 连段重置时间
+        [Tooltip("Time without further input before the combo chain resets to the first hit")]
+        [SerializeField] private float _comboResetTime = 3f;
         public float ComboResetTime => _comboResetTime;
 
-        [SerializeField] private BasicAttackData _nextCombo;        // 下一段（null表示最后一击）
+        [Tooltip("Reference to the next BasicAttackData in the combo chain (null = this is the finisher)")]
+        [SerializeField] private BasicAttackData _nextCombo;
         public BasicAttackData NextCombo => _nextCombo;
 
         [Header("=== Hit Properties ===")]
-        [SerializeField] private float _hitStopDuration;             // 命中顿帧
+        [Tooltip("Hit-stop duration in seconds (brief freeze-frame on impact for game feel)")]
+        [SerializeField] private float _hitStopDuration;
         public float HitStopDuration => _hitStopDuration;
 
-        [SerializeField] private float _impactForce;                // 冲击力度
+        [Tooltip("Knockback force applied to the target on hit")]
+        [SerializeField] private float _impactForce;
         public float ImpactForce => _impactForce;
 
-        [SerializeField] private Vector3 _impactDirection;         // 冲击方向偏移
+        [Tooltip("Knockback direction offset relative to attacker's forward")]
+        [SerializeField] private Vector3 _impactDirection;
         public Vector3 ImpactDirection => _impactDirection;
 
         [Header("=== Animation Override ===")]
-        [SerializeField] private AnimationClip _overrideClip;      // 覆盖默认动画
+        [Tooltip("Optional animation clip to override the base skill's animation. Used by AnimatorOverrideController.")]
+        [SerializeField] private AnimationClip _overrideClip;
         public AnimationClip OverrideClip => _overrideClip;
 
         [Header("=== Movement ===")]
-        [SerializeField] private bool _enableMovement = true;      // 普攻期间允许移动
+        [Tooltip("Can the character move during this attack?")]
+        [SerializeField] private bool _enableMovement = true;
         public bool EnableMovement => _enableMovement;
 
-        [SerializeField] private float _movementSpeed;              // 攻击时移动速度
+        [Tooltip("Movement speed multiplier during this attack (1 = normal speed)")]
+        [SerializeField] private float _movementSpeed;
         public float MovementSpeed => _movementSpeed;
 
         [Header("=== Attack Properties ===")]
+        [Tooltip("Hit type for damage calculation and visual feedback (slash/pierce/blunt/kick)")]
         [SerializeField] private AttackHitType _hitType = AttackHitType.Slash;
         public AttackHitType HitType => _hitType;
 
-        [SerializeField] private bool _canBeParried = true;        // 可被招架
+        [Tooltip("Can this attack be parried by the target?")]
+        [SerializeField] private bool _canBeParried = true;
         public bool CanBeParried => _canBeParried;
 
         [Header("=== Recovery Cancel ===")]
-        [SerializeField] private bool _allowRecoveryCancel = true;  // 允许收招取消
+        [Tooltip("Can this attack's recovery frames be cancelled into the next action?")]
+        [SerializeField] private bool _allowRecoveryCancel = true;
         public bool AllowRecoveryCancel => _allowRecoveryCancel;
 
-        [SerializeField] private float _cancelableWindowStart;      // 可取消窗口开始
+        [Tooltip("Normalized time (0-1) when the cancel window opens during recovery")]
+        [SerializeField] private float _cancelableWindowStart;
         public float CancelableWindowStart => _cancelableWindowStart;
 
-        [SerializeField] private float _cancelableWindowEnd;       // 可取消窗口结束
+        [Tooltip("Normalized time (0-1) when the cancel window closes during recovery")]
+        [SerializeField] private float _cancelableWindowEnd;
         public float CancelableWindowEnd => _cancelableWindowEnd;
 
         private void ValidateComboIndex()
         {
-            // 强制设置为普攻类型
             _skillType = Definition.SkillType.BasicAttack;
         }
 
-        /// <summary>
-        /// 获取当前攻击段位的动画
-        /// </summary>
         public AnimationClip GetAnimationClip()
         {
             return _overrideClip ?? base.GetMainAnimationClip();
         }
 
-        /// <summary>
-        /// 检查是否在可取消窗口内
-        /// </summary>
         public bool IsInCancelableWindow(float elapsedTime, float totalDuration)
         {
             if (!_allowRecoveryCancel) return false;
@@ -84,23 +89,21 @@ namespace Hotfix.GameSystems.Skills.Data
             return normalizedTime >= _cancelableWindowStart && normalizedTime <= _cancelableWindowEnd;
         }
 
-        /// <summary>
-        /// 获取下一段普攻的ID（如果没有返回0）
-        /// </summary>
         public int GetNextComboId()
         {
             return _nextCombo?.SkillId ?? 0;
         }
     }
 
-    /// <summary>
-    /// 普攻打击类型
-    /// </summary>
     public enum AttackHitType
     {
-        Slash,     // 劈砍
-        Pierce,    // 穿刺
-        Blunt,     // 钝击
-        Kick       // 踢击
+        [Tooltip("Slashing / cutting damage")]
+        Slash,
+        [Tooltip("Piercing / thrusting damage")]
+        Pierce,
+        [Tooltip("Blunt / crushing damage")]
+        Blunt,
+        [Tooltip("Unarmed kick damage")]
+        Kick
     }
 }

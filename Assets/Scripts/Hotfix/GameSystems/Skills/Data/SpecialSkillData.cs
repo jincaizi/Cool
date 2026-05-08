@@ -2,114 +2,123 @@ using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Data
 {
-    /// <summary>
-    /// 特殊技能数据 - 包含引导、蓄力、AOE等高级配置
-    /// </summary>
     [CreateAssetMenu(fileName = "SpecialSkill", menuName = "Game/Skills/Special Skill")]
     public class SpecialSkillData : SkillData
     {
         [Header("=== Charge Skill Properties ===")]
+        [Tooltip("Damage multiplier curve over charge time (x=charge progress 0-1, y=damage multiplier)")]
         [SerializeField] private AnimationCurve _chargeDamageCurve = AnimationCurve.Linear(0f, 1f, 1f, 2f);
         public AnimationCurve ChargeDamageCurve => _chargeDamageCurve;
 
+        [Tooltip("AOE radius multiplier curve over charge time (x=charge progress 0-1, y=radius multiplier)")]
         [SerializeField] private AnimationCurve _chargeAreaCurve = AnimationCurve.Linear(0f, 1f, 1f, 1.5f);
         public AnimationCurve ChargeAreaCurve => _chargeAreaCurve;
 
-        [SerializeField] private bool _holdToCharge = true;              // 按住继续蓄力
+        [Tooltip("Hold button to continue charging? (false = press once, auto-charge to max)")]
+        [SerializeField] private bool _holdToCharge = true;
         public bool HoldToCharge => _holdToCharge;
 
-        [SerializeField] private bool _releaseToFire = true;             // 松开发射
+        [Tooltip("Release button to fire? (false = auto-fire at max charge)")]
+        [SerializeField] private bool _releaseToFire = true;
         public bool ReleaseToFire => _releaseToFire;
 
         [Header("=== Channel Properties ===")]
-        [SerializeField] private float _tickInterval = 1f;               // 引导伤害间隔
+        [Tooltip("Interval in seconds between damage ticks during channel")]
+        [SerializeField] private float _tickInterval = 1f;
         public float TickInterval => _tickInterval;
 
-        [SerializeField] [Range(0f, 1f)] private float _tickDamagePercent = 0.2f;  // 每跳伤害百分比
+        [Tooltip("Percentage of base damage dealt per tick (0-1)")]
+        [SerializeField] [Range(0f, 1f)] private float _tickDamagePercent = 0.2f;
         public float TickDamagePercent => _tickDamagePercent;
 
-        [SerializeField] private bool _channelFollowsTarget;           // 引导跟随目标
+        [Tooltip("Should the channeling effect follow the target as it moves?")]
+        [SerializeField] private bool _channelFollowsTarget;
         public bool ChannelFollowsTarget => _channelFollowsTarget;
 
-        [SerializeField] private bool _breakOnTargetMove;               // 目标移动时中断
+        [Tooltip("Break the channel if the target moves out of range?")]
+        [SerializeField] private bool _breakOnTargetMove;
         public bool BreakOnTargetMove => _breakOnTargetMove;
 
         [Header("=== Casting Bar ===")]
+        [Tooltip("Show a casting bar on the HUD for this skill?")]
         [SerializeField] private bool _showCastingBar = true;
         public bool ShowCastingBar => _showCastingBar;
 
-        [SerializeField] private bool _canMoveWhileCastingBar = true;   // 读条时可移动
+        [Tooltip("Can the character move while the casting bar is visible?")]
+        [SerializeField] private bool _canMoveWhileCastingBar = true;
         public bool CanMoveWhileCastingBar => _canMoveWhileCastingBar;
 
+        [Tooltip("Color of the casting bar on the HUD")]
         [SerializeField] private Color _castingBarColor = Color.blue;
         public Color CastingBarColor => _castingBarColor;
 
         [Header("=== AOE Properties ===")]
+        [Tooltip("Is this an area-of-effect skill?")]
         [SerializeField] private bool _isAOE;
         public bool IsAOE => _isAOE;
 
+        [Tooltip("AOE origin: Center (around target), Origin (around caster), Direction (forward cone)")]
         [SerializeField] private AOEDamageType _aoeDamageType = AOEDamageType.Center;
         public AOEDamageType AOEDamageType => _aoeDamageType;
 
-        [SerializeField] private bool _damageFalloff = true;          // 伤害衰减
+        [Tooltip("Does damage decrease with distance from center?")]
+        [SerializeField] private bool _damageFalloff = true;
         public bool DamageFalloff => _damageFalloff;
 
+        [Tooltip("Damage falloff curve (x=distance from center ratio, y=damage multiplier)")]
         [SerializeField] private AnimationCurve _damageFalloffCurve = AnimationCurve.Linear(0f, 1f, 1f, 0.5f);
         public AnimationCurve DamageFalloffCurve => _damageFalloffCurve;
 
         [Header("=== Projectile ===")]
+        [Tooltip("Prefab for the projectile spawned on cast (null = no projectile, melee/hitscan)")]
         [SerializeField] private GameObject _projectilePrefab;
         public GameObject ProjectilePrefab => _projectilePrefab;
 
+        [Tooltip("Projectile travel speed in world units per second")]
         [SerializeField] private float _projectileSpeed = 20f;
         public float ProjectileSpeed => _projectileSpeed;
 
-        [SerializeField] private bool _projectilePierce;                 // 穿透
+        [Tooltip("Does the projectile pierce through targets?")]
+        [SerializeField] private bool _projectilePierce;
         public bool ProjectilePierce => _projectilePierce;
 
+        [Tooltip("Maximum number of targets the projectile can pierce through")]
         [SerializeField] private int _maxPierceTargets = 3;
         public int MaxPierceTargets => _maxPierceTargets;
 
-        [SerializeField] private bool _homing;                           // 制导
+        [Tooltip("Does the projectile home in on the target?")]
+        [SerializeField] private bool _homing;
         public bool Homing => _homing;
 
         [Header("=== Multi-Hit ===")]
-        [SerializeField] private int _maxHitTargets = 1;                // 最大击中目标数
+        [Tooltip("Maximum number of targets this skill can hit in one cast")]
+        [SerializeField] private int _maxHitTargets = 1;
         public int MaxHitTargets => _maxHitTargets;
 
+        [Tooltip("Target priority when multiple targets are in range")]
         [SerializeField] private HitPriority _hitPriority = HitPriority.Nearest;
         public HitPriority HitPriority => _hitPriority;
 
         private void ValidateSkillType()
         {
-            // 特殊技能类型
             if (_skillType == Definition.SkillType.BasicAttack)
             {
                 _skillType = Definition.SkillType.Special;
             }
         }
 
-        /// <summary>
-        /// 根据蓄力时间获取伤害缩放
-        /// </summary>
         public float GetDamageScaleForCharge(float chargeProgress)
         {
             if (chargeProgress <= 0) return 1f;
             return _chargeDamageCurve?.Evaluate(chargeProgress) ?? (1f + chargeProgress);
         }
 
-        /// <summary>
-        /// 根据蓄力时间获取范围缩放
-        /// </summary>
         public float GetAreaScaleForCharge(float chargeProgress)
         {
             if (chargeProgress <= 0) return 1f;
             return _chargeAreaCurve?.Evaluate(chargeProgress) ?? 1f;
         }
 
-        /// <summary>
-        /// 获取引导总tick数
-        /// </summary>
         public int GetTotalChannelTicks()
         {
             if (ChannelDuration <= 0 || TickInterval <= 0) return 0;
@@ -117,25 +126,27 @@ namespace Hotfix.GameSystems.Skills.Data
         }
     }
 
-    /// <summary>
-    /// AOE伤害类型
-    /// </summary>
     public enum AOEDamageType
     {
-        Center,         // 以目标为中心
-        Origin,         // 以施法者为中心
-        Direction       // 以施法者向前方向
+        [Tooltip("AOE centered on the target's position")]
+        Center,
+        [Tooltip("AOE centered on the caster's position")]
+        Origin,
+        [Tooltip("AOE in a cone / line forward from the caster")]
+        Direction
     }
 
-    /// <summary>
-    /// 命中优先级
-    /// </summary>
     public enum HitPriority
     {
-        Nearest,        // 最近
-        Furthest,       // 最远
-        LowestHP,       // 血量最低
-        HighestHP,      // 血量最高
-        HighestThreat   // 仇恨最高（坦克游戏）
+        [Tooltip("Prioritize the closest target")]
+        Nearest,
+        [Tooltip("Prioritize the farthest target")]
+        Furthest,
+        [Tooltip("Prioritize the target with the lowest HP")]
+        LowestHP,
+        [Tooltip("Prioritize the target with the highest HP")]
+        HighestHP,
+        [Tooltip("Prioritize the target with the highest threat / aggro")]
+        HighestThreat
     }
 }
