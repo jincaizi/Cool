@@ -27,9 +27,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         // 普攻连段追踪
         private int _currentComboIndex;
-        private float _lastAttackTime;
         private float _comboWindowEndTime;
-        private const float COMBO_WINDOW = 0.5f;  // 连段窗口时间
 
         // 事件
         public event Action<SkillData> OnSkillActivated;
@@ -168,7 +166,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             // 普攻连段逻辑
             if (_currentSkill != null && _currentSkill.IsActive &&
-                _currentSkill.Data.SkillType == SkillType.BasicAttack)
+                _currentSkill.Data is ComboSkillData currentCombo)
             {
                 // 检查连段窗口
                 if (UnityEngine.Time.time <= _comboWindowEndTime)
@@ -255,39 +253,31 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private bool CanChainSkill(int nextSkillId)
         {
             if (_currentSkill == null || !_currentSkill.IsActive)
-            {
                 return true;
-            }
 
             var nextData = GetSkillData(nextSkillId);
             if (nextData == null) return false;
 
             var currentState = _currentSkill.CurrentSubState;
-
-            // 某些状态下不允许链接
             switch (currentState)
             {
                 case SkillSubState.Execution:
                 case SkillSubState.HitConfirm:
-                    return false;  // 判定帧期间不允许取消
-
+                    return false;
                 case SkillSubState.Cancelled:
                 case SkillSubState.Completed:
-                    return true;  // 已结束，允许
+                    return true;
             }
 
-            // 检查取消窗口
             if (currentState == SkillSubState.Recovery)
-            {
                 return nextData.CanCancelIntoBasicAttack || nextData.CanCancelIntoOtherSkill;
-            }
 
-            // 检查特定状态允许取消
             return currentState switch
             {
-                SkillSubState.Casting => nextData.ReleaseType == ReleaseType.Instant,
-                SkillSubState.Channeling => nextData.ReleaseType == ReleaseType.Instant && nextData.CanMoveWhileChanneling,
-                SkillSubState.Charging => false,  // 蓄力中不允许取消
+                SkillSubState.Casting => nextData is InstantSkillData,
+                SkillSubState.Channeling => nextData is InstantSkillData
+                    && (_currentSkill.Data is ChanneledSkillData ch && ch.CanMoveWhileChanneling),
+                SkillSubState.Charging => false,
                 _ => false
             };
         }
@@ -298,19 +288,15 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private bool TryChainCombo(int nextSkillId)
         {
             if (_currentSkill == null) return false;
+            var currentCombo = _currentSkill.Data as ComboSkillData;
+            if (currentCombo == null) return false;
 
-            var currentData = _currentSkill.Data;
-            if (currentData is BasicAttackData basicAttack)
+            var nextCombo = GetSkillData(nextSkillId) as ComboSkillData;
+            if (nextCombo != null && nextCombo.ComboIndex == currentCombo.ComboIndex + 1)
             {
-                var nextAttack = GetSkillData(nextSkillId) as BasicAttackData;
-                if (nextAttack != null && nextAttack.ComboIndex == basicAttack.ComboIndex + 1)
-                {
-                    // 打断当前普攻，切换到下一段
-                    TryCancelCurrentSkill(InterruptionSource.BasicAttack);
-                    return TryActivateSkill(nextSkillId);
-                }
+                TryCancelCurrentSkill(InterruptionSource.BasicAttack);
+                return TryActivateSkill(nextSkillId);
             }
-
             return false;
         }
 
@@ -419,17 +405,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnExecutorCompleted(int skillId)
         {
-            // 更新连段信息
             if (_activeExecutors.TryGetValue(skillId, out var executor))
             {
-                if (executor.Data.SkillType == SkillType.BasicAttack)
+                if (executor.Data is ComboSkillData combo)
                 {
                     _currentComboIndex++;
-                    _lastAttackTime = UnityEngine.Time.time;
-                    _comboWindowEndTime = _lastAttackTime + COMBO_WINDOW;
+                    _comboWindowEndTime = UnityEngine.Time.time + combo.ComboWindow;
                 }
             }
-
             CleanupExecutor(skillId);
         }
 
@@ -486,11 +469,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public bool IsInSafeCastState()
         {
-            return CurrentSubState switch
+            return _currentSkill?.CurrentSubState switch
             {
-                SkillSubState.Casting => _currentSkill?.Data.CanMoveWhileCasting ?? false,
-                SkillSubState.Channeling => _currentSkill?.Data.CanMoveWhileChanneling ?? false,
-                SkillSubState.Charging => true,  // 蓄力时可以移动瞄准
+                SkillSubState.Casting => true,
+                SkillSubState.Channeling =>
+                    (_currentSkill.Data as ChanneledSkillData)?.CanMoveWhileChanneling ?? false,
+                SkillSubState.Charging => true,
                 _ => false
             };
         }
@@ -501,11 +485,15 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public bool CanMove()
         {
             if (_currentSkill == null || !_currentSkill.IsActive)
-            {
                 return true;
-            }
 
-            return _currentSkill.Data.CanMoveInState(CurrentSubState);
+            return _currentSkill.CurrentSubState switch
+            {
+                SkillSubState.Casting => true,
+                SkillSubState.Channeling =>
+                    (_currentSkill.Data as ChanneledSkillData)?.CanMoveWhileChanneling ?? true,
+                _ => true
+            };
         }
 
         /// <summary>
@@ -514,14 +502,15 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public bool CanRotate()
         {
             if (_currentSkill == null || !_currentSkill.IsActive)
-            {
                 return true;
-            }
 
-            // 读条期间可以转向
-            return CurrentSubState == SkillSubState.Casting ||
-                   CurrentSubState == SkillSubState.Charging ||
-                   _currentSkill.Data.CanRotateWhileCasting;
+            return _currentSkill.CurrentSubState switch
+            {
+                SkillSubState.Casting => true,
+                SkillSubState.Charging =>
+                    (_currentSkill.Data as ChargedSkillData)?.CanRotateWhileCharging ?? true,
+                _ => false
+            };
         }
     }
 }
