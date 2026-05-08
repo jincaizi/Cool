@@ -68,7 +68,7 @@ namespace Hotfix.GameSystems.Sys3C
             _skillCoordinator.SetDashComponent(_dashComponent);
             _skillCoordinator.OnSkillActivated += HandleSkillActivated;
 
-            // Register skills: inspector-assigned assets first, runtime defaults as fallback
+            // Register skills from Inspector-assigned SkillData assets
             int skillCount = 0;
             foreach (var skill in _characterSkills)
             {
@@ -81,29 +81,13 @@ namespace Hotfix.GameSystems.Sys3C
 
             if (skillCount == 0)
             {
-                Debug.Log("[Sys3CEntry] No SkillData assigned in Inspector, creating runtime defaults. " +
-                          "Create persistent assets via Create > Game > Skills > Skill Data and assign to _characterSkills.");
-
-                _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
-                    (int)SkillID.BasicAttack1, "Basic Attack 1", SkillType.BasicAttack, "Attack"));
-
-                _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
-                    (int)SkillID.BasicAttack2, "Basic Attack 2", SkillType.BasicAttack, "Attack"));
-
-                _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
-                    (int)SkillID.SkillQ, "Skill Q", SkillType.Special, "SkillQ",
-                    cooldown: 5f, range: 5f, dashDistance: 3f, dashDuration: 0.3f));
-
-                _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
-                    (int)SkillID.SkillR, "Skill R", SkillType.Special, "SkillR",
-                    cooldown: 10f, range: 5f,
-                    releaseType: ReleaseType.Charged,
-                    maxChargeTime: 5f, minChargeTime: 0f));
-
-                skillCount = 4;
+                Debug.LogError("[Sys3CEntry] No SkillData assigned to _characterSkills. " +
+                               "Create assets via Create > Game > Skills > Skill Data and assign them in the Inspector.");
             }
-
-            Debug.Log($"[Sys3CEntry] Skills registered: {skillCount}");
+            else
+            {
+                Debug.Log($"[Sys3CEntry] Skills registered: {skillCount}");
+            }
 
             _inputManager = GetComponent<InputManager>();
             if (_inputManager == null)
