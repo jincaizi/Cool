@@ -30,6 +30,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _characterController = characterController;
             _animator = animator;
 
+            // Initialize layer weights (was in deleted AnimationDriver constructor)
+            _animator.SetLayerWeight(AnimHashes.AttackLayerIndex, 0f);
+            _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 0f);
+
             var transitionTable = new StateTransitionTable();
             _baseFSM = new BaseFSM(_animator, transitionTable);
             _hitFSM = new HitFSM(_animator);

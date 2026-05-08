@@ -18814,3 +18814,19 @@ production/session-logs/agent-audit.log
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260508_135632
+### Commits
+f2a2cd9 fix: resolve cross-assembly ref with IDashComponent interface in Skills assembly
+6e59020 feat: wire up SkillCoordinator and SkillDashComponent in Sys3CEntry
+05e9e30 refactor: remove AnimationDriver static field from StateBehaviours, clean AttackStateBehaviour
+afd1216 refactor: remove AttackFSM from FSMManager, use Animator directly
+bb64141 refactor: replace AnimationDriver with Animator+AnimHashes in BaseFSM and HitFSM
+01e5c11 feat: add SkillDashComponent injection to SkillExecutor and SkillCoordinator
+3b22aa1 refactor: remove AttackFSM from StateCoordinator, add SetAttackLayerActive
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+---
+

@@ -64,6 +64,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             _skillCoordinator = new SkillCoordinator(null);
             _skillCoordinator.SetDashComponent(_dashComponent);
+            _skillCoordinator.OnSkillActivated += HandleSkillActivated;
 
             foreach (var skill in _characterSkills)
             {
@@ -99,6 +100,14 @@ namespace Hotfix.GameSystems.Sys3C
             _fsmManager.Update(Time.deltaTime);
             _skillCoordinator.Update(Time.deltaTime);
             _dashComponent.Update();
+
+            // Detect skill completion for animation cleanup
+            bool isSkillActive = _skillCoordinator.IsSkillActive;
+            if (_wasSkillActive && !isSkillActive)
+            {
+                CleanupSkillAnimation();
+            }
+            _wasSkillActive = isSkillActive;
 
             if (_camera != null)
                 _camera.Update();
@@ -155,6 +164,38 @@ namespace Hotfix.GameSystems.Sys3C
                     _skillCoordinator.CurrentSkill.ReleaseCharge();
                 }
             }
+        }
+
+        private string _lastSkillTrigger;
+        private bool _wasSkillActive;
+
+        private void HandleSkillActivated(SkillData skillData)
+        {
+            _lastSkillTrigger = skillData.AnimatorTrigger;
+
+            if (!string.IsNullOrEmpty(_lastSkillTrigger))
+            {
+                Animator.SetTrigger(_lastSkillTrigger);
+            }
+
+            Animator.SetLayerWeight(1, 1f);
+            Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Attacking);
+        }
+
+        private void CleanupSkillAnimation()
+        {
+            if (!string.IsNullOrEmpty(_lastSkillTrigger))
+            {
+                Animator.ResetTrigger(_lastSkillTrigger);
+                _lastSkillTrigger = null;
+            }
+
+            Animator.ResetTrigger(AnimHashes.Attack);
+            Animator.SetLayerWeight(1, 0f);
+            Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Idle);
+            _cc.LockMovement = false;
+            _cc.LockRotation = false;
+            _fsmManager.Coordinator.UnlockAndReturnToBase();
         }
 
         private int GetBasicAttackSkillId()

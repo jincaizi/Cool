@@ -1,4 +1,5 @@
 using UnityEngine;
+using Hotfix.GameSystems.Sys3C.FSM;
 
 namespace Hotfix.GameSystems.Sys3C.Character
 {
@@ -15,19 +16,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
         JumpAir = 4,
         JumpEnd = 5,
         Death = 6
-    }
-
-    /// <summary>
-    /// 攻击状态（驱动 Attack Layer FSM）
-    /// </summary>
-    public enum AttackState
-    {
-        Idle = 0,
-        Attack1 = 1,
-        Attack2 = 2,
-        SkillQ = 3,
-        SkillR_Start = 4,  // 新增：技能R起手阶段
-        SkillR_Loop = 5    // 新增：技能R持续循环阶段
     }
 
     /// <summary>
