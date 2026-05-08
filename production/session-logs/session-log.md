@@ -18696,3 +18696,121 @@ production/session-logs/agent-audit.log
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260508_134233
+### Commits
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+---
+
+## Session End: 20260508_134416
+### Commits
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_134519
+### Commits
+3b22aa1 refactor: remove AttackFSM from StateCoordinator, add SetAttackLayerActive
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_134626
+### Commits
+01e5c11 feat: add SkillDashComponent injection to SkillExecutor and SkillCoordinator
+3b22aa1 refactor: remove AttackFSM from StateCoordinator, add SetAttackLayerActive
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_134954
+### Commits
+bb64141 refactor: replace AnimationDriver with Animator+AnimHashes in BaseFSM and HitFSM
+01e5c11 feat: add SkillDashComponent injection to SkillExecutor and SkillCoordinator
+3b22aa1 refactor: remove AttackFSM from StateCoordinator, add SetAttackLayerActive
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_135104
+### Commits
+afd1216 refactor: remove AttackFSM from FSMManager, use Animator directly
+bb64141 refactor: replace AnimationDriver with Animator+AnimHashes in BaseFSM and HitFSM
+01e5c11 feat: add SkillDashComponent injection to SkillExecutor and SkillCoordinator
+3b22aa1 refactor: remove AttackFSM from StateCoordinator, add SetAttackLayerActive
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_135236
+### Commits
+05e9e30 refactor: remove AnimationDriver static field from StateBehaviours, clean AttackStateBehaviour
+afd1216 refactor: remove AttackFSM from FSMManager, use Animator directly
+bb64141 refactor: replace AnimationDriver with Animator+AnimHashes in BaseFSM and HitFSM
+01e5c11 feat: add SkillDashComponent injection to SkillExecutor and SkillCoordinator
+3b22aa1 refactor: remove AttackFSM from StateCoordinator, add SetAttackLayerActive
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+

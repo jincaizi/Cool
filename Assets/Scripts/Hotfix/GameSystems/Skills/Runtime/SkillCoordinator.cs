@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
-using Hotfix.GameSystems.Sys3C.Skill;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Runtime
@@ -20,7 +19,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly CooldownManager _cooldownManager;
         private readonly SkillInputBuffer _inputBuffer;
         private readonly SkillInterruptionMatrix _interruptionMatrix;
-        private SkillDashComponent _dashComponent;
+        private IDashComponent _dashComponent;
 
         // 当前正在执行的技能
         private SkillExecutor _currentSkill;
@@ -85,7 +84,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return _skillDatabase.TryGetValue(skillId, out var data) ? data : null;
         }
 
-        public void SetDashComponent(SkillDashComponent dashComponent)
+        public void SetDashComponent(IDashComponent dashComponent)
         {
             _dashComponent = dashComponent;
         }

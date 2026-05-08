@@ -1,11 +1,12 @@
 using UnityEngine;
+using Hotfix.GameSystems.Skills.Runtime;
 
 namespace Hotfix.GameSystems.Sys3C.Skill
 {
     /// <summary>
     /// 技能突进组件 — 处理技能位移逻辑
     /// </summary>
-    public class SkillDashComponent
+    public class SkillDashComponent : IDashComponent
     {
         private readonly UnityEngine.CharacterController _controller;
         private readonly Transform _transform;

@@ -7,6 +7,7 @@ using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Camera;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Skills.Runtime;
 
 namespace Hotfix.GameSystems.Sys3C

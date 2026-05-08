@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
-using Hotfix.GameSystems.Sys3C.Skill;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Runtime
@@ -21,7 +20,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         // 目标检测
         private Vector3 _targetPosition;
         private IEffectTarget _targetCharacter;
-        private SkillDashComponent _dashComponent;
+        private IDashComponent _dashComponent;
 
         // 回调
         public event Action<int> OnHitboxFrame;              // 判定帧触发
@@ -75,7 +74,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _targetPosition = position;
         }
 
-        public void SetDashComponent(SkillDashComponent dashComponent)
+        public void SetDashComponent(IDashComponent dashComponent)
         {
             _dashComponent = dashComponent;
         }
