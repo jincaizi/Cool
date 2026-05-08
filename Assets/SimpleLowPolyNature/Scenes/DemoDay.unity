@@ -8360,6 +8360,22 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1520462296323212634, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
+      propertyPath: _characterSkills.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1520462296323212634, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
+      propertyPath: _characterSkills.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 6bf27e3186c5f3843b9849ae688b9342, type: 2}
+    - target: {fileID: 1520462296323212634, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
+      propertyPath: _characterSkills.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: b06e148ae03949143b7aae64510b577f, type: 2}
+    - target: {fileID: 1520462296323212634, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
+      propertyPath: _characterSkills.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: 0e87d30e255e9ea4b87114d4a2bfd93f, type: 2}
     - target: {fileID: 4734815638318692212, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
       propertyPath: m_Enabled
       value: 1

@@ -321,7 +321,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             PresentationBlock pres = GetPresentation();
             if (pres?.ReleaseVFX != null)
-                Object.Instantiate(pres.ReleaseVFX, _targetPosition, Quaternion.identity);
+                UnityEngine.Object.Instantiate(pres.ReleaseVFX, _targetPosition, Quaternion.identity);
         }
 
         private PresentationBlock GetPresentation()
