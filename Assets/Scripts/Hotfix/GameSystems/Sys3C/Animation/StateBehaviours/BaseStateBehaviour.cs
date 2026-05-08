@@ -9,12 +9,10 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
         private static readonly int HASH_JumpAir = Animator.StringToHash("JumpAir");
         private static readonly int HASH_JumpEnd = Animator.StringToHash("JumpEnd");
 
-        private static AnimationDriver _driver;
         private static Action<string> _onAnimationCompleted;
 
-        public static void SetCallback(AnimationDriver driver, Action<string> callback)
+        public static void SetCallback(Action<string> callback)
         {
-            _driver = driver;
             _onAnimationCompleted = callback;
         }
 

@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using Hotfix.GameSystems.Sys3C.FSM;
 
 namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 {
@@ -15,16 +14,14 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
         private static readonly int HASH_GetUp = Animator.StringToHash("GetUp");
         private static readonly int HASH_Death = Animator.StringToHash("Death");
 
-        private static AnimationDriver _driver;
         private static Action<string> _onAnimationCompleted;
 
         // 防止重复触发的标记
         private static bool _hasTriggeredHitComplete;
         private static float _lastNormalizedTime;
 
-        public static void SetCallback(AnimationDriver driver, Action<string> callback)
+        public static void SetCallback(Action<string> callback)
         {
-            _driver = driver;
             _onAnimationCompleted = callback;
             _hasTriggeredHitComplete = false;
             _lastNormalizedTime = 0f;
