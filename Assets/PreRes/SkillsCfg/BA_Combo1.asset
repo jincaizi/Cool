@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8e4a6556790319498bbb94c131c5255, type: 3}
+  m_Name: BA_Combo1
+  m_EditorClassIdentifier: 
+  _skillId: 10001
+  _skillName: Basic Attack 1
+  _description: 
+  _icon: {fileID: 0}
+  _skillType: 0
+  _quality: 1
+  _manaCost: 0
+  _cooldown: 0
+  _staminaCost: 0
+  _animatorTrigger: Attack1
+  _castClip: {fileID: 0}
+  _releaseClip: {fileID: 0}
+  _dashDistance: 0
+  _dashDuration: 0
+  _canBeInterruptedByDamage: 1
+  _canBeInterruptedByMovement: 0
+  _interruptionPriority: 20
+  _canCancelIntoBasicAttack: 1
+  _canCancelIntoOtherSkill: 0
+  _damage:
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
+  _comboIndex: 1
+  _comboWindow: 0.5
+  _comboResetTime: 3
+  _nextCombo: {fileID: 0}
+  _enableMovement: 1
+  _movementSpeed: 0
+  _hitType: 0
+  _impactForce: 0
+  _impactDirection: {x: 0, y: 0, z: 0}
+  _canBeParried: 1
+  _allowRecoveryCancel: 1
+  _cancelableWindowStart: 0.6
+  _cancelableWindowEnd: 0.9
+  _overrideClip: {fileID: 0}
+  _shape:
+    _targetType: 0
+    _range: 2
+    _angle: 120
+    _angleStart: 0
+    _angleEnd: 90
+    _areaRadius: 0
+    _width: 1
+    _stopAtFirst: 0
+    _targetMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    _hitboxTimings:
+    - 0.3
+  _presentation:
+    _castVFX: {fileID: 0}
+    _releaseVFX: {fileID: 0}
+    _castSFX: {fileID: 0}
+    _hitStopDuration: 0
+    _showCastingBar: 1
+    _castingBarColor: {r: 0, g: 0, b: 1, a: 1}
