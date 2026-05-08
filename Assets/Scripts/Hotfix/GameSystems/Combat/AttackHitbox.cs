@@ -1,5 +1,6 @@
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Combat
@@ -19,7 +20,7 @@ namespace Hotfix.GameSystems.Combat
 
         public void Activate(AttackEffectConfig effectConfig)
         {
-            var dmg = effectConfig?.Damage ?? DamageData.CreateDefault(10f);
+            var dmg = effectConfig?.Damage ?? DamageBlock.CreateDefault(10f);
             CurrentData = new AttackHitboxData
             {
                 DamageData = dmg,
@@ -31,7 +32,7 @@ namespace Hotfix.GameSystems.Combat
             gameObject.SetActive(true);
         }
 
-        public void Activate(DamageData damageData)
+        public void Activate(DamageBlock damageData)
         {
             Activate(new AttackEffectConfig { Damage = damageData });
         }

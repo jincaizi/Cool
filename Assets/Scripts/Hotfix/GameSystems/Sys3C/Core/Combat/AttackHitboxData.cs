@@ -1,4 +1,5 @@
 using System;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Sys3C.Core.Combat
@@ -12,7 +13,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         /// <summary>
         /// 伤害数据
         /// </summary>
-        public DamageData DamageData;
+        public DamageBlock DamageData;
 
         /// <summary>
         /// 击退力

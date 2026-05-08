@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Monster
@@ -26,7 +27,7 @@ namespace Hotfix.GameSystems.Monster
             MaxHP = config.MaxHP;
         }
 
-        public void TakeDamage(DamageData damageData)
+        public void TakeDamage(DamageBlock damageData)
         {
             if (IsDead) return;
 

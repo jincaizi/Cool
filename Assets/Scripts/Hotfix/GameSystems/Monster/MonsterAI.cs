@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Monster
@@ -138,7 +139,7 @@ namespace Hotfix.GameSystems.Monster
                 _target = players[0].Transform;
         }
 
-        public void NotifyHit(DamageData damageData, Vector3 hitDirection)
+        public void NotifyHit(DamageBlock damageData, Vector3 hitDirection)
         {
             if (_state == MonsterAIState.Death) return;
 
@@ -386,7 +387,7 @@ namespace Hotfix.GameSystems.Monster
             if (_config.AttackEffects == null || _config.AttackEffects.Length == 0)
                 return new AttackEffectConfig
                 {
-                    Damage = DamageData.CreateDefault(_config.AttackPower),
+                    Damage = DamageBlock.CreateDefault(_config.AttackPower),
                 };
             int idx = Mathf.Min(_currentAttackIndex, _config.AttackEffects.Length - 1);
             return _config.AttackEffects[idx];

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Sys3C.Core.Combat
@@ -26,7 +27,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         /// <summary>
         /// 激活攻击碰撞箱
         /// </summary>
-        void Activate(DamageData damageData);
+        void Activate(DamageBlock damageData);
 
         /// <summary>
         /// 停用攻击碰撞箱

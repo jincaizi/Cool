@@ -8,165 +8,203 @@ namespace Hotfix.GameSystems.Skills.Data
     public class SkillData : ScriptableObject
     {
         [Header("=== Basic Info ===")]
-        [Tooltip("Unique numeric ID, maps to SkillID enum values (10001=BasicAttack1, 20001=SkillQ, 20002=SkillR)")]
+        // 唯一数字ID，映射到SkillID枚举值 (10001=BasicAttack1, 20001=SkillQ, 20002=SkillR)
+        [Tooltip("唯一数字ID，映射到SkillID枚举值 (10001=BasicAttack1, 20001=SkillQ, 20002=SkillR)")]
         [SerializeField] protected int _skillId;
         public int SkillId => _skillId;
 
-        [Tooltip("Display name shown in UI and debug logs")]
+        // UI和调试日志中显示的名称
+        [Tooltip("UI和调试日志中显示的名称")]
         [SerializeField] protected string _skillName;
         public string SkillName => _skillName;
 
-        [Tooltip("Flavor text / mechanical description (optional)")]
+        // 风格文本/机制描述（可选）
+        [Tooltip("风格文本/机制描述（可选）")]
         [SerializeField, TextArea(2, 5)] protected string _description;
         public string Description => _description;
 
-        [Tooltip("Icon shown on skill bar / HUD")]
+        // 技能栏/HUD上显示的图标
+        [Tooltip("技能栏/HUD上显示的图标")]
         [SerializeField] protected Sprite _icon;
         public Sprite Icon => _icon;
 
         [Header("=== Classification ===")]
-        [Tooltip("Skill category: BasicAttack uses combo logic; Special maps to Q/R keys; Ultimate for super moves")]
+        // 技能类别: BasicAttack使用连击逻辑; Special映射到Q/R键; Ultimate用于终极技能
+        [Tooltip("技能类别: BasicAttack使用连击逻辑; Special映射到Q/R键; Ultimate用于终极技能")]
         [SerializeField] protected Definition.SkillType _skillType = Definition.SkillType.Special;
         public Definition.SkillType SkillType => _skillType;
 
-        [Tooltip("Rarity tier, currently cosmetic / future loot system")]
+        // 稀有度等级，目前用于 Cosmetic / 未来掉落系统
+        [Tooltip("稀有度等级，目前用于 Cosmetic / 未来掉落系统")]
         [SerializeField] protected Definition.SkillQuality _quality = Definition.SkillQuality.Common;
         public Definition.SkillQuality Quality => _quality;
 
         [Header("=== Cost & Cooldown ===")]
-        [Tooltip("Mana / energy cost per cast (0 = no cost)")]
+        // 每次施放的法力/能量消耗 (0 = 无消耗)
+        [Tooltip("每次施放的法力/能量消耗 (0 = 无消耗)")]
         [SerializeField] protected int _manaCost;
         public int ManaCost => _manaCost;
 
-        [Tooltip("Cooldown in seconds after activation begins (0 = no cooldown)")]
+        // 激活后冷却时间(秒) (0 = 无冷却)
+        [Tooltip("激活后冷却时间(秒) (0 = 无冷却)")]
         [SerializeField] protected float _cooldown;
         public float Cooldown => _cooldown;
 
-        [Tooltip("Stamina cost per cast (0 = no cost)")]
+        // 每次施放的体力消耗 (0 = 无消耗)
+        [Tooltip("每次施放的体力消耗 (0 = 无消耗)")]
         [SerializeField] protected int _staminaCost;
         public int StaminaCost => _staminaCost;
 
         [Header("=== Release Behavior ===")]
-        [Tooltip("How the skill is released: Instant (fire-and-forget), Timed (cast bar), Charged (hold to charge), Channeled (continuous guide)")]
+        // 技能释放方式: Instant(瞬发), Timed(读条), Charged(蓄力), Channeled(引导)
+        [Tooltip("技能释放方式: Instant(瞬发), Timed(读条), Charged(蓄力), Channeled(引导)")]
         [SerializeField] protected Definition.ReleaseType _releaseType = Definition.ReleaseType.Instant;
         public Definition.ReleaseType ReleaseType => _releaseType;
 
-        [Tooltip("Cast time in seconds before the skill fires (0 = instant). Only used for Timed/Charged/Channeled.")]
+        // 技能释放前的引导时间(秒) (0 = 瞬发)。仅用于 Timed/Charged/Channeled。
+        [Tooltip("技能释放前的引导时间(秒) (0 = 瞬发)。仅用于 Timed/Charged/Channeled。")]
         [SerializeField] protected float _castTime;
         public float CastTime => _castTime;
 
-        [Tooltip("Channel duration in seconds. Only used for Channeled release type.")]
+        // 引导持续时间(秒)。仅用于 Channeled 释放类型。
+        [Tooltip("引导持续时间(秒)。仅用于 Channeled 释放类型。")]
         [SerializeField] protected float _channelDuration;
         public float ChannelDuration => _channelDuration;
 
-        [Tooltip("Minimum hold time before the skill can be released. Only used for Charged release type.")]
+        // 技能可以释放的最小蓄力时间。仅用于 Charged 释放类型。
+        [Tooltip("技能可以释放的最小蓄力时间。仅用于 Charged 释放类型。")]
         [SerializeField] protected float _minChargeTime = 0.3f;
         public float MinChargeTime => _minChargeTime;
 
-        [Tooltip("Maximum hold time before the skill auto-fires. Only used for Charged release type.")]
+        // 技能自动释放的最大蓄力时间。仅用于 Charged 释放类型。
+        [Tooltip("技能自动释放的最大蓄力时间。仅用于 Charged 释放类型。")]
         [SerializeField] protected float _maxChargeTime = 2f;
         public float MaxChargeTime => _maxChargeTime;
 
         [Header("=== Movement ===")]
-        [Tooltip("Can the character move during the cast (read bar) phase?")]
+        // 施法(读条)阶段是否可以移动?
+        [Tooltip("施法(读条)阶段是否可以移动?")]
         [SerializeField] protected bool _canMoveWhileCasting = true;
         public bool CanMoveWhileCasting => _canMoveWhileCasting;
 
-        [Tooltip("Can the character move during the channel (guide) phase?")]
+        // 引导阶段是否可以移动?
+        [Tooltip("引导阶段是否可以移动?")]
         [SerializeField] protected bool _canMoveWhileChanneling = true;
         public bool CanMoveWhileChanneling => _canMoveWhileChanneling;
 
-        [Tooltip("Can the character rotate during the cast phase?")]
+        // 施法阶段是否可以旋转?
+        [Tooltip("施法阶段是否可以旋转?")]
         [SerializeField] protected bool _canRotateWhileCasting = true;
         public bool CanRotateWhileCasting => _canRotateWhileCasting;
 
         [Header("=== Animation ===")]
-        [Tooltip("Animator Trigger parameter name. SetTrigger(this) calls the matching transition in the Animator Controller's Attack layer. Must match a Trigger parameter in the controller (e.g. 'Attack', 'SkillQ', 'SkillR').")]
+        // Animator Trigger参数名。SetTrigger(this)调用Animator Controller的Attack层中匹配的过渡。必须与控制器中的Trigger参数匹配(如 'Attack', 'SkillQ', 'SkillR')。
+        [Tooltip("Animator Trigger参数名。SetTrigger(this)调用Animator Controller的Attack层中匹配的过渡。必须与控制器中的Trigger参数匹配(如 'Attack', 'SkillQ', 'SkillR')。")]
         [SerializeField] protected string _animatorTrigger;
         public string AnimatorTrigger => _animatorTrigger;
 
-        [Tooltip("Cast animation clip. NOT played directly by code — used as duration reference by SkillStateMachine (clip.length). Can also be used for AnimatorOverrideController swapping.")]
+        // 施法动画片段。代码不直接播放 — 作为持续时间参考由SkillStateMachine使用(clip.length)。也可用于AnimatorOverrideController替换。
+        [Tooltip("施法动画片段。代码不直接播放 — 作为持续时间参考由SkillStateMachine使用(clip.length)。也可用于AnimatorOverrideController替换。")]
         [SerializeField] protected AnimationClip _castClip;
         public AnimationClip CastClip => _castClip;
 
-        [Tooltip("Release / execution animation clip. NOT played directly — used as duration reference. SkillStateMachine uses clip.length for the Execution phase timing.")]
+        // 释放/执行动画片段。代码不直接播放 — 作为持续时间参考。SkillStateMachine使用clip.length来计算Execution阶段的时间。
+        [Tooltip("释放/执行动画片段。代码不直接播放 — 作为持续时间参考。SkillStateMachine使用clip.length来计算Execution阶段的时间。")]
         [SerializeField] protected AnimationClip _releaseClip;
         public AnimationClip ReleaseClip => _releaseClip;
 
-        [Tooltip("Channel / looping animation clip. NOT played directly — used as duration reference. SkillStateMachine uses clip.length for the Channeling phase timing.")]
+        // 引导/循环动画片段。代码不直接播放 — 作为持续时间参考。SkillStateMachine使用clip.length来计算Channeling阶段的时间。
+        [Tooltip("引导/循环动画片段。代码不直接播放 — 作为持续时间参考。SkillStateMachine使用clip.length来计算Channeling阶段的时间。")]
         [SerializeField] protected AnimationClip _channelClip;
         public AnimationClip ChannelClip => _channelClip;
 
         [Header("=== Combat ===")]
-        [Tooltip("Maximum range to acquire / hit a target (world units)")]
+        // 锁定/命中目标的最大范围(世界单位)
+        [Tooltip("锁定/命中目标的最大范围(世界单位)")]
         [SerializeField] protected float _range = 3f;
         public float Range => _range;
 
-        [Tooltip("Cone angle in degrees for directional skills (360 = full circle AOE)")]
+        // 方向性技能的角度(度) (360 = 全圆AOE)
+        [Tooltip("方向性技能的角度(度) (360 = 全圆AOE)")]
         [SerializeField] protected float _angle = 360f;
         public float Angle => _angle;
 
-        [Tooltip("AOE radius in world units (0 = single-target, > 0 = sphere / circle AOE)")]
+        // AOE半径(世界单位) (0 = 单目标, > 0 = 球体/圆形AOE)
+        [Tooltip("AOE半径(世界单位) (0 = 单目标, > 0 = 球体/圆形AOE)")]
         [SerializeField] protected float _areaRadius;
         public float AreaRadius => _areaRadius;
 
-        [Tooltip("Physics layer mask for target detection")]
+        // 目标检测的物理层遮罩
+        [Tooltip("目标检测的物理层遮罩")]
         [SerializeField] protected LayerMask _targetMask = ~0;
         public LayerMask TargetMask => _targetMask;
 
-        [Tooltip("Hitbox / damage frame timings in seconds from skill start. Each value is a separate damage tick (e.g. [0.2, 0.5] = two hits at 0.2s and 0.5s).")]
+        // 从技能开始算起的击球框/伤害帧时间(秒)。每个值是一次独立的伤害检测(如 [0.2, 0.5] = 在0.2秒和0.5秒有两次伤害)。
+        [Tooltip("从技能开始算起的击球框/伤害帧时间(秒)。每个值是一次独立的伤害检测(如 [0.2, 0.5] = 在0.2秒和0.5秒有两次伤害)。")]
         [SerializeField] protected float[] _hitboxTimings = new float[] { 0.3f };
         public float[] HitboxTimings => _hitboxTimings;
 
-        [Tooltip("Damage configuration: base damage, scaling, crit, penetration, DOT settings")]
-        [SerializeField] protected DamageData _damageData;
-        public DamageData DamageData => _damageData;
+        // 伤害配置: 基础伤害, 缩放, 暴击, 穿透, DOT设置
+        [Tooltip("伤害配置: 基础伤害, 缩放, 暴击, 穿透, DOT设置")]
+        [SerializeField] protected DamageBlock _damage;
+        public DamageBlock Damage => _damage;
 
         [Header("=== Effects ===")]
-        [Tooltip("Status effects applied on hit (buff, debuff, stun, knockback, etc.)")]
+        // 命中时施加的状态效果(buff, debuff, stun, knockback等)
+        [Tooltip("命中时施加的状态效果(buff, debuff, stun, knockback等)")]
         [SerializeField] protected EffectDataList _applyEffects = new();
         public EffectDataList ApplyEffects => _applyEffects;
 
-        [Tooltip("VFX prefab spawned during cast phase")]
+        // 施法阶段生成的VFX预制体
+        [Tooltip("施法阶段生成的VFX预制体")]
         [SerializeField] protected GameObject _castVFX;
         public GameObject CastVFX => _castVFX;
 
-        [Tooltip("VFX prefab spawned on skill release / hit")]
+        // 技能释放/命中时生成的VFX预制体
+        [Tooltip("技能释放/命中时生成的VFX预制体")]
         [SerializeField] protected GameObject _releaseVFX;
         public GameObject ReleaseVFX => _releaseVFX;
 
-        [Tooltip("SFX played during cast")]
+        // 施法时播放的SFX
+        [Tooltip("施法时播放的SFX")]
         [SerializeField] protected AudioClip _castSFX;
         public AudioClip CastSFX => _castSFX;
 
         [Header("=== Interruption ===")]
-        [Tooltip("Can taking damage interrupt this skill?")]
+        // 受伤害是否可以中断此技能?
+        [Tooltip("受伤害是否可以中断此技能?")]
         [SerializeField] protected bool _canBeInterruptedByDamage = true;
         public bool CanBeInterruptedByDamage => _canBeInterruptedByDamage;
 
-        [Tooltip("Can movement input interrupt this skill?")]
+        // 移动输入是否可以中断此技能?
+        [Tooltip("移动输入是否可以中断此技能?")]
         [SerializeField] protected bool _canBeInterruptedByMovement = false;
         public bool CanBeInterruptedByMovement => _canBeInterruptedByMovement;
 
-        [Tooltip("Priority when competing with other skills. Higher = wins interruption contest.")]
+        // 与其他技能竞争时的优先级。越高 = 赢得中断争夺。
+        [Tooltip("与其他技能竞争时的优先级。越高 = 赢得中断争夺。")]
         [SerializeField] protected int _interruptionPriority = 50;
         public int InterruptionPriority => _interruptionPriority;
 
         [Header("=== Dash ===")]
-        [Tooltip("Dash distance in world units (0 = no dash). Character dashes forward when entering Execution phase.")]
+        // 冲刺距离(世界单位) (0 = 不冲刺)。进入Execution阶段时角色向前冲刺。
+        [Tooltip("冲刺距离(世界单位) (0 = 不冲刺)。进入Execution阶段时角色向前冲刺。")]
         [SerializeField] protected float _dashDistance;
         public float DashDistance => _dashDistance;
 
-        [Tooltip("Dash duration in seconds. Lower = faster dash.")]
+        // 冲刺持续时间(秒)。越低 = 冲刺越快。
+        [Tooltip("冲刺持续时间(秒)。越低 = 冲刺越快。")]
         [SerializeField] protected float _dashDuration;
         public float DashDuration => _dashDuration;
 
         [Header("=== Cancellation ===")]
-        [Tooltip("Can this skill be cancelled into a basic attack during recovery?")]
+        // 能否在恢复帧中取消为普通攻击?
+        [Tooltip("能否在恢复帧中取消为普通攻击?")]
         [SerializeField] protected bool _canCancelIntoBasicAttack = true;
         public bool CanCancelIntoBasicAttack => _canCancelIntoBasicAttack;
 
-        [Tooltip("Can this skill be cancelled into another skill during recovery?")]
+        // 能否在恢复帧中取消为另一个技能?
+        [Tooltip("能否在恢复帧中取消为另一个技能?")]
         [SerializeField] protected bool _canCancelIntoOtherSkill = false;
         public bool CanCancelIntoOtherSkill => _canCancelIntoOtherSkill;
 
@@ -233,7 +271,8 @@ namespace Hotfix.GameSystems.Skills.Data
     [System.Serializable]
     public class EffectDataList
     {
-        [Tooltip("Effects applied when the skill hits a target")]
+        // 技能命中目标时施加的效果
+        [Tooltip("技能命中目标时施加的效果")]
         [SerializeField] private EffectData[] _effects;
         public EffectData[] Effects => _effects;
     }

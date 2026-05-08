@@ -311,10 +311,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void ApplyDamage(IEffectTarget target, int frameIndex)
         {
-            if (_skillData.DamageData == null) return;
+            if (_skillData.Damage == null) return;
 
             // 计算伤害
-            float damage = _skillData.DamageData.CalculateFinalDamage(_owner.Stats);
+            float damage = _skillData.Damage.CalculateFinalDamage(_owner.Stats);
 
             // 蓄力缩放
             if (CurrentSubState == SkillSubState.Charging || CurrentSubState == SkillSubState.Execution)

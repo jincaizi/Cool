@@ -5,6 +5,7 @@ using UnityEngine.AI;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Combat;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 
@@ -88,7 +89,7 @@ namespace Hotfix.GameSystems.Monster
             PhysicsRegistry.Instance.Unregister(this);
         }
 
-        void IDamageable.TakeDamage(DamageData data, Vector3 hitDirection)
+        void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
         {
             if (_stats.IsDead) return;
             _stats.TakeDamage(data);

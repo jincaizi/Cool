@@ -1,4 +1,5 @@
 using UnityEngine;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Sys3C.Core.Combat
@@ -11,7 +12,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         /// <summary>
         /// 接受伤害
         /// </summary>
-        void TakeDamage(DamageData damageData, Vector3 hitDirection);
+        void TakeDamage(DamageBlock damageData, Vector3 hitDirection);
 
         /// <summary>
         /// 是否存活

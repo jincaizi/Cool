@@ -238,7 +238,7 @@ namespace Hotfix.GameSystems.Sys3C
         private int GetSkillQId() => (int)SkillID.SkillQ;
         private int GetSkillRId() => (int)SkillID.SkillR;
 
-        void IDamageable.TakeDamage(DamageData data, Vector3 hitDirection)
+        void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
         {
             if (_currentHP <= 0) return;
 
