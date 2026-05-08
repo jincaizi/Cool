@@ -64,7 +64,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             _dashComponent = new SkillDashComponent(CharacterController, transform);
 
-            _skillCoordinator = new SkillCoordinator(null);
+            _skillCoordinator = new SkillCoordinator(new SkillOwnerProxy(transform));
             _skillCoordinator.SetDashComponent(_dashComponent);
             _skillCoordinator.OnSkillActivated += HandleSkillActivated;
 
@@ -91,7 +91,8 @@ namespace Hotfix.GameSystems.Sys3C
                     (int)SkillID.BasicAttack2, "Basic Attack 2", SkillType.BasicAttack, "Attack"));
 
                 _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
-                    (int)SkillID.SkillQ, "Skill Q", SkillType.Special, "SkillQ", cooldown: 5f, range: 5f));
+                    (int)SkillID.SkillQ, "Skill Q", SkillType.Special, "SkillQ",
+                    cooldown: 5f, range: 5f, dashDistance: 3f, dashDuration: 0.3f));
 
                 _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
                     (int)SkillID.SkillR, "Skill R", SkillType.Special, "SkillR", cooldown: 10f, range: 5f));
@@ -256,5 +257,22 @@ namespace Hotfix.GameSystems.Sys3C
         {
             PhysicsRegistry.Instance.Unregister(this);
         }
+    }
+
+    /// <summary>
+    /// Minimal IEffectTarget proxy for SkillCoordinator.
+    /// Full implementation deferred until combat system integration.
+    /// </summary>
+    internal sealed class SkillOwnerProxy : IEffectTarget
+    {
+        private readonly Transform _transform;
+        public Transform transform => _transform;
+        public IEffectStats Stats => null;
+        public IShieldSystem ShieldSystem => null;
+        public IPhysicsSystem PhysicsSystem => null;
+        public IStatusController StatusController => null;
+        public void Heal(float amount) { }
+
+        public SkillOwnerProxy(Transform t) { _transform = t; }
     }
 }

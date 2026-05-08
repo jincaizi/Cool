@@ -142,7 +142,9 @@ namespace Hotfix.GameSystems.Skills.Data
             string animTrigger,
             float cooldown = 0f,
             float range = 3f,
-            Definition.ReleaseType releaseType = Definition.ReleaseType.Instant)
+            Definition.ReleaseType releaseType = Definition.ReleaseType.Instant,
+            float dashDistance = 0f,
+            float dashDuration = 0f)
         {
             var data = CreateInstance<SkillData>();
             data._skillId = skillId;
@@ -153,6 +155,8 @@ namespace Hotfix.GameSystems.Skills.Data
             data._range = range;
             data._releaseType = releaseType;
             data._castTime = 0f;
+            data._dashDistance = dashDistance;
+            data._dashDuration = dashDuration;
             data._canCancelIntoBasicAttack = true;
             data._canCancelIntoOtherSkill = false;
             data._canBeInterruptedByDamage = true;
