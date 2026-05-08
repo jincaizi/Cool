@@ -44,10 +44,15 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // Deliberately empty. OnStateExit fires when the default Empty state
-            // exits (e.g. when SetTrigger starts a new animation), which would
-            // prematurely invoke CleanupSkillAnimation and kill the animation.
-            // Completion detection is handled by OnStateUpdate at 95% progress.
+            // Fire for actual animation states (length > 0) that exit.
+            // The default Empty state (length == 0) is excluded to prevent
+            // premature cleanup when SetTrigger starts a new animation.
+            // This also catches fast animations where OnStateUpdate's 95%
+            // window is skipped in a single frame.
+            if (IsPlayingClip(stateInfo))
+            {
+                _onAnimationCompleted?.Invoke(GetStateName(stateInfo));
+            }
         }
     }
 }
