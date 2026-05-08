@@ -18175,3 +18175,524 @@ production/session-logs/agent-audit.log
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260508_060842
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+ecfcedd fix: configure AnimLayer.mask with proper humanoid body parts (legs excluded, root+upper body included), reapply to Attack layer
+b240fac fix: apply AvatarMask to Attack layer so legs keep locomotion during attacks
+f6e3ac3 fix: targets → _hitBuffer in ResolveAttack return statement
+183ca9e fix: Gizmos->Debug.DrawLine, add dedup to Circle/Rect fallbacks, hoist RectShape rightDir, MonsterAI ResolveNonAlloc
+e386a84 fix: MonsterAI _target assignment after FindNearby returns IDamageable
+46385bb refactor: adapt callers to IDamageable registration + ResolveNonAlloc
+137ad98 feat: add AttackShapeGizmos — debug visualization for all 4 shapes
+1c0f6c2 feat: wire SectorShape + RectShape into AttackShapeFactory
+313f99e feat: add SectorShape (asymmetric arc) + RectShape (thrust with StopAtFirst)
+35fa50b perf: HashSet dedup + Dot angle + sqrMagnitude + shared buffer in shapes
+e56d417 feat: add Sector shape type + AngleStart/AngleEnd fields to config
+8b03dd8 perf: cache LayerMask lookups in PhysicsRegistry; add buffer overflow warning
+21fe816 perf: Physics-first query + IDamageable storage + sqrMagnitude + shared buffer
+85f8e3a refactor: upgrade interfaces — IEntityRegistry uses IDamageable, IAttackShape adds ResolveNonAlloc
+0df4a25 docs: add attack detection optimization & shape extension implementation plan
+f36802d docs: add attack detection optimization & shape extension design spec
+---
+
+## Session End: 20260508_093546
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+2b8a45b fix: add DOTween.Modules reference, change lifecycle to internal, fix Sequence.OnKill
+8b12867 chore: add missing .meta files for UI framework and Res.cs
+8963703 fix: PopTo returns UniTask, PopAsync pops after hide lifecycle
+5b20a6e feat: add UIManager singleton with 5-layer Canvas, stack, and overlay management
+bc9934f feat: add UIPanel abstract base class with lifecycle and visibility modes
+5d375c4 feat: add ScreenAdapter for CanvasScaler and SafeArea
+e7a2a4a feat: add UIAnimation component with preset-driven DOTween animations
+3e586af feat: add SequenceBuilder fluent API for DOTween sequences
+14ca397 feat: add UITweenExtensions — Punch, Shake, CountUp, Flash
+d29f161 feat: add UIAnimPreset data container
+64c8ffd feat: add UI assembly definition and UIConst enums
+5fe39c1 docs: add UI framework implementation plan — 9 tasks, 8 C# files
+0353e07 docs: add UI framework design — 5-layer Canvas, UIPanel lifecycle, DOTween animation system
+c17702c chore: add missing .meta files for Core asmdef and Resource directory
+923f240 feat: add Res static entry point for resource management
+b4a36f2 fix: type-safety check, handle leak, scene dup key, and stale scene entry bugs in ResourceManager
+8cdf187 fix: UnloadSceneAsync takes string key, lookup SceneInstance internally
+75f2f53 feat: add ResourceManager with ref-counted load/release tracking
+296d1cb feat: add ResourceLoadException for resource load failures
+f3c3548 feat: add HandleEntry for reference-counted handle tracking
+4ef689c chore: add Core assembly definition for AOT infrastructure
+2246b8b chore: add UniTask package dependency
+d1306a5 docs: add Addressable resource system implementation plan
+98dca06 docs: add Addressable resource management system design
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_123203
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/Scripts/AOT/Core/Resource/Res.cs
+Assets/Scripts/AOT/Core/Resource/ResourceManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_123659
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_123830
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_124316
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+8ac661d fix: Shake uses RectTransform, WaitForSequence uses IsPlaying polling
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_124510
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_124719
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_124952
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_125910
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_130206
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_130513
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_130846
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_131043
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_131421
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_131717
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_132520
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+998b2ab feat: add NameplateTag and NameplateManager for TMP 3D nameplates
+f7d3e45 feat: add ITargetable interface, MonsterTakeDamageEvent, SkillActivatedEvent
+95aee94 feat: add FloatingTextPool with growable pool and DOTween animations
+992eb80 feat: add Nameplate asmdef and FloatingTextConfig with presets
+1daa434 docs: add nameplate and floating text implementation plan
+ba6ea7f docs: add nameplate and floating text system design
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_134049
+### Commits
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260508_134124
+### Commits
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+a969ed2 fix: add missing EventBus using, remove IsCritical from monster damage emit (DamageData has no IsCritical)
+527a109 fix: add TMP refs, fix TargetPanel OnDestroy, fix MonsterEntity event accessor syntax
+fafb6d9 fix: revert Skills→Sys3C.Core circular dep, remove redundant SkillExecutor emit (StateCoordinator already emits SkillActivatedEvent)
+e4da037 fix: resolve cyclic asmdef deps — Nameplate refs Sys3C.Core, Skills refs Sys3C.Core
+9128c45 fix: remove duplicate SkillActivatedEvent, use existing definition from SkillEvents.cs
+daf025e feat: emit SkillActivatedEvent from SkillExecutor on first hitbox frame
+8f2b259 feat: add NameplateEventBridge to route damage/skill events to FloatingTextPool
+558ac88 feat: add ITargetable to MonsterEntity, emit MonsterTakeDamageEvent
+7a8b841 feat: add TargetPanel UIPanel with ITargetable binding
+### Uncommitted Changes
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab
+Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab
+Assets/Scripts/Editor/SkillConfigGenerator.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimationDriver.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/HitManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/AttackFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/BuffData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillCoordinatorBridge.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillDefs.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Skill/SkillRegistry.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
