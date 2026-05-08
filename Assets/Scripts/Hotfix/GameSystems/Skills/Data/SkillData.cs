@@ -23,7 +23,7 @@ namespace Hotfix.GameSystems.Skills.Data
         public Sprite Icon => _icon;
 
         [Tooltip("技能类别")]
-        [SerializeField] protected Definition.SkillType _skillType = Definition.SkillType.Special;
+        [SerializeField] protected Definition.SkillType _skillType = Definition.SkillType.Combo;
         public Definition.SkillType SkillType => _skillType;
 
         [Tooltip("稀有度等级")]
