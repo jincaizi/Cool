@@ -95,7 +95,10 @@ namespace Hotfix.GameSystems.Sys3C
                     cooldown: 5f, range: 5f, dashDistance: 3f, dashDuration: 0.3f));
 
                 _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
-                    (int)SkillID.SkillR, "Skill R", SkillType.Special, "SkillR", cooldown: 10f, range: 5f));
+                    (int)SkillID.SkillR, "Skill R", SkillType.Special, "SkillR",
+                    cooldown: 10f, range: 5f,
+                    releaseType: ReleaseType.Charged,
+                    maxChargeTime: 5f, minChargeTime: 0f));
 
                 skillCount = 4;
             }
@@ -130,6 +133,13 @@ namespace Hotfix.GameSystems.Sys3C
             _fsmManager.Update(Time.deltaTime);
             _skillCoordinator.Update(Time.deltaTime);
             _dashComponent.Update();
+
+            // Safety: cleanup animation if skill ended without firing animation callback
+            // (e.g. charged skill timed out with looping animation)
+            if (_skillCoordinator.CurrentSkill == null && _lastSkillTrigger != null)
+            {
+                CleanupSkillAnimation();
+            }
 
             if (_camera != null)
                 _camera.Update();
@@ -180,10 +190,18 @@ namespace Hotfix.GameSystems.Sys3C
 
             if (_inputManager.IsSkill3Released())
             {
-                if (_skillCoordinator.CurrentSkill != null &&
-                    _skillCoordinator.CurrentSkill.CurrentSubState == Skills.Definition.SkillSubState.Charging)
+                var executor = _skillCoordinator.CurrentSkill;
+                if (executor != null)
                 {
-                    _skillCoordinator.CurrentSkill.ReleaseCharge();
+                    var subState = executor.CurrentSubState;
+                    if (subState == Skills.Definition.SkillSubState.Charging)
+                    {
+                        executor.ReleaseCharge();
+                    }
+                    // Force cleanup for looping/continuous skills
+                    // (animation callback won't fire for looping clips)
+                    executor.ForceComplete();
+                    CleanupSkillAnimation();
                 }
             }
         }
