@@ -57,8 +57,7 @@ namespace Hotfix.GameSystems.Skills.Data
 
         private void OnValidate()
         {
-            if (_skillType == Definition.SkillType.BasicAttack)
-                _skillType = Definition.SkillType.Special;
+            _skillType = Definition.SkillType.Channeled;
         }
     }
 }

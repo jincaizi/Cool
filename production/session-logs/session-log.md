@@ -18993,3 +18993,262 @@ bed2f45 feat: add AnimHashes static class and standalone AttackState enum
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260508_200112
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+693f83d refactor: remove hardcoded skill defaults, error on unconfigured skills
+e50f232 fix: re-enable OnStateExit with IsPlayingClip guard to catch fast animations
+412a636 feat: implement Skill R hold-to-spin with Charged release type
+acb6dec fix: AttackStateBehaviour IsAttackState→IsPlayingClip, remove OnStateExit callback
+26156a1 fix: add dash params to SkillQ default, fix null IEffectTarget for dash direction
+c43e3ce fix: add SkillData.CreateDefault factory, remove Resources loading, wire ForceComplete
+82297de fix: use animation-callback-driven cleanup, add Resources fallback for skills
+3cfcbe4 fix: restore animation trigger bridge SkillCoordinator→Animator, init layer weights
+f2a2cd9 fix: resolve cross-assembly ref with IDashComponent interface in Skills assembly
+6e59020 feat: wire up SkillCoordinator and SkillDashComponent in Sys3CEntry
+05e9e30 refactor: remove AnimationDriver static field from StateBehaviours, clean AttackStateBehaviour
+afd1216 refactor: remove AttackFSM from FSMManager, use Animator directly
+bb64141 refactor: replace AnimationDriver with Animator+AnimHashes in BaseFSM and HitFSM
+01e5c11 feat: add SkillDashComponent injection to SkillExecutor and SkillCoordinator
+3b22aa1 refactor: remove AttackFSM from StateCoordinator, add SetAttackLayerActive
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+---
+
+## Session End: 20260509_031406
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_031841
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_031955
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_032100
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_032326
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_034032
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_034758
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_035229
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_035736
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_040038
+### Commits
+1599045 docs: add Tooltip attributes to all SkillData, damage, and effect config fields
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_044622
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_045522
+### Commits
+964bfd7 docs: add SkillData refactor design spec — lean base + release-type subclasses
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/Basic_1.asset
+Assets/PreRes/SkillsCfg/Basic_1.asset.meta
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260509_052658
+### Commits
+9b265f3 docs: add SkillData refactor implementation plan — 13 tasks
+964bfd7 docs: add SkillData refactor design spec — lean base + release-type subclasses
+### Uncommitted Changes
+Assets/PreRes/SkillsCfg/Basic_1.asset
+Assets/PreRes/SkillsCfg/Basic_1.asset.meta
+Assets/PreRes/SkillsCfg/New Skill.asset
+Assets/PreRes/SkillsCfg/New Skill.asset.meta
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/BasicAttackData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SpecialSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/FSMConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackEffectConfig.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/AttackShapeConfig.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+

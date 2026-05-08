@@ -1,6 +1,5 @@
 using System;
 using Hotfix.GameSystems.Skills.Data;
-using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Sys3C.Core.Combat
 {

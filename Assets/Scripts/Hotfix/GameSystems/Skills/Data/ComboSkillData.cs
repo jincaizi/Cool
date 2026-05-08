@@ -92,7 +92,7 @@ namespace Hotfix.GameSystems.Skills.Data
 
         private void OnValidate()
         {
-            _skillType = Definition.SkillType.BasicAttack;
+            _skillType = Definition.SkillType.Combo;
         }
     }
 

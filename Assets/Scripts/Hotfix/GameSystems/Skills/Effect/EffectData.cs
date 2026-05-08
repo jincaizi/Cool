@@ -4,35 +4,48 @@ namespace Hotfix.GameSystems.Skills.Effect
 {
     public enum EffectType
     {
-        [Tooltip("Positive status effect")]
+        // 正面状态效果
+        [Tooltip("正面状态效果")]
         Buff,
-        [Tooltip("Negative status effect")]
+        // 负面状态效果
+        [Tooltip("负面状态效果")]
         Debuff,
-        [Tooltip("Restores health")]
+        // 恢复生命
+        [Tooltip("恢复生命")]
         Heal,
-        [Tooltip("Absorbs incoming damage")]
+        // 吸收即将到来的伤害
+        [Tooltip("吸收即将到来的伤害")]
         Shield,
-        [Tooltip("Removes buffs/debuffs")]
+        // 移除buff/debuff
+        [Tooltip("移除buff/debuff")]
         Dispel,
-        [Tooltip("Spawns a creature or object")]
+        // 生成生物或物体
+        [Tooltip("生成生物或物体")]
         Summon,
-        [Tooltip("Teleports the target")]
+        // 传送目标
+        [Tooltip("传送目标")]
         Teleport,
-        [Tooltip("Pushes the target away")]
+        // 将目标推开
+        [Tooltip("将目标推开")]
         Knockback,
-        [Tooltip("Stuns the target (cannot act)")]
+        // 晕眩目标(无法行动)
+        [Tooltip("晕眩目标(无法行动)")]
         Stun,
-        [Tooltip("Silences the target (cannot cast)")]
+        // 沉默目标(无法施法)
+        [Tooltip("沉默目标(无法施法)")]
         Silence
     }
 
     public enum StackingRule
     {
-        [Tooltip("Re-application refreshes the duration")]
+        // 重新应用刷新持续时间
+        [Tooltip("重新应用刷新持续时间")]
         Refresh,
-        [Tooltip("Re-application adds a stack (up to MaxStacks)")]
+        // 重新应用添加一层(至多MaxStacks)
+        [Tooltip("重新应用添加一层(至多MaxStacks)")]
         Stack,
-        [Tooltip("Re-application is ignored while active")]
+        // 重新应用时在激活期间被忽略
+        [Tooltip("重新应用时在激活期间被忽略")]
         Ignore
     }
 
@@ -40,34 +53,41 @@ namespace Hotfix.GameSystems.Skills.Effect
     public class EffectData
     {
         [Header("=== Basic ===")]
-        [Tooltip("Effect category (buff, debuff, heal, stun, etc.)")]
+        // 效果类别 (buff, debuff, heal, stun等)
+        [Tooltip("效果类别 (buff, debuff, heal, stun等)")]
         [SerializeField] protected EffectType _type;
         public EffectType Type => _type;
 
-        [Tooltip("Unique ID for stacking and removal (e.g. 'warrior_rage_buff')")]
+        // 用于叠加和移除的唯一ID (如 'warrior_rage_buff')
+        [Tooltip("用于叠加和移除的唯一ID (如 'warrior_rage_buff')")]
         [SerializeField] protected string _effectId;
         public string EffectId => _effectId;
         public string SetEffectId { set => _effectId = value; }
 
-        [Tooltip("Duration in seconds (0 = instant / one-shot)")]
+        // 持续时间(秒) (0 = 瞬间/一次性)
+        [Tooltip("持续时间(秒) (0 = 瞬间/一次性)")]
         [SerializeField] protected float _duration;
         public float Duration => _duration;
 
         [Header("=== Stacking ===")]
-        [Tooltip("Maximum stacks when StackingRule is Stack")]
+        // 当StackingRule为Stack时的最大层数
+        [Tooltip("当StackingRule为Stack时的最大层数")]
         [SerializeField] protected int _maxStacks = 1;
         public int MaxStacks => _maxStacks;
 
-        [Tooltip("How re-application behaves (Refresh duration, Stack, or Ignore)")]
+        // 重新应用如何处理 (Refresh刷新持续时间, Stack叠加, 或Ignore忽略)
+        [Tooltip("重新应用如何处理 (Refresh刷新持续时间, Stack叠加, 或Ignore忽略)")]
         [SerializeField] protected StackingRule _stackingRule = StackingRule.Refresh;
         public StackingRule StackingRule => _stackingRule;
 
         [Header("=== Tick ===")]
-        [Tooltip("Does this effect apply periodically (DOT, HOT, etc.)?")]
+        // 此效果是否周期性应用? (DOT, HOT等)
+        [Tooltip("此效果是否周期性应用? (DOT, HOT等)")]
         [SerializeField] protected bool _isTickEffect;
         public bool IsTickEffect => _isTickEffect;
 
-        [Tooltip("Seconds between tick applications")]
+        // 检测应用之间的时间秒数
+        [Tooltip("检测应用之间的时间秒数")]
         [SerializeField] protected float _tickInterval = 1f;
         public float TickInterval => _tickInterval;
 
@@ -119,17 +139,20 @@ namespace Hotfix.GameSystems.Skills.Effect
     public class BuffEffectData : EffectData
     {
         [Header("=== Buff Properties ===")]
-        [Tooltip("Which attribute this buff modifies (AttackPower, Defense, Speed, etc.)")]
+        // 此buff修改哪个属性 (AttackPower, Defense, Speed等)
+        [Tooltip("此buff修改哪个属性 (AttackPower, Defense, Speed等)")]
         [SerializeField] private AttributeType _attributeToModify;
         public AttributeType AttributeToModify => _attributeToModify;
         public AttributeType SetAttributeToModify { set => _attributeToModify = value; }
 
-        [Tooltip("Value of the modification (interpreted according to ModifierType)")]
+        // 修改的值(根据ModifierType解释)
+        [Tooltip("修改的值(根据ModifierType解释)")]
         [SerializeField] private float _value;
         public float Value => _value;
         public float SetValue { set => _value = value; }
 
-        [Tooltip("How the value modifies the attribute: Flat (+N), PercentAdd (+N%), PercentMult (*N%)")]
+        // 值如何修改属性: Flat (+N), PercentAdd (+N%), PercentMult (*N%)
+        [Tooltip("值如何修改属性: Flat (+N), PercentAdd (+N%), PercentMult (*N%)")]
         [SerializeField] private ModifierType _modifierType = ModifierType.Flat;
         public ModifierType ModifierType => _modifierType;
         public ModifierType SetModifierType { set => _modifierType = value; }
@@ -164,15 +187,18 @@ namespace Hotfix.GameSystems.Skills.Effect
     public class HealEffectData : EffectData
     {
         [Header("=== Heal Properties ===")]
-        [Tooltip("Base heal amount before scaling")]
+        // 缩放前的基准治疗量
+        [Tooltip("缩放前的基准治疗量")]
         [SerializeField] private float _baseHeal;
         public float BaseHeal => _baseHeal;
 
-        [Tooltip("Spell power scaling ratio (e.g. 0.5 = 50% of SpellPower added to heal)")]
+        // 法术强度缩放比 (如 0.5 = 50% SpellPower加成到治疗)
+        [Tooltip("法术强度缩放比 (如 0.5 = 50% SpellPower加成到治疗)")]
         [SerializeField] private float _spellPowerRatio;
         public float SpellPowerRatio => _spellPowerRatio;
 
-        [Tooltip("Treat BaseHeal as percentage of target's max HP? (e.g. 10 = 10% max HP)")]
+        // 将BaseHeal视为目标最大生命值的百分比? (如 10 = 10%最大生命值)
+        [Tooltip("将BaseHeal视为目标最大生命值的百分比? (如 10 = 10%最大生命值)")]
         [SerializeField] private bool _percentOfMaxHealth;
         public bool PercentOfMaxHealth => _percentOfMaxHealth;
 
@@ -205,15 +231,18 @@ namespace Hotfix.GameSystems.Skills.Effect
     public class ShieldEffectData : EffectData
     {
         [Header("=== Shield Properties ===")]
-        [Tooltip("Damage absorption amount")]
+        // 伤害吸收量
+        [Tooltip("伤害吸收量")]
         [SerializeField] private float _shieldAmount;
         public float ShieldAmount => _shieldAmount;
 
-        [Tooltip("Absorb all damage types? (false = only absorb AbsorbedDamageType)")]
+        // 吸收所有伤害类型? (false = 只吸收AbsorbedDamageType)
+        [Tooltip("吸收所有伤害类型? (false = 只吸收AbsorbedDamageType)")]
         [SerializeField] private bool _absorbAllDamageTypes = true;
         public bool AbsorbAllDamageTypes => _absorbAllDamageTypes;
 
-        [Tooltip("Damage type absorbed when AbsorbAllDamageTypes is false")]
+        // 当AbsorbAllDamageTypes为false时吸收的伤害类型
+        [Tooltip("当AbsorbAllDamageTypes为false时吸收的伤害类型")]
         [SerializeField] private DamageType _absorbedDamageType = DamageType.Physical;
         public DamageType AbsorbedDamageType => _absorbedDamageType;
 
@@ -239,15 +268,18 @@ namespace Hotfix.GameSystems.Skills.Effect
     public class KnockbackEffectData : EffectData
     {
         [Header("=== Knockback Properties ===")]
-        [Tooltip("Horizontal knockback force")]
+        // 水平击退力
+        [Tooltip("水平击退力")]
         [SerializeField] private float _force;
         public float Force => _force;
 
-        [Tooltip("Upward (vertical) knockback force")]
+        // 向上(垂直)击退力
+        [Tooltip("向上(垂直)击退力")]
         [SerializeField] private float _upwardForce;
         public float UpwardForce => _upwardForce;
 
-        [Tooltip("AOE knockback radius (0 = single target)")]
+        // AOE击退半径 (0 = 单目标)
+        [Tooltip("AOE击退半径 (0 = 单目标)")]
         [SerializeField] private float _radius;
         public float Radius => _radius;
 
@@ -271,7 +303,8 @@ namespace Hotfix.GameSystems.Skills.Effect
     public class StunEffectData : EffectData
     {
         [Header("=== Stun Properties ===")]
-        [Tooltip("Can this stun be cleansed / dispelled?")]
+        // 此晕眩是否可以被净化/驱散?
+        [Tooltip("此晕眩是否可以被净化/驱散?")]
         [SerializeField] private bool _canBeCleanse = true;
         public bool CanBeCleanse => _canBeCleanse;
 

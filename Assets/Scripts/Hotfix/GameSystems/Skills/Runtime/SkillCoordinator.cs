@@ -146,7 +146,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
 
             // 检查是否是普攻技能
-            if (skillData.SkillType != SkillType.BasicAttack)
+            if (skillData.SkillType != SkillType.Combo)
             {
                 HandleInput(input);
                 return;

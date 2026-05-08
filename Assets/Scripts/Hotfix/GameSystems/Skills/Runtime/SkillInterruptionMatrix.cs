@@ -14,7 +14,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private static readonly Dictionary<SkillType, Dictionary<InterruptionSource, bool>> _defaultRules = new()
         {
             {
-                SkillType.BasicAttack, new Dictionary<InterruptionSource, bool>
+                SkillType.Combo, new Dictionary<InterruptionSource, bool>
                 {
                     { InterruptionSource.MovementInput, true },      // 可被移动取消
                     { InterruptionSource.BasicAttack, false },       // 普攻之间不能互断
@@ -27,7 +27,46 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 }
             },
             {
-                SkillType.Special, new Dictionary<InterruptionSource, bool>
+                SkillType.Instant, new Dictionary<InterruptionSource, bool>
+                {
+                    { InterruptionSource.MovementInput, false },
+                    { InterruptionSource.BasicAttack, false },
+                    { InterruptionSource.AnotherSkill, false },
+                    { InterruptionSource.DamageTaken, true },
+                    { InterruptionSource.Stun, true },
+                    { InterruptionSource.RollDodge, false },
+                    { InterruptionSource.Parry, true },
+                    { InterruptionSource.TimeOut, true }
+                }
+            },
+            {
+                SkillType.Charged, new Dictionary<InterruptionSource, bool>
+                {
+                    { InterruptionSource.MovementInput, false },
+                    { InterruptionSource.BasicAttack, false },
+                    { InterruptionSource.AnotherSkill, false },
+                    { InterruptionSource.DamageTaken, true },
+                    { InterruptionSource.Stun, true },
+                    { InterruptionSource.RollDodge, false },
+                    { InterruptionSource.Parry, true },
+                    { InterruptionSource.TimeOut, true }
+                }
+            },
+            {
+                SkillType.Channeled, new Dictionary<InterruptionSource, bool>
+                {
+                    { InterruptionSource.MovementInput, false },
+                    { InterruptionSource.BasicAttack, false },
+                    { InterruptionSource.AnotherSkill, false },
+                    { InterruptionSource.DamageTaken, true },
+                    { InterruptionSource.Stun, true },
+                    { InterruptionSource.RollDodge, false },
+                    { InterruptionSource.Parry, true },
+                    { InterruptionSource.TimeOut, true }
+                }
+            },
+            {
+                SkillType.Projectile, new Dictionary<InterruptionSource, bool>
                 {
                     { InterruptionSource.MovementInput, false },
                     { InterruptionSource.BasicAttack, false },
