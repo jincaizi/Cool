@@ -18875,3 +18875,20 @@ bb64141 refactor: replace AnimationDriver with Animator+AnimHashes in BaseFSM an
 bed2f45 feat: add AnimHashes static class and standalone AttackState enum
 ---
 
+## Session End: 20260508_151449
+### Commits
+26156a1 fix: add dash params to SkillQ default, fix null IEffectTarget for dash direction
+c43e3ce fix: add SkillData.CreateDefault factory, remove Resources loading, wire ForceComplete
+82297de fix: use animation-callback-driven cleanup, add Resources fallback for skills
+3cfcbe4 fix: restore animation trigger bridge SkillCoordinator→Animator, init layer weights
+f2a2cd9 fix: resolve cross-assembly ref with IDashComponent interface in Skills assembly
+6e59020 feat: wire up SkillCoordinator and SkillDashComponent in Sys3CEntry
+05e9e30 refactor: remove AnimationDriver static field from StateBehaviours, clean AttackStateBehaviour
+afd1216 refactor: remove AttackFSM from FSMManager, use Animator directly
+bb64141 refactor: replace AnimationDriver with Animator+AnimHashes in BaseFSM and HitFSM
+01e5c11 feat: add SkillDashComponent injection to SkillExecutor and SkillCoordinator
+3b22aa1 refactor: remove AttackFSM from StateCoordinator, add SetAttackLayerActive
+660e551 refactor: delete old skill system, AnimationDriver, HitManager, AttackFSM
+bed2f45 feat: add AnimHashes static class and standalone AttackState enum
+---
+

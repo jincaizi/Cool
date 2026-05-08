@@ -132,13 +132,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     break;
                 case "Attack1":
                 case "Attack2":
-                    _animator.ResetTrigger(AnimHashes.Attack);
-                    _characterController.LockMovement = false;
-                    _characterController.LockRotation = false;
-                    OnAttackAnimationCompleted?.Invoke();
-                    break;
                 case "AttackSkill":
-                    // Generic attack/skill animation completed (SkillQ, SkillR, etc.)
                     OnAttackAnimationCompleted?.Invoke();
                     break;
             }
