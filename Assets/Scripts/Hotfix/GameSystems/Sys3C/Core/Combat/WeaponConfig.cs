@@ -1,3 +1,4 @@
+using Hotfix.GameSystems.Skills.Data;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Core.Combat
@@ -10,7 +11,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         public WeaponType WeaponType;
 
         [Header("Attack")]
-        public AttackShapeConfig AttackShape;
+        public ShapeBlock AttackShape;
         public AttackEffectConfig[] Effects;
         public float AttackSpeed = 1f;
 
