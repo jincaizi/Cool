@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Sys3C
@@ -29,16 +30,13 @@ namespace Hotfix.GameSystems.Sys3C
                 return;
             }
 
-            if (_config.Effects == null || _config.Effects.Length == 0) return;
+            if (_config.Damage == null) return;
 
             foreach (var t in _hitBuffer)
             {
-                foreach (var e in _config.Effects)
-                {
-                    Vector3 dir = (t.Transform.position - transform.position).normalized;
-                    t.TakeDamage(e.Damage, dir);
-                    Debug.Log($"[Attack] Hit {t.Transform.name} for {e.Damage.BaseDamage} damage");
-                }
+                Vector3 dir = (t.Transform.position - transform.position).normalized;
+                t.TakeDamage(_config.Damage, dir);
+                Debug.Log($"[Attack] Hit {t.Transform.name} for {_config.Damage.BaseDamage} damage");
             }
 
             _attackCooldownTimer = 1f / _config.AttackSpeed;

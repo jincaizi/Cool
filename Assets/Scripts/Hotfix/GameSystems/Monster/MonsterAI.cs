@@ -61,7 +61,7 @@ namespace Hotfix.GameSystems.Monster
         public MonsterAIState CurrentState => _state;
 
         public event Action OnDeathComplete;
-        public event Action<AttackEffectConfig> OnAttackHitboxActivate;
+        public event Action<DamageBlock, EffectBlock> OnAttackHitboxActivate;
         public event Action OnAttackHitboxDeactivate;
         public event Action<MonsterAIState, MonsterAIState> OnStateChanged;
 
@@ -332,9 +332,9 @@ namespace Hotfix.GameSystems.Monster
                     _animator.SetInteger(HASH_AttackIndex, _currentAttackIndex);
                     _animator.SetTrigger(HASH_Attack);
 
-                    var effect = GetCurrentEffect();
-                    _attackHitTarget = ResolveAttack(effect);
-                    OnAttackHitboxActivate?.Invoke(effect);
+                    var (damage, effect) = GetCurrentEffect();
+                    _attackHitTarget = ResolveAttack(damage, effect);
+                    OnAttackHitboxActivate?.Invoke(damage, effect);
                     break;
 
                 case MonsterAIState.Defend:
@@ -353,9 +353,9 @@ namespace Hotfix.GameSystems.Monster
             }
         }
 
-        private bool ResolveAttack(AttackEffectConfig effect)
+        private bool ResolveAttack(DamageBlock damage, EffectBlock effect)
         {
-            if (effect == null) return false;
+            if (damage == null) return false;
             int mask = LayerMask.GetMask("Character");
             var shape = AttackShapeFactory.Create(_config.AttackShape, PhysicsRegistry.Instance, EntityType.Player);
             _hitBuffer.Clear();
@@ -363,7 +363,7 @@ namespace Hotfix.GameSystems.Monster
             foreach (var t in _hitBuffer)
             {
                 Vector3 dir = (t.Transform.position - _self.position).normalized;
-                t.TakeDamage(effect.Damage, dir);
+                t.TakeDamage(damage, dir);
             }
             return _hitBuffer.Count > 0;
         }
@@ -382,15 +382,10 @@ namespace Hotfix.GameSystems.Monster
             return 0;
         }
 
-        private AttackEffectConfig GetCurrentEffect()
+        private (DamageBlock damage, EffectBlock effect) GetCurrentEffect()
         {
-            if (_config.AttackEffects == null || _config.AttackEffects.Length == 0)
-                return new AttackEffectConfig
-                {
-                    Damage = DamageBlock.CreateDefault(_config.AttackPower),
-                };
-            int idx = Mathf.Min(_currentAttackIndex, _config.AttackEffects.Length - 1);
-            return _config.AttackEffects[idx];
+            var damage = _config.AttackDamage ?? DamageBlock.CreateDefault(_config.AttackPower);
+            return (damage, _config.AttackEffect);
         }
 
         private MonsterAIContext BuildContext()

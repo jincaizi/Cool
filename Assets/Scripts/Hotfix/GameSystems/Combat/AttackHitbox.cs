@@ -18,15 +18,14 @@ namespace Hotfix.GameSystems.Combat
             gameObject.SetActive(false);
         }
 
-        public void Activate(AttackEffectConfig effectConfig)
+        public void Activate(DamageBlock damageData, EffectBlock effectData)
         {
-            var dmg = effectConfig?.Damage ?? DamageBlock.CreateDefault(10f);
             CurrentData = new AttackHitboxData
             {
-                DamageData = dmg,
-                KnockbackForce = effectConfig?.KnockbackForce ?? 0,
-                LaunchForce = effectConfig?.LaunchForce ?? 0,
-                StunDuration = effectConfig?.StunDuration ?? 0,
+                DamageData = damageData,
+                KnockbackForce = effectData?.KnockbackForce ?? 0,
+                LaunchForce = effectData?.LaunchForce ?? 0,
+                StunDuration = effectData?.StunDuration ?? 0,
             };
             IsActive = true;
             gameObject.SetActive(true);
@@ -34,7 +33,7 @@ namespace Hotfix.GameSystems.Combat
 
         public void Activate(DamageBlock damageData)
         {
-            Activate(new AttackEffectConfig { Damage = damageData });
+            Activate(damageData, null);
         }
 
         public void Deactivate()

@@ -1,5 +1,4 @@
 using Hotfix.GameSystems.Skills.Data;
-using Hotfix.GameSystems.Sys3C.Core.Combat;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Monster
@@ -79,10 +78,13 @@ namespace Hotfix.GameSystems.Monster
         [Tooltip("攻击判定形状配置")]
         public ShapeBlock AttackShape;
 
-        [Header("Attack Effects")]
-        // List of effects for each attack variant
-        [Tooltip("每个攻击变体的效果列表")]
-        public AttackEffectConfig[] AttackEffects;
+        [Header("Attack Damage")]
+        [Tooltip("攻击伤害配置")]
+        public DamageBlock AttackDamage;
+
+        [Header("Attack Effect")]
+        [Tooltip("攻击效果配置")]
+        public EffectBlock AttackEffect;
 
         [Header("Defend")]
         // Whether to enable defend behavior (TurtleShell)

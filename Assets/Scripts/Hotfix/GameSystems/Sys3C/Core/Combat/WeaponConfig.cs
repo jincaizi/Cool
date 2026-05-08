@@ -12,7 +12,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
 
         [Header("Attack")]
         public ShapeBlock AttackShape;
-        public AttackEffectConfig[] Effects;
+        public DamageBlock Damage;
         public float AttackSpeed = 1f;
 
         [Header("Skills")]

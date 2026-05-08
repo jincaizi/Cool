@@ -63,11 +63,11 @@ namespace Hotfix.GameSystems.Monster
             _stats.OnDeath += () => _onDeath?.Invoke();
 
             _ai.OnDeathComplete += () => StartCoroutine(DeathSequence());
-            _ai.OnAttackHitboxActivate += (effect) =>
+            _ai.OnAttackHitboxActivate += (damage, effect) =>
             {
-                if (AttackHitbox != null && effect != null)
+                if (AttackHitbox != null)
                 {
-                    AttackHitbox.Activate(effect);
+                    AttackHitbox.Activate(damage, effect);
                     HitZone.ResetHits();
                 }
             };
