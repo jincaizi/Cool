@@ -19,7 +19,7 @@ MonoBehaviour:
   _skillType: 2
   _quality: 1
   _manaCost: 0
-  _cooldown: 6
+  _cooldown: 15
   _staminaCost: 0
   _animatorTrigger: SkillR
   _castClip: {fileID: 0}
@@ -46,7 +46,7 @@ MonoBehaviour:
   _holdToCharge: 1
   _releaseToFire: 1
   _minChargeTime: 0.3
-  _maxChargeTime: 2
+  _maxChargeTime: 5
   _chargeDamageCurve:
     serializedVersion: 2
     m_Curve:

@@ -19,20 +19,20 @@ MonoBehaviour:
   _skillType: 1
   _quality: 1
   _manaCost: 0
-  _cooldown: 3
+  _cooldown: 6
   _staminaCost: 0
   _animatorTrigger: SkillQ
   _castClip: {fileID: 0}
   _releaseClip: {fileID: 0}
-  _dashDistance: 0
-  _dashDuration: 0
+  _dashDistance: 2
+  _dashDuration: 0.3
   _canBeInterruptedByDamage: 1
   _canBeInterruptedByMovement: 0
   _interruptionPriority: 50
   _canCancelIntoBasicAttack: 1
-  _canCancelIntoOtherSkill: 0
+  _canCancelIntoOtherSkill: 1
   _damage:
-    _baseDamage: 0
+    _baseDamage: 8
     _attackRatio: 1
     _scalingAttribute: 0
     _damageType: 0

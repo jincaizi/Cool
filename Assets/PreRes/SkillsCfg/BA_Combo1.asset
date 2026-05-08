@@ -21,7 +21,7 @@ MonoBehaviour:
   _manaCost: 0
   _cooldown: 0
   _staminaCost: 0
-  _animatorTrigger: Attack1
+  _animatorTrigger: Attack
   _castClip: {fileID: 0}
   _releaseClip: {fileID: 0}
   _dashDistance: 0
@@ -32,7 +32,7 @@ MonoBehaviour:
   _canCancelIntoBasicAttack: 1
   _canCancelIntoOtherSkill: 0
   _damage:
-    _baseDamage: 0
+    _baseDamage: 3
     _attackRatio: 1
     _scalingAttribute: 0
     _damageType: 0
