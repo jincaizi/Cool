@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
+using Hotfix.GameSystems.Sys3C.Skill;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Runtime
@@ -20,6 +21,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         // 目标检测
         private Vector3 _targetPosition;
         private IEffectTarget _targetCharacter;
+        private SkillDashComponent _dashComponent;
 
         // 回调
         public event Action<int> OnHitboxFrame;              // 判定帧触发
@@ -50,6 +52,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _stateMachine.OnHitConfirm += OnHitConfirm;
             _stateMachine.OnSkillCompleted += OnSkillComplete;
             _stateMachine.OnSkillInterrupted += OnSkillInterrupt;
+            _stateMachine.OnStateChanged += OnStateChanged;
         }
 
         /// <summary>
@@ -70,6 +73,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public void SetTargetPosition(Vector3 position)
         {
             _targetPosition = position;
+        }
+
+        public void SetDashComponent(SkillDashComponent dashComponent)
+        {
+            _dashComponent = dashComponent;
         }
 
         /// <summary>
@@ -197,6 +205,17 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private void OnSkillInterrupt(InterruptionSource source)
         {
             OnSkillInterrupted?.Invoke(source);
+        }
+
+        private void OnStateChanged(SkillSubState newState)
+        {
+            if (newState == SkillSubState.Execution &&
+                _dashComponent != null &&
+                _skillData.DashDistance > 0)
+            {
+                Vector3 dashDir = _owner.transform.forward;
+                _dashComponent.StartDash(dashDir, _skillData.DashDistance, _skillData.DashDuration);
+            }
         }
 
         private List<IEffectTarget> DetectTargets()
