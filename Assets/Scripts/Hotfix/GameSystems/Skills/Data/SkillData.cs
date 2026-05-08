@@ -121,6 +121,13 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] protected int _interruptionPriority = 50;
         public int InterruptionPriority => _interruptionPriority;
 
+        [Header("=== Dash ===")]
+        [SerializeField] protected float _dashDistance;
+        public float DashDistance => _dashDistance;
+
+        [SerializeField] protected float _dashDuration;
+        public float DashDuration => _dashDuration;
+
         [Header("=== Cancellation ===")]
         [SerializeField] protected bool _canCancelIntoBasicAttack = true;
         public bool CanCancelIntoBasicAttack => _canCancelIntoBasicAttack;
