@@ -17,6 +17,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         private readonly StateCoordinator _stateCoordinator;
 
         public event Action OnJumpEndCompleted;
+        public event Action OnAttackAnimationCompleted;
         public event Action OnHitCompleted;
         public event Action OnDeath;
 
@@ -134,6 +135,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     _animator.ResetTrigger(AnimHashes.Attack);
                     _characterController.LockMovement = false;
                     _characterController.LockRotation = false;
+                    OnAttackAnimationCompleted?.Invoke();
+                    break;
+                case "AttackSkill":
+                    // Generic attack/skill animation completed (SkillQ, SkillR, etc.)
+                    OnAttackAnimationCompleted?.Invoke();
                     break;
             }
         }

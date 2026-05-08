@@ -5,9 +5,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 {
     public class AttackStateBehaviour : StateMachineBehaviour
     {
-        private static readonly int HASH_Attack1 = Animator.StringToHash("Attack1");
-        private static readonly int HASH_Attack2 = Animator.StringToHash("Attack2");
-
         private static Action<string> _onAnimationCompleted;
 
         public static void SetCallback(Action<string> callback)
@@ -17,16 +14,15 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         private bool IsAttackState(AnimatorStateInfo stateInfo)
         {
-            var hash = stateInfo.shortNameHash;
-            return hash == HASH_Attack1 || hash == HASH_Attack2;
+            // Accept any non-default state on the attack layer
+            return stateInfo.shortNameHash != 0;
         }
 
         private string GetStateName(AnimatorStateInfo stateInfo)
         {
-            var stateHash = stateInfo.shortNameHash;
-            if (stateHash == HASH_Attack1) return "Attack1";
-            if (stateHash == HASH_Attack2) return "Attack2";
-            return "Unknown";
+            var hash = stateInfo.shortNameHash;
+            // Return a generic tag for FSMManager to fire OnAttackAnimationCompleted
+            return "AttackSkill";
         }
 
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

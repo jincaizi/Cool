@@ -59,6 +59,7 @@ namespace Hotfix.GameSystems.Sys3C
                 transform, CharacterController, GroundLayer);
 
             _fsmManager = new FSMManager(_cc, Animator);
+            _fsmManager.OnAttackAnimationCompleted += CleanupSkillAnimation;
 
             _dashComponent = new SkillDashComponent(CharacterController, transform);
 
@@ -66,11 +67,31 @@ namespace Hotfix.GameSystems.Sys3C
             _skillCoordinator.SetDashComponent(_dashComponent);
             _skillCoordinator.OnSkillActivated += HandleSkillActivated;
 
+            // Load skills: inspector-assigned first, then Resources fallback
+            int skillCount = 0;
             foreach (var skill in _characterSkills)
             {
                 if (skill != null)
+                {
                     _skillCoordinator.RegisterSkill(skill);
+                    skillCount++;
+                }
             }
+
+            if (skillCount == 0)
+            {
+                var loaded = Resources.LoadAll<SkillData>("Skills");
+                foreach (var skill in loaded)
+                {
+                    _skillCoordinator.RegisterSkill(skill);
+                    skillCount++;
+                }
+            }
+
+            if (skillCount == 0)
+                Debug.LogWarning("[Sys3CEntry] No SkillData assigned. Create assets via Create > Game > Skills > Skill Data and place in Resources/Skills/ or assign to _characterSkills.");
+            else
+                Debug.Log($"[Sys3CEntry] Skills registered: {skillCount}");
 
             _inputManager = GetComponent<InputManager>();
             if (_inputManager == null)
@@ -100,14 +121,6 @@ namespace Hotfix.GameSystems.Sys3C
             _fsmManager.Update(Time.deltaTime);
             _skillCoordinator.Update(Time.deltaTime);
             _dashComponent.Update();
-
-            // Detect skill completion for animation cleanup
-            bool isSkillActive = _skillCoordinator.IsSkillActive;
-            if (_wasSkillActive && !isSkillActive)
-            {
-                CleanupSkillAnimation();
-            }
-            _wasSkillActive = isSkillActive;
 
             if (_camera != null)
                 _camera.Update();
@@ -167,7 +180,6 @@ namespace Hotfix.GameSystems.Sys3C
         }
 
         private string _lastSkillTrigger;
-        private bool _wasSkillActive;
 
         private void HandleSkillActivated(SkillData skillData)
         {
@@ -176,6 +188,11 @@ namespace Hotfix.GameSystems.Sys3C
             if (!string.IsNullOrEmpty(_lastSkillTrigger))
             {
                 Animator.SetTrigger(_lastSkillTrigger);
+                Debug.Log($"[Sys3CEntry] Skill activated: {skillData.SkillName} (id={skillData.SkillId}), trigger={_lastSkillTrigger}");
+            }
+            else
+            {
+                Debug.LogWarning($"[Sys3CEntry] Skill '{skillData.SkillName}' has no AnimatorTrigger set!");
             }
 
             Animator.SetLayerWeight(1, 1f);
