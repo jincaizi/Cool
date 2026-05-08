@@ -135,6 +135,31 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] protected bool _canCancelIntoOtherSkill = false;
         public bool CanCancelIntoOtherSkill => _canCancelIntoOtherSkill;
 
+        public static SkillData CreateDefault(
+            int skillId,
+            string name,
+            Definition.SkillType type,
+            string animTrigger,
+            float cooldown = 0f,
+            float range = 3f,
+            Definition.ReleaseType releaseType = Definition.ReleaseType.Instant)
+        {
+            var data = CreateInstance<SkillData>();
+            data._skillId = skillId;
+            data._skillName = name;
+            data._skillType = type;
+            data._animatorTrigger = animTrigger;
+            data._cooldown = cooldown;
+            data._range = range;
+            data._releaseType = releaseType;
+            data._castTime = 0f;
+            data._canCancelIntoBasicAttack = true;
+            data._canCancelIntoOtherSkill = false;
+            data._canBeInterruptedByDamage = true;
+            data._interruptionPriority = type == Definition.SkillType.BasicAttack ? 20 : 50;
+            return data;
+        }
+
         /// <summary>
         /// 获取在特定子状态下是否可以移动
         /// </summary>

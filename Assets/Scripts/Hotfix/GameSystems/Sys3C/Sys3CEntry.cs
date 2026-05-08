@@ -7,6 +7,7 @@ using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Camera;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Skills.Runtime;
 
@@ -67,7 +68,7 @@ namespace Hotfix.GameSystems.Sys3C
             _skillCoordinator.SetDashComponent(_dashComponent);
             _skillCoordinator.OnSkillActivated += HandleSkillActivated;
 
-            // Load skills: inspector-assigned first, then Resources fallback
+            // Register skills: inspector-assigned assets first, runtime defaults as fallback
             int skillCount = 0;
             foreach (var skill in _characterSkills)
             {
@@ -80,18 +81,25 @@ namespace Hotfix.GameSystems.Sys3C
 
             if (skillCount == 0)
             {
-                var loaded = Resources.LoadAll<SkillData>("Skills");
-                foreach (var skill in loaded)
-                {
-                    _skillCoordinator.RegisterSkill(skill);
-                    skillCount++;
-                }
+                Debug.Log("[Sys3CEntry] No SkillData assigned in Inspector, creating runtime defaults. " +
+                          "Create persistent assets via Create > Game > Skills > Skill Data and assign to _characterSkills.");
+
+                _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
+                    (int)SkillID.BasicAttack1, "Basic Attack 1", SkillType.BasicAttack, "Attack"));
+
+                _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
+                    (int)SkillID.BasicAttack2, "Basic Attack 2", SkillType.BasicAttack, "Attack"));
+
+                _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
+                    (int)SkillID.SkillQ, "Skill Q", SkillType.Special, "SkillQ", cooldown: 5f, range: 5f));
+
+                _skillCoordinator.RegisterSkill(SkillData.CreateDefault(
+                    (int)SkillID.SkillR, "Skill R", SkillType.Special, "SkillR", cooldown: 10f, range: 5f));
+
+                skillCount = 4;
             }
 
-            if (skillCount == 0)
-                Debug.LogWarning("[Sys3CEntry] No SkillData assigned. Create assets via Create > Game > Skills > Skill Data and place in Resources/Skills/ or assign to _characterSkills.");
-            else
-                Debug.Log($"[Sys3CEntry] Skills registered: {skillCount}");
+            Debug.Log($"[Sys3CEntry] Skills registered: {skillCount}");
 
             _inputManager = GetComponent<InputManager>();
             if (_inputManager == null)
@@ -180,6 +188,7 @@ namespace Hotfix.GameSystems.Sys3C
         }
 
         private string _lastSkillTrigger;
+        private bool _cleanupInProgress;
 
         private void HandleSkillActivated(SkillData skillData)
         {
@@ -201,6 +210,9 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void CleanupSkillAnimation()
         {
+            if (_cleanupInProgress) return;
+            _cleanupInProgress = true;
+
             if (!string.IsNullOrEmpty(_lastSkillTrigger))
             {
                 Animator.ResetTrigger(_lastSkillTrigger);
@@ -212,42 +224,16 @@ namespace Hotfix.GameSystems.Sys3C
             Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Idle);
             _cc.LockMovement = false;
             _cc.LockRotation = false;
+
+            _skillCoordinator.CurrentSkill?.ForceComplete();
+
             _fsmManager.Coordinator.UnlockAndReturnToBase();
+            _cleanupInProgress = false;
         }
 
-        private int GetBasicAttackSkillId()
-        {
-            foreach (var skill in _characterSkills)
-            {
-                if (skill != null && skill.SkillType == Skills.Definition.SkillType.BasicAttack)
-                    return skill.SkillId;
-            }
-            return 0;
-        }
-
-        private int GetSkillQId()
-        {
-            foreach (var skill in _characterSkills)
-            {
-                if (skill != null && skill.SkillType == Skills.Definition.SkillType.Special)
-                    return skill.SkillId;
-            }
-            return 0;
-        }
-
-        private int GetSkillRId()
-        {
-            bool foundFirst = false;
-            foreach (var skill in _characterSkills)
-            {
-                if (skill != null && skill.SkillType == Skills.Definition.SkillType.Special)
-                {
-                    if (!foundFirst) { foundFirst = true; continue; }
-                    return skill.SkillId;
-                }
-            }
-            return 0;
-        }
+        private int GetBasicAttackSkillId() => (int)SkillID.BasicAttack1;
+        private int GetSkillQId() => (int)SkillID.SkillQ;
+        private int GetSkillRId() => (int)SkillID.SkillR;
 
         void IDamageable.TakeDamage(DamageData data, Vector3 hitDirection)
         {
