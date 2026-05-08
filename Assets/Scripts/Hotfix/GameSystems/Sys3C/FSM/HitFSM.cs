@@ -50,7 +50,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
     /// </summary>
     public class HitFSM
     {
-        private readonly AnimationDriver _driver;
+        private readonly Animator _animator;
         private readonly FSMConfig _config;
 
         private HitState _currentState;
@@ -139,14 +139,14 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             }
         }
 
-        public HitFSM(AnimationDriver driver)
-            : this(driver, FSMConfig.Default)
+        public HitFSM(Animator animator)
+            : this(animator, FSMConfig.Default)
         {
         }
 
-        public HitFSM(AnimationDriver driver, FSMConfig config)
+        public HitFSM(Animator animator, FSMConfig config)
         {
-            _driver = driver;
+            _animator = animator;
             _config = config;
             _currentState = HitState.None;
         }
@@ -327,48 +327,52 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             switch (target)
             {
                 case HitState.Hit:
-                    _driver.TriggerHit();
-                    _driver.SetHitLayerWeight(1f);
+                    _animator.SetTrigger(AnimHashes.Hit);
+                    _animator.SetBool(AnimHashes.IsHit, true);
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.Hit);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
                     break;
 
                 case HitState.Knockback:
-                    _driver.SetHitState(HitState.Knockback);
-                    _driver.SetHitLayerWeight(1f);
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.Knockback);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
                     // 计算击退速度
                     _knockbackVelocity = _hitData.HitDirection * _hitData.KnockbackForce;
                     break;
 
                 case HitState.Launched:
-                    _driver.SetHitState(HitState.Launched);
-                    _driver.SetHitLayerWeight(1f);
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.Launched);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
                     // 浮空有垂直速度
                     _knockbackVelocity = _hitData.HitDirection * _hitData.KnockbackForce +
                                          Vector3.up * _hitData.LaunchForce;
                     break;
 
                 case HitState.Dizzy:
-                    _driver.SetHitState(HitState.Dizzy);
-                    _driver.SetHitLayerWeight(1f);
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.Dizzy);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
                     break;
 
                 case HitState.Down:
-                    _driver.SetHitState(HitState.Down);
-                    _driver.SetHitLayerWeight(1f);
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.Down);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
                     break;
 
                 case HitState.GetUp:
-                    _driver.SetHitState(HitState.GetUp);
-                    _driver.SetHitLayerWeight(1f);
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.GetUp);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
                     break;
 
                 case HitState.Death:
-                    _driver.TriggerDeath();
-                    _driver.SetHitLayerWeight(1f);
+                    _animator.SetTrigger(AnimHashes.Death);
+                    _animator.SetBool(AnimHashes.IsDead, true);
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.Death);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
                     break;
 
                 case HitState.None:
-                    _driver.SetHitLayerWeight(0f);
-                    _driver.SetHitState(HitState.None);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 0f);
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.None);
                     _knockbackVelocity = Vector3.zero;
                     break;
             }

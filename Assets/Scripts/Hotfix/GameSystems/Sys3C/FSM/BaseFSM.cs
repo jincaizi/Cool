@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Animation;
 
@@ -9,7 +10,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
     /// </summary>
     public class BaseFSM
     {
-        private readonly AnimationDriver _driver;
+        private readonly Animator _animator;
         private readonly StateTransitionTable _table;
 
         private BaseState _currentState;
@@ -18,14 +19,14 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public BaseState CurrentState => _currentState;
         public event Action<BaseState> OnStateChanged;
 
-        public BaseFSM(AnimationDriver driver, StateTransitionTable table)
+        public BaseFSM(Animator animator, StateTransitionTable table)
         {
-            _driver = driver;
+            _animator = animator;
             _table = table;
             _currentState = BaseState.Idle;
         }
 
-        public void Update(CharacterData data, AttackState attackState)
+        public void Update(CharacterData data, bool isAttacking)
         {
             if (_lockedState.HasValue)
             {
@@ -39,7 +40,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
             // 如果当前处于攻击/技能状态，限制 BaseLayer 转换
             // 只允许跳跃相关转换，不允许 Idle/Move 之间的切换
-            bool isInAttackState = attackState != AttackState.Idle;
+            bool isInAttackState = isAttacking;
 
             var target = _table.Evaluate(_currentState, data);
             if (target.HasValue && target.Value != _currentState)
@@ -74,7 +75,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             if (_currentState != target)
             {
                 _currentState = target;
-                _driver.SetBaseState(target);
+                _animator.SetInteger(AnimHashes.BaseState, (int)target);
                 OnStateChanged?.Invoke(target);
             }
         }
@@ -91,24 +92,24 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             if (_currentState == BaseState.Death)
             {
                 _currentState = defaultState;
-                _driver.SetBaseState(_currentState);
+                _animator.SetInteger(AnimHashes.BaseState, (int)_currentState);
             }
         }
 
         private void TransitionTo(BaseState target)
         {
             _currentState = target;
-            _driver.SetBaseState(target);
+            _animator.SetInteger(AnimHashes.BaseState, (int)target);
 
             bool isJumping = target == BaseState.JumpStart
                           || target == BaseState.JumpAir
                           || target == BaseState.JumpEnd;
-            _driver.SetIsJumping(isJumping);
+            _animator.SetBool(AnimHashes.IsJumping,isJumping);
 
             // 跳跃时将 Blend 设置为 0（停止 Locomotion 动画）
             if (isJumping)
             {
-                _driver.SetBlend(0f);
+                _animator.SetFloat(AnimHashes.Blend, 0f);
             }
 
             OnStateChanged?.Invoke(target);
@@ -117,7 +118,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public void DebugSetState(BaseState state)
         {
             _currentState = state;
-            _driver.SetBaseState(state);
+            _animator.SetInteger(AnimHashes.BaseState, (int)state);
         }
     }
 }
