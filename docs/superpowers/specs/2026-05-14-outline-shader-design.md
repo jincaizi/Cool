@@ -97,33 +97,53 @@ float width = Mathf.Lerp(0.01f, 0.04f, pulse);
 
 新增 `HitFlashVFX` 组件，订阅 `DamageEvent`（玩家受击）/ `MonsterTakeDamageEvent`（怪物受击）：
 
+可调控参数（`[SerializeField]`）：
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `_flashWidth` | 0.05 | 峰值描边宽度（世界单位） |
+| `_flashDuration` | 0.15s | 衰减持续时间 |
+| `_flashStartColor` | White | 起始颜色 |
+| `_flashEndColor` | Red | 结束颜色 |
+
 ```
 命中瞬间:
-  _OutlineColor = Color.white
-  _OutlineWidth = 0.05（最大值）
-0.15s 内:
+  _OutlineColor = _flashStartColor
+  _OutlineWidth = _flashWidth
+_flashDuration 内:
   _OutlineWidth → 0（线性衰减）
-  _OutlineColor → Color.red（渐变）
+  _OutlineColor → _flashEndColor（线性插值）
 触发方式: DOTween 快速 Tween
 ```
 
 ```csharp
-// HitFlashVFX pseudo
-private void OnDamaged(DamageEvent e) // or MonsterTakeDamageEvent
+// HitFlashVFX
+[SerializeField] private float _flashWidth = 0.05f;
+[SerializeField] private float _flashDuration = 0.15f;
+[SerializeField] private Color _flashStartColor = Color.white;
+[SerializeField] private Color _flashEndColor = Color.red;
+
+private void TriggerFlash()
 {
     if (_hitRenderer == null) return;
     
+    // Kill any active flash tween first
+    _flashTween?.Kill();
+    
     _hitRenderer.GetPropertyBlock(_propBlock);
-    _propBlock.SetColor("_OutlineColor", Color.white);
-    _propBlock.SetFloat("_OutlineWidth", 0.05f);
+    _propBlock.SetColor("_OutlineColor", _flashStartColor);
+    _propBlock.SetFloat("_OutlineWidth", _flashWidth);
     _hitRenderer.SetPropertyBlock(_propBlock);
     
-    DOTween.To(() => 0.05f, width => {
+    _flashTween = DOTween.To(() => _flashWidth, width =>
+    {
+        if (_hitRenderer == null) return;
         _hitRenderer.GetPropertyBlock(_propBlock);
         _propBlock.SetFloat("_OutlineWidth", width);
-        _propBlock.SetColor("_OutlineColor", Color.Lerp(Color.white, Color.red, 1f - width / 0.05f));
+        float t = 1f - width / _flashWidth;
+        _propBlock.SetColor("_OutlineColor", Color.Lerp(_flashStartColor, _flashEndColor, t));
         _hitRenderer.SetPropertyBlock(_propBlock);
-    }, 0f, 0.15f).SetTarget(_hitRenderer);
+    }, 0f, _flashDuration).SetTarget(_hitRenderer);
 }
 ```
 
@@ -142,7 +162,7 @@ private void OnDamaged(DamageEvent e) // or MonsterTakeDamageEvent
 |------|------|
 | `Assets/Shaders/Outline.shader` | 双 Pass 描边 shader |
 | `Assets/Materials/Outline.mat` | 占位材质 |
-| `Assets/Scripts/Hotfix/GameSystems/VFX/HitFlashVFX.cs` | 受击闪白组件 |
+| `Assets/Scripts/Hotfix/GameSystems/VFX/HitFlashVFX.cs` | 受击闪白组件（4 个可调控参数：width/duration/startColor/endColor） |
 
 ### 修改
 
