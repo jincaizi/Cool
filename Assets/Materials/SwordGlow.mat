@@ -69,8 +69,8 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FlowIntensity: 0.8
-    - _FlowSpeed: 0.5
+    - _FlowIntensity: 1.2
+    - _FlowSpeed: 0.35
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1

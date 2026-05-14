@@ -146,7 +146,7 @@ Shader "Custom/SwordGlow"
                 {
                     half2 flowUV  = i.uv + half2(0, _Time.y * _FlowSpeed);
                     half  flowMask = tex2D(_FlowTex, flowUV).r;
-                    glow += flowMask * _EdgeColor.rgb * _FlowIntensity * pulse;
+                    glow += flowMask * _CoreColor.rgb * _FlowIntensity * pulse;
                 }
 
                 // ---- Composite ----
