@@ -101,17 +101,17 @@ Shader "Custom/SwordGlow"
 
             half proceduralFrost(half2 uv)
             {
-                half2 p = floor(uv);
-                half2 f = frac(uv);
+                float2 p = floor((float2)uv);
+                float2 f = frac((float2)uv);
                 f = f * f * (3.0 - 2.0 * f);
-                half2 a = p + half2(1.0, 0.0);
-                half2 b = p + half2(0.0, 1.0);
-                half2 c = p + half2(1.0, 1.0);
-                half h0 = frac(sin(dot(p, half2(12.9898, 78.233))) * 43758.5453);
-                half h1 = frac(sin(dot(a, half2(12.9898, 78.233))) * 43758.5453);
-                half h2 = frac(sin(dot(b, half2(12.9898, 78.233))) * 43758.5453);
-                half h3 = frac(sin(dot(c, half2(12.9898, 78.233))) * 43758.5453);
-                return lerp(lerp(h0, h1, f.x), lerp(h2, h3, f.x), f.y);
+                float2 a = p + float2(1.0, 0.0);
+                float2 b = p + float2(0.0, 1.0);
+                float2 c = p + float2(1.0, 1.0);
+                float h0 = frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
+                float h1 = frac(sin(dot(a, float2(12.9898, 78.233))) * 43758.5453);
+                float h2 = frac(sin(dot(b, float2(12.9898, 78.233))) * 43758.5453);
+                float h3 = frac(sin(dot(c, float2(12.9898, 78.233))) * 43758.5453);
+                return (half)lerp(lerp(h0, h1, f.x), lerp(h2, h3, f.x), f.y);
             }
 
             v2f vert(appdata v)
