@@ -40,7 +40,7 @@ Shader "Custom/Outline"
 
             struct v2f
             {
-                float4 vertex   : SV_POSITION;
+                float4 pos      : SV_POSITION;
                 float2 uv       : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
                 float3 worldPos    : TEXCOORD2;
@@ -54,7 +54,7 @@ Shader "Custom/Outline"
             v2f vert(appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv     = TRANSFORM_TEX(v.uv, _MainTex);
                 o.worldNormal = UnityObjectToWorldNormal(v.normal);
                 o.worldPos    = mul(unity_ObjectToWorld, v.vertex).xyz;
