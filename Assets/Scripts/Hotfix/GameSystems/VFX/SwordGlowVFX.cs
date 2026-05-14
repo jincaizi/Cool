@@ -15,6 +15,19 @@ namespace Hotfix.GameSystems.VFX
         private MaterialPropertyBlock _propBlock;
         private bool _isActive;
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
+        private static readonly int OutlineColorId = Shader.PropertyToID("_OutlineColor");
+        private static readonly int OutlineWidthId = Shader.PropertyToID("_OutlineWidth");
+        private static readonly int OutlineGlowId = Shader.PropertyToID("_OutlineGlow");
+
+        [Header("Outline Pulse")]
+        [SerializeField] private Color _outlineColor = new Color(0.2f, 0.5f, 1f);
+        [SerializeField] private float _outlineWidthMin = 0.01f;
+        [SerializeField] private float _outlineWidthMax = 0.04f;
+        [SerializeField] private float _outlineGlowMin = 0.5f;
+        [SerializeField] private float _outlineGlowMax = 1.5f;
+        [SerializeField] private float _pulseFrequency = 3f;
+
+        private float _pulseTime;
 
         private void Awake()
         {
@@ -65,6 +78,7 @@ namespace Hotfix.GameSystems.VFX
         {
             if (!WatchesSkill(e.SkillId)) return;
             _isActive = true;
+            _pulseTime = 0f;
             UpdateGlow(0f);
         }
 
@@ -85,8 +99,25 @@ namespace Hotfix.GameSystems.VFX
         {
             if (_weaponRenderer == null) return;
             _weaponRenderer.GetPropertyBlock(_propBlock);
+
             float intensity = Mathf.Lerp(0.3f, _maxGlowIntensity, t);
             _propBlock.SetColor(EmissionColorId, _glowColor * intensity);
+
+            if (_isActive)
+            {
+                _pulseTime += Time.deltaTime;
+                float pulse = Mathf.Sin(_pulseTime * _pulseFrequency * Mathf.PI * 2f) * 0.5f + 0.5f;
+                float width = Mathf.Lerp(_outlineWidthMin, _outlineWidthMax, pulse);
+                float glow = Mathf.Lerp(_outlineGlowMin, _outlineGlowMax, pulse);
+                _propBlock.SetColor(OutlineColorId, _outlineColor);
+                _propBlock.SetFloat(OutlineWidthId, width);
+                _propBlock.SetFloat(OutlineGlowId, glow);
+            }
+            else
+            {
+                _propBlock.SetFloat(OutlineWidthId, 0f);
+            }
+
             _weaponRenderer.SetPropertyBlock(_propBlock);
         }
     }

@@ -8382,6 +8382,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 9175385655781485315, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: f7553c1aeb7b669478008cdf03a8bcf4, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -8416,6 +8420,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8189980434977739222, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1155425914}
+    - targetCorrespondingSourceObject: {fileID: 8189980434977739222, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1155425920}
     - targetCorrespondingSourceObject: {fileID: 1150964035454596192, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1913191335}
@@ -8551,6 +8558,12 @@ MonoBehaviour:
   _weaponBonePath: weapon_r
   _glowColor: {r: 0.2, g: 0.5, b: 1, a: 1}
   _maxGlowIntensity: 2
+  _outlineColor: {r: 0.2, g: 0.5, b: 1, a: 1}
+  _outlineWidthMin: 0.01
+  _outlineWidthMax: 0.04
+  _outlineGlowMin: 0.5
+  _outlineGlowMax: 1.5
+  _pulseFrequency: 3
 --- !u!114 &1155425919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8568,6 +8581,23 @@ MonoBehaviour:
   _maxEmissionRate: 50
   _maxRadius: 1.5
   _maxOrbitalSpeed: 3
+--- !u!114 &1155425920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155425910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 360448d0dec70d14e8ed80848f1b5c3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _flashWidth: 0.05
+  _flashDuration: 0.15
+  _flashStartColor: {r: 1, g: 1, b: 1, a: 1}
+  _flashEndColor: {r: 1, g: 0, b: 0, a: 1}
+  _targetRenderer: {fileID: 0}
 --- !u!1001 &1157192953
 PrefabInstance:
   m_ObjectHideFlags: 0
