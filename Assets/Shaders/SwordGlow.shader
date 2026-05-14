@@ -28,9 +28,13 @@ Shader "Custom/SwordGlow"
         [Header(Flow)]
         // 沿世界空间流动的光纹遮罩(R通道)。黑色纹理=无流动效果
         [NoScaleOffset] _FlowTex ("Flow Texture", 2D) = "black" {}
+        // 光纹颜色。独立于辉光颜色，通常设为亮白或淡蓝
+        _FlowColor ("Flow Color", Color) = (1, 1, 1, 1)
+        // 光纹在世界空间中的流动方向。(0,1,0)=竖直，(1,0,0)=水平，(0,0,1)=纵深
+        _FlowDirection ("Flow Direction", Vector) = (0, 1, 0)
         // 光纹密度。值越大条纹越密集。0.5=宽条纹，3=细密光纹
         _FlowDensity ("Flow Density", Range(0.1, 5)) = 0.8
-        // 光纹流动速度。正=向上，负=向下
+        // 光纹流动速度。正=沿 Direction 正向，负=反向
         _FlowSpeed ("Flow Speed", Range(-2, 2)) = 0.35
         // 光纹叠加强度。0=关闭（跳过采样），1.2=清晰可见，3=强烈
         _FlowIntensity ("Flow Intensity", Range(0, 3)) = 1.2
@@ -95,6 +99,8 @@ Shader "Custom/SwordGlow"
             half  _PulseMin;
 
             sampler2D _FlowTex;
+            half4     _FlowColor;
+            half3     _FlowDirection;
             half      _FlowDensity;
             half      _FlowSpeed;
             half      _FlowIntensity;
@@ -152,11 +158,12 @@ Shader "Custom/SwordGlow"
                 // ---- Flow: world-space (完全不依赖 UV) ----
                 if (_FlowIntensity > 0.001)
                 {
-                    // 取世界空间 Y 轴投影，使光纹沿剑的竖直方向流动
-                    half flowCoord = i.worldPos.y * _FlowDensity + _Time.y * _FlowSpeed;
-                    half2 flowUV  = half2(frac(flowCoord), 0.5);
+                    // 沿可配方向投影世界空间坐标 → 光纹坐标
+                    half flowCoord = dot(i.worldPos, normalize(_FlowDirection))
+                                   * _FlowDensity + _Time.y * _FlowSpeed;
+                    half2 flowUV   = half2(frac(flowCoord), 0.5);
                     half  flowMask = tex2D(_FlowTex, flowUV).r;
-                    glow += flowMask * _CoreColor.rgb * _FlowIntensity * pulse;
+                    glow += flowMask * _FlowColor.rgb * _FlowIntensity * pulse;
                 }
 
                 // ---- Composite ----

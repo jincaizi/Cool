@@ -66,23 +66,26 @@ Material:
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
+    - _CorePower: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FlowIntensity: 1.2
-    - _FlowSpeed: 0.35
+    - _EdgePower: 3
+    - _FlowDensity: 0.99
+    - _FlowIntensity: 1.56
+    - _FlowSpeed: -0.58
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _GlowIntensity: 0.18
-    - _GradientPower: 2.07
+    - _GlowIntensity: 0
+    - _GradientPower: 0.5
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _PulseMin: 0.1
-    - _PulseSpeed: 1.28
-    - _RimPower: 2.53
+    - _PulseMin: 0
+    - _PulseSpeed: 0
+    - _RimPower: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -94,5 +97,7 @@ Material:
     - _CoreColor: {r: 0.45900315, g: 0.5695958, b: 0.98490566, a: 1}
     - _EdgeColor: {r: 0.106265455, g: 0.18790582, b: 0.7509433, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FlowColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FlowDirection: {r: 0, g: 1, b: 0, a: 0}
     - _RimColor: {r: 1, g: 0.909996, b: 0.8886792, a: 1}
   m_BuildTextureStacks: []
