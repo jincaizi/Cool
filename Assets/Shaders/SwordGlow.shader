@@ -25,20 +25,6 @@ Shader "Custom/SwordGlow"
         // 脉冲最低亮度比例。0=完全暗掉，0.3=最暗时30%亮度，1=不脉冲
         _PulseMin ("Pulse Min", Range(0, 1)) = 0.3
 
-        [Header(Flow)]
-        // 沿世界空间流动的光纹遮罩(R通道)。黑色纹理=无流动效果
-        [NoScaleOffset] _FlowTex ("Flow Texture", 2D) = "black" {}
-        // 光纹颜色。独立于辉光颜色，通常设为亮白或淡蓝
-        _FlowColor ("Flow Color", Color) = (1, 1, 1, 1)
-        // 光纹在世界空间中的流动方向。(0,1,0)=竖直，(1,0,0)=水平，(0,0,1)=纵深
-        _FlowDirection ("Flow Direction", Vector) = (0, 1, 0)
-        // 光纹密度。值越大条纹越密集。0.5=宽条纹，3=细密光纹
-        _FlowDensity ("Flow Density", Range(0.1, 5)) = 0.8
-        // 光纹流动速度。正=沿 Direction 正向，负=反向
-        _FlowSpeed ("Flow Speed", Range(-2, 2)) = 0.35
-        // 光纹叠加强度。0=关闭（跳过采样），1.2=清晰可见，3=强烈
-        _FlowIntensity ("Flow Intensity", Range(0, 3)) = 1.2
-
         [Header(Rim)]
         // 边缘补光颜色。模拟环境光在边缘的反射，防止暗面死黑
         _RimColor ("Rim Color", Color) = (0.3, 0.5, 0.8, 1)
@@ -98,13 +84,6 @@ Shader "Custom/SwordGlow"
             half  _PulseSpeed;
             half  _PulseMin;
 
-            sampler2D _FlowTex;
-            half4     _FlowColor;
-            half3     _FlowDirection;
-            half      _FlowDensity;
-            half      _FlowSpeed;
-            half      _FlowIntensity;
-
             half4 _RimColor;
             half  _RimPower;
 
@@ -154,16 +133,6 @@ Shader "Custom/SwordGlow"
                 pulse = lerp(_PulseMin, 1.0, pulse);
 
                 half3 glow = glowColor * _GlowIntensity * pulse;
-
-                // ---- Flow: world-space (完全不依赖 UV) ----
-                if (_FlowIntensity > 0.001)
-                {
-                    half flowCoord = dot(i.worldPos, normalize(_FlowDirection))
-                                   * _FlowDensity + _Time.y * _FlowSpeed;
-                    half2 flowUV   = half2(0.5, frac(flowCoord));
-                    half  flowMask = tex2D(_FlowTex, flowUV).r;
-                    glow += flowMask * _FlowColor.rgb * _FlowIntensity * pulse;
-                }
 
                 // ---- Composite ----
                 half3 finalColor = litColor + glow;
