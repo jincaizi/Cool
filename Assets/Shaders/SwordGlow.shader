@@ -24,18 +24,22 @@ Shader "Custom/SwordGlow"
         _PulseMin ("Pulse Min", Range(0, 1)) = 0.3
 
         [Header(Flow)]
-        // 沿剑脊流动的符文/光纹遮罩(R通道)。黑色=无流动效果
+        // 沿剑脊流动的符文/光纹遮罩(R通道)。黑色纹理=无流动效果
         [NoScaleOffset] _FlowTex ("Flow Texture", 2D) = "black" {}
         // 符文流动方向和速度。正=向UV上方，负=反向
         _FlowSpeed ("Flow Speed", Range(-2, 2)) = 0.5
-        // 符文流光叠加强度。0=无，0.8=微妙流动，3=强烈光纹
-        _FlowIntensity ("Flow Intensity", Range(0, 3)) = 0.8
+        // 符文流光叠加强度。0=关闭（跳过纹理采样），0.8=微妙流动，3=强烈光纹
+        _FlowIntensity ("Flow Intensity", Range(0, 3)) = 0.0
 
         [Header(Rim)]
         // 边缘光颜色。模拟环境补光，防止暗面死黑
         _RimColor ("Rim Color", Color) = (0.3, 0.5, 0.8, 1)
         // 边缘光锐度。越小范围越宽，越大越集中。3=典型武器边缘补光
         _RimPower ("Rim Power", Range(0.5, 8)) = 3.0
+
+        [Header(Lighting)]
+        // 环境光常量。替代昂贵的 SH 球谐求值，移动端友好
+        _AmbientColor ("Ambient Color", Color) = (0.15, 0.15, 0.18, 1)
     }
 
     SubShader
@@ -52,10 +56,12 @@ Shader "Custom/SwordGlow"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            #pragma multi_compile_fwdbase
+
+            // 最小变体集：仅方向光，无阴影/Lightmap/SH
+            #pragma multi_compile _ DIRECTIONAL
+
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
-            #include "AutoLight.cginc"
 
             struct appdata
             {
@@ -67,87 +73,85 @@ Shader "Custom/SwordGlow"
             struct v2f
             {
                 float4 pos         : SV_POSITION;
-                float2 uv          : TEXCOORD0;
-                float3 worldNormal : TEXCOORD1;
-                float3 worldPos    : TEXCOORD2;
-                float3 viewDir     : TEXCOORD3;
-                SHADOW_COORDS(4)
+                half2  uv          : TEXCOORD0;
+                half3  worldNormal : TEXCOORD1;
+                half3  viewDir     : TEXCOORD2;
             };
 
             sampler2D _MainTex;
             float4    _MainTex_ST;
-            fixed4    _Color;
+            half4     _Color;
 
-            fixed4 _CoreColor;
-            fixed4 _EdgeColor;
-            float  _GlowIntensity;
-            float  _GradientPower;
+            half4 _CoreColor;
+            half4 _EdgeColor;
+            half  _GlowIntensity;
+            half  _GradientPower;
 
-            float  _PulseSpeed;
-            float  _PulseMin;
+            half  _PulseSpeed;
+            half  _PulseMin;
 
             sampler2D _FlowTex;
-            float     _FlowSpeed;
-            float     _FlowIntensity;
+            half      _FlowSpeed;
+            half      _FlowIntensity;
 
-            fixed4 _RimColor;
-            float  _RimPower;
+            half4 _RimColor;
+            half  _RimPower;
+
+            half4 _AmbientColor;
 
             v2f vert(appdata v)
             {
                 v2f o;
                 o.pos         = UnityObjectToClipPos(v.vertex);
                 o.uv          = TRANSFORM_TEX(v.uv, _MainTex);
-                o.worldNormal = UnityObjectToWorldNormal(v.normal);
-                o.worldPos    = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.viewDir     = WorldSpaceViewDir(v.vertex);
-                TRANSFER_SHADOW(o);
+                o.worldNormal = (half3)UnityObjectToWorldNormal(v.normal);
+                o.viewDir     = (half3)WorldSpaceViewDir(v.vertex);
                 return o;
             }
 
-            fixed4 frag(v2f i) : SV_Target
+            half4 frag(v2f i) : SV_Target
             {
-                fixed4 albedo = tex2D(_MainTex, i.uv) * _Color;
+                half4 albedo = tex2D(_MainTex, i.uv) * _Color;
 
-                // ---- Lighting ----
-                float3 normal   = normalize(i.worldNormal);
-                float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
-                float3 viewDir  = normalize(i.viewDir);
-                float  NdotL    = saturate(dot(normal, lightDir));
-                float  NdotV    = saturate(dot(normal, viewDir));
+                // ---- Lighting (移动端精简) ----
+                half3 normal   = normalize(i.worldNormal);
+                half3 lightDir = (half3)_WorldSpaceLightPos0.xyz;
+                half3 viewDir  = normalize(i.viewDir);
+                half  NdotL    = saturate(dot(normal, lightDir));
+                half  NdotV    = saturate(dot(normal, viewDir));
 
-                fixed3 ambient = ShadeSH9(half4(normal, 1));
-                fixed3 diffuse = _LightColor0.rgb * albedo.rgb * NdotL;
+                half3 ambient  = _AmbientColor.rgb;
+                half3 diffuse  = _LightColor0.rgb * albedo.rgb * NdotL;
 
-                UNITY_LIGHT_ATTENUATION(atten, i, i.worldPos);
-                diffuse *= atten;
+                // Rim light — half-precision pow, 移动端硬件加速
+                half rim       = 1.0 - NdotV;
+                half3 rimLight = _RimColor.rgb * pow(rim, _RimPower);
 
-                // Rim light
-                float rim = 1.0 - NdotV;
-                rim = pow(rim, _RimPower);
-                fixed3 rimLight = _RimColor.rgb * rim;
-
-                fixed3 litColor = ambient * albedo.rgb + diffuse + rimLight;
+                half3 litColor = ambient * albedo.rgb + diffuse + rimLight;
 
                 // ---- Glow gradient (UV-space) ----
-                float distToCenter = abs(i.uv.x - 0.5) * 2.0;
-                float glowFactor   = pow(distToCenter, _GradientPower);
-                fixed3 glowColor   = lerp(_CoreColor.rgb, _EdgeColor.rgb, glowFactor);
+                half distToCenter = abs(i.uv.x - 0.5) * 2.0;
+                // mobile fast pow: exp2(log2(x) * power)
+                half glowFactor = exp2(log2(max(distToCenter, 0.0001)) * _GradientPower);
+                half3 glowColor = lerp(_CoreColor.rgb, _EdgeColor.rgb, glowFactor);
 
                 // ---- Pulse ----
-                float pulse = sin(_Time.y * _PulseSpeed * 6.283185) * 0.5 + 0.5;
+                half pulse = sin(_Time.y * _PulseSpeed * 6.283185) * 0.5 + 0.5;
                 pulse = lerp(_PulseMin, 1.0, pulse);
 
-                float3 glow = glowColor * _GlowIntensity * pulse;
+                half3 glow = glowColor * _GlowIntensity * pulse;
 
-                // ---- Flow texture ----
-                float2 flowUV = i.uv + float2(0, _Time.y * _FlowSpeed);
-                fixed  flowMask = tex2D(_FlowTex, flowUV).r;
-                glow += flowMask * _EdgeColor.rgb * _FlowIntensity * pulse;
+                // ---- Flow texture (运行时跳过：FlowIntensity=0 时不采样) ----
+                if (_FlowIntensity > 0.001)
+                {
+                    half2 flowUV  = i.uv + half2(0, _Time.y * _FlowSpeed);
+                    half  flowMask = tex2D(_FlowTex, flowUV).r;
+                    glow += flowMask * _EdgeColor.rgb * _FlowIntensity * pulse;
+                }
 
                 // ---- Composite ----
-                fixed3 finalColor = litColor + glow;
-                return fixed4(finalColor, albedo.a);
+                half3 finalColor = litColor + glow;
+                return half4(finalColor, albedo.a);
             }
             ENDCG
         }
