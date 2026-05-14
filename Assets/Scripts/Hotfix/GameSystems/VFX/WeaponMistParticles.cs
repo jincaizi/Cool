@@ -4,7 +4,9 @@ namespace Hotfix.GameSystems.VFX
 {
     public class WeaponMistParticles : MonoBehaviour
     {
+        private GameObject _childGo;
         private ParticleSystem _ps;
+        private Material _cachedMaterial;
         private ParticleSystem.EmissionModule _emission;
         private ParticleSystem.MainModule _main;
         private ParticleSystem.ShapeModule _shape;
@@ -14,9 +16,18 @@ namespace Hotfix.GameSystems.VFX
 
         public void Init(WeaponElementConfig config)
         {
-            var child = new GameObject("_frostMistParticles");
-            child.transform.SetParent(transform, false);
-            _ps = child.AddComponent<ParticleSystem>();
+            if (config == null)
+            {
+                Debug.LogError("[WeaponMistParticles] Init called with null config");
+                return;
+            }
+
+            if (_ps != null)
+                return;
+
+            _childGo = new GameObject("_weaponMistParticles");
+            _childGo.transform.SetParent(transform, false);
+            _ps = _childGo.AddComponent<ParticleSystem>();
 
             _main = _ps.main;
             _main.startLifetime = new ParticleSystem.MinMaxCurve(config.MistLifetimeMin, config.MistLifetimeMax);
@@ -62,9 +73,10 @@ namespace Hotfix.GameSystems.VFX
             _noise.frequency = config.MistNoiseFrequency;
             _noise.scrollSpeed = 0.3f;
 
-            var renderer = child.GetComponent<ParticleSystemRenderer>();
+            var renderer = _childGo.GetComponent<ParticleSystemRenderer>();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
-            renderer.material = GetDefaultAdditiveMaterial();
+            _cachedMaterial = GetDefaultAdditiveMaterial();
+            renderer.material = _cachedMaterial;
 
             _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
@@ -76,6 +88,21 @@ namespace Hotfix.GameSystems.VFX
                 _ps.Play();
             else if (!visible && _ps.isPlaying)
                 _ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
+
+        private void OnDestroy()
+        {
+            if (_cachedMaterial != null)
+            {
+                Destroy(_cachedMaterial);
+                _cachedMaterial = null;
+            }
+
+            if (_childGo != null)
+            {
+                Destroy(_childGo);
+                _childGo = null;
+            }
         }
 
         private static Material GetDefaultAdditiveMaterial()
