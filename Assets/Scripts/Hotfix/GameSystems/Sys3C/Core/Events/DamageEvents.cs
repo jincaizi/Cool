@@ -49,12 +49,14 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
     /// </summary>
     public struct MonsterTakeDamageEvent : IEvent
     {
+        public int EntityId;
         public Vector3 HitPosition;
         public int Damage;
         public bool IsCritical;
 
-        public MonsterTakeDamageEvent(Vector3 hitPos, int damage, bool isCritical = false)
+        public MonsterTakeDamageEvent(int entityId, Vector3 hitPos, int damage, bool isCritical = false)
         {
+            EntityId = entityId;
             HitPosition = hitPos;
             Damage = damage;
             IsCritical = isCritical;

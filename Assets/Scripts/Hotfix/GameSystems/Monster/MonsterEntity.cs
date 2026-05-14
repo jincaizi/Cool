@@ -6,8 +6,8 @@ using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Combat;
 using Hotfix.GameSystems.Skills.Data;
-using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Nameplate;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -76,6 +76,14 @@ namespace Hotfix.GameSystems.Monster
                 if (AttackHitbox != null)
                     AttackHitbox.Deactivate();
             };
+
+            // Register nameplate
+            var displayMgr = EntityDisplayManager.Instance;
+            if (displayMgr != null && !string.IsNullOrEmpty(_config.DisplayName))
+            {
+                var cfg = new NameplateConfig(_config.DisplayName, ColorPalette.Monster);
+                displayMgr.Register(GetInstanceID(), transform, cfg);
+            }
         }
 
         private void Update()
@@ -86,6 +94,7 @@ namespace Hotfix.GameSystems.Monster
 
         private void OnDestroy()
         {
+            EntityDisplayManager.Instance?.Unregister(GetInstanceID());
             PhysicsRegistry.Instance.Unregister(this);
         }
 
@@ -97,8 +106,10 @@ namespace Hotfix.GameSystems.Monster
 
             // Emit monster damage event for floating text
             EventBus.Emit(new MonsterTakeDamageEvent(
+                GetInstanceID(),
                 transform.position + Vector3.up * 2f,
-                Mathf.CeilToInt(data.BaseDamage)
+                Mathf.CeilToInt(data.BaseDamage),
+                data.WasCritical
             ));
         }
 

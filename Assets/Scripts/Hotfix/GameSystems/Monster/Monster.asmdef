@@ -5,7 +5,8 @@
         "Hotfix.GameSystems.Sys3C.Core",
         "Hotfix.GameSystems.Sys3C",
         "Hotfix.GameSystems.Combat",
-        "Hotfix.GameSystems.Skills"
+        "Hotfix.GameSystems.Skills",
+        "Hotfix.GameSystems.Nameplate"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

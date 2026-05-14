@@ -66,6 +66,8 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] private int _totalTicks = 5;
         public int TotalTicks => _totalTicks;
 
+        public bool WasCritical { get; private set; }
+
         public float CalculateFinalDamage(Effect.IEffectStats attackerStats)
         {
             if (attackerStats == null)
@@ -82,8 +84,17 @@ namespace Hotfix.GameSystems.Skills.Data
                 float critChance = 0.05f + _criticalRateBonus;
                 if (UnityEngine.Random.value < critChance)
                 {
+                    WasCritical = true;
                     damage *= (1f + 1.5f + _criticalDamageBonus);
                 }
+                else
+                {
+                    WasCritical = false;
+                }
+            }
+            else
+            {
+                WasCritical = false;
             }
 
             return _isDOT ? damage * _tickInterval : damage;
