@@ -1,3 +1,5 @@
+using Hotfix.GameSystems.Skills.Events;
+
 namespace Hotfix.GameSystems.Sys3C.Core.Events
 {
     /// <summary>

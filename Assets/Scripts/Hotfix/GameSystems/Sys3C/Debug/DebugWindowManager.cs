@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Skills;
 using UnityInput = UnityEngine.Input;
 
 namespace Hotfix.GameSystems.Sys3C.Debug

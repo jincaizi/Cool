@@ -1,4 +1,4 @@
-using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Skills.Events;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Monster

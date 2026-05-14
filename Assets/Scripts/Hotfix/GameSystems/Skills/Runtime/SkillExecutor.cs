@@ -4,6 +4,8 @@ using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
 using UnityEngine;
+using Hotfix.GameSystems.Skills.Events;
+using Hotfix.GameSystems.Skills;
 
 namespace Hotfix.GameSystems.Skills.Runtime
 {
@@ -21,6 +23,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private Vector3 _targetPosition;
         private IEffectTarget _targetCharacter;
         private IDashComponent _dashComponent;
+        private bool _wasFullCharge;
 
         // 回调
         public event Action<int> OnHitboxFrame;              // 判定帧触发
@@ -84,7 +87,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public bool TryStart()
         {
-            return _stateMachine.TryStart();
+            bool started = _stateMachine.TryStart();
+            if (started && _skillData is ChargedSkillData)
+            {
+                EventBus.Emit(new SkillChargingStartedEvent { SkillId = _skillData.SkillId });
+            }
+            return started;
         }
 
         /// <summary>
@@ -93,6 +101,15 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public void Update(float deltaTime)
         {
             _stateMachine.Update(deltaTime);
+
+            if (CurrentSubState == SkillSubState.Charging)
+            {
+                EventBus.Emit(new SkillChargeTickEvent
+                {
+                    SkillId = _skillData.SkillId,
+                    Progress = GetChargeProgress()
+                });
+            }
         }
 
         /// <summary>
@@ -102,6 +119,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             if (CurrentSubState == SkillSubState.Charging)
             {
+                _wasFullCharge = GetChargeProgress() >= 1f;
                 _stateMachine.ReleaseCharge();
             }
         }
@@ -187,6 +205,21 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             // 触发判定帧事件
             OnHitboxFrame?.Invoke(frameIndex);
+
+            if (targets.Count > 0)
+            {
+                var hitPos = targets[0].transform.position;
+                foreach (var t in targets)
+                {
+                    EventBus.Emit(new SkillHitTargetEvent
+                    {
+                        SkillId = _skillData.SkillId,
+                        CasterId = _owner.transform.GetInstanceID(),
+                        HitPosition = hitPos,
+                        IsFullCharge = _wasFullCharge
+                    });
+                }
+            }
         }
 
         private void OnHitConfirm()
@@ -207,6 +240,16 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnStateChanged(SkillSubState newState)
         {
+            if (newState == SkillSubState.Execution && _skillData is ChargedSkillData)
+            {
+                EventBus.Emit(new SkillReleasedEvent
+                {
+                    SkillId = _skillData.SkillId,
+                    IsFullCharge = _wasFullCharge,
+                    CasterId = _owner.transform.GetInstanceID()
+                });
+            }
+
             if (newState == SkillSubState.Execution &&
                 _dashComponent != null &&
                 _skillData.DashDistance > 0)

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
-using Hotfix.GameSystems.Sys3C.Core;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Combat;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C.Core.Events;

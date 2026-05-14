@@ -1,4 +1,4 @@
-namespace Hotfix.GameSystems.Sys3C.Core.Events
+namespace Hotfix.GameSystems.Skills.Events
 {
     /// <summary>
     /// 事件接口，所有事件必须实现此接口

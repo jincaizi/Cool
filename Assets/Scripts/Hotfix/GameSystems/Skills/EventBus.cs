@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Skills.Events;
 
-namespace Hotfix.GameSystems.Sys3C.Core
+namespace Hotfix.GameSystems.Skills
 {
     /// <summary>
     /// 事件总线 - 轻量级事件发布订阅系统

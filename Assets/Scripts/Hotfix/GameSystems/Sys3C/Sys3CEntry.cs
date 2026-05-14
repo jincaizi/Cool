@@ -60,7 +60,7 @@ namespace Hotfix.GameSystems.Sys3C
                 transform, CharacterController, GroundLayer);
 
             _fsmManager = new FSMManager(_cc, Animator);
-            _fsmManager.OnAttackAnimationCompleted += CleanupSkillAnimation;
+            _fsmManager.OnAttackAnimationCompleted += HandleAttackAnimationCompleted;
 
             _dashComponent = new SkillDashComponent(CharacterController, transform);
 
@@ -118,8 +118,35 @@ namespace Hotfix.GameSystems.Sys3C
             _skillCoordinator.Update(Time.deltaTime);
             _dashComponent.Update();
 
+            // Dynamic movement/rotation control: respect skill settings
+            _cc.LockRotation = !_skillCoordinator.CanRotate();
+            _cc.LockMovement = !_skillCoordinator.CanMove();
+
+            // Detect when skill leaves looping state (Charging/Channeling → Execution)
+            var curSubState = _skillCoordinator.CurrentSubState;
+            bool wasLooping = _prevSkillSubState == Skills.Definition.SkillSubState.Charging ||
+                              _prevSkillSubState == Skills.Definition.SkillSubState.Channeling;
+            bool stillLooping = curSubState == Skills.Definition.SkillSubState.Charging ||
+                                curSubState == Skills.Definition.SkillSubState.Channeling;
+            if (wasLooping && !stillLooping && _lastSkillTrigger != null)
+            {
+                if (_prevSkillSubState == Skills.Definition.SkillSubState.Channeling)
+                {
+                    // Channeling end: looping anims have exit-time that delays
+                    // CleanupSkillAnimation. All damage was dealt during ticks, so
+                    // immediately clean up to avoid a 0.5-1s movement freeze.
+                    CleanupSkillAnimation();
+                }
+                else
+                {
+                    // Charging end: use the same full cleanup path
+                    CleanupSkillAnimation();
+                }
+            }
+            _prevSkillSubState = curSubState;
+
             // Safety: cleanup animation if skill ended without firing animation callback
-            // (e.g. charged skill timed out with looping animation)
+            // (e.g. executor cleaned up externally)
             if (_skillCoordinator.CurrentSkill == null && _lastSkillTrigger != null)
             {
                 CleanupSkillAnimation();
@@ -143,7 +170,6 @@ namespace Hotfix.GameSystems.Sys3C
                 {
                     var input = SkillInput.BasicAttack(attackId, transform.forward);
                     _skillCoordinator.HandleBasicAttackInput(input);
-                    _fsmManager.Coordinator.SetAttackLayerActive();
                 }
             }
 
@@ -154,9 +180,6 @@ namespace Hotfix.GameSystems.Sys3C
                 {
                     var input = SkillInput.SkillToPosition(skillQId, transform.position + transform.forward * 5f);
                     _skillCoordinator.HandleInput(input);
-                    _fsmManager.Coordinator.SetAttackLayerActive();
-                    _cc.LockRotation = true;
-                    _cc.LockMovement = true;
                 }
             }
 
@@ -167,35 +190,36 @@ namespace Hotfix.GameSystems.Sys3C
                 {
                     var input = SkillInput.SkillToPosition(skillRId, transform.position + transform.forward * 5f);
                     _skillCoordinator.HandleInput(input);
-                    _fsmManager.Coordinator.SetAttackLayerActive();
-                    _cc.LockRotation = true;
                 }
             }
 
             if (_inputManager.IsSkill3Released())
             {
                 var executor = _skillCoordinator.CurrentSkill;
-                if (executor != null)
+                if (executor != null && executor.CurrentSubState == Skills.Definition.SkillSubState.Charging)
                 {
-                    var subState = executor.CurrentSubState;
-                    if (subState == Skills.Definition.SkillSubState.Charging)
-                    {
-                        executor.ReleaseCharge();
-                    }
-                    // Force cleanup for looping/continuous skills
-                    // (animation callback won't fire for looping clips)
-                    executor.ForceComplete();
-                    CleanupSkillAnimation();
+                    executor.ReleaseCharge();
                 }
             }
         }
 
         private string _lastSkillTrigger;
         private bool _cleanupInProgress;
+        private Skills.Definition.SkillSubState _prevSkillSubState;
 
         private void HandleSkillActivated(SkillData skillData)
         {
+            // 连段时先清除旧的触发器，确保新触发器能正确被 Animator 消费
+            if (!string.IsNullOrEmpty(_lastSkillTrigger))
+            {
+                Animator.ResetTrigger(_lastSkillTrigger);
+            }
+
             _lastSkillTrigger = skillData.AnimatorTrigger;
+
+            _fsmManager.Coordinator.SetAttackLayerActive();
+            _cc.LockRotation = true;
+            _cc.LockMovement = true;
 
             if (!string.IsNullOrEmpty(_lastSkillTrigger))
             {
@@ -209,6 +233,16 @@ namespace Hotfix.GameSystems.Sys3C
 
             Animator.SetLayerWeight(1, 1f);
             Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Attacking);
+        }
+
+        private void HandleAttackAnimationCompleted()
+        {
+            var subState = _skillCoordinator.CurrentSubState;
+            if (subState == Skills.Definition.SkillSubState.Charging ||
+                subState == Skills.Definition.SkillSubState.Channeling)
+                return;
+
+            CleanupSkillAnimation();
         }
 
         private void CleanupSkillAnimation()

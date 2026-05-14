@@ -1,12 +1,10 @@
 {
-    "name": "Hotfix.GameSystems.Nameplate",
-    "rootNamespace": "Hotfix.GameSystems.Nameplate",
+    "name": "Hotfix.GameSystems.VFX",
+    "rootNamespace": "Hotfix.GameSystems.VFX",
     "references": [
-        "Core",
-        "UniTask",
-        "DOTween.Modules",
         "Hotfix.GameSystems.Sys3C.Core",
         "Hotfix.GameSystems.Skills",
+        "DOTween.Modules",
         "Unity.TextMeshPro"
     ],
     "includePlatforms": [],

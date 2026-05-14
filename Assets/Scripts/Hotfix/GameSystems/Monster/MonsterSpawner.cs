@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Hotfix.GameSystems.Sys3C.Core;
+using Hotfix.GameSystems.Skills;
 
 namespace Hotfix.GameSystems.Monster
 {

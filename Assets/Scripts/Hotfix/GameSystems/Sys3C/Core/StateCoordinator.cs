@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 
 namespace Hotfix.GameSystems.Sys3C.Core

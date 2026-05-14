@@ -68,6 +68,7 @@ namespace Hotfix.GameSystems.Skills.Effect
         [Tooltip("持续时间(秒) (0 = 瞬间/一次性)")]
         [SerializeField] protected float _duration;
         public float Duration => _duration;
+        public float SetDuration { set => _duration = value; }
 
         [Header("=== Stacking ===")]
         // 当StackingRule为Stack时的最大层数
@@ -307,6 +308,7 @@ namespace Hotfix.GameSystems.Skills.Effect
         [Tooltip("此晕眩是否可以被净化/驱散?")]
         [SerializeField] private bool _canBeCleanse = true;
         public bool CanBeCleanse => _canBeCleanse;
+        public bool SetCanBeCleanse { set => _canBeCleanse = value; }
 
         public StunEffectData()
         {

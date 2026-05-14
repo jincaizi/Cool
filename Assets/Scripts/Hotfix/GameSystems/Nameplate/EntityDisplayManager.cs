@@ -3,7 +3,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Hotfix.GameSystems.Sys3C.Core;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 
 namespace Hotfix.GameSystems.Nameplate
