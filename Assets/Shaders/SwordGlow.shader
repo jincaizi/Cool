@@ -34,6 +34,12 @@ Shader "Custom/SwordGlow"
         [Header(Lighting)]
         // 环境光常量。替代昂贵的 SH 球谐求值，移动端友好
         _AmbientColor ("Ambient Color", Color) = (0.15, 0.15, 0.18, 1)
+
+        [Header(Frost)]
+        _FrostAmount ("Frost Amount", Range(0, 1)) = 0.0
+        _FrostTex ("Frost Texture", 2D) = "white" {}
+        _FrostColor ("Frost Color", Color) = (0.6, 0.8, 1.0, 1)
+        _FrostFlowSpeed ("Frost Flow Speed", Range(0, 0.5)) = 0.05
     }
 
     SubShader
@@ -89,6 +95,25 @@ Shader "Custom/SwordGlow"
 
             half4 _AmbientColor;
 
+            half  _FrostAmount;
+            half4 _FrostColor;
+            half  _FrostFlowSpeed;
+
+            half proceduralFrost(half2 uv)
+            {
+                half2 p = floor(uv);
+                half2 f = frac(uv);
+                f = f * f * (3.0 - 2.0 * f);
+                half2 a = p + half2(1.0, 0.0);
+                half2 b = p + half2(0.0, 1.0);
+                half2 c = p + half2(1.0, 1.0);
+                half h0 = frac(sin(dot(p, half2(12.9898, 78.233))) * 43758.5453);
+                half h1 = frac(sin(dot(a, half2(12.9898, 78.233))) * 43758.5453);
+                half h2 = frac(sin(dot(b, half2(12.9898, 78.233))) * 43758.5453);
+                half h3 = frac(sin(dot(c, half2(12.9898, 78.233))) * 43758.5453);
+                return lerp(lerp(h0, h1, f.x), lerp(h2, h3, f.x), f.y);
+            }
+
             v2f vert(appdata v)
             {
                 v2f o;
@@ -136,6 +161,14 @@ Shader "Custom/SwordGlow"
 
                 // ---- Composite ----
                 half3 finalColor = litColor + glow;
+
+                // ---- Frost overlay ----
+                // Procedural noise frost texture — no texture sample needed.
+                // _FrostTex reserved for future artist-authored frost pattern replacement.
+                half frostNoise = proceduralFrost(i.uv * 8.0 + _Time.y * _FrostFlowSpeed);
+                half edgeFrost = frostNoise * (1.0 - NdotV * 0.5);
+                finalColor = lerp(finalColor, _FrostColor.rgb, edgeFrost * _FrostAmount * _FrostColor.a);
+
                 return half4(finalColor, albedo.a);
             }
             ENDCG
