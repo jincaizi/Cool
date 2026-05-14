@@ -38,6 +38,10 @@ Shader "Custom/SwordGlow"
         _FlowSpeed ("Flow Speed", Range(-2, 2)) = 0.35
         // 光纹叠加强度。0=关闭（跳过采样），1.2=清晰可见，3=强烈
         _FlowIntensity ("Flow Intensity", Range(0, 3)) = 1.2
+        // 完整周期时长(秒)。一次流光 + 停顿 = 一个周期。0=连续不暂停
+        _FlowCycle ("Flow Cycle (s)", Range(0, 10)) = 3.0
+        // 活跃占比。0.6=周期60%时间在流动，40%时间停顿。1=连续
+        _FlowDuty ("Flow Duty", Range(0.1, 1)) = 0.6
 
         [Header(Rim)]
         // 边缘补光颜色。模拟环境光在边缘的反射，防止暗面死黑
@@ -104,6 +108,8 @@ Shader "Custom/SwordGlow"
             half      _FlowDensity;
             half      _FlowSpeed;
             half      _FlowIntensity;
+            half      _FlowCycle;
+            half      _FlowDuty;
 
             half4 _RimColor;
             half  _RimPower;
@@ -158,9 +164,18 @@ Shader "Custom/SwordGlow"
                 // ---- Flow: world-space (完全不依赖 UV) ----
                 if (_FlowIntensity > 0.001)
                 {
-                    // 沿可配方向投影世界空间坐标 → 光纹坐标
+                    // 带停顿间隔的循环时间
+                    half flowTime = _Time.y;
+                    if (_FlowCycle > 0.001)
+                    {
+                        half cycleT = fmod(_Time.y, _FlowCycle);
+                        half activeDur = _FlowCycle * _FlowDuty;
+                        // 只在活跃期内推进，停顿期冻结
+                        flowTime = _Time.y - cycleT + min(cycleT, activeDur);
+                    }
+
                     half flowCoord = dot(i.worldPos, normalize(_FlowDirection))
-                                   * _FlowDensity + _Time.y * _FlowSpeed;
+                                   * _FlowDensity + flowTime * _FlowSpeed;
                     half2 flowUV   = half2(0.5, frac(flowCoord));
                     half  flowMask = tex2D(_FlowTex, flowUV).r;
                     glow += flowMask * _FlowColor.rgb * _FlowIntensity * pulse;

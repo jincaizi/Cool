@@ -71,9 +71,11 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EdgePower: 3
-    - _FlowDensity: 0.99
-    - _FlowIntensity: 1.56
-    - _FlowSpeed: -0.58
+    - _FlowCycle: 3
+    - _FlowDensity: 3.32
+    - _FlowDuty: 0.6
+    - _FlowIntensity: 1.76
+    - _FlowSpeed: 0.73
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -98,6 +100,6 @@ Material:
     - _EdgeColor: {r: 0.106265455, g: 0.18790582, b: 0.7509433, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FlowColor: {r: 1, g: 1, b: 1, a: 1}
-    - _FlowDirection: {r: 0, g: 1, b: 0, a: 0}
+    - _FlowDirection: {r: 1, g: 0.23, b: 0, a: 0}
     - _RimColor: {r: 1, g: 0.909996, b: 0.8886792, a: 1}
   m_BuildTextureStacks: []
