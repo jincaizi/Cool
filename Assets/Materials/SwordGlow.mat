@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Outline
-  m_Shader: {fileID: 4800000, guid: d8d5803576cb8a84a9031d7e0d082809, type: 3}
+  m_Name: SwordGlow
+  m_Shader: {fileID: 4800000, guid: d7a613c66f4c45b4faefa034b739ed44, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -23,15 +23,26 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _FlowTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _OutlineGlow: 1
-    - _OutlineWidth: 0.02
+    - _FlowIntensity: 0.8
+    - _FlowSpeed: 0.5
+    - _GlowIntensity: 1.5
+    - _GradientPower: 1.5
+    - _PulseMin: 0.3
+    - _PulseSpeed: 3
+    - _RimPower: 3
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _OutlineColor: {r: 0.2, g: 0.5, b: 1, a: 1}
+    - _CoreColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EdgeColor: {r: 0.19999996, g: 0.5, b: 1, a: 1}
+    - _RimColor: {r: 0.29999998, g: 0.5, b: 0.8, a: 1}
   m_BuildTextureStacks: []

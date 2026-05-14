@@ -4,30 +4,26 @@ using UnityEngine;
 
 namespace Hotfix.GameSystems.VFX
 {
+    /// <summary>
+    /// 剑身发光 — 蓄力时通过 MaterialPropertyBlock 控制 Custom/SwordGlow shader 的辉光属性。
+    /// 渐变中心白→边缘冰蓝，脉冲呼吸，符文 UV 流动由 shader 内部处理。
+    /// </summary>
     public class SwordGlowVFX : MonoBehaviour
     {
         [SerializeField] private int[] _watchSkillIds;
         [SerializeField] private string _weaponBonePath = "weapon_r";
-        [SerializeField] private Color _glowColor = new Color(0.2f, 0.5f, 1f);
-        [SerializeField] private float _maxGlowIntensity = 2f;
+
+        [Header("Glow Settings")]
+        [SerializeField] private Color _edgeColor = new Color(0.2f, 0.5f, 1f);
+        [SerializeField] private float _glowIntensityMin = 0.15f;
+        [SerializeField] private float _glowIntensityMax = 1.5f;
 
         private Renderer _weaponRenderer;
         private MaterialPropertyBlock _propBlock;
         private bool _isActive;
-        private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
-        private static readonly int OutlineColorId = Shader.PropertyToID("_OutlineColor");
-        private static readonly int OutlineWidthId = Shader.PropertyToID("_OutlineWidth");
-        private static readonly int OutlineGlowId = Shader.PropertyToID("_OutlineGlow");
 
-        [Header("Outline Pulse")]
-        [SerializeField] private Color _outlineColor = new Color(0.2f, 0.5f, 1f);
-        [SerializeField] private float _outlineWidthMin = 0.01f;
-        [SerializeField] private float _outlineWidthMax = 0.04f;
-        [SerializeField] private float _outlineGlowMin = 0.5f;
-        [SerializeField] private float _outlineGlowMax = 1.5f;
-        [SerializeField] private float _pulseFrequency = 3f;
-
-        private float _pulseTime;
+        private static readonly int EdgeColorId       = Shader.PropertyToID("_EdgeColor");
+        private static readonly int GlowIntensityId   = Shader.PropertyToID("_GlowIntensity");
 
         private void Awake()
         {
@@ -49,6 +45,15 @@ namespace Hotfix.GameSystems.VFX
                 }
                 if (_weaponRenderer == null && allRenderers.Length > 0)
                     _weaponRenderer = allRenderers[0];
+            }
+
+            // Ensure glow starts off
+            if (_weaponRenderer != null)
+            {
+                _weaponRenderer.GetPropertyBlock(_propBlock);
+                _propBlock.SetColor(EdgeColorId, Color.black);
+                _propBlock.SetFloat(GlowIntensityId, 0f);
+                _weaponRenderer.SetPropertyBlock(_propBlock);
             }
         }
 
@@ -78,46 +83,29 @@ namespace Hotfix.GameSystems.VFX
         {
             if (!WatchesSkill(e.SkillId)) return;
             _isActive = true;
-            _pulseTime = 0f;
-            UpdateGlow(0f);
+            SetGlow(_edgeColor, _glowIntensityMin);
         }
 
         private void OnChargeTick(SkillChargeTickEvent e)
         {
             if (!_isActive || !WatchesSkill(e.SkillId)) return;
-            UpdateGlow(e.Progress);
+            float intensity = Mathf.Lerp(_glowIntensityMin, _glowIntensityMax, e.Progress);
+            SetGlow(_edgeColor, intensity);
         }
 
         private void OnReleased(SkillReleasedEvent e)
         {
             if (!_isActive || !WatchesSkill(e.SkillId)) return;
             _isActive = false;
-            UpdateGlow(0f);
+            SetGlow(Color.black, 0f);
         }
 
-        private void UpdateGlow(float t)
+        private void SetGlow(Color edgeColor, float intensity)
         {
             if (_weaponRenderer == null) return;
             _weaponRenderer.GetPropertyBlock(_propBlock);
-
-            float intensity = Mathf.Lerp(0.3f, _maxGlowIntensity, t);
-            _propBlock.SetColor(EmissionColorId, _glowColor * intensity);
-
-            if (_isActive)
-            {
-                _pulseTime += Time.deltaTime;
-                float pulse = Mathf.Sin(_pulseTime * _pulseFrequency * Mathf.PI * 2f) * 0.5f + 0.5f;
-                float width = Mathf.Lerp(_outlineWidthMin, _outlineWidthMax, pulse);
-                float glow = Mathf.Lerp(_outlineGlowMin, _outlineGlowMax, pulse);
-                _propBlock.SetColor(OutlineColorId, _outlineColor);
-                _propBlock.SetFloat(OutlineWidthId, width);
-                _propBlock.SetFloat(OutlineGlowId, glow);
-            }
-            else
-            {
-                _propBlock.SetFloat(OutlineWidthId, 0f);
-            }
-
+            _propBlock.SetColor(EdgeColorId, edgeColor);
+            _propBlock.SetFloat(GlowIntensityId, intensity);
             _weaponRenderer.SetPropertyBlock(_propBlock);
         }
     }
