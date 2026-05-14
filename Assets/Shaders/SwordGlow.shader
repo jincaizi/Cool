@@ -161,7 +161,7 @@ Shader "Custom/SwordGlow"
                     // 沿可配方向投影世界空间坐标 → 光纹坐标
                     half flowCoord = dot(i.worldPos, normalize(_FlowDirection))
                                    * _FlowDensity + _Time.y * _FlowSpeed;
-                    half2 flowUV   = half2(frac(flowCoord), 0.5);
+                    half2 flowUV   = half2(0.5, frac(flowCoord));
                     half  flowMask = tex2D(_FlowTex, flowUV).r;
                     glow += flowMask * _FlowColor.rgb * _FlowIntensity * pulse;
                 }
