@@ -164,14 +164,16 @@ Shader "Custom/SwordGlow"
                 // ---- Flow: world-space (完全不依赖 UV) ----
                 if (_FlowIntensity > 0.001)
                 {
-                    // 带停顿间隔的循环时间
+                    // 按整数步长推进：每周期恰好完成一个完整贴图循环(0→1)
+                    // 停顿在 seam (0.0=黑色)，不会卡在亮纹中间
                     half flowTime = _Time.y;
                     if (_FlowCycle > 0.001)
                     {
-                        half cycleT = fmod(_Time.y, _FlowCycle);
+                        half steps     = floor(_Time.y / _FlowCycle);
+                        half cycleT    = _Time.y - steps * _FlowCycle;
                         half activeDur = _FlowCycle * _FlowDuty;
-                        // 只在活跃期内推进，停顿期冻结
-                        flowTime = _Time.y - cycleT + min(cycleT, activeDur);
+                        half progress  = saturate(cycleT / max(activeDur, 0.001));
+                        flowTime       = steps + progress;
                     }
 
                     half flowCoord = dot(i.worldPos, normalize(_FlowDirection))
