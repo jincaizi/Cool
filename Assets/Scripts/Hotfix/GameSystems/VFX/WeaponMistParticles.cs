@@ -55,6 +55,10 @@ namespace Hotfix.GameSystems.VFX
 
             _velOverLifetime = _ps.velocityOverLifetime;
             _velOverLifetime.enabled = true;
+            // All axes must share the same curve mode — set linear X/Y/Z explicitly
+            _velOverLifetime.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+            _velOverLifetime.y = new ParticleSystem.MinMaxCurve(0f, 0f);
+            _velOverLifetime.z = new ParticleSystem.MinMaxCurve(0f, 0f);
             _velOverLifetime.orbitalZ = new ParticleSystem.MinMaxCurve(config.MistOrbitalSpeedMin, config.MistOrbitalSpeedMax);
             _velOverLifetime.radial = new ParticleSystem.MinMaxCurve(-0.3f, 0.3f);
             _velOverLifetime.space = ParticleSystemSimulationSpace.Local;
