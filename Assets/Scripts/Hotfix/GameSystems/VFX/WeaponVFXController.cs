@@ -1,3 +1,6 @@
+using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Skills.Definition;
+using Hotfix.GameSystems.Skills.Events;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.VFX
@@ -7,6 +10,7 @@ namespace Hotfix.GameSystems.VFX
         [SerializeField] private WeaponElementConfig _elementConfig;
         [SerializeField] private float _swingThreshold = 120f;
         [SerializeField] private float _swingCooldown = 0.3f;
+        [SerializeField] private int _skillId = (int)SkillID.SkillR;
 
         private WeaponMaterialProxy _materialProxy;
         private WeaponMistParticles _mistParticles;
@@ -41,6 +45,30 @@ namespace Hotfix.GameSystems.VFX
                     $"expected 'Custom/SwordGlow'. Frost shader overlay won't work. " +
                     $"Assign a material using the 'Custom/SwordGlow' shader.");
             }
+        }
+
+        private void OnEnable()
+        {
+            EventBus.Subscribe<SkillChargingStartedEvent>(OnSkillRStarted);
+            EventBus.Subscribe<SkillReleasedEvent>(OnSkillREnded);
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<SkillChargingStartedEvent>(OnSkillRStarted);
+            EventBus.Unsubscribe<SkillReleasedEvent>(OnSkillREnded);
+        }
+
+        private void OnSkillRStarted(SkillChargingStartedEvent e)
+        {
+            if (e.SkillId != _skillId) return;
+            SetActive(true);
+        }
+
+        private void OnSkillREnded(SkillReleasedEvent e)
+        {
+            if (e.SkillId != _skillId) return;
+            SetActive(false);
         }
 
         private void Start()
