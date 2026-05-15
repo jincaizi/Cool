@@ -28,6 +28,7 @@ namespace Hotfix.GameSystems.VFX
             _childGo = new GameObject("_weaponMistParticles");
             _childGo.transform.SetParent(transform, false);
             _ps = _childGo.AddComponent<ParticleSystem>();
+            _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
             _main = _ps.main;
             _main.startLifetime = new ParticleSystem.MinMaxCurve(config.MistLifetimeMin, config.MistLifetimeMax);
