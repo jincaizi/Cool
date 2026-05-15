@@ -44,7 +44,10 @@ namespace Hotfix.GameSystems.Nameplate
                 merge.Sum += value;
                 merge.LastHitTime = Time.time;
                 merge.Tmp.text = $"-{merge.Sum}";
+                merge.Tmp.DOKill();
                 merge.Tmp.alpha = 1f;
+                merge.Tmp.DOFade(0f, settings.Duration * (1f - settings.FadeStartRatio))
+                    .SetDelay(settings.Duration * settings.FadeStartRatio);
                 return;
             }
 
@@ -83,6 +86,8 @@ namespace Hotfix.GameSystems.Nameplate
                 var tmp = _pool.Pop();
                 if (tmp != null) Object.Destroy(tmp.gameObject);
             }
+
+            _mergeTracker.Clear();
         }
 
         private TextMeshProUGUI Spawn(Vector3 worldPos, FloatTextSettings settings, int value, string textOverride)
