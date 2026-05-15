@@ -6882,10 +6882,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66519d665c65132448cc9973a413b80c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fontAsset: {fileID: 11400000, guid: c240252520313ba48a1e082bbb79faa0, type: 2}
-  _fontMaterial: {fileID: 0}
-  _cullDistance: 30
-  _fadeStartDistance: 20
+  _nameplateSettings: {fileID: 11400000, guid: 6c07ad300b42c7b41bc955eca31789b7, type: 2}
+  _damageSettings: {fileID: 11400000, guid: c9fa1db0a2aa8304184e821b54c49383, type: 2}
+  _critDamageSettings: {fileID: 11400000, guid: 8cce06053e50ad74498ba1d9773dec40, type: 2}
+  _skillNameSettings: {fileID: 11400000, guid: e82add030c5552c42a8ab7d69ec5bc6f, type: 2}
 --- !u!4 &937939793
 Transform:
   m_ObjectHideFlags: 0
@@ -14781,7 +14781,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &1940115118
 Light:
   m_ObjectHideFlags: 0
