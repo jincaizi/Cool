@@ -14,6 +14,7 @@ namespace Hotfix.GameSystems.VFX
         public float BladeOffset = 0.8f;
 
         [Header("Mist Particles")]
+        public Texture2D ParticleTexture;
         public Color MistStartColor = new Color(0.6f, 0.8f, 1f, 1f);
         public Color MistEndColor = new Color(0.6f, 0.8f, 1f, 0f);
         [Tooltip("Particles emitted per second.")]

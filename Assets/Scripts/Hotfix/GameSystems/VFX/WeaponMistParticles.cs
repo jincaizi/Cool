@@ -82,6 +82,8 @@ namespace Hotfix.GameSystems.VFX
             var renderer = _childGo.GetComponent<ParticleSystemRenderer>();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
             _cachedMaterial = GetDefaultAdditiveMaterial();
+            if (config.ParticleTexture != null)
+                _cachedMaterial.mainTexture = config.ParticleTexture;
             renderer.material = _cachedMaterial;
 
             _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
