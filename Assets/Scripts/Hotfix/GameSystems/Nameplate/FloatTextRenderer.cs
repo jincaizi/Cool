@@ -44,10 +44,7 @@ namespace Hotfix.GameSystems.Nameplate
                 merge.Sum += value;
                 merge.LastHitTime = Time.time;
                 merge.Tmp.text = $"-{merge.Sum}";
-                merge.Tmp.DOKill();
                 merge.Tmp.alpha = 1f;
-                merge.Tmp.DOFade(0f, settings.Duration * (1f - settings.FadeStartRatio))
-                    .SetDelay(settings.Duration * settings.FadeStartRatio);
                 return;
             }
 
@@ -77,7 +74,7 @@ namespace Hotfix.GameSystems.Nameplate
 
         public void Cleanup()
         {
-            foreach (var tmp in _active)
+            foreach (var tmp in new List<TextMeshProUGUI>(_active))
                 if (tmp != null) Object.Destroy(tmp.gameObject);
             _active.Clear();
 
