@@ -36,7 +36,7 @@ namespace Hotfix.GameSystems.Nameplate
             var classIcon = root.transform.Find("ClassIcon").GetComponent<Image>();
 
             nameText.text = config.DisplayName;
-            nameText.color = config.NameColor;
+            nameText.color = config.NameColor ?? _settings.DefaultColor;
 
             if (config.ClassIcon != null)
             {

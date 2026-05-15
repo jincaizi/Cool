@@ -81,7 +81,7 @@ namespace Hotfix.GameSystems.Monster
             var displayMgr = EntityDisplayManager.Instance;
             if (displayMgr != null && !string.IsNullOrEmpty(_config.DisplayName))
             {
-                var cfg = new NameplateConfig(_config.DisplayName, ColorPalette.Monster);
+                var cfg = new NameplateConfig(_config.DisplayName);
                 displayMgr.Register(GetInstanceID(), transform, cfg);
             }
         }
