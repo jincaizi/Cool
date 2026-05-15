@@ -31,6 +31,7 @@ namespace Hotfix.GameSystems.Nameplate
             _nameplate = new NameplateRenderer(_nameplateSettings, _canvas.transform);
             _floatText = new FloatTextRenderer(_canvas.transform);
             _damageScreenEffect = new DamageScreenEffect(_canvas.transform);
+            _floatText.Camera = _camera;
 
             _eventBridge = new DisplayEventBridge(
                 _floatText, _damageScreenEffect,

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Hotfix.GameSystems.Nameplate
 {
     public enum FloatTextType
@@ -11,12 +9,5 @@ namespace Hotfix.GameSystems.Nameplate
         Block,
         DOT,
         SkillName
-    }
-
-    public class FloatTextConfig
-    {
-        public FloatTextSettings Settings;
-        public string TextOverride;
-        public bool ShowName;
     }
 }
