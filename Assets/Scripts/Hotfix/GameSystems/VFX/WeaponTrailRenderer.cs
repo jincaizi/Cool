@@ -19,6 +19,7 @@ namespace Hotfix.GameSystems.VFX
 
             _childGo = new GameObject("_weaponTrail");
             _childGo.transform.SetParent(transform, false);
+            _childGo.transform.localPosition = WeaponElementConfig.GetAxisVector(config.Axis) * config.BladeOffset;
             _trail = _childGo.AddComponent<TrailRenderer>();
 
             _trail.time = config.TrailTime;

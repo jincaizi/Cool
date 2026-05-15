@@ -3,10 +3,16 @@ using UnityEngine;
 namespace Hotfix.GameSystems.VFX
 {
     public enum VFXQualityLevel { High, Low }
+    public enum BladeAxis { Y, Z, X }
 
     [CreateAssetMenu(menuName = "VFX/Weapon Element Config")]
     public class WeaponElementConfig : ScriptableObject
     {
+        [Header("Blade Positioning")]
+        public BladeAxis Axis = BladeAxis.Y;
+        [Tooltip("从剑柄 (weapon_r) 沿剑身方向的偏移距离")]
+        public float BladeOffset = 0.8f;
+
         [Header("Mist Particles")]
         public Color MistStartColor = new Color(0.6f, 0.8f, 1f, 1f);
         public Color MistEndColor = new Color(0.6f, 0.8f, 1f, 0f);
@@ -50,6 +56,14 @@ namespace Hotfix.GameSystems.VFX
         public int MaxParticlesHigh = 30;
         public int MaxParticlesLow = 15;
         public float EmissionRateLow = 8f;
+
+        public static Vector3 GetAxisVector(BladeAxis axis) => axis switch
+        {
+            BladeAxis.X => Vector3.right,
+            BladeAxis.Y => Vector3.up,
+            BladeAxis.Z => Vector3.forward,
+            _ => Vector3.up
+        };
 
         private void OnValidate()
         {

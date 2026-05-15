@@ -27,6 +27,7 @@ namespace Hotfix.GameSystems.VFX
 
             _childGo = new GameObject("_weaponMistParticles");
             _childGo.transform.SetParent(transform, false);
+            _childGo.transform.localPosition = WeaponElementConfig.GetAxisVector(config.Axis) * config.BladeOffset;
             _ps = _childGo.AddComponent<ParticleSystem>();
             _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
