@@ -19,7 +19,7 @@
 ### SelectionRing (新增)
 
 - 挂在玩家角色上的 MonoBehaviour
-- 子 GameObject 含 SpriteRenderer，默认隐藏
+- 子 GameObject 含 SpriteRenderer，贴图使用 `Assets/PreRes/Texture/Com/role_picSele.png`，默认隐藏
 - `AttachTo(Transform parent, float yOffset)` — SetParent 到目标 + 设 localPos + 显示
 - `Detach()` — SetParent 回玩家 + 隐藏 + 取消 OnDeath 订阅
 
