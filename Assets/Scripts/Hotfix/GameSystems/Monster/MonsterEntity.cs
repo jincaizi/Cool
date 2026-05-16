@@ -20,6 +20,7 @@ namespace Hotfix.GameSystems.Monster
         public AttackHitbox AttackHitbox;
 
         private MonsterConfig _config;
+        public MonsterConfig Config => _config;
         private MonsterStats _stats;
         private MonsterAI _ai;
         private MonsterMovement _movement;

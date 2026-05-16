@@ -154,6 +154,10 @@ namespace Hotfix.GameSystems.Monster
         // Destroy delay after death in seconds
         [Tooltip("死亡后销毁延迟(秒)")]
         public float DeathDestroyDelay = 3f;
+
+        [Header("Selection Ring")]
+        [Tooltip("选中光环的脚底Y轴偏移量，用于调整光环在目标脚下的高度位置")]
+        public float RingYOffset = -0.9f;
     }
 
     public enum SpawnMode
