@@ -16,9 +16,9 @@ namespace Hotfix.GameSystems.Sys3C
 
         public bool CanAttack() => _attackCooldownTimer <= 0;
 
-        public void Attack(Vector3 forward, LayerMask targetMask)
+        public List<IDamageable> Attack(Vector3 forward, LayerMask targetMask)
         {
-            if (_config == null) return;
+            if (_config == null) return _hitBuffer;
 
             var shape = AttackShapeFactory.Create(_config.AttackShape, PhysicsRegistry.Instance, EntityType.Monster);
             _hitBuffer.Clear();
@@ -27,10 +27,10 @@ namespace Hotfix.GameSystems.Sys3C
             if (_hitBuffer.Count == 0)
             {
                 Debug.Log("[Attack] Miss - no target in range");
-                return;
+                return _hitBuffer;
             }
 
-            if (_config.Damage == null) return;
+            if (_config.Damage == null) return _hitBuffer;
 
             foreach (var t in _hitBuffer)
             {
@@ -40,6 +40,7 @@ namespace Hotfix.GameSystems.Sys3C
             }
 
             _attackCooldownTimer = 1f / _config.AttackSpeed;
+            return _hitBuffer;
         }
 
         private void Update()

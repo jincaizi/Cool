@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Core.Combat
@@ -12,7 +13,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
     {
         WeaponType WeaponType { get; }
         bool CanAttack();
-        void Attack(Vector3 forward, LayerMask targetMask);
+        List<IDamageable> Attack(Vector3 forward, LayerMask targetMask);
         WeaponConfig Config { get; }
     }
 }
