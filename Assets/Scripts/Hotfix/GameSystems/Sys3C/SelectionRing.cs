@@ -13,7 +13,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void Awake()
         {
-            _originalParent = transform;
+            _originalParent = transform.parent;
             if (_ringRenderer == null)
                 _ringRenderer = GetComponentInChildren<SpriteRenderer>();
             if (_ringRenderer != null)
