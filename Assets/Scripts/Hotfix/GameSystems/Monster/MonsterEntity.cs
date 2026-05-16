@@ -158,5 +158,6 @@ namespace Hotfix.GameSystems.Monster
         int ITargetable.CurrentHP => _stats != null ? Mathf.CeilToInt(_stats.HP) : 0;
         int ITargetable.MaxHP => _stats != null ? Mathf.CeilToInt(_stats.MaxHP) : 0;
         Vector3 ITargetable.WorldPosition => transform.position;
+        float ITargetable.SelectionRingYOffset => _config?.RingYOffset ?? -0.9f;
     }
 }

@@ -12,6 +12,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         int CurrentHP { get; }
         int MaxHP { get; }
         Vector3 WorldPosition { get; }
+        float SelectionRingYOffset { get; }
         event Action<float, int, int> OnHPChanged;
         event Action OnDeath;
     }

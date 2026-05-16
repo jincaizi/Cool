@@ -45,7 +45,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             _selectionRing.Detach();
 
-            float yOffset = -0.9f;
+            float yOffset = targetable.SelectionRingYOffset;
 
             _currentTarget = targetable;
             _onTargetDeath = () =>
