@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
-using Hotfix.GameSystems.Monster;
 
 namespace Hotfix.GameSystems.Sys3C
 {
@@ -47,8 +46,6 @@ namespace Hotfix.GameSystems.Sys3C
             _selectionRing.Detach();
 
             float yOffset = -0.9f;
-            if (target is MonsterEntity monster && monster.Config != null)
-                yOffset = monster.Config.RingYOffset;
 
             _currentTarget = targetable;
             _onTargetDeath = () =>
