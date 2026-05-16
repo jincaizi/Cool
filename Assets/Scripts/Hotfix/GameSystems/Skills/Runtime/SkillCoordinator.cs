@@ -28,11 +28,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
         // 普攻连段追踪
         private int _currentComboIndex;
         private float _comboWindowEndTime;
+        private int _lastCompletedComboSkillId;
 
         // 事件
         public event Action<SkillData> OnSkillActivated;
         public event Action<int, SkillSubState> OnSkillStateChanged;
         public event Action<int, float> OnCooldownUpdate;  // skillId, progress
+        public event Action<IEffectTarget> OnTargetHit;
 
         // 属性
         public SkillExecutor CurrentSkill => _currentSkill;
@@ -152,35 +154,46 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 return;
             }
 
+            // 确定要激活的技能ID：连段窗口内尝试推进到下一段
+            int skillToActivate = input.SkillId;
+            if (UnityEngine.Time.time <= _comboWindowEndTime && _lastCompletedComboSkillId > 0)
+            {
+                var lastCombo = GetSkillData(_lastCompletedComboSkillId) as ComboSkillData;
+                int nextId = lastCombo?.GetNextComboId() ?? 0;
+                if (nextId > 0 && _skillDatabase.ContainsKey(nextId))
+                    skillToActivate = nextId;
+            }
+
+            // 如果当前连段技能正在执行中，尝试强制推进
+            if (_currentSkill != null && _currentSkill.IsActive &&
+                _currentSkill.Data is ComboSkillData)
+            {
+                if (UnityEngine.Time.time <= _comboWindowEndTime)
+                {
+                    if (TryChainCombo(skillToActivate))
+                        return;
+                }
+            }
+
+            // 跳过重复激活同一个技能
+            if (_currentSkill != null && _currentSkill.IsActive && _currentSkill.SkillId == skillToActivate)
+                return;
+
             // 检查冷却
-            if (_cooldownManager.IsOnCooldown(input.SkillId))
+            if (_cooldownManager.IsOnCooldown(skillToActivate))
             {
                 return;
             }
 
             // 检查资源
-            if (!HasEnoughResources(skillData))
+            var resolvedData = GetSkillData(skillToActivate);
+            if (resolvedData == null || !HasEnoughResources(resolvedData))
             {
                 return;
             }
 
-            // 普攻连段逻辑
-            if (_currentSkill != null && _currentSkill.IsActive &&
-                _currentSkill.Data is ComboSkillData currentCombo)
-            {
-                // 检查连段窗口
-                if (UnityEngine.Time.time <= _comboWindowEndTime)
-                {
-                    // 尝试进入下一段
-                    if (TryChainCombo(input.SkillId))
-                    {
-                        return;
-                    }
-                }
-            }
-
-            // 直接释放普攻
-            TryActivateSkill(input.SkillId, input);
+            // 释放技能
+            TryActivateSkill(skillToActivate, input);
         }
 
         /// <summary>
@@ -224,6 +237,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // 注册事件
             executor.OnSkillCompleted += () => OnExecutorCompleted(skillId);
             executor.OnSkillInterrupted += (source) => OnExecutorInterrupted(skillId, source);
+            executor.OnTargetHit += (target) => OnTargetHit?.Invoke(target);
 
             _activeExecutors[skillId] = executor;
             _currentSkill = executor;
@@ -283,18 +297,19 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
-        /// 尝试连段
+        /// 尝试连段（在当前技能执行期间接到下一个普攻输入）
+        /// 使用 ForceComplete 而非中断系统，因为 Combo 类型的 Execution 阶段不允许被 BasicAttack 打断
         /// </summary>
         private bool TryChainCombo(int nextSkillId)
         {
-            if (_currentSkill == null) return false;
+            if (_currentSkill == null || !_currentSkill.IsActive) return false;
             var currentCombo = _currentSkill.Data as ComboSkillData;
             if (currentCombo == null) return false;
 
             var nextCombo = GetSkillData(nextSkillId) as ComboSkillData;
             if (nextCombo != null && nextCombo.ComboIndex == currentCombo.ComboIndex + 1)
             {
-                TryCancelCurrentSkill(InterruptionSource.BasicAttack);
+                _currentSkill.ForceComplete();
                 return TryActivateSkill(nextSkillId);
             }
             return false;
@@ -349,6 +364,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (_currentComboIndex > 0 && UnityEngine.Time.time > _comboWindowEndTime)
             {
                 _currentComboIndex = 0;
+                _lastCompletedComboSkillId = 0;
             }
 
             // 处理缓冲输入
@@ -411,6 +427,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 {
                     _currentComboIndex++;
                     _comboWindowEndTime = UnityEngine.Time.time + combo.ComboWindow;
+                    _lastCompletedComboSkillId = skillId;
                 }
             }
             CleanupExecutor(skillId);
@@ -490,9 +507,19 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return _currentSkill.CurrentSubState switch
             {
                 SkillSubState.Casting => true,
+                SkillSubState.Execution => _currentSkill.Data switch
+                {
+                    ComboSkillData combo => combo.EnableMovement,
+                    ChargedSkillData => true,
+                    _ => false
+                },
+                SkillSubState.Recovery => _currentSkill.Data is ChargedSkillData
+                                       || _currentSkill.Data is ComboSkillData,
                 SkillSubState.Channeling =>
-                    (_currentSkill.Data as ChanneledSkillData)?.CanMoveWhileChanneling ?? true,
-                _ => true
+                    (_currentSkill.Data as ChanneledSkillData)?.CanMoveWhileChanneling ?? false,
+                SkillSubState.Charging =>
+                    (_currentSkill.Data as ChargedSkillData)?.CanMoveWhileCharging ?? false,
+                _ => false
             };
         }
 
@@ -507,6 +534,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return _currentSkill.CurrentSubState switch
             {
                 SkillSubState.Casting => true,
+                SkillSubState.Execution => _currentSkill.Data is ChargedSkillData,
+                SkillSubState.Recovery => _currentSkill.Data is ChargedSkillData,
                 SkillSubState.Charging =>
                     (_currentSkill.Data as ChargedSkillData)?.CanRotateWhileCharging ?? true,
                 _ => false

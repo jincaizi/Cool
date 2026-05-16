@@ -67,6 +67,11 @@ namespace Hotfix.GameSystems.Sys3C
             _skillCoordinator = new SkillCoordinator(new SkillOwnerProxy(transform));
             _skillCoordinator.SetDashComponent(_dashComponent);
             _skillCoordinator.OnSkillActivated += HandleSkillActivated;
+            _skillCoordinator.OnTargetHit += (target) =>
+            {
+                if (target is IDamageable damageable)
+                    _attackHandler.SelectTarget(damageable);
+            };
 
             // Register skills from Inspector-assigned SkillData assets
             int skillCount = 0;
