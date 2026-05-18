@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using DataDefinition;
 
 namespace Hotfix.GameSystems.Nameplate
 {
@@ -47,7 +48,7 @@ namespace Hotfix.GameSystems.Nameplate
             _canvas.sortingOrder = 4500;
             var scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.referenceResolution = DataDefinition.GameSettings.Instance.ReferenceResolution;
             scaler.matchWidthOrHeight = 0.5f;
             go.AddComponent<GraphicRaycaster>();
         }

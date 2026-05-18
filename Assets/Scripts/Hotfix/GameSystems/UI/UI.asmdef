@@ -2,6 +2,7 @@
     "name": "Hotfix.GameSystems.UI",
     "rootNamespace": "Hotfix.GameSystems.UI",
     "references": [
+        "DataDefinition",
         "Core",
         "UniTask",
         "DOTween.Modules",

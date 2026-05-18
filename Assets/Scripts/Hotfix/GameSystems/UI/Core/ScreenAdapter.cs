@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using DataDefinition;
 
 namespace Hotfix.GameSystems.UI
 {
@@ -35,7 +36,7 @@ namespace Hotfix.GameSystems.UI
             if (_scaler == null) return;
 
             _scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            _scaler.referenceResolution = new Vector2(1920, 1080);
+            _scaler.referenceResolution = DataDefinition.GameSettings.Instance.ReferenceResolution;
             _scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             _scaler.matchWidthOrHeight = 0.5f;
         }

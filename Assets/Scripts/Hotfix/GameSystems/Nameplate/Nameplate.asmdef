@@ -1,21 +1,16 @@
 {
     "name": "Hotfix.GameSystems.Nameplate",
-    "rootNamespace": "Hotfix.GameSystems.Nameplate",
+    "rootNamespace": "",
     "references": [
-        "Core",
-        "UniTask",
-        "DOTween.Modules",
-        "Hotfix.GameSystems.Sys3C.Core",
+        "DataDefinition",
+        "Unity.TextMeshPro",
         "Hotfix.GameSystems.Skills",
-        "Unity.TextMeshPro"
+        "Hotfix.GameSystems.Sys3C.Core",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

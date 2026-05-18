@@ -2,6 +2,7 @@
     "name": "Hotfix.GameSystems.VFX",
     "rootNamespace": "Hotfix.GameSystems.VFX",
     "references": [
+        "DataDefinition",
         "Hotfix.GameSystems.Sys3C.Core",
         "Hotfix.GameSystems.Skills",
         "DOTween.Modules",
