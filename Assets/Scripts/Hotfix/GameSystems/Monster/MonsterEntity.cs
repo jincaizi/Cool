@@ -47,6 +47,10 @@ namespace Hotfix.GameSystems.Monster
 
             PhysicsRegistry.Instance.Register(this, EntityType.Monster);
 
+            // HitZone forces the existing collider to trigger for damage detection.
+            // Add a non-trigger collider so the player's CharacterController can collide.
+            EnsurePhysicsCollider();
+
             _stats = new MonsterStats(config);
             _movement = new MonsterMovement(NavAgent, transform, config);
             _ai = new MonsterAI(_movement, _stats, Animator, transform, config, spawnPoint);
@@ -82,7 +86,9 @@ namespace Hotfix.GameSystems.Monster
             var displayMgr = EntityDisplayManager.Instance;
             if (displayMgr != null && !string.IsNullOrEmpty(_config.DisplayName))
             {
-                var cfg = new NameplateConfig(_config.DisplayName);
+                var cfg = _config.NameplateData != null
+                    ? NameplateConfig.FromData(_config.NameplateData, _config.DisplayName)
+                    : new NameplateConfig(_config.DisplayName);
                 displayMgr.Register(GetInstanceID(), transform, cfg);
             }
         }
@@ -97,6 +103,42 @@ namespace Hotfix.GameSystems.Monster
         {
             EntityDisplayManager.Instance?.Unregister(GetInstanceID());
             PhysicsRegistry.Instance.Unregister(this);
+        }
+
+        private void EnsurePhysicsCollider()
+        {
+            var triggerCol = GetComponent<Collider>();
+            if (triggerCol == null) return;
+
+            // Check if a non-trigger collider already exists
+            var allColliders = GetComponents<Collider>();
+            foreach (var c in allColliders)
+            {
+                if (!c.isTrigger) return; // Already have a physics collider
+            }
+
+            if (triggerCol is CapsuleCollider capsule)
+            {
+                var physicsCol = gameObject.AddComponent<CapsuleCollider>();
+                physicsCol.center = capsule.center;
+                physicsCol.radius = capsule.radius;
+                physicsCol.height = capsule.height;
+                physicsCol.isTrigger = false;
+            }
+            else if (triggerCol is SphereCollider sphere)
+            {
+                var physicsCol = gameObject.AddComponent<SphereCollider>();
+                physicsCol.center = sphere.center;
+                physicsCol.radius = sphere.radius;
+                physicsCol.isTrigger = false;
+            }
+            else if (triggerCol is BoxCollider box)
+            {
+                var physicsCol = gameObject.AddComponent<BoxCollider>();
+                physicsCol.center = box.center;
+                physicsCol.size = box.size;
+                physicsCol.isTrigger = false;
+            }
         }
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
@@ -116,6 +158,13 @@ namespace Hotfix.GameSystems.Monster
 
         private void HandleDeath()
         {
+            if (_movement != null)
+            {
+                var dir = _ai.LastHitDirection;
+                var force = _ai.LastKnockbackForce * _config.DeathKnockbackMultiplier;
+                _movement.ApplyKnockback(dir, force);
+                _movement.Stop();
+            }
             _ai.EnterDeath();
             if (NavAgent != null) NavAgent.enabled = false;
         }

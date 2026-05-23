@@ -9,6 +9,9 @@ namespace Hotfix.GameSystems.Monster
         private readonly Transform _self;
         private readonly MonsterConfig _config;
 
+        private Vector3 _knockbackVelocity;
+        private float _knockbackTimer;
+
         public bool HasReachedDestination =>
             !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.1f;
 
@@ -61,6 +64,42 @@ namespace Hotfix.GameSystems.Monster
                     Quaternion.LookRotation(dir),
                     _config.RotationSpeed * Time.deltaTime);
             }
+        }
+
+        // ===== Knockback =====
+
+        public void ApplyKnockback(Vector3 direction, float force)
+        {
+            if (force <= 0) return;
+            _knockbackVelocity = direction.normalized * force;
+            _knockbackTimer = _config.KnockbackDecay;
+        }
+
+        public Vector3 GetKnockbackDisplacement()
+        {
+            return _knockbackVelocity * Time.deltaTime;
+        }
+
+        public void UpdateKnockback(float deltaTime)
+        {
+            if (_knockbackTimer <= 0)
+            {
+                _knockbackVelocity = Vector3.zero;
+                return;
+            }
+
+            _knockbackTimer -= deltaTime;
+            float t = _config.KnockbackDecay > 0
+                ? deltaTime / _config.KnockbackDecay
+                : deltaTime / 0.5f;
+            _knockbackVelocity = Vector3.Lerp(_knockbackVelocity, Vector3.zero, t);
+            _self.position += _knockbackVelocity * deltaTime;
+        }
+
+        public void ResetKnockback()
+        {
+            _knockbackVelocity = Vector3.zero;
+            _knockbackTimer = 0;
         }
     }
 }

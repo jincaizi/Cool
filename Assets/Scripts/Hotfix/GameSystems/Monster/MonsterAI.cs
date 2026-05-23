@@ -37,6 +37,8 @@ namespace Hotfix.GameSystems.Monster
         private int _currentAttackIndex;
         private bool _attackHitTarget;
         private float _defendChaseTimer;
+        private Vector3 _lastHitDirection = Vector3.back;
+        private float _lastKnockbackForce;
 
         private readonly List<Vector3> _patrolPoints = new();
 
@@ -59,6 +61,8 @@ namespace Hotfix.GameSystems.Monster
         }
 
         public MonsterAIState CurrentState => _state;
+        public Vector3 LastHitDirection => _lastHitDirection;
+        public float LastKnockbackForce => _lastKnockbackForce;
 
         public event Action OnDeathComplete;
         public event Action<DamageBlock, EffectBlock> OnAttackHitboxActivate;
@@ -116,7 +120,11 @@ namespace Hotfix.GameSystems.Monster
 
         public void Update(float deltaTime)
         {
-            if (_state == MonsterAIState.Death) return;
+            if (_state == MonsterAIState.Death)
+            {
+                _movement.UpdateKnockback(deltaTime);
+                return;
+            }
 
             _attackCooldown -= deltaTime;
             _stateTimer -= deltaTime;
@@ -143,36 +151,33 @@ namespace Hotfix.GameSystems.Monster
         {
             if (_state == MonsterAIState.Death) return;
 
+            _lastHitDirection = hitDirection;
+            _lastKnockbackForce = damageData?.KnockbackForce ?? 0f;
+
+            // Defend: front absorbs, behind interrupts with knockback
             if (_state == MonsterAIState.Defend && _defend != null)
             {
-                Vector3 dirToAttacker = hitDirection;
-                float angle = Vector3.Angle(_self.forward, -dirToAttacker);
+                float angle = Vector3.Angle(_self.forward, -hitDirection);
                 if (angle < _config.DefendAngle * 0.5f)
                 {
                     var ctx = BuildContext();
                     ctx.DefendBlockCount++;
+                    _animator.SetTrigger(HASH_Hit);
+                    return;
                 }
             }
 
             _preHitState = _state == MonsterAIState.Hit ? _preHitState : _state;
 
-            if (_state == MonsterAIState.Defend)
-            {
-                _animator.SetTrigger(HASH_Hit);
-            }
-            else
-            {
-                _stateTimer = 0.3f;
-                TransitionTo(MonsterAIState.Hit);
-                _animator.SetTrigger(HASH_Hit);
-            }
-
+            _movement.ApplyKnockback(hitDirection, _lastKnockbackForce);
             _movement.Stop();
+            _stateTimer = _config.KnockbackDecay + 0.3f;
+            TransitionTo(MonsterAIState.Hit);
+            _animator.SetTrigger(HASH_Hit);
         }
 
         public void EnterDeath()
         {
-            _movement.Stop();
             TransitionTo(MonsterAIState.Death);
             _animator.SetTrigger(HASH_Death);
         }
@@ -291,6 +296,7 @@ namespace Hotfix.GameSystems.Monster
                 case MonsterAIState.Taunt:
                     break;
                 case MonsterAIState.Hit:
+                    _movement.UpdateKnockback(deltaTime);
                     break;
             }
         }

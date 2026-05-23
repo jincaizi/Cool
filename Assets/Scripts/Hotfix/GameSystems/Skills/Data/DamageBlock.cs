@@ -50,6 +50,11 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] private float _armorPenetration;
         public float ArmorPenetration => _armorPenetration;
 
+        [Header("=== Knockback ===")]
+        [Tooltip("击退力度")]
+        [SerializeField] private float _knockbackForce;
+        public float KnockbackForce => _knockbackForce;
+
         [Header("=== Over Time ===")]
         // 是否为持续伤害效果?
         [Tooltip("是否为持续伤害效果?")]

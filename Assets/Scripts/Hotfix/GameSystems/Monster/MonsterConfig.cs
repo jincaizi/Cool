@@ -1,4 +1,5 @@
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Nameplate;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Monster
@@ -147,6 +148,12 @@ namespace Hotfix.GameSystems.Monster
         [Tooltip("固定刷新点位(仅 FixedPoints 模式)")]
         public Vector3[] FixedSpawnPositions;
 
+        [Header("Knockback")]
+        [Tooltip("击退衰减时间(秒)")]
+        public float KnockbackDecay = 0.5f;
+        [Tooltip("死亡击退力度倍率")]
+        public float DeathKnockbackMultiplier = 1.5f;
+
         [Header("Loot & Death")]
         // Loot table
         [Tooltip("掉落表")]
@@ -158,6 +165,10 @@ namespace Hotfix.GameSystems.Monster
         [Header("Selection Ring")]
         [Tooltip("选中光环的脚底Y轴偏移量，用于调整光环在目标脚下的高度位置")]
         public float RingYOffset = -0.9f;
+
+        [Header("Nameplate")]
+        [Tooltip("昵称配置表（留空则使用默认样式）")]
+        public NameplateData NameplateData;
     }
 
     public enum SpawnMode
