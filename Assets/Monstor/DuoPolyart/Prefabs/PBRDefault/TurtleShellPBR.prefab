@@ -519,6 +519,8 @@ GameObject:
   - component: {fileID: 6053222121562264369}
   - component: {fileID: 5998236221650650532}
   - component: {fileID: 213229529036977866}
+  - component: {fileID: 2355066260908827210}
+  - component: {fileID: 4014924303895831987}
   m_Layer: 0
   m_Name: TurtleShellPBR
   m_TagString: Untagged
@@ -638,6 +640,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd98010ad7b0a4e4f935cd6baa52bb95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2355066260908827210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1524411113276028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 360448d0dec70d14e8ed80848f1b5c3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _targetRenderer: {fileID: 0}
+--- !u!114 &4014924303895831987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1524411113276028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66df620c15e0aaa47b7bf449954b6ec1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _normalHitParticles: {fileID: 8927754642888407331, guid: ee980ac93dc023744b36f65c09f72a6c, type: 3}
+  _criticalHitParticles: {fileID: 0}
 --- !u!1 &1532652994627396
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,30 +15,32 @@ MonoBehaviour:
   WeaponId: sword_shield
   WeaponType: 0
   AttackShape:
-    Type: 0
-    Range: 2
-    Angle: 120
-    Width: 0
-    StopAtFirst: 0
-  Effects:
-  - Damage:
-      _baseDamage: 15
-      _attackRatio: 1.2
-      _scalingAttribute: 0
-      _damageType: 0
-      _criticalRateBonus: 0
-      _criticalDamageBonus: 0
-      _isTrueDamage: 0
-      _armorPenetration: 0
-      _isDOT: 0
-      _tickInterval: 1
-      _totalTicks: 5
-    KnockbackForce: 2
-    LaunchForce: 0
-    StunDuration: 0
-    Status: 0
-    StatusDuration: 0
-    StatusValue: 0
+    _targetType: 0
+    _range: 2
+    _angle: 120
+    _angleStart: 0
+    _angleEnd: 90
+    _areaRadius: 0
+    _width: 1
+    _stopAtFirst: 0
+    _targetMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    _hitboxTimings:
+    - 0.3
+  Damage:
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _knockbackForce: 5
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
   AttackSpeed: 1
   SkillIds:
   - skill_q

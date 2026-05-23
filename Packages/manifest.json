@@ -1,9 +1,10 @@
 {
   "dependencies": {
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.github-glitchenzo.nugetforunity": "https://gitcode.com/gh_mirrors/nu/NuGetForUnity.git?path=/src/NuGetForUnity",
-    "com.ivanmurzak.unity.mcp": "0.68.0",
-    "com.ivanmurzak.unity.mcp.animation": "1.1.32",
-    "com.ivanmurzak.unity.mcp.particlesystem": "1.0.59",
+    "com.ivanmurzak.unity.mcp": "0.72.0",
+    "com.ivanmurzak.unity.mcp.animation": "1.1.37",
+    "com.ivanmurzak.unity.mcp.particlesystem": "1.0.63",
     "com.unity.addressables": "1.21.21",
     "com.unity.ai.navigation": "1.1.7",
     "com.unity.collab-proxy": "2.3.1",
@@ -43,8 +44,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
+    "com.unity.modules.xr": "1.0.0"
   },
   "scopedRegistries": [
     {

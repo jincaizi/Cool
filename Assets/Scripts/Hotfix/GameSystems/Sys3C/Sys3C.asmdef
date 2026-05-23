@@ -4,11 +4,15 @@
     "references": [
         "KcpNet",
         "Hotfix.GameSystems.Skills",
-        "Hotfix.GameSystems.Sys3C.Core"
+        "Hotfix.GameSystems.Sys3C.Core3C"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

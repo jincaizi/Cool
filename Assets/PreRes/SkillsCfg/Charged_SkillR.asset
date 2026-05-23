@@ -40,6 +40,7 @@ MonoBehaviour:
     _criticalDamageBonus: 0
     _isTrueDamage: 0
     _armorPenetration: 0
+    _knockbackForce: 0
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
@@ -113,8 +114,8 @@ MonoBehaviour:
     - 0.3
   _effect:
     _applyEffects: []
-    _knockbackForce: 0
-    _launchForce: 0
+    _knockbackForce: 5
+    _launchForce: 2
     _stunDuration: 0
     _statusType: 0
     _statusDuration: 0

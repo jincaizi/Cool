@@ -3,8 +3,8 @@
     "rootNamespace": "Hotfix.GameSystems.Sys3C.Debug",
     "references": [
         "Hotfix.GameSystems.Sys3C",
-        "Hotfix.GameSystems.Sys3C.Core",
-        "Hotfix.GameSystems.Skills"
+        "Hotfix.GameSystems.Skills",
+        "Hotfix.GameSystems.Sys3C.Core3C"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

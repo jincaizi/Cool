@@ -1,0 +1,526 @@
+{
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Core\\Enums.cs": {
+    "mtime": 1777844195.7905395,
+    "hash": "8f90d5bb9a07ca3f014d403878e7ceb8"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Core\\Events\\BagEvents.cs": {
+    "mtime": 1777844307.4369617,
+    "hash": "e7ea3dd9f9aab9f4c9b94cf3e37cc09e"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Core\\Events\\IBagEvent.cs": {
+    "mtime": 1777849096.8365269,
+    "hash": "69bd270bb1b2d40891a59429b3fea12c"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Data\\BagData.cs": {
+    "mtime": 1777844196.5209062,
+    "hash": "2ccd511b6a87d57da9b4af139161bbe1"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Data\\BagSlotData.cs": {
+    "mtime": 1777844196.1574814,
+    "hash": "e38c1e025e3e0870c447c28697ff20f1"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Data\\ItemData.cs": {
+    "mtime": 1777844196.3414598,
+    "hash": "88a54c969ce5da591fcc1f76caf0880a"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Data\\ItemTemplate.cs": {
+    "mtime": 1777849074.214692,
+    "hash": "72480903343f86b8f119a859a12e621f"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Runtime\\BagManager.cs": {
+    "mtime": 1777849373.7127225,
+    "hash": "4918720e97588e93cf2c4c9910de27ce"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\Runtime\\ItemFactory.cs": {
+    "mtime": 1777844307.8330605,
+    "hash": "1ff38fe2800ddeaef6791ef3d5be5c9f"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\UI\\BagPanel.cs": {
+    "mtime": 1777849179.022392,
+    "hash": "13e017d2e8dd617dc5649efe3ebdb8d8"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\UI\\Components\\ItemCell.cs": {
+    "mtime": 1777849273.8989794,
+    "hash": "fa0042156dd170d33dcb5cb58d981b21"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Bag\\UI\\Components\\ItemTooltip.cs": {
+    "mtime": 1777844431.0583274,
+    "hash": "2129d10dcd6b913c51268cced116ae41"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Combat\\AttackHitbox.cs": {
+    "mtime": 1778276302.7952075,
+    "hash": "a0a5da617fbb4b5299e35085b7a883e3"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Combat\\HitZone.cs": {
+    "mtime": 1778070957.6328323,
+    "hash": "ecf39d14fc06f20b35ac938ad8f0f348"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Combat\\PlayerHitZone.cs": {
+    "mtime": 1778044909.4585636,
+    "hash": "979d475379694dec0a4c5148ecbfa9a8"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\AlertBehaviour.cs": {
+    "mtime": 1778071748.060967,
+    "hash": "a18846f64aa2e580f813cc62b1930738"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\DefendBehaviour.cs": {
+    "mtime": 1778071747.6900015,
+    "hash": "97d5631559929279669d790e59763c21"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\IAIBehaviour.cs": {
+    "mtime": 1778071572.5798914,
+    "hash": "8cd562343ee6b40cb83b60e6abcfc016"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterAI.cs": {
+    "mtime": 1778276293.9599068,
+    "hash": "74751ded7f829cd44f668dcab9a57825"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterAIContext.cs": {
+    "mtime": 1778071572.7518039,
+    "hash": "3b14b5de1a570ca93f89f79bd399a7f5"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterConfig.cs": {
+    "mtime": 1778276273.856411,
+    "hash": "cd79e8c75b18f4c486786565f21b665f"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterEntity.cs": {
+    "mtime": 1778276302.6087189,
+    "hash": "b17f347c0d056f3d797bd8898ccdf8e7"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterEvents.cs": {
+    "mtime": 1778008267.6077468,
+    "hash": "b99c9b092a79912278136cc03dcd8c7a"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterLootTable.cs": {
+    "mtime": 1778008267.7826738,
+    "hash": "522b67a4e53f88f4c4b95906193a266f"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterMovement.cs": {
+    "mtime": 1778072167.7210317,
+    "hash": "4f8dac5574c3eb7b1a94d49b3cc54232"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterSpawner.cs": {
+    "mtime": 1778092143.4430127,
+    "hash": "f4328ebf383c423f94294171b134dfe0"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\MonsterStats.cs": {
+    "mtime": 1778275904.2690995,
+    "hash": "645cddfc35ce8e8b26aec1a57a4e3dde"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Monster\\TauntBehaviour.cs": {
+    "mtime": 1778071747.8830285,
+    "hash": "2c5875f978bef5f26b9c302b7ebda730"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Nameplate\\FloatingTextConfig.cs": {
+    "mtime": 1778189830.1821554,
+    "hash": "479397f699bf53601f334ee8ec1cb8e2"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Nameplate\\FloatingTextPool.cs": {
+    "mtime": 1778189911.2676914,
+    "hash": "f4e08a6b14a4fad735109640d95f7e20"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Nameplate\\NameplateEventBridge.cs": {
+    "mtime": 1778191692.3143573,
+    "hash": "bffdb27a112f524f6b54d8de55c54692"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Nameplate\\NameplateManager.cs": {
+    "mtime": 1778190015.9839017,
+    "hash": "1e751140fce942971c5e901c2b0e27f8"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Nameplate\\NameplateTag.cs": {
+    "mtime": 1778190015.792889,
+    "hash": "53e4a79ecedcce6979558d8511bbc628"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\NpcMirror\\NpcAnimationController.cs": {
+    "mtime": 1777842273.3256693,
+    "hash": "b1876f6a67f078bb1d5edbf06d64aa3e"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\NpcMirror\\NpcMessages.cs": {
+    "mtime": 1777842273.3261712,
+    "hash": "c9e789081c7022994ced5760dc98aec6"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\NpcMirror\\NpcMirrorComponent.cs": {
+    "mtime": 1777842273.3271735,
+    "hash": "5614b20224a035e9b6025ef817a57acf"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\NpcMirror\\NpcMirrorManager.cs": {
+    "mtime": 1777842273.3281837,
+    "hash": "082f09940e1d5b5c0439043cafee2da5"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\ChanneledSkillData.cs": {
+    "mtime": 1778436161.268509,
+    "hash": "c59e238f0e27f0646f67abd48e58a054"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\ChargedSkillData.cs": {
+    "mtime": 1778277193.307518,
+    "hash": "a7c3e3640413b125dd14510a56f7deff"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\ComboSkillData.cs": {
+    "mtime": 1778277193.1185184,
+    "hash": "1bfbea54044996c6830f9f621b6dcb9e"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\DamageBlock.cs": {
+    "mtime": 1778275875.5474484,
+    "hash": "c3d9291db206e897e1b7c95418815919"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\EffectBlock.cs": {
+    "mtime": 1778275791.1991324,
+    "hash": "d28669b5271706c7cf4963ca37998c49"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\InstantSkillData.cs": {
+    "mtime": 1778276522.4774294,
+    "hash": "86f0a6420f198cd76e13ea15d8e00062"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\PresentationBlock.cs": {
+    "mtime": 1778275791.394165,
+    "hash": "f8e7c7585bb8c1676bba2606388884af"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\ProjectileSkillData.cs": {
+    "mtime": 1778276523.0253348,
+    "hash": "08a86cda2a7758322ac6c8fc25e776de"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\ShapeBlock.cs": {
+    "mtime": 1778275829.2049596,
+    "hash": "ce0c03b36cff5f27466534f2d7c78e74"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Data\\SkillData.cs": {
+    "mtime": 1778277202.465531,
+    "hash": "2036c56ee52c43e315c3c7e3e6f080f2"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Definition\\SkillState.cs": {
+    "mtime": 1777842319.6224134,
+    "hash": "464fbe1ae8287586ad51e3e56f4c081f"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Definition\\SkillType.cs": {
+    "mtime": 1778277192.91494,
+    "hash": "257690150bc49736f969bf284ff8661f"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Effect\\DamageEnums.cs": {
+    "mtime": 1778276034.1440823,
+    "hash": "312020d2a3021f4a8254e83e78f58068"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Effect\\EffectData.cs": {
+    "mtime": 1778267569.6425862,
+    "hash": "d775d12e3f2b70869d4e6e76e45da8b7"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Runtime\\CooldownManager.cs": {
+    "mtime": 1777842319.625433,
+    "hash": "0f3855f5fa19713624f404c6cc956381"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Runtime\\IDashComponent.cs": {
+    "mtime": 1778219667.386384,
+    "hash": "5e0aeb25515ebe67bfe63f04e19c2cab"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Runtime\\SkillCoordinator.cs": {
+    "mtime": 1778438331.837396,
+    "hash": "93d15c32fdfc6447ad7df105b7edf0ec"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Runtime\\SkillExecutor.cs": {
+    "mtime": 1778277918.7765446,
+    "hash": "b4cf48cc22cdd7f7224460be75fb2be1"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Runtime\\SkillInputBuffer.cs": {
+    "mtime": 1777842319.628445,
+    "hash": "d0108f159cc78d53258c2de5fc0f5211"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Runtime\\SkillInterruptionMatrix.cs": {
+    "mtime": 1778277193.8433557,
+    "hash": "54850b1f8740cf29d5322ecf75a5d11d"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Skills\\Runtime\\SkillStateMachine.cs": {
+    "mtime": 1778276940.136397,
+    "hash": "f8b07394804e9f872396ebdffce15670"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\CharacterAttackHandler.cs": {
+    "mtime": 1778072444.1267357,
+    "hash": "caf78dad958fe94c0ed00a814f87adbe"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\MeleeWeapon.cs": {
+    "mtime": 1778276280.9112816,
+    "hash": "8f17ba663b3b679a3dba7010211db8a1"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Sys3CEntry.cs": {
+    "mtime": 1778437880.8166573,
+    "hash": "892b3cdbf1cadf1b44383c0c29fc8011"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Animation\\AnimHashes.cs": {
+    "mtime": 1778218862.7117822,
+    "hash": "cb0b83a142de99503d0974d166419ba6"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Animation\\StateBehaviours\\AttackStateBehaviour.cs": {
+    "mtime": 1778227624.6058884,
+    "hash": "bc7c470ea55d2a294ec4ec425e3df5de"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Animation\\StateBehaviours\\BaseStateBehaviour.cs": {
+    "mtime": 1778219466.9405644,
+    "hash": "285e4b61c07cb2e67880d8de67e7cb32"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Animation\\StateBehaviours\\HitStateBehaviour.cs": {
+    "mtime": 1778219467.217531,
+    "hash": "6fdf4beb6b0bfbe4d5112c1b4e4da3a4"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Camera\\ThirdPersonCameraController.cs": {
+    "mtime": 1777842319.6339746,
+    "hash": "1ebc4f6ae13213dc5270f3d388f6f800"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Character\\CharacterAdapters.cs": {
+    "mtime": 1778034491.7232769,
+    "hash": "8660f09731f10535a1874034eaa14683"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Character\\CharacterController.cs": {
+    "mtime": 1778435795.452768,
+    "hash": "e726c6b59d1f14e2764ad3bb440d5ce9"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Character\\CharacterData.cs": {
+    "mtime": 1778221301.2740762,
+    "hash": "3cf141a082789ed024dd9794c4013624"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Character\\FSMConfig.cs": {
+    "mtime": 1778267637.8227549,
+    "hash": "571cb4630fa507818619386843a0eb53"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Character\\GroundDetector.cs": {
+    "mtime": 1777842319.6359856,
+    "hash": "1ad9f89cba9991c71d63d5570d1d0505"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Enums.cs": {
+    "mtime": 1777842273.3397405,
+    "hash": "ab2875e844353f90add0112faa684c01"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\EventBus.cs": {
+    "mtime": 1777848155.9006102,
+    "hash": "db8608525dc233a680226a830d26e5fd"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\IFSM.cs": {
+    "mtime": 1777848012.3190124,
+    "hash": "fb9b67ba07d3efaf13c6df5c1d281578"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\IHitFSM.cs": {
+    "mtime": 1777847927.9314866,
+    "hash": "7d52a83e00a4a8b0b80b34bad672a31c"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\IStateCoordinator.cs": {
+    "mtime": 1777847945.77702,
+    "hash": "4942d87baed24fafe9ff0e7c5413abbc"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\StateCoordinator.cs": {
+    "mtime": 1778219095.7427166,
+    "hash": "b217d6e44bc40b19c85711db63651be5"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\StatePriority.cs": {
+    "mtime": 1777842273.3432584,
+    "hash": "9668837ead8a03ebf66d9a036ddb6832"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\AttackHitboxData.cs": {
+    "mtime": 1778277185.5660088,
+    "hash": "daa45e10a1f1c5ff5fc3392305724dde"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\AttackShapeFactory.cs": {
+    "mtime": 1778275829.3999908,
+    "hash": "a2f6e467a33312f616309c40038f51ac"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\AttackShapeGizmos.cs": {
+    "mtime": 1778166009.7849448,
+    "hash": "96d5501d09d46ce617be032617b09662"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\CircleShape.cs": {
+    "mtime": 1778166009.9603746,
+    "hash": "fd8d6da46b6819c078169c42396c49b9"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\ConeShape.cs": {
+    "mtime": 1778165022.1117713,
+    "hash": "87dd9f973bae96fa5447f62d38ec625e"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\IAttackHitbox.cs": {
+    "mtime": 1778275926.2641091,
+    "hash": "caa67f81714b969633ef2f93108612b3"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\IAttackShape.cs": {
+    "mtime": 1778164329.026291,
+    "hash": "de9b87514d5a40135f1e9bab04d5b2d3"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\IDamageable.cs": {
+    "mtime": 1778275893.0094497,
+    "hash": "88679505f485ff1bfab2e5287076f5ba"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\IEntityRegistry.cs": {
+    "mtime": 1778164328.835279,
+    "hash": "f27039aa36815e85f662dfcde220b4d7"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\IHitDetector.cs": {
+    "mtime": 1778091608.97578,
+    "hash": "3e19f17e025ebe4b55c7182bf4cb32a7"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\ITargetable.cs": {
+    "mtime": 1778189988.9295864,
+    "hash": "021a1e93a122fb655ea64b4799b8b330"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\IWeapon.cs": {
+    "mtime": 1778072243.6874504,
+    "hash": "b2ac8d450320423ac91fc29a0f0f60b9"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\PhysicsRegistry.cs": {
+    "mtime": 1778164778.8833184,
+    "hash": "5efa624a16ce324e5cbb7ac71231d263"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\RectShape.cs": {
+    "mtime": 1778166010.3273208,
+    "hash": "da53e0d559cff92e3d5fe2080b4db67a"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\SectorShape.cs": {
+    "mtime": 1778165184.5266314,
+    "hash": "652962d4c94a5a4596cd8adfcf858082"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Combat\\WeaponConfig.cs": {
+    "mtime": 1778276270.155807,
+    "hash": "2aa663cb95cf5a53efa1f5986ad69c80"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Events\\DamageEvents.cs": {
+    "mtime": 1778190499.0719664,
+    "hash": "8b2dd3b8c5a1495a8f403fc35861ce17"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Events\\DeathEvents.cs": {
+    "mtime": 1777845021.469908,
+    "hash": "7bb72fe73e92fc81a7c9c319a5b57fba"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Events\\IEvent.cs": {
+    "mtime": 1777842273.3412504,
+    "hash": "2bb46f0a041e22ebc3c525468a7336b2"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Events\\MovementEvents.cs": {
+    "mtime": 1777842273.3417532,
+    "hash": "cd6014ed23cebdb10741696da709a71d"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Events\\SkillEvents.cs": {
+    "mtime": 1777842273.3417532,
+    "hash": "82872537fa8e587333cc73cf53dd7ce7"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Core\\Events\\StateEvents.cs": {
+    "mtime": 1777842273.3422556,
+    "hash": "ffdbe3c67f085ca9a9c10aeff43aa29b"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Debug\\DebugWindowManager.cs": {
+    "mtime": 1777848961.2040448,
+    "hash": "0e30f523ac7a257dee40f35642792f4b"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Debug\\StateLogger.cs": {
+    "mtime": 1777848989.8879905,
+    "hash": "c541730b98c52349eb530acd44a2b4b2"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\FSM\\AttackState.cs": {
+    "mtime": 1778218862.8957565,
+    "hash": "de8afde44ee9b7591eef85af39dd0d54"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\FSM\\BaseFSM.cs": {
+    "mtime": 1778219176.7000747,
+    "hash": "817f03f4384a23eb91282a3d3d37296e"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\FSM\\FSMManager.cs": {
+    "mtime": 1778225367.3143609,
+    "hash": "17443d7471a57783d5c4c57544bad856"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\FSM\\HitFSM.cs": {
+    "mtime": 1778219288.2298784,
+    "hash": "24ab82192ac70c9bf78e40c63e79f210"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\FSM\\StateTransitionTable.cs": {
+    "mtime": 1777960150.4974618,
+    "hash": "ac16a7e25dce4d2a0e7569d7e6faf855"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\FSM\\States\\AttackStates.cs": {
+    "mtime": 1777842273.351804,
+    "hash": "aa24810c1f0c503ba32cb087379381b0"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\FSM\\States\\BaseStates.cs": {
+    "mtime": 1777842273.3528092,
+    "hash": "2d5f00c6db3eb22cecb7ea34ba19ea22"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\FSM\\States\\IState.cs": {
+    "mtime": 1777842273.353815,
+    "hash": "121c9d55dc9141d4f6cd3dadf48fa348"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Input\\InputManager.cs": {
+    "mtime": 1778034615.5552504,
+    "hash": "85d64921e8e38bee5eaf6c107f8b9f52"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Input\\JoystickInputAdapter.cs": {
+    "mtime": 1777842273.356831,
+    "hash": "78b475e8fcfbf053c0720daaf57cbbe2"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Input\\KeyboardInputAdapter.cs": {
+    "mtime": 1777842273.357836,
+    "hash": "89218253a17c904c60b1cfbb624af14a"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Network\\MovementPolicy.cs": {
+    "mtime": 1777842273.358842,
+    "hash": "c18fcfebc4afe69734b3c9acdfbad053"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Network\\NetworkBridge.cs": {
+    "mtime": 1777842273.359847,
+    "hash": "43e6f13aaaab4b9f555938405334acfe"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Network\\NetworkPrediction.cs": {
+    "mtime": 1777842273.3608518,
+    "hash": "551368840e8decc6fcb74d31f64bae07"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Network\\PositionInterpolator.cs": {
+    "mtime": 1777842273.3618577,
+    "hash": "83a7a771b2c5b103f53307ec645f1d7d"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Network\\SkillNetworkSync.cs": {
+    "mtime": 1778034646.348374,
+    "hash": "ceddf814726bbde30072c72e6cf40e21"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Skill\\SkillDashComponent.cs": {
+    "mtime": 1778219688.0769882,
+    "hash": "b1bcd4a06f3b0553186e87d2e2add2d2"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Animation\\SequenceBuilder.cs": {
+    "mtime": 1778184507.2812853,
+    "hash": "423e59ffeec3f40e62a28cb3b0cbddbb"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Animation\\UIAnimation.cs": {
+    "mtime": 1778184670.279738,
+    "hash": "65653f3b132e0ad9bf48baf8a07084c9"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Animation\\UIAnimPreset.cs": {
+    "mtime": 1778184270.8025873,
+    "hash": "19b58208ca6e394b81ac7f6fce96ce85"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Animation\\UITweenExtensions.cs": {
+    "mtime": 1778186597.8636816,
+    "hash": "21ee385f9f8eb7277934712701983cdb"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Const\\UIConst.cs": {
+    "mtime": 1778184129.7740166,
+    "hash": "3fdbb803e1a87d6c59b09b925c84cf08"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Core\\ScreenAdapter.cs": {
+    "mtime": 1778184789.9051633,
+    "hash": "a0e311fd6a59736ecbc77d530d7941d1"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Core\\UIManager.cs": {
+    "mtime": 1778186776.0832639,
+    "hash": "644420a345c7443d648bd38e0730c421"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Core\\UIPanel.cs": {
+    "mtime": 1778185896.6365747,
+    "hash": "79a162c7919c1aa004951b8e8ca0908c"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\UI\\Panel\\HUD\\TargetPanel.cs": {
+    "mtime": 1778191419.8684013,
+    "hash": "765541df6230aaf26fae7b5d96f0ec3b"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\docs\\HYBRIDCLR_AOT_ASSEMBLIES.md": {
+    "mtime": 1778044367.3005903,
+    "hash": "a067998c74e7fce934f91d8e0a914095"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\DebugNotes.md": {
+    "mtime": 1777842273.3452697,
+    "hash": "3911227e6bf07ddf1c383c2f15805371"
+  },
+  "E:\\CodeForJob\\Cool\\Assets\\Scripts\\Hotfix\\GameSystems\\Sys3C\\Sys3C-CurrentDesign.md": {
+    "mtime": 1777842319.6425197,
+    "hash": "47c3a67563b38008f68d972e90d2178f"
+  }
+}

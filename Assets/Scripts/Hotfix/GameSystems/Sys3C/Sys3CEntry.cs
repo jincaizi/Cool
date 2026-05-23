@@ -119,6 +119,7 @@ namespace Hotfix.GameSystems.Sys3C
             var command = _inputManager.GetMoveCommand(cameraForward);
 
             _cc.Update(command);
+            ApplyPushVector();
             _fsmManager.Update(Time.deltaTime);
             _skillCoordinator.Update(Time.deltaTime);
             _dashComponent.Update();
@@ -212,6 +213,10 @@ namespace Hotfix.GameSystems.Sys3C
         private bool _cleanupInProgress;
         private Skills.Definition.SkillSubState _prevSkillSubState;
 
+        // Push-away from monster collision
+        private Vector3 _pushVector;
+        private float _pushForce = 0.08f;
+
         private void HandleSkillActivated(SkillData skillData)
         {
             // 连段时先清除旧的触发器，确保新触发器能正确被 Animator 消费
@@ -297,6 +302,26 @@ namespace Hotfix.GameSystems.Sys3C
         private void OnDestroy()
         {
             PhysicsRegistry.Instance.Unregister(this);
+        }
+
+        private void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            var damageable = hit.collider.GetComponent<IDamageable>();
+            if (damageable == null || hit.collider.gameObject == gameObject) return;
+
+            Vector3 toPlayer = transform.position - hit.collider.transform.position;
+            toPlayer.y = 0;
+            if (toPlayer.sqrMagnitude < 0.01f)
+                toPlayer = -hit.moveDirection;
+            _pushVector += toPlayer.normalized * _pushForce;
+        }
+
+        private void ApplyPushVector()
+        {
+            if (_pushVector.sqrMagnitude < 0.0001f) return;
+
+            CharacterController.Move(_pushVector);
+            _pushVector = Vector3.zero;
         }
     }
 

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae706dae3a2fd2b429cc10c6d702eaf1, type: 3}
+  m_Name: FloatText_DOT
+  m_EditorClassIdentifier: 
+  Type: 5
+  Font: {fileID: 11400000, guid: c240252520313ba48a1e082bbb79faa0, type: 2}
+  FontMaterial: {fileID: 4857915465648842615, guid: c240252520313ba48a1e082bbb79faa0, type: 2}
+  FontSize: 22
+  Color: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  Duration: 0.5
+  MoveUpDistance: 20
+  FadeStartRatio: 0.5
+  StartScale: 1

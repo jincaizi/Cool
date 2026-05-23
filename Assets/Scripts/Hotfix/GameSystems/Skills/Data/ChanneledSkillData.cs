@@ -36,7 +36,7 @@ namespace Hotfix.GameSystems.Skills.Data
 
         [Header("=== Movement ===")]
         [Tooltip("引导阶段是否可以移动?")]
-        [SerializeField] private bool _canMoveWhileChanneling = true;
+        [SerializeField] private bool _canMoveWhileChanneling = false;
         public bool CanMoveWhileChanneling => _canMoveWhileChanneling;
 
         [Header("=== Config Blocks ===")]

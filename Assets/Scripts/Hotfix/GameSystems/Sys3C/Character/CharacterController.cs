@@ -414,9 +414,12 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 _data.BaseState == BaseState.Move ||
                 _data.BaseState == BaseState.Sprint)
             {
+                // 技能/移动锁定时不更新基础状态，防止动画混合树显示行走动画
+                if (LockMovement)
+                    return;
+
                 if (command.MoveDir.sqrMagnitude > 0.01f)
                 {
-                    // 技能播放期间不更新朝向，让角色保持动画朝向
                     if (!LockRotation)
                     {
                         _transform.rotation = Quaternion.Slerp(

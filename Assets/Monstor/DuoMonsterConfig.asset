@@ -23,19 +23,50 @@ MonoBehaviour:
   LeaveRange: 15
   AttackRange: 2
   AttackCooldown: 1.5
+  AttackCooldownVariance: 0.3
   PatrolRadius: 5
+  PatrolRadiusVariance: 1
   IdleDuration: 2
+  IdleDurationVariance: 0.5
   AttackAnimCount: 1
   AttackWeights:
   - 1
   AttackAnimSpeed: 1
   AttackShape:
-    Type: 0
-    Range: 0
-    Angle: 0
-    Width: 0
-    StopAtFirst: 0
-  AttackEffects: []
+    _targetType: 0
+    _range: 2
+    _angle: 120
+    _angleStart: 0
+    _angleEnd: 90
+    _areaRadius: 0
+    _width: 1
+    _stopAtFirst: 0
+    _targetMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    _hitboxTimings:
+    - 0.3
+  AttackDamage:
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _knockbackForce: 3
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
+  AttackEffect:
+    _applyEffects: []
+    _knockbackForce: 0
+    _launchForce: 0
+    _stunDuration: 0
+    _statusType: 0
+    _statusDuration: 0
+    _statusValue: 0
   EnableDefend: 0
   DefendHPThreshold: 0.5
   DefendChaseTimeThreshold: 3
@@ -51,5 +82,11 @@ MonoBehaviour:
   AlertRange: 15
   ChaseAnimIsRun: 1
   RotationSpeed: 10
+  SpawnMode: 0
+  FixedSpawnPositions: []
+  KnockbackDecay: 0.5
+  DeathKnockbackMultiplier: 1.5
   LootTable: {fileID: 0}
   DeathDestroyDelay: 3
+  RingYOffset: -0.9
+  NameplateData: {fileID: 0}

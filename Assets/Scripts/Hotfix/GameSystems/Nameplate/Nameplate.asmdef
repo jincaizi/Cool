@@ -5,12 +5,17 @@
         "DataDefinition",
         "Unity.TextMeshPro",
         "Hotfix.GameSystems.Skills",
-        "Hotfix.GameSystems.Sys3C.Core",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "Core",
+        "Hotfix.GameSystems.Sys3C.Core3C"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

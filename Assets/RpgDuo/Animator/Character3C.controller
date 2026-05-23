@@ -7,7 +7,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: AttackR_Start
+  m_Name: SkillR_start
   m_Speed: 1
   m_CycleOffset: 1
   m_Transitions:
@@ -86,7 +86,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: AttackQ
+  m_Name: SkillQ
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -338,7 +338,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Attack2
+  m_Name: Combo2
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -577,9 +577,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.15822749
-  m_TransitionOffset: 0
-  m_ExitTime: 0.51671386
+  m_TransitionDuration: 0.060745656
+  m_TransitionOffset: 0.7395644
+  m_ExitTime: 0.77433306
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -692,7 +692,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Attack1
+  m_Name: BaseAttack
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -1071,7 +1071,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: AttackR_Loop
+  m_Name: SkillR_loop
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:

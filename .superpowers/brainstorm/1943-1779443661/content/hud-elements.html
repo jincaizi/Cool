@@ -1,0 +1,128 @@
+<h2>角色HUD要展示哪些信息？</h2>
+<p class="subtitle">选择一个你最需要的配置（多选可组合）</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="hp-bar" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>生命值条 (HP Bar)</h3>
+      <p>红色血条 + 数值显示 (当前/最大)，角色基本生存信息</p>
+    </div>
+  </div>
+  <div class="option" data-choice="resource-bar" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>资源条 (MP/Rage/Energy)</h3>
+      <p>蓝色资源条，用于技能消耗（法力/怒气/能量等）</p>
+    </div>
+  </div>
+  <div class="option" data-choice="name-level" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>角色名 & 等级</h3>
+      <p>显示玩家名字和当前等级</p>
+    </div>
+  </div>
+  <div class="option" data-choice="buff-bar" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Buff/Debuff 图标栏</h3>
+      <p>当前身上的增益和减益效果小图标</p>
+    </div>
+  </div>
+  <div class="option" data-choice="skill-cd" onclick="toggleSelect(this)">
+    <div class="letter">E</div>
+    <div class="content">
+      <h3>技能冷却图标</h3>
+      <p>主要技能(Q/R)的冷却倒计时</p>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top: 24px;">预览参考 - 三种常见配置</h3>
+<p class="subtitle">点击配置卡片查看哪种最接近你想要的</p>
+
+<div class="cards">
+  <div class="card" data-choice="minimal" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup" style="background:#1a1a2e;padding:12px;border-radius:6px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;background:#444;border-radius:4px;"></div>
+          <div>
+            <div style="color:#fff;font-size:12px;margin-bottom:4px;">PlayerName Lv.50</div>
+            <div style="width:160px;height:14px;background:#333;border-radius:3px;overflow:hidden;">
+              <div style="width:75%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+            </div>
+            <div style="color:#aaa;font-size:10px;margin-top:2px;">7500 / 10000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>简约配置</h3>
+      <p>HP + 名字等级，适合快速原型</p>
+    </div>
+  </div>
+  <div class="card" data-choice="standard" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup" style="background:#1a1a2e;padding:12px;border-radius:6px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;background:#444;border-radius:4px;"></div>
+          <div>
+            <div style="color:#fff;font-size:12px;margin-bottom:4px;">PlayerName Lv.50</div>
+            <div style="width:180px;height:12px;background:#333;border-radius:3px;overflow:hidden;margin-bottom:3px;">
+              <div style="width:75%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+            </div>
+            <div style="color:#aaa;font-size:9px;margin-bottom:4px;">7500 / 10000</div>
+            <div style="width:180px;height:12px;background:#333;border-radius:3px;overflow:hidden;">
+              <div style="width:60%;height:100%;background:linear-gradient(#3498db,#2980b9);"></div>
+            </div>
+            <div style="color:#aaa;font-size:9px;margin-top:2px;">300 / 500</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>标准MMO配置</h3>
+      <p>HP + MP + 名字等级，经典MMO玩家HUD</p>
+    </div>
+  </div>
+  <div class="card" data-choice="full" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup" style="background:#1a1a2e;padding:12px;border-radius:6px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="width:32px;height:32px;background:#444;border-radius:4px;flex-shrink:0;"></div>
+          <div>
+            <div style="color:#fff;font-size:12px;margin-bottom:4px;">PlayerName Lv.50</div>
+            <div style="width:200px;height:10px;background:#333;border-radius:3px;overflow:hidden;margin-bottom:2px;">
+              <div style="width:75%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+            </div>
+            <div style="color:#aaa;font-size:9px;margin-bottom:3px;">7500 / 10000</div>
+            <div style="width:200px;height:10px;background:#333;border-radius:3px;overflow:hidden;margin-bottom:2px;">
+              <div style="width:60%;height:100%;background:linear-gradient(#3498db,#2980b9);"></div>
+            </div>
+            <div style="color:#aaa;font-size:9px;margin-bottom:5px;">300 / 500</div>
+            <div style="display:flex;gap:3px;margin-bottom:4px;">
+              <div style="width:20px;height:20px;background:#2d572c;border-radius:2px;border:1px solid #5a5;"></div>
+              <div style="width:20px;height:20px;background:#2d572c;border-radius:2px;border:1px solid #5a5;"></div>
+              <div style="width:20px;height:20px;background:#5c2d2d;border-radius:2px;border:1px solid #a55;"></div>
+              <div style="width:20px;height:20px;background:#5c2d2d;border-radius:2px;border:1px solid #a55;"></div>
+            </div>
+            <div style="display:flex;gap:4px;">
+              <div style="width:28px;height:28px;background:#444;border-radius:4px;position:relative;overflow:hidden;">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:40%;background:rgba(0,0,0,0.7);"></div>
+              </div>
+              <div style="width:28px;height:28px;background:#444;border-radius:4px;position:relative;overflow:hidden;">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:70%;background:rgba(0,0,0,0.7);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>完整配置</h3>
+      <p>HP + MP + Buffs + 技能CD，最全面的信息展示</p>
+    </div>
+  </div>
+</div>

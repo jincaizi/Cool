@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: SlimeConfig
   m_EditorClassIdentifier: 
   MonsterId: slime
-  DisplayName: Slime
+  DisplayName: "\u53F2\u83B1\u59C6"
   Prefab: {fileID: 1931298151966786, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}
-  MaxHP: 60
+  MaxHP: 600
   AttackPower: 15
   Defense: 5
   MoveSpeed: 5
@@ -34,48 +34,40 @@ MonoBehaviour:
   - 0.3
   AttackAnimSpeed: 1.2
   AttackShape:
-    Type: 0
-    Range: 2
-    Angle: 120
-    Width: 0
-    StopAtFirst: 0
-  AttackEffects:
-  - Damage:
-      _baseDamage: 12
-      _attackRatio: 1
-      _scalingAttribute: 0
-      _damageType: 0
-      _criticalRateBonus: 0
-      _criticalDamageBonus: 0
-      _isTrueDamage: 0
-      _armorPenetration: 0
-      _isDOT: 0
-      _tickInterval: 1
-      _totalTicks: 5
-    KnockbackForce: 2
-    LaunchForce: 0
-    StunDuration: 0
-    Status: 0
-    StatusDuration: 0
-    StatusValue: 0
-  - Damage:
-      _baseDamage: 20
-      _attackRatio: 1
-      _scalingAttribute: 0
-      _damageType: 0
-      _criticalRateBonus: 0
-      _criticalDamageBonus: 0
-      _isTrueDamage: 0
-      _armorPenetration: 0
-      _isDOT: 0
-      _tickInterval: 1
-      _totalTicks: 5
-    KnockbackForce: 5
-    LaunchForce: 0
-    StunDuration: 0
-    Status: 0
-    StatusDuration: 0
-    StatusValue: 0
+    _targetType: 0
+    _range: 2
+    _angle: 120
+    _angleStart: 0
+    _angleEnd: 90
+    _areaRadius: 0
+    _width: 1
+    _stopAtFirst: 0
+    _targetMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    _hitboxTimings:
+    - 0.3
+  AttackDamage:
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _knockbackForce: 3
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
+  AttackEffect:
+    _applyEffects: []
+    _knockbackForce: 0
+    _launchForce: 0
+    _stunDuration: 0
+    _statusType: 0
+    _statusDuration: 0
+    _statusValue: 0
   EnableDefend: 0
   DefendHPThreshold: 0.5
   DefendChaseTimeThreshold: 3
@@ -93,5 +85,9 @@ MonoBehaviour:
   RotationSpeed: 15
   SpawnMode: 0
   FixedSpawnPositions: []
+  KnockbackDecay: 0.5
+  DeathKnockbackMultiplier: 1.5
   LootTable: {fileID: 0}
   DeathDestroyDelay: 3
+  RingYOffset: -0.9
+  NameplateData: {fileID: 11400000, guid: 6aa72c355a9e1634c9ad3bebb8508ae6, type: 2}

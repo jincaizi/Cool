@@ -38,6 +38,18 @@ namespace Hotfix.GameSystems.Nameplate
             nameText.text = config.DisplayName;
             nameText.color = config.NameColor ?? _settings.DefaultColor;
 
+            // Apply per-config font settings if specified
+            if (config.Font != null)
+            {
+                nameText.font = config.Font;
+                if(config.FontMaterial != null) nameText.fontMaterial = config.FontMaterial;
+                nameText.fontSize = config.FontSize > 0 ? config.FontSize : _settings.FontSize;
+            }
+            else
+            {
+                nameText.fontSize = _settings.FontSize;
+            }
+
             if (config.ClassIcon != null)
             {
                 classIcon.sprite = config.ClassIcon;
@@ -106,7 +118,7 @@ namespace Hotfix.GameSystems.Nameplate
 
                 entry.Root.SetActive(true);
 
-                var worldPos = entry.Owner.position + Vector3.up * _settings.VerticalOffset;
+                var worldPos = entry.Owner.position + Vector3.up * (entry.Config.VerticalOffset >= 0 ? entry.Config.VerticalOffset : _settings.VerticalOffset);
                 var screenPos = camera.WorldToScreenPoint(worldPos);
                 if (screenPos.z > 0)
                     entry.Root.transform.position = screenPos;

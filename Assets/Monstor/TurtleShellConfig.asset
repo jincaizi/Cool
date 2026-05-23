@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: TurtleShellConfig
   m_EditorClassIdentifier: 
   MonsterId: turtleshell
-  DisplayName: TurtleShell
+  DisplayName: "\u523A\u80CC\u9F9F"
   Prefab: {fileID: 1524411113276028, guid: e2aafa8770d34a9591b41bedf4e318ba, type: 3}
-  MaxHP: 150
-  AttackPower: 25
-  Defense: 20
+  MaxHP: 1500
+  AttackPower: 10
+  Defense: 5
   MoveSpeed: 2
   DetectRange: 8
   LeaveRange: 12
@@ -30,52 +30,51 @@ MonoBehaviour:
   IdleDurationVariance: 0.5
   AttackAnimCount: 2
   AttackWeights:
-  - 0.5
-  - 0.5
+  - 0.6
+  - 0.4
   AttackAnimSpeed: 1
   AttackShape:
-    Type: 1
-    Range: 2
-    Angle: 0
-    Width: 0
-    StopAtFirst: 0
-  AttackEffects:
-  - Damage:
-      _baseDamage: 20
-      _attackRatio: 1
-      _scalingAttribute: 0
-      _damageType: 0
-      _criticalRateBonus: 0
-      _criticalDamageBonus: 0
-      _isTrueDamage: 0
-      _armorPenetration: 0
-      _isDOT: 0
-      _tickInterval: 1
-      _totalTicks: 5
-    KnockbackForce: 3
-    LaunchForce: 0
-    StunDuration: 0
-    Status: 0
-    StatusDuration: 0
-    StatusValue: 0
-  - Damage:
-      _baseDamage: 35
-      _attackRatio: 1
-      _scalingAttribute: 0
-      _damageType: 0
-      _criticalRateBonus: 0
-      _criticalDamageBonus: 0
-      _isTrueDamage: 0
-      _armorPenetration: 0
-      _isDOT: 0
-      _tickInterval: 1
-      _totalTicks: 5
-    KnockbackForce: 8
-    LaunchForce: 0
-    StunDuration: 0
-    Status: 0
-    StatusDuration: 0
-    StatusValue: 0
+    _targetType: 0
+    _range: 2
+    _angle: 120
+    _angleStart: 0
+    _angleEnd: 90
+    _areaRadius: 0
+    _width: 1
+    _stopAtFirst: 0
+    _targetMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    _hitboxTimings:
+    - 0.3
+  AttackDamage:
+    _baseDamage: 2
+    _attackRatio: 1
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0.1
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _knockbackForce: 2
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
+  AttackEffect:
+    _applyEffects:
+    - _type: 8
+      _effectId: 
+      _duration: 0
+      _maxStacks: 0
+      _stackingRule: 0
+      _isTickEffect: 1
+      _tickInterval: 0
+    _knockbackForce: 0
+    _launchForce: 0
+    _stunDuration: 0
+    _statusType: 0
+    _statusDuration: 0
+    _statusValue: 0
   EnableDefend: 1
   DefendHPThreshold: 0.5
   DefendChaseTimeThreshold: 3
@@ -93,5 +92,9 @@ MonoBehaviour:
   RotationSpeed: 5
   SpawnMode: 0
   FixedSpawnPositions: []
+  KnockbackDecay: 0.5
+  DeathKnockbackMultiplier: 1.5
   LootTable: {fileID: 0}
   DeathDestroyDelay: 3
+  RingYOffset: -0.9
+  NameplateData: {fileID: 11400000, guid: 69a01ca8a12c71d4ea562662726ffa31, type: 2}

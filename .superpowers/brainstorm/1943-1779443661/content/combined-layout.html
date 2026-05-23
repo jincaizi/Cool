@@ -1,0 +1,192 @@
+<h2>玩家HUD + 目标面板 整体布局</h2>
+<p class="subtitle">左上角玩家HUD（已确定横向排列），目标面板放哪里？</p>
+
+<div class="cards">
+  <div class="card" data-choice="top-center" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup" style="background:#1a1a2e;padding:20px;border-radius:8px;min-width:500px;">
+        <!-- Game viewport top bar -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <!-- Player HUD - top left -->
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.5);padding:8px 12px;border-radius:8px;">
+            <div style="width:40px;height:40px;background:#555;border-radius:50%;flex-shrink:0;"></div>
+            <div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px;">
+                <span style="color:#fff;font-size:12px;font-weight:bold;">我 Lv.50</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px;">
+                <div style="width:140px;height:10px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                  <div style="width:75%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;text-shadow:0 1px 2px #000;">7500/10000</span>
+                </div>
+                <div style="width:140px;height:10px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                  <div style="width:60%;height:100%;background:linear-gradient(#3498db,#2980b9);"></div>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;text-shadow:0 1px 2px #000;">300/500</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:2px;margin-top:3px;">
+                <div style="width:18px;height:18px;background:#2d572c;border-radius:2px;border:1px solid #5a5;"></div>
+                <div style="width:18px;height:18px;background:#6b2d2d;border-radius:2px;border:1px solid #a55;"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Target Panel - top center -->
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.5);padding:8px 12px;border-radius:8px;">
+            <div style="width:40px;height:40px;background:#3a3a5c;border-radius:6px;flex-shrink:0;border:2px solid #c0392b;"></div>
+            <div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px;">
+                <span style="color:#e74c3c;font-size:12px;font-weight:bold;">Boss怪物</span>
+                <span style="color:#f1c40f;font-size:10px;">Lv.55</span>
+              </div>
+              <div style="width:160px;height:12px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                <div style="width:40%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+                <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;text-shadow:0 1px 2px #000;">4000/10000</span>
+              </div>
+              <div style="display:flex;gap:2px;margin-top:3px;">
+                <div style="width:18px;height:18px;background:#6b2d2d;border-radius:2px;border:1px solid #a55;"></div>
+              </div>
+            </div>
+          </div>
+          <div></div> <!-- spacer -->
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — 目标面板置顶居中</h3>
+      <p>玩家HUD左上，目标面板顶部居中。经典MMO布局，视线自然聚焦</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="top-right" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup" style="background:#1a1a2e;padding:20px;border-radius:8px;min-width:500px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <!-- Player HUD - top left -->
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.5);padding:8px 12px;border-radius:8px;">
+            <div style="width:40px;height:40px;background:#555;border-radius:50%;flex-shrink:0;"></div>
+            <div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px;">
+                <span style="color:#fff;font-size:12px;font-weight:bold;">我 Lv.50</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px;">
+                <div style="width:140px;height:10px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                  <div style="width:75%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;">7500/10000</span>
+                </div>
+                <div style="width:140px;height:10px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                  <div style="width:60%;height:100%;background:linear-gradient(#3498db,#2980b9);"></div>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;">300/500</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:2px;margin-top:3px;">
+                <div style="width:18px;height:18px;background:#2d572c;border-radius:2px;border:1px solid #5a5;"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Target Panel - top right -->
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.5);padding:8px 12px;border-radius:8px;">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px;justify-content:flex-end;">
+                <span style="color:#e74c3c;font-size:12px;font-weight:bold;">Boss怪物</span>
+                <span style="color:#f1c40f;font-size:10px;">Lv.55</span>
+              </div>
+              <div style="width:160px;height:12px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                <div style="width:40%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+                <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;">4000/10000</span>
+              </div>
+              <div style="display:flex;gap:2px;margin-top:3px;justify-content:flex-end;">
+                <div style="width:18px;height:18px;background:#6b2d2d;border-radius:2px;border:1px solid #a55;"></div>
+              </div>
+            </div>
+            <div style="width:40px;height:40px;background:#3a3a5c;border-radius:6px;flex-shrink:0;border:2px solid #c0392b;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — 目标面板右上角</h3>
+      <p>玩家HUD左上，目标面板右上。左右对称，不遮挡中心视野</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="below-player" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup" style="background:#1a1a2e;padding:20px;border-radius:8px;min-width:300px;">
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;">
+          <!-- Player HUD -->
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.5);padding:8px 12px;border-radius:8px;">
+            <div style="width:40px;height:40px;background:#555;border-radius:50%;flex-shrink:0;"></div>
+            <div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px;">
+                <span style="color:#fff;font-size:12px;font-weight:bold;">我 Lv.50</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px;">
+                <div style="width:140px;height:10px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                  <div style="width:75%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;">7500/10000</span>
+                </div>
+                <div style="width:140px;height:10px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                  <div style="width:60%;height:100%;background:linear-gradient(#3498db,#2980b9);"></div>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;">300/500</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Target Panel - below player -->
+          <div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 12px;border-radius:8px;margin-left:50px;">
+            <div style="width:30px;height:30px;background:#3a3a5c;border-radius:4px;border:2px solid #c0392b;"></div>
+            <div>
+              <div style="display:flex;align-items:baseline;gap:6px;">
+                <span style="color:#e74c3c;font-size:11px;font-weight:bold;">Boss怪物</span>
+                <span style="color:#f1c40f;font-size:9px;">Lv.55</span>
+              </div>
+              <div style="width:140px;height:8px;background:#333;border-radius:3px;overflow:hidden;position:relative;">
+                <div style="width:40%;height:100%;background:linear-gradient(#e74c3c,#c0392b);"></div>
+                <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:7px;">4000/10000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — 目标面板在玩家HUD下方</h3>
+      <p>目标在玩家HUD正下方，略缩进。信息集中在一侧，方便一眼看完</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>目标面板内容</h3>
+  <p class="subtitle">目标面板要展示哪些信息？（可多选）</p>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="target-hp" onclick="toggleSelect(this)">
+      <div class="letter"></div>
+      <div class="content">
+        <h3>HP条 + 数值</h3>
+        <p>和目标血量和当前/最大数值（已有）</p>
+      </div>
+    </div>
+    <div class="option" data-choice="target-mp" onclick="toggleSelect(this)">
+      <div class="letter"></div>
+      <div class="content">
+        <h3>MP/资源条</h3>
+        <p>目标资源条（PvP时有意义）</p>
+      </div>
+    </div>
+    <div class="option" data-choice="target-buffs" onclick="toggleSelect(this)">
+      <div class="letter"></div>
+      <div class="content">
+        <h3>Buff/Debuff图标</h3>
+        <p>目标身上的效果，战斗中重要</p>
+      </div>
+    </div>
+    <div class="option" data-choice="target-castbar" onclick="toggleSelect(this)">
+      <div class="letter"></div>
+      <div class="content">
+        <h3>施法条</h3>
+        <p>目标正在释放的技能读条</p>
+      </div>
+    </div>
+  </div>
+</div>

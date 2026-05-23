@@ -1,77 +1,76 @@
-# Graph Report - Assets/Scripts  (2026-05-08)
+# Graph Report - Assets/Scripts/Hotfix/GameSystems  (2026-05-11)
 
 ## Corpus Check
-- 153 files ¬∑ ~56,043 words
-- Verdict: corpus is large enough that graph structure adds value.
+- Corpus is ~35,489 words - fits in a single context window. You may not need a graph.
 
 ## Summary
-- 1990 nodes ¬∑ 2806 edges ¬∑ 167 communities (77 shown, 90 thin omitted)
-- Extraction: 99% EXTRACTED ¬∑ 1% INFERRED ¬∑ 0% AMBIGUOUS ¬∑ INFERRED: 21 edges (avg confidence: 0.81)
-- Token cost: 0 input ¬∑ 0 output
+- 1472 nodes °§ 2012 edges °§ 140 communities (56 shown, 84 thin omitted)
+- Extraction: 99% EXTRACTED °§ 1% INFERRED °§ 0% AMBIGUOUS °§ INFERRED: 14 edges (avg confidence: 0.81)
+- Token cost: 0 input °§ 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Animation SMB Callbacks|Animation SMB Callbacks]]
-- [[_COMMUNITY_KCP Networking Examples|KCP Networking Examples]]
-- [[_COMMUNITY_FSM Attack Layer|FSM Attack Layer]]
-- [[_COMMUNITY_Character + Buff System|Character + Buff System]]
-- [[_COMMUNITY_FSM Core  3C Root|FSM Core / 3C Root]]
-- [[_COMMUNITY_Monster AI + NPC Animation|Monster AI + NPC Animation]]
-- [[_COMMUNITY_UI + Debug + Weapon|UI + Debug + Weapon]]
-- [[_COMMUNITY_Monster Combat System|Monster Combat System]]
-- [[_COMMUNITY_StateCoordinator + KCP Session|StateCoordinator + KCP Session]]
-- [[_COMMUNITY_Spawning + Camera + Pool|Spawning + Camera + Pool]]
-- [[_COMMUNITY_Combat Attack Shapes|Combat Attack Shapes]]
-- [[_COMMUNITY_Debug Window + Confirm|Debug Window + Confirm]]
-- [[_COMMUNITY_KCP Core Networking|KCP Core Networking]]
-- [[_COMMUNITY_Character Update Loop|Character Update Loop]]
-- [[_COMMUNITY_Bag UI Panel|Bag UI Panel]]
-- [[_COMMUNITY_Skill Input Processing|Skill Input Processing]]
-- [[_COMMUNITY_Logging Infrastructure|Logging Infrastructure]]
-- [[_COMMUNITY_Animation Driver API|Animation Driver API]]
-- [[_COMMUNITY_Message Codec Layer|Message Codec Layer]]
-- [[_COMMUNITY_KCP Socket  Buffer|KCP Socket / Buffer]]
-- [[_COMMUNITY_Hit FSM|Hit FSM]]
-- [[_COMMUNITY_Input Adapters|Input Adapters]]
-- [[_COMMUNITY_UIPanel Lifecycle|UIPanel Lifecycle]]
-- [[_COMMUNITY_AI Behaviour States|AI Behaviour States]]
-- [[_COMMUNITY_Skill State Machine|Skill State Machine]]
-- [[_COMMUNITY_Community 25|Community 25]]
-- [[_COMMUNITY_Community 26|Community 26]]
-- [[_COMMUNITY_Community 27|Community 27]]
-- [[_COMMUNITY_Community 28|Community 28]]
-- [[_COMMUNITY_Community 29|Community 29]]
-- [[_COMMUNITY_Community 30|Community 30]]
-- [[_COMMUNITY_Community 31|Community 31]]
-- [[_COMMUNITY_Community 32|Community 32]]
-- [[_COMMUNITY_Community 33|Community 33]]
-- [[_COMMUNITY_Community 34|Community 34]]
-- [[_COMMUNITY_Community 35|Community 35]]
-- [[_COMMUNITY_Community 36|Community 36]]
-- [[_COMMUNITY_Community 37|Community 37]]
-- [[_COMMUNITY_Community 38|Community 38]]
-- [[_COMMUNITY_Community 39|Community 39]]
-- [[_COMMUNITY_Community 40|Community 40]]
-- [[_COMMUNITY_Community 41|Community 41]]
-- [[_COMMUNITY_Community 42|Community 42]]
-- [[_COMMUNITY_Community 43|Community 43]]
-- [[_COMMUNITY_Community 44|Community 44]]
-- [[_COMMUNITY_Community 45|Community 45]]
-- [[_COMMUNITY_Community 46|Community 46]]
-- [[_COMMUNITY_Community 47|Community 47]]
-- [[_COMMUNITY_Community 48|Community 48]]
-- [[_COMMUNITY_Community 49|Community 49]]
-- [[_COMMUNITY_Community 50|Community 50]]
-- [[_COMMUNITY_Community 51|Community 51]]
-- [[_COMMUNITY_Community 52|Community 52]]
-- [[_COMMUNITY_Community 53|Community 53]]
-- [[_COMMUNITY_Community 54|Community 54]]
-- [[_COMMUNITY_Community 55|Community 55]]
-- [[_COMMUNITY_Community 56|Community 56]]
-- [[_COMMUNITY_Community 57|Community 57]]
-- [[_COMMUNITY_Community 58|Community 58]]
-- [[_COMMUNITY_Community 59|Community 59]]
-- [[_COMMUNITY_Community 60|Community 60]]
-- [[_COMMUNITY_Community 61|Community 61]]
+- [[_COMMUNITY_Bag UI Components|Bag UI Components]]
+- [[_COMMUNITY_Network Sync|Network Sync]]
+- [[_COMMUNITY_Monster AI & Entity|Monster AI & Entity]]
+- [[_COMMUNITY_FSM Core|FSM Core]]
+- [[_COMMUNITY_3C System Core|3C System Core]]
+- [[_COMMUNITY_Combat & Skills Integration|Combat & Skills Integration]]
+- [[_COMMUNITY_Combat Hit Detection|Combat Hit Detection]]
+- [[_COMMUNITY_Network Bridge & Animation|Network Bridge & Animation]]
+- [[_COMMUNITY_KCP Networking|KCP Networking]]
+- [[_COMMUNITY_Bag Panel UI|Bag Panel UI]]
+- [[_COMMUNITY_Character Controller|Character Controller]]
+- [[_COMMUNITY_Skill Coordinator Runtime|Skill Coordinator Runtime]]
+- [[_COMMUNITY_Effect Data System|Effect Data System]]
+- [[_COMMUNITY_Skill Executor Runtime|Skill Executor Runtime]]
+- [[_COMMUNITY_Skill Data & Weapon Config|Skill Data & Weapon Config]]
+- [[_COMMUNITY_UI Animation System|UI Animation System]]
+- [[_COMMUNITY_Input Manager|Input Manager]]
+- [[_COMMUNITY_AI Behaviours|AI Behaviours]]
+- [[_COMMUNITY_Debug Window Manager|Debug Window Manager]]
+- [[_COMMUNITY_Skill Data Types|Skill Data Types]]
+- [[_COMMUNITY_Camera & Monster Movement|Camera & Monster Movement]]
+- [[_COMMUNITY_Skill State Machine Runtime|Skill State Machine Runtime]]
+- [[_COMMUNITY_State Coordinator Core|State Coordinator Core]]
+- [[_COMMUNITY_Skill Input Buffer Runtime|Skill Input Buffer Runtime]]
+- [[_COMMUNITY_FSM Manager|FSM Manager]]
+- [[_COMMUNITY_Sys3C Entry|Sys3C Entry]]
+- [[_COMMUNITY_UI Manager Core|UI Manager Core]]
+- [[_COMMUNITY_Cooldown Manager|Cooldown Manager]]
+- [[_COMMUNITY_Hit Zone & HitFSM|Hit Zone & HitFSM]]
+- [[_COMMUNITY_Bag Manager|Bag Manager]]
+- [[_COMMUNITY_Character Attack & Weapon|Character Attack & Weapon]]
+- [[_COMMUNITY_State Logger|State Logger]]
+- [[_COMMUNITY_Animation Hashes & UI Const|Animation Hashes & UI Const]]
+- [[_COMMUNITY_AnimHashes & FloatingText|AnimHashes & FloatingText]]
+- [[_COMMUNITY_Status Controller & ShapeBlock|Status Controller & ShapeBlock]]
+- [[_COMMUNITY_Movement Policy|Movement Policy]]
+- [[_COMMUNITY_Nameplate Manager|Nameplate Manager]]
+- [[_COMMUNITY_UI Framework|UI Framework]]
+- [[_COMMUNITY_Skill Interruption Matrix|Skill Interruption Matrix]]
+- [[_COMMUNITY_IFSM Interfaces|IFSM Interfaces]]
+- [[_COMMUNITY_IStateCoordinator Interface|IStateCoordinator Interface]]
+- [[_COMMUNITY_Keyboard Input Adapter|Keyboard Input Adapter]]
+- [[_COMMUNITY_Floating Text Pool|Floating Text Pool]]
+- [[_COMMUNITY_UI Panel Base|UI Panel Base]]
+- [[_COMMUNITY_Bag Events|Bag Events]]
+- [[_COMMUNITY_Bag Data|Bag Data]]
+- [[_COMMUNITY_State Transition Table|State Transition Table]]
+- [[_COMMUNITY_NPC Mirror Manager|NPC Mirror Manager]]
+- [[_COMMUNITY_Event Bus|Event Bus]]
+- [[_COMMUNITY_Shield System Adapter|Shield System Adapter]]
+- [[_COMMUNITY_Character Stats Adapter|Character Stats Adapter]]
+- [[_COMMUNITY_Item Template Registry|Item Template Registry]]
+- [[_COMMUNITY_Presentation Block & Nameplate|Presentation Block & Nameplate]]
+- [[_COMMUNITY_Attack State Implementations|Attack State Implementations]]
+- [[_COMMUNITY_Bag System Types|Bag System Types]]
+- [[_COMMUNITY_Item Factory|Item Factory]]
+- [[_COMMUNITY_Attack Shape Gizmos|Attack Shape Gizmos]]
+- [[_COMMUNITY_Physics Adapter & Ground|Physics Adapter & Ground]]
+- [[_COMMUNITY_Status Controller Adapter|Status Controller Adapter]]
+- [[_COMMUNITY_Shield Effect Data|Shield Effect Data]]
+- [[_COMMUNITY_Skill Dash Component|Skill Dash Component]]
+- [[_COMMUNITY_Combo Skill Data|Combo Skill Data]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
 - [[_COMMUNITY_Community 64|Community 64]]
@@ -150,387 +149,276 @@
 - [[_COMMUNITY_Community 137|Community 137]]
 - [[_COMMUNITY_Community 138|Community 138]]
 - [[_COMMUNITY_Community 139|Community 139]]
-- [[_COMMUNITY_Community 140|Community 140]]
-- [[_COMMUNITY_Community 141|Community 141]]
-- [[_COMMUNITY_Community 142|Community 142]]
-- [[_COMMUNITY_Community 143|Community 143]]
-- [[_COMMUNITY_Community 144|Community 144]]
-- [[_COMMUNITY_Community 145|Community 145]]
-- [[_COMMUNITY_Community 146|Community 146]]
-- [[_COMMUNITY_Community 147|Community 147]]
-- [[_COMMUNITY_Community 148|Community 148]]
-- [[_COMMUNITY_Community 149|Community 149]]
-- [[_COMMUNITY_Community 150|Community 150]]
-- [[_COMMUNITY_Community 151|Community 151]]
-- [[_COMMUNITY_Community 152|Community 152]]
-- [[_COMMUNITY_Community 153|Community 153]]
-- [[_COMMUNITY_Community 154|Community 154]]
-- [[_COMMUNITY_Community 155|Community 155]]
-- [[_COMMUNITY_Community 156|Community 156]]
-- [[_COMMUNITY_Community 157|Community 157]]
-- [[_COMMUNITY_Community 158|Community 158]]
-- [[_COMMUNITY_Community 159|Community 159]]
-- [[_COMMUNITY_Community 160|Community 160]]
-- [[_COMMUNITY_Community 161|Community 161]]
-- [[_COMMUNITY_Community 162|Community 162]]
-- [[_COMMUNITY_Community 163|Community 163]]
-- [[_COMMUNITY_Community 164|Community 164]]
-- [[_COMMUNITY_Community 165|Community 165]]
-- [[_COMMUNITY_Community 166|Community 166]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `float` - 50 edges
-2. `bool` - 43 edges
-3. `int` - 40 edges
-4. `CharacterController` - 39 edges
-5. `BagPanel` - 34 edges
-6. `MonsterAI` - 34 edges
-7. `FSMManager` - 34 edges
-8. `KcpServer` - 32 edges
-9. `SkillCoordinator` - 32 edges
-10. `KcpTransportBase` - 27 edges
+1. `float` - 48 edges
+2. `CharacterController` - 39 edges
+3. `BagPanel` - 34 edges
+4. `MonsterAI` - 34 edges
+5. `SkillCoordinator` - 34 edges
+6. `bool` - 32 edges
+7. `SkillExecutor` - 32 edges
+8. `Sys3CEntry` - 29 edges
+9. `int` - 28 edges
+10. `DebugWindowManager` - 27 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `BagPanel` --references--> `Button`  [EXTRACTED]
+  Bag/UI/BagPanel.cs °˙ Sys3C/Debug/DebugWindowManager.cs
+- `MonsterEntity` --inherits--> `ITargetable`  [EXTRACTED]
+  Monster/MonsterEntity.cs °˙ UI/Panel/HUD/TargetPanel.cs
+- `NpcMirrorComponent` --references--> `Quaternion`  [EXTRACTED]
+  NpcMirror/NpcMirrorComponent.cs °˙ Sys3C/Network/PositionInterpolator.cs
+- `SkillStateMachine` --references--> `SkillSubState`  [EXTRACTED]
+  Skills/Runtime/SkillStateMachine.cs °˙ Sys3C/Sys3CEntry.cs
 - `HybridCLR AOT Assembly Architecture` --shares_data_with--> `CharacterController`  [INFERRED]
-  Assets/Scripts/Hotfix/GameSystems/docs/HYBRIDCLR_AOT_ASSEMBLIES.md ‚Üí Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
-- `KcpClient` --references--> `IMessageExecutor`  [EXTRACTED]
-  AOT/KcpNet/Client/KcpClient.cs ‚Üí Examples/ClientExample.cs
-- `KcpClient` --references--> `long`  [EXTRACTED]
-  AOT/KcpNet/Client/KcpClient.cs ‚Üí Hotfix/GameSystems/Sys3C/Network/SkillNetworkSync.cs
-- `KcpClient` --references--> `bool`  [EXTRACTED]
-  AOT/KcpNet/Client/KcpClient.cs ‚Üí Hotfix/GameSystems/UI/Framework/Core/UIPanel.cs
-- `KcpClient` --references--> `int`  [EXTRACTED]
-  AOT/KcpNet/Client/KcpClient.cs ‚Üí Hotfix/GameSystems/UI/Panel/HUD/HUDViewModel.cs
+  Assets/Scripts/Hotfix/GameSystems/docs/HYBRIDCLR_AOT_ASSEMBLIES.md °˙ Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
 
-## Communities (167 total, 90 thin omitted)
+## Communities (140 total, 84 thin omitted)
 
-### Community 0 - "Animation SMB Callbacks"
+### Community 0 - "Bag UI Components"
 Cohesion: 0.05
-Nodes (18): Action, HitManager, Hotfix.GameSystems.Sys3C.Animation, AnimationDriver, BaseState, BaseFSM, Hotfix.GameSystems.Sys3C.FSM, Hotfix.GameSystems.Sys3C.Network (+10 more)
+Nodes (21): Action<int, ItemData>, CanvasScaler, Hotfix.GameSystems.Bag.UI.Components, ItemCell, Hotfix.GameSystems.Bag.UI.Components, ItemTooltip, Hotfix.GameSystems.UI, ScreenAdapter (+13 more)
 
-### Community 1 - "KCP Networking Examples"
+### Community 1 - "Network Sync"
+Cohesion: 0.05
+Nodes (16): Hotfix.GameSystems.Bag.Data, ItemData, INetworkClient, long, Hotfix.GameSystems.Sys3C.Network, InterpolateTarget, PositionInterpolator, Hotfix.GameSystems.Sys3C.Network (+8 more)
+
+### Community 2 - "Monster AI & Entity"
 Cohesion: 0.06
-Nodes (10): CancellationTokenSource, KcpClient, KcpNet, ClientExample, Examples, Examples, ServerExample, IMessageExecutor (+2 more)
+Nodes (17): AlertBehaviour, AttackHitbox, DefendBehaviour, HitZone, Hotfix.GameSystems.Monster, MonsterAI, Hotfix.GameSystems.Monster, MonsterEntity (+9 more)
 
-### Community 2 - "FSM Attack Layer"
-Cohesion: 0.05
-Nodes (9): AttackFSM, AttackState, BaseFSM, AttackFSM, Hotfix.GameSystems.Sys3C.FSM, FSMManager, Hotfix.GameSystems.Sys3C.FSM, HitFSM (+1 more)
+### Community 3 - "FSM Core"
+Cohesion: 0.06
+Nodes (16): Animator, BaseState, BaseFSM, Hotfix.GameSystems.Sys3C.FSM, HitFSM, Hotfix.GameSystems.Sys3C.FSM, FSMConfig, HitData (+8 more)
 
-### Community 3 - "Character + Buff System"
-Cohesion: 0.05
-Nodes (14): BuffHandler, GroundDetector, Hotfix.GameSystems.Sys3C.Character, CharacterController, Hotfix.GameSystems.Sys3C.Network, IMovementPolicy, LocalMovementPolicy, PredictionMovementPolicy (+6 more)
-
-### Community 4 - "FSM Core / 3C Root"
+### Community 4 - "3C System Core"
 Cohesion: 0.05
 Nodes (47): AnimationDriver, Attack1State, Attack2State, AttackFSM, AttackStateBehaviour, BaseFSM, BaseStateBehaviour, CharacterController (+39 more)
 
-### Community 5 - "Monster AI + NPC Animation"
-Cohesion: 0.07
-Nodes (17): AlertBehaviour, Animator, AttackHitbox, DefendBehaviour, HitZone, Hotfix.GameSystems.Monster, MonsterAI, Hotfix.GameSystems.Monster (+9 more)
-
-### Community 6 - "UI + Debug + Weapon"
-Cohesion: 0.06
-Nodes (12): Hotfix.GameSystems.Sys3C.Debug, StateLogger, ToString(), List, CooldownManager, Hotfix.GameSystems.Skills.Runtime, StreamWriter, Hotfix.GameSystems.Sys3C (+4 more)
-
-### Community 7 - "Monster Combat System"
+### Community 5 - "Combat & Skills Integration"
 Cohesion: 0.07
 Nodes (44): AlertBehaviour, AttackEffectConfig, AttackHitbox, AttackShapeConfig, AttackShapeFactory, BasicAttackData, CharacterAttackHandler, CircleShape (+36 more)
 
-### Community 8 - "StateCoordinator + KCP Session"
-Cohesion: 0.06
-Nodes (9): KcpNet, KcpSession, SessionDisconnectedEventArgs, SessionStatistics, Hotfix.GameSystems.Sys3C.Core, StateCoordinator, EventArgs, LayerType (+1 more)
-
-### Community 9 - "Spawning + Camera + Pool"
-Cohesion: 0.07
-Nodes (12): Hotfix.GameSystems.Sys3C.Camera, ThirdPersonCameraController, Hotfix.GameSystems.UI.Framework.Core, PoolData, UIPool, Hotfix.GameSystems.Monster, MonsterMovement, Hotfix.GameSystems.Monster (+4 more)
-
-### Community 10 - "Combat Attack Shapes"
+### Community 6 - "Combat Hit Detection"
 Cohesion: 0.07
 Nodes (17): Collider, AttackHitbox, Hotfix.GameSystems.Combat, CircleShape, Hotfix.GameSystems.Sys3C.Core.Combat, ConeShape, Hotfix.GameSystems.Sys3C.Core.Combat, Hotfix.GameSystems.Sys3C.Core.Combat (+9 more)
 
-### Community 11 - "Debug Window + Confirm"
-Cohesion: 0.09
-Nodes (8): Button, Confirm, Hotfix.GameSystems.UI.Components, DebugWindowManager, Hotfix.GameSystems.Sys3C.Debug, KeyCode, ScrollRect, StateCoordinator
+### Community 7 - "Network Bridge & Animation"
+Cohesion: 0.07
+Nodes (11): Action, Hotfix.GameSystems.Sys3C.Network, INetworkClient, NetworkBridge, AttackStateBehaviour, Hotfix.GameSystems.Sys3C.Animation.StateBehaviours, BaseStateBehaviour, Hotfix.GameSystems.Sys3C.Animation.StateBehaviours (+3 more)
 
-### Community 12 - "KCP Core Networking"
+### Community 8 - "KCP Networking"
 Cohesion: 0.09
-Nodes (33): ChatMessage - ËÅäÂ§©Ê∂àÊÅØ, ClientExample - KCPÂÆ¢Êà∑Á´Ø‰ΩøÁî®Á§∫‰æã, ConsoleLogger - ÊéßÂà∂Âè∞Êó•ÂøóËÆ∞ÂΩïÂô®, DirectMessageExecutor - Áõ¥Êé•ÊâßË°åÂô®, Heartbeat - ÂøÉË∑≥Ê∂àÊÅØ, IKcpTransport - ‰º†ËæìÂ±ÇÊé•Âè£, ILogger - Êó•ÂøóËÆ∞ÂΩïÂô®Êé•Âè£, IMessage - Ê∂àÊÅØÂü∫Êé•Âè£ (+25 more)
+Nodes (33): ChatMessage - ¡ƒÃÏœ˚œ¢, ClientExample - KCPøÕªß∂À π”√ æ¿˝, ConsoleLogger - øÿ÷∆Ã®»’÷æº«¬º∆˜, DirectMessageExecutor - ÷±Ω”÷¥––∆˜, Heartbeat - –ƒÃ¯œ˚œ¢, IKcpTransport - ¥´ ‰≤„Ω”ø⁄, ILogger - »’÷æº«¬º∆˜Ω”ø⁄, IMessage - œ˚œ¢ª˘Ω”ø⁄ (+25 more)
 
-### Community 13 - "Character Update Loop"
+### Community 9 - "Bag Panel UI"
+Cohesion: 0.11
+Nodes (6): GridLayoutGroup, ItemCell, ItemData, ItemTooltip, BagPanel, Hotfix.GameSystems.Bag.UI
+
+### Community 10 - "Character Controller"
 Cohesion: 0.09
 Nodes (9): CharacterController, Hotfix.GameSystems.Sys3C.Character, CharacterData, CharacterStatsAdapter, GroundDetector, NetworkPrediction, PhysicsSystemAdapter, ShieldSystemAdapter (+1 more)
 
-### Community 14 - "Bag UI Panel"
+### Community 11 - "Skill Coordinator Runtime"
 Cohesion: 0.12
-Nodes (5): GridLayoutGroup, ItemCell, ItemTooltip, BagPanel, Hotfix.GameSystems.Bag.UI
+Nodes (6): CooldownManager, Hotfix.GameSystems.Skills.Runtime, SkillCoordinator, SkillExecutor, SkillInputBuffer, SkillInterruptionMatrix
 
-### Community 15 - "Skill Input Processing"
-Cohesion: 0.14
-Nodes (5): CooldownManager, Hotfix.GameSystems.Skills.Runtime, SkillCoordinator, SkillExecutor, SkillInputBuffer
-
-### Community 16 - "Logging Infrastructure"
-Cohesion: 0.1
-Nodes (5): ConsoleLogger, ILogger, KcpNet, NullLogger, LogLevel
-
-### Community 18 - "Message Codec Layer"
-Cohesion: 0.13
-Nodes (5): ArrayBufferWriter, KcpNet, MessageCodec, MessageTypeRegistry, IBufferWriter
-
-### Community 19 - "KCP Socket / Buffer"
+### Community 12 - "Effect Data System"
 Cohesion: 0.09
-Nodes (10): byte, Kcp, KcpCallbackHandler, KcpNet, SimpleMemoryOwner, EndPoint, ILogger, IMemoryOwner (+2 more)
+Nodes (11): BuffEffectData, EffectData, HealEffectData, Hotfix.GameSystems.Skills.Effect, IEffectStats, IEffectTarget, IPhysicsSystem, KnockbackEffectData (+3 more)
 
-### Community 20 - "Hit FSM"
-Cohesion: 0.15
-Nodes (5): HitFSM, Hotfix.GameSystems.Sys3C.FSM, FSMConfig, HitData, HitState
+### Community 13 - "Skill Executor Runtime"
+Cohesion: 0.09
+Nodes (3): Hotfix.GameSystems.Skills.Runtime, SkillExecutor, SkillStateMachine
 
-### Community 21 - "Input Adapters"
+### Community 14 - "Skill Data & Weapon Config"
+Cohesion: 0.08
+Nodes (21): ShieldInstance, AttackHitboxData, Hotfix.GameSystems.Sys3C.Core.Combat, Hotfix.GameSystems.Sys3C.Core.Combat, WeaponConfig, DamageBlock, Hotfix.GameSystems.Skills.Data, SkillData (+13 more)
+
+### Community 15 - "UI Animation System"
+Cohesion: 0.1
+Nodes (7): Hotfix.GameSystems.UI, SequenceBuilder, Hotfix.GameSystems.UI, UIAnimation, CanvasGroup, Sequence, UIAnimPreset
+
+### Community 16 - "Input Manager"
 Cohesion: 0.11
 Nodes (5): IInputAdapter, Hotfix.GameSystems.Sys3C.Input, InputManager, Hotfix.GameSystems.Sys3C.Input, JoystickInputAdapter
 
-### Community 22 - "UIPanel Lifecycle"
-Cohesion: 0.13
-Nodes (4): Canvas, Hotfix.GameSystems.UI.Framework.Core, UIPanel, UIDataBinding
-
-### Community 23 - "AI Behaviour States"
+### Community 17 - "AI Behaviours"
 Cohesion: 0.09
 Nodes (7): IAIBehaviour, AlertBehaviour, Hotfix.GameSystems.Monster, DefendBehaviour, Hotfix.GameSystems.Monster, Hotfix.GameSystems.Monster, TauntBehaviour
 
-### Community 24 - "Skill State Machine"
-Cohesion: 0.19
-Nodes (3): Hotfix.GameSystems.Skills.Runtime, SkillStateMachine, SkillSubState
-
-### Community 25 - "Community 25"
-Cohesion: 0.1
-Nodes (18): AttackEffectConfig, AttackShapeConfig, Hotfix.GameSystems.Sys3C.Core.Combat, WeaponConfig, ExecutePattern, GameObject, Hotfix.GameSystems.Monster, MonsterConfig (+10 more)
-
-### Community 26 - "Community 26"
-Cohesion: 0.09
-Nodes (15): FSMConfig, Hotfix.GameSystems.Sys3C.Character, AttackEffectConfig, Hotfix.GameSystems.Sys3C.Core.Combat, AttackHitboxData, Hotfix.GameSystems.Sys3C.Core.Combat, AttackShapeConfig, Hotfix.GameSystems.Sys3C.Core.Combat (+7 more)
-
-### Community 28 - "Community 28"
-Cohesion: 0.12
-Nodes (3): SkillExecutor, SkillInterruptionMatrix, SkillStateMachine
-
-### Community 29 - "Community 29"
-Cohesion: 0.14
-Nodes (4): KcpNet, KcpTransportBase, IKcpTransport, KcpTransportState
-
-### Community 30 - "Community 30"
-Cohesion: 0.12
-Nodes (7): BuffEffectData, Hotfix.GameSystems.Skills.Effect, IEffectStats, IEffectTarget, IPhysicsSystem, KnockbackEffectData, ModifierType
-
-### Community 31 - "Community 31"
+### Community 18 - "Debug Window Manager"
 Cohesion: 0.15
-Nodes (3): Hotfix.GameSystems.UI.Framework.Core, UIManager, Stack
+Nodes (6): Button, DebugWindowManager, Hotfix.GameSystems.Sys3C.Debug, KeyCode, ScrollRect, StateCoordinator
 
-### Community 32 - "Community 32"
-Cohesion: 0.13
-Nodes (9): ConnectionStatistics, DateTime, KcpOptions, KcpSession, RateLimiter, ConnectionStatistics, KcpNet, KcpServerSession (+1 more)
+### Community 19 - "Skill Data Types"
+Cohesion: 0.12
+Nodes (13): AnimationClip, AnimationCurve, ChanneledSkillData, Hotfix.GameSystems.Skills.Data, ChargedSkillData, Hotfix.GameSystems.Skills.Data, Hotfix.GameSystems.Skills.Data, InstantSkillData (+5 more)
 
-### Community 33 - "Community 33"
+### Community 20 - "Camera & Monster Movement"
+Cohesion: 0.1
+Nodes (7): Hotfix.GameSystems.Sys3C.Camera, ThirdPersonCameraController, IEffectTarget, Hotfix.GameSystems.Monster, MonsterMovement, SkillOwnerProxy, Transform
+
+### Community 21 - "Skill State Machine Runtime"
+Cohesion: 0.22
+Nodes (4): ChanneledSkillData, ChargedSkillData, Hotfix.GameSystems.Skills.Runtime, SkillStateMachine
+
+### Community 22 - "State Coordinator Core"
+Cohesion: 0.12
+Nodes (4): Hotfix.GameSystems.Sys3C.Core, StateCoordinator, LayerType, object
+
+### Community 23 - "Skill Input Buffer Runtime"
 Cohesion: 0.14
 Nodes (3): Queue, Hotfix.GameSystems.Skills.Runtime, SkillInputBuffer
 
-### Community 34 - "Community 34"
-Cohesion: 0.13
-Nodes (7): KcpNet, MessageDispatcher, MessageDispatchItem, MessageHandler, ConcurrentDictionary, SemaphoreSlim, Task
+### Community 24 - "FSM Manager"
+Cohesion: 0.12
+Nodes (3): BaseFSM, FSMManager, HitFSM
 
-### Community 35 - "Community 35"
-Cohesion: 0.14
-Nodes (6): Action<int, ItemData>, Hotfix.GameSystems.Bag.UI.Components, ItemCell, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
-
-### Community 36 - "Community 36"
-Cohesion: 0.14
-Nodes (7): CharacterAttackHandler, HitManager, InputManager, SkillRegistry, Hotfix.GameSystems.Sys3C, Sys3CEntry, ThirdPersonCameraController
-
-### Community 38 - "Community 38"
+### Community 25 - "Sys3C Entry"
 Cohesion: 0.15
-Nodes (6): INetworkClient, Hotfix.GameSystems.Sys3C.Network, SkillEventHandler, SkillNetworkManager, Queue<SkillEventMessage>, SkillCoordinatorRuntime
+Nodes (7): CharacterAttackHandler, InputManager, SkillCoordinator, SkillDashComponent, SkillSubState, Sys3CEntry, ThirdPersonCameraController
 
-### Community 39 - "Community 39"
-Cohesion: 0.14
-Nodes (11): Hotfix.GameSystems.UI.Framework.Core, UIConst, Hotfix.GameSystems.UI.Panel.HUD, HUDViewModel, int, Hotfix.GameSystems.Sys3C.Skill, SkillDefs, string (+3 more)
+### Community 28 - "Hit Zone & HitFSM"
+Cohesion: 0.13
+Nodes (8): HitZone, Hotfix.GameSystems.Combat, Hotfix.GameSystems.Combat, PlayerHitZone, FSMManager, HashSet, IDamageable, MonoBehaviour
 
-### Community 40 - "Community 40"
-Cohesion: 0.14
-Nodes (3): Hotfix.GameSystems.UI.Framework.Animation, UIAnimation, Ease
-
-### Community 41 - "Community 41"
-Cohesion: 0.14
-Nodes (8): long, Hotfix.GameSystems.Sys3C.Network, InterpolateTarget, NpcAnimationController, Hotfix.GameSystems.NpcMirror, NpcMirrorComponent, Quaternion, Vector3
-
-### Community 42 - "Community 42"
-Cohesion: 0.18
-Nodes (3): SkillSyncComponent, Queue<SkillSyncData>, SkillSyncData
-
-### Community 43 - "Community 43"
+### Community 29 - "Bag Manager"
 Cohesion: 0.21
 Nodes (3): BagData, BagManager, Hotfix.GameSystems.Bag.Runtime
 
-### Community 44 - "Community 44"
-Cohesion: 0.21
-Nodes (3): Hotfix.GameSystems.UI.Components, Loading, Tween
-
-### Community 45 - "Community 45"
+### Community 30 - "Character Attack & Weapon"
 Cohesion: 0.13
-Nodes (11): AudioClip, ToastItem, EffectDataList, Hotfix.GameSystems.Skills.Data, SkillData, EffectData, EffectDataList, ReleaseType (+3 more)
+Nodes (7): IWeapon, List, CharacterAttackHandler, Hotfix.GameSystems.Sys3C, Hotfix.GameSystems.Sys3C, MeleeWeapon, WeaponConfig
 
-### Community 46 - "Community 46"
-Cohesion: 0.26
-Nodes (13): BroadcastMessage, ChatMessage, DisconnectRequest, Heartbeat, IMessage, KcpNet, Kick, LoginRequest (+5 more)
+### Community 31 - "State Logger"
+Cohesion: 0.24
+Nodes (4): Hotfix.GameSystems.Sys3C.Debug, StateLogger, ToString(), StreamWriter
 
-### Community 47 - "Community 47"
-Cohesion: 0.22
-Nodes (5): CanvasGroup, Hotfix.GameSystems.Bag.UI.Components, ItemTooltip, ItemData, VerticalLayoutGroup
-
-### Community 49 - "Community 49"
-Cohesion: 0.18
-Nodes (7): bool, EffectData, HealEffectData, EffectType, BuffData, Hotfix.GameSystems.Sys3C.Skill, StackingRule
-
-### Community 50 - "Community 50"
+### Community 32 - "Animation Hashes & UI Const"
 Cohesion: 0.15
-Nodes (6): AttributeType, DamageType, DamageData, Hotfix.GameSystems.Skills.Effect, IShieldSystem, ShieldEffectData
+Nodes (8): AnimHashes, Hotfix.GameSystems.Sys3C.Animation, AttributeType, Hotfix.GameSystems.UI, UIConst, DamageBlock, Hotfix.GameSystems.Skills.Data, int
 
-### Community 51 - "Community 51"
+### Community 33 - "AnimHashes & FloatingText"
+Cohesion: 0.18
+Nodes (10): Hotfix.GameSystems.UI, UIAnimPreset, FSMConfig, Hotfix.GameSystems.Sys3C.Character, Direction, Ease, float, FloatingTextConfig (+2 more)
+
+### Community 34 - "Status Controller & ShapeBlock"
+Cohesion: 0.17
+Nodes (7): bool, Hotfix.GameSystems.Skills.Data, ShapeBlock, IStatusController, StunEffectData, LayerMask, TargetType
+
+### Community 35 - "Movement Policy"
 Cohesion: 0.19
-Nodes (5): ConcurrentQueue, Examples, ExecutorMonoBehaviour, UnityMainThreadExecutor, MonoBehaviour
+Nodes (6): Hotfix.GameSystems.Sys3C.Network, IMovementPolicy, LocalMovementPolicy, PredictionMovementPolicy, NetworkBridge, uint
 
-### Community 52 - "Community 52"
+### Community 36 - "Nameplate Manager"
+Cohesion: 0.15
+Nodes (5): Camera, Material, Hotfix.GameSystems.Nameplate, NameplateManager, Hotfix.GameSystems.Sys3C
+
+### Community 37 - "UI Framework"
 Cohesion: 0.19
 Nodes (13): HUD Panel Example, HUD ViewModel, RectTransform Extension Methods, Floating Tips Component, Toast Notification Component, UI Animation Extensions, UI Layer Constants, Data Binding System (+5 more)
 
-### Community 54 - "Community 54"
+### Community 39 - "IFSM Interfaces"
 Cohesion: 0.18
 Nodes (5): CharacterFSMConfig, Hotfix.GameSystems.Sys3C.Core, IAttackFSM, IBaseFSM, ICharacterFSMConfig
 
-### Community 56 - "Community 56"
+### Community 41 - "Keyboard Input Adapter"
 Cohesion: 0.21
 Nodes (3): Hotfix.GameSystems.Sys3C.Input, IInputAdapter, KeyboardInputAdapter
 
-### Community 57 - "Community 57"
-Cohesion: 0.25
-Nodes (4): DirectMessageExecutor, IMessageExecutor, KcpNet, UnityMainThreadExecutor
+### Community 42 - "Floating Text Pool"
+Cohesion: 0.24
+Nodes (5): Canvas, FloatingTextPool, Hotfix.GameSystems.Nameplate, Stack, TMP_FontAsset
 
-### Community 59 - "Community 59"
-Cohesion: 0.2
-Nodes (4): KcpClientTransport, KcpNet, Kcp, KcpTransportBase
-
-### Community 60 - "Community 60"
+### Community 44 - "Bag Events"
 Cohesion: 0.31
 Nodes (10): BagCapacityChangedEvent, BagOpenChangedEvent, Hotfix.GameSystems.Bag.Core.Events, ItemAddedEvent, ItemLockChangedEvent, ItemMovedEvent, ItemRemovedEvent, ItemStackedEvent (+2 more)
 
-### Community 63 - "Community 63"
+### Community 46 - "State Transition Table"
 Cohesion: 0.18
 Nodes (5): Dictionary, Hotfix.GameSystems.Sys3C.FSM, StateTransitionTable, Hotfix.GameSystems.Monster, MonsterStats
 
-### Community 67 - "Community 67"
-Cohesion: 0.2
-Nodes (6): Hotfix.GameSystems.UI.Panel.HUD, HUDPanel, HUDViewModel, Slider, Text, UIPanel
+### Community 49 - "Shield System Adapter"
+Cohesion: 0.22
+Nodes (4): CharacterControllerExtensions, Hotfix.GameSystems.Sys3C.Character, ShieldSystemAdapter, IShieldSystem
 
-### Community 68 - "Community 68"
-Cohesion: 0.29
-Nodes (4): Hotfix.GameSystems.UI.Components, Toast, Image, RectTransform
-
-### Community 70 - "Community 70"
+### Community 51 - "Item Template Registry"
 Cohesion: 0.22
 Nodes (3): Hotfix.GameSystems.Bag.Data, ItemTemplate, ItemTemplateRegistry
 
-### Community 71 - "Community 71"
-Cohesion: 0.24
-Nodes (3): ShieldSystemAdapter, IShieldSystem, ShieldSystem
-
-### Community 72 - "Community 72"
+### Community 52 - "Presentation Block & Nameplate"
 Cohesion: 0.2
-Nodes (3): Hotfix.GameSystems.Sys3C.FSM.States, SkillQState, SkillRState
+Nodes (8): AudioClip, Color, Hotfix.GameSystems.Skills.Data, PresentationBlock, GameObject, Hotfix.GameSystems.Nameplate, NameplateTag, Vector3
 
-### Community 73 - "Community 73"
-Cohesion: 0.24
-Nodes (3): Color, AttackShapeGizmos, Hotfix.GameSystems.Sys3C.Core.Combat
-
-### Community 74 - "Community 74"
-Cohesion: 0.22
-Nodes (5): AnimationClip, AttackHitType, BasicAttackData, Hotfix.GameSystems.Skills.Data, SkillData
-
-### Community 75 - "Community 75"
+### Community 53 - "Attack State Implementations"
 Cohesion: 0.2
-Nodes (5): AnimationCurve, AOEDamageType, Hotfix.GameSystems.Skills.Data, SpecialSkillData, HitPriority
+Nodes (3): AttackIdleState, Hotfix.GameSystems.Sys3C.FSM.States, SkillRState
 
-### Community 76 - "Community 76"
+### Community 54 - "Bag System Types"
 Cohesion: 0.38
 Nodes (10): BagData, BagManager, BagPanel, BagSlotData, ItemCell, ItemData, ItemFactory, ItemTemplate (+2 more)
 
-### Community 77 - "Community 77"
+### Community 57 - "Physics Adapter & Ground"
 Cohesion: 0.22
-Nodes (3): IKcpTransport, KcpNet, IDisposable
+Nodes (5): PhysicsSystemAdapter, GroundDetector, Hotfix.GameSystems.Sys3C.Character, CharacterController, IPhysicsSystem
 
-### Community 78 - "Community 78"
-Cohesion: 0.31
-Nodes (3): Hotfix.GameSystems.Sys3C.Editor, SkillConfigGenerator, EditorWindow
-
-### Community 82 - "Community 82"
-Cohesion: 0.22
-Nodes (5): IPhysicsSystem, IStatusController, Hotfix.GameSystems.Skills.Runtime, PhysicsSystem, StatusController
-
-### Community 83 - "Community 83"
-Cohesion: 0.25
-Nodes (4): KcpNet, ServerStatistics, SocketExtensions, TaskExtensions
-
-### Community 85 - "Community 85"
-Cohesion: 0.25
-Nodes (4): IWeapon, LayerMask, CharacterAttackHandler, Hotfix.GameSystems.Sys3C
-
-### Community 86 - "Community 86"
-Cohesion: 0.25
-Nodes (3): HitZone, Hotfix.GameSystems.Combat, IDamageable
-
-### Community 87 - "Community 87"
-Cohesion: 0.25
-Nodes (3): Hotfix.GameSystems.UI.Framework.Message, MessageCallback, UIMessage
-
-### Community 89 - "Community 89"
-Cohesion: 0.25
-Nodes (4): CharacterControllerExtensions, Hotfix.GameSystems.Sys3C.Character, PhysicsSystemAdapter, ShieldInstance
-
-### Community 91 - "Community 91"
+### Community 59 - "Shield Effect Data"
 Cohesion: 0.29
-Nodes (4): Hotfix.GameSystems.Combat, PlayerHitZone, FSMManager, HashSet
+Nodes (3): DamageType, IShieldSystem, ShieldEffectData
 
-### Community 98 - "Community 98"
+### Community 60 - "Skill Dash Component"
+Cohesion: 0.32
+Nodes (3): IDashComponent, Hotfix.GameSystems.Sys3C.Skill, SkillDashComponent
+
+### Community 61 - "Combo Skill Data"
+Cohesion: 0.29
+Nodes (3): AttackHitType, ComboSkillData, Hotfix.GameSystems.Skills.Data
+
+### Community 66 - "Community 66"
+Cohesion: 0.29
+Nodes (3): Hotfix.GameSystems.Sys3C.Network, NetworkPrediction, SortedList
+
+### Community 68 - "Community 68"
 Cohesion: 0.33
 Nodes (5): Hotfix.GameSystems.NpcMirror, NpcAnimSync, NpcDespawn, NpcPosSync, NpcSpawn
 
-### Community 107 - "Community 107"
+### Community 73 - "Community 73"
+Cohesion: 0.4
+Nodes (4): EffectBlock, Hotfix.GameSystems.Skills.Data, EffectData, StatusEffectType
+
+### Community 77 - "Community 77"
 Cohesion: 0.5
 Nodes (4): DeathEvent, Hotfix.GameSystems.Sys3C.Core.Events, ResurrectEvent, IEvent
 
-### Community 121 - "Community 121"
+### Community 91 - "Community 91"
 Cohesion: 0.5
 Nodes (4): BuffData, BuffHandler, SkillCoordinatorBridge, SkillRegistry
 
-### Community 125 - "Community 125"
+### Community 95 - "Community 95"
 Cohesion: 0.67
 Nodes (3): NpcAnimationController, NpcMirrorComponent, NpcMirrorManager
 
 ## Knowledge Gaps
-- **321 isolated node(s):** `KcpNet`, `KcpNet`, `KcpNet`, `KcpNet`, `LogLevel` (+316 more)
-  These have ‚â§1 connection - possible missing edges or undocumented components.
-- **90 thin communities (<3 nodes) omitted from report** ‚Äî run `graphify query` to explore isolated nodes.
+- **285 isolated node(s):** `Hotfix.GameSystems.Bag.Core`, `Hotfix.GameSystems.Bag.Core.Events`, `Hotfix.GameSystems.Bag.Core.Events`, `IBagEvent`, `Hotfix.GameSystems.Bag.Data` (+280 more)
+  These have °‹1 connection - possible missing edges or undocumented components.
+- **84 thin communities (<3 nodes) omitted from report** °™ run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `int` connect `Community 39` to `Animation SMB Callbacks`, `KCP Networking Examples`, `Monster AI + NPC Animation`, `UI + Debug + Weapon`, `Spawning + Camera + Pool`, `Combat Attack Shapes`, `Debug Window + Confirm`, `Bag UI Panel`, `Skill Input Processing`, `Animation Driver API`, `Message Codec Layer`, `UIPanel Lifecycle`, `Skill State Machine`, `Community 25`, `Community 26`, `Community 32`, `Community 33`, `Community 44`, `Community 45`, `Community 49`, `Community 50`, `Community 61`, `Community 73`, `Community 74`, `Community 75`, `Community 95`, `Community 96`?**
-  _High betweenness centrality (0.189) - this node is a cross-community bridge._
-- **Why does `float` connect `Community 26` to `Animation SMB Callbacks`, `FSM Attack Layer`, `Character + Buff System`, `Monster AI + NPC Animation`, `UI + Debug + Weapon`, `StateCoordinator + KCP Session`, `Spawning + Camera + Pool`, `Combat Attack Shapes`, `Character Update Loop`, `Skill Input Processing`, `Hit FSM`, `Input Adapters`, `UIPanel Lifecycle`, `AI Behaviour States`, `Skill State Machine`, `Community 25`, `Community 30`, `Community 33`, `Community 36`, `Community 39`, `Community 41`, `Community 42`, `Community 45`, `Community 49`, `Community 50`, `Community 56`, `Community 74`, `Community 75`, `Community 89`, `Community 93`, `Community 94`, `Community 96`?**
-  _High betweenness centrality (0.186) - this node is a cross-community bridge._
-- **Why does `bool` connect `Community 49` to `Animation SMB Callbacks`, `KCP Networking Examples`, `FSM Attack Layer`, `Monster AI + NPC Animation`, `StateCoordinator + KCP Session`, `Spawning + Camera + Pool`, `Combat Attack Shapes`, `Debug Window + Confirm`, `Character Update Loop`, `KCP Socket / Buffer`, `Input Adapters`, `UIPanel Lifecycle`, `AI Behaviour States`, `Skill State Machine`, `Community 25`, `Community 26`, `Community 27`, `Community 29`, `Community 32`, `Community 34`, `Community 43`, `Community 45`, `Community 48`, `Community 50`, `Community 58`, `Community 59`, `Community 62`, `Community 66`, `Community 68`, `Community 73`, `Community 74`, `Community 75`, `Community 94`, `Community 96`, `Community 97`?**
-  _High betweenness centrality (0.184) - this node is a cross-community bridge._
-- **What connects `KcpNet`, `KcpNet`, `KcpNet` to the rest of the system?**
-  _321 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Animation SMB Callbacks` be split into smaller, more focused modules?**
+- **Why does `float` connect `AnimHashes & FloatingText` to `Network Sync`, `Monster AI & Entity`, `FSM Core`, `Combat Hit Detection`, `Network Bridge & Animation`, `Character Controller`, `Skill Coordinator Runtime`, `Effect Data System`, `Skill Data & Weapon Config`, `Input Manager`, `AI Behaviours`, `Skill Data Types`, `Camera & Monster Movement`, `Skill State Machine Runtime`, `State Coordinator Core`, `Skill Input Buffer Runtime`, `Sys3C Entry`, `Character Attack & Weapon`, `Animation Hashes & UI Const`, `Status Controller & ShapeBlock`, `Nameplate Manager`, `Keyboard Input Adapter`, `Presentation Block & Nameplate`, `Status Controller Adapter`, `Shield Effect Data`, `Skill Dash Component`, `Combo Skill Data`, `Community 66`, `Community 73`?**
+  _High betweenness centrality (0.196) - this node is a cross-community bridge._
+- **Why does `bool` connect `Status Controller & ShapeBlock` to `Bag UI Components`, `Monster AI & Entity`, `Combat Hit Detection`, `Network Bridge & Animation`, `Character Controller`, `Effect Data System`, `Skill Data & Weapon Config`, `Input Manager`, `AI Behaviours`, `Debug Window Manager`, `Skill Data Types`, `Camera & Monster Movement`, `Skill State Machine Runtime`, `Sys3C Entry`, `Bag Manager`, `Animation Hashes & UI Const`, `AnimHashes & FloatingText`, `Event Bus`, `Presentation Block & Nameplate`, `Attack Shape Gizmos`, `Status Controller Adapter`, `Shield Effect Data`, `Skill Dash Component`, `Combo Skill Data`?**
+  _High betweenness centrality (0.118) - this node is a cross-community bridge._
+- **Why does `int` connect `Animation Hashes & UI Const` to `Monster AI & Entity`, `Combat Hit Detection`, `Network Bridge & Animation`, `Bag Panel UI`, `Skill Coordinator Runtime`, `Effect Data System`, `Skill Data & Weapon Config`, `Debug Window Manager`, `Skill Data Types`, `Skill State Machine Runtime`, `Skill Input Buffer Runtime`, `State Logger`, `Floating Text Pool`, `Bag Data`, `Attack Shape Gizmos`, `Skill Dash Component`, `Combo Skill Data`, `Community 66`, `Community 67`?**
+  _High betweenness centrality (0.116) - this node is a cross-community bridge._
+- **What connects `Hotfix.GameSystems.Bag.Core`, `Hotfix.GameSystems.Bag.Core.Events`, `Hotfix.GameSystems.Bag.Core.Events` to the rest of the system?**
+  _285 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Bag UI Components` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._
-- **Should `KCP Networking Examples` be split into smaller, more focused modules?**
+- **Should `Network Sync` be split into smaller, more focused modules?**
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
+- **Should `Monster AI & Entity` be split into smaller, more focused modules?**
   _Cohesion score 0.06 - nodes in this community are weakly interconnected._
-- **Should `FSM Attack Layer` be split into smaller, more focused modules?**
-  _Cohesion score 0.05 - nodes in this community are weakly interconnected._

@@ -12,10 +12,10 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "4d4b59f0cdde99940743b68c099575d78daac832"
+      "hash": "acc1c7bc9ea34c33b830e40316fca52553878d29"
     },
     "com.ivanmurzak.unity.mcp": {
-      "version": "0.68.0",
+      "version": "0.72.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -26,21 +26,21 @@
       "url": "https://package.openupm.com"
     },
     "com.ivanmurzak.unity.mcp.animation": {
-      "version": "1.1.32",
+      "version": "1.1.37",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.ivanmurzak.unity.mcp": "0.68.0",
+        "com.ivanmurzak.unity.mcp": "0.71.0",
         "com.unity.modules.animation": "1.0.0"
       },
       "url": "https://package.openupm.com"
     },
     "com.ivanmurzak.unity.mcp.particlesystem": {
-      "version": "1.0.59",
+      "version": "1.0.63",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.ivanmurzak.unity.mcp": "0.68.0",
+        "com.ivanmurzak.unity.mcp": "0.71.0",
         "com.unity.modules.particlesystem": "1.0.0"
       },
       "url": "https://package.openupm.com"

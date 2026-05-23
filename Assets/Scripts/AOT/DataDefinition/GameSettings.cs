@@ -33,5 +33,8 @@ namespace DataDefinition
 
         [Tooltip("受击闪屏时长(秒)")]
         public float HitFlashDuration = 0.15f;
+
+        [Tooltip("受击闪屏cd(秒)")]
+        public float HitFlashCD = 120f;
     }
 }

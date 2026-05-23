@@ -141,21 +141,31 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public void HandleBasicAttackInput(SkillInput input)
         {
-            // 检查技能是否存在
             if (!_skillDatabase.TryGetValue(input.SkillId, out var skillData))
-            {
                 return;
-            }
 
-            // 检查是否是普攻技能
             if (skillData.SkillType != SkillType.Combo)
             {
                 HandleInput(input);
                 return;
             }
 
-            // 确定要激活的技能ID：连段窗口内尝试推进到下一段
             int skillToActivate = input.SkillId;
+
+            // 当前有连段技能正在执行：从当前技能推导下一段，尝试链式推进
+            if (_currentSkill != null && _currentSkill.IsActive &&
+                _currentSkill.Data is ComboSkillData currentCombo)
+            {
+                int nextId = currentCombo.GetNextComboId();
+                if (nextId > 0 && _skillDatabase.ContainsKey(nextId))
+                {
+                    skillToActivate = nextId;
+                    if (TryChainCombo(skillToActivate))
+                        return;
+                }
+            }
+
+            // 连段窗口内（上一段已完成）：从上次完成的技能推导下一段
             if (UnityEngine.Time.time <= _comboWindowEndTime && _lastCompletedComboSkillId > 0)
             {
                 var lastCombo = GetSkillData(_lastCompletedComboSkillId) as ComboSkillData;
@@ -164,33 +174,18 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     skillToActivate = nextId;
             }
 
-            // 如果当前连段技能正在执行中，尝试强制推进
-            if (_currentSkill != null && _currentSkill.IsActive &&
-                _currentSkill.Data is ComboSkillData)
-            {
-                if (UnityEngine.Time.time <= _comboWindowEndTime)
-                {
-                    if (TryChainCombo(skillToActivate))
-                        return;
-                }
-            }
-
             // 跳过重复激活同一个技能
             if (_currentSkill != null && _currentSkill.IsActive && _currentSkill.SkillId == skillToActivate)
                 return;
 
             // 检查冷却
             if (_cooldownManager.IsOnCooldown(skillToActivate))
-            {
                 return;
-            }
 
             // 检查资源
             var resolvedData = GetSkillData(skillToActivate);
             if (resolvedData == null || !HasEnoughResources(resolvedData))
-            {
                 return;
-            }
 
             // 释放技能
             TryActivateSkill(skillToActivate, input);

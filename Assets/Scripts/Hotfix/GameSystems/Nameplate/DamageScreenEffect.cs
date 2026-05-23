@@ -1,21 +1,28 @@
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using Core.Resource;
+using DataDefinition;
 
 namespace Hotfix.GameSystems.Nameplate
 {
     public class DamageScreenEffect
     {
         private readonly Image _overlay;
-        private float _lastFlashTime = -999f;
-        private const float FlashCooldown = 3f;
+        private readonly float _cooldown;
+        private float _lastFlashTime = 0f;
+
+        private const int FlashCount = 3;
+        private const float FlashOnDuration = 0.08f;
+        private const float FlashOffDuration = 0.05f;
+        private const float FlashFadeDuration = 1.5f;
+        private const float FlashAlpha = 0.15f;
 
         public DamageScreenEffect(Transform canvasTransform)
         {
             var go = new GameObject("DamageOverlay");
             go.transform.SetParent(canvasTransform, false);
             _overlay = go.AddComponent<Image>();
-            _overlay.color = new Color(1f, 0f, 0f, 0f);
             _overlay.raycastTarget = false;
 
             var rt = _overlay.rectTransform;
@@ -23,18 +30,30 @@ namespace Hotfix.GameSystems.Nameplate
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+            _overlay.sprite = GameSettings.Instance.HitFlashSprite;
+            var initColor = GameSettings.Instance.HitFlashColor;
+            _overlay.color = new Color(initColor.r, initColor.g, initColor.b, 0f);
+            _cooldown = GameSettings.Instance.HitFlashCD;
         }
 
         public void Flash()
         {
-            if (Time.time - _lastFlashTime < FlashCooldown) return;
+            if (_cooldown > 0f && Time.time - _lastFlashTime < _cooldown) return;
             _lastFlashTime = Time.time;
 
             _overlay.DOKill();
-            _overlay.DOFade(0.15f, 0.1f).OnComplete(() =>
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < FlashCount; i++)
             {
-                _overlay.DOFade(0f, 2.5f);
-            });
+                seq.Append(_overlay.DOFade(FlashAlpha, FlashOnDuration));
+                seq.AppendInterval(FlashOffDuration);
+                seq.Append(_overlay.DOFade(0f, FlashOffDuration));
+                if (i < FlashCount - 1)
+                    seq.AppendInterval(FlashOffDuration);
+            }
+            seq.Append(_overlay.DOFade(FlashAlpha, FlashOffDuration));
+            seq.Append(_overlay.DOFade(0f, FlashFadeDuration));
         }
 
         public void Cleanup()

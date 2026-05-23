@@ -12,7 +12,7 @@ namespace Hotfix.GameSystems.Nameplate
         public Color DefaultColor = Color.white;
         public float OutlineWidth = 0.15f;
         public Color OutlineColor = Color.black;
-        public float VerticalOffset = 2.5f;
+        public float VerticalOffset = 1.2f;
         public float CullDistance = 50f;
         public float FadeStartDistance = 30f;
         public Vector2 IconSize = new(20, 20);

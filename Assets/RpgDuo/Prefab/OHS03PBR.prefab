@@ -11,6 +11,12 @@ GameObject:
   - component: {fileID: 5086268201243115593}
   - component: {fileID: 8158787969259999212}
   - component: {fileID: 6259195511646583590}
+  - component: {fileID: -1229012921808030054}
+  - component: {fileID: 8881116034598632102}
+  - component: {fileID: 6748691334047235786}
+  - component: {fileID: 4524962913621127497}
+  - component: {fileID: 5234656535100174470}
+  - component: {fileID: 5216840941461916848}
   m_Layer: 0
   m_Name: OHS03PBR
   m_TagString: Untagged
@@ -25,12 +31,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5610884078883986163}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8158787969259999212
 MeshFilter:
@@ -51,14 +58,16 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f323cced30244554986ee5e9f5dd8b67, type: 2}
+  - {fileID: 2100000, guid: 323acb9185c2995449ae3f39cd5ad94e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -79,3 +88,84 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-1229012921808030054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610884078883986163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c627cb94b4b7684599fb9a5c3648ec7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _weaponBonePath: weapon_r
+--- !u!114 &8881116034598632102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610884078883986163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d947a793fcbaed40ad9171b7b0e4359, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6748691334047235786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610884078883986163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed43d2981c4ce3f4e98de70a82a13408, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4524962913621127497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610884078883986163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b656efc7428ea0240bd4936508599098, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5234656535100174470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610884078883986163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d27bb31ada5a77542baa2da342361a15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _elementConfig: {fileID: 11400000, guid: a0d2227d9b60e804faa8804f9e86a699, type: 2}
+  _swingThreshold: 120
+  _swingCooldown: 0.3
+--- !u!114 &5216840941461916848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610884078883986163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e057db6e264d2f40b60607438e49e75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _watchSkillIds: 
+  _edgeColor: {r: 0.2, g: 0.5, b: 1, a: 1}
+  _glowIntensityMin: 0.15
+  _glowIntensityMax: 1.5

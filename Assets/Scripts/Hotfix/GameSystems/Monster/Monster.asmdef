@@ -2,11 +2,12 @@
     "name": "Hotfix.GameSystems.Monster",
     "rootNamespace": "Hotfix.GameSystems.Monster",
     "references": [
-        "Hotfix.GameSystems.Sys3C.Core",
+        "Unity.TextMeshPro",
         "Hotfix.GameSystems.Sys3C",
         "Hotfix.GameSystems.Combat",
         "Hotfix.GameSystems.Skills",
-        "Hotfix.GameSystems.Nameplate"
+        "Hotfix.GameSystems.Nameplate",
+        "Hotfix.GameSystems.Sys3C.Core3C"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
