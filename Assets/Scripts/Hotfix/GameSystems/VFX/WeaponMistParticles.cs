@@ -115,7 +115,7 @@ namespace Hotfix.GameSystems.VFX
 
         private static Material GetDefaultAdditiveMaterial()
         {
-            var mat = new Material(Shader.Find("Particles/Standard Unlit"));
+            var mat = new Material(Shader.Find("Mobile/Particles/Additive"));
             mat.SetInt("_BlendOp", 0);
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);

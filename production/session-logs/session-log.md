@@ -69307,3 +69307,13 @@ production/session-logs/session-log.md
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260524_020204
+### Commits
+3ab7766 perf: switch all particle materials to Mobile shaders for performance
+36510de fix: particle prefab had no material (NULL) and loop=True — particles invisible at runtime
+2f8eca0 fix: set KnockbackForce=5 on WeaponConfig (SwordShieldConfig) for player-to-monster knockback
+39357dc feat: add HitFlashVFX + HitParticleController to monster prefabs, create hit particle prefab, configure KnockbackForce
+187391b feat: add monster hit knockback, death knockback, and hit particles with object pool
+15264b8 docs: add monster hit knockback & VFX design spec
+---
+
