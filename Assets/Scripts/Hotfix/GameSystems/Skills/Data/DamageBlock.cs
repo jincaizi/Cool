@@ -53,7 +53,7 @@ namespace Hotfix.GameSystems.Skills.Data
         [Header("=== Knockback ===")]
         [Tooltip("击退力度")]
         [SerializeField] private float _knockbackForce;
-        public float KnockbackForce => _knockbackForce;
+        public float KnockbackForce { get => _knockbackForce; set => _knockbackForce = value; }
 
         [Header("=== Over Time ===")]
         // 是否为持续伤害效果?

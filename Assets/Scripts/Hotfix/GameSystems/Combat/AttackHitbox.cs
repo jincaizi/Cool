@@ -20,6 +20,10 @@ namespace Hotfix.GameSystems.Combat
 
         public void Activate(DamageBlock damageData, EffectBlock effectData)
         {
+            if (damageData != null && effectData != null)
+            {
+                damageData.KnockbackForce = effectData.KnockbackForce;
+            }
             CurrentData = new AttackHitboxData
             {
                 DamageData = damageData,
