@@ -2428,11 +2428,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6db81cadee4802242ab0aad4b50156cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxHP: 100
   CharacterController: {fileID: 4734815638318692212}
   Animator: {fileID: 9036980633323257398}
   GroundLayer:
     serializedVersion: 2
     m_Bits: 1
+  _characterSkills: []
 --- !u!143 &4734815638318692212
 CharacterController:
   m_ObjectHideFlags: 0
@@ -2804,7 +2806,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: OHS03
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -1229012921808030054, guid: 9fbe61d1f4bc091439f25f985dd189a5, type: 3}
+    - {fileID: 8881116034598632102, guid: 9fbe61d1f4bc091439f25f985dd189a5, type: 3}
+    - {fileID: 6748691334047235786, guid: 9fbe61d1f4bc091439f25f985dd189a5, type: 3}
+    - {fileID: 4524962913621127497, guid: 9fbe61d1f4bc091439f25f985dd189a5, type: 3}
+    - {fileID: 5234656535100174470, guid: 9fbe61d1f4bc091439f25f985dd189a5, type: 3}
+    - {fileID: 5216840941461916848, guid: 9fbe61d1f4bc091439f25f985dd189a5, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
