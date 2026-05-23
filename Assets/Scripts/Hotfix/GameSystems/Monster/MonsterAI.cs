@@ -120,11 +120,9 @@ namespace Hotfix.GameSystems.Monster
 
         public void Update(float deltaTime)
         {
-            if (_state == MonsterAIState.Death)
-            {
-                _movement.UpdateKnockback(deltaTime);
-                return;
-            }
+            _movement.UpdateKnockback(deltaTime);
+
+            if (_state == MonsterAIState.Death) return;
 
             _attackCooldown -= deltaTime;
             _stateTimer -= deltaTime;
@@ -171,7 +169,7 @@ namespace Hotfix.GameSystems.Monster
 
             _movement.ApplyKnockback(hitDirection, _lastKnockbackForce);
             _movement.Stop();
-            _stateTimer = _config.KnockbackDecay + 0.3f;
+            _stateTimer = 0.3f;
             TransitionTo(MonsterAIState.Hit);
             _animator.SetTrigger(HASH_Hit);
         }
@@ -296,7 +294,6 @@ namespace Hotfix.GameSystems.Monster
                 case MonsterAIState.Taunt:
                     break;
                 case MonsterAIState.Hit:
-                    _movement.UpdateKnockback(deltaTime);
                     break;
             }
         }
@@ -432,6 +429,8 @@ namespace Hotfix.GameSystems.Monster
 
         private void RecoverFromHit()
         {
+            _movement.ResetKnockback();
+
             if (Target != null)
             {
                 float dist = Vector3.Distance(_self.position, Target.position);
