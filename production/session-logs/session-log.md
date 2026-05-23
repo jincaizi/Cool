@@ -69389,3 +69389,30 @@ e31e845 fix: add Animation Events on attack clips, fix WeaponMistParticles shade
 39357dc feat: add HitFlashVFX + HitParticleController to monster prefabs, create hit particle prefab, configure KnockbackForce
 ---
 
+## Session End: 20260524_023707
+### Commits
+9186fdb fix: GetHit animation loops forever — add exit transition to IdleNormal
+064934b fix: monster stuck in hit animation — decouple hit timer from knockback duration
+d31833d feat: add OnAttackActivated Animation Events to SkillR animation clips
+8086913 feat: optimize hit particles — enhanced visuals, critical variant, directional spray
+e31e845 fix: add Animation Events on attack clips, fix WeaponMistParticles shader
+3ab7766 perf: switch all particle materials to Mobile shaders for performance
+36510de fix: particle prefab had no material (NULL) and loop=True — particles invisible at runtime
+2f8eca0 fix: set KnockbackForce=5 on WeaponConfig (SwordShieldConfig) for player-to-monster knockback
+---
+
+## Session End: 20260524_024125
+### Commits
+9186fdb fix: GetHit animation loops forever — add exit transition to IdleNormal
+064934b fix: monster stuck in hit animation — decouple hit timer from knockback duration
+d31833d feat: add OnAttackActivated Animation Events to SkillR animation clips
+8086913 feat: optimize hit particles — enhanced visuals, critical variant, directional spray
+e31e845 fix: add Animation Events on attack clips, fix WeaponMistParticles shader
+3ab7766 perf: switch all particle materials to Mobile shaders for performance
+36510de fix: particle prefab had no material (NULL) and loop=True — particles invisible at runtime
+2f8eca0 fix: set KnockbackForce=5 on WeaponConfig (SwordShieldConfig) for player-to-monster knockback
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
