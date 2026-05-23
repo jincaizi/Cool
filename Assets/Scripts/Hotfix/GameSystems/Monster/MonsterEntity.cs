@@ -151,6 +151,7 @@ namespace Hotfix.GameSystems.Monster
             EventBus.Emit(new MonsterTakeDamageEvent(
                 GetInstanceID(),
                 transform.position + Vector3.up * 2f,
+                hitDirection,
                 Mathf.CeilToInt(data.BaseDamage),
                 data.WasCritical
             ));

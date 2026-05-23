@@ -666,7 +666,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _normalHitParticles: {fileID: 8927754642888407331, guid: ee980ac93dc023744b36f65c09f72a6c, type: 3}
-  _criticalHitParticles: {fileID: 0}
+  _criticalHitParticles: {fileID: 3084192173317419100, guid: da51241a971ecc64eaf7215233361999, type: 3}
 --- !u!1 &1532652994627396
 GameObject:
   m_ObjectHideFlags: 0

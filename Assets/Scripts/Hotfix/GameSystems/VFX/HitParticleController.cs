@@ -42,6 +42,8 @@ namespace Hotfix.GameSystems.VFX
             var pool = GetOrCreatePool(prefab, e.IsCritical);
             var ps = pool.Get();
             ps.transform.position = e.HitPosition;
+            if (e.HitDirection != Vector3.zero)
+                ps.transform.forward = e.HitDirection;
             var pooled = ps.GetComponent<PooledParticle>();
             if (pooled != null) pooled.SetPool(pool);
             ps.Play();
