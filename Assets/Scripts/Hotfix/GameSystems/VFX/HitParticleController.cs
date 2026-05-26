@@ -15,6 +15,7 @@ namespace Hotfix.GameSystems.VFX
         private static ComponentPool<ParticleSystem> _criticalPool;
         private bool _warnedMissingPrefab;
 
+        // Static pools -- assumes one prefab per slot across all instances.
         private static ComponentPool<SlashBloodTrail> _trailPool;
         private bool _warnedMissingTrail;
 

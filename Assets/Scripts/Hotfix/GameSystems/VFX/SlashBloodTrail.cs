@@ -32,6 +32,8 @@ namespace Hotfix.GameSystems.VFX
                 StopCoroutine(_activeRoutine);
 
             transform.position = startPos;
+            transform.rotation = Quaternion.identity;
+            transform.localScale = Vector3.one;
             _trail.Clear();
             _trail.emitting = true;
 
