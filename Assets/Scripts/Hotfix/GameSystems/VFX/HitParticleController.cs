@@ -9,10 +9,14 @@ namespace Hotfix.GameSystems.VFX
     {
         [SerializeField] private GameObject _normalHitParticles;
         [SerializeField] private GameObject _criticalHitParticles;
+        [SerializeField] private GameObject _slashBloodTrailPrefab;
 
         private static ComponentPool<ParticleSystem> _normalPool;
         private static ComponentPool<ParticleSystem> _criticalPool;
         private bool _warnedMissingPrefab;
+
+        private static ComponentPool<SlashBloodTrail> _trailPool;
+        private bool _warnedMissingTrail;
 
         private void OnEnable()
         {
@@ -47,6 +51,19 @@ namespace Hotfix.GameSystems.VFX
             var pooled = ps.GetComponent<PooledParticle>();
             if (pooled != null) pooled.SetPool(pool);
             ps.Play();
+
+            if (e.IsCritical && _slashBloodTrailPrefab != null)
+            {
+                var trailPool = GetOrCreateTrailPool(_slashBloodTrailPrefab);
+                var trail = trailPool.Get();
+                trail.SetPool(trailPool);
+                trail.Activate(e.HitPosition, e.HitDirection);
+            }
+            else if (e.IsCritical && !_warnedMissingTrail)
+            {
+                Debug.LogWarning("[HitParticleController] No slash blood trail prefab assigned", this);
+                _warnedMissingTrail = true;
+            }
         }
 
         private ComponentPool<ParticleSystem> GetOrCreatePool(GameObject prefab, bool isCritical)
@@ -62,6 +79,14 @@ namespace Hotfix.GameSystems.VFX
                 _normalPool = new ComponentPool<ParticleSystem>(
                     prefab.GetComponent<ParticleSystem>(), null);
             return _normalPool;
+        }
+
+        private ComponentPool<SlashBloodTrail> GetOrCreateTrailPool(GameObject prefab)
+        {
+            if (_trailPool == null)
+                _trailPool = new ComponentPool<SlashBloodTrail>(
+                    prefab.GetComponent<SlashBloodTrail>(), null);
+            return _trailPool;
         }
     }
 }
