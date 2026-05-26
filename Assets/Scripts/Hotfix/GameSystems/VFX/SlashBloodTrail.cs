@@ -17,6 +17,8 @@ namespace Hotfix.GameSystems.VFX
         private void Awake()
         {
             _trail = GetComponent<TrailRenderer>();
+            if (_trail == null)
+                Debug.LogWarning("[SlashBloodTrail] No TrailRenderer found on " + name, this);
         }
 
         public void SetPool(ComponentPool<SlashBloodTrail> pool)
