@@ -1,4 +1,3 @@
-using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Core.Pool;
 using UnityEngine;
@@ -10,12 +9,14 @@ namespace Hotfix.GameSystems.VFX
         [SerializeField] private GameObject _normalHitParticles;
         [SerializeField] private GameObject _criticalHitParticles;
         [SerializeField] private GameObject _slashBloodTrailPrefab;
+        [SerializeField] private GameObject _hitShockwavePrefab;
+        [SerializeField] private GameObject _hitSparkBurstPrefab;
+        [SerializeField] private HitFeedbackProfile _profile;
 
         private static ComponentPool<ParticleSystem> _normalPool;
         private static ComponentPool<ParticleSystem> _criticalPool;
         private bool _warnedMissingPrefab;
 
-        // Static pools -- assumes one prefab per slot across all instances.
         private static ComponentPool<SlashBloodTrail> _trailPool;
         private bool _warnedMissingTrail;
 
@@ -34,24 +35,36 @@ namespace Hotfix.GameSystems.VFX
             var prefab = e.IsCritical && _criticalHitParticles != null
                 ? _criticalHitParticles : _normalHitParticles;
 
-            if (prefab == null)
+            if (prefab != null)
             {
-                if (!_warnedMissingPrefab)
-                {
-                    Debug.LogWarning($"[HitParticleController] No particle prefab assigned on {name}", this);
-                    _warnedMissingPrefab = true;
-                }
-                return;
+                var pool = GetOrCreatePool(prefab, e.IsCritical);
+                var ps = pool.Get();
+                ps.transform.position = e.HitPosition;
+                if (e.HitDirection != Vector3.zero)
+                    ps.transform.forward = e.HitDirection;
+
+                float scale = _profile != null
+                    ? (e.IsCritical ? _profile.CritParticleScale
+                        : e.SkillId > 0 ? _profile.SkillParticleScale
+                        : _profile.NormalParticleScale)
+                    : 1f;
+                ps.transform.localScale = Vector3.one * scale;
+
+                var pooled = ps.GetComponent<PooledParticle>();
+                if (pooled != null) pooled.SetPool(pool);
+                ps.Play();
+            }
+            else if (!_warnedMissingPrefab)
+            {
+                Debug.LogWarning("[HitParticleController] No particle prefab assigned on " + name, this);
+                _warnedMissingPrefab = true;
             }
 
-            var pool = GetOrCreatePool(prefab, e.IsCritical);
-            var ps = pool.Get();
-            ps.transform.position = e.HitPosition;
-            if (e.HitDirection != Vector3.zero)
-                ps.transform.forward = e.HitDirection;
-            var pooled = ps.GetComponent<PooledParticle>();
-            if (pooled != null) pooled.SetPool(pool);
-            ps.Play();
+            if (_hitSparkBurstPrefab != null)
+                SpawnAtHit(_hitSparkBurstPrefab, e.HitPosition, e.HitDirection);
+
+            if ((e.IsCritical || e.SkillId > 0) && _hitShockwavePrefab != null)
+                SpawnAtHit(_hitShockwavePrefab, e.HitPosition, e.HitDirection);
 
             if (e.IsCritical && _slashBloodTrailPrefab != null)
             {
@@ -65,6 +78,14 @@ namespace Hotfix.GameSystems.VFX
                 Debug.LogWarning("[HitParticleController] No slash blood trail prefab assigned", this);
                 _warnedMissingTrail = true;
             }
+        }
+
+        private void SpawnAtHit(GameObject prefab, Vector3 pos, Vector3 dir)
+        {
+            var go = Instantiate(prefab, pos, Quaternion.identity);
+            if (dir != Vector3.zero)
+                go.transform.forward = dir;
+            Destroy(go, 1f);
         }
 
         private ComponentPool<ParticleSystem> GetOrCreatePool(GameObject prefab, bool isCritical)
