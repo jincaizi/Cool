@@ -6,6 +6,7 @@ using Hotfix.GameSystems.Skills.Effect;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Events;
 using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Sys3C.Core.Events;
 
 namespace Hotfix.GameSystems.Skills.Runtime
 {
@@ -24,6 +25,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private IEffectTarget _targetCharacter;
         private IDashComponent _dashComponent;
         private bool _wasFullCharge;
+        private DamageBlock _lastDamageBlock;
 
         // 回调
         public event Action<int> OnHitboxFrame;              // 判定帧触发
@@ -209,6 +211,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (targets.Count > 0)
             {
                 var hitPos = targets[0].transform.position;
+                bool wasCrit = _lastDamageBlock != null && _lastDamageBlock.WasCritical;
                 foreach (var t in targets)
                 {
                     EventBus.Emit(new SkillHitTargetEvent
@@ -218,6 +221,16 @@ namespace Hotfix.GameSystems.Skills.Runtime
                         HitPosition = hitPos,
                         IsFullCharge = _wasFullCharge
                     });
+
+                    EventBus.Emit(new MonsterTakeDamageEvent(
+                        t.transform.GetInstanceID(),
+                        hitPos + Vector3.up * 2f,
+                        _owner.transform.forward,
+                        Mathf.CeilToInt(Mathf.Abs(_lastDamageBlock?.BaseDamage ?? 0f)),
+                        wasCrit,
+                        _skillData.SkillId,
+                        frameIndex + 1
+                    ));
                 }
             }
         }
@@ -295,6 +308,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 {
                     if (hit.collider.TryGetComponent(out IEffectTarget target) && target != _owner)
                         targets.Add(target);
+                    else
+                    {
+                        // Check parent (e.g. AttackHitbox child collider)
+                        var parentTarget = hit.collider.GetComponentInParent<IEffectTarget>();
+                        if (parentTarget != null && parentTarget != _owner)
+                            targets.Add(parentTarget);
+                    }
                 }
             }
         }
@@ -345,6 +365,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (CurrentSubState == SkillSubState.Charging || CurrentSubState == SkillSubState.Execution)
                 damage *= 1f + GetChargeProgress() * 0.5f;
 
+            _lastDamageBlock = damageBlock;
             target.Heal(-damage);
         }
 
