@@ -55,14 +55,21 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
         public Vector3 HitDirection;
         public int Damage;
         public bool IsCritical;
+        public int SkillId;
+        public int ComboIndex;
 
-        public MonsterTakeDamageEvent(int entityId, Vector3 hitPos, Vector3 hitDir, int damage, bool isCritical = false)
+        public MonsterTakeDamageEvent(
+            int entityId, Vector3 hitPos, Vector3 hitDir,
+            int damage, bool isCritical = false,
+            int skillId = 0, int comboIndex = 1)
         {
             EntityId = entityId;
             HitPosition = hitPos;
             HitDirection = hitDir;
             Damage = damage;
             IsCritical = isCritical;
+            SkillId = skillId;
+            ComboIndex = comboIndex;
         }
     }
 
