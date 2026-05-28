@@ -7,11 +7,12 @@ using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Combat;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Nameplate;
 
 namespace Hotfix.GameSystems.Monster
 {
-    public class MonsterEntity : MonoBehaviour, IDamageable, ITargetable
+    public class MonsterEntity : MonoBehaviour, IDamageable, ITargetable, IEffectTarget
     {
         [Header("Components")]
         public Animator Animator;
@@ -147,14 +148,26 @@ namespace Hotfix.GameSystems.Monster
             _stats.TakeDamage(data);
             _ai.NotifyHit(data, hitDirection);
 
-            // Emit monster damage event for floating text
+            // Emit monster damage event for floating text + VFX
             EventBus.Emit(new MonsterTakeDamageEvent(
                 GetInstanceID(),
                 transform.position + Vector3.up * 2f,
                 hitDirection,
                 Mathf.CeilToInt(data.BaseDamage),
-                data.WasCritical
+                data.WasCritical,
+                0,  // skillId = 0 for normal attacks
+                1   // comboIndex = 1
             ));
+
+            // Emit knockback event
+            if (data.KnockbackForce > 0)
+            {
+                EventBus.Emit(new KnockbackEvent(
+                    GetInstanceID(),
+                    hitDirection,
+                    data.KnockbackForce
+                ));
+            }
         }
 
         private void HandleDeath()
@@ -209,5 +222,22 @@ namespace Hotfix.GameSystems.Monster
         int ITargetable.MaxHP => _stats != null ? Mathf.CeilToInt(_stats.MaxHP) : 0;
         Vector3 ITargetable.WorldPosition => transform.position;
         float ITargetable.SelectionRingYOffset => _config?.RingYOffset ?? -0.9f;
+
+        // ===== IEffectTarget =====
+
+        IEffectStats IEffectTarget.Stats => null;
+        IShieldSystem IEffectTarget.ShieldSystem => null;
+        IPhysicsSystem IEffectTarget.PhysicsSystem => null;
+        IStatusController IEffectTarget.StatusController => null;
+
+        void IEffectTarget.Heal(float amount)
+        {
+            if (amount >= 0 || _stats == null || _stats.IsDead) return;
+
+            float damage = -amount;
+            var damageBlock = DamageBlock.CreateDefault(damage);
+            _stats.TakeDamage(damageBlock);
+            _ai?.NotifyHit(damageBlock, Vector3.zero);
+        }
     }
 }
