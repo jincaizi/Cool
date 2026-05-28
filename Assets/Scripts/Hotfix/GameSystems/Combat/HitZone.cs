@@ -38,6 +38,7 @@ namespace Hotfix.GameSystems.Combat
             var data = hitbox.CurrentData;
             if (data != null && data.DamageData != null)
             {
+                data.DamageData.KnockbackForce = data.KnockbackForce;
                 _owner?.TakeDamage(data.DamageData, hitDir);
             }
         }
