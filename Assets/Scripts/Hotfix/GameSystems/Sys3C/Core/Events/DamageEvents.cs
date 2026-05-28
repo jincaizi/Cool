@@ -73,4 +73,21 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
         }
     }
 
+    /// <summary>
+    /// 击退事件
+    /// </summary>
+    public struct KnockbackEvent : IEvent
+    {
+        public int EntityId;
+        public Vector3 Direction;
+        public float Force;
+
+        public KnockbackEvent(int entityId, Vector3 direction, float force)
+        {
+            EntityId = entityId;
+            Direction = direction;
+            Force = force;
+        }
+    }
+
 }
