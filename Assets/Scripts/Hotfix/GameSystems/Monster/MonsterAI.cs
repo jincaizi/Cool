@@ -167,7 +167,6 @@ namespace Hotfix.GameSystems.Monster
 
             _preHitState = _state == MonsterAIState.Hit ? _preHitState : _state;
 
-            _movement.ApplyKnockback(hitDirection, _lastKnockbackForce);
             _movement.Stop();
             _stateTimer = 0.3f;
             TransitionTo(MonsterAIState.Hit);
