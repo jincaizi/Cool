@@ -41,6 +41,23 @@ namespace Hotfix.GameSystems.Monster
             if (AttackHitbox == null) AttackHitbox = GetComponentInChildren<AttackHitbox>();
         }
 
+        private void OnEnable()
+        {
+            EventBus.Subscribe<KnockbackEvent>(OnKnockback);
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<KnockbackEvent>(OnKnockback);
+        }
+
+        private void OnKnockback(KnockbackEvent e)
+        {
+            if (_stats == null || _stats.IsDead) return;
+            if (e.EntityId != GetInstanceID()) return;
+            _movement.ApplyKnockback(e.Direction, e.Force);
+        }
+
         public void Init(MonsterConfig config, Vector3 spawnPoint)
         {
             _config = config;
