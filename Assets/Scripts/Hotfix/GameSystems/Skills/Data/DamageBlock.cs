@@ -55,6 +55,10 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] private float _knockbackForce;
         public float KnockbackForce { get => _knockbackForce; set => _knockbackForce = value; }
 
+        // Runtime skill context (not serialized — set by SkillExecutor before calling TakeDamage)
+        [System.NonSerialized] public int SkillId;
+        [System.NonSerialized] public int ComboIndex = 1;
+
         [Header("=== Over Time ===")]
         // 是否为持续伤害效果?
         [Tooltip("是否为持续伤害效果?")]
