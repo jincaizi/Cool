@@ -29,12 +29,14 @@ namespace Hotfix.GameSystems.Combat
                 ? hitboxData.DamageData.CalculateFinalDamage(null)
                 : 10f;
 
+            float knockbackForce = hitboxData != null ? hitboxData.KnockbackForce : 0f;
+
             Vector3 hitDir = (transform.position - hitbox.GetBounds().center).normalized;
             _fsmManager.HandleDamage(
                 sourceId: -1,
                 damage: damage,
                 hitDirection: hitDir,
-                knockbackForce: 1f,
+                knockbackForce: knockbackForce,
                 launchForce: 0,
                 stunDuration: 0,
                 isCritical: false
