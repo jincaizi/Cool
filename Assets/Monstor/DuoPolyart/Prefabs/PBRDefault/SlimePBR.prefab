@@ -562,6 +562,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetRenderer: {fileID: 0}
+  _flashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &8376229191510100468
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -569,13 +570,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1931298151966786}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 66df620c15e0aaa47b7bf449954b6ec1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _normalHitParticles: {fileID: 8927754642888407331, guid: ee980ac93dc023744b36f65c09f72a6c, type: 3}
   _criticalHitParticles: {fileID: 3084192173317419100, guid: da51241a971ecc64eaf7215233361999, type: 3}
+  _slashBloodTrailPrefab: {fileID: 0}
+  _hitShockwavePrefab: {fileID: 0}
+  _hitSparkBurstPrefab: {fileID: 0}
+  _profile: {fileID: 0}
 --- !u!1 &501719361074203905
 GameObject:
   m_ObjectHideFlags: 0
