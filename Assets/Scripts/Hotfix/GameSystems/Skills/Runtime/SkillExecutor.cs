@@ -6,7 +6,7 @@ using Hotfix.GameSystems.Skills.Effect;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Events;
 using Hotfix.GameSystems.Skills;
-using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Skills.Runtime
 {
@@ -190,28 +190,20 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnHitboxTriggered(int frameIndex)
         {
-            // 检测目标
             var targets = DetectTargets();
 
             foreach (var target in targets)
             {
-                // 应用伤害
                 ApplyDamage(target, frameIndex);
-
-                // 应用效果
                 ApplyEffects(target);
-
-                // 触发命中回调
                 OnTargetHit?.Invoke(target);
             }
 
-            // 触发判定帧事件
             OnHitboxFrame?.Invoke(frameIndex);
 
             if (targets.Count > 0)
             {
                 var hitPos = targets[0].transform.position;
-                bool wasCrit = _lastDamageBlock != null && _lastDamageBlock.WasCritical;
                 foreach (var t in targets)
                 {
                     EventBus.Emit(new SkillHitTargetEvent
@@ -221,16 +213,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
                         HitPosition = hitPos,
                         IsFullCharge = _wasFullCharge
                     });
-
-                    EventBus.Emit(new MonsterTakeDamageEvent(
-                        t.transform.GetInstanceID(),
-                        hitPos + Vector3.up * 2f,
-                        _owner.transform.forward,
-                        Mathf.CeilToInt(Mathf.Abs(_lastDamageBlock?.BaseDamage ?? 0f)),
-                        wasCrit,
-                        _skillData.SkillId,
-                        frameIndex + 1
-                    ));
                 }
             }
         }
@@ -361,21 +343,44 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (damageBlock == null) return;
 
             float damage = damageBlock.CalculateFinalDamage(_owner.Stats);
-
             if (CurrentSubState == SkillSubState.Charging || CurrentSubState == SkillSubState.Execution)
                 damage *= 1f + GetChargeProgress() * 0.5f;
 
             _lastDamageBlock = damageBlock;
-            target.Heal(-damage);
+
+            // Set runtime skill context so MonsterEntity.TakeDamage can emit
+            // MonsterTakeDamageEvent with correct SkillId/ComboIndex
+            damageBlock.SkillId = _skillData.SkillId;
+            damageBlock.ComboIndex = frameIndex + 1;
+
+            // Set knockback force from EffectBlock if present (overrides DamageBlock default)
+            var effect = GetEffect();
+            if (effect != null && effect.KnockbackForce > 0)
+                damageBlock.KnockbackForce = effect.KnockbackForce;
+
+            // Route through IDamageable for unified feedback path
+            if (target is IDamageable damageable)
+            {
+                Vector3 hitDir = (_owner.transform.position - target.transform.position).normalized;
+                damageable.TakeDamage(damageBlock, hitDir);
+            }
+            else
+            {
+                target.Heal(-damage);
+            }
+        }
+
+        private EffectBlock GetEffect()
+        {
+            return (_skillData as InstantSkillData)?.Effect
+                ?? (_skillData as ChargedSkillData)?.Effect
+                ?? (_skillData as ChanneledSkillData)?.Effect
+                ?? (_skillData as ProjectileSkillData)?.Effect;
         }
 
         private void ApplyEffects(IEffectTarget target)
         {
-            EffectBlock effect = (_skillData as InstantSkillData)?.Effect
-                ?? (_skillData as ChargedSkillData)?.Effect
-                ?? (_skillData as ChanneledSkillData)?.Effect
-                ?? (_skillData as ProjectileSkillData)?.Effect;
-
+            var effect = GetEffect();
             if (effect?.ApplyEffects == null) return;
             foreach (var effectData in effect.ApplyEffects)
                 effectData?.Apply(_owner, target);
