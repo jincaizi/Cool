@@ -43,18 +43,17 @@ namespace Hotfix.GameSystems.Monster
 
         private void OnEnable()
         {
-            EventBus.Subscribe<KnockbackEvent>(OnKnockback);
+            EventBus.SubscribeTargeted<KnockbackEvent>(GetInstanceID(), OnKnockback);
         }
 
         private void OnDisable()
         {
-            EventBus.Unsubscribe<KnockbackEvent>(OnKnockback);
+            EventBus.UnsubscribeTargeted<KnockbackEvent>(GetInstanceID(), OnKnockback);
         }
 
         private void OnKnockback(KnockbackEvent e)
         {
             if (_stats == null || _stats.IsDead) return;
-            if (e.EntityId != GetInstanceID()) return;
             _movement.ApplyKnockback(e.Direction, e.Force);
         }
 
@@ -166,20 +165,22 @@ namespace Hotfix.GameSystems.Monster
             _ai.NotifyHit(data, hitDirection);
 
             // Emit monster damage event for floating text + VFX
-            EventBus.Emit(new MonsterTakeDamageEvent(
+            var damageEvent = new MonsterTakeDamageEvent(
                 GetInstanceID(),
-                transform.position + Vector3.up * 2f,
+                transform.position + Vector3.up * 1.2f,
                 hitDirection,
                 Mathf.CeilToInt(data.BaseDamage),
                 data.WasCritical,
-                0,  // skillId = 0 for normal attacks
-                1   // comboIndex = 1
-            ));
+                data.SkillId,
+                data.ComboIndex
+            );
+            EventBus.Emit(damageEvent);
+            EventBus.TargetedEmit(GetInstanceID(), damageEvent);
 
             // Emit knockback event
             if (data.KnockbackForce > 0)
             {
-                EventBus.Emit(new KnockbackEvent(
+                EventBus.TargetedEmit(GetInstanceID(), new KnockbackEvent(
                     GetInstanceID(),
                     hitDirection,
                     data.KnockbackForce
@@ -238,7 +239,7 @@ namespace Hotfix.GameSystems.Monster
         int ITargetable.CurrentHP => _stats != null ? Mathf.CeilToInt(_stats.HP) : 0;
         int ITargetable.MaxHP => _stats != null ? Mathf.CeilToInt(_stats.MaxHP) : 0;
         Vector3 ITargetable.WorldPosition => transform.position;
-        float ITargetable.SelectionRingYOffset => _config?.RingYOffset ?? -0.9f;
+        float ITargetable.SelectionRingYOffset => _config?.RingYOffset ?? 0f;
 
         // ===== IEffectTarget =====
 
