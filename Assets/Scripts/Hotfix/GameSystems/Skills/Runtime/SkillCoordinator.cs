@@ -132,6 +132,84 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
+        /// 轻击（横劈）——仅当无技能执行或在可取消窗口内才激活
+        /// </summary>
+        public void HandleLightAttack()
+        {
+            int skillId = (int)Definition.SkillID.LightAttack;
+            if (!_skillDatabase.TryGetValue(skillId, out var skillData))
+                return;
+
+            // 有技能正在执行，检查是否在可取消窗口
+            if (_currentSkill != null && _currentSkill.IsActive)
+            {
+                if (!IsInCancelableWindow())
+                    return;
+                _currentSkill.ForceComplete();
+            }
+
+            // 检查冷却
+            if (_cooldownManager.IsOnCooldown(skillId))
+                return;
+
+            if (!HasEnoughResources(skillData))
+                return;
+
+            var input = SkillInput.BasicAttack(skillId, _owner.transform.forward);
+            TryActivateSkill(skillId, input);
+        }
+
+        /// <summary>
+        /// 重击（竖劈蓄力）——开始蓄力
+        /// </summary>
+        public void HandleHeavyAttack()
+        {
+            int skillId = (int)Definition.SkillID.HeavyAttack;
+            if (!_skillDatabase.TryGetValue(skillId, out var skillData))
+                return;
+
+            // 已在蓄力中，跳过
+            if (_currentSkill != null && _currentSkill.IsActive
+                && _currentSkill.CurrentSubState == SkillSubState.Charging)
+                return;
+
+            // 检查冷却
+            if (_cooldownManager.IsOnCooldown(skillId))
+                return;
+
+            if (!HasEnoughResources(skillData))
+                return;
+
+            var input = SkillInput.ChargingSkill(skillId, _owner.transform.forward);
+            TryActivateSkill(skillId, input);
+        }
+
+        /// <summary>
+        /// 释放重击蓄力
+        /// </summary>
+        public void HandleHeavyRelease()
+        {
+            if (_currentSkill != null && _currentSkill.IsActive
+                && _currentSkill.CurrentSubState == SkillSubState.Charging)
+            {
+                _currentSkill.ReleaseCharge();
+            }
+        }
+
+        private bool IsInCancelableWindow()
+        {
+            if (_currentSkill == null) return true;
+            float totalDuration = _currentSkill.Data.GetMainAnimationClip()?.length ?? 0.5f;
+            if (totalDuration <= 0f) return true;
+
+            return _currentSkill.Data switch
+            {
+                ComboSkillData combo => combo.IsInCancelableWindow(_currentSkill.ElapsedTime, totalDuration),
+                _ => false
+            };
+        }
+
+        /// <summary>
         /// 尝试激活技能
         /// </summary>
         private bool TryActivateSkill(int skillId, SkillInput input = default)
