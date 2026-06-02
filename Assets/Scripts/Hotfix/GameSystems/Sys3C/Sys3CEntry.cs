@@ -169,14 +169,24 @@ namespace Hotfix.GameSystems.Sys3C
                 _cc.RequestJump();
             }
 
-            if (_inputManager.IsAttackPressed())
+            // Attack: tap (<0.2s) → light, hold (>=0.2s) → heavy charge, release → fire heavy
+            float attackDuration = _inputManager.GetAttackReleaseDuration();
+            if (attackDuration >= 0f)
             {
-                int attackId = GetBasicAttackSkillId();
-                if (attackId > 0)
+                // Button was just released
+                if (attackDuration < 0.2f)
                 {
-                    var input = SkillInput.BasicAttack(attackId, transform.forward);
-                    _skillCoordinator.HandleInput(input);
+                    _skillCoordinator.HandleLightAttack();
                 }
+                else
+                {
+                    _skillCoordinator.HandleHeavyRelease();
+                }
+            }
+            else if (_inputManager.IsAttackHeldOver(0.2f))
+            {
+                // Still holding past threshold — start/continue charging
+                _skillCoordinator.HandleHeavyAttack();
             }
 
             if (_inputManager.IsSkill2Pressed())
