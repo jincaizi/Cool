@@ -171,9 +171,6 @@ namespace Hotfix.GameSystems.Sys3C
 
             // Attack: tap (<0.2s) → light, hold (>=0.2s) → heavy charge, release → fire heavy
             float attackDuration = _inputManager.GetAttackReleaseDuration();
-            bool heldOver = _inputManager.IsAttackHeldOver(0.2f);
-            if (attackDuration >= 0f || heldOver)
-                UnityEngine.Debug.Log($"[Input] releaseDur={attackDuration:F3} heldOver={heldOver} isHeld={_inputManager.IsAttackHeld()}");
             if (attackDuration >= 0f)
             {
                 // Button was just released

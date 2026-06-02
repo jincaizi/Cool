@@ -173,12 +173,17 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 && _currentSkill.CurrentSubState == SkillSubState.Charging)
                 return;
 
-            // 检查冷却
             if (_cooldownManager.IsOnCooldown(skillId))
                 return;
 
             if (!HasEnoughResources(skillData))
                 return;
+
+            if (_currentSkill != null && _currentSkill.IsActive)
+            {
+                // 有活跃技能，尝试打断
+                _currentSkill.ForceComplete();
+            }
 
             var input = SkillInput.ChargingSkill(skillId, _owner.transform.forward);
             TryActivateSkill(skillId, input);
