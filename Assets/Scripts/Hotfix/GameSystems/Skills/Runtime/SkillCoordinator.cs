@@ -179,6 +179,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (!HasEnoughResources(skillData))
                 return;
 
+            // 取消当前轻击/其他技能，为蓄力让路
+            if (_currentSkill != null && _currentSkill.IsActive)
+                _currentSkill.ForceComplete();
+
             var input = SkillInput.ChargingSkill(skillId, _owner.transform.forward);
             TryActivateSkill(skillId, input);
         }
