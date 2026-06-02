@@ -29,6 +29,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         // Attack button hold tracking
         private bool _attackHeld;
         private float _attackHoldStart = -1f;
+        private float _lastReleaseDuration = -1f;
 
         private void Awake()
         {
@@ -40,18 +41,22 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public void Update()
         {
-            // 每帧开始时重置消费标志，允许下一帧再次触发
             _jumpConsumed = false;
             _skill2Consumed = false;
             _skill3Consumed = false;
+            _lastReleaseDuration = -1f;
 
             if (UnityInput.GetMouseButtonDown(0))
             {
                 _attackHeld = true;
                 _attackHoldStart = Time.time;
             }
-            // Mouse up handled in GetAttackReleaseDuration to avoid
-            // clearing state before HandleInput can read it
+            if (UnityInput.GetMouseButtonUp(0))
+            {
+                _lastReleaseDuration = Time.time - _attackHoldStart;
+                _attackHeld = false;
+                _attackHoldStart = -1f;
+            }
         }
 
         /// <summary>
@@ -123,14 +128,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public float GetAttackReleaseDuration()
         {
-            if (_attackHeld && UnityInput.GetMouseButtonUp(0))
-            {
-                _attackHeld = false;
-                float duration = Time.time - _attackHoldStart;
-                _attackHoldStart = -1f;
-                return duration;
-            }
-            return -1f;
+            return _lastReleaseDuration;
         }
 
         /// <summary>
