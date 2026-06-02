@@ -46,12 +46,13 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skill3Consumed = false;
             _lastReleaseDuration = -1f;
 
-            if (UnityInput.GetMouseButtonDown(0))
+            bool mouseDown = UnityInput.GetMouseButton(0);
+            if (mouseDown && !_attackHeld)
             {
                 _attackHeld = true;
                 _attackHoldStart = Time.time;
             }
-            if (UnityInput.GetMouseButtonUp(0))
+            else if (!mouseDown && _attackHeld)
             {
                 _lastReleaseDuration = Time.time - _attackHoldStart;
                 _attackHeld = false;
