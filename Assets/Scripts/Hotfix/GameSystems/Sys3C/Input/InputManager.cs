@@ -50,11 +50,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 _attackHeld = true;
                 _attackHoldStart = Time.time;
             }
-            if (UnityInput.GetMouseButtonUp(0))
-            {
-                _attackHeld = false;
-                _attackHoldStart = -1f;
-            }
+            // Mouse up handled in GetAttackReleaseDuration to avoid
+            // clearing state before HandleInput can read it
         }
 
         /// <summary>
@@ -126,8 +123,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public float GetAttackReleaseDuration()
         {
-            if (!_attackHeld && _attackHoldStart > 0f)
+            if (_attackHeld && UnityInput.GetMouseButtonUp(0))
             {
+                _attackHeld = false;
                 float duration = Time.time - _attackHoldStart;
                 _attackHoldStart = -1f;
                 return duration;
