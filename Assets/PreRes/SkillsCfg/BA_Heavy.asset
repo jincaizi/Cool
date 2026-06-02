@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7ba06c46ef894048b17eac0403c8713, type: 3}
+  m_Name: BA_Heavy
+  m_EditorClassIdentifier: 
+  _skillId: 10002
+  _skillName: Heavy Attack
+  _description: 
+  _icon: {fileID: 0}
+  _skillType: 2
+  _quality: 1
+  _manaCost: 0
+  _cooldown: 0.5
+  _staminaCost: 0
+  _animatorTrigger: HeavyAttack
+  _castClip: {fileID: 0}
+  _releaseClip: {fileID: 0}
+  _dashDistance: 0
+  _dashDuration: 0
+  _canBeInterruptedByDamage: 1
+  _canBeInterruptedByMovement: 0
+  _interruptionPriority: 60
+  _canCancelIntoBasicAttack: 0
+  _canCancelIntoOtherSkill: 0
+  _damage:
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _knockbackForce: 0
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
+  _holdToCharge: 1
+  _releaseToFire: 1
+  _minChargeTime: 0.3
+  _maxChargeTime: 0.8
+  _chargeDamageCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 2
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _chargeAreaCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0.5
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1.5
+      inSlope: 0.5
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _canMoveWhileCharging: 0
+  _canRotateWhileCharging: 0
+  _shape:
+    _targetType: 0
+    _range: 2.5
+    _angle: 120
+    _angleStart: -10
+    _angleEnd: 10
+    _areaRadius: 0
+    _width: 1
+    _stopAtFirst: 0
+    _targetMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    _hitboxTimings:
+    - 0.35
+  _effect:
+    _applyEffects: []
+    _knockbackForce: 0
+    _launchForce: 0
+    _stunDuration: 0
+    _statusType: 0
+    _statusDuration: 0
+    _statusValue: 0
+  _presentation:
+    _castVFX: {fileID: 0}
+    _releaseVFX: {fileID: 0}
+    _castSFX: {fileID: 0}
+    _hitStopDuration: 0
+    _showCastingBar: 1
+    _castingBarColor: {r: 0, g: 0, b: 1, a: 1}
