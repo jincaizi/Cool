@@ -175,7 +175,7 @@ namespace Hotfix.GameSystems.Sys3C
                 if (attackId > 0)
                 {
                     var input = SkillInput.BasicAttack(attackId, transform.forward);
-                    _skillCoordinator.HandleBasicAttackInput(input);
+                    _skillCoordinator.HandleInput(input);
                 }
             }
 

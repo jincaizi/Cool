@@ -25,11 +25,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private SkillExecutor _currentSkill;
         private SkillExecutor _queuedSkill;  // 预输入的技能
 
-        // 普攻连段追踪
-        private int _currentComboIndex;
-        private float _comboWindowEndTime;
-        private int _lastCompletedComboSkillId;
-
         // 事件
         public event Action<SkillData> OnSkillActivated;
         public event Action<int, SkillSubState> OnSkillStateChanged;
@@ -137,61 +132,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
-        /// 处理普攻输入（特殊处理连段）
-        /// </summary>
-        public void HandleBasicAttackInput(SkillInput input)
-        {
-            if (!_skillDatabase.TryGetValue(input.SkillId, out var skillData))
-                return;
-
-            if (skillData.SkillType != SkillType.Combo)
-            {
-                HandleInput(input);
-                return;
-            }
-
-            int skillToActivate = input.SkillId;
-
-            // 当前有连段技能正在执行：从当前技能推导下一段，尝试链式推进
-            if (_currentSkill != null && _currentSkill.IsActive &&
-                _currentSkill.Data is ComboSkillData currentCombo)
-            {
-                int nextId = currentCombo.GetNextComboId();
-                if (nextId > 0 && _skillDatabase.ContainsKey(nextId))
-                {
-                    skillToActivate = nextId;
-                    if (TryChainCombo(skillToActivate))
-                        return;
-                }
-            }
-
-            // 连段窗口内（上一段已完成）：从上次完成的技能推导下一段
-            if (UnityEngine.Time.time <= _comboWindowEndTime && _lastCompletedComboSkillId > 0)
-            {
-                var lastCombo = GetSkillData(_lastCompletedComboSkillId) as ComboSkillData;
-                int nextId = lastCombo?.GetNextComboId() ?? 0;
-                if (nextId > 0 && _skillDatabase.ContainsKey(nextId))
-                    skillToActivate = nextId;
-            }
-
-            // 跳过重复激活同一个技能
-            if (_currentSkill != null && _currentSkill.IsActive && _currentSkill.SkillId == skillToActivate)
-                return;
-
-            // 检查冷却
-            if (_cooldownManager.IsOnCooldown(skillToActivate))
-                return;
-
-            // 检查资源
-            var resolvedData = GetSkillData(skillToActivate);
-            if (resolvedData == null || !HasEnoughResources(resolvedData))
-                return;
-
-            // 释放技能
-            TryActivateSkill(skillToActivate, input);
-        }
-
-        /// <summary>
         /// 尝试激活技能
         /// </summary>
         private bool TryActivateSkill(int skillId, SkillInput input = default)
@@ -292,25 +232,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
-        /// 尝试连段（在当前技能执行期间接到下一个普攻输入）
-        /// 使用 ForceComplete 而非中断系统，因为 Combo 类型的 Execution 阶段不允许被 BasicAttack 打断
-        /// </summary>
-        private bool TryChainCombo(int nextSkillId)
-        {
-            if (_currentSkill == null || !_currentSkill.IsActive) return false;
-            var currentCombo = _currentSkill.Data as ComboSkillData;
-            if (currentCombo == null) return false;
-
-            var nextCombo = GetSkillData(nextSkillId) as ComboSkillData;
-            if (nextCombo != null && nextCombo.ComboIndex == currentCombo.ComboIndex + 1)
-            {
-                _currentSkill.ForceComplete();
-                return TryActivateSkill(nextSkillId);
-            }
-            return false;
-        }
-
-        /// <summary>
         /// 尝试取消当前技能
         /// </summary>
         private bool TryCancelCurrentSkill(InterruptionSource source)
@@ -354,13 +275,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             // 更新冷却管理器
             _cooldownManager.Update(deltaTime);
-
-            // 检查连段窗口超时
-            if (_currentComboIndex > 0 && UnityEngine.Time.time > _comboWindowEndTime)
-            {
-                _currentComboIndex = 0;
-                _lastCompletedComboSkillId = 0;
-            }
 
             // 处理缓冲输入
             ProcessInputBuffer();
@@ -416,15 +330,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnExecutorCompleted(int skillId)
         {
-            if (_activeExecutors.TryGetValue(skillId, out var executor))
-            {
-                if (executor.Data is ComboSkillData combo)
-                {
-                    _currentComboIndex++;
-                    _comboWindowEndTime = UnityEngine.Time.time + combo.ComboWindow;
-                    _lastCompletedComboSkillId = skillId;
-                }
-            }
             CleanupExecutor(skillId);
         }
 
@@ -470,11 +375,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             return _cooldownManager.GetCooldownInfo(skillId);
         }
-
-        /// <summary>
-        /// 获取连段计数
-        /// </summary>
-        public int GetComboCount() => _currentComboIndex;
 
         /// <summary>
         /// 是否在安全施法状态（可以切换目标等）
