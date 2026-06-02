@@ -23,9 +23,12 @@ namespace Hotfix.GameSystems.Sys3C.Input
 
         // === 一次性事件（每帧只触发一次） ===
         private bool _jumpConsumed;
-        private bool _attackConsumed;
         private bool _skill2Consumed;
         private bool _skill3Consumed;
+
+        // Attack button hold tracking
+        private bool _attackHeld;
+        private float _attackHoldStart = -1f;
 
         private void Awake()
         {
@@ -39,9 +42,19 @@ namespace Hotfix.GameSystems.Sys3C.Input
         {
             // 每帧开始时重置消费标志，允许下一帧再次触发
             _jumpConsumed = false;
-            _attackConsumed = false;
             _skill2Consumed = false;
             _skill3Consumed = false;
+
+            if (UnityInput.GetMouseButtonDown(0))
+            {
+                _attackHeld = true;
+                _attackHoldStart = Time.time;
+            }
+            if (UnityInput.GetMouseButtonUp(0))
+            {
+                _attackHeld = false;
+                _attackHoldStart = -1f;
+            }
         }
 
         /// <summary>
@@ -109,18 +122,33 @@ namespace Hotfix.GameSystems.Sys3C.Input
         }
 
         /// <summary>
-        /// 攻击按下（一次性事件）
+        /// 攻击键刚松开时返回按住时长（秒）。未松开返回 -1。
         /// </summary>
-        public bool IsAttackPressed()
+        public float GetAttackReleaseDuration()
         {
-            // 鼠标左键
-            bool pressed = UnityInput.GetMouseButtonDown(0);
-            if (pressed && !_attackConsumed)
+            if (!_attackHeld && _attackHoldStart > 0f)
             {
-                _attackConsumed = true;
-                return true;
+                float duration = Time.time - _attackHoldStart;
+                _attackHoldStart = -1f;
+                return duration;
             }
-            return false;
+            return -1f;
+        }
+
+        /// <summary>
+        /// 攻击键是否按住超过指定秒数
+        /// </summary>
+        public bool IsAttackHeldOver(float seconds)
+        {
+            return _attackHeld && _attackHoldStart > 0f && (Time.time - _attackHoldStart) >= seconds;
+        }
+
+        /// <summary>
+        /// 攻击键是否正在按住
+        /// </summary>
+        public bool IsAttackHeld()
+        {
+            return _attackHeld;
         }
 
         /// <summary>
