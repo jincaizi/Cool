@@ -161,7 +161,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
-        /// 重击（竖劈蓄力）——开始蓄力
+        /// 重击（竖劈蓄力）——仅在无活跃技能时激活
         /// </summary>
         public void HandleHeavyAttack()
         {
@@ -174,15 +174,15 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 && _currentSkill.CurrentSubState == SkillSubState.Charging)
                 return;
 
+            // 有其他活跃技能，不打断
+            if (_currentSkill != null && _currentSkill.IsActive)
+                return;
+
             if (_cooldownManager.IsOnCooldown(skillId))
                 return;
 
             if (!HasEnoughResources(skillData))
                 return;
-
-            // 取消当前轻击/其他技能，为蓄力让路
-            if (_currentSkill != null && _currentSkill.IsActive)
-                _currentSkill.ForceComplete();
 
             var input = SkillInput.ChargingSkill(skillId, _owner.transform.forward);
             TryActivateSkill(skillId, input);
