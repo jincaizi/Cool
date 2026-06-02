@@ -47,12 +47,12 @@ namespace Hotfix.GameSystems.Sys3C
 
             if (CharacterController == null)
             {
-                Debug.LogError("[Sys3CEntry] CharacterController is null!");
+                UnityEngine.Debug.LogError("[Sys3CEntry] CharacterController is null!");
                 return;
             }
             if (Animator == null)
             {
-                Debug.LogError("[Sys3CEntry] Animator is null!");
+                UnityEngine.Debug.LogError("[Sys3CEntry] Animator is null!");
                 return;
             }
 
@@ -86,12 +86,12 @@ namespace Hotfix.GameSystems.Sys3C
 
             if (skillCount == 0)
             {
-                Debug.LogError("[Sys3CEntry] No SkillData assigned to _characterSkills. " +
+                UnityEngine.Debug.LogError("[Sys3CEntry] No SkillData assigned to _characterSkills. " +
                                "Create assets via Create > Game > Skills > Skill Data and assign them in the Inspector.");
             }
             else
             {
-                Debug.Log($"[Sys3CEntry] Skills registered: {skillCount}");
+                UnityEngine.Debug.Log($"[Sys3CEntry] Skills registered: {skillCount}");
             }
 
             _inputManager = GetComponent<InputManager>();
@@ -234,11 +234,11 @@ namespace Hotfix.GameSystems.Sys3C
             if (!string.IsNullOrEmpty(_lastSkillTrigger))
             {
                 Animator.SetTrigger(_lastSkillTrigger);
-                Debug.Log($"[Sys3CEntry] Skill activated: {skillData.SkillName} (id={skillData.SkillId}), trigger={_lastSkillTrigger}");
+                UnityEngine.Debug.Log($"[Sys3CEntry] Skill activated: {skillData.SkillName} (id={skillData.SkillId}), trigger={_lastSkillTrigger}");
             }
             else
             {
-                Debug.LogWarning($"[Sys3CEntry] Skill '{skillData.SkillName}' has no AnimatorTrigger set!");
+                UnityEngine.Debug.LogWarning($"[Sys3CEntry] Skill '{skillData.SkillName}' has no AnimatorTrigger set!");
             }
 
             Animator.SetLayerWeight(1, 1f);
@@ -278,7 +278,7 @@ namespace Hotfix.GameSystems.Sys3C
             _cleanupInProgress = false;
         }
 
-        private int GetBasicAttackSkillId() => (int)SkillID.BasicAttack1;
+        private int GetBasicAttackSkillId() => (int)SkillID.LightAttack;
         private int GetSkillQId() => (int)SkillID.SkillQ;
         private int GetSkillRId() => (int)SkillID.SkillR;
 
@@ -288,14 +288,14 @@ namespace Hotfix.GameSystems.Sys3C
 
             float damage = data != null ? data.BaseDamage : 10f;
             _currentHP -= damage;
-            Debug.Log($"[Player] Took {damage} damage, HP: {_currentHP}/{_maxHP}");
+            UnityEngine.Debug.Log($"[Player] Took {damage} damage, HP: {_currentHP}/{_maxHP}");
 
             _fsmManager.HandleDamage(sourceId: -1, damage: damage, hitDirection: hitDirection);
 
             if (_currentHP <= 0)
             {
                 _currentHP = 0;
-                Debug.Log("[Player] Died!");
+                UnityEngine.Debug.Log("[Player] Died!");
             }
         }
 

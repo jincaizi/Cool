@@ -24,8 +24,8 @@ namespace Hotfix.GameSystems.Skills.Definition
     public enum SkillID
     {
         None = 0,
-        BasicAttack1 = 10001,
-        BasicAttack2 = 10002,
+        LightAttack = 10001,
+        HeavyAttack = 10002,
         BasicAttack3 = 10003,
         SkillQ = 20001,
         SkillR = 20002,
