@@ -39,6 +39,7 @@ namespace Hotfix.GameSystems.Sys3C
         private InputManager _inputManager;
         private ThirdPersonCameraController _camera;
         private CharacterAttackHandler _attackHandler;
+        private bool _heavyActivatedThisHold;
 
         private void Start()
         {
@@ -169,11 +170,11 @@ namespace Hotfix.GameSystems.Sys3C
                 _cc.RequestJump();
             }
 
-            // Attack: tap (<0.2s) → light, hold (>=0.2s) → heavy charge, release → fire heavy
+            // Attack: tap (<0.2s) → light, hold (>=0.2s) → heavy charge once, release → fire heavy
             float attackDuration = _inputManager.GetAttackReleaseDuration();
             if (attackDuration >= 0f)
             {
-                // Button was just released
+                _heavyActivatedThisHold = false;
                 if (attackDuration < 0.2f)
                 {
                     _skillCoordinator.HandleLightAttack();
@@ -183,10 +184,10 @@ namespace Hotfix.GameSystems.Sys3C
                     _skillCoordinator.HandleHeavyRelease();
                 }
             }
-            else if (_inputManager.IsAttackHeldOver(0.2f))
+            else if (_inputManager.IsAttackHeldOver(0.2f) && !_heavyActivatedThisHold)
             {
-                // Still holding past threshold — start/continue charging
                 _skillCoordinator.HandleHeavyAttack();
+                _heavyActivatedThisHold = true;
             }
 
             if (_inputManager.IsSkill2Pressed())

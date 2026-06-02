@@ -179,12 +179,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (!HasEnoughResources(skillData))
                 return;
 
-            if (_currentSkill != null && _currentSkill.IsActive)
-            {
-                // 有活跃技能，尝试打断
-                _currentSkill.ForceComplete();
-            }
-
             var input = SkillInput.ChargingSkill(skillId, _owner.transform.forward);
             TryActivateSkill(skillId, input);
         }
@@ -204,7 +198,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private bool IsInCancelableWindow()
         {
             if (_currentSkill == null) return true;
-            float totalDuration = _currentSkill.Data.GetMainAnimationClip()?.length ?? 0.5f;
+
+            var clip = _currentSkill.Data.GetMainAnimationClip();
+            if (clip == null) return true;
+
+            float totalDuration = clip.length;
             if (totalDuration <= 0f) return true;
 
             return _currentSkill.Data switch
