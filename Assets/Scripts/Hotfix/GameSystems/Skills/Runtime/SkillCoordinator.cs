@@ -30,6 +30,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public event Action<int, SkillSubState> OnSkillStateChanged;
         public event Action<int, float> OnCooldownUpdate;  // skillId, progress
         public event Action<IEffectTarget> OnTargetHit;
+        public event Action OnLightAttackCompleted;
 
         // 属性
         public SkillExecutor CurrentSkill => _currentSkill;
@@ -415,6 +416,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnExecutorCompleted(int skillId)
         {
+            if (skillId == (int)Definition.SkillID.LightAttack)
+                OnLightAttackCompleted?.Invoke();
             CleanupExecutor(skillId);
         }
 
