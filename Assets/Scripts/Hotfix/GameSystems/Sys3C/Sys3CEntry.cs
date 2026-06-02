@@ -39,7 +39,6 @@ namespace Hotfix.GameSystems.Sys3C
         private InputManager _inputManager;
         private ThirdPersonCameraController _camera;
         private CharacterAttackHandler _attackHandler;
-        private bool _heavyActivatedThisHold;
 
         private void Start()
         {
@@ -72,6 +71,13 @@ namespace Hotfix.GameSystems.Sys3C
             {
                 if (target is IDamageable damageable)
                     _attackHandler.SelectTarget(damageable);
+            };
+            _skillCoordinator.OnLightAttackCompleted += () =>
+            {
+                if (_inputManager.IsAttackHeld())
+                {
+                    _skillCoordinator.HandleHeavyAttack();
+                }
             };
 
             // Register skills from Inspector-assigned SkillData assets
@@ -170,20 +176,14 @@ namespace Hotfix.GameSystems.Sys3C
                 _cc.RequestJump();
             }
 
-            // Attack: press → light attack; hold > 0.2s → cancel light, start heavy charge; release → fire heavy
+            // Press → light attack. Light completes while held → charge. Release → fire heavy.
             if (_inputManager.IsAttackJustPressed())
             {
                 _skillCoordinator.HandleLightAttack();
-                _heavyActivatedThisHold = false;
-            }
-            else if (_inputManager.IsAttackHeldOver(0.2f) && !_heavyActivatedThisHold)
-            {
-                _skillCoordinator.HandleHeavyAttack();
-                _heavyActivatedThisHold = true;
             }
 
             float attackDuration = _inputManager.GetAttackReleaseDuration();
-            if (attackDuration >= 0.2f)
+            if (attackDuration >= 0f)
             {
                 _skillCoordinator.HandleHeavyRelease();
             }
