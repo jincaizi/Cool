@@ -170,24 +170,22 @@ namespace Hotfix.GameSystems.Sys3C
                 _cc.RequestJump();
             }
 
-            // Attack: tap (<0.2s) → light, hold (>=0.2s) → heavy charge once, release → fire heavy
-            float attackDuration = _inputManager.GetAttackReleaseDuration();
-            if (attackDuration >= 0f)
+            // Attack: press → light attack; hold > 0.2s → cancel light, start heavy charge; release → fire heavy
+            if (_inputManager.IsAttackJustPressed())
             {
+                _skillCoordinator.HandleLightAttack();
                 _heavyActivatedThisHold = false;
-                if (attackDuration < 0.2f)
-                {
-                    _skillCoordinator.HandleLightAttack();
-                }
-                else
-                {
-                    _skillCoordinator.HandleHeavyRelease();
-                }
             }
             else if (_inputManager.IsAttackHeldOver(0.2f) && !_heavyActivatedThisHold)
             {
                 _skillCoordinator.HandleHeavyAttack();
                 _heavyActivatedThisHold = true;
+            }
+
+            float attackDuration = _inputManager.GetAttackReleaseDuration();
+            if (attackDuration >= 0.2f)
+            {
+                _skillCoordinator.HandleHeavyRelease();
             }
 
             if (_inputManager.IsSkill2Pressed())

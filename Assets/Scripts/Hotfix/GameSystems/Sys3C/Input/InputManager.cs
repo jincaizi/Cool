@@ -30,6 +30,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private bool _attackHeld;
         private float _attackHoldStart = -1f;
         private float _lastReleaseDuration = -1f;
+        private bool _attackJustPressed;
 
         private void Awake()
         {
@@ -45,12 +46,14 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skill2Consumed = false;
             _skill3Consumed = false;
             _lastReleaseDuration = -1f;
+            _attackJustPressed = false;
 
             bool mouseDown = UnityInput.GetMouseButton(0);
             if (mouseDown && !_attackHeld)
             {
                 _attackHeld = true;
                 _attackHoldStart = Time.time;
+                _attackJustPressed = true;
             }
             else if (!mouseDown && _attackHeld)
             {
@@ -127,6 +130,14 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// <summary>
         /// 攻击键刚松开时返回按住时长（秒）。未松开返回 -1。
         /// </summary>
+        /// <summary>
+        /// 攻击键刚按下的那一帧返回 true
+        /// </summary>
+        public bool IsAttackJustPressed()
+        {
+            return _attackJustPressed;
+        }
+
         public float GetAttackReleaseDuration()
         {
             return _lastReleaseDuration;
