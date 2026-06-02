@@ -47,7 +47,7 @@ MonoBehaviour:
   _holdToCharge: 1
   _releaseToFire: 1
   _minChargeTime: 0.3
-  _maxChargeTime: 0.8
+  _maxChargeTime: 999
   _chargeDamageCurve:
     serializedVersion: 2
     m_Curve:
@@ -96,8 +96,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _canMoveWhileCharging: 0
-  _canRotateWhileCharging: 0
+  _canMoveWhileCharging: 1
+  _canRotateWhileCharging: 1
   _shape:
     _targetType: 0
     _range: 2.5
