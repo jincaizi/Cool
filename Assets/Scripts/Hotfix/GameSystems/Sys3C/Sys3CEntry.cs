@@ -39,6 +39,7 @@ namespace Hotfix.GameSystems.Sys3C
         private InputManager _inputManager;
         private ThirdPersonCameraController _camera;
         private CharacterAttackHandler _attackHandler;
+        private bool _canFireHeavy;
 
         private void Start()
         {
@@ -76,7 +77,7 @@ namespace Hotfix.GameSystems.Sys3C
             {
                 if (_inputManager.IsAttackHeld())
                 {
-                    _skillCoordinator.HandleHeavyAttack();
+                    _canFireHeavy = true;
                 }
             };
 
@@ -176,16 +177,18 @@ namespace Hotfix.GameSystems.Sys3C
                 _cc.RequestJump();
             }
 
-            // Press → light attack. Light completes while held → charge. Release → fire heavy.
+            // Press → light attack. Complete + held → canFireHeavy. Release → fire heavy.
             if (_inputManager.IsAttackJustPressed())
             {
                 _skillCoordinator.HandleLightAttack();
+                _canFireHeavy = false;
             }
 
             float attackDuration = _inputManager.GetAttackReleaseDuration();
-            if (attackDuration >= 0f)
+            if (attackDuration >= 0f && _canFireHeavy)
             {
-                _skillCoordinator.HandleHeavyRelease();
+                _skillCoordinator.HandleHeavyFire();
+                _canFireHeavy = false;
             }
 
             if (_inputManager.IsSkill2Pressed())

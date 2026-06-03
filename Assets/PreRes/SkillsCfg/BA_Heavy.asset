@@ -9,14 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7ba06c46ef894048b17eac0403c8713, type: 3}
+  m_Script: {fileID: 11500000, guid: 9acafbccd98f6484da8355cdece7514a, type: 3}
   m_Name: BA_Heavy
   m_EditorClassIdentifier: 
   _skillId: 10002
   _skillName: Heavy Attack
   _description: 
   _icon: {fileID: 0}
-  _skillType: 2
+  _skillType: 0
   _quality: 1
   _manaCost: 0
   _cooldown: 0.5
@@ -26,10 +26,10 @@ MonoBehaviour:
   _releaseClip: {fileID: 0}
   _dashDistance: 0
   _dashDuration: 0
-  _canBeInterruptedByDamage: 1
+  _canBeInterruptedByDamage: 0
   _canBeInterruptedByMovement: 0
   _interruptionPriority: 60
-  _canCancelIntoBasicAttack: 0
+  _canCancelIntoBasicAttack: 1
   _canCancelIntoOtherSkill: 0
   _damage:
     _baseDamage: 0
@@ -44,60 +44,6 @@ MonoBehaviour:
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
-  _holdToCharge: 1
-  _releaseToFire: 1
-  _minChargeTime: 0.3
-  _maxChargeTime: 999
-  _chargeDamageCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 2
-      inSlope: 1
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _chargeAreaCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0.5
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1.5
-      inSlope: 0.5
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _canMoveWhileCharging: 1
-  _canRotateWhileCharging: 1
   _shape:
     _targetType: 0
     _range: 2.5

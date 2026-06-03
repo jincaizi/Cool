@@ -161,20 +161,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
-        /// 重击（竖劈蓄力）——仅在无活跃技能时激活
+        /// 重击（竖劈）——松手即放，仅在无活跃技能时激活
         /// </summary>
-        public void HandleHeavyAttack()
+        public void HandleHeavyFire()
         {
             int skillId = (int)Definition.SkillID.HeavyAttack;
             if (!_skillDatabase.TryGetValue(skillId, out var skillData))
                 return;
 
-            // 已在蓄力中，跳过
-            if (_currentSkill != null && _currentSkill.IsActive
-                && _currentSkill.CurrentSubState == SkillSubState.Charging)
-                return;
-
-            // 有其他活跃技能，不打断
             if (_currentSkill != null && _currentSkill.IsActive)
                 return;
 
@@ -184,20 +178,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (!HasEnoughResources(skillData))
                 return;
 
-            var input = SkillInput.ChargingSkill(skillId, _owner.transform.forward);
+            var input = SkillInput.BasicAttack(skillId, _owner.transform.forward);
             TryActivateSkill(skillId, input);
-        }
-
-        /// <summary>
-        /// 释放重击蓄力
-        /// </summary>
-        public void HandleHeavyRelease()
-        {
-            if (_currentSkill != null && _currentSkill.IsActive
-                && _currentSkill.CurrentSubState == SkillSubState.Charging)
-            {
-                _currentSkill.ReleaseCharge();
-            }
         }
 
         private bool IsInCancelableWindow()
