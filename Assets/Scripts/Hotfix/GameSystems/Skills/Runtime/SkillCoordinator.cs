@@ -476,10 +476,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 {
                     ComboSkillData combo => combo.EnableMovement,
                     ChargedSkillData => true,
+                    InstantSkillData => true,
                     _ => false
                 },
                 SkillSubState.Recovery => _currentSkill.Data is ChargedSkillData
-                                       || _currentSkill.Data is ComboSkillData,
+                                       || _currentSkill.Data is ComboSkillData
+                                       || _currentSkill.Data is InstantSkillData,
                 SkillSubState.Channeling =>
                     (_currentSkill.Data as ChanneledSkillData)?.CanMoveWhileChanneling ?? false,
                 SkillSubState.Charging =>
