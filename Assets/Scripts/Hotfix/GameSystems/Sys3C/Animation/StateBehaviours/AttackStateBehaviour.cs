@@ -5,8 +5,8 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 {
     public class AttackStateBehaviour : StateMachineBehaviour
     {
-        private static readonly int HASH_Attack1 = Animator.StringToHash("Attack1");
-        private static readonly int HASH_Attack2 = Animator.StringToHash("Attack2");
+        private static readonly int HASH_Attack1 = Animator.StringToHash("BaseAttack");
+        private static readonly int HASH_Attack2 = Animator.StringToHash("Attack02");
 
         private static Action<string> _onAnimationCompleted;
 

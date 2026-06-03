@@ -21,7 +21,7 @@ MonoBehaviour:
   _manaCost: 0
   _cooldown: 0.5
   _staminaCost: 0
-  _animatorTrigger: Attack
+  _animatorTrigger: HeavyAttack
   _castClip: {fileID: 0}
   _releaseClip: {fileID: 0}
   _dashDistance: 0
