@@ -264,6 +264,8 @@ namespace Hotfix.GameSystems.Sys3C
                 subState == Skills.Definition.SkillSubState.Channeling)
                 return;
 
+            // 立即设 AttackState=0 让 Animator 切回 Idle，不等 Cleanup 走完
+            Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Idle);
             CleanupSkillAnimation();
         }
 
