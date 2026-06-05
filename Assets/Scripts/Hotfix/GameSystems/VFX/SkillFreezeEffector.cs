@@ -10,6 +10,9 @@ namespace Hotfix.GameSystems.VFX
         [SerializeField] private int[] _watchSkillIds;
         [SerializeField] private float _freezeDuration = 2f;
 
+        // Reuse buffer to avoid per-hit array allocation in OverlapSphere
+        private static readonly Collider[] _buffer = new Collider[16];
+
         private void OnEnable()
         {
             EventBus.Subscribe<SkillHitTargetEvent>(OnHitTarget);
@@ -33,10 +36,10 @@ namespace Hotfix.GameSystems.VFX
         {
             if (!e.IsFullCharge || !WatchesSkill(e.SkillId)) return;
 
-            var colliders = Physics.OverlapSphere(e.HitPosition, 2f);
-            foreach (var col in colliders)
+            int count = Physics.OverlapSphereNonAlloc(e.HitPosition, 2f, _buffer);
+            for (int i = 0; i < count; i++)
             {
-                if (col.TryGetComponent(out IEffectTarget target))
+                if (_buffer[i].TryGetComponent(out IEffectTarget target))
                 {
                     var freezeEffect = new StunEffectData
                     {

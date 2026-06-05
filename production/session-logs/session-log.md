@@ -80430,3 +80430,11 @@ production/session-logs/compaction-log.txt
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260605_170907
+### Commits
+75fd9f9 perf: fix R-skill frame drops — remove hot-path Debug.Log, pool VFX, cache Lists
+dc6ddc8 refactor(monster): replace monolithic MonsterAI with modular AI system
+7e35c11 docs: add monster AI refactor implementation plan
+a9e00ec docs: add monster AI refactor design spec
+---
+

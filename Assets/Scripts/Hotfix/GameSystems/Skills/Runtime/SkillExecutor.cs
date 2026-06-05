@@ -541,11 +541,25 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 effectData?.Apply(_owner, target);
         }
 
+        // Pooled instance of the release VFX. Re-instantiated only if destroyed.
+        private GameObject _cachedReleaseVFX;
+
         private void PlayHitEffects()
         {
             PresentationBlock pres = GetPresentation();
-            if (pres?.ReleaseVFX != null)
-                UnityEngine.Object.Instantiate(pres.ReleaseVFX, _targetPosition, Quaternion.identity);
+            if (pres?.ReleaseVFX == null) return;
+
+            // Reuse cached instance instead of Instantiate every hit
+            if (_cachedReleaseVFX == null)
+            {
+                _cachedReleaseVFX = UnityEngine.Object.Instantiate(pres.ReleaseVFX);
+                _cachedReleaseVFX.name = pres.ReleaseVFX.name + "_Pooled";
+            }
+            _cachedReleaseVFX.transform.position = _targetPosition;
+            _cachedReleaseVFX.transform.rotation = Quaternion.identity;
+
+            var ps = _cachedReleaseVFX.GetComponent<ParticleSystem>();
+            if (ps != null) { ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); ps.Play(); }
         }
 
         private PresentationBlock GetPresentation()
