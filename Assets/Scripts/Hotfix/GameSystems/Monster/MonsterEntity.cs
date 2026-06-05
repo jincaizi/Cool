@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
@@ -12,6 +13,8 @@ using Hotfix.GameSystems.Nameplate;
 
 namespace Hotfix.GameSystems.Monster
 {
+    [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(NavMeshAgent))]
     public class MonsterEntity : MonoBehaviour, IDamageable, ITargetable, IEffectTarget
     {
         [Header("Components")]
@@ -23,8 +26,10 @@ namespace Hotfix.GameSystems.Monster
         private MonsterConfig _config;
         public MonsterConfig Config => _config;
         private MonsterStats _stats;
-        private MonsterAI _ai;
         private MonsterMovement _movement;
+        private DamagePipeline _damagePipeline;
+        private AIBrain _brain;
+        private AIContext _ctx;
         private Vector3 _spawnPoint;
 
         bool IDamageable.IsAlive => !_stats.IsDead;
@@ -63,18 +68,53 @@ namespace Hotfix.GameSystems.Monster
             _spawnPoint = spawnPoint;
 
             PhysicsRegistry.Instance.Register(this, EntityType.Monster);
-
-            // HitZone forces the existing collider to trigger for damage detection.
-            // Add a non-trigger collider so the player's CharacterController can collide.
             EnsurePhysicsCollider();
 
+            // Build systems bottom-up
             _stats = new MonsterStats(config);
             _movement = new MonsterMovement(NavAgent, transform, config);
-            _ai = new MonsterAI(_movement, _stats, Animator, transform, config, spawnPoint);
 
+            // Damage pipeline with i-frame modifier (built-in) + defend modifier
+            _damagePipeline = new DamagePipeline(config, _stats);
+            _damagePipeline.AddModifier(new DefendModifier(config, transform));
+
+            // Shared AI context — class, mutations persist across calls
+            _ctx = new AIContext
+            {
+                Self = transform,
+                Animator = Animator,
+                Stats = _stats,
+                Movement = _movement,
+                Config = config,
+            };
+
+            // Build AI states
+            var patrolState = new PatrolState();
+            var patrolRadius = RandomRange(config.PatrolRadius, config.PatrolRadiusVariance);
+            patrolState.GeneratePatrolPoints(spawnPoint, patrolRadius);
+
+            var hitState = new HitState(_damagePipeline);
+
+            var states = new Dictionary<MonsterAIState, AIStateBase>
+            {
+                { MonsterAIState.Idle, new IdleState() },
+                { MonsterAIState.Patrol, patrolState },
+                { MonsterAIState.Chase, new ChaseState() },
+                { MonsterAIState.Attack, new AttackState() },
+                { MonsterAIState.Hit, hitState },
+                { MonsterAIState.Death, new DeathState() },
+                { MonsterAIState.Defend, new DefendState() },
+                { MonsterAIState.Taunt, new TauntState() },
+            };
+
+            var fsm = new AIStateMachine(states, MonsterAIState.Idle);
+            _brain = new AIBrain(_ctx, fsm, config);
+            _brain.Initialize();
+
+            // Wire hit zone
             if (HitZone != null) HitZone.Init(this);
 
-            _stats.OnDeath += HandleDeath;
+            // Wire stats events to external systems (nameplate, target panel)
             _stats.OnHPChanged += (cur, max) =>
             {
                 _onHPChanged?.Invoke(
@@ -82,21 +122,10 @@ namespace Hotfix.GameSystems.Monster
                     Mathf.CeilToInt(cur),
                     Mathf.CeilToInt(max));
             };
-            _stats.OnDeath += () => _onDeath?.Invoke();
-
-            _ai.OnDeathComplete += () => StartCoroutine(DeathSequence());
-            _ai.OnAttackHitboxActivate += (damage, effect) =>
+            _stats.OnDeath += () =>
             {
-                if (AttackHitbox != null)
-                {
-                    AttackHitbox.Activate(damage, effect);
-                    HitZone.ResetHits();
-                }
-            };
-            _ai.OnAttackHitboxDeactivate += () =>
-            {
-                if (AttackHitbox != null)
-                    AttackHitbox.Deactivate();
+                _onDeath?.Invoke();
+                HandleDeath();
             };
 
             // Register nameplate
@@ -112,26 +141,116 @@ namespace Hotfix.GameSystems.Monster
 
         private void Update()
         {
-            if (_stats == null || _stats.IsDead || _ai == null) return;
-            _ai.Update(Time.deltaTime);
+            if (_stats == null || _stats.IsDead || _brain == null) return;
+            _brain.Update(Time.deltaTime);
         }
 
+        // Safety net: unsubscribe even if OnDisable is skipped (e.g., DestroyImmediate in editor)
         private void OnDestroy()
         {
+            EventBus.UnsubscribeTargeted<KnockbackEvent>(GetInstanceID(), OnKnockback);
             EntityDisplayManager.Instance?.Unregister(GetInstanceID());
-            PhysicsRegistry.Instance.Unregister(this);
+            PhysicsRegistry.Instance?.Unregister(this);
         }
+
+        // ── Damage Pipeline ──
+
+        void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
+        {
+            if (_stats.IsDead) return;
+
+            // Build damage context (struct, zero alloc)
+            var ctx = new DamageContext
+            {
+                RawData = data,
+                HitDirection = hitDirection,
+                AttackerId = 0,
+                Flags = data.WasCritical ? DamageFlags.IsCritical : DamageFlags.None,
+            };
+
+            // Run through pipeline: Modifier Chain → Gate Check → ApplyDamage
+            var result = _damagePipeline.Process(ref ctx);
+
+            // Notify AI — may transition to Hit state based on HitReactLevel
+            _brain.OnDamageReceived(result, hitDirection);
+
+            // Post-damage events (VFX, floating text) — emit regardless of block/reduce
+            EmitDamageEvents(data, hitDirection, result);
+
+            // Knockback — only if pipeline says it should happen
+            if (result.ShouldKnockback && data.KnockbackForce > 0)
+            {
+                EventBus.TargetedEmit(GetInstanceID(), new KnockbackEvent(
+                    GetInstanceID(),
+                    hitDirection,
+                    data.KnockbackForce
+                ));
+            }
+        }
+
+        private void EmitDamageEvents(DamageBlock data, Vector3 hitDirection, DamageResult result)
+        {
+            var displayDamage = result.WasBlocked ? 0 : Mathf.CeilToInt(result.FinalDamage);
+            var damageEvent = new MonsterTakeDamageEvent(
+                GetInstanceID(),
+                transform.position + Vector3.up * 1.2f,
+                hitDirection,
+                displayDamage,
+                data.WasCritical,
+                data.SkillId,
+                data.ComboIndex
+            );
+            EventBus.Emit(damageEvent);
+            EventBus.TargetedEmit(GetInstanceID(), damageEvent);
+        }
+
+        private void HandleDeath()
+        {
+            if (_movement != null)
+            {
+                // Apply death knockback with configurable multiplier
+                var dir = _brain.LastHitDirection;
+                var force = _brain.LastKnockbackForce * _config.DeathKnockbackMultiplier;
+                _movement.ApplyKnockback(dir, force);
+                _movement.Stop();
+            }
+
+            _brain.EnterDeath();
+            if (NavAgent != null) NavAgent.enabled = false;
+
+            StartCoroutine(DeathSequence());
+        }
+
+        private IEnumerator DeathSequence()
+        {
+            // Brief pause for death animation to play
+            yield return new WaitForSeconds(0.5f);
+
+            // Roll loot table
+            var loot = _config.LootTable?.Roll();
+            if (loot != null && loot.Count > 0)
+            {
+                var lootArr = loot.ToArray();
+                OnLootDrop?.Invoke(lootArr);
+                EventBus.Emit(new MonsterDeathEvent(_config.MonsterId, transform.position, lootArr));
+            }
+
+            yield return new WaitForSeconds(_config.DeathDestroyDelay);
+            OnDeathComplete?.Invoke();
+            Destroy(gameObject);
+        }
+
+        // ── Physics Collider ──
 
         private void EnsurePhysicsCollider()
         {
             var triggerCol = GetComponent<Collider>();
             if (triggerCol == null) return;
 
-            // Check if a non-trigger collider already exists
             var allColliders = GetComponents<Collider>();
             foreach (var c in allColliders)
             {
-                if (!c.isTrigger) return; // Already have a physics collider
+                if (!c.isTrigger) return;
             }
 
             if (triggerCol is CapsuleCollider capsule)
@@ -158,65 +277,15 @@ namespace Hotfix.GameSystems.Monster
             }
         }
 
-        void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
+        // ── Utility ──
+
+        private static float RandomRange(float baseValue, float variance)
         {
-            if (_stats.IsDead) return;
-            _stats.TakeDamage(data);
-            _ai.NotifyHit(data, hitDirection);
-
-            // Emit monster damage event for floating text + VFX
-            var damageEvent = new MonsterTakeDamageEvent(
-                GetInstanceID(),
-                transform.position + Vector3.up * 1.2f,
-                hitDirection,
-                Mathf.CeilToInt(data.BaseDamage),
-                data.WasCritical,
-                data.SkillId,
-                data.ComboIndex
-            );
-            EventBus.Emit(damageEvent);
-            EventBus.TargetedEmit(GetInstanceID(), damageEvent);
-
-            // Emit knockback event
-            if (data.KnockbackForce > 0)
-            {
-                EventBus.TargetedEmit(GetInstanceID(), new KnockbackEvent(
-                    GetInstanceID(),
-                    hitDirection,
-                    data.KnockbackForce
-                ));
-            }
+            if (variance <= 0) return baseValue;
+            return baseValue + UnityEngine.Random.Range(-variance, variance);
         }
 
-        private void HandleDeath()
-        {
-            if (_movement != null)
-            {
-                var dir = _ai.LastHitDirection;
-                var force = _ai.LastKnockbackForce * _config.DeathKnockbackMultiplier;
-                _movement.ApplyKnockback(dir, force);
-                _movement.Stop();
-            }
-            _ai.EnterDeath();
-            if (NavAgent != null) NavAgent.enabled = false;
-        }
-
-        private IEnumerator DeathSequence()
-        {
-            var loot = _config.LootTable?.Roll();
-            if (loot != null && loot.Count > 0)
-            {
-                var lootArr = loot.ToArray();
-                OnLootDrop?.Invoke(lootArr);
-                EventBus.Emit(new MonsterDeathEvent(_config.MonsterId, transform.position, lootArr));
-            }
-
-            yield return new WaitForSeconds(_config.DeathDestroyDelay);
-            OnDeathComplete?.Invoke();
-            Destroy(gameObject);
-        }
-
-        // ===== ITargetable =====
+        // ── ITargetable ──
 
         private event Action<float, int, int> _onHPChanged;
         private event Action _onDeath;
@@ -241,7 +310,7 @@ namespace Hotfix.GameSystems.Monster
         Vector3 ITargetable.WorldPosition => transform.position;
         float ITargetable.SelectionRingYOffset => _config?.RingYOffset ?? 0f;
 
-        // ===== IEffectTarget =====
+        // ── IEffectTarget ──
 
         IEffectStats IEffectTarget.Stats => null;
         IShieldSystem IEffectTarget.ShieldSystem => null;
@@ -250,12 +319,12 @@ namespace Hotfix.GameSystems.Monster
 
         void IEffectTarget.Heal(float amount)
         {
+            // Negative amount = damage. Route through pipeline for consistency.
             if (amount >= 0 || _stats == null || _stats.IsDead) return;
 
             float damage = -amount;
             var damageBlock = DamageBlock.CreateDefault(damage);
-            _stats.TakeDamage(damageBlock);
-            _ai?.NotifyHit(damageBlock, Vector3.zero);
+            ((IDamageable)this).TakeDamage(damageBlock, Vector3.zero);
         }
     }
 }

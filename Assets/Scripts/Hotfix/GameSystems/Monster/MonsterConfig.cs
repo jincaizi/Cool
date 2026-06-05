@@ -5,6 +5,10 @@ using UnityEngine;
 namespace Hotfix.GameSystems.Monster
 {
     [CreateAssetMenu(fileName = "MonsterConfig", menuName = "Game/Monster/Config")]
+    // INVARIANT: MonsterConfig is a shared ScriptableObject asset.
+    // All fields are read-only at runtime. States and modifiers read config
+    // values but NEVER write to them. State-specific mutable data lives in
+    // AIContext, not in config.
     public class MonsterConfig : ScriptableObject
     {
         [Header("Basic")]
@@ -87,6 +91,20 @@ namespace Hotfix.GameSystems.Monster
         [Tooltip("攻击效果配置")]
         public EffectBlock AttackEffect;
 
+        [Header("Attack Timing")]
+        [Tooltip("前摇时间（秒），在此时间后结算伤害。Windup duration before damage is dealt (seconds).")]
+        public float AttackWindupTime = 0.2f;
+
+        [Tooltip("后摇时间（秒），伤害结算后到状态可退出的时间。Recovery duration after damage before state can exit (seconds).")]
+        public float AttackRecoveryTime = 0.3f;
+
+        [Header("Hit Reaction")]
+        [Tooltip("每种HitReactLevel对应的受击硬直时长（秒）。Hit reaction duration per HitReactLevel (seconds). Indices: [0]=None, [1]=Flinch, [2]=Stagger, [3]=Knockback, [4]=Launch.")]
+        public float[] HitReactDurations = { 0f, 0.3f, 0.6f, 0.2f, 1.0f };
+
+        [Tooltip("受击后的短暂无敌时间（秒），防止被连续硬直锁死。Brief invincibility duration after being hit (seconds).")]
+        public float HitIFrameDuration = 0.15f;
+
         [Header("Defend")]
         // Whether to enable defend behavior (TurtleShell)
         [Tooltip("是否启用防御行为(TurtleShell)")]
@@ -163,8 +181,8 @@ namespace Hotfix.GameSystems.Monster
         public float DeathDestroyDelay = 3f;
 
         [Header("Selection Ring")]
-        [Tooltip("选中光环的脚底Y轴偏移量，用于调整光环在目标脚下的高度位置")]
-        public float RingYOffset = -0.9f;
+        [Tooltip("选中光环的Y轴微调偏移，正值向上。光环自动贴合Collider底部，此值仅在Collider不存在时作为fallback")]
+        public float RingYOffset = 0f;
 
         [Header("Nameplate")]
         [Tooltip("昵称配置表（留空则使用默认样式）")]

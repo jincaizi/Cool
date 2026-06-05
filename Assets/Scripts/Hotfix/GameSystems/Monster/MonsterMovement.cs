@@ -32,9 +32,17 @@ namespace Hotfix.GameSystems.Monster
 
         public void Resume()
         {
+            // ResetPath clears any stale path from before the agent was stopped.
+            // Without this, the agent may move 1 frame towards the old destination
+            // before the new SetDestination overrides it.
+            _agent.ResetPath();
             _agent.isStopped = false;
         }
 
+        // Performance note: SetDestination is called every frame.
+        // If this becomes a bottleneck with many active monsters (20+),
+        // throttle to every 0.25s: cache last destination + only update
+        // if target moved > 0.5m or timer elapsed.
         public void Chase(Transform target)
         {
             _agent.isStopped = false;
@@ -100,6 +108,12 @@ namespace Hotfix.GameSystems.Monster
         {
             _knockbackVelocity = Vector3.zero;
             _knockbackTimer = 0;
+            // Sync NavMeshAgent to current position after knockback displacement.
+            // Without this, the agent resumes from its last calculated position
+            // which may be far from where knockback pushed the transform.
+            // Only sync when enabled — disabled agents reject nextPosition (e.g., after death).
+            if (_agent.enabled)
+                _agent.nextPosition = _self.position;
         }
     }
 }

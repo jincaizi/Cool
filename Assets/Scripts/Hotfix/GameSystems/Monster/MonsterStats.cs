@@ -27,6 +27,27 @@ namespace Hotfix.GameSystems.Monster
             MaxHP = config.MaxHP;
         }
 
+        // ApplyDamage is the new damage entry point called by DamagePipeline.
+        // Unlike TakeDamage, this is a pure HP subtraction — no defense formula,
+        // no death event emission. Defense is handled upstream by DamagePipeline.
+        // Death is handled by MonsterEntity after the pipeline completes.
+        public void ApplyDamage(float damage)
+        {
+            if (IsDead || damage <= 0) return;
+
+            _attributes[AttributeType.Health] -= damage;
+            if (_attributes[AttributeType.Health] < 0)
+                _attributes[AttributeType.Health] = 0;
+
+            OnHPChanged?.Invoke(HP, MaxHP);
+
+            if (HP <= 0)
+            {
+                _attributes[AttributeType.Health] = 0;
+                OnDeath?.Invoke();
+            }
+        }
+
         public void TakeDamage(DamageBlock damageData)
         {
             if (IsDead) return;
