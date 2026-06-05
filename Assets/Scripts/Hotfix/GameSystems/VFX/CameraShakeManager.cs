@@ -6,6 +6,8 @@ namespace Hotfix.GameSystems.VFX
 {
     public class CameraShakeManager : MonoBehaviour
     {
+        public static bool EnableVFX = false;
+
         [SerializeField] private HitFeedbackProfile _profile;
         [SerializeField] private Transform _camera;
 
@@ -34,6 +36,7 @@ namespace Hotfix.GameSystems.VFX
 
         private void OnHit(MonsterTakeDamageEvent e)
         {
+            if (!EnableVFX) return;
             float intensity = e.SkillId > 0
                 ? _profile.SkillShakeIntensity
                 : _profile.NormalShakeIntensity;

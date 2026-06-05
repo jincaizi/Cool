@@ -7,6 +7,8 @@ namespace Hotfix.GameSystems.Nameplate
 {
     public class FloatTextRenderer
     {
+        public static bool EnableVFX = false;
+
         private readonly Transform _canvasTransform;
         private readonly Stack<TextMeshProUGUI> _pool = new();
         private readonly HashSet<TextMeshProUGUI> _active = new();
@@ -35,6 +37,7 @@ namespace Hotfix.GameSystems.Nameplate
 
         public void ShowDamageText(int entityId, Vector3 worldPos, FloatTextSettings settings, int value)
         {
+            if (!EnableVFX) return;
             var mergeKey = MakeMergeKey(entityId, settings.Type);
 
             if (_mergeTracker.TryGetValue(mergeKey, out var merge)

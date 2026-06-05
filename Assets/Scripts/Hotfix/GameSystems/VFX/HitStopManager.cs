@@ -9,6 +9,8 @@ namespace Hotfix.GameSystems.VFX
 {
     public class HitStopManager : MonoBehaviour
     {
+        public static bool EnableVFX = false;
+
         [SerializeField] private HitFeedbackProfile _profile;
         [SerializeField] private Animator _playerAnimator;
 
@@ -32,6 +34,7 @@ namespace Hotfix.GameSystems.VFX
 
         private void OnHit(MonsterTakeDamageEvent e)
         {
+            if (!EnableVFX) return;
             float duration = e.SkillId > 0 ? _profile.SkillHitStop : _profile.NormalHitStop;
             if (e.IsCritical) duration += _profile.CritHitStopBonus;
             duration += (e.ComboIndex - 1) * _profile.ComboHitStopBonus;

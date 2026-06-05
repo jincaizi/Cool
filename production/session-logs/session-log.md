@@ -80454,3 +80454,37 @@ abb5c84 perf: fix R-skill hit frame drops — pool VFX instantiates, cache physi
 75fd9f9 perf: fix R-skill frame drops — remove hot-path Debug.Log, pool VFX, cache Lists
 ---
 
+## Session End: 20260605_202155
+### Commits
+c270388 perf: add EnableVFX toggle to disable all hit particle effects
+372234c chore: remove all hit-detection debug logs from SkillExecutor hot path
+abb5c84 perf: fix R-skill hit frame drops — pool VFX instantiates, cache physics buffers
+75fd9f9 perf: fix R-skill frame drops — remove hot-path Debug.Log, pool VFX, cache Lists
+---
+
+## Session End: 20260606_041417
+### Commits
+c270388 perf: add EnableVFX toggle to disable all hit particle effects
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260606_042230
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260606_043421
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260606_044530
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
