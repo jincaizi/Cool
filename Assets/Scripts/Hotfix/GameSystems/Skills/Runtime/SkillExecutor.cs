@@ -15,6 +15,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
     /// </summary>
     public class SkillExecutor
     {
+        public static bool EnableVFX = false;
         private static readonly Collider[] s_HitBuffer = new Collider[32];
 
         private readonly IEffectTarget _owner;
@@ -485,6 +486,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void PlayHitEffects()
         {
+            if (!EnableVFX) return;
             PresentationBlock pres = GetPresentation();
             if (pres?.ReleaseVFX == null) return;
 

@@ -8,6 +8,8 @@ namespace Hotfix.GameSystems.VFX
 {
     public class HitFlashVFX : MonoBehaviour
     {
+        public static bool EnableVFX = false;
+
         [SerializeField] private Renderer _targetRenderer;
         [SerializeField] private Color _flashColor = Color.red;
 
@@ -37,6 +39,7 @@ namespace Hotfix.GameSystems.VFX
 
         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
         {
+            if (!EnableVFX) return;
             TriggerFlash();
         }
 

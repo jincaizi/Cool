@@ -7,6 +7,8 @@ namespace Hotfix.GameSystems.VFX
 {
     public class IceBurstVFX : MonoBehaviour
     {
+        public static bool EnableVFX = false;
+
         [SerializeField] private int[] _watchSkillIds;
         [SerializeField] private GameObject _iceBurstPrefab;
 
@@ -36,6 +38,7 @@ namespace Hotfix.GameSystems.VFX
 
         private void OnHitTarget(SkillHitTargetEvent e)
         {
+            if (!EnableVFX) return;
             if (!WatchesSkill(e.SkillId)) return;
             if (_iceBurstPrefab == null) return;
 

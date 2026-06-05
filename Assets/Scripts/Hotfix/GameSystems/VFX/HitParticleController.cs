@@ -9,6 +9,8 @@ namespace Hotfix.GameSystems.VFX
 {
     public class HitParticleController : MonoBehaviour
     {
+        public static bool EnableVFX = false;
+
         [SerializeField] private GameObject _normalHitParticles;
         [SerializeField] private GameObject _criticalHitParticles;
         [SerializeField] private GameObject _slashBloodTrailPrefab;
@@ -41,6 +43,8 @@ namespace Hotfix.GameSystems.VFX
 
         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
         {
+            if (!EnableVFX) return;
+
             var prefab = e.IsCritical && _criticalHitParticles != null
                 ? _criticalHitParticles : _normalHitParticles;
 
