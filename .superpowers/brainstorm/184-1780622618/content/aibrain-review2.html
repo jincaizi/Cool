@@ -1,0 +1,182 @@
+<h2>Second Review: 6 More Issues Found</h2>
+<p class="subtitle">Deeper pass — focusing on state internals, edge flows, and config design.</p>
+
+<div class="section">
+  <h3>Issue 7: Attack Sub-State Timing — Animation vs Timer</h3>
+  <p style="font-size:13px;">The design says "Windup → Active → Recovery" but doesn't specify what drives the transitions. Two options:</p>
+
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">Option A: Animation Callback</div>
+      <div class="mockup-body" style="font-size:12px;">
+        <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;">
+Attack anim → StateMachineBehaviour
+  → AIBrain → AttackState
+    → ResolveDamage()
+
+Pros: frame-perfect sync with VFX
+Cons: Requires new StateMachineBehaviour
+      on monster anims, tighter coupling</pre>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">Option B: Timer-Based ✅</div>
+      <div class="mockup-body" style="font-size:12px;">
+        <pre style="background:#1e1e1e;color:#6a9955;padding:8px;">
+Config fields:
+  AttackWindupTime = 0.2f
+  AttackRecoveryTime = 0.3f
+
+AttackState.OnUpdate():
+  if timer >= windupTime && !dealt
+    → ResolveDamage()
+  if timer >= windup+recovery
+    → Transition out
+
+Pros: Simple, data-driven, no new callbacks
+Cons: Timing decoupled from anim frames</pre>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:12px; color:#aaa;">→ Choose Option B for now. Add config fields AttackWindupTime / AttackRecoveryTime. Comment explains: "For frame-accurate hit timing, replace with animation event callback in the future."</p>
+</div>
+
+<div class="section">
+  <h3>Issue 8: NavMeshAgent Position Sync After Knockback</h3>
+  <p style="font-size:13px;">Knockback moves transform directly. When knockback ends and agent resumes, it may warp back to pre-knockback position because <code>agent.nextPosition</code> wasn't synced.</p>
+  <pre style="background:#1e1e1e;color:#6a9955;padding:12px;border-radius:4px;font-size:12px;">
+// MonsterMovement.ResetKnockback() — add sync:
+public void ResetKnockback()
+{
+    _knockbackVelocity = Vector3.zero;
+    _knockbackTimer = 0;
+    // Sync NavMeshAgent to current position to prevent warp-back.
+    // Without this, the agent resumes from its last calculated position
+    // which may be far from where knockback pushed the transform.
+    if (_agent.enabled)
+        _agent.nextPosition = _self.position;
+}
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 9: Target Loss During Attack/Defend — Abrupt Interruption</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <tr style="background:#1e1e1e;color:#fff;"><th style="padding:6px;">Current</th><th style="padding:6px;">New Design</th></tr>
+    <tr>
+      <td style="padding:8px;border:1px solid #333;background:#3d2020;">
+        Target=null → <code>ReturnToSpawn()</code> immediately<br>
+        Interrupts attack mid-animation. Looks broken.
+      </td>
+      <td style="padding:8px;border:1px solid #333;background:#1e3d1e;">
+        Each state handles gracefully:<br>
+        • Attack: finish current swing, then return<br>
+        • Defend: finish duration, then return<br>
+        • Taunt: finish animation, then return<br>
+        • Chase: return immediately (no animation to interrupt)
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Issue 10: Config Fields for New Features</h3>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;font-size:12px;overflow-x:auto;">
+// MonsterConfig additions:
+
+[Header("Attack Timing")]
+[Tooltip("Windup duration before damage is dealt (seconds). "
+       + "Damage resolves after this delay from attack start. "
+       + "For future: replace with animation-event-driven timing for frame-accurate hits.")]
+public float AttackWindupTime = 0.2f;
+
+[Tooltip("Recovery duration after damage before state can exit (seconds). "
+       + "Total attack duration = WindupTime + RecoveryTime.")]
+public float AttackRecoveryTime = 0.3f;
+
+[Header("Hit Reaction")]
+[Tooltip("Hit reaction duration per HitReactLevel. "
+       + "Indices: [0]=None, [1]=Flinch, [2]=Stagger, [3]=Knockback, [4]=Launch. "
+       + "Duration of 0 means that level causes no hit state transition.")]
+public float[] HitReactDurations = { 0f, 0.3f, 0.6f, 0.2f, 1.0f };
+
+[Tooltip("Brief invincibility duration after being hit (seconds). "
+       + "Prevents rapid consecutive hits from stun-locking the monster.")]
+public float HitIFrameDuration = 0.15f;
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 11: AIContext Field Ownership</h3>
+  <p style="font-size:13px;">AIContext is a mutable class shared across all components. Without clear ownership, fields become spaghetti state. Solution: document ownership in comments.</p>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;font-size:12px;">
+// AIContext is the single source of truth for all AI-related mutable state.
+// Ownership conventions (enforced by convention, not compiler):
+//
+// ── Owned by AIBrain ──
+//   Target, DeltaTime, AttackCooldown
+//
+// ── Owned by AIStateMachine ──
+//   CurrentState, StateTimer, PreviousState
+//
+// ── Owned by specific State ──
+//   BlockCount (DefendState), CurrentAttackIndex (AttackState)
+//
+// ── Owned by DamagePipeline ──
+//   LastHitResult, LastHitDirection, LastKnockbackForce
+//
+// Rule: a component should only write its own fields. Reading across
+// ownership is fine. If you find yourself writing another component's
+// field, add a method to that component instead.
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 12: Chase Destination Update Frequency</h3>
+  <p style="font-size:13px;"><code>_agent.SetDestination(target.position)</code> is called every frame during Chase. For 20+ monsters chasing the player, this causes unnecessary path recalculations. Not critical for current scope, but add a comment.</p>
+  <pre style="background:#1e1e1e;color:#6a9955;padding:12px;border-radius:4px;font-size:12px;">
+// MonsterMovement.Chase():
+// Performance note: SetDestination is called every frame.
+// If this becomes a bottleneck with many active monsters,
+// throttle to every 0.25s: cache last destination + only update
+// if target moved > 0.5m or timer elapsed.
+      </pre>
+</div>
+</div>
+
+<hr style="margin:24px 0;border-color:#333;">
+
+<h3>Final File Structure</h3>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:6px;font-size:12px;overflow-x:auto;">
+Monster/
+├── AI/
+│   ├── AIBrain.cs           ← Orchestrator (Update loop, target finding)
+│   ├── AIStateMachine.cs    ← Global transitions + state switching
+│   ├── AIContext.cs         ← Shared mutable state (class, with ownership docs)
+│   └── States/
+│       ├── AIStateBase.cs   ← OnEnter/OnUpdate/EvaluateTransitions/OnExit
+│       ├── IdleState.cs     ← Timer → Patrol or Chase
+│       ├── PatrolState.cs   ← Navigate waypoint → Idle or Chase
+│       ├── ChaseState.cs    ← Follow target → Attack or Idle (target lost)
+│       ├── AttackState.cs   ← Windup(no damage) → Active(resolve) → Recovery(exit)
+│       ├── HitState.cs      ← Timer based on HitReactLevel → recover
+│       ├── DeathState.cs    ← Terminal, triggers death animation
+│       ├── DefendState.cs   ← Block counting, cooldown, counter-attack trigger
+│       └── TauntState.cs    ← Random trigger on attack miss
+│
+├── Damage/
+│   ├── IDamageModifier.cs   ← Interface for pre-damage hooks
+│   ├── DamagePipeline.cs    ← PreCheck → Gate → Apply → PostNotify
+│   ├── DamageContext.cs     ← Input (DamageBlock, flags, direction)
+│   ├── DamageResult.cs      ← Output (final damage, react level, flags)
+│   └── Modifiers/
+│       ├── DefendModifier.cs    ← Front-facing damage reduction
+│       └── IFrameModifier.cs   ← Post-hit invincibility window
+│
+├── MonsterEntity.cs         ← Thin wiring (pipeline + AI + events)
+├── MonsterConfig.cs         ← + Attack timing, HitReact, IFrame fields
+├── MonsterMovement.cs       ← + NavMeshAgent sync in ResetKnockback
+├── MonsterSpawner.cs        ← (unchanged)
+├── MonsterStats.cs          ← Simplified: only HP + attributes, no death logic
+└── MonsterEvents.cs         ← (unchanged)
+</pre>

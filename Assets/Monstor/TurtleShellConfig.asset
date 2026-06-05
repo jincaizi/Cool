@@ -56,7 +56,7 @@ MonoBehaviour:
     _criticalDamageBonus: 0
     _isTrueDamage: 0
     _armorPenetration: 0
-    _knockbackForce: 2
+    _knockbackForce: 0
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
@@ -96,5 +96,5 @@ MonoBehaviour:
   DeathKnockbackMultiplier: 1.5
   LootTable: {fileID: 0}
   DeathDestroyDelay: 3
-  RingYOffset: -0.9
+  RingYOffset: 0
   NameplateData: {fileID: 11400000, guid: 69a01ca8a12c71d4ea562662726ffa31, type: 2}

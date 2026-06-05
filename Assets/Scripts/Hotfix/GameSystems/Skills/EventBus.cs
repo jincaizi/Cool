@@ -11,6 +11,7 @@ namespace Hotfix.GameSystems.Skills
     public static class EventBus
     {
         private static readonly Dictionary<Type, List<Delegate>> _subscribers = new();
+        private static readonly Dictionary<Type, Dictionary<int, List<Delegate>>> _targetedSubscribers = new();
         private static bool _isPaused;
 
         /// <summary>
@@ -114,6 +115,68 @@ namespace Hotfix.GameSystems.Skills
                     catch (Exception ex)
                     {
                         Debug.LogError($"[EventBus] Exception in event callback for {type.Name}: {ex}");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 订阅事件，仅当 TargetedEmit 指定了相同 entityId 时才收到
+        /// </summary>
+        public static void SubscribeTargeted<T>(int entityId, Action<T> callback) where T : IEvent
+        {
+            var type = typeof(T);
+            if (!_targetedSubscribers.TryGetValue(type, out var dict))
+            {
+                dict = new Dictionary<int, List<Delegate>>();
+                _targetedSubscribers[type] = dict;
+            }
+            if (!dict.TryGetValue(entityId, out var list))
+            {
+                list = new List<Delegate>();
+                dict[entityId] = list;
+            }
+            list.Add(callback);
+        }
+
+        /// <summary>
+        /// 取消 targeted 订阅
+        /// </summary>
+        public static void UnsubscribeTargeted<T>(int entityId, Action<T> callback) where T : IEvent
+        {
+            var type = typeof(T);
+            if (_targetedSubscribers.TryGetValue(type, out var dict))
+            {
+                if (dict.TryGetValue(entityId, out var list))
+                {
+                    list.Remove(callback);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 精准投递事件到指定 entityId 的 targeted 订阅者
+        /// </summary>
+        public static void TargetedEmit<T>(int entityId, T evt) where T : IEvent
+        {
+            if (_isPaused) return;
+
+            var type = typeof(T);
+            if (_targetedSubscribers.TryGetValue(type, out var dict))
+            {
+                if (dict.TryGetValue(entityId, out var list))
+                {
+                    var callbacks = list.ToArray();
+                    foreach (var callback in callbacks)
+                    {
+                        try
+                        {
+                            ((Action<T>)callback)?.Invoke(evt);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogError($"[EventBus] Exception in targeted event for {type.Name} entity {entityId}: {ex}");
+                        }
                     }
                 }
             }

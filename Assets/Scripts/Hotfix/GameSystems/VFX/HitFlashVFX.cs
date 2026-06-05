@@ -9,11 +9,11 @@ namespace Hotfix.GameSystems.VFX
     public class HitFlashVFX : MonoBehaviour
     {
         [SerializeField] private Renderer _targetRenderer;
+        [SerializeField] private Color _flashColor = Color.red;
 
         private MaterialPropertyBlock _propBlock;
         private Tween _flashTween;
-        private static readonly int OutlineColorId = Shader.PropertyToID("_OutlineColor");
-        private static readonly int OutlineWidthId = Shader.PropertyToID("_OutlineWidth");
+        private static readonly int ColorId = Shader.PropertyToID("_Color");
 
         private void Awake()
         {
@@ -26,20 +26,13 @@ namespace Hotfix.GameSystems.VFX
 
         private void OnEnable()
         {
-            EventBus.Subscribe<DamageEvent>(OnPlayerDamaged);
-            EventBus.Subscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
+            EventBus.SubscribeTargeted<MonsterTakeDamageEvent>(gameObject.GetInstanceID(), OnMonsterDamaged);
         }
 
         private void OnDisable()
         {
-            EventBus.Unsubscribe<DamageEvent>(OnPlayerDamaged);
-            EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
+            EventBus.UnsubscribeTargeted<MonsterTakeDamageEvent>(gameObject.GetInstanceID(), OnMonsterDamaged);
             _flashTween?.Kill();
-        }
-
-        private void OnPlayerDamaged(DamageEvent e)
-        {
-            TriggerFlash();
         }
 
         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
@@ -52,26 +45,23 @@ namespace Hotfix.GameSystems.VFX
             if (_targetRenderer == null) return;
 
             var settings = GameSettings.Instance;
-            var flashWidth = 0.05f;
             var flashDuration = settings.HitFlashDuration;
+            var originalColor = _targetRenderer.sharedMaterial.GetColor(ColorId);
 
             _flashTween?.Kill();
 
-            _targetRenderer.GetPropertyBlock(_propBlock);
-            _propBlock.SetColor(OutlineColorId, settings.HitFlashColor);
-            _propBlock.SetFloat(OutlineWidthId, flashWidth);
+            _propBlock.SetColor(ColorId, _flashColor);
             _targetRenderer.SetPropertyBlock(_propBlock);
 
-            var startColor = settings.HitFlashColor;
-            _flashTween = DOTween.To(() => flashWidth, width =>
+            var current = _flashColor;
+            _flashTween = DOTween.To(() => current, color =>
             {
+                current = color;
                 if (_targetRenderer == null) return;
                 _targetRenderer.GetPropertyBlock(_propBlock);
-                _propBlock.SetFloat(OutlineWidthId, width);
-                float t = 1f - width / flashWidth;
-                _propBlock.SetColor(OutlineColorId, Color.Lerp(startColor, Color.clear, t));
+                _propBlock.SetColor(ColorId, color);
                 _targetRenderer.SetPropertyBlock(_propBlock);
-            }, 0f, flashDuration).SetTarget(_targetRenderer);
+            }, originalColor, flashDuration).SetTarget(_targetRenderer);
         }
 
         private void OnDestroy()

@@ -26,7 +26,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             if (_hitBuffer.Count == 0)
             {
-                Debug.Log("[Attack] Miss - no target in range");
+                UnityEngine.Debug.Log("[Attack] Miss - no target in range");
                 return _hitBuffer;
             }
 
@@ -36,7 +36,7 @@ namespace Hotfix.GameSystems.Sys3C
             {
                 Vector3 dir = (t.Transform.position - transform.position).normalized;
                 t.TakeDamage(_config.Damage, dir);
-                Debug.Log($"[Attack] Hit {t.Transform.name} for {_config.Damage.BaseDamage} damage");
+                UnityEngine.Debug.Log($"[Attack] Hit {t.Transform.name} for {_config.Damage.BaseDamage} damage");
             }
 
             _attackCooldownTimer = 1f / _config.AttackSpeed;

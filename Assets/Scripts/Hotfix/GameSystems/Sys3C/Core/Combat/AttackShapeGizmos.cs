@@ -16,8 +16,8 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             DrawArc(origin, forward, range, -halfAngle, halfAngle, MissColor, duration);
             Vector3 left = Quaternion.Euler(0, -halfAngle, 0) * forward * range;
             Vector3 right = Quaternion.Euler(0, halfAngle, 0) * forward * range;
-            Debug.DrawLine(origin, origin + left, MissColor, duration);
-            Debug.DrawLine(origin, origin + right, MissColor, duration);
+            UnityEngine.Debug.DrawLine(origin, origin + left, MissColor, duration);
+            UnityEngine.Debug.DrawLine(origin, origin + right, MissColor, duration);
         }
 
         public static void DrawSector(Vector3 origin, Vector3 forward, float range,
@@ -27,8 +27,8 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             DrawArc(origin, forward, range, angleStart, angleEnd, MissColor, duration);
             Vector3 startDir = Quaternion.Euler(0, angleStart, 0) * forward * range;
             Vector3 endDir = Quaternion.Euler(0, angleEnd, 0) * forward * range;
-            Debug.DrawLine(origin, origin + startDir, MissColor, duration);
-            Debug.DrawLine(origin, origin + endDir, MissColor, duration);
+            UnityEngine.Debug.DrawLine(origin, origin + startDir, MissColor, duration);
+            UnityEngine.Debug.DrawLine(origin, origin + endDir, MissColor, duration);
         }
 
         public static void DrawCircle(Vector3 origin, float radius, float duration = 0f)
@@ -40,7 +40,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
                 float angle = i * 360f / ARC_SEGMENTS * Mathf.Deg2Rad;
                 Vector3 next = origin + new Vector3(
                     Mathf.Sin(angle) * radius, 0, Mathf.Cos(angle) * radius);
-                Debug.DrawLine(prev, next, MissColor, duration);
+                UnityEngine.Debug.DrawLine(prev, next, MissColor, duration);
                 prev = next;
             }
         }
@@ -51,10 +51,10 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
             Vector3 farCenter = origin + forward * range;
             Vector3 halfW = right * (width * 0.5f);
-            Debug.DrawLine(origin - halfW, origin + halfW, MissColor, duration);
-            Debug.DrawLine(farCenter - halfW, farCenter + halfW, MissColor, duration);
-            Debug.DrawLine(origin - halfW, farCenter - halfW, MissColor, duration);
-            Debug.DrawLine(origin + halfW, farCenter + halfW, MissColor, duration);
+            UnityEngine.Debug.DrawLine(origin - halfW, origin + halfW, MissColor, duration);
+            UnityEngine.Debug.DrawLine(farCenter - halfW, farCenter + halfW, MissColor, duration);
+            UnityEngine.Debug.DrawLine(origin - halfW, farCenter - halfW, MissColor, duration);
+            UnityEngine.Debug.DrawLine(origin + halfW, farCenter + halfW, MissColor, duration);
         }
 
         public static void DrawHit(Vector3 position, float duration = 0f)
@@ -66,7 +66,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             {
                 float angle = i * 360f / 8 * Mathf.Deg2Rad;
                 Vector3 next = position + new Vector3(Mathf.Sin(angle) * r, 0, Mathf.Cos(angle) * r);
-                Debug.DrawLine(prev, next, HitColor, duration);
+                UnityEngine.Debug.DrawLine(prev, next, HitColor, duration);
                 prev = next;
             }
         }
@@ -81,7 +81,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
             {
                 float angle = startAngle + (i / (float)steps) * span;
                 Vector3 next = origin + Quaternion.Euler(0, angle, 0) * forward * radius;
-                Debug.DrawLine(prev, next, color, duration);
+                UnityEngine.Debug.DrawLine(prev, next, color, duration);
                 prev = next;
             }
         }

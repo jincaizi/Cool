@@ -15,7 +15,7 @@ MonoBehaviour:
   Type: 1
   Font: {fileID: 11400000, guid: c240252520313ba48a1e082bbb79faa0, type: 2}
   FontMaterial: {fileID: 4857915465648842615, guid: c240252520313ba48a1e082bbb79faa0, type: 2}
-  FontSize: 42
+  FontSize: 56
   Color: {r: 1, g: 0.53, b: 0, a: 1}
   Duration: 1.2
   MoveUpDistance: 70

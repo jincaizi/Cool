@@ -29,7 +29,7 @@ MonoBehaviour:
     _hitboxTimings:
     - 0.3
   Damage:
-    _baseDamage: 0
+    _baseDamage: 20
     _attackRatio: 1
     _scalingAttribute: 0
     _damageType: 0

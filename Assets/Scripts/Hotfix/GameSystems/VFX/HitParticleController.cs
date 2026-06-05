@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Core.Pool;
@@ -16,6 +18,10 @@ namespace Hotfix.GameSystems.VFX
 
         private static ComponentPool<ParticleSystem> _normalPool;
         private static ComponentPool<ParticleSystem> _criticalPool;
+        private static readonly Queue<GameObject> _sparkPool = new Queue<GameObject>();
+        private static readonly Queue<GameObject> _shockwavePool = new Queue<GameObject>();
+        private const int MaxPooledPerType = 8;
+
         private bool _warnedMissingPrefab;
 
         private static ComponentPool<SlashBloodTrail> _trailPool;
@@ -29,6 +35,8 @@ namespace Hotfix.GameSystems.VFX
         private void OnDisable()
         {
             EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
+            while (_sparkPool.Count > 0) Destroy(_sparkPool.Dequeue());
+            while (_shockwavePool.Count > 0) Destroy(_shockwavePool.Dequeue());
         }
 
         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
@@ -83,10 +91,38 @@ namespace Hotfix.GameSystems.VFX
 
         private void SpawnAtHit(GameObject prefab, Vector3 pos, Vector3 dir)
         {
-            var go = Instantiate(prefab, pos, Quaternion.identity);
+            var pool = prefab == _hitSparkBurstPrefab ? _sparkPool : _shockwavePool;
+
+            GameObject go;
+            if (pool.Count > 0)
+            {
+                go = pool.Dequeue();
+                go.SetActive(true);
+            }
+            else
+            {
+                go = Instantiate(prefab);
+            }
+
+            go.transform.position = pos;
             if (dir != Vector3.zero)
                 go.transform.forward = dir;
-            Destroy(go, 1f);
+
+            StartCoroutine(ReturnToPool(go, pool, 1f));
+        }
+
+        private System.Collections.IEnumerator ReturnToPool(GameObject go, Queue<GameObject> pool, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (pool.Count < MaxPooledPerType)
+            {
+                go.SetActive(false);
+                pool.Enqueue(go);
+            }
+            else
+            {
+                Destroy(go);
+            }
         }
 
         private ComponentPool<ParticleSystem> GetOrCreatePool(GameObject prefab, bool isCritical)

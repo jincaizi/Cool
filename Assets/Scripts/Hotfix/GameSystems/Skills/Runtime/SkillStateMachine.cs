@@ -134,6 +134,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 {
                     TransitionTo(SkillSubState.Charging);
                     _chargeStartTime = GetCurrentTime();
+                    _currentTick = 0;
                 }
                 else if (_isChanneled)
                 {
@@ -153,6 +154,22 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (_chargedData == null) { Complete(); return; }
 
             float chargeTime = GetCurrentTime() - _chargeStartTime;
+
+            // Fire hitbox frames at intervals during charging (e.g. spin attack ticks)
+            float[] hitboxTimings = GetHitboxTimings();
+            if (hitboxTimings != null)
+            {
+                for (int i = _currentTick; i < hitboxTimings.Length; i++)
+                {
+                    if (chargeTime >= hitboxTimings[i])
+                    {
+                        _currentTick = i + 1;
+                        _onHitboxFrame?.Invoke(i);
+                        _onHitConfirm?.Invoke();
+                    }
+                }
+            }
+
             if (chargeTime >= _chargedData.MaxChargeTime)
                 TransitionTo(SkillSubState.Execution);
             else if (!_isCharging && chargeTime >= _chargedData.MinChargeTime)

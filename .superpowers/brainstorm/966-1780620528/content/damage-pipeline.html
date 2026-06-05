@@ -1,0 +1,85 @@
+<h2>Section 1: Damage Pipeline</h2>
+<p class="subtitle">The #1 bug: damage was applied before defense checks. The new pipeline fixes this structurally.</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Current (Broken)</div>
+    <div class="mockup-body" style="font-size:13px;">
+      <pre style="background:#1e1e1e;color:#f48771;padding:12px;border-radius:4px;">
+TakeDamage(data, dir)
+  │
+  ├─ _stats.TakeDamage(data)  ← 伤害已扣！
+  └─ _ai.NotifyHit(data, dir)
+       └─ if (Defend)
+            return  ← 太晚了，血已经没了
+      </pre>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">New Pipeline</div>
+    <div class="mockup-body" style="font-size:13px;">
+      <pre style="background:#1e1e1e;color:#6a9955;padding:12px;border-radius:4px;">
+TakeDamage(rawData, dir)
+  │
+  ├─ PreDamageCheck(rawData, dir)
+  │    ├─ Defend: front → reduce, side → full
+  │    ├─ Shield: absorb
+  │    └─ Invincible: block
+  │    → returns finalDamage
+  │
+  ├─ _stats.ApplyDamage(finalDamage)
+  │
+  └─ PostDamageNotify(rawData, dir)
+       ├─ VFX / FloatText / HitReact
+       └─ AI state machine notified
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>IDamageModifier Interface</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="font-size:13px; padding:16px;">
+      <p>Each defense mechanism is a pluggable modifier, checked in order:</p>
+      <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;">
+public interface IDamageModifier
+{
+    // Priority: lower = checked first. Defend=100, Shield=200, BossInvincible=0
+    int Priority { get; }
+
+    // Returns the modified damage amount. Can block completely (return 0).
+    // Sets flags on the result to signal VFX, hit reaction, etc.
+    DamageResult Modify(DamageContext ctx);
+}
+
+public struct DamageResult
+{
+    public float FinalDamage;
+    public bool WasBlocked;      // no damage, no hit react
+    public bool WasReduced;      // partial damage, maybe different VFX
+    public bool ShouldKnockback; // defend may suppress knockback
+}
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>How It Fixes the Original Bugs</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    <tr style="background:#e8f5e9;">
+      <td style="padding:8px;border:1px solid #ddd;"><b>Bug #1</b></td>
+      <td style="padding:8px;border:1px solid #ddd;">伤害先扣再判 → PreDamageCheck 在扣血前执行</td>
+    </tr>
+    <tr style="background:#e8f5e9;">
+      <td style="padding:8px;border:1px solid #ddd;"><b>Bug #2</b></td>
+      <td style="padding:8px;border:1px solid #ddd;">DefendDamageReduction 从未被用 → DefendModifier 读取配置并执行减伤</td>
+    </tr>
+    <tr style="background:#e8f5e9;">
+      <td style="padding:8px;border:1px solid #ddd;"><b>Boss-ready</b></td>
+      <td style="padding:8px;border:1px solid #ddd;">Boss 的无敌阶段只需加一个 InvincibleModifier(Priority=0)，不需要改 AI 代码</td>
+    </tr>
+  </table>
+</div>

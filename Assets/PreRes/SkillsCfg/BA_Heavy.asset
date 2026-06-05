@@ -32,7 +32,7 @@ MonoBehaviour:
   _canCancelIntoBasicAttack: 1
   _canCancelIntoOtherSkill: 0
   _damage:
-    _baseDamage: 0
+    _baseDamage: 10
     _attackRatio: 1
     _scalingAttribute: 0
     _damageType: 0
@@ -40,7 +40,7 @@ MonoBehaviour:
     _criticalDamageBonus: 0
     _isTrueDamage: 0
     _armorPenetration: 0
-    _knockbackForce: 0
+    _knockbackForce: 12
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
@@ -48,8 +48,10 @@ MonoBehaviour:
     _targetType: 0
     _range: 2.5
     _angle: 120
-    _angleStart: -10
-    _angleEnd: 10
+    _angleStart: -15
+    _angleEnd: 15
+    _innerRadius: 1
+    _innerAngle: 90
     _areaRadius: 0
     _width: 1
     _stopAtFirst: 0
@@ -60,7 +62,7 @@ MonoBehaviour:
     - 0.35
   _effect:
     _applyEffects: []
-    _knockbackForce: 0
+    _knockbackForce: 12
     _launchForce: 0
     _stunDuration: 0
     _statusType: 0

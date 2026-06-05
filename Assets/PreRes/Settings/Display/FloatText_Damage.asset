@@ -15,9 +15,9 @@ MonoBehaviour:
   Type: 0
   Font: {fileID: 11400000, guid: c240252520313ba48a1e082bbb79faa0, type: 2}
   FontMaterial: {fileID: 4857915465648842615, guid: c240252520313ba48a1e082bbb79faa0, type: 2}
-  FontSize: 36
+  FontSize: 48
   Color: {r: 1, g: 0.27, b: 0.27, a: 1}
   Duration: 0.8
-  MoveUpDistance: 50
+  MoveUpDistance: 40
   FadeStartRatio: 0.5
   StartScale: 1

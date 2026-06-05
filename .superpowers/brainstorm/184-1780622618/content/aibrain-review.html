@@ -1,0 +1,129 @@
+<h2>Self-Review: AIBrain &amp; State Machine — 6 Issues Found</h2>
+<p class="subtitle">Critical re-examination of the proposed design. 3 issues require structural changes.</p>
+
+<div class="section">
+  <h3>Issue 1: Update Order Bug</h3>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;font-size:12px;">
+// ORIGINAL PROPOSAL (wrong order):
+_behaviours.UpdateActive(_ctx);   // Updates behaviour for OLD state
+_fsm.Update(_ctx);                // Transitions to NEW state, runs OnUpdate
+// → Behaviour got updated for the wrong state this frame!
+
+// FIXED ORDER:
+_fsm.EvaluateTransitions(_ctx);   // 1. Check transitions (may change state)
+_fsm.ExecuteState(_ctx);          // 2. Run OnUpdate for CURRENT state
+_behaviours.UpdateActive(_ctx);   // 3. Update behaviour for CURRENT state
+      </pre>
+  <div class="section">
+    <h3>Issue 2: IAIBehaviour Adds Complexity, Little Value</h3>
+    <p style="font-size:13px;">Each behaviour maps 1:1 to a state (DefendBehaviour ↔ Defend, TauntBehaviour ↔ Taunt). The extra interface + scheduler layer creates the exact bug it's trying to prevent (forgetting to call Update).</p>
+
+    <div class="pros-cons">
+      <div class="pros"><h4>Fix: Merge behaviour into state</h4>
+        <ul>
+          <li>DefendState contains block counting, cooldown, counter logic</li>
+          <li>TauntState contains random trigger logic</li>
+          <li>FSM guarantees OnEnter/OnUpdate/OnExit are always called</li>
+          <li>Eliminates IAIBehaviour + BehaviourScheduler entirely</li>
+          <li>Bug class "forgot to call Update()" becomes impossible</li>
+        </ul>
+      </div>
+      <div class="cons"><h4>What we lose</h4>
+        <ul>
+          <li>Can't hot-swap behaviours at runtime (never used)</li>
+          <li>Can't share behaviour across states (never used — each is 1:1)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Issue 3: Global Transition Priority Unclear</h3>
+    <p style="font-size:13px;">Death must interrupt ANY state. Who checks it — each state individually, or the FSM globally?</p>
+    <pre style="background:#1e1e1e;color:#6a9955;padding:12px;border-radius:4px;font-size:12px;">
+// FIX: AIStateMachine checks global transitions first, then delegates to state
+public void EvaluateTransitions(AIContext ctx)
+{
+    var next = CheckGlobalTransitions(ctx)      // Death, future: phase change
+            ?? _currentState.EvaluateTransitions(ctx);
+    if (next != null) TransitionTo(next, ctx);
+}
+
+private AIStateBase CheckGlobalTransitions(AIContext ctx)
+{
+    if (ctx.Stats.IsDead && _currentState.StateType != MonsterAIState.Death)
+        return GetState(MonsterAIState.Death);
+    // Future: check boss phase override here
+    return null;
+}
+      </pre>
+  </div>
+
+  <div class="section">
+    <h3>Issue 4: Attack Sub-States Need Animation Callback</h3>
+    <p style="font-size:13px;">The current code fires damage on state entry. The fix requires animation events to drive the Windup → Active → Recovery transitions. But the animation callback (StateMachineBehaviour) runs on the Animator, not on AIStateBase.</p>
+    <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;font-size:12px;">
+// AttackState exposes a callback that the Animator StateMachineBehaviour calls:
+public class AttackState : AIStateBase
+{
+    // Called by AttackStateBehaviour.OnStateEnter via AIBrain reference
+    public void OnAnimationAttackWindow()
+    {
+        _shouldResolveDamage = true;  // Damage resolved in next OnUpdate
+    }
+}
+      </pre>
+    <p style="font-size:12px; color:#aaa;">→ AIBrain holds a reference that StateMachineBehaviour can access via the Animator's GameObject → MonsterEntity → AIBrain → current AttackState.</p>
+  </div>
+
+  <div class="section">
+    <h3>Issue 5: State Instance Lifetime</h3>
+    <p style="font-size:13px;">Created once in AIStateMachine constructor and reused — zero allocation during gameplay. Each OnEnter must fully reset state (clear timers, reset flags). This is a convention, not enforced by code — document it clearly.</p>
+  </div>
+
+  <div class="section">
+    <h3>Issue 6: Defend → Counter Attack Flow</h3>
+    <p style="font-size:13px;">Current code: Defend state exits → Attack if counter ready OR if target in range.</p>
+    <p style="font-size:13px;">With merged DefendState, this logic lives in <code>DefendState.EvaluateTransitions()</code>, which has direct access to block count, timer, and target distance. Simpler and more cohesive than routing through a separate DefendBehaviour.</p>
+  </div>
+
+  <hr style="margin:24px 0;border-color:#333;">
+
+  <h3>Revised Architecture (Simpler)</h3>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:6px;font-size:12px;overflow-x:auto;">
+Monster/
+├── AI/
+│   ├── AIBrain.cs              ← Orchestrator, holds AIContext + StateMachine
+│   ├── AIStateMachine.cs       ← Global transitions + state switching
+│   ├── AIContext.cs            ← Mutable shared state (class)
+│   └── States/
+│       ├── AIStateBase.cs      ← OnEnter / OnUpdate / EvaluateTransitions / OnExit
+│       ├── IdleState.cs
+│       ├── PatrolState.cs
+│       ├── ChaseState.cs
+│       ├── AttackState.cs      ← Internal windup/active/recovery
+│       ├── HitState.cs
+│       ├── DeathState.cs
+│       ├── DefendState.cs      ← Block count + counter logic (was DefendBehaviour)
+│       └── TauntState.cs       ← Random trigger logic (was TauntBehaviour)
+│
+├── Damage/                     ← (unchanged from Section 1)
+│   ├── IDamageModifier.cs
+│   ├── DamagePipeline.cs
+│   ├── DamageContext.cs
+│   ├── DamageResult.cs
+│   └── Modifiers/
+│       ├── DefendModifier.cs
+│       └── IFrameModifier.cs
+│
+├── MonsterEntity.cs
+├── MonsterConfig.cs
+├── MonsterMovement.cs
+└── MonsterStats.cs
+      </pre>
+
+  <p style="font-size:12px; color:#aaa; margin-top:8px;">
+  Removed: IAIBehaviour, DefendBehaviour, TauntBehaviour, AlertBehaviour, BehaviourScheduler, MonsterAIContext struct.<br>
+  All behaviour logic merged into state classes. FSM guarantees lifecycle. Fewer files, fewer bugs.
+  </p>
+</div>

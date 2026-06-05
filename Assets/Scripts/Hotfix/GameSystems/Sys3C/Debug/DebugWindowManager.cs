@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityInput = UnityEngine.Input;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Skills;
-using UnityInput = UnityEngine.Input;
 
 namespace Hotfix.GameSystems.Sys3C.Debug
 {
@@ -99,7 +100,7 @@ namespace Hotfix.GameSystems.Sys3C.Debug
         /// <summary>
         /// 添加日志
         /// </summary>
-        public void Log(string message, LogLevel level = LogLevel.Info)
+        public void Log(string message, Core.LogLevel level = Core.LogLevel.Info)
         {
             var timestamp = Time.time.ToString("F2");
             var levelTag = level switch

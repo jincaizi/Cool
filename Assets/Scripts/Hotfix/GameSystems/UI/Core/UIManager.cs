@@ -15,7 +15,7 @@ namespace Hotfix.GameSystems.UI
         private readonly Stack<UIPanel> _stack = new Stack<UIPanel>();
         private readonly HashSet<UIPanel> _activeOverlays = new HashSet<UIPanel>();
 
-        private void Awake()
+        private async void Awake()
         {
             if (Instance != null)
             {
@@ -25,6 +25,44 @@ namespace Hotfix.GameSystems.UI
             Instance = this;
             DontDestroyOnLoad(gameObject);
             CreateCanvasLayers();
+            await LoadBuiltInPanels();
+        }
+
+        private async UniTask LoadBuiltInPanels()
+        {
+            await RegisterFromPrefab("Prefabs/UI/PlayerHudPanel", "PlayerHudPanel");
+            await RegisterFromPrefab("Prefabs/UI/TargetPanel", "TargetPanel");
+
+            if (_registry.TryGetValue("PlayerHudPanel", out var hud))
+            {
+                await ShowPanelAsync(hud);
+            }
+        }
+
+        private async UniTask RegisterFromPrefab(string resourcePath, string panelId)
+        {
+            var prefab = Resources.Load<GameObject>(resourcePath);
+            if (prefab == null)
+            {
+                Debug.LogError($"UIManager: Prefab not found at Resources/{resourcePath}");
+                return;
+            }
+
+            var instance = Instantiate(prefab);
+            var panel = instance.GetComponent<UIPanel>();
+            if (panel == null)
+            {
+                Debug.LogError($"UIManager: Prefab at {resourcePath} has no UIPanel component");
+                Destroy(instance);
+                return;
+            }
+
+            if (panel.PanelId != panelId)
+            {
+                Debug.LogWarning($"UIManager: PanelId mismatch, expected '{panelId}' got '{panel.PanelId}'");
+            }
+
+            Register(panel);
         }
 
         private void CreateCanvasLayers()

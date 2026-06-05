@@ -1,0 +1,114 @@
+<h2>Damage Pipeline: Edge Case Review</h2>
+<p class="subtitle">15 edge cases analyzed. The pipeline design holds, but needs 4 structural additions.</p>
+
+<div class="section">
+  <h3>Revised Pipeline (with additions highlighted)</h3>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:6px;font-size:13px;overflow-x:auto;">
+TakeDamage(DamageContext ctx)          <span style="color:#569cd6;">// ctx carries flags: IsDoT, IsCritical, IgnoresDefense...</span>
+  │
+  ├─ <b>1. PreDamageCheck</b>
+  │     Run IDamageModifier chain by priority (0 → N)
+  │     Each modifier reads ctx, returns DamageResult
+  │     ctx.RawDamage is progressively reduced
+  │     <span style="color:#6a9955;">← NEW: ref DamageContext so modifiers mutate shared state</span>
+  │
+  ├─ <b>2. Gate Check</b>                  <span style="color:#6a9955;">← NEW</span>
+  │     If result.WasBlocked → skip to PostDamageNotify (no HP change)
+  │     If IsDead && NoPosthumousProc → return
+  │
+  ├─ <b>3. ApplyDamage</b>
+  │     stats.HP -= result.FinalDamage
+  │     Clamp HP to 0
+  │     If HP ≤ 0 && !result.PreventDeath → flag pending death
+  │
+  ├─ <b>4. PostDamageNotify</b>            <span style="color:#6a9955;">← Always fires, even on death</span>
+  │     ├─ result.HitReactLevel → AI state machine
+  │     ├─ result.ShouldKnockback → movement system
+  │     ├─ VFX, floating text
+  │     └─ On-hit procs (lifesteal, thorns, poison)
+  │
+  └─ <b>5. Death Check</b>
+        If pending death → EnterDeath()
+      </pre>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">DamageContext (revised)</div>
+    <div class="mockup-body" style="font-size:12px;">
+      <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;">
+public class DamageContext
+{
+    // Input
+    public DamageBlock RawData;
+    public Vector3 HitDirection;
+    public int AttackerId;
+    public DamageFlags Flags;
+    public float RawDamage;
+
+    // Mutated by modifiers
+    public float CurrentDamage;
+    public int BlockCount;
+}
+
+[Flags]
+public enum DamageFlags
+{
+    None = 0,
+    IsDoT = 1&lt;&lt;0,
+    IsCritical = 1&lt;&lt;1,
+    IgnoresDefense = 1&lt;&lt;2,
+    IsReflected = 1&lt;&lt;3,
+}
+      </pre>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">DamageResult (revised)</div>
+    <div class="mockup-body" style="font-size:12px;">
+      <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;">
+public struct DamageResult
+{
+    public float FinalDamage;
+    public bool WasBlocked;
+    public bool WasReduced;
+    public bool PreventDeath;
+    public bool ShouldKnockback;
+    public HitReactLevel ReactLevel;
+}
+
+public enum HitReactLevel
+{
+    None,       // Boss super armor
+    Flinch,     // Brief interrupt
+    Stagger,    // Medium stun
+    Knockback,  // Push back
+    Launch,     // Airborne
+}
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Edge Cases → Solutions</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <tr style="background:#1e1e1e;color:#fff;"><th style="padding:6px;">#</th><th style="padding:6px;">Edge Case</th><th style="padding:6px;">Solution</th></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">1</td><td style="padding:5px;border:1px solid #333;"><b>Multi-hit same frame</b> — two players hit simultaneously</td><td style="padding:5px;border:1px solid #333;">Unity main thread = sequential. Each TakeDamage call is atomic. Safe by default.</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">2</td><td style="padding:5px;border:1px solid #333;"><b>Death prevention</b> — "survive with 1 HP" buff</td><td style="padding:5px;border:1px solid #333;"><code>DamageResult.PreventDeath = true</code> → skip death even if HP≤0</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">3</td><td style="padding:5px;border:1px solid #333;"><b>Knockback suppression</b> — boss super armor ignores push</td><td style="padding:5px;border:1px solid #333;"><code>result.ShouldKnockback = false</code> → KnockbackEvent not emitted</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">4</td><td style="padding:5px;border:1px solid #333;"><b>Hit reaction variation</b> — light vs heavy attack</td><td style="padding:5px;border:1px solid #333;"><code>DamageResult.ReactLevel</code> → AI FSM checks against current super-armor level</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">5</td><td style="padding:5px;border:1px solid #333;"><b>DoT ticks</b> — should not trigger hit stun or VFX spam</td><td style="padding:5px;border:1px solid #333;"><code>DamageFlags.IsDoT</code> → modifiers skip hit react, minimal VFX</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">6</td><td style="padding:5px;border:1px solid #333;"><b>Damage reflection / thorns</b></td><td style="padding:5px;border:1px solid #333;">ThornsModifier in PostDamageNotify emits reflected damage to attacker via EventBus</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">7</td><td style="padding:5px;border:1px solid #333;"><b>On-hit procs</b> — lifesteal, poison, status effects</td><td style="padding:5px;border:1px solid #333;">PostDamageNotify → EventBus emits OnDamageDealt/OnDamageReceived, proc systems subscribe</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">8</td><td style="padding:5px;border:1px solid #333;"><b>Defend angle vs fast-moving attacker</b></td><td style="padding:5px;border:1px solid #333;">Acceptable. Hit direction is sampled at collision frame. Design decision, not a bug.</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">9</td><td style="padding:5px;border:1px solid #333;"><b>Shield + Defend stacking</b> — which applies first?</td><td style="padding:5px;border:1px solid #333;">Priority system: ShieldModifier=200 (absorbs first), DefendModifier=100 (reduces remainder). Deterministic.</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">10</td><td style="padding:5px;border:1px solid #333;"><b>Modifier state mutation</b> — shield HP decreases, block count++</td><td style="padding:5px;border:1px solid #333;">Modifiers own their state (ShieldModifier.CurrentHP, DefendModifier.BlockCount). Modify() has side effects — explicit design choice.</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">11</td><td style="padding:5px;border:1px solid #333;"><b>I-frames after hit</b> — brief invincibility window</td><td style="padding:5px;border:1px solid #333;">HitInvincibilityModifier(Priority=0) with configurable duration timer. Blocks all damage during window.</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">12</td><td style="padding:5px;border:1px solid #333;"><b>Zero damage after reduction</b></td><td style="padding:5px;border:1px solid #333;"><code>WasBlocked=true</code> → skip VFX. <code>WasReduced=true</code> but damage>0 → play "glancing hit" VFX.</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">13</td><td style="padding:5px;border:1px solid #333;"><b>Overkill</b> — 10HP monster takes 1000 damage</td><td style="padding:5px;border:1px solid #333;">HP clamped to 0. Track OverkillDamage for boss "dramatic death" VFX (optional).</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">14</td><td style="padding:5px;border:1px solid #333;"><b>Damage during death animation</b></td><td style="padding:5px;border:1px solid #333;">PreDamageCheck skips, ApplyDamage skips, <b>but PostDamageNotify still fires</b> for on-death procs.</td></tr>
+    <tr><td style="padding:5px;border:1px solid #333;">15</td><td style="padding:5px;border:1px solid #333;"><b>Combo damage scaling</b> — consecutive hits deal more</td><td style="padding:5px;border:1px solid #333;">AIContext tracks RecentHitCount + LastHitTime. ComboModifier reads this in PreDamageCheck.</td></tr>
+  </table>
+</div>

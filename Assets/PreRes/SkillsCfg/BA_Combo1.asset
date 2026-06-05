@@ -62,8 +62,10 @@ MonoBehaviour:
     _targetType: 0
     _range: 2
     _angle: 120
-    _angleStart: 0
-    _angleEnd: 90
+    _angleStart: -35
+    _angleEnd: 70
+    _innerRadius: 0.8
+    _innerAngle: 90
     _areaRadius: 0
     _width: 1
     _stopAtFirst: 0

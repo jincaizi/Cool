@@ -1,5 +1,6 @@
 using System;
-using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using Hotfix.GameSystems.UI;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 
@@ -19,6 +20,9 @@ namespace Hotfix.GameSystems.Sys3C
             _currentWeapon = GetComponent<IWeapon>();
             if (_currentWeapon == null)
                 _currentWeapon = GetComponentInChildren<IWeapon>();
+
+            if (_selectionRing == null)
+                _selectionRing = GetComponentInChildren<SelectionRing>();
         }
 
         public void EquipWeapon(IWeapon weapon) => _currentWeapon = weapon;
@@ -34,31 +38,52 @@ namespace Hotfix.GameSystems.Sys3C
         public void SelectTarget(IDamageable target)
         {
             if (!(target is ITargetable targetable) || targetable == _currentTarget) return;
-            if (_selectionRing == null) return;
 
-            // Unsubscribe old target's death event
-            if (_currentTarget != null && _onTargetDeath != null)
-            {
-                _currentTarget.OnDeath -= _onTargetDeath;
-                _onTargetDeath = null;
-            }
-
-            _selectionRing.Detach();
-
-            float yOffset = targetable.SelectionRingYOffset;
+            DetachCurrentTarget();
 
             _currentTarget = targetable;
+
+            // Selection ring
+            if (_selectionRing != null)
+            {
+                _selectionRing.AttachTo(target.Transform, targetable.SelectionRingYOffset);
+            }
+
+            // Target panel
+            var targetPanel = UIManager.Instance?.GetPanel<TargetPanel>("TargetPanel");
+            if (targetPanel != null)
+            {
+                targetPanel.Bind(_currentTarget);
+                UIManager.Instance.ShowAlwaysAsync("TargetPanel").Forget();
+            }
+
             _onTargetDeath = () =>
             {
                 if (_currentTarget != null)
                     _currentTarget.OnDeath -= _onTargetDeath;
-                _selectionRing.Detach();
-                _currentTarget = null;
+                DetachCurrentTarget();
                 _onTargetDeath = null;
             };
             _currentTarget.OnDeath += _onTargetDeath;
+        }
 
-            _selectionRing.AttachTo(target.Transform, yOffset);
+        private void DetachCurrentTarget()
+        {
+            if (_currentTarget == null) return;
+
+            _currentTarget.OnDeath -= _onTargetDeath;
+
+            if (_selectionRing != null)
+                _selectionRing.Detach();
+
+            var targetPanel = UIManager.Instance?.GetPanel<TargetPanel>("TargetPanel");
+            if (targetPanel != null)
+            {
+                targetPanel.Clear();
+                UIManager.Instance.HideAlwaysAsync("TargetPanel").Forget();
+            }
+
+            _currentTarget = null;
         }
     }
 }

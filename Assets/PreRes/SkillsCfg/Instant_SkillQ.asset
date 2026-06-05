@@ -40,16 +40,18 @@ MonoBehaviour:
     _criticalDamageBonus: 0
     _isTrueDamage: 0
     _armorPenetration: 0
-    _knockbackForce: 3
+    _knockbackForce: 8
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
   _shape:
     _targetType: 0
-    _range: 2
+    _range: 3.5
     _angle: 120
-    _angleStart: 0
-    _angleEnd: 90
+    _angleStart: -15
+    _angleEnd: 15
+    _innerRadius: 0.8
+    _innerAngle: 90
     _areaRadius: 0
     _width: 1
     _stopAtFirst: 0
@@ -60,7 +62,7 @@ MonoBehaviour:
     - 0.3
   _effect:
     _applyEffects: []
-    _knockbackForce: 0
+    _knockbackForce: 8
     _launchForce: 0
     _stunDuration: 0
     _statusType: 0

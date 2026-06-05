@@ -41,6 +41,15 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] private float _angleEnd = 90f;
         public float AngleEnd => _angleEnd;
 
+        [Header("=== Inner Hit Zone ===")]
+        [Tooltip("内圈必中半径（世界单位，0 = 禁用）。目标在此距离内且在内圈角度中时跳过扇形角度检查。")]
+        [SerializeField] private float _innerRadius = 0.5f;
+        public float InnerRadius => _innerRadius;
+
+        [Tooltip("内圈必中角度（全角，以角色正前方为中心对称展开）。例如 60 = ±30°。")]
+        [SerializeField] private float _innerAngle = 60f;
+        public float InnerAngle => _innerAngle;
+
         [Tooltip("AOE半径（世界单位，0 = 单体）")]
         [SerializeField] private float _areaRadius;
         public float AreaRadius => _areaRadius;

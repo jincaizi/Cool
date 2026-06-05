@@ -15,6 +15,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
     /// </summary>
     public class SkillExecutor
     {
+        private static readonly Collider[] s_HitBuffer = new Collider[32];
+
         private readonly IEffectTarget _owner;
         private readonly SkillData _skillData;
         private readonly SkillStateMachine _stateMachine;
@@ -22,6 +24,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         // 目标检测
         private Vector3 _targetPosition;
+        private Vector3 _attackDirection;
+        private System.Collections.Generic.Dictionary<int, int> _consecutiveHits;
+        private readonly List<IEffectTarget> _cachedTargets = new List<IEffectTarget>();
+        private readonly List<int> _cachedToRemove = new List<int>();
+        private readonly List<IEffectTarget> _cachedDamagedTargets = new List<IEffectTarget>();
         private IEffectTarget _targetCharacter;
         private IDashComponent _dashComponent;
         private bool _wasFullCharge;
@@ -77,6 +84,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public void SetTargetPosition(Vector3 position)
         {
             _targetPosition = position;
+        }
+
+        public void SetAttackDirection(Vector3 direction)
+        {
+            _attackDirection = direction;
         }
 
         public void SetDashComponent(IDashComponent dashComponent)
@@ -192,19 +204,50 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             var targets = DetectTargets();
 
+            // Consecutive hit tracking: only deal damage every 3rd consecutive detection per target
+            const int consecutiveRequired = 3;
+            if (_consecutiveHits == null)
+                _consecutiveHits = new System.Collections.Generic.Dictionary<int, int>();
+
+            // Reset counts for targets no longer detected this tick
+            var toRemove = _cachedToRemove;
+            toRemove.Clear();
+            foreach (var kv in _consecutiveHits)
+            {
+                bool stillHit = false;
+                foreach (var t in targets)
+                {
+                    if (t.transform.GetInstanceID() == kv.Key) { stillHit = true; break; }
+                }
+                if (!stillHit) toRemove.Add(kv.Key);
+            }
+            foreach (var id in toRemove) _consecutiveHits.Remove(id);
+
+            var damagedTargets = _cachedDamagedTargets;
+            damagedTargets.Clear();
             foreach (var target in targets)
             {
-                ApplyDamage(target, frameIndex);
-                ApplyEffects(target);
-                OnTargetHit?.Invoke(target);
+                int id = target.transform.GetInstanceID();
+                _consecutiveHits.TryGetValue(id, out int count);
+                count++;
+                _consecutiveHits[id] = count;
+
+                if (count >= consecutiveRequired)
+                {
+                    _consecutiveHits[id] = 0;
+                    ApplyDamage(target, frameIndex);
+                    ApplyEffects(target);
+                    OnTargetHit?.Invoke(target);
+                    damagedTargets.Add(target);
+                }
             }
 
             OnHitboxFrame?.Invoke(frameIndex);
 
-            if (targets.Count > 0)
+            if (damagedTargets.Count > 0)
             {
-                var hitPos = targets[0].transform.position;
-                foreach (var t in targets)
+                var hitPos = damagedTargets[0].transform.position;
+                foreach (var t in damagedTargets)
                 {
                     EventBus.Emit(new SkillHitTargetEvent
                     {
@@ -225,11 +268,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnSkillComplete()
         {
+            _consecutiveHits?.Clear();
             OnSkillCompleted?.Invoke();
         }
 
         private void OnSkillInterrupt(InterruptionSource source)
         {
+            _consecutiveHits?.Clear();
             OnSkillInterrupted?.Invoke(source);
         }
 
@@ -264,47 +309,144 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private List<IEffectTarget> DetectTargets()
         {
-            var targets = new List<IEffectTarget>();
+            var targets = _cachedTargets;
+            targets.Clear();
             ShapeBlock shape = GetShape();
             if (shape == null) return targets;
 
             if (shape.AreaRadius > 0)
                 DetectAOETargets(targets, shape);
             else
-                DetectSingleTarget(targets, shape);
+                DetectMeleeSector(targets, shape);
+
+#if UNITY_EDITOR
+            if (targets.Count == 0)
+            {
+                UnityEngine.Debug.LogWarning($"[HitDetect] SkillId={SkillId} — NO targets found. " +
+                    $"origin={_owner.transform.position}, forward={_owner.transform.forward}, " +
+                    $"range={shape.Range}, areaRadius={shape.AreaRadius}, " +
+                    $"angle=[{shape.AngleStart}°..{shape.AngleEnd}°], innerR={shape.InnerRadius}, innerAngle={shape.InnerAngle}°");
+            }
+            else
+            {
+                UnityEngine.Debug.Log($"[HitDetect] SkillId={SkillId} — hit {targets.Count} target(s): " +
+                    string.Join(", ", targets.ConvertAll(t => t.transform.name)));
+            }
+#endif
             return targets;
         }
 
-        private void DetectSingleTarget(List<IEffectTarget> targets, ShapeBlock shape)
+        private void DetectMeleeSector(List<IEffectTarget> targets, ShapeBlock shape)
         {
             if (_targetCharacter != null && _targetCharacter != _owner)
             {
                 float distance = Vector3.Distance(_owner.transform.position, _targetCharacter.transform.position);
                 if (distance <= shape.Range)
                     targets.Add(_targetCharacter);
+                return;
             }
+
+            Vector3 origin = _owner.transform.position;
+            Vector3 forward;
+            if (_attackDirection.sqrMagnitude > 0.0001f)
+                forward = _attackDirection.normalized;
+            else if (_targetPosition.sqrMagnitude > 0.0001f)
+                forward = (_targetPosition - origin).normalized;
             else
+                forward = _owner.transform.forward;
+            float halfInnerAngle = shape.InnerAngle * 0.5f;
+
+            int count = Physics.OverlapSphereNonAlloc(origin, shape.Range, s_HitBuffer, shape.TargetMask);
+            for (int i = 0; i < count; i++)
             {
-                Ray ray = new Ray(_owner.transform.position, _owner.transform.forward);
-                if (Physics.Raycast(ray, out var hit, shape.Range, shape.TargetMask))
+                var col = s_HitBuffer[i];
+                if (col.transform.IsChildOf(_owner.transform)) continue;
+
+                Vector3 dir;
+
+                bool useClosestPoint = col is BoxCollider
+                                    || col is SphereCollider
+                                    || col is CapsuleCollider
+                                    || (col is MeshCollider mc && mc.convex);
+
+                if (useClosestPoint)
                 {
-                    if (hit.collider.TryGetComponent(out IEffectTarget target) && target != _owner)
-                        targets.Add(target);
+                    Vector3 closest = col.ClosestPoint(origin);
+                    dir = closest - origin;
+
+                    // Fallback when player origin is inside the collider (ClosestPoint returns origin)
+                    if (dir.sqrMagnitude < 0.0001f)
+                        dir = col.transform.position - origin;
+                }
+                else
+                {
+                    // Non-convex MeshCollider, TerrainCollider, etc.
+                    // Use bounds center (closer to actual overlap than transform.position)
+                    dir = col.bounds.center - origin;
+                }
+
+                float dist = dir.magnitude;
+                float angle = Vector3.SignedAngle(forward, dir, Vector3.up);
+
+                // Inner hit zone: bypass sector check when within inner radius and inner angle
+                bool inInnerZone = shape.InnerRadius > 0f
+                                   && dist <= shape.InnerRadius
+                                   && Mathf.Abs(angle) <= halfInnerAngle;
+
+                if (!inInnerZone)
+                {
+                    if (angle < shape.AngleStart || angle > shape.AngleEnd)
+                        continue;
+                }
+
+                var target = col.GetComponentInParent<IEffectTarget>();
+                if (target == null || target == _owner || targets.Contains(target))
+                    continue;
+                targets.Add(target);
+            }
+#if UNITY_EDITOR
+            if (targets.Count == 0 && count > 0)
+            {
+                var details = new System.Text.StringBuilder();
+                details.AppendLine($"[HitDetect] Melee sector: {count} colliders in sphere, hits=0");
+                for (int i = 0; i < count; i++)
+                {
+                    var c = s_HitBuffer[i];
+                    if (c.transform.IsChildOf(_owner.transform))
+                    {
+                        details.AppendLine($"  [self] {c.name} ({c.GetType().Name})");
+                        continue;
+                    }
+                    Vector3 d;
+                    bool canClosest = c is BoxCollider || c is SphereCollider || c is CapsuleCollider || (c is MeshCollider mc && mc.convex);
+                    if (canClosest)
+                    {
+                        d = c.ClosestPoint(origin) - origin;
+                        if (d.sqrMagnitude < 0.0001f) d = c.transform.position - origin;
+                    }
                     else
                     {
-                        // Check parent (e.g. AttackHitbox child collider)
-                        var parentTarget = hit.collider.GetComponentInParent<IEffectTarget>();
-                        if (parentTarget != null && parentTarget != _owner)
-                            targets.Add(parentTarget);
+                        d = c.bounds.center - origin;
                     }
+                    float a = Vector3.SignedAngle(forward, d, Vector3.up);
+                    float r = d.magnitude;
+                    bool inInner = shape.InnerRadius > 0 && r <= shape.InnerRadius && Mathf.Abs(a) <= halfInnerAngle;
+                    bool inSector = a >= shape.AngleStart && a <= shape.AngleEnd;
+                    var t = c.GetComponentInParent<IEffectTarget>();
+                    details.AppendLine($"  [{c.name}] {c.GetType().Name} dist={r:F2} angle={a:F1}° inner={inInner} sector={inSector} hasIEffectTarget={t != null}");
                 }
+                UnityEngine.Debug.LogWarning(details.ToString());
             }
+#endif
         }
 
         private void DetectAOETargets(List<IEffectTarget> targets, ShapeBlock shape)
         {
+            // When no target is locked, center the AOE on the owner (for self-centered skills like spin attacks).
+            // When a target IS locked, center on the target.
             Vector3 center = _targetCharacter != null
-                ? _targetCharacter.transform.position : _targetPosition;
+                ? _targetCharacter.transform.position
+                : _owner.transform.position;
 
             if (shape.TargetType == TargetType.AOE_Cone)
                 DetectConeTargets(center, targets, shape);
@@ -316,6 +458,19 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     if (collider.TryGetComponent(out IEffectTarget target) && target != _owner)
                         targets.Add(target);
                 }
+#if UNITY_EDITOR
+                if (targets.Count == 0 && colliders.Length > 0)
+                {
+                    var sb = new System.Text.StringBuilder();
+                    sb.AppendLine($"[HitDetect] AOE: center={center} radius={shape.AreaRadius} {colliders.Length} colliders, hits=0");
+                    foreach (var c in colliders)
+                    {
+                        var t = c.GetComponent<IEffectTarget>();
+                        sb.AppendLine($"  [{c.name}] {c.GetType().Name} hasIEffectTarget={t != null} isOwner={t == _owner}");
+                    }
+                    UnityEngine.Debug.LogWarning(sb.ToString());
+                }
+#endif
             }
         }
 
@@ -361,7 +516,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // Route through IDamageable for unified feedback path
             if (target is IDamageable damageable)
             {
-                Vector3 hitDir = (_owner.transform.position - target.transform.position).normalized;
+                Vector3 hitDir = (target.transform.position - _owner.transform.position).normalized;
                 damageable.TakeDamage(damageBlock, hitDir);
             }
             else

@@ -88,5 +88,5 @@ MonoBehaviour:
   DeathKnockbackMultiplier: 1.5
   LootTable: {fileID: 0}
   DeathDestroyDelay: 3
-  RingYOffset: -0.9
+  RingYOffset: 0
   NameplateData: {fileID: 0}

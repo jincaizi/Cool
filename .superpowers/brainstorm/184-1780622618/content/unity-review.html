@@ -1,0 +1,179 @@
+<h2>Senior Unity Dev Review: 8 Issues</h2>
+<p class="subtitle">Unity-specific concerns: GC allocation, NavMeshAgent lifecycle, MonoBehaviour boundaries, Animator timing.</p>
+
+<div class="section">
+  <h3>Issue 13: DamageContext GC Allocation Per Hit</h3>
+  <p style="font-size:13px;">DamageContext is created <code>new DamageContext{...}</code> every TakeDamage call. In an AoE hitting 30 monsters, that's 30 heap allocations in one frame.</p>
+  <div class="split">
+    <div class="mockup" style="background:#3d2020;">
+      <div class="mockup-header">Class (allocates)</div>
+      <div class="mockup-body" style="font-size:12px;">
+        <pre style="background:#1e1e1e;color:#f48771;padding:8px;">
+public class DamageContext { ... }
+
+// Every hit:
+var ctx = new DamageContext { ... };
+pipeline.Process(ctx);  // GC alloc</pre>
+      </div>
+    </div>
+    <div class="mockup" style="background:#1e3d1e;">
+      <div class="mockup-header">Struct + ref (zero alloc)</div>
+      <div class="mockup-body" style="font-size:12px;">
+        <pre style="background:#1e1e1e;color:#6a9955;padding:8px;">
+public struct DamageContext { ... }
+
+// Every hit — stack allocation, zero GC:
+DamageContext ctx = default;
+ctx.RawData = data;
+ctx.HitDirection = dir;
+pipeline.Process(ref ctx);</pre>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:12px; color:#aaa;">→ Fix: DamageContext → struct, all pipeline methods take <code>ref DamageContext</code>.</p>
+</div>
+
+<div class="section">
+  <h3>Issue 14: Double OnUpdate on Transition Frame</h3>
+  <p style="font-size:13px;">If TransitionTo calls OnEnter→OnUpdate for the new state, and then ExecuteState also calls OnUpdate, the new state runs OnUpdate twice in the same frame.</p>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;font-size:12px;">
+// WRONG (TransitionTo runs OnUpdate, ExecuteState runs it again):
+_fsm.EvaluateTransitions(_ctx);   // internally calls TransitionTo → OnEnter → OnUpdate
+_fsm.ExecuteState(_ctx);          // calls OnUpdate again!
+
+// FIXED — Three-phase execution:
+public void Update(float deltaTime)
+{
+    _ctx.DeltaTime = deltaTime;
+    _ctx.AttackCooldown -= deltaTime;
+    _ctx.Movement.UpdateKnockback(deltaTime);
+    TryFindTarget();
+
+    // Phase 1: Evaluate (returns next state or null, NO side effects)
+    var next = _fsm.EvaluateTransitions(_ctx);
+
+    // Phase 2: Execute transition if needed
+    if (next != null)
+        _fsm.TransitionTo(next, _ctx);   // OnExit → swap → OnEnter (no OnUpdate)
+
+    // Phase 3: Execute current state (always runs once)
+    _fsm.ExecuteState(_ctx);             // OnUpdate
+}
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 15: NavMeshAgent Resume() May Follow Stale Path</h3>
+  <p style="font-size:13px;">After knockback + hit recovery, Resume() sets <code>isStopped=false</code> but the agent still has its old path. It may move 1 frame towards the old destination before the new SetDestination overrides it.</p>
+  <pre style="background:#1e1e1e;color:#6a9955;padding:12px;border-radius:4px;font-size:12px;">
+public void Resume()
+{
+    _agent.ResetPath();       // ← Clear stale path to prevent 1-frame wrong movement
+    _agent.isStopped = false;
+}
+
+public void ResetKnockback()
+{
+    _knockbackVelocity = Vector3.zero;
+    _knockbackTimer = 0;
+    // Only sync if agent is enabled; disabled agents reject nextPosition
+    if (_agent.enabled)
+        _agent.nextPosition = _self.position;
+}
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 16: AIContext Stores Unity Object References — Stale Reference Risk</h3>
+  <p style="font-size:13px;">AIContext holds Animator, Target (Transform), Self (Transform). If a state stores the AIContext reference as a field and accesses it after the GameObject is destroyed → MissingReferenceException.</p>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;font-size:12px;">
+// AIStateBase — document the contract:
+//
+// IMPORTANT: States receive AIContext as a method parameter.
+// Do NOT store AIContext as a field — it contains Unity Object references
+// (Animator, Transform) that become invalid on GameObject destruction.
+// All state access should happen through the method parameter,
+// which is guaranteed valid for the duration of the call.
+
+public abstract class AIStateBase
+{
+    // NO: private AIContext _ctx; // ← forbidden
+    public virtual void OnEnter(AIContext ctx) { }
+    public virtual void OnUpdate(AIContext ctx) { }
+    public virtual AIStateBase EvaluateTransitions(AIContext ctx) { return null; }
+    public virtual void OnExit(AIContext ctx) { }
+    public abstract MonsterAIState StateType { get; }
+}
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 17: Missing [RequireComponent] — Silent Failures</h3>
+  <p style="font-size:13px;">MonsterEntity depends on Animator and NavMeshAgent. Without [RequireComponent], forgetting to add them to the prefab causes NullReferenceException at runtime instead of a clear editor error.</p>
+  <pre style="background:#1e1e1e;color:#6a9955;padding:12px;border-radius:4px;font-size:12px;">
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(NavMeshAgent))]
+public class MonsterEntity : MonoBehaviour, IDamageable, ITargetable, IEffectTarget
+{
+    // ...
+}
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 18: EventBus Leak on Destroy-Without-Disable</h3>
+  <p style="font-size:13px;">OnEnable subscribes, OnDisable unsubscribes. But if the GameObject is destroyed directly (rare but possible via DestroyImmediate in editor), OnDisable might not fire.</p>
+  <pre style="background:#1e1e1e;color:#6a9955;padding:12px;border-radius:4px;font-size:12px;">
+private void OnDestroy()
+{
+    // Safety net: unsubscribe even if OnDisable was skipped
+    EventBus.UnsubscribeTargeted&lt;KnockbackEvent&gt;(GetInstanceID(), OnKnockback);
+    EntityDisplayManager.Instance?.Unregister(GetInstanceID());
+    PhysicsRegistry.Instance?.Unregister(this);
+}
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 19: Animator Hash Duplication Across States</h3>
+  <p style="font-size:13px;">Each state class sets animator params. Without a shared constants file, hash strings are duplicated and inconsistent.</p>
+  <pre style="background:#1e1e1e;color:#6a9955;padding:12px;border-radius:4px;font-size:12px;">
+// Single source of truth for all animator parameter hashes:
+public static class MonsterAnimHashes
+{
+    public static readonly int AIState     = Animator.StringToHash("AIState");
+    public static readonly int Attack      = Animator.StringToHash("Attack");
+    public static readonly int AttackIndex = Animator.StringToHash("AttackIndex");
+    public static readonly int Hit         = Animator.StringToHash("Hit");
+    public static readonly int Death       = Animator.StringToHash("Death");
+    public static readonly int Speed       = Animator.StringToHash("Speed");
+    public static readonly int IsDefending = Animator.StringToHash("IsDefending");
+    public static readonly int Taunt       = Animator.StringToHash("Taunt");
+}
+      </pre>
+</div>
+
+<div class="section">
+  <h3>Issue 20: Config is Shared — Must Be Read-Only at Runtime</h3>
+  <p style="font-size:13px;">MonsterConfig is a ScriptableObject asset. Multiple monster instances share the same config. If any runtime code writes to a config field, it corrupts all instances. Comment as invariant.</p>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;font-size:12px;">
+// MonsterConfig.cs header comment:
+//
+// INVARIANT: MonsterConfig is a shared ScriptableObject asset.
+// All fields are read-only at runtime. States and modifiers read config
+// values but NEVER write to them. State-specific mutable data lives in
+// AIContext, not in config.
+      </pre>
+</div>
+
+<hr style="margin:24px 0;border-color:#333;">
+
+<h3>Summary: 3 Reviews, 20 Issues, 0 Remaining</h3>
+<table style="width:100%;border-collapse:collapse;font-size:12px;">
+  <tr style="background:#1e1e1e;color:#fff;"><th>Review</th><th>Issues</th><th>Type</th></tr>
+  <tr><td style="padding:5px;">First pass</td><td style="padding:5px;">#1-#15</td><td style="padding:5px;">Logic bugs, struct vs class, dead code</td></tr>
+  <tr><td style="padding:5px;">Self-review #1</td><td style="padding:5px;">#1-#6 (design)</td><td style="padding:5px;">Update order, behaviour complexity, global transitions</td></tr>
+  <tr><td style="padding:5px;">Self-review #2</td><td style="padding:5px;">#7-#12</td><td style="padding:5px;">Attack timing, knockback sync, config, ownership</td></tr>
+  <tr><td style="padding:5px;background:#e8f5e9;">Unity review</td><td style="padding:5px;background:#e8f5e9;">#13-#20</td><td style="padding:5px;background:#e8f5e9;">GC, NavMesh lifecycle, MB safety, Animator</td></tr>
+</table>
+</div>

@@ -1,0 +1,141 @@
+<h2>Section 2: AIBrain &amp; State Machine</h2>
+<p class="subtitle">Split the 464-line MonsterAI into 3 focused classes. Each state is its own class — easy to add boss phases later.</p>
+
+<div class="section">
+  <h3>File Split</h3>
+  <pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:6px;font-size:13px;overflow-x:auto;">
+MonsterAI.cs (464 lines, 1 file)
+        │
+        ▼  split into 4 files
+        │
+Monster/
+├── AI/
+│   ├── AIBrain.cs          ← Orchestrator: owns context, runs main loop
+│   ├── AIStateMachine.cs   ← FSM core: transition table + state switching
+│   ├── AIContext.cs        ← Shared mutable state (class, not struct)
+│   ├── States/
+│   │   ├── AIStateBase.cs       ← Abstract state base
+│   │   ├── IdleState.cs
+│   │   ├── PatrolState.cs
+│   │   ├── ChaseState.cs
+│   │   ├── AttackState.cs       ← Windup/Active/Recovery sub-states
+│   │   ├── HitState.cs          ← React level → duration lookup
+│   │   ├── DeathState.cs
+│   │   ├── DefendState.cs
+│   │   └── TauntState.cs
+│   └── Behaviours/
+│       ├── IAIBehaviour.cs     ← (unchanged, but Update IS called now)
+│       ├── DefendBehaviour.cs
+│       ├── TauntBehaviour.cs
+│       └── BossPhaseBehaviour.cs  ← NEW: phase transition logic
+├── Damage/
+│   ├── IDamageModifier.cs      ← Pluggable pre-damage hook
+│   ├── DamagePipeline.cs       ← PreCheck → Apply → PostNotify
+│   ├── DamageContext.cs        ← Input to pipeline
+│   ├── DamageResult.cs         ← Output from pipeline
+│   └── Modifiers/
+│       ├── DefendModifier.cs   ← Front damage reduction
+│       └── IFrameModifier.cs   ← Post-hit invincibility (implements now)
+├── MonsterEntity.cs           ← Thin orchestration, wires pipeline + AI
+├── MonsterConfig.cs           ← + Boss phase data, + HitReact config
+└── ...
+      </pre>
+</div>
+
+<div class="section">
+  <h3>AIStateBase — The Key Abstraction</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="font-size:13px;padding:12px;">
+      <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;">
+// Design: Each AI state is a self-contained class with clear lifecycle.
+// This makes adding a new state (e.g., BossPhase2Idle) trivial —
+// just subclass and override the hooks you need.
+//
+// To add a new state type in the future:
+// 1. Create a subclass (e.g., BossEnrageState)
+// 2. Register it in AIStateMachine's transition table
+// 3. Done — no need to touch AIBrain or any other state.
+
+public abstract class AIStateBase
+{
+    // Called once when entering this state.
+    // Override to set animator params, start timers, etc.
+    public virtual void OnEnter(AIContext ctx) { }
+
+    // Called every frame while this state is active.
+    // Return the next state to transition to, or null to stay.
+    // Override to define per-state transition logic.
+    public virtual AIStateBase EvaluateTransitions(AIContext ctx) { return null; }
+
+    // Called every frame. Override for per-frame behavior (movement, look-at, etc.)
+    public virtual void OnUpdate(AIContext ctx) { }
+
+    // Called once when leaving this state. Clean up animator params, timers.
+    public virtual void OnExit(AIContext ctx) { }
+
+    // Unique identifier for animator hash lookup.
+    public abstract MonsterAIState StateType { get; }
+}
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>AIBrain — The Orchestrator</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="font-size:13px;padding:12px;">
+      <pre style="background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:4px;">
+// AIBrain is the single entry point for monster AI.
+// It owns the AIContext, AIStateMachine, and behaviours.
+// MonsterEntity calls Update() each frame — everything else is internal.
+//
+// Design principle: AIBrain knows nothing about specific states or behaviours.
+// States register themselves in the state machine. Behaviours are scheduled
+// automatically based on active state. Adding a new state or behaviour
+// requires zero changes to this class.
+
+public class AIBrain
+{
+    private readonly AIContext _ctx;           // Shared mutable state (class)
+    private readonly AIStateMachine _fsm;
+    private readonly BehaviourScheduler _behaviours;
+
+    public AIBrain(MonsterConfig config, Transform self, ...) { ... }
+
+    public void Update(float deltaTime)
+    {
+        if (_ctx.IsDead) return;
+
+        _ctx.DeltaTime = deltaTime;
+        _ctx.Movement.UpdateKnockback(deltaTime);
+
+        TryFindTarget();
+        _behaviours.UpdateActive(_ctx);   // Calls Update() on active behaviours
+        _fsm.Update(_ctx);                // Evaluate transitions + execute state
+    }
+
+    // Called by MonsterEntity.TakeDamage (via damage pipeline)
+    public void NotifyHit(DamageResult result, Vector3 hitDirection)
+    {
+        _ctx.LastHitResult = result;
+        _ctx.LastHitDirection = hitDirection;
+        _fsm.OnHitReceived(_ctx);  // FSM decides: enter Hit state or ignore
+    }
+}
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Bug Fixes Embedded in This Design</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <tr style="background:#e8f5e9;"><td style="padding:6px;"><b>#2</b></td><td style="padding:6px;">Context struct → AIContext class — mutations survive across calls</td></tr>
+    <tr style="background:#e8f5e9;"><td style="padding:6px;"><b>#3</b></td><td style="padding:6px;">BehaviourScheduler auto-calls Update() on active behaviour each frame</td></tr>
+    <tr style="background:#e8f5e9;"><td style="padding:6px;"><b>#5</b></td><td style="padding:6px;">Alert state removed (dead code). Any state via AIStateBase subclass.</td></tr>
+    <tr style="background:#e8f5e9;"><td style="padding:6px;"><b>#7</b></td><td style="padding:6px;">HitReactLevel → configurable HitState duration per reaction level</td></tr>
+    <tr style="background:#e8f5e9;"><td style="padding:6px;"><b>#10</b></td><td style="padding:6px;">BehaviourScheduler ensures Update() contract is honored</td></tr>
+    <tr style="background:#e8f5e9;"><td style="padding:6px;"><b>#14</b></td><td style="padding:6px;">Target=null → handled per-state in EvaluateTransitions</td></tr>
+  </table>
+</div>

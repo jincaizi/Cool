@@ -151,11 +151,9 @@ namespace Hotfix.GameSystems.Sys3C
                     // immediately clean up to avoid a 0.5-1s movement freeze.
                     CleanupSkillAnimation();
                 }
-                else
-                {
-                    // Charging end: use the same full cleanup path
-                    CleanupSkillAnimation();
-                }
+                // Charging → Execution: do NOT cleanup here.
+                // Damage is dealt during Execution phase via hitbox frames.
+                // Animation callback (AttackStateBehaviour) handles cleanup at 95%.
             }
             _prevSkillSubState = curSubState;
 
@@ -304,7 +302,8 @@ namespace Hotfix.GameSystems.Sys3C
             _currentHP -= damage;
             UnityEngine.Debug.Log($"[Player] Took {damage} damage, HP: {_currentHP}/{_maxHP}");
 
-            _fsmManager.HandleDamage(sourceId: -1, damage: damage, hitDirection: hitDirection);
+            _fsmManager.HandleDamage(sourceId: -1, damage: damage, hitDirection: hitDirection,
+                knockbackForce: data?.KnockbackForce ?? 0);
 
             if (_currentHP <= 0)
             {

@@ -1,0 +1,94 @@
+<h2>Monster AI Refactor: Architecture Comparison</h2>
+<p class="subtitle">Current system has 3 root-cause design flaws. The refactor fixes them structurally.</p>
+
+<div class="section">
+  <h3>Current Architecture (3 Root Flaws)</h3>
+  <div class="mockup">
+    <div class="mockup-header">MonsterAI.cpp — 464 lines, single class, god object tendency</div>
+    <div class="mockup-body" style="font-size:13px; line-height:1.6;">
+      <table style="width:100%; border-collapse:collapse;">
+        <tr style="background:#fff3cd;">
+          <td style="padding:8px;border:1px solid #ddd;"><b>1. Struct Context</b></td>
+          <td style="padding:8px;border:1px solid #ddd;">MonsterAIContext is a <b>struct</b> — all mutations discarded on return. DefendBlockCount, CooldownTimer never persist.</td>
+        </tr>
+        <tr style="background:#f8d7da;">
+          <td style="padding:8px;border:1px solid #ddd;"><b>2. Damage Flow</b></td>
+          <td style="padding:8px;border:1px solid #ddd;">TakeDamage → <b>damage applied</b> → NotifyHit (defense check here = too late). No pre-damage hook.</td>
+        </tr>
+        <tr style="background:#fff3cd;">
+          <td style="padding:8px;border:1px solid #ddd;"><b>3. Instant Attack</b></td>
+          <td style="padding:8px;border:1px solid #ddd;">ResolveAttack() called during TransitionTo(Attack) — <b>before animation plays</b>. 0-frame reaction window.</td>
+        </tr>
+        <tr style="background:#f8d7da;">
+          <td style="padding:8px;border:1px solid #ddd;"><b>4. NavMeshAgent + Knockback</b></td>
+          <td style="padding:8px;border:1px solid #ddd;">_self.position += velocity while NavMeshAgent is active — <b>conflicting position writes</b>.</td>
+        </tr>
+        <tr style="background:#fff3cd;">
+          <td style="padding:8px;border:1px solid #ddd;"><b>5. Dead Behaviour Code</b></td>
+          <td style="padding:8px;border:1px solid #ddd;">Alert unreachable. Update() never called on any behaviour. Lifecycle ignored.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Proposed Architecture</h3>
+  <div class="mockup">
+    <div class="mockup-header">Separation of Concerns</div>
+    <div class="mockup-body" style="font-size:13px; line-height:1.6;">
+
+      <pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:6px;overflow-x:auto;">
+┌─────────────────────────────────────────────────────────┐
+│                   MonsterEntity                         │
+│  (MonoBehaviour — thin orchestration layer)             │
+└──────────┬──────────┬──────────┬──────────┬────────────┘
+           │          │          │          │
+    ┌──────▼──┐ ┌────▼───┐ ┌────▼───┐ ┌────▼──────┐
+    │ Damage  │ │  AI    │ │Movement│ │ Animation │
+    │ Pipeline│ │ Brain  │ │System  │ │ Driver    │
+    └─────────┘ └────────┘ └────────┘ └───────────┘
+      │                                    │
+      ├─ PreDamageCheck()  ◄── Defend      │
+      ├─ CalculateDamage()     Shield      │
+      ├─ ApplyDamage()                     │
+      └─ PostDamageNotify()   VFX/UI       │
+
+┌─────────────────────────────────────────────────────────┐
+│                   AIBrain (new)                          │
+│  ┌──────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │Behaviour │  │ State Machine│  │ Decision Context │  │
+│  │Scheduler │  │ (FSM core)   │  │ (class, mutable) │  │
+│  │          │  │              │  │                  │  │
+│  │ Auto-call│  │ States:      │  │ Shared mutable   │  │
+│  │ Update() │  │ Idle/Patrol/ │  │ state that       │  │
+│  │ on active│  │ Chase/Attack │  │ survives across  │  │
+│  │ behaviour│  │ /Hit/Death/  │  │ calls            │  │
+│  │ each frame│ │ Defend/Taunt │  │                  │  │
+│  └──────────┘  └──────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Key Structural Changes</h3>
+
+  <div class="pros-cons">
+    <div class="pros"><h4>Fixed at Root</h4><ul>
+      <li>Context → class (mutable, shared)</li>
+      <li>Damage pipeline: PreCheck → Calc → Apply → Notify</li>
+      <li>Attack: Windup → Active → Recovery sub-states</li>
+      <li>NavMeshAgent disabled during knockback</li>
+      <li>Behaviour lifecycle auto-managed by scheduler</li>
+      <li>Boss-ready: phase system, multi-attack patterns</li>
+    </ul></div>
+    <div class="cons"><h4>Removed</h4><ul>
+      <li>MonsterAIContext struct → replaced by AIContext class</li>
+      <li>MonsterAI.cs (~464 lines) → split into AIBrain + StateMachine + Scheduler</li>
+      <li>AlertBehaviour (dead code)</li>
+      <li>Direct transform writes during NavMeshAgent active</li>
+    </ul></div>
+  </div>
+</div>

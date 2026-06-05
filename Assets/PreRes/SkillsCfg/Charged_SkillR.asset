@@ -32,7 +32,7 @@ MonoBehaviour:
   _canCancelIntoBasicAttack: 0
   _canCancelIntoOtherSkill: 0
   _damage:
-    _baseDamage: 0
+    _baseDamage: 2
     _attackRatio: 1
     _scalingAttribute: 0
     _damageType: 0
@@ -40,7 +40,7 @@ MonoBehaviour:
     _criticalDamageBonus: 0
     _isTrueDamage: 0
     _armorPenetration: 0
-    _knockbackForce: 0
+    _knockbackForce: 4
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
@@ -99,23 +99,36 @@ MonoBehaviour:
   _canMoveWhileCharging: 1
   _canRotateWhileCharging: 1
   _shape:
-    _targetType: 0
+    _targetType: 1
     _range: 2
     _angle: 120
     _angleStart: 0
     _angleEnd: 90
-    _areaRadius: 0
+    _innerRadius: 0.5
+    _innerAngle: 60
+    _areaRadius: 2.5
     _width: 1
     _stopAtFirst: 0
     _targetMask:
       serializedVersion: 2
       m_Bits: 4294967295
     _hitboxTimings:
+    - 0.15
     - 0.3
+    - 0.45
+    - 0.6
+    - 0.75
+    - 0.9
+    - 1.05
+    - 1.2
+    - 1.35
+    - 1.5
+    - 1.65
+    - 1.8
   _effect:
     _applyEffects: []
-    _knockbackForce: 5
-    _launchForce: 2
+    _knockbackForce: 4
+    _launchForce: 0
     _stunDuration: 0
     _statusType: 0
     _statusDuration: 0
@@ -124,6 +137,6 @@ MonoBehaviour:
     _castVFX: {fileID: 0}
     _releaseVFX: {fileID: 0}
     _castSFX: {fileID: 0}
-    _hitStopDuration: 0
+    _hitStopDuration: 0.2
     _showCastingBar: 1
     _castingBarColor: {r: 0, g: 0, b: 1, a: 1}

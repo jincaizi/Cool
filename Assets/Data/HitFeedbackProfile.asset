@@ -17,9 +17,9 @@ MonoBehaviour:
   CritHitStopBonus: 0.04
   MaxHitStop: 0.15
   ComboHitStopBonus: 0.01
-  NormalShakeIntensity: 0.5
-  SkillShakeIntensity: 1.5
-  CritShakeMultiplier: 1.5
+  NormalShakeIntensity: 0.2
+  SkillShakeIntensity: 0.6
+  CritShakeMultiplier: 1.3
   ShakeDuration: 0.15
   CritTimeSlowScale: 0.3
   CritTimeSlowDuration: 0.3

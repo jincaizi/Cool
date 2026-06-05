@@ -231,6 +231,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 executor.SetDashComponent(_dashComponent);
             }
             executor.SetTargetPosition(input.TargetPosition);
+            executor.SetAttackDirection(input.InputDirection);
             if (input.TargetEntityId > 0)
             {
                 // 设置目标单位（需要通过ID查找）

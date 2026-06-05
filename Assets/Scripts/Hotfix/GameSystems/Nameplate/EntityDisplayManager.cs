@@ -35,8 +35,8 @@ namespace Hotfix.GameSystems.Nameplate
             _floatText.Camera = _camera;
 
             _eventBridge = new DisplayEventBridge(
-                _floatText, _damageScreenEffect,
-                _damageSettings, _critDamageSettings, _skillNameSettings);
+                _floatText,
+                _damageSettings, _critDamageSettings);
         }
 
         private void CreateCanvas()
