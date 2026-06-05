@@ -319,20 +319,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
             else
                 DetectMeleeSector(targets, shape);
 
-#if UNITY_EDITOR
-            if (targets.Count == 0)
-            {
-                UnityEngine.Debug.LogWarning($"[HitDetect] SkillId={SkillId} — NO targets found. " +
-                    $"origin={_owner.transform.position}, forward={_owner.transform.forward}, " +
-                    $"range={shape.Range}, areaRadius={shape.AreaRadius}, " +
-                    $"angle=[{shape.AngleStart}°..{shape.AngleEnd}°], innerR={shape.InnerRadius}, innerAngle={shape.InnerAngle}°");
-            }
-            else
-            {
-                UnityEngine.Debug.Log($"[HitDetect] SkillId={SkillId} — hit {targets.Count} target(s): " +
-                    string.Join(", ", targets.ConvertAll(t => t.transform.name)));
-            }
-#endif
             return targets;
         }
 
@@ -404,40 +390,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     continue;
                 targets.Add(target);
             }
-#if UNITY_EDITOR
-            if (targets.Count == 0 && count > 0)
-            {
-                var details = new System.Text.StringBuilder();
-                details.AppendLine($"[HitDetect] Melee sector: {count} colliders in sphere, hits=0");
-                for (int i = 0; i < count; i++)
-                {
-                    var c = s_HitBuffer[i];
-                    if (c.transform.IsChildOf(_owner.transform))
-                    {
-                        details.AppendLine($"  [self] {c.name} ({c.GetType().Name})");
-                        continue;
-                    }
-                    Vector3 d;
-                    bool canClosest = c is BoxCollider || c is SphereCollider || c is CapsuleCollider || (c is MeshCollider mc && mc.convex);
-                    if (canClosest)
-                    {
-                        d = c.ClosestPoint(origin) - origin;
-                        if (d.sqrMagnitude < 0.0001f) d = c.transform.position - origin;
-                    }
-                    else
-                    {
-                        d = c.bounds.center - origin;
-                    }
-                    float a = Vector3.SignedAngle(forward, d, Vector3.up);
-                    float r = d.magnitude;
-                    bool inInner = shape.InnerRadius > 0 && r <= shape.InnerRadius && Mathf.Abs(a) <= halfInnerAngle;
-                    bool inSector = a >= shape.AngleStart && a <= shape.AngleEnd;
-                    var t = c.GetComponentInParent<IEffectTarget>();
-                    details.AppendLine($"  [{c.name}] {c.GetType().Name} dist={r:F2} angle={a:F1}° inner={inInner} sector={inSector} hasIEffectTarget={t != null}");
-                }
-                UnityEngine.Debug.LogWarning(details.ToString());
-            }
-#endif
         }
 
         private void DetectAOETargets(List<IEffectTarget> targets, ShapeBlock shape)
@@ -458,19 +410,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     if (collider.TryGetComponent(out IEffectTarget target) && target != _owner)
                         targets.Add(target);
                 }
-#if UNITY_EDITOR
-                if (targets.Count == 0 && colliders.Length > 0)
-                {
-                    var sb = new System.Text.StringBuilder();
-                    sb.AppendLine($"[HitDetect] AOE: center={center} radius={shape.AreaRadius} {colliders.Length} colliders, hits=0");
-                    foreach (var c in colliders)
-                    {
-                        var t = c.GetComponent<IEffectTarget>();
-                        sb.AppendLine($"  [{c.name}] {c.GetType().Name} hasIEffectTarget={t != null} isOwner={t == _owner}");
-                    }
-                    UnityEngine.Debug.LogWarning(sb.ToString());
-                }
-#endif
             }
         }
 
