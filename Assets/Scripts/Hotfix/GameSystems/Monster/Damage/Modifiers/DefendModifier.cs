@@ -2,18 +2,30 @@ using UnityEngine;
 
 namespace Hotfix.GameSystems.Monster
 {
-    // Reduces damage from frontal attacks during Defend state.
+    // Configuration values for defend behavior, extracted from monster/player configs.
+    public struct DefendConfig
+    {
+        public float DamageReduction;  // 0..1, fraction of damage blocked (e.g. 0.8 = 80% reduction)
+        public float DefendAngle;      // full-angle in degrees for frontal block check
+
+        public static DefendConfig Default => new DefendConfig
+        {
+            DamageReduction = 0.8f,
+            DefendAngle = 160f
+        };
+    }
+
+    // Reduces damage from frontal attacks during defend state.
     // Priority=100: runs after invincibility checks, before shields.
-    // Read MonsterConfig.DefendAngle and DefendDamageReduction at runtime.
     public class DefendModifier : IDamageModifier
     {
-        private readonly MonsterConfig _config;
+        private readonly DefendConfig _config;
         private readonly Transform _self;
         private readonly System.Func<bool> _isDefending;
 
         public int Priority => 100;
 
-        public DefendModifier(MonsterConfig config, Transform self, System.Func<bool> isDefending)
+        public DefendModifier(DefendConfig config, Transform self, System.Func<bool> isDefending)
         {
             _config = config;
             _self = self;
@@ -22,7 +34,6 @@ namespace Hotfix.GameSystems.Monster
 
         public DamageResult Modify(ref DamageContext ctx)
         {
-            // Passthrough when not actively defending — no reduction, full knockback
             if (!_isDefending())
                 return new DamageResult { FinalDamage = ctx.CurrentDamage, ShouldKnockback = true, ReactLevel = HitReactLevel.Flinch };
 
@@ -34,7 +45,7 @@ namespace Hotfix.GameSystems.Monster
                 return new DamageResult { FinalDamage = ctx.CurrentDamage, ShouldKnockback = true, ReactLevel = HitReactLevel.Flinch };
 
             ctx.BlockCount++;
-            float reducedDmg = ctx.CurrentDamage * (1f - _config.DefendDamageReduction);
+            float reducedDmg = ctx.CurrentDamage * (1f - _config.DamageReduction);
 
             var result = new DamageResult
             {

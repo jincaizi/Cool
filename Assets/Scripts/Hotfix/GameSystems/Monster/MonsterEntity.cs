@@ -86,7 +86,12 @@ namespace Hotfix.GameSystems.Monster
 
             // Damage pipeline: i-frame modifier (built-in) + defend modifier (only active in DefendState)
             _damagePipeline = new DamagePipeline(config, _stats);
-            _damagePipeline.AddModifier(new DefendModifier(config, transform, () => _ctx.CurrentState == MonsterAIState.Defend));
+            var defendCfg = new DefendConfig
+            {
+                DamageReduction = config.DefendDamageReduction,
+                DefendAngle = config.DefendAngle
+            };
+            _damagePipeline.AddModifier(new DefendModifier(defendCfg, transform, () => _ctx.CurrentState == MonsterAIState.Defend));
 
             // Build AI states
             var patrolState = new PatrolState();
