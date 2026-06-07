@@ -448,6 +448,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // MonsterTakeDamageEvent with correct SkillId/ComboIndex
             damageBlock.SkillId = _skillData.SkillId;
             damageBlock.ComboIndex = frameIndex + 1;
+            damageBlock.CalculatedDamage = damage;
 
             // Set knockback force from EffectBlock if present (overrides DamageBlock default)
             var effect = GetEffect();

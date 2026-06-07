@@ -7775,10 +7775,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Groups:
   - Config: {fileID: 11400000, guid: 071183ac8b66e97428f74d84b1e18acf, type: 2}
-    Count: 50
+    Count: 11
     SpawnRadius: 18
   - Config: {fileID: 11400000, guid: f5e15c082287de345a8cd42c2144ea3f, type: 2}
-    Count: 30
+    Count: 8
     SpawnRadius: 8
   RespawnDelay: 30
 --- !u!4 &1032188191

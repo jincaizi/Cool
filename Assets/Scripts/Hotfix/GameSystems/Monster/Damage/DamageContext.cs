@@ -16,7 +16,11 @@ namespace Hotfix.GameSystems.Monster
         public float CurrentDamage;
         public int BlockCount;
 
-        public float RawDamage => RawData?.BaseDamage ?? 0f;
+        // When set by caller, used as the damage amount instead of reading BaseDamage.
+        // This allows SkillExecutor to pass the post-scaling calculated damage.
+        public float OverrideDamage;
+
+        public float RawDamage => OverrideDamage > 0 ? OverrideDamage : (RawData?.BaseDamage ?? 0f);
     }
 
     // Flags allow modifiers to branch behavior without type-checking each damage source.

@@ -80521,3 +80521,10 @@ fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
 tmp-diff.txt
 ---
 
+## Session End: 20260608_045320
+### Commits
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+---
+

@@ -58,6 +58,7 @@ namespace Hotfix.GameSystems.Skills.Data
         // Runtime skill context (not serialized — set by SkillExecutor before calling TakeDamage)
         [System.NonSerialized] public int SkillId;
         [System.NonSerialized] public int ComboIndex = 1;
+        [System.NonSerialized] public float CalculatedDamage;
 
         [Header("=== Over Time ===")]
         // 是否为持续伤害效果?

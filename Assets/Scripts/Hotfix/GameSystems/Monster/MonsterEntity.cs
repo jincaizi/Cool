@@ -167,6 +167,7 @@ namespace Hotfix.GameSystems.Monster
                 HitDirection = hitDirection,
                 AttackerId = 0,
                 Flags = data.WasCritical ? DamageFlags.IsCritical : DamageFlags.None,
+                OverrideDamage = data.CalculatedDamage,
             };
 
             var result = _damagePipeline.Process(ref ctx);
