@@ -5,6 +5,7 @@ using Hotfix.GameSystems.Sys3C.Skill;
 using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Camera;
+using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
@@ -320,13 +321,16 @@ namespace Hotfix.GameSystems.Sys3C
         {
             if (_currentHP <= 0) return;
 
-            float baseDamage = data?.BaseDamage ?? 10f;
+            float baseDamage = (data != null && data.CalculatedDamage > 0)
+                ? data.CalculatedDamage
+                : (data?.BaseDamage ?? 10f);
 
             // 构建伤害上下文
             var ctx = new DamageContext
             {
                 RawData = data,
                 HitDirection = hitDirection,
+                OverrideDamage = data?.CalculatedDamage ?? 0f,
                 CurrentDamage = baseDamage
             };
 
@@ -375,6 +379,7 @@ namespace Hotfix.GameSystems.Sys3C
                     Damage = finalDamage,
                     HitDirection = hitDirection
                 });
+                _fsmManager.Coordinator.SetActiveLayer(LayerType.Hit);
             }
 
             // 扣血
