@@ -10,6 +10,7 @@ using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Skills.Runtime;
+using Hotfix.GameSystems.Monster;
 
 namespace Hotfix.GameSystems.Sys3C
 {
@@ -40,6 +41,8 @@ namespace Hotfix.GameSystems.Sys3C
         private ThirdPersonCameraController _camera;
         private CharacterAttackHandler _attackHandler;
         private bool _canFireHeavy;
+        private DefendModifier _defendModifier;
+        private DefendConfig _defendConfig = DefendConfig.Default;
 
         private void Start()
         {
@@ -59,6 +62,8 @@ namespace Hotfix.GameSystems.Sys3C
 
             _cc = new Hotfix.GameSystems.Sys3C.Character.CharacterController(
                 transform, CharacterController, GroundLayer);
+
+            _defendModifier = new DefendModifier(_defendConfig, transform, () => _cc.IsDefending);
 
             _fsmManager = new FSMManager(_cc, Animator);
             _fsmManager.OnAttackAnimationCompleted += HandleAttackAnimationCompleted;
@@ -170,6 +175,23 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void HandleInput()
         {
+            // 防御处理（按住右键举盾，松开放下）
+            if (_inputManager.IsDefendHeld())
+            {
+                if (_fsmManager.CanDefend && _cc.TryEnterDefend())
+                {
+                    _fsmManager.EnterDefend();
+                }
+            }
+            else
+            {
+                if (_cc.IsDefending)
+                {
+                    _cc.TryExitDefend();
+                    _fsmManager.ExitDefend();
+                }
+            }
+
             if (_inputManager.IsJumpPressed())
             {
                 _cc.RequestJump();
@@ -298,17 +320,70 @@ namespace Hotfix.GameSystems.Sys3C
         {
             if (_currentHP <= 0) return;
 
-            float damage = data != null ? data.BaseDamage : 10f;
-            _currentHP -= damage;
-            UnityEngine.Debug.Log($"[Player] Took {damage} damage, HP: {_currentHP}/{_maxHP}");
+            float baseDamage = data?.BaseDamage ?? 10f;
 
-            _fsmManager.HandleDamage(sourceId: -1, damage: damage, hitDirection: hitDirection,
-                knockbackForce: data?.KnockbackForce ?? 0);
+            // 构建伤害上下文
+            var ctx = new DamageContext
+            {
+                RawData = data,
+                HitDirection = hitDirection,
+                CurrentDamage = baseDamage
+            };
+
+            // 防御修正器介入
+            var result = _defendModifier?.Modify(ref ctx) ?? new DamageResult
+            {
+                FinalDamage = baseDamage,
+                ShouldKnockback = true,
+                ReactLevel = HitReactLevel.Flinch
+            };
+
+            float finalDamage = result.FinalDamage;
+            bool wasBlocked = result.ReactLevel == HitReactLevel.None;
+
+            // 防御未被触发（背面受击或不在防御状态）→ 退出防御
+            if (_cc.IsDefending && !wasBlocked)
+            {
+                _cc.TryExitDefend();
+                _fsmManager.ExitDefend();
+            }
+
+            // 格挡成功 → 扣耐久 + 播 DefendHit
+            if (_cc.IsDefending && wasBlocked)
+            {
+                float absorbed = baseDamage - finalDamage;
+                bool broken = _cc.AbsorbDamage(absorbed);
+                if (broken)
+                {
+                    _cc.OnShieldBreak();
+                    _fsmManager.HandleShieldBreak(new HitData
+                    {
+                        Damage = finalDamage,
+                        HitDirection = hitDirection
+                    });
+                    return;
+                }
+
+                _fsmManager.HitFSM.EnterDefendHit(new HitData
+                {
+                    Damage = finalDamage,
+                    HitDirection = hitDirection
+                });
+            }
+
+            // 扣血
+            _currentHP -= finalDamage;
+
+            // 正常受击路由（非格挡时走 HitFSM）
+            if (!wasBlocked)
+            {
+                _fsmManager.HandleDamage(sourceId: -1, damage: finalDamage, hitDirection: hitDirection,
+                    knockbackForce: data?.KnockbackForce ?? 0);
+            }
 
             if (_currentHP <= 0)
             {
                 _currentHP = 0;
-                UnityEngine.Debug.Log("[Player] Died!");
             }
         }
 
