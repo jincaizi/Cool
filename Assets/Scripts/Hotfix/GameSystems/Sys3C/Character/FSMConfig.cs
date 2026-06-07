@@ -33,6 +33,10 @@ namespace Hotfix.GameSystems.Sys3C.Character
         [Tooltip("起身动画时长")]
         public float GetUpDuration = 0.5f;
 
+        [Header("防御受击")]
+        [Tooltip("防御受击动画时长")]
+        public float DefendHitDuration = 0.4f;
+
         [Header("击退物理")]
         // Knockback deceleration coefficient
         [Tooltip("击退减速系数")]

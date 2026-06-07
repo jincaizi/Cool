@@ -19,7 +19,8 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         Dizzy = 4,         // 眩晕
         Down = 5,          // 倒地
         GetUp = 6,         // 起身
-        Death = 7          // 死亡
+        Death = 7,         // 死亡
+        DefendHit = 8   // 防御受击（举盾时正面受击）
     }
 
     /// <summary>
@@ -83,6 +84,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             HitState.Knockback => 70,
             HitState.Dizzy => 60,
             HitState.Hit => 50,
+            HitState.DefendHit => 50,   // Same priority as Hit
             HitState.GetUp => 40,
             HitState.None => 0,
             _ => 0
@@ -135,6 +137,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 case "Death":
                     // 死亡动画结束，触发死亡完成事件
                     OnDeathComplete?.Invoke();
+                    break;
+
+                case "DefendHit":
+                    if (_currentState == HitState.DefendHit)
+                        Recover();
                     break;
             }
         }
@@ -252,6 +259,21 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         }
 
         /// <summary>
+        /// 进入防御受击状态 — 举盾时正面受击触发
+        /// </summary>
+        public void EnterDefendHit(HitData hitData)
+        {
+            // 只在 None 或 DefendHit 状态时接受（DefendHit 期间不重复触发）
+            if (_currentState == HitState.Death || _currentState == HitState.Down ||
+                _currentState == HitState.Launched || _currentState == HitState.Dizzy ||
+                _currentState == HitState.Knockback || _currentState == HitState.GetUp)
+                return;
+
+            _hitData = hitData;
+            TransitionTo(HitState.DefendHit);
+        }
+
+        /// <summary>
         /// 受伤后恢复（受击动画结束）
         /// </summary>
         public void Recover()
@@ -348,6 +370,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                                          Vector3.up * _hitData.LaunchForce;
                     break;
 
+                case HitState.DefendHit:
+                    _animator.SetInteger(AnimHashes.HitState, (int)HitState.DefendHit);
+                    _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
+                    break;
+
                 case HitState.Dizzy:
                     _animator.SetInteger(AnimHashes.HitState, (int)HitState.Dizzy);
                     _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
@@ -391,6 +418,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 HitState.Down => _config.DownDuration,
                 HitState.GetUp => _config.GetUpDuration,
                 HitState.Death => float.MaxValue, // 死亡状态持续
+                HitState.DefendHit => _config.DefendHitDuration,
                 _ => 0
             };
         }
@@ -416,6 +444,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     // 倒地结束，起身
                     TransitionTo(HitState.GetUp);
                     _stateTimer = GetStateDuration(HitState.GetUp);
+                    break;
+
+                case HitState.DefendHit:
+                    Recover();
                     break;
 
                 case HitState.GetUp:

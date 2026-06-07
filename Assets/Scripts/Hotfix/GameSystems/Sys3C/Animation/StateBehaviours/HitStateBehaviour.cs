@@ -13,6 +13,7 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
         private static readonly int HASH_Down = Animator.StringToHash("Down");
         private static readonly int HASH_GetUp = Animator.StringToHash("GetUp");
         private static readonly int HASH_Death = Animator.StringToHash("Death");
+        private static readonly int HASH_DefendHit = Animator.StringToHash("DefendHit");
 
         private static Action<string> _onAnimationCompleted;
 
@@ -34,7 +35,7 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
             if (stateHash == HASH_Hit || stateHash == HASH_Knockback ||
                 stateHash == HASH_Launched || stateHash == HASH_Dizzy ||
                 stateHash == HASH_Down || stateHash == HASH_GetUp ||
-                stateHash == HASH_Death)
+                stateHash == HASH_Death || stateHash == HASH_DefendHit)
             {
                 _hasTriggeredHitComplete = false;
                 _lastNormalizedTime = 0f;
@@ -72,7 +73,8 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
         {
             return hash == HASH_Hit || hash == HASH_Knockback ||
                    hash == HASH_Launched || hash == HASH_Dizzy ||
-                   hash == HASH_Down || hash == HASH_GetUp;
+                   hash == HASH_Down || hash == HASH_GetUp ||
+                   hash == HASH_DefendHit;
         }
 
         private static string GetStateName(int hash)
@@ -84,6 +86,7 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
             if (hash == HASH_Down) return "Down";
             if (hash == HASH_GetUp) return "GetUp";
             if (hash == HASH_Death) return "Death";
+            if (hash == HASH_DefendHit) return "DefendHit";
             return "Unknown";
         }
     }
