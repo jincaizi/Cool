@@ -7,7 +7,7 @@ namespace Hotfix.GameSystems.Nameplate
 {
     public class FloatTextRenderer
     {
-        public static bool EnableVFX = false;
+        public static bool EnableVFX = true;
 
         private readonly Transform _canvasTransform;
         private readonly Stack<TextMeshProUGUI> _pool = new();
@@ -97,8 +97,10 @@ namespace Hotfix.GameSystems.Nameplate
 
             if (!string.IsNullOrEmpty(textOverride))
                 tmp.text = textOverride;
+            else if (settings.Type == FloatTextType.Heal)
+                tmp.SetText("+{0}", value);
             else
-                tmp.text = settings.Type == FloatTextType.Heal ? $"+{value}" : $"-{value}";
+                tmp.SetText("-{0}", value);
 
             tmp.color = settings.Color;
             tmp.fontSize = settings.FontSize;

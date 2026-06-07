@@ -79,13 +79,13 @@ namespace Hotfix.GameSystems.Skills
             var type = typeof(T);
             if (_subscribers.TryGetValue(type, out var list))
             {
-                // 复制列表以防止在回调中修改列表导致的问题
-                var callbacks = list.ToArray();
-                foreach (var callback in callbacks)
+                // Iterate backwards to avoid ToArray() allocation.
+                // Backwards iteration is safe against callbacks removing themselves.
+                for (int i = list.Count - 1; i >= 0; i--)
                 {
                     try
                     {
-                        ((Action<T>)callback)?.Invoke(evt);
+                        ((Action<T>)list[i])?.Invoke(evt);
                     }
                     catch (Exception ex)
                     {
@@ -105,12 +105,11 @@ namespace Hotfix.GameSystems.Skills
             var type = evt.GetType();
             if (_subscribers.TryGetValue(type, out var list))
             {
-                var callbacks = list.ToArray();
-                foreach (var callback in callbacks)
+                for (int i = list.Count - 1; i >= 0; i--)
                 {
                     try
                     {
-                        ((Action<IEvent>)callback)?.Invoke(evt);
+                        ((Action<IEvent>)list[i])?.Invoke(evt);
                     }
                     catch (Exception ex)
                     {
@@ -166,12 +165,11 @@ namespace Hotfix.GameSystems.Skills
             {
                 if (dict.TryGetValue(entityId, out var list))
                 {
-                    var callbacks = list.ToArray();
-                    foreach (var callback in callbacks)
+                    for (int i = list.Count - 1; i >= 0; i--)
                     {
                         try
                         {
-                            ((Action<T>)callback)?.Invoke(evt);
+                            ((Action<T>)list[i])?.Invoke(evt);
                         }
                         catch (Exception ex)
                         {

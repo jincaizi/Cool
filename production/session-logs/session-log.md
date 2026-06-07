@@ -80488,3 +80488,23 @@ production/session-logs/agent-audit.log
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260606_065057
+### Commits
+486f52e perf: extend EnableVFX toggle to FloatTextRenderer, HitStopManager, CameraShakeManager
+---
+
+## Session End: 20260606_065713
+### Commits
+486f52e perf: extend EnableVFX toggle to FloatTextRenderer, HitStopManager, CameraShakeManager
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260607_060012
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
