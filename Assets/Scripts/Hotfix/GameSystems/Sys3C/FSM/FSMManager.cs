@@ -133,6 +133,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 HitDirection = hitData.HitDirection,
                 StunDuration = 1.5f
             });
+            _stateCoordinator.SetActiveLayer(LayerType.Hit);
         }
 
         public void TriggerHit(float knockbackForce = 0f)
