@@ -35,6 +35,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public bool IsDead;
         public bool RequestJump;       // 跳跃请求标记
         public bool HasLeftGround;     // 是否已离地（用于受击判定：地面受击 vs 空中受击）
+        public bool IsDefending;       // 是否处于防御姿态
         public float MovementSpeed;    // 当前移动速度（0-1，用于 Blend Tree）
         public float MoveMagnitude;    // 移动方向幅度（用于 Blend Tree）
     }
