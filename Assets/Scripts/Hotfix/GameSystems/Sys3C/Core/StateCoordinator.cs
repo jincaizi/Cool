@@ -17,6 +17,7 @@ namespace Hotfix.GameSystems.Sys3C.Core
         public LayerType ActiveLayer => _activeLayer;
         public bool CanMove => _activeLayer != LayerType.Hit;
         public bool CanAttack => _activeLayer != LayerType.Hit;
+        public bool CanDefend => _activeLayer == LayerType.Base;
 
         public bool IsImmune
         {

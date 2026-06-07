@@ -23,6 +23,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public StateCoordinator Coordinator => _stateCoordinator;
         public HitFSM HitFSM => _hitFSM;
+        public bool CanDefend => _stateCoordinator.CanDefend;
 
         public FSMManager(
             Hotfix.GameSystems.Sys3C.Character.CharacterController characterController,
@@ -108,6 +109,30 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public void RequestResurrect()
         {
             _stateCoordinator.HandleResurrect();
+        }
+
+        public void EnterDefend()
+        {
+            _baseFSM.LockState(BaseState.Defend);
+            _animator.SetBool(AnimHashes.IsDefending, true);
+        }
+
+        public void ExitDefend()
+        {
+            _baseFSM.Unlock(BaseState.Idle);
+            _animator.SetBool(AnimHashes.IsDefending, false);
+        }
+
+        public void HandleShieldBreak(HitData hitData)
+        {
+            _baseFSM.Unlock(BaseState.Idle);
+            _animator.SetBool(AnimHashes.IsDefending, false);
+            _hitFSM.EnterHit(new HitData
+            {
+                Damage = hitData.Damage,
+                HitDirection = hitData.HitDirection,
+                StunDuration = 1.5f
+            });
         }
 
         public void TriggerHit(float knockbackForce = 0f)
