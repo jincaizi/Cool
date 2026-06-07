@@ -37,6 +37,19 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         public bool LockMovement { get; set; }
 
+        private bool _isDefending;
+        public bool IsDefending => _isDefending;
+
+        // 盾耐久
+        private float _shieldDurability;
+        private const float MaxShieldDurability = 50f;
+        private const float DefendSpeedMultiplier = 0.4f;
+
+        public float ShieldDurabilityPercent =>
+            _shieldDurability / MaxShieldDurability;
+
+        public bool IsShieldBroken => _shieldDurability <= 0f;
+
         public CharacterData Data => _data;
         public bool IsGrounded => _groundDetector.IsGrounded();
         public Transform Transform => _transform;
@@ -179,6 +192,13 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 return;
             }
 
+            // 防御姿态：限制移动速度 + 禁用跳跃
+            if (_isDefending)
+            {
+                _data.RequestJump = false;
+                _jumpRequested = false;
+            }
+
             // 眩晕状态：只处理重力
             if (StatusControllerAdapter.IsStunned)
             {
@@ -252,6 +272,11 @@ namespace Hotfix.GameSystems.Sys3C.Character
             }
 
             float currentSpeed = command.IsSprint ? SprintSpeed : MoveSpeed;
+
+            // 防御中减速
+            if (_isDefending)
+                currentSpeed *= DefendSpeedMultiplier;
+
             Vector3 moveVelocity = command.MoveDir * currentSpeed;
             moveVelocity.y = _velocity.y;
             _controller.Move(moveVelocity * Time.deltaTime);
@@ -498,6 +523,50 @@ namespace Hotfix.GameSystems.Sys3C.Character
             float currentHealth = StatsAdapter.GetAttribute(AttributeType.Health);
             float maxHealth = StatsAdapter.GetMaxHealth();
             StatsAdapter.SetBaseAttribute(AttributeType.Health, Mathf.Min(maxHealth, currentHealth + amount));
+        }
+
+        /// <summary>
+        /// 尝试进入防御姿态。条件：着地、未死亡、未受击、未已在防御。
+        /// </summary>
+        public bool TryEnterDefend()
+        {
+            if (!_data.IsGrounded || _data.IsDead || _isDefending)
+                return false;
+
+            _isDefending = true;
+            _data.IsDefending = true;
+            _shieldDurability = MaxShieldDurability;
+            return true;
+        }
+
+        /// <summary>
+        /// 退出防御姿态。
+        /// </summary>
+        public void TryExitDefend()
+        {
+            if (!_isDefending) return;
+
+            _isDefending = false;
+            _data.IsDefending = false;
+        }
+
+        /// <summary>
+        /// 盾吸收伤害，返回是否盾已破。
+        /// </summary>
+        public bool AbsorbDamage(float absorbedAmount)
+        {
+            _shieldDurability -= absorbedAmount;
+            return _shieldDurability <= 0f;
+        }
+
+        /// <summary>
+        /// 盾被打破，强制退出防御。
+        /// </summary>
+        public void OnShieldBreak()
+        {
+            _isDefending = false;
+            _data.IsDefending = false;
+            _shieldDurability = 0f;
         }
     }
 }
