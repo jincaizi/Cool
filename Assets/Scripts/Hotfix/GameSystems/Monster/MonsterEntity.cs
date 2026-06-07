@@ -74,10 +74,6 @@ namespace Hotfix.GameSystems.Monster
             _stats = new MonsterStats(config);
             _movement = new MonsterMovement(NavAgent, transform, config);
 
-            // Damage pipeline with i-frame modifier (built-in) + defend modifier
-            _damagePipeline = new DamagePipeline(config, _stats);
-            _damagePipeline.AddModifier(new DefendModifier(config, transform));
-
             // Shared AI context — class, mutations persist across calls
             _ctx = new AIContext
             {
@@ -87,6 +83,10 @@ namespace Hotfix.GameSystems.Monster
                 Movement = _movement,
                 Config = config,
             };
+
+            // Damage pipeline: i-frame modifier (built-in) + defend modifier (only active in DefendState)
+            _damagePipeline = new DamagePipeline(config, _stats);
+            _damagePipeline.AddModifier(new DefendModifier(config, transform, () => _ctx.CurrentState == MonsterAIState.Defend));
 
             // Build AI states
             var patrolState = new PatrolState();

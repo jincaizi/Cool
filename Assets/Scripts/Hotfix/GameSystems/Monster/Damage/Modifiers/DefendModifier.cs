@@ -9,46 +9,41 @@ namespace Hotfix.GameSystems.Monster
     {
         private readonly MonsterConfig _config;
         private readonly Transform _self;
+        private readonly System.Func<bool> _isDefending;
 
         public int Priority => 100;
 
-        public DefendModifier(MonsterConfig config, Transform self)
+        public DefendModifier(MonsterConfig config, Transform self, System.Func<bool> isDefending)
         {
             _config = config;
             _self = self;
+            _isDefending = isDefending;
         }
 
         public DamageResult Modify(ref DamageContext ctx)
         {
-            var result = new DamageResult
-            {
-                FinalDamage = ctx.CurrentDamage,
-                ShouldKnockback = true,
-                ReactLevel = HitReactLevel.Flinch,
-            };
+            // Passthrough when not actively defending — no reduction, full knockback
+            if (!_isDefending())
+                return new DamageResult { FinalDamage = ctx.CurrentDamage, ShouldKnockback = true, ReactLevel = HitReactLevel.Flinch };
 
-            // IgnoresDefense flag bypasses all defense checks
             if ((ctx.Flags & DamageFlags.IgnoresDefense) != 0)
-                return result;
+                return new DamageResult { FinalDamage = ctx.CurrentDamage, ShouldKnockback = true, ReactLevel = HitReactLevel.Flinch };
 
-            // Only active during Defend state — caller checks state before invoking pipeline.
-            // If the hit comes from behind or outside the defend cone, defense is bypassed entirely.
             float angle = Vector3.Angle(_self.forward, -ctx.HitDirection);
             if (angle >= _config.DefendAngle * 0.5f)
-                return result;
+                return new DamageResult { FinalDamage = ctx.CurrentDamage, ShouldKnockback = true, ReactLevel = HitReactLevel.Flinch };
 
-            // Frontal hit: reduce damage and suppress knockback
             ctx.BlockCount++;
-            result.FinalDamage = ctx.CurrentDamage * (1f - _config.DefendDamageReduction);
-            result.WasReduced = true;
-            result.ShouldKnockback = false;
-            result.ReactLevel = HitReactLevel.None;
+            float reducedDmg = ctx.CurrentDamage * (1f - _config.DefendDamageReduction);
 
-            if (result.FinalDamage <= 0)
+            var result = new DamageResult
             {
-                result.FinalDamage = 0;
-                result.WasBlocked = true;
-            }
+                FinalDamage = reducedDmg <= 0 ? 0 : reducedDmg,
+                WasReduced = true,
+                WasBlocked = reducedDmg <= 0,
+                ShouldKnockback = false,
+                ReactLevel = HitReactLevel.None,
+            };
 
             return result;
         }
