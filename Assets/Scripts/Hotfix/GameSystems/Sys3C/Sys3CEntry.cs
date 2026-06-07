@@ -361,6 +361,12 @@ namespace Hotfix.GameSystems.Sys3C
                         Damage = finalDamage,
                         HitDirection = hitDirection
                     });
+                    // 扣血（盾破时穿透伤害仍要扣除）
+                    _currentHP -= finalDamage;
+                    if (_currentHP <= 0)
+                    {
+                        _currentHP = 0;
+                    }
                     return;
                 }
 
