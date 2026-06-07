@@ -15,7 +15,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
         JumpStart = 3,
         JumpAir = 4,
         JumpEnd = 5,
-        Death = 6
+        Death = 6,
+        Defend = 8
     }
 
     /// <summary>

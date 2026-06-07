@@ -95,6 +95,14 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
             // Death
             _transitions[BaseState.Death] = new List<StateTransition>();
+
+            // ========== Defend 状态 ==========
+            _transitions[BaseState.Defend] = new List<StateTransition>
+            {
+                new StateTransition(BaseState.Death, d => d.IsDead, 100),
+                new StateTransition(BaseState.Move, d => d.MoveDir.sqrMagnitude > 0.01f, 2),
+                new StateTransition(BaseState.Idle, d => true, 1)
+            };
         }
 
         public BaseState? Evaluate(BaseState currentFSMState, CharacterData data)
@@ -140,6 +148,9 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
                 case BaseState.Death:
                     return true;
+
+                case BaseState.Defend:
+                    return data.IsGrounded && !data.IsDead;
 
                 default:
                     return false;
