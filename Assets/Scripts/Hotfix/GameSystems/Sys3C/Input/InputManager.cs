@@ -168,6 +168,14 @@ namespace Hotfix.GameSystems.Sys3C.Input
         }
 
         /// <summary>
+        /// 防御键按住（持续状态）— 鼠标右键
+        /// </summary>
+        public bool IsDefendHeld()
+        {
+            return UnityInput.GetMouseButton(1);  // Right mouse button
+        }
+
+        /// <summary>
         /// 2技能按下（Q键）- 普通攻击升级版
         /// </summary>
         public bool IsSkill2Pressed()
