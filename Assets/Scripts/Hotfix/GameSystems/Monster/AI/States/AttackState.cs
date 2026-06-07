@@ -30,10 +30,7 @@ namespace Hotfix.GameSystems.Monster
             if (ctx.Target != null)
                 ctx.Movement.LookAt(ctx.Target.position);
 
-            // Pick attack animation based on weights, store index for animation
             int attackIndex = PickAttackIndex(ctx.Config);
-            ctx.CurrentAttackIndex = attackIndex;
-
             ctx.Animator.SetInteger(MonsterAnimHashes.AttackIndex, attackIndex);
             ctx.Animator.SetTrigger(MonsterAnimHashes.Attack);
             ctx.AttackCooldown = RandomRange(ctx.Config.AttackCooldown, ctx.Config.AttackCooldownVariance);

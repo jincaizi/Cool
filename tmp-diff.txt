@@ -1,0 +1,1496 @@
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/VFX.asmdef.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI.meta
+similarity index 57%
+rename from Assets/Scripts/Hotfix/GameSystems/VFX/VFX.asmdef.meta
+rename to Assets/Scripts/Hotfix/GameSystems/Monster/AI.meta
+index d3449d6..797139a 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/VFX.asmdef.meta
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI.meta
+@@ -1,6 +1,7 @@
+ fileFormatVersion: 2
+-guid: 1d015a54d402cb947a9c316c87042365
+-AssemblyDefinitionImporter:
++guid: d743ae7ad0ab71f43ada6bf8bf3e926c
++folderAsset: yes
++DefaultImporter:
+   externalObjects: {}
+   userData: 
+   assetBundleName: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIBrain.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIBrain.cs.meta
+new file mode 100644
+index 0000000..76a5f4a
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIBrain.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 149454748906e354a9e6dc93238d2614
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIContext.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIContext.cs.meta
+new file mode 100644
+index 0000000..96567c7
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIContext.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: c30abebc522f34844a45565cbeacd6fb
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIStateMachine.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIStateMachine.cs.meta
+new file mode 100644
+index 0000000..daa3798
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIStateMachine.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 1fa868e4ba79aff408fd47d936751ab2
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/MonsterAnimHashes.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/MonsterAnimHashes.cs.meta
+new file mode 100644
+index 0000000..354299d
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/MonsterAnimHashes.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 2786f66c7dc1f8c4890a1905636dde9a
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States.meta
+new file mode 100644
+index 0000000..a0db1ae
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: d8f8cdd9ce9f1be40ba3fa223fc4613f
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/AIStateBase.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/AIStateBase.cs.meta
+new file mode 100644
+index 0000000..33458e7
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/AIStateBase.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: ebad33fbef6ba3c449b27c46a5bbc8dd
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/AttackState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/AttackState.cs.meta
+new file mode 100644
+index 0000000..a7181d7
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/AttackState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 307ec6ac095db0248a13b9e4471bb05a
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/ChaseState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/ChaseState.cs.meta
+new file mode 100644
+index 0000000..4d0bb4f
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/ChaseState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 673f4b2700bfbf1498305915c5a5dfc1
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/DeathState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/DeathState.cs.meta
+new file mode 100644
+index 0000000..dd8cfb5
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/DeathState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: ee44c7eadfa7b5a439a66d85d875446b
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/DefendState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/DefendState.cs.meta
+new file mode 100644
+index 0000000..053fd39
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/DefendState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 4d779c6c94a3c3b42ab995a5bcd3a5a0
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/HitState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/HitState.cs.meta
+new file mode 100644
+index 0000000..f48170f
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/HitState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: c41eb705eca338a4391a0fc67c1fee0f
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/IdleState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/IdleState.cs.meta
+new file mode 100644
+index 0000000..3aea292
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/IdleState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 996b67865c5902946baaf2aac472844f
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/PatrolState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/PatrolState.cs.meta
+new file mode 100644
+index 0000000..c549475
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/PatrolState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 883dfe2f0dd1065489e5bbce530e0b77
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/TauntState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/TauntState.cs.meta
+new file mode 100644
+index 0000000..57edba8
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/TauntState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 305def839702058488273dd9ab24f104
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/Damage.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage.meta
+new file mode 100644
+index 0000000..35b648c
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: 18ee4e6c87aa8474c898970583a0d407
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamageContext.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamageContext.cs.meta
+new file mode 100644
+index 0000000..8c311b5
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamageContext.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: f202fcd54b989684aa0eb82c6f91cbd8
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamagePipeline.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamagePipeline.cs.meta
+new file mode 100644
+index 0000000..4d8d8df
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamagePipeline.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 5150ed63d492ef74c9b8870517c3f966
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamageResult.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamageResult.cs.meta
+new file mode 100644
+index 0000000..e863bad
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamageResult.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 99942d476fb59414b89679ef220f2181
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/IDamageModifier.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/IDamageModifier.cs.meta
+new file mode 100644
+index 0000000..4ebca05
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/IDamageModifier.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 1b970ea02480c1e4e854b60c9196b02c
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers.meta
+new file mode 100644
+index 0000000..4befd2d
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers.meta
+@@ -0,0 +1,8 @@
++fileFormatVersion: 2
++guid: 16c4c8a96e3982e419d6712b7d18cdcc
++folderAsset: yes
++DefaultImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers/DefendModifier.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers/DefendModifier.cs.meta
+new file mode 100644
+index 0000000..098e463
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers/DefendModifier.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: b75a45e1e19ab704889050ab02942256
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers/IFrameModifier.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers/IFrameModifier.cs.meta
+new file mode 100644
+index 0000000..9482d0d
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/Damage/Modifiers/IFrameModifier.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: c231e3063fa90d34381acd9b848b0b09
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAIState.cs.meta b/Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAIState.cs.meta
+new file mode 100644
+index 0000000..369c19e
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/Monster/MonsterAIState.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 849e421b7ef461f4a93c0dedf4461581
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Nameplate/DisplayEventBridge.cs b/Assets/Scripts/Hotfix/GameSystems/Nameplate/DisplayEventBridge.cs
+index 418b8cb..d4e0005 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/Nameplate/DisplayEventBridge.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/Nameplate/DisplayEventBridge.cs
+@@ -1,50 +1,32 @@
+ using Hotfix.GameSystems.Skills;
+ using Hotfix.GameSystems.Sys3C.Core.Events;
+-using UnityEngine;
+ 
+ namespace Hotfix.GameSystems.Nameplate
+ {
+     public class DisplayEventBridge
+     {
+         private readonly FloatTextRenderer _floatText;
+-        private readonly DamageScreenEffect _damageScreenEffect;
+         private readonly FloatTextSettings _damageSettings;
+         private readonly FloatTextSettings _critDamageSettings;
+-        private readonly FloatTextSettings _skillNameSettings;
+ 
+         public DisplayEventBridge(
+             FloatTextRenderer floatText,
+-            DamageScreenEffect damageScreenEffect,
+             FloatTextSettings damageSettings,
+-            FloatTextSettings critDamageSettings,
+-            FloatTextSettings skillNameSettings)
++            FloatTextSettings critDamageSettings)
+         {
+             _floatText = floatText;
+-            _damageScreenEffect = damageScreenEffect;
+             _damageSettings = damageSettings;
+             _critDamageSettings = critDamageSettings;
+-            _skillNameSettings = skillNameSettings;
+         }
+ 
+         public void Enable()
+         {
+-            EventBus.Subscribe<DamageEvent>(OnPlayerDamaged);
+             EventBus.Subscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
+-            EventBus.Subscribe<SkillActivatedEvent>(OnSkillActivated);
+         }
+ 
+         public void Disable()
+         {
+-            EventBus.Unsubscribe<DamageEvent>(OnPlayerDamaged);
+             EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
+-            EventBus.Unsubscribe<SkillActivatedEvent>(OnSkillActivated);
+-        }
+-
+-        private void OnPlayerDamaged(DamageEvent e)
+-        {
+-            _damageScreenEffect.Flash();
+-            var settings = e.IsCritical ? _critDamageSettings : _damageSettings;
+-            _floatText.ShowDamageText(e.TargetId, Vector3.up * 2f, settings, Mathf.CeilToInt(e.Damage));
+         }
+ 
+         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
+@@ -52,10 +34,5 @@ namespace Hotfix.GameSystems.Nameplate
+             var settings = e.IsCritical ? _critDamageSettings : _damageSettings;
+             _floatText.ShowDamageText(e.EntityId, e.HitPosition, settings, e.Damage);
+         }
+-
+-        private void OnSkillActivated(SkillActivatedEvent e)
+-        {
+-            _floatText.ShowFloatingText(Vector3.zero, _skillNameSettings, e.SkillName);
+-        }
+     }
+ }
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs b/Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs
+index 2bafb56..9e6dd27 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs
+@@ -7,6 +7,8 @@ namespace Hotfix.GameSystems.Nameplate
+ {
+     public class FloatTextRenderer
+     {
++        public static bool EnableVFX = true;
++
+         private readonly Transform _canvasTransform;
+         private readonly Stack<TextMeshProUGUI> _pool = new();
+         private readonly HashSet<TextMeshProUGUI> _active = new();
+@@ -35,6 +37,7 @@ namespace Hotfix.GameSystems.Nameplate
+ 
+         public void ShowDamageText(int entityId, Vector3 worldPos, FloatTextSettings settings, int value)
+         {
++            if (!EnableVFX) return;
+             var mergeKey = MakeMergeKey(entityId, settings.Type);
+ 
+             if (_mergeTracker.TryGetValue(mergeKey, out var merge)
+@@ -94,8 +97,10 @@ namespace Hotfix.GameSystems.Nameplate
+ 
+             if (!string.IsNullOrEmpty(textOverride))
+                 tmp.text = textOverride;
++            else if (settings.Type == FloatTextType.Heal)
++                tmp.SetText("+{0}", value);
+             else
+-                tmp.text = settings.Type == FloatTextType.Heal ? $"+{value}" : $"-{value}";
++                tmp.SetText("-{0}", value);
+ 
+             tmp.color = settings.Color;
+             tmp.fontSize = settings.FontSize;
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Skills/EventBus.cs b/Assets/Scripts/Hotfix/GameSystems/Skills/EventBus.cs
+index e53b8a4..6052403 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/Skills/EventBus.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/Skills/EventBus.cs
+@@ -11,6 +11,7 @@ namespace Hotfix.GameSystems.Skills
+     public static class EventBus
+     {
+         private static readonly Dictionary<Type, List<Delegate>> _subscribers = new();
++        private static readonly Dictionary<Type, Dictionary<int, List<Delegate>>> _targetedSubscribers = new();
+         private static bool _isPaused;
+ 
+         /// <summary>
+@@ -78,13 +79,13 @@ namespace Hotfix.GameSystems.Skills
+             var type = typeof(T);
+             if (_subscribers.TryGetValue(type, out var list))
+             {
+-                // 复制列表以防止在回调中修改列表导致的问题
+-                var callbacks = list.ToArray();
+-                foreach (var callback in callbacks)
++                // Iterate backwards to avoid ToArray() allocation.
++                // Backwards iteration is safe against callbacks removing themselves.
++                for (int i = list.Count - 1; i >= 0; i--)
+                 {
+                     try
+                     {
+-                        ((Action<T>)callback)?.Invoke(evt);
++                        ((Action<T>)list[i])?.Invoke(evt);
+                     }
+                     catch (Exception ex)
+                     {
+@@ -104,12 +105,11 @@ namespace Hotfix.GameSystems.Skills
+             var type = evt.GetType();
+             if (_subscribers.TryGetValue(type, out var list))
+             {
+-                var callbacks = list.ToArray();
+-                foreach (var callback in callbacks)
++                for (int i = list.Count - 1; i >= 0; i--)
+                 {
+                     try
+                     {
+-                        ((Action<IEvent>)callback)?.Invoke(evt);
++                        ((Action<IEvent>)list[i])?.Invoke(evt);
+                     }
+                     catch (Exception ex)
+                     {
+@@ -119,6 +119,67 @@ namespace Hotfix.GameSystems.Skills
+             }
+         }
+ 
++        /// <summary>
++        /// 订阅事件，仅当 TargetedEmit 指定了相同 entityId 时才收到
++        /// </summary>
++        public static void SubscribeTargeted<T>(int entityId, Action<T> callback) where T : IEvent
++        {
++            var type = typeof(T);
++            if (!_targetedSubscribers.TryGetValue(type, out var dict))
++            {
++                dict = new Dictionary<int, List<Delegate>>();
++                _targetedSubscribers[type] = dict;
++            }
++            if (!dict.TryGetValue(entityId, out var list))
++            {
++                list = new List<Delegate>();
++                dict[entityId] = list;
++            }
++            list.Add(callback);
++        }
++
++        /// <summary>
++        /// 取消 targeted 订阅
++        /// </summary>
++        public static void UnsubscribeTargeted<T>(int entityId, Action<T> callback) where T : IEvent
++        {
++            var type = typeof(T);
++            if (_targetedSubscribers.TryGetValue(type, out var dict))
++            {
++                if (dict.TryGetValue(entityId, out var list))
++                {
++                    list.Remove(callback);
++                }
++            }
++        }
++
++        /// <summary>
++        /// 精准投递事件到指定 entityId 的 targeted 订阅者
++        /// </summary>
++        public static void TargetedEmit<T>(int entityId, T evt) where T : IEvent
++        {
++            if (_isPaused) return;
++
++            var type = typeof(T);
++            if (_targetedSubscribers.TryGetValue(type, out var dict))
++            {
++                if (dict.TryGetValue(entityId, out var list))
++                {
++                    for (int i = list.Count - 1; i >= 0; i--)
++                    {
++                        try
++                        {
++                            ((Action<T>)list[i])?.Invoke(evt);
++                        }
++                        catch (Exception ex)
++                        {
++                            Debug.LogError($"[EventBus] Exception in targeted event for {type.Name} entity {entityId}: {ex}");
++                        }
++                    }
++                }
++            }
++        }
++
+         /// <summary>
+         /// 清空所有订阅
+         /// </summary>
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs b/Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+index f56ef12..4209ae8 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+@@ -15,6 +15,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
+     /// </summary>
+     public class SkillExecutor
+     {
++        public static bool EnableVFX = false;
++        private static readonly Collider[] s_HitBuffer = new Collider[32];
++
+         private readonly IEffectTarget _owner;
+         private readonly SkillData _skillData;
+         private readonly SkillStateMachine _stateMachine;
+@@ -22,6 +25,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
+ 
+         // 目标检测
+         private Vector3 _targetPosition;
++        private Vector3 _attackDirection;
++        private System.Collections.Generic.Dictionary<int, int> _consecutiveHits;
++        private readonly List<IEffectTarget> _cachedTargets = new List<IEffectTarget>();
++        private readonly List<int> _cachedToRemove = new List<int>();
++        private readonly List<IEffectTarget> _cachedDamagedTargets = new List<IEffectTarget>();
+         private IEffectTarget _targetCharacter;
+         private IDashComponent _dashComponent;
+         private bool _wasFullCharge;
+@@ -79,6 +87,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
+             _targetPosition = position;
+         }
+ 
++        public void SetAttackDirection(Vector3 direction)
++        {
++            _attackDirection = direction;
++        }
++
+         public void SetDashComponent(IDashComponent dashComponent)
+         {
+             _dashComponent = dashComponent;
+@@ -192,19 +205,50 @@ namespace Hotfix.GameSystems.Skills.Runtime
+         {
+             var targets = DetectTargets();
+ 
++            // Consecutive hit tracking: only deal damage every 3rd consecutive detection per target
++            const int consecutiveRequired = 3;
++            if (_consecutiveHits == null)
++                _consecutiveHits = new System.Collections.Generic.Dictionary<int, int>();
++
++            // Reset counts for targets no longer detected this tick
++            var toRemove = _cachedToRemove;
++            toRemove.Clear();
++            foreach (var kv in _consecutiveHits)
++            {
++                bool stillHit = false;
++                foreach (var t in targets)
++                {
++                    if (t.transform.GetInstanceID() == kv.Key) { stillHit = true; break; }
++                }
++                if (!stillHit) toRemove.Add(kv.Key);
++            }
++            foreach (var id in toRemove) _consecutiveHits.Remove(id);
++
++            var damagedTargets = _cachedDamagedTargets;
++            damagedTargets.Clear();
+             foreach (var target in targets)
+             {
+-                ApplyDamage(target, frameIndex);
+-                ApplyEffects(target);
+-                OnTargetHit?.Invoke(target);
++                int id = target.transform.GetInstanceID();
++                _consecutiveHits.TryGetValue(id, out int count);
++                count++;
++                _consecutiveHits[id] = count;
++
++                if (count >= consecutiveRequired)
++                {
++                    _consecutiveHits[id] = 0;
++                    ApplyDamage(target, frameIndex);
++                    ApplyEffects(target);
++                    OnTargetHit?.Invoke(target);
++                    damagedTargets.Add(target);
++                }
+             }
+ 
+             OnHitboxFrame?.Invoke(frameIndex);
+ 
+-            if (targets.Count > 0)
++            if (damagedTargets.Count > 0)
+             {
+-                var hitPos = targets[0].transform.position;
+-                foreach (var t in targets)
++                var hitPos = damagedTargets[0].transform.position;
++                foreach (var t in damagedTargets)
+                 {
+                     EventBus.Emit(new SkillHitTargetEvent
+                     {
+@@ -225,11 +269,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
+ 
+         private void OnSkillComplete()
+         {
++            _consecutiveHits?.Clear();
+             OnSkillCompleted?.Invoke();
+         }
+ 
+         private void OnSkillInterrupt(InterruptionSource source)
+         {
++            _consecutiveHits?.Clear();
+             OnSkillInterrupted?.Invoke(source);
+         }
+ 
+@@ -264,47 +310,96 @@ namespace Hotfix.GameSystems.Skills.Runtime
+ 
+         private List<IEffectTarget> DetectTargets()
+         {
+-            var targets = new List<IEffectTarget>();
++            var targets = _cachedTargets;
++            targets.Clear();
+             ShapeBlock shape = GetShape();
+             if (shape == null) return targets;
+ 
+             if (shape.AreaRadius > 0)
+                 DetectAOETargets(targets, shape);
+             else
+-                DetectSingleTarget(targets, shape);
++                DetectMeleeSector(targets, shape);
++
+             return targets;
+         }
+ 
+-        private void DetectSingleTarget(List<IEffectTarget> targets, ShapeBlock shape)
++        private void DetectMeleeSector(List<IEffectTarget> targets, ShapeBlock shape)
+         {
+             if (_targetCharacter != null && _targetCharacter != _owner)
+             {
+                 float distance = Vector3.Distance(_owner.transform.position, _targetCharacter.transform.position);
+                 if (distance <= shape.Range)
+                     targets.Add(_targetCharacter);
++                return;
+             }
++
++            Vector3 origin = _owner.transform.position;
++            Vector3 forward;
++            if (_attackDirection.sqrMagnitude > 0.0001f)
++                forward = _attackDirection.normalized;
++            else if (_targetPosition.sqrMagnitude > 0.0001f)
++                forward = (_targetPosition - origin).normalized;
+             else
++                forward = _owner.transform.forward;
++            float halfInnerAngle = shape.InnerAngle * 0.5f;
++
++            int count = Physics.OverlapSphereNonAlloc(origin, shape.Range, s_HitBuffer, shape.TargetMask);
++            for (int i = 0; i < count; i++)
+             {
+-                Ray ray = new Ray(_owner.transform.position, _owner.transform.forward);
+-                if (Physics.Raycast(ray, out var hit, shape.Range, shape.TargetMask))
++                var col = s_HitBuffer[i];
++                if (col.transform.IsChildOf(_owner.transform)) continue;
++
++                Vector3 dir;
++
++                bool useClosestPoint = col is BoxCollider
++                                    || col is SphereCollider
++                                    || col is CapsuleCollider
++                                    || (col is MeshCollider mc && mc.convex);
++
++                if (useClosestPoint)
+                 {
+-                    if (hit.collider.TryGetComponent(out IEffectTarget target) && target != _owner)
+-                        targets.Add(target);
+-                    else
+-                    {
+-                        // Check parent (e.g. AttackHitbox child collider)
+-                        var parentTarget = hit.collider.GetComponentInParent<IEffectTarget>();
+-                        if (parentTarget != null && parentTarget != _owner)
+-                            targets.Add(parentTarget);
+-                    }
++                    Vector3 closest = col.ClosestPoint(origin);
++                    dir = closest - origin;
++
++                    // Fallback when player origin is inside the collider (ClosestPoint returns origin)
++                    if (dir.sqrMagnitude < 0.0001f)
++                        dir = col.transform.position - origin;
++                }
++                else
++                {
++                    // Non-convex MeshCollider, TerrainCollider, etc.
++                    // Use bounds center (closer to actual overlap than transform.position)
++                    dir = col.bounds.center - origin;
++                }
++
++                float dist = dir.magnitude;
++                float angle = Vector3.SignedAngle(forward, dir, Vector3.up);
++
++                // Inner hit zone: bypass sector check when within inner radius and inner angle
++                bool inInnerZone = shape.InnerRadius > 0f
++                                   && dist <= shape.InnerRadius
++                                   && Mathf.Abs(angle) <= halfInnerAngle;
++
++                if (!inInnerZone)
++                {
++                    if (angle < shape.AngleStart || angle > shape.AngleEnd)
++                        continue;
+                 }
++
++                var target = col.GetComponentInParent<IEffectTarget>();
++                if (target == null || target == _owner || targets.Contains(target))
++                    continue;
++                targets.Add(target);
+             }
+         }
+ 
+         private void DetectAOETargets(List<IEffectTarget> targets, ShapeBlock shape)
+         {
++            // When no target is locked, center the AOE on the owner (for self-centered skills like spin attacks).
++            // When a target IS locked, center on the target.
+             Vector3 center = _targetCharacter != null
+-                ? _targetCharacter.transform.position : _targetPosition;
++                ? _targetCharacter.transform.position
++                : _owner.transform.position;
+ 
+             if (shape.TargetType == TargetType.AOE_Cone)
+                 DetectConeTargets(center, targets, shape);
+@@ -361,7 +456,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
+             // Route through IDamageable for unified feedback path
+             if (target is IDamageable damageable)
+             {
+-                Vector3 hitDir = (_owner.transform.position - target.transform.position).normalized;
++                Vector3 hitDir = (target.transform.position - _owner.transform.position).normalized;
+                 damageable.TakeDamage(damageBlock, hitDir);
+             }
+             else
+@@ -386,11 +481,26 @@ namespace Hotfix.GameSystems.Skills.Runtime
+                 effectData?.Apply(_owner, target);
+         }
+ 
++        // Pooled instance of the release VFX. Re-instantiated only if destroyed.
++        private GameObject _cachedReleaseVFX;
++
+         private void PlayHitEffects()
+         {
++            if (!EnableVFX) return;
+             PresentationBlock pres = GetPresentation();
+-            if (pres?.ReleaseVFX != null)
+-                UnityEngine.Object.Instantiate(pres.ReleaseVFX, _targetPosition, Quaternion.identity);
++            if (pres?.ReleaseVFX == null) return;
++
++            // Reuse cached instance instead of Instantiate every hit
++            if (_cachedReleaseVFX == null)
++            {
++                _cachedReleaseVFX = UnityEngine.Object.Instantiate(pres.ReleaseVFX);
++                _cachedReleaseVFX.name = pres.ReleaseVFX.name + "_Pooled";
++            }
++            _cachedReleaseVFX.transform.position = _targetPosition;
++            _cachedReleaseVFX.transform.rotation = Quaternion.identity;
++
++            var ps = _cachedReleaseVFX.GetComponent<ParticleSystem>();
++            if (ps != null) { ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); ps.Play(); }
+         }
+ 
+         private PresentationBlock GetPresentation()
+@@ -402,4 +512,4 @@ namespace Hotfix.GameSystems.Skills.Runtime
+                 ?? (_skillData as ProjectileSkillData)?.Presentation;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillStateMachine.cs b/Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillStateMachine.cs
+index 1474981..817efad 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillStateMachine.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillStateMachine.cs
+@@ -134,6 +134,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
+                 {
+                     TransitionTo(SkillSubState.Charging);
+                     _chargeStartTime = GetCurrentTime();
++                    _currentTick = 0;
+                 }
+                 else if (_isChanneled)
+                 {
+@@ -153,6 +154,22 @@ namespace Hotfix.GameSystems.Skills.Runtime
+             if (_chargedData == null) { Complete(); return; }
+ 
+             float chargeTime = GetCurrentTime() - _chargeStartTime;
++
++            // Fire hitbox frames at intervals during charging (e.g. spin attack ticks)
++            float[] hitboxTimings = GetHitboxTimings();
++            if (hitboxTimings != null)
++            {
++                for (int i = _currentTick; i < hitboxTimings.Length; i++)
++                {
++                    if (chargeTime >= hitboxTimings[i])
++                    {
++                        _currentTick = i + 1;
++                        _onHitboxFrame?.Invoke(i);
++                        _onHitConfirm?.Invoke();
++                    }
++                }
++            }
++
+             if (chargeTime >= _chargedData.MaxChargeTime)
+                 TransitionTo(SkillSubState.Execution);
+             else if (!_isCharging && chargeTime >= _chargedData.MinChargeTime)
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/CameraShakeManager.cs b/Assets/Scripts/Hotfix/GameSystems/VFX/CameraShakeManager.cs
+index d1bf1aa..40c67ed 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/CameraShakeManager.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/CameraShakeManager.cs
+@@ -6,6 +6,8 @@ namespace Hotfix.GameSystems.VFX
+ {
+     public class CameraShakeManager : MonoBehaviour
+     {
++        public static bool EnableVFX = false;
++
+         [SerializeField] private HitFeedbackProfile _profile;
+         [SerializeField] private Transform _camera;
+ 
+@@ -34,6 +36,7 @@ namespace Hotfix.GameSystems.VFX
+ 
+         private void OnHit(MonsterTakeDamageEvent e)
+         {
++            if (!EnableVFX) return;
+             float intensity = e.SkillId > 0
+                 ? _profile.SkillShakeIntensity
+                 : _profile.NormalShakeIntensity;
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/CameraShakeManager.cs.meta b/Assets/Scripts/Hotfix/GameSystems/VFX/CameraShakeManager.cs.meta
+new file mode 100644
+index 0000000..e6675f8
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/CameraShakeManager.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 82201b37914837c4db9eed55c426eff6
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/HitFeedbackProfile.cs.meta b/Assets/Scripts/Hotfix/GameSystems/VFX/HitFeedbackProfile.cs.meta
+new file mode 100644
+index 0000000..2da0b87
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/HitFeedbackProfile.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 86ef5b915d291e441ae0af50c8e9762a
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/HitFlashVFX.cs b/Assets/Scripts/Hotfix/GameSystems/VFX/HitFlashVFX.cs
+index 0648930..0b0f1a3 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/HitFlashVFX.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/HitFlashVFX.cs
+@@ -8,12 +8,14 @@ namespace Hotfix.GameSystems.VFX
+ {
+     public class HitFlashVFX : MonoBehaviour
+     {
++        public static bool EnableVFX = false;
++
+         [SerializeField] private Renderer _targetRenderer;
++        [SerializeField] private Color _flashColor = Color.red;
+ 
+         private MaterialPropertyBlock _propBlock;
+         private Tween _flashTween;
+-        private static readonly int OutlineColorId = Shader.PropertyToID("_OutlineColor");
+-        private static readonly int OutlineWidthId = Shader.PropertyToID("_OutlineWidth");
++        private static readonly int ColorId = Shader.PropertyToID("_Color");
+ 
+         private void Awake()
+         {
+@@ -26,24 +28,18 @@ namespace Hotfix.GameSystems.VFX
+ 
+         private void OnEnable()
+         {
+-            EventBus.Subscribe<DamageEvent>(OnPlayerDamaged);
+-            EventBus.Subscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
++            EventBus.SubscribeTargeted<MonsterTakeDamageEvent>(gameObject.GetInstanceID(), OnMonsterDamaged);
+         }
+ 
+         private void OnDisable()
+         {
+-            EventBus.Unsubscribe<DamageEvent>(OnPlayerDamaged);
+-            EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
++            EventBus.UnsubscribeTargeted<MonsterTakeDamageEvent>(gameObject.GetInstanceID(), OnMonsterDamaged);
+             _flashTween?.Kill();
+         }
+ 
+-        private void OnPlayerDamaged(DamageEvent e)
+-        {
+-            TriggerFlash();
+-        }
+-
+         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
+         {
++            if (!EnableVFX) return;
+             TriggerFlash();
+         }
+ 
+@@ -52,26 +48,23 @@ namespace Hotfix.GameSystems.VFX
+             if (_targetRenderer == null) return;
+ 
+             var settings = GameSettings.Instance;
+-            var flashWidth = 0.05f;
+             var flashDuration = settings.HitFlashDuration;
++            var originalColor = _targetRenderer.sharedMaterial.GetColor(ColorId);
+ 
+             _flashTween?.Kill();
+ 
+-            _targetRenderer.GetPropertyBlock(_propBlock);
+-            _propBlock.SetColor(OutlineColorId, settings.HitFlashColor);
+-            _propBlock.SetFloat(OutlineWidthId, flashWidth);
++            _propBlock.SetColor(ColorId, _flashColor);
+             _targetRenderer.SetPropertyBlock(_propBlock);
+ 
+-            var startColor = settings.HitFlashColor;
+-            _flashTween = DOTween.To(() => flashWidth, width =>
++            var current = _flashColor;
++            _flashTween = DOTween.To(() => current, color =>
+             {
++                current = color;
+                 if (_targetRenderer == null) return;
+                 _targetRenderer.GetPropertyBlock(_propBlock);
+-                _propBlock.SetFloat(OutlineWidthId, width);
+-                float t = 1f - width / flashWidth;
+-                _propBlock.SetColor(OutlineColorId, Color.Lerp(startColor, Color.clear, t));
++                _propBlock.SetColor(ColorId, color);
+                 _targetRenderer.SetPropertyBlock(_propBlock);
+-            }, 0f, flashDuration).SetTarget(_targetRenderer);
++            }, originalColor, flashDuration).SetTarget(_targetRenderer);
+         }
+ 
+         private void OnDestroy()
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/HitParticleController.cs b/Assets/Scripts/Hotfix/GameSystems/VFX/HitParticleController.cs
+index 3f19ebc..9dd4faa 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/HitParticleController.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/HitParticleController.cs
+@@ -1,3 +1,5 @@
++using System.Collections;
++using System.Collections.Generic;
+ using Hotfix.GameSystems.Skills;
+ using Hotfix.GameSystems.Sys3C.Core.Events;
+ using Hotfix.GameSystems.Sys3C.Core.Pool;
+@@ -7,6 +9,8 @@ namespace Hotfix.GameSystems.VFX
+ {
+     public class HitParticleController : MonoBehaviour
+     {
++        public static bool EnableVFX = false;
++
+         [SerializeField] private GameObject _normalHitParticles;
+         [SerializeField] private GameObject _criticalHitParticles;
+         [SerializeField] private GameObject _slashBloodTrailPrefab;
+@@ -16,6 +20,10 @@ namespace Hotfix.GameSystems.VFX
+ 
+         private static ComponentPool<ParticleSystem> _normalPool;
+         private static ComponentPool<ParticleSystem> _criticalPool;
++        private static readonly Queue<GameObject> _sparkPool = new Queue<GameObject>();
++        private static readonly Queue<GameObject> _shockwavePool = new Queue<GameObject>();
++        private const int MaxPooledPerType = 8;
++
+         private bool _warnedMissingPrefab;
+ 
+         private static ComponentPool<SlashBloodTrail> _trailPool;
+@@ -29,10 +37,14 @@ namespace Hotfix.GameSystems.VFX
+         private void OnDisable()
+         {
+             EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
++            while (_sparkPool.Count > 0) Destroy(_sparkPool.Dequeue());
++            while (_shockwavePool.Count > 0) Destroy(_shockwavePool.Dequeue());
+         }
+ 
+         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
+         {
++            if (!EnableVFX) return;
++
+             var prefab = e.IsCritical && _criticalHitParticles != null
+                 ? _criticalHitParticles : _normalHitParticles;
+ 
+@@ -83,10 +95,38 @@ namespace Hotfix.GameSystems.VFX
+ 
+         private void SpawnAtHit(GameObject prefab, Vector3 pos, Vector3 dir)
+         {
+-            var go = Instantiate(prefab, pos, Quaternion.identity);
++            var pool = prefab == _hitSparkBurstPrefab ? _sparkPool : _shockwavePool;
++
++            GameObject go;
++            if (pool.Count > 0)
++            {
++                go = pool.Dequeue();
++                go.SetActive(true);
++            }
++            else
++            {
++                go = Instantiate(prefab);
++            }
++
++            go.transform.position = pos;
+             if (dir != Vector3.zero)
+                 go.transform.forward = dir;
+-            Destroy(go, 1f);
++
++            StartCoroutine(ReturnToPool(go, pool, 1f));
++        }
++
++        private System.Collections.IEnumerator ReturnToPool(GameObject go, Queue<GameObject> pool, float delay)
++        {
++            yield return new WaitForSeconds(delay);
++            if (pool.Count < MaxPooledPerType)
++            {
++                go.SetActive(false);
++                pool.Enqueue(go);
++            }
++            else
++            {
++                Destroy(go);
++            }
+         }
+ 
+         private ComponentPool<ParticleSystem> GetOrCreatePool(GameObject prefab, bool isCritical)
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs b/Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs
+index d6759c6..e31d6b6 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs
+@@ -9,6 +9,8 @@ namespace Hotfix.GameSystems.VFX
+ {
+     public class HitStopManager : MonoBehaviour
+     {
++        public static bool EnableVFX = false;
++
+         [SerializeField] private HitFeedbackProfile _profile;
+         [SerializeField] private Animator _playerAnimator;
+ 
+@@ -32,6 +34,7 @@ namespace Hotfix.GameSystems.VFX
+ 
+         private void OnHit(MonsterTakeDamageEvent e)
+         {
++            if (!EnableVFX) return;
+             float duration = e.SkillId > 0 ? _profile.SkillHitStop : _profile.NormalHitStop;
+             if (e.IsCritical) duration += _profile.CritHitStopBonus;
+             duration += (e.ComboIndex - 1) * _profile.ComboHitStopBonus;
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs.meta b/Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs.meta
+new file mode 100644
+index 0000000..f3ef3e7
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 110818233bdf9d149a033476379f21e1
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/IceBurstVFX.cs b/Assets/Scripts/Hotfix/GameSystems/VFX/IceBurstVFX.cs
+index f806730..1ab7c8f 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/IceBurstVFX.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/IceBurstVFX.cs
+@@ -1,3 +1,4 @@
++using System.Collections.Generic;
+ using Hotfix.GameSystems.Skills;
+ using Hotfix.GameSystems.Skills.Events;
+ using UnityEngine;
+@@ -6,9 +7,14 @@ namespace Hotfix.GameSystems.VFX
+ {
+     public class IceBurstVFX : MonoBehaviour
+     {
++        public static bool EnableVFX = false;
++
+         [SerializeField] private int[] _watchSkillIds;
+         [SerializeField] private GameObject _iceBurstPrefab;
+ 
++        private static readonly Queue<GameObject> _pool = new Queue<GameObject>();
++        private const int MaxPooled = 4;
++
+         private void OnEnable()
+         {
+             EventBus.Subscribe<SkillHitTargetEvent>(OnHitTarget);
+@@ -17,11 +23,14 @@ namespace Hotfix.GameSystems.VFX
+         private void OnDisable()
+         {
+             EventBus.Unsubscribe<SkillHitTargetEvent>(OnHitTarget);
++            // Clean up pool
++            while (_pool.Count > 0) Destroy(_pool.Dequeue());
+         }
+ 
+         private bool WatchesSkill(int skillId)
+         {
+-            if (_watchSkillIds == null || _watchSkillIds.Length == 0) return true;
++            if (_watchSkillIds == null || _watchSkillIds.Length == 0)
++                return skillId == (int)Skills.Definition.SkillID.SkillR;
+             foreach (var id in _watchSkillIds)
+                 if (id == skillId) return true;
+             return false;
+@@ -29,21 +38,43 @@ namespace Hotfix.GameSystems.VFX
+ 
+         private void OnHitTarget(SkillHitTargetEvent e)
+         {
++            if (!EnableVFX) return;
+             if (!WatchesSkill(e.SkillId)) return;
++            if (_iceBurstPrefab == null) return;
++
++            GameObject instance;
++            if (_pool.Count > 0)
++            {
++                instance = _pool.Dequeue();
++                instance.SetActive(true);
++            }
++            else
++            {
++                instance = Instantiate(_iceBurstPrefab);
++            }
+ 
+-            if (_iceBurstPrefab != null)
++            instance.transform.position = e.HitPosition;
++            instance.transform.rotation = Quaternion.identity;
++
++            var ps = instance.GetComponent<ParticleSystem>();
++            float lifetime = ps != null
++                ? ps.main.duration + ps.main.startLifetime.constantMax
++                : 2f;
++
++            StartCoroutine(ReturnToPool(instance, lifetime));
++        }
++
++        private System.Collections.IEnumerator ReturnToPool(GameObject instance, float delay)
++        {
++            yield return new WaitForSeconds(delay);
++            if (_pool.Count < MaxPooled)
++            {
++                instance.SetActive(false);
++                _pool.Enqueue(instance);
++            }
++            else
+             {
+-                var instance = Instantiate(_iceBurstPrefab, e.HitPosition, Quaternion.identity);
+-                var ps = instance.GetComponent<ParticleSystem>();
+-                if (ps != null)
+-                {
+-                    ps.Play();
+-                    Destroy(instance, ps.main.duration + ps.main.startLifetime.constantMax);
+-                }
+-                else
+-                {
+-                    Destroy(instance, 2f);
+-                }
++                Destroy(instance);
+             }
+         }
+     }
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/SkillFreezeEffector.cs b/Assets/Scripts/Hotfix/GameSystems/VFX/SkillFreezeEffector.cs
+index d8e2595..588830b 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/SkillFreezeEffector.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/SkillFreezeEffector.cs
+@@ -10,6 +10,9 @@ namespace Hotfix.GameSystems.VFX
+         [SerializeField] private int[] _watchSkillIds;
+         [SerializeField] private float _freezeDuration = 2f;
+ 
++        // Reuse buffer to avoid per-hit array allocation in OverlapSphere
++        private static readonly Collider[] _buffer = new Collider[16];
++
+         private void OnEnable()
+         {
+             EventBus.Subscribe<SkillHitTargetEvent>(OnHitTarget);
+@@ -22,7 +25,8 @@ namespace Hotfix.GameSystems.VFX
+ 
+         private bool WatchesSkill(int skillId)
+         {
+-            if (_watchSkillIds == null || _watchSkillIds.Length == 0) return true;
++            if (_watchSkillIds == null || _watchSkillIds.Length == 0)
++                return skillId == (int)Skills.Definition.SkillID.SkillR;
+             foreach (var id in _watchSkillIds)
+                 if (id == skillId) return true;
+             return false;
+@@ -32,10 +36,10 @@ namespace Hotfix.GameSystems.VFX
+         {
+             if (!e.IsFullCharge || !WatchesSkill(e.SkillId)) return;
+ 
+-            var colliders = Physics.OverlapSphere(e.HitPosition, 2f);
+-            foreach (var col in colliders)
++            int count = Physics.OverlapSphereNonAlloc(e.HitPosition, 2f, _buffer);
++            for (int i = 0; i < count; i++)
+             {
+-                if (col.TryGetComponent(out IEffectTarget target))
++                if (_buffer[i].TryGetComponent(out IEffectTarget target))
+                 {
+                     var freezeEffect = new StunEffectData
+                     {
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/SlashBloodTrail.cs.meta b/Assets/Scripts/Hotfix/GameSystems/VFX/SlashBloodTrail.cs.meta
+new file mode 100644
+index 0000000..a86a880
+--- /dev/null
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/SlashBloodTrail.cs.meta
+@@ -0,0 +1,11 @@
++fileFormatVersion: 2
++guid: 279ad6bec2dd3124d92854f0982551a0
++MonoImporter:
++  externalObjects: {}
++  serializedVersion: 2
++  defaultReferences: []
++  executionOrder: 0
++  icon: {instanceID: 0}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/VFX.asmdef b/Assets/Scripts/Hotfix/GameSystems/VFX/VFX.asmdef
+deleted file mode 100644
+index 15f2f41..0000000
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/VFX.asmdef
++++ /dev/null
+@@ -1,20 +0,0 @@
+-{
+-    "name": "Hotfix.GameSystems.VFX",
+-    "rootNamespace": "Hotfix.GameSystems.VFX",
+-    "references": [
+-        "DataDefinition",
+-        "Hotfix.GameSystems.Skills",
+-        "DOTween.Modules",
+-        "Unity.TextMeshPro",
+-        "Hotfix.GameSystems.Sys3C.Core3C"
+-    ],
+-    "includePlatforms": [],
+-    "excludePlatforms": [],
+-    "allowUnsafeCode": false,
+-    "overrideReferences": false,
+-    "precompiledReferences": [],
+-    "autoReferenced": true,
+-    "defineConstraints": [],
+-    "versionDefines": [],
+-    "noEngineReferences": false
+-}
+\ No newline at end of file
+diff --git a/Assets/Scripts/Hotfix/GameSystems/VFX/WeaponMistParticles.cs b/Assets/Scripts/Hotfix/GameSystems/VFX/WeaponMistParticles.cs
+index cdb629d..f8be720 100644
+--- a/Assets/Scripts/Hotfix/GameSystems/VFX/WeaponMistParticles.cs
++++ b/Assets/Scripts/Hotfix/GameSystems/VFX/WeaponMistParticles.cs
+@@ -4,15 +4,11 @@ namespace Hotfix.GameSystems.VFX
+ {
+     public class WeaponMistParticles : MonoBehaviour
+     {
++        [SerializeField] private GameObject _mistPrefab;
++
+         private GameObject _childGo;
+         private ParticleSystem _ps;
+         private Material _cachedMaterial;
+-        private ParticleSystem.EmissionModule _emission;
+-        private ParticleSystem.MainModule _main;
+-        private ParticleSystem.ShapeModule _shape;
+-        private ParticleSystem.VelocityOverLifetimeModule _velOverLifetime;
+-        private ParticleSystem.NoiseModule _noise;
+-        private ParticleSystem.ColorOverLifetimeModule _colorOverLifetime;
+ 
+         public void Init(WeaponElementConfig config)
+         {
+@@ -25,66 +21,51 @@ namespace Hotfix.GameSystems.VFX
+             if (_ps != null)
+                 return;
+ 
+-            _childGo = new GameObject("_weaponMistParticles");
+-            _childGo.transform.SetParent(transform, false);
++            if (_mistPrefab == null)
++            {
++                Debug.LogError("[WeaponMistParticles] _mistPrefab is not assigned");
++                return;
++            }
++
++            _childGo = Instantiate(_mistPrefab, transform);
++            _childGo.name = "_weaponMistParticles";
+             _childGo.transform.localPosition = WeaponElementConfig.GetAxisVector(config.Axis) * config.BladeOffset;
+-            _ps = _childGo.AddComponent<ParticleSystem>();
++            _ps = _childGo.GetComponent<ParticleSystem>();
+             _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+ 
+-            _main = _ps.main;
+-            _main.startLifetime = new ParticleSystem.MinMaxCurve(config.MistLifetimeMin, config.MistLifetimeMax);
+-            _main.startSize = new ParticleSystem.MinMaxCurve(config.MistStartSizeMin, config.MistStartSizeMax);
+-            _main.startSpeed = 0f;
+-            _main.simulationSpace = ParticleSystemSimulationSpace.Local;
+-            _main.startColor = config.MistStartColor;
+-            int maxP = config.Quality == VFXQualityLevel.Low ? config.MaxParticlesLow : config.MaxParticlesHigh;
+-            _main.maxParticles = maxP;
+-            _main.duration = 999f;
+-            _main.loop = true;
+-
+-            _emission = _ps.emission;
+-            float rate = config.Quality == VFXQualityLevel.Low ? config.EmissionRateLow : config.MistEmissionRate;
+-            _emission.rateOverTime = rate;
+-
+-            _shape = _ps.shape;
+-            _shape.shapeType = (ParticleSystemShapeType)17; // Cylinder
+-            _shape.radius = config.MistShapeRadius;
+-            _shape.radiusThickness = 0.3f;
+-            _shape.arc = 360f;
+-            _shape.arcMode = ParticleSystemShapeMultiModeValue.Random;
+-            _shape.scale = new Vector3(1f, config.MistShapeHeight / 2f, 1f);
+-
+-            _velOverLifetime = _ps.velocityOverLifetime;
+-            _velOverLifetime.enabled = true;
+-            // All axes must share the same curve mode — set linear X/Y/Z explicitly
+-            _velOverLifetime.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+-            _velOverLifetime.y = new ParticleSystem.MinMaxCurve(0f, 0f);
+-            _velOverLifetime.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+-            _velOverLifetime.orbitalZ = new ParticleSystem.MinMaxCurve(config.MistOrbitalSpeedMin, config.MistOrbitalSpeedMax);
+-            _velOverLifetime.radial = new ParticleSystem.MinMaxCurve(-0.3f, 0.3f);
+-            _velOverLifetime.space = ParticleSystemSimulationSpace.Local;
+-
+-            _colorOverLifetime = _ps.colorOverLifetime;
+-            _colorOverLifetime.enabled = true;
+-            var grad = new Gradient();
++            // Override config-dependent properties
++            var main = _ps.main;
++            main.startLifetime = new ParticleSystem.MinMaxCurve(config.MistLifetimeMin, config.MistLifetimeMax);
++            main.startSize = new ParticleSystem.MinMaxCurve(config.MistStartSizeMin, config.MistStartSizeMax);
++            main.startColor = config.MistStartColor;
++            main.maxParticles = config.Quality == VFXQualityLevel.Low ? config.MaxParticlesLow : config.MaxParticlesHigh;
++
++            var emission = _ps.emission;
++            emission.rateOverTime = config.Quality == VFXQualityLevel.Low ? config.EmissionRateLow : config.MistEmissionRate;
++
++            var shape = _ps.shape;
++            shape.radius = config.MistShapeRadius;
++            shape.scale = new Vector3(1f, config.MistShapeHeight / 2f, 1f);
++
++            var vel = _ps.velocityOverLifetime;
++            vel.orbitalZ = new ParticleSystem.MinMaxCurve(config.MistOrbitalSpeedMin, config.MistOrbitalSpeedMax);
++
++            var colorLife = _ps.colorOverLifetime;
++            var grad = colorLife.color.gradient;
+             grad.SetKeys(
+                 new[] { new GradientColorKey(config.MistStartColor, 0f), new GradientColorKey(config.MistStartColor, 0.3f),
+                         new GradientColorKey(config.MistEndColor, 1f) },
+-                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.7f, 0.3f), new GradientAlphaKey(0f, 1f) });
+-            _colorOverLifetime.color = grad;
++                grad.alphaKeys);
++            colorLife.color = grad;
+ 
+-            _noise = _ps.noise;
+-            _noise.enabled = true;
+-            _noise.strength = config.MistNoiseStrength;
+-            _noise.frequency = config.MistNoiseFrequency;
+-            _noise.scrollSpeed = 0.3f;
++            var noise = _ps.noise;
++            noise.strength = config.MistNoiseStrength;
++            noise.frequency = config.MistNoiseFrequency;
+ 
+             var renderer = _childGo.GetComponent<ParticleSystemRenderer>();
+-            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+-            _cachedMaterial = GetDefaultAdditiveMaterial();
++            _cachedMaterial = renderer.material;
+             if (config.ParticleTexture != null)
+                 _cachedMaterial.mainTexture = config.ParticleTexture;
+-            renderer.material = _cachedMaterial;
+ 
+             _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+         }
+@@ -112,19 +93,5 @@ namespace Hotfix.GameSystems.VFX
+                 _childGo = null;
+             }
+         }
+-
+-        private static Material GetDefaultAdditiveMaterial()
+-        {
+-            var mat = new Material(Shader.Find("Mobile/Particles/Additive"));
+-            mat.SetInt("_BlendOp", 0);
+-            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+-            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
+-            mat.SetInt("_ZWrite", 0);
+-            mat.EnableKeyword("_EMISSION");
+-            mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+-            mat.color = Color.white;
+-            mat.SetColor("_EmissionColor", Color.white);
+-            return mat;
+-        }
+     }
+ }

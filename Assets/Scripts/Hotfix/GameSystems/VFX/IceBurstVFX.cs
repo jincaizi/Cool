@@ -27,14 +27,7 @@ namespace Hotfix.GameSystems.VFX
             while (_pool.Count > 0) Destroy(_pool.Dequeue());
         }
 
-        private bool WatchesSkill(int skillId)
-        {
-            if (_watchSkillIds == null || _watchSkillIds.Length == 0)
-                return skillId == (int)Skills.Definition.SkillID.SkillR;
-            foreach (var id in _watchSkillIds)
-                if (id == skillId) return true;
-            return false;
-        }
+        private bool WatchesSkill(int skillId) => SkillWatcher.Matches(_watchSkillIds, skillId);
 
         private void OnHitTarget(SkillHitTargetEvent e)
         {

@@ -38,7 +38,6 @@ namespace Hotfix.GameSystems.Monster
             _sorted = false;
         }
 
-        // Enable/disable brief invincibility after being hit.
         // Called by HitState.OnEnter and HitState.OnExit.
         public void SetIFrameActive(bool active)
         {
@@ -52,7 +51,6 @@ namespace Hotfix.GameSystems.Monster
         {
             ctx.CurrentDamage = ctx.RawDamage;
 
-            // Phase 1: Run all modifiers in priority order
             if (!_sorted)
             {
                 _modifiers.Sort((a, b) => a.Priority.CompareTo(b.Priority));
@@ -82,11 +80,11 @@ namespace Hotfix.GameSystems.Monster
                 }
             }
 
-            // Phase 2: Gate check — if blocked, skip damage but still notify
+            // If blocked, skip damage but still notify caller
             if (merged.WasBlocked)
                 return merged;
 
-            // Phase 3: Apply damage
+            // Apply damage
             if (_stats.IsDead)
                 return merged;
 

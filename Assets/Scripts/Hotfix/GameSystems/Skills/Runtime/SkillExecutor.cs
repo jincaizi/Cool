@@ -17,6 +17,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
     {
         public static bool EnableVFX = false;
         private static readonly Collider[] s_HitBuffer = new Collider[32];
+        private static readonly Collider[] s_AoeBuffer = new Collider[64];
 
         private readonly IEffectTarget _owner;
         private readonly SkillData _skillData;
@@ -405,10 +406,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 DetectConeTargets(center, targets, shape);
             else
             {
-                var colliders = Physics.OverlapSphere(center, shape.AreaRadius, shape.TargetMask);
-                foreach (var collider in colliders)
+                int count = Physics.OverlapSphereNonAlloc(center, shape.AreaRadius, s_AoeBuffer, shape.TargetMask);
+                for (int i = 0; i < count; i++)
                 {
-                    if (collider.TryGetComponent(out IEffectTarget target) && target != _owner)
+                    if (s_AoeBuffer[i].TryGetComponent(out IEffectTarget target) && target != _owner)
                         targets.Add(target);
                 }
             }
@@ -419,10 +420,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
             Vector3 ownerPos = _owner.transform.position;
             Vector3 directionToCenter = (center - ownerPos).normalized;
             float halfAngle = shape.Angle / 2f;
-            var colliders = Physics.OverlapSphere(ownerPos, shape.Range, shape.TargetMask);
-            foreach (var collider in colliders)
+            int count = Physics.OverlapSphereNonAlloc(ownerPos, shape.Range, s_AoeBuffer, shape.TargetMask);
+            for (int i = 0; i < count; i++)
             {
-                if (collider.TryGetComponent(out IEffectTarget target) && target != _owner)
+                if (s_AoeBuffer[i].TryGetComponent(out IEffectTarget target) && target != _owner)
                 {
                     Vector3 dirToTarget = (target.transform.position - ownerPos).normalized;
                     float angle = Vector3.Angle(directionToCenter, dirToTarget);

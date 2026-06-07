@@ -33,8 +33,6 @@ namespace Hotfix.GameSystems.Monster
             _currentState.OnEnter(ctx);
         }
 
-        // Phase 1+2: Evaluate global transitions, then state-specific.
-        // Executes the transition immediately if one is returned.
         public void EvaluateAndTransition(AIContext ctx)
         {
             var nextStateType = CheckGlobalTransitions(ctx)
@@ -52,7 +50,6 @@ namespace Hotfix.GameSystems.Monster
             }
         }
 
-        // Phase 3: Execute the transition. OnExit(old) → swap → OnEnter(new).
         public void TransitionTo(AIStateBase nextState, AIContext ctx)
         {
             if (_currentState == nextState) return;

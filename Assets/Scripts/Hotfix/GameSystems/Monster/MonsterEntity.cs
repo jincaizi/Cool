@@ -159,7 +159,8 @@ namespace Hotfix.GameSystems.Monster
         {
             if (_stats.IsDead) return;
 
-            // Build damage context (struct, zero alloc)
+            int myId = GetInstanceID();
+
             var ctx = new DamageContext
             {
                 RawData = data,
@@ -168,31 +169,27 @@ namespace Hotfix.GameSystems.Monster
                 Flags = data.WasCritical ? DamageFlags.IsCritical : DamageFlags.None,
             };
 
-            // Run through pipeline: Modifier Chain → Gate Check → ApplyDamage
             var result = _damagePipeline.Process(ref ctx);
 
-            // Notify AI — may transition to Hit state based on HitReactLevel
             _brain.OnDamageReceived(result, hitDirection);
 
-            // Post-damage events (VFX, floating text) — emit regardless of block/reduce
-            EmitDamageEvents(data, hitDirection, result);
+            EmitDamageEvents(myId, data, hitDirection, result);
 
-            // Knockback — only if pipeline says it should happen
             if (result.ShouldKnockback && data.KnockbackForce > 0)
             {
-                EventBus.TargetedEmit(GetInstanceID(), new KnockbackEvent(
-                    GetInstanceID(),
+                EventBus.TargetedEmit(myId, new KnockbackEvent(
+                    myId,
                     hitDirection,
                     data.KnockbackForce
                 ));
             }
         }
 
-        private void EmitDamageEvents(DamageBlock data, Vector3 hitDirection, DamageResult result)
+        private void EmitDamageEvents(int entityId, DamageBlock data, Vector3 hitDirection, DamageResult result)
         {
             var displayDamage = result.WasBlocked ? 0 : Mathf.CeilToInt(result.FinalDamage);
             var damageEvent = new MonsterTakeDamageEvent(
-                GetInstanceID(),
+                entityId,
                 transform.position + Vector3.up * 1.2f,
                 hitDirection,
                 displayDamage,
@@ -201,8 +198,9 @@ namespace Hotfix.GameSystems.Monster
                 data.ComboIndex
             );
             EventBus.Emit(damageEvent);
-            EventBus.TargetedEmit(GetInstanceID(), damageEvent);
+            EventBus.TargetedEmit(entityId, damageEvent);
         }
+
 
         private void HandleDeath()
         {

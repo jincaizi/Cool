@@ -80508,3 +80508,8 @@ production/session-logs/agent-audit.log
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260608_043541
+### Commits
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+---
+

@@ -17,7 +17,7 @@ namespace Hotfix.GameSystems.Monster
     //   CurrentState, PreviousState
     //
     // ── Owned by specific State ──
-    //   BlockCount (DefendState), CurrentAttackIndex (AttackState)
+    //   BlockCount (DefendState)
     //
     // ── Owned by DamagePipeline ──
     //   LastHitResult, LastHitDirection, LastKnockbackForce
@@ -46,9 +46,6 @@ namespace Hotfix.GameSystems.Monster
 
         // ── DefendState-owned ──
         public int BlockCount;
-
-        // ── AttackState-owned ──
-        public int CurrentAttackIndex;
 
         // ── DamagePipeline-owned ──
         public DamageResult LastHitResult;
