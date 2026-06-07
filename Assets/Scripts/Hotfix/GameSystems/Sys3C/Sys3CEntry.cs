@@ -198,48 +198,53 @@ namespace Hotfix.GameSystems.Sys3C
                 _cc.RequestJump();
             }
 
-            // Press → light attack. Complete + held → canFireHeavy. Release → fire heavy.
-            if (_inputManager.IsAttackJustPressed())
+            // 防御期间禁止攻击和技能
+            if (!_cc.IsDefending)
             {
-                _skillCoordinator.HandleLightAttack();
-                _canFireHeavy = false;
-            }
-
-            float attackDuration = _inputManager.GetAttackReleaseDuration();
-            if (attackDuration >= 0f && _canFireHeavy)
-            {
-                _skillCoordinator.HandleHeavyFire();
-                _canFireHeavy = false;
-            }
-
-            if (_inputManager.IsSkill2Pressed())
-            {
-                int skillQId = GetSkillQId();
-                if (skillQId > 0)
+                // Press → light attack. Complete + held → canFireHeavy. Release → fire heavy.
+                if (_inputManager.IsAttackJustPressed())
                 {
-                    var input = SkillInput.SkillToPosition(skillQId, transform.position + transform.forward * 5f);
-                    _skillCoordinator.HandleInput(input);
+                    _skillCoordinator.HandleLightAttack();
+                    _canFireHeavy = false;
+                }
+
+                float attackDuration = _inputManager.GetAttackReleaseDuration();
+                if (attackDuration >= 0f && _canFireHeavy)
+                {
+                    _skillCoordinator.HandleHeavyFire();
+                    _canFireHeavy = false;
+                }
+
+                if (_inputManager.IsSkill2Pressed())
+                {
+                    int skillQId = GetSkillQId();
+                    if (skillQId > 0)
+                    {
+                        var input = SkillInput.SkillToPosition(skillQId, transform.position + transform.forward * 5f);
+                        _skillCoordinator.HandleInput(input);
+                    }
+                }
+
+                if (_inputManager.IsSkill3Pressed())
+                {
+                    int skillRId = GetSkillRId();
+                    if (skillRId > 0)
+                    {
+                        var input = SkillInput.SkillToPosition(skillRId, transform.position + transform.forward * 5f);
+                        _skillCoordinator.HandleInput(input);
+                    }
+                }
+
+                if (_inputManager.IsSkill3Released())
+                {
+                    var executor = _skillCoordinator.CurrentSkill;
+                    if (executor != null && executor.CurrentSubState == Skills.Definition.SkillSubState.Charging)
+                    {
+                        executor.ReleaseCharge();
+                    }
                 }
             }
 
-            if (_inputManager.IsSkill3Pressed())
-            {
-                int skillRId = GetSkillRId();
-                if (skillRId > 0)
-                {
-                    var input = SkillInput.SkillToPosition(skillRId, transform.position + transform.forward * 5f);
-                    _skillCoordinator.HandleInput(input);
-                }
-            }
-
-            if (_inputManager.IsSkill3Released())
-            {
-                var executor = _skillCoordinator.CurrentSkill;
-                if (executor != null && executor.CurrentSubState == Skills.Definition.SkillSubState.Charging)
-                {
-                    executor.ReleaseCharge();
-                }
-            }
         }
 
         private string _lastSkillTrigger;
