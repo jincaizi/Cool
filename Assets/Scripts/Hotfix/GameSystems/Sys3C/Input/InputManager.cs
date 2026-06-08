@@ -167,12 +167,23 @@ namespace Hotfix.GameSystems.Sys3C.Input
             return UnityInput.GetKey(KeyCode.LeftShift);
         }
 
+        // UI 按钮设置的防御状态（手游平台使用）
+        private bool _defendHeldFromUI;
+
         /// <summary>
-        /// 防御键按住（持续状态）— 鼠标右键
+        /// 由 UI 按钮调用，设置防御状态。手游平台通过按钮的按下/释放事件调用。
+        /// </summary>
+        public void SetDefendHeld(bool held)
+        {
+            _defendHeldFromUI = held;
+        }
+
+        /// <summary>
+        /// 防御键按住（持续状态）— PC/Editor 鼠标右键，或手游 UI 按钮
         /// </summary>
         public bool IsDefendHeld()
         {
-            return UnityInput.GetMouseButton(1);  // Right mouse button
+            return _defendHeldFromUI || UnityInput.GetMouseButton(1);
         }
 
         /// <summary>
