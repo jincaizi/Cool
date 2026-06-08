@@ -291,7 +291,7 @@ namespace Hotfix.GameSystems.Sys3C
                 return;
 
             // 立即设 AttackState=0 让 Animator 切回 Idle，不等 Cleanup 走完
-            Animator.SetInteger(AnimHashes.AttackState, (int)FSM.AttackState.Idle);
+            Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Idle);
             CleanupSkillAnimation();
         }
 
@@ -308,7 +308,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             Animator.ResetTrigger(AnimHashes.Attack);
             Animator.SetLayerWeight(1, 0f);
-            Animator.SetInteger(AnimHashes.AttackState, (int)FSM.AttackState.Idle);
+            Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Idle);
             _cc.LockMovement = false;
             _cc.LockRotation = false;
 

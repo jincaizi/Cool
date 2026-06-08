@@ -6,13 +6,13 @@ using Hotfix.GameSystems.Skills.Effect;
 
 namespace Hotfix.GameSystems.Monster
 {
-    // AttackState lifecycle:
+    // MonsterAttackState lifecycle:
     //   Windup (timer < WindupTime) → Active (resolve damage) → Recovery (timer < total) → Exit
     //
     // Damage is resolved ONCE at the Windup→Active boundary.
     // Timer-based (not animation callback) for simplicity.
     // For frame-accurate timing, replace timer check with animation event callback in the future.
-    public class AttackState : AIStateBase
+    public class MonsterAttackState : AIStateBase
     {
         private readonly List<IDamageable> _hitBuffer = new List<IDamageable>(8);
         private bool _damageDealt;

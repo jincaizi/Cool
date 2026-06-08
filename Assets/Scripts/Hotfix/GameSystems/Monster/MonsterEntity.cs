@@ -105,7 +105,7 @@ namespace Hotfix.GameSystems.Monster
                 { MonsterAIState.Idle, new IdleState() },
                 { MonsterAIState.Patrol, patrolState },
                 { MonsterAIState.Chase, new ChaseState() },
-                { MonsterAIState.Attack, new AttackState() },
+                { MonsterAIState.Attack, new MonsterAttackState() },
                 { MonsterAIState.Hit, hitState },
                 { MonsterAIState.Death, new DeathState() },
                 { MonsterAIState.Defend, new DefendState() },

@@ -80528,3 +80528,324 @@ c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
 fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
 ---
 
+## Session End: 20260608_051009
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+---
+
+## Session End: 20260608_051801
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_051827
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_051929
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_052015
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_052043
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_052218
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_052337
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_052453
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_052859
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_053335
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_053701
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_054056
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_054224
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_054832
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_055238
+### Commits
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_055417
+### Commits
+d7a6304 docs: add character defend skill design spec
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_055617
+### Commits
+0a555f9 docs: add defend skill implementation plan (9 tasks, 12 files)
+d7a6304 docs: add character defend skill design spec
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_061503
+### Commits
+2bc1b7a fix: use CalculatedDamage and set ActiveLayer on EnterDefendHit
+f01ea4e fix: apply HP damage on shield break (was being skipped by early return)
+f5858ff feat: wire defend input and DefendModifier into Sys3CEntry damage pipeline
+9918de9 feat: add IsDefendHeld() to InputManager for right-click defend
+936ea09 fix: add missing SetActiveLayer(Hit) in HandleShieldBreak
+c61b79c feat: add EnterDefend/ExitDefend/HandleShieldBreak to FSMManager
+6aaa784 refactor: make DefendModifier generic with DefendConfig struct
+1c35ba8 feat: add shield durability, defend enter/exit, speed limiting to CharacterController
+da3b9d2 feat: add DefendHit state to HitFSM with EnterDefendHit method
+7f713ac feat: add Defend state to BaseFSM and StateTransitionTable
+1a39303 feat: add IsDefending field and animator hash for defend skill
+0a555f9 docs: add defend skill implementation plan (9 tasks, 12 files)
+d7a6304 docs: add character defend skill design spec
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_065245
+### Commits
+2bc1b7a fix: use CalculatedDamage and set ActiveLayer on EnterDefendHit
+f01ea4e fix: apply HP damage on shield break (was being skipped by early return)
+f5858ff feat: wire defend input and DefendModifier into Sys3CEntry damage pipeline
+9918de9 feat: add IsDefendHeld() to InputManager for right-click defend
+936ea09 fix: add missing SetActiveLayer(Hit) in HandleShieldBreak
+c61b79c feat: add EnterDefend/ExitDefend/HandleShieldBreak to FSMManager
+6aaa784 refactor: make DefendModifier generic with DefendConfig struct
+1c35ba8 feat: add shield durability, defend enter/exit, speed limiting to CharacterController
+da3b9d2 feat: add DefendHit state to HitFSM with EnterDefendHit method
+7f713ac feat: add Defend state to BaseFSM and StateTransitionTable
+1a39303 feat: add IsDefending field and animator hash for defend skill
+0a555f9 docs: add defend skill implementation plan (9 tasks, 12 files)
+d7a6304 docs: add character defend skill design spec
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_065604
+### Commits
+2bc1b7a fix: use CalculatedDamage and set ActiveLayer on EnterDefendHit
+f01ea4e fix: apply HP damage on shield break (was being skipped by early return)
+f5858ff feat: wire defend input and DefendModifier into Sys3CEntry damage pipeline
+9918de9 feat: add IsDefendHeld() to InputManager for right-click defend
+936ea09 fix: add missing SetActiveLayer(Hit) in HandleShieldBreak
+c61b79c feat: add EnterDefend/ExitDefend/HandleShieldBreak to FSMManager
+6aaa784 refactor: make DefendModifier generic with DefendConfig struct
+1c35ba8 feat: add shield durability, defend enter/exit, speed limiting to CharacterController
+da3b9d2 feat: add DefendHit state to HitFSM with EnterDefendHit method
+7f713ac feat: add Defend state to BaseFSM and StateTransitionTable
+1a39303 feat: add IsDefending field and animator hash for defend skill
+0a555f9 docs: add defend skill implementation plan (9 tasks, 12 files)
+d7a6304 docs: add character defend skill design spec
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260608_065819
+### Commits
+1d8cffa fix: block attack and skill input while defending
+2bc1b7a fix: use CalculatedDamage and set ActiveLayer on EnterDefendHit
+f01ea4e fix: apply HP damage on shield break (was being skipped by early return)
+f5858ff feat: wire defend input and DefendModifier into Sys3CEntry damage pipeline
+9918de9 feat: add IsDefendHeld() to InputManager for right-click defend
+936ea09 fix: add missing SetActiveLayer(Hit) in HandleShieldBreak
+c61b79c feat: add EnterDefend/ExitDefend/HandleShieldBreak to FSMManager
+6aaa784 refactor: make DefendModifier generic with DefendConfig struct
+1c35ba8 feat: add shield durability, defend enter/exit, speed limiting to CharacterController
+da3b9d2 feat: add DefendHit state to HitFSM with EnterDefendHit method
+7f713ac feat: add Defend state to BaseFSM and StateTransitionTable
+1a39303 feat: add IsDefending field and animator hash for defend skill
+0a555f9 docs: add defend skill implementation plan (9 tasks, 12 files)
+d7a6304 docs: add character defend skill design spec
+1711e64 fix: pass calculated damage (with stat scaling) through pipeline
+6eaea0b fix: DefendModifier only active in DefendState + increase damage font size
+c21dcfa refactor: simplify — fix code reuse, quality, and efficiency issues
+fdcf89e perf: eliminate EventBus.ToArray() allocation on every Emit call
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260609_062532
+### Commits
+a4d511c feat: add SetDefendHeld() for mobile UI button defend input
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260609_063102
+### Commits
+98cb334 fix: disambiguate AttackState reference between Sys3C.FSM and Monster namespaces
+a4d511c feat: add SetDefendHeld() for mobile UI button defend input
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260609_063222
+### Commits
+98cb334 fix: disambiguate AttackState reference between Sys3C.FSM and Monster namespaces
+a4d511c feat: add SetDefendHeld() for mobile UI button defend input
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
