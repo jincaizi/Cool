@@ -114,19 +114,16 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public void EnterDefend()
         {
             _baseFSM.LockState(BaseState.Defend);
-            _animator.SetBool(AnimHashes.IsDefending, true);
         }
 
         public void ExitDefend()
         {
             _baseFSM.Unlock(BaseState.Idle);
-            _animator.SetBool(AnimHashes.IsDefending, false);
         }
 
         public void HandleShieldBreak(HitData hitData)
         {
             _baseFSM.Unlock(BaseState.Idle);
-            _animator.SetBool(AnimHashes.IsDefending, false);
             _hitFSM.EnterHit(new HitData
             {
                 Damage = hitData.Damage,
