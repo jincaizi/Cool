@@ -131,6 +131,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             Vector3 cameraForward = _camera != null ? _camera.transform.forward : Vector3.forward;
             var command = _inputManager.GetMoveCommand(cameraForward);
+            command.Speed *= _skillCoordinator.GetMoveSpeedMultiplier();
 
             _cc.Update(command);
             ApplyPushVector();
@@ -232,15 +233,6 @@ namespace Hotfix.GameSystems.Sys3C
                     {
                         var input = SkillInput.SkillToPosition(skillRId, transform.position + transform.forward * 5f);
                         _skillCoordinator.HandleInput(input);
-                    }
-                }
-
-                if (_inputManager.IsSkill3Released())
-                {
-                    var executor = _skillCoordinator.CurrentSkill;
-                    if (executor != null && executor.CurrentSubState == Skills.Definition.SkillSubState.Charging)
-                    {
-                        executor.ReleaseCharge();
                     }
                 }
             }
@@ -375,6 +367,7 @@ namespace Hotfix.GameSystems.Sys3C
                     if (_currentHP <= 0)
                     {
                         _currentHP = 0;
+                        _skillCoordinator.InterruptCurrentSkill(Hotfix.GameSystems.Skills.Definition.InterruptionSource.Stun);
                     }
                     return;
                 }
@@ -400,6 +393,7 @@ namespace Hotfix.GameSystems.Sys3C
             if (_currentHP <= 0)
             {
                 _currentHP = 0;
+                _skillCoordinator.InterruptCurrentSkill(Hotfix.GameSystems.Skills.Definition.InterruptionSource.Stun);
             }
         }
 
