@@ -65,6 +65,7 @@ namespace GameSys.EditorTests
             _coordinator.HandleInput(SkillInput.SkillToPosition(SpinId, Vector3.zero));
 
             Assert.AreEqual(0, _buffer.Count, "spin 期间按R永不入缓冲（否则会延迟重施放）");
+            Assert.AreEqual(SkillSubState.Spinning, _coordinator.CurrentSubState, "min 窗口内按R不得取消");
         }
 
         [Test]
@@ -84,6 +85,13 @@ namespace GameSys.EditorTests
 
             _coordinator.HandleInput(SkillInput.SkillToPosition(SpinId, Vector3.zero));
             Assert.AreEqual(0.5f, _coordinator.GetMoveSpeedMultiplier(), 0.0001f, "旋转时返回配置倍率");
+        }
+
+        [Test]
+        public void GetMoveSpeedMultiplier_OtherSkillActive_IsOne()
+        {
+            _coordinator.HandleInput(SkillInput.SkillToPosition(QId, Vector3.zero));
+            Assert.AreEqual(1f, _coordinator.GetMoveSpeedMultiplier(), 0.0001f, "其他技能活跃时倍率为1");
         }
     }
 }
