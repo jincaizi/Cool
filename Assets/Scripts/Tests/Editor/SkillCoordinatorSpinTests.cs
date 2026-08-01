@@ -93,5 +93,16 @@ namespace GameSys.EditorTests
             _coordinator.HandleInput(SkillInput.SkillToPosition(QId, Vector3.zero));
             Assert.AreEqual(1f, _coordinator.GetMoveSpeedMultiplier(), 0.0001f, "其他技能活跃时倍率为1");
         }
+
+        [Test]
+        public void ClearInputBuffer_EmptiesBufferedInput()
+        {
+            _coordinator.HandleInput(SkillInput.SkillToPosition(SpinId, Vector3.zero));
+            _coordinator.HandleInput(SkillInput.SkillToPosition(QId, Vector3.zero));
+            Assert.AreEqual(1, _buffer.Count, "前置：Q 在旋转期间被缓冲");
+
+            _coordinator.ClearInputBuffer();
+            Assert.AreEqual(0, _buffer.Count, "ClearInputBuffer 清空缓冲");
+        }
     }
 }

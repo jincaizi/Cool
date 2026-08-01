@@ -148,18 +148,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
-        /// 释放蓄力（松开蓄力键）
-        /// </summary>
-        public void ReleaseCharge()
-        {
-            if (CurrentSubState == SkillSubState.Charging)
-            {
-                _wasFullCharge = GetChargeProgress() >= 1f;
-                _stateMachine.ReleaseCharge();
-            }
-        }
-
-        /// <summary>
         /// 尝试中断技能
         /// </summary>
         public bool TryInterrupt(InterruptionSource source)

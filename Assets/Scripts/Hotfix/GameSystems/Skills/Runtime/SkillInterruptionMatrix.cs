@@ -105,6 +105,19 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     { InterruptionSource.Stun, true },
                     { InterruptionSource.TimeOut, true }
                 }
+            },
+            {
+                SkillType.Spin, new Dictionary<InterruptionSource, bool>
+                {
+                    { InterruptionSource.MovementInput, false },
+                    { InterruptionSource.BasicAttack, false },
+                    { InterruptionSource.AnotherSkill, false },
+                    { InterruptionSource.DamageTaken, false },     // 旋转霸体
+                    { InterruptionSource.Stun, true },             // 眩晕/死亡可打断
+                    { InterruptionSource.RollDodge, true },        // 可翻滚取消
+                    { InterruptionSource.Parry, true },            // 可被招架
+                    { InterruptionSource.TimeOut, true }
+                }
             }
         };
 

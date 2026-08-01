@@ -131,7 +131,6 @@ namespace Hotfix.GameSystems.Sys3C
 
             Vector3 cameraForward = _camera != null ? _camera.transform.forward : Vector3.forward;
             var command = _inputManager.GetMoveCommand(cameraForward);
-            command.Speed *= _skillCoordinator.GetMoveSpeedMultiplier();
 
             _cc.Update(command);
             ApplyPushVector();
@@ -142,6 +141,7 @@ namespace Hotfix.GameSystems.Sys3C
             // Dynamic movement/rotation control: respect skill settings
             _cc.LockRotation = !_skillCoordinator.CanRotate();
             _cc.LockMovement = !_skillCoordinator.CanMove();
+            _cc.MoveSpeedScale = _skillCoordinator.GetMoveSpeedMultiplier();
 
             // Detect when skill leaves looping state (Charging/Channeling → Execution)
             var curSubState = _skillCoordinator.CurrentSubState;
@@ -367,7 +367,8 @@ namespace Hotfix.GameSystems.Sys3C
                     if (_currentHP <= 0)
                     {
                         _currentHP = 0;
-                        _skillCoordinator.InterruptCurrentSkill(Hotfix.GameSystems.Skills.Definition.InterruptionSource.Stun);
+                        _skillCoordinator.ClearInputBuffer();
+                        _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
                     }
                     return;
                 }
@@ -393,7 +394,8 @@ namespace Hotfix.GameSystems.Sys3C
             if (_currentHP <= 0)
             {
                 _currentHP = 0;
-                _skillCoordinator.InterruptCurrentSkill(Hotfix.GameSystems.Skills.Definition.InterruptionSource.Stun);
+                _skillCoordinator.ClearInputBuffer();
+                _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
             }
         }
 

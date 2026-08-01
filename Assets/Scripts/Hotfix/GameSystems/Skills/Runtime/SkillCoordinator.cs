@@ -371,6 +371,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
         }
 
+        /// <summary>
+        /// 清空输入缓冲（死亡等不可施放场景，防止缓冲技能被意外触发）
+        /// </summary>
+        public void ClearInputBuffer()
+        {
+            _inputBuffer.Clear();
+        }
+
         private void ProcessInputBuffer()
         {
             while (_inputBuffer.TryPeek(out var buffered))

@@ -45,6 +45,11 @@ namespace Hotfix.GameSystems.Sys3C.Character
         private const float MaxShieldDurability = 50f;
         private const float DefendSpeedMultiplier = 0.4f;
 
+        /// <summary>
+        /// 技能/状态移动速度倍率（旋转减速等），每帧由外部设置
+        /// </summary>
+        public float MoveSpeedScale { get; set; } = 1f;
+
         public float ShieldDurabilityPercent =>
             _shieldDurability / MaxShieldDurability;
 
@@ -276,6 +281,9 @@ namespace Hotfix.GameSystems.Sys3C.Character
             // 防御中减速
             if (_isDefending)
                 currentSpeed *= DefendSpeedMultiplier;
+
+            // 技能/状态速度倍率（旋转减速等）
+            currentSpeed *= MoveSpeedScale;
 
             Vector3 moveVelocity = command.MoveDir * currentSpeed;
             moveVelocity.y = _velocity.y;

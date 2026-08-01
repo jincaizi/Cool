@@ -117,12 +117,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
         }
 
-        public void ReleaseCharge()
-        {
-            if (_currentState == SkillSubState.Charging)
-                _isCharging = false;
-        }
-
         public bool Interrupt(InterruptionSource source)
         {
             if (!CanBeInterrupted(source)) return false;
