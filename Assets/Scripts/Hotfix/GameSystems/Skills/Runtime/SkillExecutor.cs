@@ -35,6 +35,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private IDashComponent _dashComponent;
         private bool _wasFullCharge;
         private DamageBlock _lastDamageBlock;
+        private readonly SpinSkillData _spinData;
+        private SpinHitTracker _spinHitTracker;
 
         // 回调
         public event Action<int> OnHitboxFrame;              // 判定帧触发
@@ -59,6 +61,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _owner = owner;
             _skillData = data;
             _interruptionMatrix = interruptionMatrix ?? new SkillInterruptionMatrix();
+            _spinData = data as SpinSkillData;
             _stateMachine = new SkillStateMachine(data);
 
             _stateMachine.OnHitboxFrame += OnHitboxTriggered;
@@ -109,6 +112,22 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 EventBus.Emit(new SkillChargingStartedEvent { SkillId = _skillData.SkillId });
             }
             return started;
+        }
+
+        /// <summary>
+        /// 旋转技能：当前是否在可取消窗口内
+        /// </summary>
+        public bool CanCancel()
+        {
+            return _stateMachine.CanCancel();
+        }
+
+        /// <summary>
+        /// 旋转技能：窗口内主动取消（正常完成语义）
+        /// </summary>
+        public bool Cancel()
+        {
+            return _stateMachine.Cancel();
         }
 
         /// <summary>
@@ -206,6 +225,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             var targets = DetectTargets();
 
+            if (_spinData != null)
+            {
+                HandleSpinTick(targets, frameIndex);
+                return;
+            }
+            // 以下为现有非旋转逻辑（保持不变）
             // Consecutive hit tracking: only deal damage every 3rd consecutive detection per target
             const int consecutiveRequired = 3;
             if (_consecutiveHits == null)
@@ -262,6 +287,48 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
         }
 
+        private void HandleSpinTick(List<IEffectTarget> targets, int tickIndex)
+        {
+            if (_spinHitTracker == null)
+                _spinHitTracker = new SpinHitTracker(_spinData.MaxHitsPerTarget);
+
+            var damagedTargets = _cachedDamagedTargets;
+            damagedTargets.Clear();
+            foreach (var target in targets)
+            {
+                int id = target.transform.GetInstanceID();
+                if (!_spinHitTracker.TryRecordHit(id)) continue;
+                ApplyDamage(target, tickIndex);
+                ApplyEffects(target);
+                OnTargetHit?.Invoke(target);
+                damagedTargets.Add(target);
+            }
+
+            OnHitboxFrame?.Invoke(tickIndex);
+
+            if (damagedTargets.Count > 0)
+            {
+                var hitPos = damagedTargets[0].transform.position;
+                foreach (var t in damagedTargets)
+                {
+                    EventBus.Emit(new SkillHitTargetEvent
+                    {
+                        SkillId = _skillData.SkillId,
+                        CasterId = _owner.transform.GetInstanceID(),
+                        HitPosition = hitPos,
+                        IsFullCharge = _wasFullCharge
+                    });
+                }
+            }
+
+            // 旋转tick进度事件（VFX 复用蓄力事件，Progress 供剑光/拖尾强度）
+            EventBus.Emit(new SkillChargeTickEvent
+            {
+                SkillId = _skillData.SkillId,
+                Progress = Mathf.Clamp01(_stateMachine.ElapsedTime / _spinData.MaxDuration)
+            });
+        }
+
         private void OnHitConfirm()
         {
             // 可以在这里触发命中特效、音效等
@@ -270,18 +337,43 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnSkillComplete()
         {
+            if (_spinData != null)
+            {
+                EventBus.Emit(new SkillReleasedEvent
+                {
+                    SkillId = _skillData.SkillId,
+                    IsFullCharge = false,
+                    CasterId = _owner.transform.GetInstanceID()
+                });
+                _spinHitTracker?.Clear();
+            }
             _consecutiveHits?.Clear();
             OnSkillCompleted?.Invoke();
         }
 
         private void OnSkillInterrupt(InterruptionSource source)
         {
+            if (_spinData != null)
+            {
+                EventBus.Emit(new SkillReleasedEvent
+                {
+                    SkillId = _skillData.SkillId,
+                    IsFullCharge = false,
+                    CasterId = _owner.transform.GetInstanceID()
+                });
+                _spinHitTracker?.Clear();
+            }
             _consecutiveHits?.Clear();
             OnSkillInterrupted?.Invoke(source);
         }
 
         private void OnStateChanged(SkillSubState newState)
         {
+            if (newState == SkillSubState.Spinning && _spinData != null)
+            {
+                EventBus.Emit(new SkillChargingStartedEvent { SkillId = _skillData.SkillId });
+            }
+
             if (newState == SkillSubState.Execution && _skillData is ChargedSkillData)
             {
                 EventBus.Emit(new SkillReleasedEvent
@@ -306,7 +398,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return (_skillData as ComboSkillData)?.Shape
                 ?? (_skillData as InstantSkillData)?.Shape
                 ?? (_skillData as ChargedSkillData)?.Shape
-                ?? (_skillData as ChanneledSkillData)?.Shape;
+                ?? (_skillData as ChanneledSkillData)?.Shape
+                ?? (_skillData as SpinSkillData)?.Shape;
         }
 
         private List<IEffectTarget> DetectTargets()
@@ -472,7 +565,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return (_skillData as InstantSkillData)?.Effect
                 ?? (_skillData as ChargedSkillData)?.Effect
                 ?? (_skillData as ChanneledSkillData)?.Effect
-                ?? (_skillData as ProjectileSkillData)?.Effect;
+                ?? (_skillData as ProjectileSkillData)?.Effect
+                ?? (_skillData as SpinSkillData)?.Effect;
         }
 
         private void ApplyEffects(IEffectTarget target)
@@ -511,7 +605,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 ?? (_skillData as InstantSkillData)?.Presentation
                 ?? (_skillData as ChargedSkillData)?.Presentation
                 ?? (_skillData as ChanneledSkillData)?.Presentation
-                ?? (_skillData as ProjectileSkillData)?.Presentation;
+                ?? (_skillData as ProjectileSkillData)?.Presentation
+                ?? (_skillData as SpinSkillData)?.Presentation;
         }
     }
 }
