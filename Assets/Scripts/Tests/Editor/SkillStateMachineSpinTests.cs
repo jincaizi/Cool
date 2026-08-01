@@ -112,6 +112,7 @@ namespace GameSys.EditorTests
             machine.Update(0.01f);
             Assert.AreEqual(SkillSubState.Completed, machine.CurrentState);
             Assert.AreEqual(1, _completedCount, "自动完成只触发一次 OnSkillCompleted");
+            Assert.AreEqual(new[] { 0, 1 }, _ticks.ToArray(), "elapsed==max 时到期 tick 先触发，然后自动完成");
         }
 
         [Test]
@@ -169,6 +170,56 @@ namespace GameSys.EditorTests
             machine.Now = 1.2f;
             machine.Update(0.01f);
             Assert.IsTrue(machine.CanCancel());
+        }
+
+        [Test]
+        public void Update_AfterBigHitch_FiresOneTickPerFrame()
+        {
+            var machine = CreateMachine(CreateSpinData(1f, 5f, 0.2f));
+            machine.TryStart();
+
+            // 模拟 3 秒大卡顿：一次性跳到 Now=3.0
+            machine.Now = 3.0f;
+            machine.Update(0.01f);
+            Assert.AreEqual(new[] { 0 }, _ticks.ToArray(), "卡顿后第一帧只补 1 个 tick");
+
+            machine.Now = 3.01f;
+            machine.Update(0.01f);
+            Assert.AreEqual(new[] { 0, 1 }, _ticks.ToArray(), "逐帧追 tick，序号连续");
+        }
+
+        [Test]
+        public void Update_HitchCrossingMaxDuration_DropsBacklogAndCompletesOnce()
+        {
+            var machine = CreateMachine(CreateSpinData(1f, 1f, 0.2f));
+            machine.TryStart();
+
+            // 卡顿越过 max：欠账 tick 只补 1 个（tick 检查先于完成检查），随后完成，欠账丢弃
+            machine.Now = 3.0f;
+            machine.Update(0.01f);
+            Assert.AreEqual(new[] { 0 }, _ticks.ToArray(), "完成前只补发 1 个欠账 tick");
+            Assert.AreEqual(SkillSubState.Completed, machine.CurrentState);
+            Assert.AreEqual(1, _completedCount);
+
+            machine.Now = 3.01f;
+            machine.Update(0.01f);
+            Assert.AreEqual(1, _ticks.Count, "完成后不再补发欠账 tick");
+            Assert.AreEqual(1, _completedCount, "完成事件只触发一次");
+        }
+
+        [Test]
+        public void Complete_AfterCancel_DoesNotDoubleFire()
+        {
+            var machine = CreateMachine(CreateSpinData(1f, 5f, 0.2f));
+            machine.TryStart();
+
+            machine.Now = 1.2f;
+            machine.Update(0.01f);
+            Assert.IsTrue(machine.Cancel(), "取消成功");
+            Assert.AreEqual(1, _completedCount);
+
+            machine.Complete();   // 防御：Cancel 后 Complete 不得重复触发完成事件
+            Assert.AreEqual(1, _completedCount, "Complete 在已完成后不得再次触发");
         }
     }
 }

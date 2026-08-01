@@ -70,6 +70,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _isSpin = _spinData != null;
             _currentState = SkillSubState.Ready;
             _stateStartTime = -1f;
+            _nextTickTime = -1f;
         }
 
         public bool TryStart()
@@ -132,6 +133,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         public void Complete()
         {
+            if (_currentState == SkillSubState.Completed || _currentState == SkillSubState.Cancelled)
+                return;
             TransitionTo(SkillSubState.Completed);
             _onSkillCompleted?.Invoke();
         }
