@@ -502,7 +502,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 int count = Physics.OverlapSphereNonAlloc(center, shape.AreaRadius, s_AoeBuffer, shape.TargetMask);
                 for (int i = 0; i < count; i++)
                 {
-                    if (s_AoeBuffer[i].TryGetComponent(out IEffectTarget target) && target != _owner)
+                    if (s_AoeBuffer[i].TryGetComponent(out IEffectTarget target) && target != _owner && !targets.Contains(target))
                         targets.Add(target);
                 }
             }
@@ -520,7 +520,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 {
                     Vector3 dirToTarget = (target.transform.position - ownerPos).normalized;
                     float angle = Vector3.Angle(directionToCenter, dirToTarget);
-                    if (angle <= halfAngle)
+                    if (angle <= halfAngle && !targets.Contains(target))
                         targets.Add(target);
                 }
             }
