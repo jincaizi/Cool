@@ -277,9 +277,8 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void HandleAttackAnimationCompleted()
         {
-            var subState = _skillCoordinator.CurrentSubState;
-            if (subState == Skills.Definition.SkillSubState.Charging ||
-                subState == Skills.Definition.SkillSubState.Channeling)
+            // 持续型技能（蓄力/引导/旋转）的动画完成不代表技能结束，忽略回调
+            if (_skillCoordinator.IsAnimationCompletionIgnored())
                 return;
 
             // 立即设 AttackState=0 让 Animator 切回 Idle，不等 Cleanup 走完

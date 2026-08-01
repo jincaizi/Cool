@@ -545,5 +545,20 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
             return 1f;
         }
+
+        /// <summary>
+        /// 持续型技能（蓄力/引导/旋转）期间，攻击动画的完成回调应被忽略——
+        /// 这些技能的起手/循环动画结束不代表技能结束（否则 SkillR_start 95% 回调会强制完成技能）
+        /// </summary>
+        public bool IsAnimationCompletionIgnored()
+        {
+            return CurrentSubState switch
+            {
+                SkillSubState.Charging => true,
+                SkillSubState.Channeling => true,
+                SkillSubState.Spinning => true,
+                _ => false
+            };
+        }
     }
 }

@@ -104,5 +104,25 @@ namespace GameSys.EditorTests
             _coordinator.ClearInputBuffer();
             Assert.AreEqual(0, _buffer.Count, "ClearInputBuffer 清空缓冲");
         }
+
+        [Test]
+        public void IsAnimationCompletionIgnored_WhileSpinning_True()
+        {
+            _coordinator.HandleInput(SkillInput.SkillToPosition(SpinId, Vector3.zero));
+            Assert.IsTrue(_coordinator.IsAnimationCompletionIgnored(), "旋转期间动画完成回调必须被忽略，否则技能被提前清理");
+        }
+
+        [Test]
+        public void IsAnimationCompletionIgnored_NoSkill_False()
+        {
+            Assert.IsFalse(_coordinator.IsAnimationCompletionIgnored(), "无技能时不应忽略");
+        }
+
+        [Test]
+        public void IsAnimationCompletionIgnored_InstantSkillExecution_False()
+        {
+            _coordinator.HandleInput(SkillInput.SkillToPosition(QId, Vector3.zero));
+            Assert.IsFalse(_coordinator.IsAnimationCompletionIgnored(), "瞬发技能执行中不应忽略（动画完成=技能结束）");
+        }
     }
 }
