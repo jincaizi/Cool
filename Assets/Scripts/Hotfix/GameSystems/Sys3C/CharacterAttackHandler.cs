@@ -37,6 +37,10 @@ namespace Hotfix.GameSystems.Sys3C
 
         public void SelectTarget(IDamageable target)
         {
+            // 死亡目标（含尸体）不可选中——否则光环会 re-parent 到尸体上并被随尸体销毁
+            if (target is IDamageable d && !d.IsAlive)
+                return;
+
             if (!(target is ITargetable targetable) || targetable == _currentTarget) return;
 
             DetachCurrentTarget();

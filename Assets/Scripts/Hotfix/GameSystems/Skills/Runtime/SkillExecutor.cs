@@ -284,6 +284,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
             damagedTargets.Clear();
             foreach (var target in targets)
             {
+                if (target is IDamageable damageable && !damageable.IsAlive)
+                    continue;
                 int id = target.transform.GetInstanceID();
                 if (!_spinHitTracker.TryRecordHit(id)) continue;
                 ApplyDamage(target, tickIndex);
