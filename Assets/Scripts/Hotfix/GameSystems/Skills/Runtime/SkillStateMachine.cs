@@ -20,6 +20,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly bool _isChanneled;
         private readonly ChargedSkillData _chargedData;
         private readonly ChanneledSkillData _channeledData;
+        private readonly bool _isSpin;
+        private readonly SpinSkillData _spinData;
+        private float _nextTickTime;
 
         private event Action<SkillSubState> _onStateChanged;
         private event Action<int> _onHitboxFrame;
@@ -63,6 +66,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _channeledData = data as ChanneledSkillData;
             _isCharged = _chargedData != null;
             _isChanneled = _channeledData != null;
+            _spinData = data as SpinSkillData;
+            _isSpin = _spinData != null;
             _currentState = SkillSubState.Ready;
             _stateStartTime = -1f;
         }
@@ -82,6 +87,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
             {
                 TransitionTo(SkillSubState.Casting);
             }
+            else if (_isSpin)
+            {
+                // 旋转技能：瞬发，无 Casting 阶段
+                TransitionTo(SkillSubState.Spinning);
+            }
             else
             {
                 // Instant, Combo, Projectile — skip cast
@@ -99,6 +109,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             {
                 case SkillSubState.Casting: UpdateCasting(); break;
                 case SkillSubState.Charging: UpdateCharging(); break;
+                case SkillSubState.Spinning: UpdateSpinning(); break;
                 case SkillSubState.Channeling: UpdateChanneling(); break;
                 case SkillSubState.Execution: UpdateExecution(); break;
                 case SkillSubState.Recovery: UpdateRecovery(); break;
@@ -174,6 +185,51 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 TransitionTo(SkillSubState.Execution);
             else if (!_isCharging && chargeTime >= _chargedData.MinChargeTime)
                 TransitionTo(SkillSubState.Execution);
+        }
+
+        private void UpdateSpinning()
+        {
+            if (_spinData == null) { Complete(); return; }
+
+            float startOffset = _spinData.CastClip != null ? _spinData.CastClip.length : 0f;
+            if (_nextTickTime < 0f)
+                _nextTickTime = startOffset + _spinData.TickInterval;
+
+            // 每帧最多触发一个tick（大卡顿后按帧追tick，避免一帧内爆发多次伤害）
+            if (_elapsedTime >= _nextTickTime)
+            {
+                _onHitboxFrame?.Invoke(_currentTick);
+                _onHitConfirm?.Invoke();
+                _currentTick++;
+                _nextTickTime += _spinData.TickInterval;
+            }
+
+            if (_elapsedTime >= _spinData.MaxDuration)
+                Complete();
+        }
+
+        /// <summary>
+        /// 旋转技能：窗口内主动取消（正常完成语义，冷却不受影响）
+        /// </summary>
+        public bool Cancel()
+        {
+            if (_currentState != SkillSubState.Spinning || _spinData == null)
+                return false;
+            if (!_spinData.IsInCancelWindow(_elapsedTime))
+                return false;
+            TransitionTo(SkillSubState.Completed);
+            _onSkillCompleted?.Invoke();
+            return true;
+        }
+
+        /// <summary>
+        /// 旋转技能：当前是否在可取消窗口内
+        /// </summary>
+        public bool CanCancel()
+        {
+            return _currentState == SkillSubState.Spinning
+                && _spinData != null
+                && _spinData.IsInCancelWindow(_elapsedTime);
         }
 
         private void UpdateChanneling()
@@ -262,6 +318,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _currentState = newState;
             _stateStartTime = GetCurrentTime();
             _elapsedTime = 0f;
+            if (newState == SkillSubState.Spinning)
+            {
+                _currentTick = 0;
+                _nextTickTime = -1f;
+            }
             _onStateChanged?.Invoke(newState);
         }
 
@@ -278,7 +339,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             };
         }
 
-        private float GetCurrentTime() => UnityEngine.Time.time;
+        protected virtual float GetCurrentTime() => UnityEngine.Time.time;
         private bool Approximately(float a, float b) => UnityEngine.Mathf.Approximately(a, b);
     }
 }
