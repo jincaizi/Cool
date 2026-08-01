@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebd3d914d590e8c47b1b62ff08d8ad10, type: 3}
+  m_Name: Spin_SkillR
+  m_EditorClassIdentifier:
+  _skillId: 20002
+  _skillName: Skill R
+  _description:
+  _icon: {fileID: 0}
+  _skillType: 8
+  _quality: 1
+  _manaCost: 0
+  _cooldown: 15
+  _staminaCost: 0
+  _animatorTrigger: SkillR
+  _castClip: {fileID: 1827226128182048838, guid: 11cede249330b1744a2bc174ddb6111c, type: 3}
+  _releaseClip: {fileID: 1827226128182048838, guid: 5729b70d60fdcac45bd03f32c0b8dbea, type: 3}
+  _dashDistance: 0
+  _dashDuration: 0
+  _canBeInterruptedByDamage: 0
+  _canBeInterruptedByMovement: 0
+  _interruptionPriority: 80
+  _canCancelIntoBasicAttack: 0
+  _canCancelIntoOtherSkill: 0
+  _damage:
+    _baseDamage: 160
+    _attackRatio: 0
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0.25
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _knockbackForce: 4
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
+  _minDuration: 1
+  _maxDuration: 5
+  _tickInterval: 0.2
+  _maxHitsPerTarget: 5
+  _moveSpeedMultiplier: 0.5
+  _shape:
+    _targetType: 1
+    _range: 2
+    _angle: 120
+    _angleStart: 0
+    _angleEnd: 90
+    _innerRadius: 0.5
+    _innerAngle: 60
+    _areaRadius: 2.5
+    _width: 1
+    _stopAtFirst: 0
+    _targetMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    _hitboxTimings: []
+  _effect:
+    _applyEffects: []
+    _knockbackForce: 4
+    _launchForce: 0
+    _stunDuration: 0
+    _statusType: 0
+    _statusDuration: 0
+    _statusValue: 0
+  _presentation:
+    _castVFX: {fileID: 0}
+    _releaseVFX: {fileID: 0}
+    _castSFX: {fileID: 0}
+    _hitStopDuration: 0.2
+    _showCastingBar: 1
+    _castingBarColor: {r: 0, g: 0, b: 1, a: 1}
