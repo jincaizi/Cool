@@ -36,5 +36,10 @@ namespace DataDefinition
 
         [Tooltip("受击闪屏cd(秒)")]
         public float HitFlashCD = 120f;
+
+        [Header("Combat")]
+        [Tooltip("Damage fluctuation range as a fraction. 0.1 = ±10%")]
+        [Range(0f, 1f)]
+        public float DamageFluctuation = 0f;
     }
 }

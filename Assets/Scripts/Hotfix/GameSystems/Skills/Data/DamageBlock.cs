@@ -80,34 +80,39 @@ namespace Hotfix.GameSystems.Skills.Data
 
         public float CalculateFinalDamage(Effect.IEffectStats attackerStats)
         {
-            if (attackerStats == null)
+            float damage = _baseDamage;
+
+            if (attackerStats != null)
             {
-                return _baseDamage;
+                float scalingValue = attackerStats.GetAttribute(_scalingAttribute);
+                damage += scalingValue * _attackRatio;
             }
 
-            float damage = _baseDamage;
-            float scalingValue = attackerStats.GetAttribute(_scalingAttribute);
-            damage += scalingValue * _attackRatio;
-
-            if (_criticalRateBonus > 0)
+            // Critical hit — skill-defined rate, no external base chance
+            if (_criticalRateBonus > 0 && UnityEngine.Random.value < _criticalRateBonus)
             {
-                float critChance = 0.05f + _criticalRateBonus;
-                if (UnityEngine.Random.value < critChance)
-                {
-                    WasCritical = true;
-                    damage *= (1f + 1.5f + _criticalDamageBonus);
-                }
-                else
-                {
-                    WasCritical = false;
-                }
+                WasCritical = true;
+                damage *= 1.5f + _criticalDamageBonus;
             }
             else
             {
                 WasCritical = false;
             }
 
-            return _isDOT ? damage * _tickInterval : damage;
+            if (_isDOT) damage *= _tickInterval;
+
+            // 全局伤害波动 —— 最后一步，只作用于本方法输出
+            // （不含调用方在返回值之后叠加的乘数，如 SkillExecutor 的蓄力加成）
+            float fluctuation = DataDefinition.GameSettings.Instance.DamageFluctuation;
+            if (fluctuation > 0f)
+            {
+                damage *= 1f + UnityEngine.Random.Range(-fluctuation, fluctuation);
+                // 钳制：波动不产生 0 伤害，避免 DamageContext.RawDamage 的
+                // OverrideDamage == 0 回退到 BaseDamage 的已知 bug 被放大
+                damage = Mathf.Max(1f, damage);
+            }
+
+            return damage;
         }
 
         public static DamageBlock CreateDefault(float baseDamage, float attackRatio = 1f)
