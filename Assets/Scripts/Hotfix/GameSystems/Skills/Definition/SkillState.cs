@@ -16,7 +16,6 @@ namespace Hotfix.GameSystems.Skills.Definition
         Casting,        // 读条中（不可移动）
         Channeling,     // 引导中（可移动）
         Charging,       // 蓄力中（按压蓄力，松发）
-        Spinning,       // 持续旋转中
 
         // 执行阶段
         Execution,      // 释放/执行中（判定帧）
@@ -25,7 +24,8 @@ namespace Hotfix.GameSystems.Skills.Definition
         // 收尾阶段
         Recovery,       // 收招硬直
         Cancelled,      // 被打断
-        Completed       // 正常完成
+        Completed,      // 正常完成
+        Spinning        // 持续旋转中（末尾追加：该枚举经 SkillNetworkSync 线格式序列化，禁止中部插入）
     }
 
     /// <summary>

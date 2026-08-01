@@ -8,6 +8,19 @@ namespace GameSys.EditorTests
 {
     public class SpinSkillDataTests
     {
+        private readonly System.Collections.Generic.List<SpinSkillData> _created = new System.Collections.Generic.List<SpinSkillData>();
+
+        [TearDown]
+        public void TearDown()
+        {
+            foreach (var data in _created)
+            {
+                if (data != null)
+                    Object.DestroyImmediate(data);
+            }
+            _created.Clear();
+        }
+
         private static void SetField(object target, string name, object value)
         {
             typeof(SpinSkillData).GetField(name, BindingFlags.NonPublic | BindingFlags.Instance)
@@ -20,9 +33,11 @@ namespace GameSys.EditorTests
                 .Invoke(data, null);
         }
 
-        private static SpinSkillData CreateData()
+        private SpinSkillData CreateData()
         {
-            return ScriptableObject.CreateInstance<SpinSkillData>();
+            var data = ScriptableObject.CreateInstance<SpinSkillData>();
+            _created.Add(data);
+            return data;
         }
 
         [Test]
