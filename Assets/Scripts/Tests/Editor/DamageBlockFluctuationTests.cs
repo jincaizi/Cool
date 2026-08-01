@@ -12,13 +12,15 @@ namespace GameSys.EditorTests
         private static readonly FieldInfo InstanceField =
             typeof(GameSettings).GetField("_instance", BindingFlags.NonPublic | BindingFlags.Static);
 
-        // 注入测试用 GameSettings（不依赖 Resources 资产），TearDown 恢复 null
-        private static void SetFluctuation(float value)
+        private GameSettings _injectedSettings;
+
+        private void SetFluctuation(float value)
         {
-            InstanceField.SetValue(null, null);
-            var settings = ScriptableObject.CreateInstance<GameSettings>();
-            settings.DamageFluctuation = value;
-            InstanceField.SetValue(null, settings);
+            if (_injectedSettings != null)
+                Object.DestroyImmediate(_injectedSettings);
+            _injectedSettings = ScriptableObject.CreateInstance<GameSettings>();
+            _injectedSettings.DamageFluctuation = value;
+            InstanceField.SetValue(null, _injectedSettings);
         }
 
         private static void SetDamageField(DamageBlock block, string name, object value)
@@ -31,6 +33,11 @@ namespace GameSys.EditorTests
         public void TearDown()
         {
             InstanceField.SetValue(null, null);
+            if (_injectedSettings != null)
+            {
+                Object.DestroyImmediate(_injectedSettings);
+                _injectedSettings = null;
+            }
         }
 
         [Test]
@@ -86,7 +93,7 @@ namespace GameSys.EditorTests
             SetFluctuation(0.1f);
             var block = new DamageBlock();
             SetDamageField(block, "_baseDamage", 100f);
-            SetDamageField(block, "_criticalRateBonus", 1f); // 必暴击，基础 1.5 倍
+            SetDamageField(block, "_criticalRateBonus", 1f); // 必暴击；依赖 spec 暴击公式 1.5x，期望 [135, 165]
 
             for (int i = 0; i < 200; i++)
             {
