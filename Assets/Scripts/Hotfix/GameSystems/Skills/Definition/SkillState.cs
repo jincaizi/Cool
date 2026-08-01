@@ -16,6 +16,7 @@ namespace Hotfix.GameSystems.Skills.Definition
         Casting,        // 读条中（不可移动）
         Channeling,     // 引导中（可移动）
         Charging,       // 蓄力中（按压蓄力，松发）
+        Spinning,       // 持续旋转中
 
         // 执行阶段
         Execution,      // 释放/执行中（判定帧）

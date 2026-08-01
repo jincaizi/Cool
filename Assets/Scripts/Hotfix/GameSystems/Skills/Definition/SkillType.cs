@@ -9,7 +9,8 @@ namespace Hotfix.GameSystems.Skills.Definition
         Projectile, // 投射物技能 (ProjectileSkillData)
         Ultimate,   // 大招
         Passive,    // 被动
-        Item        // 物品技能
+        Item,       // 物品技能
+        Spin        // 旋转技能 (SpinSkillData)
     }
 
     public enum SkillQuality
