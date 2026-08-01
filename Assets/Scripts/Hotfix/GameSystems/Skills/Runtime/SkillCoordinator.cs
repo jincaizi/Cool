@@ -90,6 +90,17 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public void HandleInput(SkillInput input)
         {
+            // R 同键取消特例：旋转期间再按同技能键 = 取消（必须位于冷却检查之前，
+            // 因为旋转中技能自身处于冷却；永不入缓冲，防延迟重施放）
+            if (_currentSkill != null
+                && _currentSkill.CurrentSubState == SkillSubState.Spinning
+                && input.SkillId == _currentSkill.SkillId)
+            {
+                if (_currentSkill.CanCancel())
+                    _currentSkill.Cancel();
+                return;
+            }
+
             // 检查技能是否存在
             if (!_skillDatabase.TryGetValue(input.SkillId, out var skillData))
             {
@@ -296,6 +307,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 SkillSubState.Channeling => nextData is InstantSkillData
                     && (_currentSkill.Data is ChanneledSkillData ch && ch.CanMoveWhileChanneling),
                 SkillSubState.Charging => false,
+                SkillSubState.Spinning => false,
                 _ => false
             };
         }
@@ -487,6 +499,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     (_currentSkill.Data as ChanneledSkillData)?.CanMoveWhileChanneling ?? false,
                 SkillSubState.Charging =>
                     (_currentSkill.Data as ChargedSkillData)?.CanMoveWhileCharging ?? false,
+                SkillSubState.Spinning => true,
                 _ => false
             };
         }
@@ -506,8 +519,23 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 SkillSubState.Recovery => _currentSkill.Data is ChargedSkillData,
                 SkillSubState.Charging =>
                     (_currentSkill.Data as ChargedSkillData)?.CanRotateWhileCharging ?? true,
+                SkillSubState.Spinning => true,
                 _ => false
             };
+        }
+
+        /// <summary>
+        /// 当前移动速度倍率（旋转期间按配置减速，其余为1）
+        /// </summary>
+        public float GetMoveSpeedMultiplier()
+        {
+            if (_currentSkill != null
+                && _currentSkill.CurrentSubState == SkillSubState.Spinning
+                && _currentSkill.Data is SpinSkillData spin)
+            {
+                return spin.MoveSpeedMultiplier;
+            }
+            return 1f;
         }
     }
 }
