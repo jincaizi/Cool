@@ -11,15 +11,15 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ebd3d914d590e8c47b1b62ff08d8ad10, type: 3}
   m_Name: Spin_SkillR
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   _skillId: 20002
   _skillName: Skill R
-  _description:
+  _description: 
   _icon: {fileID: 0}
   _skillType: 8
   _quality: 1
   _manaCost: 0
-  _cooldown: 15
+  _cooldown: 5
   _staminaCost: 0
   _animatorTrigger: SkillR
   _castClip: {fileID: 1827226128182048838, guid: 11cede249330b1744a2bc174ddb6111c, type: 3}

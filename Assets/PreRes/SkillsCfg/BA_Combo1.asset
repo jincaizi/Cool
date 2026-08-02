@@ -32,11 +32,11 @@ MonoBehaviour:
   _canCancelIntoBasicAttack: 1
   _canCancelIntoOtherSkill: 0
   _damage:
-    _baseDamage: 3
-    _attackRatio: 1
+    _baseDamage: 50
+    _attackRatio: 0
     _scalingAttribute: 0
     _damageType: 0
-    _criticalRateBonus: 0
+    _criticalRateBonus: 0.15
     _criticalDamageBonus: 0
     _isTrueDamage: 0
     _armorPenetration: 0
