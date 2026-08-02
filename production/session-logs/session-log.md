@@ -82340,3 +82340,17 @@ d183406 docs: revise hit-feedback spec per code-verified review (hook points, Pl
 899e6c4 docs: hit feedback (hit-location impact feel) design spec
 ---
 
+## Session End: 20260803_020936
+### Commits
+82eab89 docs: hit feedback implementation plan
+6fbecad docs: amend hit-feedback spec — FromDirection fallback, PlayerHitZone dormant, ElementColor in events, scale multipliers
+9da229d chore: update session log
+52c1761 docs: damage pipeline unification plan and design spec
+624765e chore: merge working changes (NuGet, packages, project settings, session logs)
+fc9b3b5 feat: retune skill damage to flat values, add BasicAttack data asset, SkillR cooldown 15->5
+aaa2e77 feat: monster spawner pooling, defend cooldown, blocked hits silent, duo config fields + meta rename fix
+80cc219 fix: continuous-jump drift — JumpEnd->JumpStart chain-jump, unconditional Blend write
+d183406 docs: revise hit-feedback spec per code-verified review (hook points, PlayerHitZone path, KnockbackForce line)
+899e6c4 docs: hit feedback (hit-location impact feel) design spec
+---
+
