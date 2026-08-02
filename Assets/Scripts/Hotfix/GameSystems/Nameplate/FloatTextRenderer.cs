@@ -103,6 +103,8 @@ namespace Hotfix.GameSystems.Nameplate
                 tmp.SetText("-{0}", value);
 
             tmp.color = settings.Color;
+            tmp.outlineWidth = settings.OutlineWidth;
+            tmp.outlineColor = settings.OutlineColor;
             tmp.fontSize = settings.FontSize;
             if (settings.Font != null) tmp.font = settings.Font;
             if (settings.FontMaterial != null) tmp.fontMaterial = settings.FontMaterial;

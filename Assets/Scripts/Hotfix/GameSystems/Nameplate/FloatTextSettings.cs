@@ -11,6 +11,8 @@ namespace Hotfix.GameSystems.Nameplate
         public Material FontMaterial;
         public float FontSize = 36f;
         public Color Color = Color.white;
+        [Range(0f, 1f)] public float OutlineWidth = 0f;
+        public Color OutlineColor = Color.black;
         public float Duration = 1f;
         public float MoveUpDistance = 50f;
         [Range(0f, 1f)] public float FadeStartRatio = 0.5f;
