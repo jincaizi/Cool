@@ -46,12 +46,18 @@ namespace Hotfix.GameSystems.Monster
                 return MonsterAIState.Attack;
 
             // Check defend trigger conditions (HP low OR chasing too long)
-            if (ctx.Config.EnableDefend)
+            // Defend cooldown prevents immediate re-entry after exiting Defend
+            if (ctx.Config.EnableDefend
+                && Time.time - ctx.LastDefendExitTime > ctx.Config.DefendCooldown)
             {
                 float hpRatio = ctx.Stats.HP / ctx.Stats.MaxHP;
                 if (hpRatio < ctx.Config.DefendHPThreshold
                     || ChaseTimer > ctx.Config.DefendChaseTimeThreshold)
+                {
+                    // Reset chase timer so we don't re-trigger immediately on next Chase entry
+                    ChaseTimer = 0f;
                     return MonsterAIState.Defend;
+                }
             }
 
             return null;

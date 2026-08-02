@@ -45,6 +45,7 @@ namespace Hotfix.GameSystems.Monster
 
         public override void OnExit(AIContext ctx)
         {
+            ctx.LastDefendExitTime = Time.time;
             ctx.Animator.SetBool(MonsterAnimHashes.IsDefending, false);
             ctx.Movement.Resume();
         }

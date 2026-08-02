@@ -46,6 +46,7 @@ namespace Hotfix.GameSystems.Monster
 
         // ── DefendState-owned ──
         public int BlockCount;
+        public float LastDefendExitTime = float.MinValue;  // Time.time when Defend last ended
 
         // ── DamagePipeline-owned ──
         public DamageResult LastHitResult;

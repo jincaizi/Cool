@@ -193,7 +193,10 @@ namespace Hotfix.GameSystems.Monster
 
         private void EmitDamageEvents(int entityId, DamageBlock data, Vector3 hitDirection, DamageResult result)
         {
-            var displayDamage = result.WasBlocked ? 0 : Mathf.CeilToInt(result.FinalDamage);
+            // Blocked hits don't show float text
+            if (result.WasBlocked) return;
+
+            var displayDamage = Mathf.CeilToInt(result.FinalDamage);
             var damageEvent = new MonsterTakeDamageEvent(
                 entityId,
                 transform.position + Vector3.up * 1.2f,

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Hotfix.GameSystems.Nameplate;
 using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -18,8 +20,18 @@ namespace Hotfix.GameSystems.Monster
         public SpawnGroup[] Groups;
         public float RespawnDelay = 30f;
 
+        private Transform _container;
         private readonly List<MonsterEntity> _aliveMonsters = new();
         private readonly Dictionary<string, float> _respawnTimers = new();
+        private readonly Queue<MonsterEntity> _pool = new();
+
+        private void Awake()
+        {
+            // Create a dedicated container node for organization in the hierarchy
+            var containerGo = new GameObject("Monsters");
+            containerGo.transform.SetParent(transform);
+            _container = containerGo.transform;
+        }
 
         private void Start()
         {
@@ -80,16 +92,40 @@ namespace Hotfix.GameSystems.Monster
                 return null;
             }
 
-            var go = Instantiate(config.Prefab, position, Quaternion.identity);
-            var entity = go.GetComponent<MonsterEntity>();
-            if (entity == null)
+            // Try pool first
+            MonsterEntity entity = null;
+            while (_pool.Count > 0)
             {
-                Debug.LogError($"[MonsterSpawner] MonsterEntity component not found on prefab {config.MonsterId}");
-                Destroy(go);
-                return null;
+                var pooled = _pool.Dequeue();
+                if (pooled != null && pooled.gameObject != null)
+                {
+                    entity = pooled;
+                    break;
+                }
             }
 
-            entity.Init(config, position);
+            if (entity != null)
+            {
+                // Reuse pooled monster
+                entity.gameObject.SetActive(true);
+                entity.transform.SetPositionAndRotation(position, Quaternion.identity);
+                entity.transform.SetParent(_container);
+                entity.Init(config, position);
+            }
+            else
+            {
+                // Fresh instantiation
+                var go = Instantiate(config.Prefab, position, Quaternion.identity, _container);
+                entity = go.GetComponent<MonsterEntity>();
+                if (entity == null)
+                {
+                    Debug.LogError($"[MonsterSpawner] MonsterEntity component not found on prefab {config.MonsterId}");
+                    Destroy(go);
+                    return null;
+                }
+                entity.Init(config, position);
+            }
+
             entity.OnDeathComplete += () => HandleMonsterDeath(config, entity);
             _aliveMonsters.Add(entity);
 
@@ -101,6 +137,14 @@ namespace Hotfix.GameSystems.Monster
         {
             _aliveMonsters.Remove(entity);
             _respawnTimers[config.MonsterId] = Time.time + RespawnDelay;
+
+            // Cleanup external systems before pooling
+            EntityDisplayManager.Instance?.Unregister(entity.GetInstanceID());
+            PhysicsRegistry.Instance?.Unregister(entity);
+
+            // Return to pool — deactivate but keep GameObject for reuse
+            entity.gameObject.SetActive(false);
+            _pool.Enqueue(entity);
         }
     }
 }

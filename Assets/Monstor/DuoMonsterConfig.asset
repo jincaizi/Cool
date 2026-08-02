@@ -38,6 +38,8 @@ MonoBehaviour:
     _angle: 120
     _angleStart: 0
     _angleEnd: 90
+    _innerRadius: 0.5
+    _innerAngle: 60
     _areaRadius: 0
     _width: 1
     _stopAtFirst: 0
@@ -67,6 +69,15 @@ MonoBehaviour:
     _statusType: 0
     _statusDuration: 0
     _statusValue: 0
+  AttackWindupTime: 0.2
+  AttackRecoveryTime: 0.3
+  HitReactDurations:
+  - 0
+  - 0.3
+  - 0.6
+  - 0.2
+  - 1
+  HitIFrameDuration: 0.15
   EnableDefend: 0
   DefendHPThreshold: 0.5
   DefendChaseTimeThreshold: 3
