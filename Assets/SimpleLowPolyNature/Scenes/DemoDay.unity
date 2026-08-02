@@ -7039,6 +7039,7 @@ MonoBehaviour:
   _damageSettings: {fileID: 11400000, guid: c9fa1db0a2aa8304184e821b54c49383, type: 2}
   _critDamageSettings: {fileID: 11400000, guid: 8cce06053e50ad74498ba1d9773dec40, type: 2}
   _skillNameSettings: {fileID: 11400000, guid: e82add030c5552c42a8ab7d69ec5bc6f, type: 2}
+  _playerDamageSettings: {fileID: 11400000, guid: 801f57803152fd5429119ec5acd922e3, type: 2}
 --- !u!4 &937939793
 Transform:
   m_ObjectHideFlags: 0
