@@ -37,7 +37,7 @@ namespace Hotfix.GameSystems.Nameplate
 
         public void ShowDamageText(int entityId, Vector3 worldPos, FloatTextSettings settings, int value)
         {
-            if (!EnableVFX) return;
+            if (!EnableVFX || value <= 0) return;
             var mergeKey = MakeMergeKey(entityId, settings.Type);
 
             if (_mergeTracker.TryGetValue(mergeKey, out var merge)
