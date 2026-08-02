@@ -88,8 +88,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             };
 
             // JumpEnd → Locomotion（落地后返回 Locomotion 状态）
+            // JumpEnd → JumpStart（落地帧仍有跳跃请求时直接连跳，避免冲刷回 Locomotion 导致空中无跳跃动画）
             _transitions[BaseState.JumpEnd] = new List<StateTransition>
             {
+                new StateTransition(BaseState.JumpStart, d => d.RequestJump, 10),
                 new StateTransition(BaseState.Locomotion, d => true, 1)
             };
 

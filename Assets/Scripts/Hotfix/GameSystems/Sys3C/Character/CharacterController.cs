@@ -445,7 +445,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
         {
             if (_data.BaseState == BaseState.Idle ||
                 _data.BaseState == BaseState.Move ||
-                _data.BaseState == BaseState.Sprint)
+                _data.BaseState == BaseState.Sprint ||
+                _data.BaseState == BaseState.JumpEnd)
             {
                 // 技能/移动锁定时不更新基础状态，防止动画混合树显示行走动画
                 if (LockMovement)

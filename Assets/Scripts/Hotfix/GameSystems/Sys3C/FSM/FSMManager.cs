@@ -73,13 +73,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         private void UpdateBlendParameter(CharacterData data)
         {
-            if (data.BaseState == BaseState.Idle ||
-                data.BaseState == BaseState.Move ||
-                data.BaseState == BaseState.Sprint ||
-                data.BaseState == BaseState.Locomotion)
-            {
-                _animator.SetFloat(AnimHashes.Blend, data.MovementSpeed);
-            }
+            // Blend 只影响 Locomotion Blend Tree，跳跃/受击状态使用独立动画剪辑，写入无副作用。
+            // 不能用 data.BaseState 门控：落地后 BaseState 可能滞留在 JumpEnd
+            // （JumpEnd 完成回调依赖 Animator 播放完整剪辑，连跳时不可靠），
+            // 一旦被门控跳过，Blend 会永远停在跳跃时清零的 0，腿部失去移动动画（漂移）。
+            _animator.SetFloat(AnimHashes.Blend, data.MovementSpeed);
         }
 
         public bool TryJump()
