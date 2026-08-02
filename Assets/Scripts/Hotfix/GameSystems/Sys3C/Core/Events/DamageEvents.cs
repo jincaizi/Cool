@@ -1,5 +1,6 @@
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Events;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Sys3C.Core.Events
 {
@@ -46,22 +47,25 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
     }
 
     /// <summary>
-    /// 怪物受伤事件（给浮字系统使用）
+    /// 怪物受伤事件（给浮字/火花系统使用）
     /// </summary>
     public struct MonsterTakeDamageEvent : IEvent
     {
         public int EntityId;
-        public Vector3 HitPosition;
+        public Vector3 HitPosition;   // 真实接触点（或 FromDirection 重建点）
         public Vector3 HitDirection;
         public int Damage;
         public bool IsCritical;
         public int SkillId;
         public int ComboIndex;
+        public HitZonePart Part;
+        public Color ElementColor;
 
         public MonsterTakeDamageEvent(
             int entityId, Vector3 hitPos, Vector3 hitDir,
             int damage, bool isCritical = false,
-            int skillId = 0, int comboIndex = 1)
+            int skillId = 0, int comboIndex = 1,
+            HitZonePart part = HitZonePart.Torso, Color elementColor = default)
         {
             EntityId = entityId;
             HitPosition = hitPos;
@@ -70,6 +74,8 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
             IsCritical = isCritical;
             SkillId = skillId;
             ComboIndex = comboIndex;
+            Part = part;
+            ElementColor = elementColor;
         }
     }
 
