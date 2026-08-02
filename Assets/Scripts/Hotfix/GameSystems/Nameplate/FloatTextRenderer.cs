@@ -103,11 +103,14 @@ namespace Hotfix.GameSystems.Nameplate
                 tmp.SetText("-{0}", value);
 
             tmp.color = settings.Color;
-            tmp.outlineWidth = settings.OutlineWidth;
-            tmp.outlineColor = settings.OutlineColor;
             tmp.fontSize = settings.FontSize;
             if (settings.Font != null) tmp.font = settings.Font;
             if (settings.FontMaterial != null) tmp.fontMaterial = settings.FontMaterial;
+            // TMP 的 outlineWidth getter 以材质 _OutlineWidth 为准;fontMaterial 赋值会把材质换回
+            // 共享材质(宽度0),而组件缓存值不变会让 setter 短路,故先归零强制重新写入材质
+            tmp.outlineWidth = 0f;
+            tmp.outlineWidth = settings.OutlineWidth;
+            tmp.outlineColor = settings.OutlineColor;
             tmp.alpha = 1f;
 
             if (Camera != null)
