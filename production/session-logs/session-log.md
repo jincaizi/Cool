@@ -82330,3 +82330,13 @@ production/session-logs/agent-audit.log
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260803_020151
+### Commits
+624765e chore: merge working changes (NuGet, packages, project settings, session logs)
+fc9b3b5 feat: retune skill damage to flat values, add BasicAttack data asset, SkillR cooldown 15->5
+aaa2e77 feat: monster spawner pooling, defend cooldown, blocked hits silent, duo config fields + meta rename fix
+80cc219 fix: continuous-jump drift — JumpEnd->JumpStart chain-jump, unconditional Blend write
+d183406 docs: revise hit-feedback spec per code-verified review (hook points, PlayerHitZone path, KnockbackForce line)
+899e6c4 docs: hit feedback (hit-location impact feel) design spec
+---
+
