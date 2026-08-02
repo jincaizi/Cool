@@ -8,6 +8,12 @@ namespace Hotfix.GameSystems.VFX
     public class WeaponVFXController : MonoBehaviour
     {
         [SerializeField] private WeaponElementConfig _elementConfig;
+
+        private static Color _currentElementColor = Color.white;
+
+        /// <summary>当前武器元素色（火花染色用；单武器客户端够用，只读防外部写）</summary>
+        public static Color CurrentElementColor => _currentElementColor;
+
         [SerializeField] private float _swingThreshold = 120f;
         [SerializeField] private float _swingCooldown = 0.3f;
         [SerializeField] private int _skillId = (int)SkillID.SkillR;
@@ -36,6 +42,8 @@ namespace Hotfix.GameSystems.VFX
                 enabled = false;
                 return;
             }
+
+            _currentElementColor = _elementConfig != null ? _elementConfig.TrailColor : Color.white;
 
             var renderer = _materialProxy?.WeaponRenderer;
             if (renderer != null && !renderer.sharedMaterial.shader.name.Contains("SwordGlow"))
