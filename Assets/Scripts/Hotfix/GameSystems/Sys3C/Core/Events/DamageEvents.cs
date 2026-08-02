@@ -75,7 +75,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
             SkillId = skillId;
             ComboIndex = comboIndex;
             Part = part;
-            ElementColor = elementColor;
+            ElementColor = elementColor == default ? Color.white : elementColor;
         }
     }
 
