@@ -11,18 +11,22 @@ namespace GameSys.EditorTests
     {
         private GameObject _host;
         private FloatTextRenderer _renderer;
+        private FloatTextSettings _settings;
 
         [SetUp]
         public void SetUp()
         {
             _host = new GameObject("TestCanvas");
             _renderer = new FloatTextRenderer(_host.transform);
+            _settings = ScriptableObject.CreateInstance<FloatTextSettings>();
+            FloatTextRenderer.EnableVFX = true;
         }
 
         [TearDown]
         public void TearDown()
         {
             _renderer.Cleanup();
+            Object.DestroyImmediate(_settings);
             Object.DestroyImmediate(_host);
         }
 
@@ -30,14 +34,13 @@ namespace GameSys.EditorTests
         public void test_float_text_renderer_zero_damage_no_spawn()
         {
             // Arrange
-            var settings = ScriptableObject.CreateInstance<FloatTextSettings>();
             var activeField = typeof(FloatTextRenderer)
                 .GetField("_active", BindingFlags.NonPublic | BindingFlags.Instance);
             var mergeField = typeof(FloatTextRenderer)
                 .GetField("_mergeTracker", BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Act
-            _renderer.ShowDamageText(1, Vector3.zero, settings, 0);
+            _renderer.ShowDamageText(1, Vector3.zero, _settings, 0);
 
             // Assert
             var activeCount = ((IEnumerable)activeField.GetValue(_renderer)).Cast<object>().Count();
@@ -50,12 +53,11 @@ namespace GameSys.EditorTests
         public void test_float_text_renderer_negative_damage_no_spawn()
         {
             // Arrange
-            var settings = ScriptableObject.CreateInstance<FloatTextSettings>();
             var activeField = typeof(FloatTextRenderer)
                 .GetField("_active", BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Act
-            _renderer.ShowDamageText(1, Vector3.zero, settings, -5);
+            _renderer.ShowDamageText(1, Vector3.zero, _settings, -5);
 
             // Assert
             var activeCount = ((IEnumerable)activeField.GetValue(_renderer)).Cast<object>().Count();
