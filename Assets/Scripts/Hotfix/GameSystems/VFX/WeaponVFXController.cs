@@ -43,7 +43,7 @@ namespace Hotfix.GameSystems.VFX
                 return;
             }
 
-            _currentElementColor = _elementConfig != null ? _elementConfig.TrailColor : Color.white;
+            _currentElementColor = _elementConfig.TrailColor;
 
             var renderer = _materialProxy?.WeaponRenderer;
             if (renderer != null && !renderer.sharedMaterial.shader.name.Contains("SwordGlow"))
