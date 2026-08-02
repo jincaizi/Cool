@@ -1,4 +1,5 @@
 using UnityEngine;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -19,6 +20,9 @@ namespace Hotfix.GameSystems.Monster
         // When set by caller, used as the damage amount instead of reading BaseDamage.
         // This allows SkillExecutor to pass the post-scaling calculated damage.
         public float OverrideDamage;
+
+        // 命中上下文（真实接触点/部位/元素色）；None 时接收方用 FromDirection 重建
+        public HitContact Contact;
 
         public float RawDamage => OverrideDamage > 0 ? OverrideDamage : (RawData?.BaseDamage ?? 0f);
     }

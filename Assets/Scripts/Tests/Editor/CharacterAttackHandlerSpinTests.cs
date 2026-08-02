@@ -14,6 +14,7 @@ namespace GameSys.EditorTests
             public bool IsAlive => false;
             public Transform Transform => null;
             public void TakeDamage(DamageBlock damageData, Vector3 hitDirection) { }
+            public void TakeDamage(DamageBlock damageData, Vector3 hitDirection, HitContact contact) { }
             public event System.Action<float, int, int> OnHPChanged;
             public event System.Action OnDeath;
             public Vector3 WorldPosition => Vector3.zero;

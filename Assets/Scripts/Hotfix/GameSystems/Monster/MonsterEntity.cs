@@ -31,6 +31,7 @@ namespace Hotfix.GameSystems.Monster
         private AIBrain _brain;
         private AIContext _ctx;
         private Vector3 _spawnPoint;
+        private Collider _collider;
 
         bool IDamageable.IsAlive => !_stats.IsDead;
         Transform IDamageable.Transform => transform;
@@ -43,6 +44,7 @@ namespace Hotfix.GameSystems.Monster
             if (Animator == null) Animator = GetComponent<Animator>();
             if (NavAgent == null) NavAgent = GetComponent<NavMeshAgent>();
             if (HitZone == null) HitZone = GetComponent<HitZone>();
+            if (_collider == null) _collider = GetComponent<Collider>();
             if (AttackHitbox == null) AttackHitbox = GetComponentInChildren<AttackHitbox>();
         }
 
@@ -161,8 +163,16 @@ namespace Hotfix.GameSystems.Monster
         // ── Damage Pipeline ──
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
+            => ((IDamageable)this).TakeDamage(data, hitDirection, HitContact.None);
+
+        void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection, HitContact contact)
         {
             if (_stats.IsDead) return;
+
+            // None → 方向重建（无碰撞箱路径也能拿真实部位）
+            HitContact resolved = contact.HasContact || _collider == null
+                ? contact
+                : HitContact.FromDirection(_collider, hitDirection);
 
             int myId = GetInstanceID();
 
@@ -173,25 +183,24 @@ namespace Hotfix.GameSystems.Monster
                 AttackerId = 0,
                 Flags = data.WasCritical ? DamageFlags.IsCritical : DamageFlags.None,
                 OverrideDamage = data.CalculatedDamage,
+                Contact = resolved,
             };
 
             var result = _damagePipeline.Process(ref ctx);
 
             _brain.OnDamageReceived(result, hitDirection);
 
-            EmitDamageEvents(myId, data, hitDirection, result);
+            EmitDamageEvents(myId, data, hitDirection, result, resolved);
 
             if (result.ShouldKnockback && data.KnockbackForce > 0)
             {
-                EventBus.TargetedEmit(myId, new KnockbackEvent(
-                    myId,
-                    hitDirection,
-                    data.KnockbackForce
-                ));
+                float force = data.KnockbackForce * HitZoneClassifier.KnockbackMultiplier(resolved.Part);
+                EventBus.TargetedEmit(myId, new KnockbackEvent(myId, hitDirection, force));
             }
         }
 
-        private void EmitDamageEvents(int entityId, DamageBlock data, Vector3 hitDirection, DamageResult result)
+        private void EmitDamageEvents(int entityId, DamageBlock data, Vector3 hitDirection,
+            DamageResult result, HitContact contact)
         {
             // Blocked hits don't show float text
             if (result.WasBlocked) return;
@@ -199,12 +208,14 @@ namespace Hotfix.GameSystems.Monster
             var displayDamage = Mathf.CeilToInt(result.FinalDamage);
             var damageEvent = new MonsterTakeDamageEvent(
                 entityId,
-                transform.position + Vector3.up * 1.2f,
+                contact.HitPoint,
                 hitDirection,
                 displayDamage,
                 data.WasCritical,
                 data.SkillId,
-                data.ComboIndex
+                data.ComboIndex,
+                contact.Part,
+                contact.ElementColor
             );
             EventBus.Emit(damageEvent);
             EventBus.TargetedEmit(entityId, damageEvent);

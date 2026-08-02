@@ -15,6 +15,11 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         void TakeDamage(DamageBlock damageData, Vector3 hitDirection);
 
         /// <summary>
+        /// 接受伤害（带命中上下文：真实接触点/部位/元素色）
+        /// </summary>
+        void TakeDamage(DamageBlock damageData, Vector3 hitDirection, HitContact contact);
+
+        /// <summary>
         /// 是否存活
         /// </summary>
         bool IsAlive { get; }

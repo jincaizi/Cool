@@ -7,6 +7,8 @@ using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Camera;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
@@ -44,6 +46,7 @@ namespace Hotfix.GameSystems.Sys3C
         private bool _canFireHeavy;
         private DefendModifier _defendModifier;
         private DefendConfig _defendConfig = DefendConfig.Default;
+        private Collider _bodyCollider;
 
         private void Start()
         {
@@ -111,6 +114,8 @@ namespace Hotfix.GameSystems.Sys3C
             _inputManager = GetComponent<InputManager>();
             if (_inputManager == null)
                 _inputManager = gameObject.AddComponent<InputManager>();
+
+            _bodyCollider = GetComponent<Collider>();  // 玩家根节点：CharacterController 即 Collider，用于默认接触点
 
             _camera = FindObjectOfType<ThirdPersonCameraController>();
             if (_camera != null && _cc != null)
@@ -317,6 +322,9 @@ namespace Hotfix.GameSystems.Sys3C
         private int GetSkillRId() => (int)SkillID.SkillR;
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
+            => ((IDamageable)this).TakeDamage(data, hitDirection, HitContact.None);
+
+        void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection, HitContact contact)
         {
             if (_currentHP <= 0) return;
 
@@ -324,13 +332,19 @@ namespace Hotfix.GameSystems.Sys3C
                 ? data.CalculatedDamage
                 : (data?.BaseDamage ?? 10f);
 
+            // None → 方向重建（怪物 AttackShape 直调 2 参路径）
+            HitContact resolved = contact.HasContact || _bodyCollider == null
+                ? contact
+                : HitContact.FromDirection(_bodyCollider, hitDirection);
+
             // 构建伤害上下文
             var ctx = new DamageContext
             {
                 RawData = data,
                 HitDirection = hitDirection,
                 OverrideDamage = data?.CalculatedDamage ?? 0f,
-                CurrentDamage = baseDamage
+                CurrentDamage = baseDamage,
+                Contact = resolved
             };
 
             // 防御修正器介入
@@ -386,11 +400,25 @@ namespace Hotfix.GameSystems.Sys3C
             // 扣血
             _currentHP -= finalDamage;
 
-            // 正常受击路由（非格挡时走 HitFSM）
+            // 正常受击路由（非格挡时走 HitFSM，击退 × 部位倍率）
             if (!wasBlocked)
             {
+                float kb = (data?.KnockbackForce ?? 0f) * HitZoneClassifier.KnockbackMultiplier(resolved.Part);
                 _fsmManager.HandleDamage(sourceId: -1, damage: finalDamage, hitDirection: hitDirection,
-                    knockbackForce: data?.KnockbackForce ?? 0);
+                    knockbackForce: kb);
+
+                // 玩家受击事件（死亡不发射——死亡判定在下方，用 _currentHP > 0 守卫）
+                if (_currentHP > 0)
+                {
+                    EventBus.Emit(new PlayerTakeDamageEvent(
+                        gameObject.GetInstanceID(),
+                        resolved.HitPoint,
+                        resolved.Part,
+                        hitDirection,
+                        Mathf.CeilToInt(finalDamage),
+                        resolved.ElementColor
+                    ));
+                }
             }
 
             if (_currentHP <= 0)
