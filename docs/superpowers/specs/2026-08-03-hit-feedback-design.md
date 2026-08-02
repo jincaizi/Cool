@@ -37,10 +37,10 @@ HitZone / PlayerHitZone (命中检测)
        └─ IDamageable.TakeDamage(data, hitDir, contact)   ← 3 参重载
             ├─ [MonsterEntity]
             │    ├─ 击退 × 部位倍率 → KnockbackEvent
-            │    └─ MonsterTakeDamageEvent{ HitPoint(真实), Part, ... }
-            └─ [Sys3CEntry]
+            │    └─ MonsterTakeDamageEvent{ HitPosition(真实接触点), Part, ... }
+            └─ [Sys3CEntry]  (注: PlayerHitZone 现为直连 HandleDamage, 本设计统一改走 TakeDamage)
                  ├─ 击退 × 部位倍率 → HitFSM
-                 └─ PlayerTakeDamageEvent{ HitPoint, Part, ... }  ← 新增
+                 └─ PlayerTakeDamageEvent{ HitPosition, Part, ... }  ← 新增
                       ↓
             HitFeedbackSystem (单例, 订阅双向事件)
               ├─ 火花池: 8 实例 round-robin, stopAction=Callback 自动回收
@@ -107,11 +107,13 @@ public static class HitZoneClassifier
 
 ### 5.1 `MonsterTakeDamageEvent` 扩展（修改）
 
-加字段：`HitPoint`（真实接触点）、`Part`（HitZonePart）。发射点 `MonsterEntity.EmitDamageEvents` 改用 `contact` 数据：`HasContact=true` 用 `contact.HitPoint`，否则默认点。`WasBlocked` 早退逻辑不变。
+**复用现有 `HitPosition` 字段，不新增位置字段**（`DisplayEventBridge` 已在消费 `HitPosition`，加第二个位置字段是冗余）：语义改为真实接触点——`HasContact=true` 填 `contact.HitPoint`，否则填接收方默认点。只新增 `Part` 字段（HitZonePart）。`WasBlocked` 早退逻辑不变。
 
 ### 5.2 `PlayerTakeDamageEvent`（新文件 `Sys3C/Core/Events/PlayerTakeDamageEvent.cs`）
 
-字段：`EntityId, HitPoint, Part, HitDirection, Damage`（int，CeilToInt）。从 `Sys3CEntry.OnDamageProcessed` 正常受击分支发射（被格挡/死亡不发射，与怪物侧 `WasBlocked` 早退一致）。
+字段：`EntityId, HitPosition, Part, HitDirection, Damage`（int，CeilToInt）。字段命名与 `MonsterTakeDamageEvent` 对齐（`HitPosition`）。
+
+**发射点**：`Sys3CEntry.IDamageable.TakeDamage` 非格挡分支（现状没有 `OnDamageProcessed` 回调——那是 damage-pipeline-unification 的未来设计，本 spec 不依赖它）。具体位置：`_fsmManager.HandleDamage(...)` 调用之后、`_currentHP <= 0` 死亡判定之前，加 `_currentHP > 0` 守卫。被格挡（`ReactLevel == None`）/死亡不发射，与怪物侧 `WasBlocked` 早退一致。
 
 ## 6. `HitFeedbackSystem`（新单例 `VFX/HitFeedbackSystem.cs`）
 
@@ -120,10 +122,12 @@ public static class HitZoneClassifier
 - **火花池**：8 个 `HitSpark` 粒子预制体实例（程序化创建，场景初始化时预填充，**运行时永不 new**），round-robin 复用；`ParticleSystemStopAction.Callback` 回调自动回收，**无每帧轮询、无 Update**。
 - 每次命中：`SetPosition(HitPoint)`；缩放 = 基础 × 部位倍率（Head 1.3 / Torso 1.0 / Legs 0.8）× 暴击 ×2 × 技能(SkillId>0) ×1.5；颜色 = `contact.ElementColor`（事件带色，避免全局状态流转）。
 - 全局 `EnableVFX` 静态开关（沿用 `FloatTextRenderer.EnableVFX` / `HitStopManager.EnableVFX` 先例）。
+- **预制体来源与挂载点**：`HitSpark.prefab` 用 `[SerializeField] GameObject` 引用（场景中挂 `HitFeedbackSystem` 的节点上拖引用），不 Addressable、不 Resources.Load——避免异步加载复杂度和资源路径魔法。
+- **场景挂载**：`HitFeedbackSystem` 挂场景独立节点（与 `EntityDisplayManager` 同场景、各自独立 GameObject），`DontDestroyOnLoad`。
 
 ### 元素色来源
 
-- `WeaponVFXController` 加 `public static Color CurrentElementColor`（OnEnable 从 `_elementConfig.TrailColor` 读，无配置=白）。单武器客户端够用。
+- `WeaponVFXController` 加 `public static Color CurrentElementColor => _currentElementColor`（私有 static 字段 + 只读属性，防外部写；OnEnable 从 `_elementConfig.TrailColor` 读，无配置=白）。单武器客户端够用。
 - `HitZone`（玩家打怪）填 `WeaponVFXController.CurrentElementColor`；`PlayerHitZone`（怪打玩家）显式填白。
 
 ## 7. 命中点组件改造（`HitZone.cs` / `PlayerHitZone.cs`）
@@ -148,16 +152,21 @@ private void OnTriggerStay(Collider other)
     };
     var data = hitbox.CurrentData;
     if (data != null && data.DamageData != null)
+    {
+        data.DamageData.KnockbackForce = data.KnockbackForce;  // 保留既有功能行
         _owner?.TakeDamage(data.DamageData, hitDir, contact);
+    }
 }
 ```
 
 `[RequireComponent(typeof(Collider))]` 保证 `_collider` 非空。`ClosestPoint` 对胶囊/球/盒是廉价图元数学。
 
+**⚠ PlayerHitZone 现状与图不同**：`PlayerHitZone.OnTriggerStay` 现在**不走 `IDamageable.TakeDamage`**，直连 `_fsmManager.HandleDamage(...)`（且 `_hitSources` 永不清理）。本 spec 要求改造为与 `HitZone` 对称：`PlayerHitZone` 改为调用玩家 `IDamageable.TakeDamage(data.DamageData, hitDir, contact)`（与 `MonsterAttackState:79` 直调 `TakeDamage` 的路径统一到同一入口），去重改用 `_hitInstanceIds` + `ResetHits` 模式（对齐 `HitZone`）。元素色显式填白。
+
 ## 8. 击退差异化（两处乘法）
 
 - 怪物侧：`MonsterEntity.TakeDamage` 发 `KnockbackEvent` 时 `force × HitZoneClassifier.KnockbackMultiplier(contact.Part)`。
-- 玩家侧：`Sys3CEntry.OnDamageProcessed` 正常受击分支 `knockbackForce × KnockbackMultiplier(contact.Part)`。
+- 玩家侧：`Sys3CEntry.IDamageable.TakeDamage` 非格挡分支，`knockbackForce × KnockbackMultiplier(contact.Part)` 后再传入 `_fsmManager.HandleDamage`。
 - 方向不变，只乘力度。死亡击退（`_brain.LastHitDirection`）不受影响。
 
 ## 9. 玩家受击飘字
@@ -205,7 +214,7 @@ private void OnTriggerStay(Collider other)
 | `Combat/HitZone.cs` | `TryGetComponent`、缓存 `_collider`、接触点+分类+元素色、3 参调用 |
 | `Combat/PlayerHitZone.cs` | 同上（元素色=白） |
 | `Monster/MonsterEntity.cs` | 3 参实现、事件带真实点、击退×倍率、`None` 默认点回退 |
-| `Monster/MonsterTakeDamageEvent.cs` | +`HitPoint`、+`Part` |
+| `Sys3C/Core/Events/DamageEvents.cs` | `MonsterTakeDamageEvent` 复用 `HitPosition`（值改真实接触点）、+`Part` |
 | `Sys3C/Sys3CEntry.cs` | 3 参实现（contact 存进 `DamageContext` 供 `OnDamageProcessed` 使用）、击退×倍率、发射玩家事件 |
 | `Nameplate/DisplayEventBridge.cs` | +玩家事件订阅（飘字） |
 | `VFX/WeaponVFXController.cs` | +静态 `CurrentElementColor` |
@@ -214,7 +223,7 @@ private void OnTriggerStay(Collider other)
 `SkillExecutor` / `MeleeWeapon` / `MonsterAttackState`（2 参重载 → `None` 回退）。
 
 ### 实现时验证项
-- `PlayerHitZone` 是否在实际使用（`MonsterAttackState:79` 存在直调 `TakeDamage` 的另一条路径）——两条路径都要接入玩家事件与击退倍率。
+- ~~`PlayerHitZone` 是否在实际使用~~ → 已确认为**明确需求**（§7）：`PlayerHitZone` 改造为走玩家 `IDamageable.TakeDamage`，与 `MonsterAttackState:79` 直调 `TakeDamage` 的路径统一到同一入口；两条路径都要接入玩家事件与击退倍率。
 - `DamageContext` 增加 `HitContact` 字段的可行性（ref struct 传参）。
 
 ## 12. 测试
