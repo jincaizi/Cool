@@ -22,11 +22,19 @@ namespace Hotfix.GameSystems.Nameplate
         public void Enable()
         {
             EventBus.Subscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
+            EventBus.Subscribe<PlayerTakeDamageEvent>(OnPlayerDamaged);
         }
 
         public void Disable()
         {
             EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
+            EventBus.Unsubscribe<PlayerTakeDamageEvent>(OnPlayerDamaged);
+        }
+
+        private void OnPlayerDamaged(PlayerTakeDamageEvent e)
+        {
+            // 玩家飘字复用怪物同款 settings（后续需要差异化时再新增配置）
+            _floatText.ShowDamageText(e.EntityId, e.HitPosition, _damageSettings, e.Damage);
         }
 
         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
