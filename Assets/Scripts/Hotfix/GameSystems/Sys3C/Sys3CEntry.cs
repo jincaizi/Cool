@@ -261,6 +261,12 @@ namespace Hotfix.GameSystems.Sys3C
             _cc.LockRotation = true;
             _cc.LockMovement = true;
 
+            // 先恢复攻击层权重与状态，最后再 SetTrigger——
+            // 层权重为 0 时 SetTrigger 会被 Animator 静默丢弃（技能在清理回调栈内
+            // 激活时层权重恰为 0，trigger 丢失会导致动画卡在上一状态循环）
+            Animator.SetLayerWeight(1, 1f);
+            Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Attacking);
+
             if (!string.IsNullOrEmpty(_lastSkillTrigger))
             {
                 Animator.SetTrigger(_lastSkillTrigger);
@@ -270,9 +276,6 @@ namespace Hotfix.GameSystems.Sys3C
             {
                 UnityEngine.Debug.LogWarning($"[Sys3CEntry] Skill '{skillData.SkillName}' has no AnimatorTrigger set!");
             }
-
-            Animator.SetLayerWeight(1, 1f);
-            Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Attacking);
         }
 
         private void HandleAttackAnimationCompleted()
