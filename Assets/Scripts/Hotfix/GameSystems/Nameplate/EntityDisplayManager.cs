@@ -9,6 +9,7 @@ namespace Hotfix.GameSystems.Nameplate
         [SerializeField] private NameplateSettings _nameplateSettings;
         [SerializeField] private FloatTextSettings _damageSettings;
         [SerializeField] private FloatTextSettings _critDamageSettings;
+        [SerializeField] private FloatTextSettings _playerDamageSettings;
         [SerializeField] private FloatTextSettings _skillNameSettings;
 
         private Canvas _canvas;
@@ -36,7 +37,7 @@ namespace Hotfix.GameSystems.Nameplate
 
             _eventBridge = new DisplayEventBridge(
                 _floatText,
-                _damageSettings, _critDamageSettings);
+                _damageSettings, _critDamageSettings, _playerDamageSettings);
         }
 
         private void CreateCanvas()

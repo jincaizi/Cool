@@ -8,15 +8,18 @@ namespace Hotfix.GameSystems.Nameplate
         private readonly FloatTextRenderer _floatText;
         private readonly FloatTextSettings _damageSettings;
         private readonly FloatTextSettings _critDamageSettings;
+        private readonly FloatTextSettings _playerDamageSettings;
 
         public DisplayEventBridge(
             FloatTextRenderer floatText,
             FloatTextSettings damageSettings,
-            FloatTextSettings critDamageSettings)
+            FloatTextSettings critDamageSettings,
+            FloatTextSettings playerDamageSettings)
         {
             _floatText = floatText;
             _damageSettings = damageSettings;
             _critDamageSettings = critDamageSettings;
+            _playerDamageSettings = playerDamageSettings;
         }
 
         public void Enable()
@@ -33,8 +36,8 @@ namespace Hotfix.GameSystems.Nameplate
 
         private void OnPlayerDamaged(PlayerTakeDamageEvent e)
         {
-            // 玩家飘字复用怪物同款 settings（后续需要差异化时再新增配置）
-            _floatText.ShowDamageText(e.EntityId, e.HitPosition, _damageSettings, e.Damage);
+            // 玩家掉血飘字使用专属配置(灰字+黑描边),与怪物掉血(红字)区分
+            _floatText.ShowDamageText(e.EntityId, e.HitPosition, _playerDamageSettings, e.Damage);
         }
 
         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
