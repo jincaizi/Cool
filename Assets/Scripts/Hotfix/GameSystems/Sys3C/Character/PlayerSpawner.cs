@@ -41,6 +41,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
             var spawnPos = _spawnPoint != null ? _spawnPoint.position : Vector3.zero;
             _currentPlayer = Instantiate(prefab, spawnPos, Quaternion.identity);
+            EventBus.Emit(new PlayerSpawnedEvent(_currentPlayer.GetComponent<Animator>()));
         }
     }
 }

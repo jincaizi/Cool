@@ -20,11 +20,13 @@ namespace Hotfix.GameSystems.VFX
         private void OnEnable()
         {
             EventBus.Subscribe<MonsterTakeDamageEvent>(OnHit);
+            EventBus.Subscribe<PlayerSpawnedEvent>(OnPlayerSpawned);
         }
 
         private void OnDisable()
         {
             EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnHit);
+            EventBus.Unsubscribe<PlayerSpawnedEvent>(OnPlayerSpawned);
             StopAllCoroutines();
             _playerFrozen = false;
             _timeSlowing = false;
@@ -49,6 +51,12 @@ namespace Hotfix.GameSystems.VFX
 
             if (e.IsCritical && !_timeSlowing)
                 StartCoroutine(TimeSlowRoutine(_profile.CritTimeSlowScale, _profile.CritTimeSlowDuration));
+        }
+
+        private void OnPlayerSpawned(PlayerSpawnedEvent e)
+        {
+            if (e.PlayerAnimator != null)
+                _playerAnimator = e.PlayerAnimator;
         }
 
         private IEnumerator FreezePlayerAnimator(float duration)
