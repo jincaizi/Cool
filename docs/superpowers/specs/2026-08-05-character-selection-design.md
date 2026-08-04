@@ -31,7 +31,8 @@ RPG Duo 资产包自带男女角色，共用同一骨架（`ModularCharacterPBR.
 
 ### 3.2 预览 prefab（2 个，剥离脚本）
 
-- 从玩家 prefab 复制并**删除全部脚本组件**（无 Sys3CEntry/无 VFX/无物理），仅保留模型部件 + 部件可见性状态（男预览 = 男部件，女预览 = 女部件）
+- 从玩家 prefab 复制并**删除全部 MonoBehaviour 脚本**（无 Sys3CEntry/无 VFX/无物理），仅保留模型部件 + 部件可见性状态（男预览 = 男部件，女预览 = 女部件）
+- **禁用 Animator**（静态摆姿，不跑 Locomotion 树；MVP 不做动画预览）
 - `CharacterSelectPanel` 序列化引用，运行时零 `GetComponent`
 
 ## 4. 新增代码
@@ -42,13 +43,14 @@ RPG Duo 资产包自带男女角色，共用同一骨架（`ModularCharacterPBR.
 | `Sys3C/Character/CharacterSelectionService.cs` | 静态类：`Current`、`Save(gender)`、`Load()`；PlayerPrefs key `character.gender`，无存档/非法值 → `Male` |
 | `Sys3C/Character/PlayerSpawner.cs` | MonoBehaviour：序列化 `_malePrefab`/`_femalePrefab`/`_spawnPoint`；EventBus 订阅 `CharacterSelectedEvent`，生成前销毁旧玩家实例（防重复）；不持有相机引用 |
 | `Sys3C/Core/Events/CharacterSelectedEvent.cs` | 事件：携带 `CharacterGender` |
-| `UI/Panel/CharacterSelect/CharacterSelectPanel.cs` | UIPanel：两个预览位（序列化引用预览 prefab）、上次选择高亮、确认按钮 → Save + `EventBus.Publish(CharacterSelectedEvent)` + 关闭自身 |
+| `UI/Panel/CharacterSelect/CharacterSelectPanel.cs` | UIPanel：序列化引用 2 个预览 prefab，**打开时 Instantiate、关闭时销毁**（面板持有预览体，场景只负责相机取景位置）；上次选择高亮、确认按钮 → Save + `EventBus.Publish(CharacterSelectedEvent)` + 关闭自身 |
 | `UI/Panel/CharacterSelect/PreviewRotator.cs` | 挂在预览体上的纯旋转组件（无 GetComponent） |
 
 ## 5. 改动清单
 
 - `UIManager.LoadBuiltInPanels()`（UIManager.cs:31-40）：+2 行 —— 注册 `CharacterSelectPanel`（Resources/Prefabs/UI/CharacterSelectPanel）并 `OpenAsync`；HUD 自动显示逻辑**不动**（选人面板全屏覆盖，确认后关闭）
 - 场景（DemoDay）：移除烘焙的 `MaleCharacterPBR` 实例；新增 `PlayerSpawner` 对象（序列化 2 个玩家 prefab + 出生点 `PlayerSpawnPoint` 空对象）；Main Camera 位置调整为选人视角（能看见两个预览体）
+- **接线基准**：以场景中当前正常工作的男模玩家实例（prefab + 可能的场景侧新增）为基准 —— diff 出的场景侧组件**先并入男玩家 prefab**（保证生成后与现状行为一致），再镜像到女 prefab
 
 ## 6. 数据流
 
