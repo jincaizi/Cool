@@ -478,7 +478,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c627cb94b4b7684599fb9a5c3648ec7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _weaponBonePath: OHS03
+  _weaponBonePath: OHS06
 --- !u!1 &1548294074606817794
 GameObject:
   m_ObjectHideFlags: 0
