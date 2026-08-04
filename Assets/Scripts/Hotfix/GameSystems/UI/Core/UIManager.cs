@@ -32,10 +32,17 @@ namespace Hotfix.GameSystems.UI
         {
             await RegisterFromPrefab("Prefabs/UI/PlayerHudPanel", "PlayerHudPanel");
             await RegisterFromPrefab("Prefabs/UI/TargetPanel", "TargetPanel");
+            await RegisterFromPrefab("Prefabs/UI/CharacterSelectPanel", "CharacterSelectPanel");
 
             if (_registry.TryGetValue("PlayerHudPanel", out var hud))
             {
                 await ShowPanelAsync(hud);
+            }
+
+            // 启动流程：先选人，再进世界（选人面板全屏覆盖 HUD）
+            if (_registry.TryGetValue("CharacterSelectPanel", out var select))
+            {
+                await OpenAsync("CharacterSelectPanel");
             }
         }
 
