@@ -43,5 +43,12 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _currentPlayer = Instantiate(prefab, spawnPos, Quaternion.identity);
             EventBus.Emit(new PlayerSpawnedEvent(_currentPlayer.GetComponent<Animator>()));
         }
+
+        private void Start()
+        {
+            // 场景加载后从保存的选择生成（选人场景发的事件本场景收不到）
+            if (_currentPlayer == null)
+                OnCharacterSelected(new CharacterSelectedEvent(CharacterSelectionService.Load()));
+        }
     }
 }
