@@ -105,3 +105,10 @@ Run: `mcp__ai-game-developer__tests-run`（EditMode）→ 66/66 全绿
 - **占位符扫描**：无；数值精确到设计分辨率单位
 - **类型一致性**：GUID 引用与 DemoDay 一致；布局数值与 spec 表格一致
 - **教训应用**：场景/prefab 操作后 git 复核；验证用真实输入链路（本次事故根因就是验证绕过了输入系统）
+
+## 执行记录（2026-08-06，执行后追加）
+
+- 3 个任务完成（提交 5648f8e → 2f08d43，落 master）：EventSystem 添加（+69 行，与 DemoDay 逐字段一致）+ 布局调整（13 值 + 3 行 TMP 伴生字段）
+- 端到端验证**全程真实射线链路**：EventSystem.current + RaycastAll 首命中断言（MaleCard/FemaleCard/ConfirmButton 各命中）+ pointerDown/Up/Click → Button.onClick → Select → OnSelectionChanged → 预览切换全链通；确认 → 6 秒内 DemoDay 加载 → 玩家生成
+- 布局视觉确认（PIL 数值校验）：三控件底部水平居中（|Δx| ≤ 88px）、顶部预览区无遮挡、卡片面积约为原 30%
+- 已知编辑器副作用（非本特性）：ZhunYuan SDF.asset 在 PlayMode 后产生 TMP 动态字形（未提交，可 git checkout）
