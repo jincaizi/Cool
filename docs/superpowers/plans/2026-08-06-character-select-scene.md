@@ -313,3 +313,10 @@ Play CharacterSelect → 连续两次 `_confirmButton.onClick.Invoke()`（同帧
 - **占位符扫描**：三个代码任务含完整代码；场景任务含精确工具与步骤 ✓
 - **类型一致性**：`OnSelectionChanged`/`OnClosed` 事件签名在 Task 1 定义、Task 2 订阅一致；`CharacterSelectPanel` PanelId 不变；`SceneManager.LoadScene("DemoDay")` 与 Build Settings 场景名一致 ✓
 - **历史教训应用**：① prefab/场景文件操作后以 git 为准复核（防 4066722 式破坏）；② 验证必须含组件全集抽查（上轮自动化验证盲区）；③ 场景任务避开 prefab 编辑态（本计划无 prefab 修改，仅场景对象操作）
+
+## 执行记录（2026-08-06，执行后追加）
+
+- 全部 6 个任务完成（提交 73adaa6 → 9410bd4，落 master），每任务经 spec 合规 + 代码质量双审
+- **计划外追加 1**（Task 4 审查发现）：清理选人场景的 NavMeshSurface（引用了 DemoDay 的烘焙数据 = 跨场景资产耦合）+ Tent/CampFire 的 NavMeshModifier + 篝火冗余点光，commit d070596e
+- 验证亮点：端到端验证全 PASS（正式流程 + 组件全集抽查 + 双击保护 + 持久化 + dev 路径）；质量审查误报"HitStopManager 孤儿"经 git 复核证伪（组件确在 DemoDay 的 HitFeedbackManager 上）
+- 最终审查：✅ 可交付；EditMode 66/66 全绿；遗留手动项（移动/攻击/技能输入、面板视觉手感）已记录 session-log
