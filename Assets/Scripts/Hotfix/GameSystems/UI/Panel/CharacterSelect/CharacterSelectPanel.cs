@@ -1,3 +1,4 @@
+using System;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Core.Events;
@@ -22,7 +23,13 @@ namespace Hotfix.GameSystems.UI
         [SerializeField] private GameObject _maleHighlight;
         [SerializeField] private GameObject _femaleHighlight;
 
+        /// <summary>选人切换事件（场景侧 SelectStageController 用于切换预览体）</summary>
+        public event Action<CharacterGender> OnSelectionChanged;
+        /// <summary>面板完全关闭后触发（用于触发游戏场景加载）</summary>
+        public event Action OnClosed;
+
         private CharacterGender _selected;
+        private bool _closing;   // 重入保护：防双击确认导致重复关闭/重复加载
 
         protected override void Awake()
         {
@@ -43,6 +50,7 @@ namespace Hotfix.GameSystems.UI
         {
             _selected = gender;
             RefreshHighlight();
+            OnSelectionChanged?.Invoke(gender);
         }
 
         private void RefreshHighlight()
@@ -53,6 +61,8 @@ namespace Hotfix.GameSystems.UI
 
         private void Confirm()
         {
+            if (_closing) return;
+            _closing = true;
             CharacterSelectionService.Save(_selected);
             EventBus.Emit(new CharacterSelectedEvent(_selected));
             CloseSelf();
@@ -62,6 +72,7 @@ namespace Hotfix.GameSystems.UI
         {
             if (UIManager.Instance != null)
                 await UIManager.Instance.CloseAsync(PanelId);
+            OnClosed?.Invoke();
         }
     }
 }
