@@ -652,3 +652,10 @@ Run: `editor-application-set-state`（PlayMode）
 - **占位符扫描**：所有代码步骤含完整代码；资产步骤含精确 MCP 工具与参数 ✓
 - **类型一致性**：`CharacterGender`/`CharacterSelectedEvent`/`PanelId="CharacterSelectPanel"`/Resources 路径 `Prefabs/UI/CharacterSelectPanel` 跨任务一致 ✓；`EventBus.Emit/Subscribe` 签名与现有 `EventBus.cs` 一致 ✓；测试命名遵循 `test_[system]_[scenario]_[expected_result]` 规范 ✓
 - **一处实现细化**（相对 spec §4）：预览体由「面板 Instantiate」改为「场景烘焙 + PreviewRotator」—— 面板是 Resources 加载的 prefab，无法序列化场景锚点引用，场景烘焙免去锚点传递管道（无 GetComponent、无生命周期同步），与 spec 意图（剥离模型预览）一致
+
+## 执行记录（2026-08-05，执行后追加）
+
+- 全部 9 个任务完成（提交 4248fbe → 5d7ca8c，落 master），每任务经 spec 合规 + 代码质量双审
+- **计划外追加 1**（Task 8 审查发现）：`PlayerSpawnedEvent` 重绑 `HitStopManager._playerAnimator`（场景重构删烘焙玩家导致序列化引用失效），commit 203ed74
+- **计划外追加 2**（Task 9 后核查）：commit 4066722 误将工作树污染的 FemalePlayer.prefab 破坏性提交（净删 17 组件），已 revert 至 01ef7bd 完整镜像（commit 5d7ca8c），并深度复验女路径组件全集；会话日志已追加更正
+- 最终审查：✅ 可交付；EditMode 66/66 全绿；遗留手动验证项（移动/攻击/技能输入、预览旋转观感）已记录于 session-log
