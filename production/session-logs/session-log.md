@@ -83096,3 +83096,46 @@ task9_01_select_panel.png / task9_02_select_panel.png / task9_03_female_playing.
 ### 备注
 - 会话中发现 MaleCharacterPBR.prefab 曾出现意外改动（weapon_r 上 7 个 VFX 组件被删，原因未明，疑与 prefab 编辑 session 副作用有关），已 git checkout 恢复；提交前已确认该文件干净。
 - 提交内容：FemalePlayer.prefab 修复 + 本日志；截图/verify 目录不提交。
+
+
+---
+
+## 更正（2026-08-05 晚间复验）— 4066722 为破坏性提交，Task 9 修复记录陈述有误
+
+### 原记录条目引用
+- 本文件上方 `## Session: 20260805_074852 — Task 9 端到端验证（男女双路径）` 一节中的
+  「发现并修复的 Bug 1：FemalePlayer.prefab 缺少 3C 组件……修复：以 MaleCharacterPBR 为基准添加 CharacterController + Sys3CEntry……女路径复验全 PASS」。
+- 对应提交：`4066722 fix: wire Sys3CEntry + CharacterController and fix Animator controller on FemalePlayer prefab (found by Task 9 E2E verification)`。
+
+### 事实（复核依据：git 历史 + 本次深度复验）
+- `4066722` 对 `Assets/Prefabs/Character/FemalePlayer.prefab` 的改动为 **1 文件、11 行插入 / 333 行删除**：
+  从根节点删除了 CharacterAttackHandler / MeleeWeapon / SkillFreezeEffector / IceBurstVFX / IceDecalVFX / FrostAuraVFX / HitFlashVFX，
+  从 weapon_r 删除了 7 个 VFX 组件（SlashTrailVFX / SwordGlowVFX / WeaponVFXController / WeaponTrailRenderer / WeaponSurfaceShader / WeaponMistParticles / WeaponMaterialProxy），
+  并删除了 RingVisual（SelectionRing + SpriteRenderer），合计 **删除 17 个组件**；
+  同时将 Sys3CEntry 退化为空字段、CharacterController 改为 slopeLimit 45 且 m_Material 为空。
+  这**不是**"补回 3C 组件"，而是把 Task 5 完整镜像（01ef7bd，根 11 + weapon_r 8 + RingVisual 3）**删空**后的二次污染。
+- 根因链条：Task 9 会话中女 prefab 工作树文件确已被污染（同一编辑器会话的 prefab 跨文件写入副作用，男 prefab 同次中招后经 git checkout 恢复）；
+  Task 9 的"修复"基于被污染的工作树状态重写，误把破坏当缺口，导致 4066722 提交了删组件版本。
+- 本次处理：`git checkout 01ef7bd -- Assets/Prefabs/Character/FemalePlayer.prefab` 精确还原（`git diff 01ef7bd` 为空），
+  女 prefab 回到 Task 5 完整镜像：根 11 组件（Transform/Animator/CharacterController/Sys3CEntry/CharacterAttackHandler/MeleeWeapon/SkillFreezeEffector/IceBurstVFX/IceDecalVFX/FrostAuraVFX/HitFlashVFX）、
+  weapon_r 8（Transform + 7 VFX，WeaponMaterialProxy._weaponBonePath=OHS06）、RingVisual 3（Transform+SpriteRenderer+SelectionRing）、
+  Sys3CEntry._characterSkills=4、slopeLimit=40、m_Material=PlayerPhysicMaterial、layer=9、Animator=Character3C.controller(fb7ffdef)。
+
+### 本次深度复验结果（PlayMode，比 Task 9 更深的实例级检查）
+- 选人面板出现 → 女卡片点击 FemaleHighlight 亮 → 确认 → FemalePlayer(Clone) 生成（位置=PlayerSpawnPoint）。
+- 实例组件清单（typeName 全集）：根 = Transform/Animator/CharacterController/Sys3CEntry/CharacterAttackHandler/MeleeWeapon/SkillFreezeEffector/IceBurstVFX/IceDecalVFX/FrostAuraVFX/HitFlashVFX（+运行期 InputManager）；
+  weapon_r = Transform + SlashTrailVFX/SwordGlowVFX/WeaponVFXController/WeaponTrailRenderer/WeaponSurfaceShader/WeaponMistParticles/WeaponMaterialProxy 共 8；RingVisual = Transform/SpriteRenderer/SelectionRing 共 3。
+- Sys3CEntry._characterSkills.Length == 4；相机 ThirdPersonCameraController.Target == FemalePlayer(Clone)。
+- 受击闪红双路径实测：反射调 HitFlashVFX.TriggerFlash() → Body10 SkinnedMeshRenderer _propBlock._Color 变红 (1,0,0,1)；EventBus.TargetedEmit(MonsterTakeDamageEvent) 真实链路同样变红。
+- 持久化：PlayerPrefs character.gender=1，CharacterSelectionService.Load()=Female；面板确认后 CanvasGroup alpha=0（IsVisible=False）正常关闭。
+- 截图：production/verify/task9_redo_1_select_panel.png / task9_redo_2_female_selected.png / task9_redo_3_female_playing.png（不提交 git）。
+- 退出 PlayMode 后 git status 复核：FemalePlayer.prefab 工作树 = 01ef7bd 内容（仅本次 staged 还原），MaleCharacterPBR.prefab 未被污染，无 prefab 副作用复发。
+
+### 当前状态
+- `FemalePlayer.prefab` 已还原为 01ef7bd 完整镜像并提交（提交信息：fix: restore FemalePlayer.prefab to full mirror (revert destructive 4066722 changes)）。
+- 男 prefab（MaleCharacterPBR.prefab）复检：`git diff ec37abd HEAD` 为空，根 11 + weapon_r 8 + RingVisual 3 完整（WeaponMaterialProxy._weaponBonePath=OHS03 为男资产既有基线）。
+
+### 教训
+1. **prefab 状态以 git 为准**：工作树文件可能被编辑器会话副作用污染（跨文件写入），验证前先 `git status`/`git diff` 对比基线，污染先 checkout 还原，不要在脏状态上"修复"。
+2. **自动化验证未覆盖攻击/武器组件**：Task 9 验证矩阵只查了相机绑定/动画/闪红，未断言根节点与 weapon_r 的组件 typeName 全集，导致删组件未被发现。已补实例级组件清单断言（本次复验矩阵可作为后续回归基线）。
+3. 任何"需要再修 prefab"的信号，先质疑数据来源是否来自被污染的工作树，再动手。
