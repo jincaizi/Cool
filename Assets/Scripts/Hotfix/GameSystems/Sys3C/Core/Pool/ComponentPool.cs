@@ -14,7 +14,11 @@ namespace Hotfix.GameSystems.Sys3C.Core.Pool
             _prefab = prefab;
             _parent = parent;
             for (int i = 0; i < prewarmCount; i++)
-                _pool.Enqueue(CreateNew());
+            {
+                var instance = CreateNew();
+                instance.gameObject.SetActive(false); // 池化实例未取出前不激活（预热不产生可见物体）
+                _pool.Enqueue(instance);
+            }
         }
 
         public T Get()

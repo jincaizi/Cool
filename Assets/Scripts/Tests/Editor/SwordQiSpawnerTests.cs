@@ -50,22 +50,22 @@ namespace GameSys.EditorTests
 
             // Act
             SwordQiSpawner.Spawn(cfg, DamageBlock.CreateDefault(10f, 0f), Vector3.zero, Vector3.forward);
-            // 手动步进：Spawn 复用的实例配置了 config，会飞行；惰性预热实例 config 为空原地不动
+            // 手动步进：Spawn 复用的实例配置了 config，会飞行；预制体模板 config 为空原地不动
             foreach (var qi in Object.FindObjectsOfType<SwordQiProjectile>())
                 qi.Tick(0.5f);
 
             // Assert
-            // 池懒初始化：预热 PrewarmCount 个实例（Spawn 复用其一，不新建）
-            Assert.AreEqual(before + SwordQiSpawner.PrewarmCount,
+            // 池懒初始化：预热实例未取出前不激活（inactive），FindObjectsOfType 只统计活跃实例
+            Assert.AreEqual(before + 1,
                             Object.FindObjectsOfType<SwordQiProjectile>().Length,
-                            "懒初始化池创建后实例数应为预热数量");
+                            "懒初始化池创建后活跃实例数应为 Spawn 的 1 个（预热实例不激活）");
             int moving = 0;
             foreach (var qi in Object.FindObjectsOfType<SwordQiProjectile>())
             {
                 Assert.IsTrue(qi.gameObject.activeSelf);
                 if (qi.transform.position.z > 5f) moving++;
             }
-            Assert.AreEqual(1, moving, "应恰好生成 1 道飞行剑气（其余为惰性预热实例）");
+            Assert.AreEqual(1, moving, "应恰好生成 1 道飞行剑气");
         }
 
         [Test]

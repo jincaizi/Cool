@@ -77,8 +77,8 @@ namespace GameSys.EditorTests
 
         /// <summary>
         /// 统计"真·生成"的剑气：手动步进一帧，只有配置了 config 的实例会飞行
-        /// （池预热实例/预制体模板 config 为空原地不动），按 SwordQiSpawnerTests
-        /// 的 T6 约定以位移区分生成实例
+        /// （预制体模板 config 为空原地不动；池预热实例未取出前不激活，不会被步进），
+        /// 按 SwordQiSpawnerTests 的 T6 约定以位移区分生成实例
         /// </summary>
         private static int CountFlyingQi()
         {
@@ -103,11 +103,11 @@ namespace GameSys.EditorTests
             RaiseHitboxFrame(executor, 0);
 
             // Assert
-            // 池懒初始化：预热 PrewarmCount 个实例（Spawn 复用其一，不新建）——按 T6 约定断言
-            Assert.AreEqual(before + SwordQiSpawner.PrewarmCount,
+            // 池懒初始化：预热实例未取出前不激活，活跃数 = 模板 + Spawn 的 1 个
+            Assert.AreEqual(before + 1,
                             Object.FindObjectsOfType<SwordQiProjectile>().Length,
-                            "匹配的判定帧应触发池初始化（预热实例 + 预制体模板）");
-            Assert.AreEqual(1, CountFlyingQi(), "应恰好生成 1 道飞行剑气（其余为惰性预热实例）");
+                            "匹配的判定帧应触发池初始化并激活 1 个实例");
+            Assert.AreEqual(1, CountFlyingQi(), "应恰好生成 1 道飞行剑气");
         }
 
         [Test]
@@ -124,10 +124,10 @@ namespace GameSys.EditorTests
 
             // Assert
             // 同一次施放只生成一道剑气：第二次触发被 _swordQiSpawned 拦截。
-            // （若拦截失效，第二道剑气会复用第二只预热实例——总数不变但飞行数变 2）
-            Assert.AreEqual(before + SwordQiSpawner.PrewarmCount,
+            // （若拦截失效，第二道剑气会复用第二只预热实例——活跃数变 before+2 且飞行数变 2）
+            Assert.AreEqual(before + 1,
                             Object.FindObjectsOfType<SwordQiProjectile>().Length,
-                            "池实例总数不增长（无额外实例化）");
+                            "活跃实例数应保持模板 + 1 个（无额外实例化）");
             Assert.AreEqual(1, CountFlyingQi(), "同一次施放只生成一道剑气");
         }
 
@@ -153,9 +153,9 @@ namespace GameSys.EditorTests
             RaiseHitboxFrame(executor, 2);
 
             // Assert
-            Assert.AreEqual(before + SwordQiSpawner.PrewarmCount,
+            Assert.AreEqual(before + 1,
                             Object.FindObjectsOfType<SwordQiProjectile>().Length,
-                            "配置帧应触发池初始化");
+                            "配置帧应触发池初始化并激活 1 个实例");
             Assert.AreEqual(1, CountFlyingQi(), "仅在配置帧索引生成");
         }
 
