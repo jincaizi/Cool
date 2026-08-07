@@ -63,7 +63,7 @@ public class SwordQiConfig : ScriptableObject
 
 ### 2. `SwordQiProjectile`（MonoBehaviour，新增）
 
-- `OnSpawn(SwordQiConfig cfg, DamageBlock damage, Vector3 origin, Vector3 dir)` 初始化（持有 damage 的**私有拷贝**）
+- `OnSpawn(SwordQiConfig cfg, DamageBlock damage, Vector3 origin, Vector3 dir)` 初始化（持有 damage 的**私有拷贝**——若 DamageBlock 无现成拷贝 API，则字段级手动拷贝）
 - `Tick(float deltaTime)`：移动 + 带判定 + 去重 + 伤害；`Update()` 内调用，公开供 EditMode 测试手动步进
 - 命中：`PhysicsRegistry.FindNearby(position, detectRadius, EntityType.Monster)`，`HashSet<int>`（Transform instanceID）去重，每目标只命中一次
 - 伤害：`SkillDamageHelper.FillDamageContext(...)` 后 `target.TakeDamage(damageBlock, hitDir)`（两参数版，hitDir = 目标位置 - 剑气位置，与 `SkillExecutor.ApplyDamage` 路径一致）
@@ -78,11 +78,11 @@ public static class SkillDamageHelper
 {
     // CalculateFinalDamage + SkillId/ComboIndex/CalculatedDamage 填充 + EffectBlock 击退覆盖
     public static void FillDamageContext(DamageBlock damage, int skillId, int comboIndex,
-                                         EffectBlock effect, CharacterStats stats);
+                                         EffectBlock effect, IEffectStats stats);
 }
 ```
 
-`SkillExecutor.ApplyDamage` 重构为调用此帮助类（**行为不变**），`SwordQiProjectile` 复用，保证 `MonsterTakeDamageEvent` 等依赖字段语义一致。
+`SkillExecutor.ApplyDamage` 重构为调用此帮助类（**行为不变**），`SwordQiProjectile` 复用，保证 `MonsterTakeDamageEvent` 等依赖字段语义一致。（`IEffectStats` 即 `IEffectTarget.Stats` 的属性类型。）
 
 ### 4. `ComboSkillData` 扩展
 
