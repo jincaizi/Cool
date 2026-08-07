@@ -44,6 +44,7 @@ MonoBehaviour:
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
+  _swordQi: {fileID: 11400000, guid: 20f1d43170927f2449ded01e8e842266, type: 2}
   _shape:
     _targetType: 0
     _range: 2.5
