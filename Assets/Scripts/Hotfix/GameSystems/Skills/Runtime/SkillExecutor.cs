@@ -6,6 +6,7 @@ using Hotfix.GameSystems.Skills.Effect;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Events;
 using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Skills.Runtime.SwordQi;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Skills.Runtime
@@ -37,6 +38,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private DamageBlock _lastDamageBlock;
         private readonly SpinSkillData _spinData;
         private SpinHitTracker _spinHitTracker;
+        private bool _swordQiSpawned;
 
         // 回调
         public event Action<int> OnHitboxFrame;              // 判定帧触发
@@ -65,6 +67,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _stateMachine = new SkillStateMachine(data);
 
             _stateMachine.OnHitboxFrame += OnHitboxTriggered;
+            _stateMachine.OnHitboxFrame += OnSwordQiFrame;
             _stateMachine.OnHitConfirm += OnHitConfirm;
             _stateMachine.OnSkillCompleted += OnSkillComplete;
             _stateMachine.OnSkillInterrupted += OnSkillInterrupt;
@@ -106,6 +109,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public bool TryStart()
         {
+            _swordQiSpawned = false; // 每次施放复位（连击链多次施放）
             bool started = _stateMachine.TryStart();
             if (started && _skillData is ChargedSkillData)
             {
@@ -207,6 +211,48 @@ namespace Hotfix.GameSystems.Skills.Runtime
             float castTime = channeled?.CastTime ?? 0f;
             if (castTime <= 0) return 1f;
             return Mathf.Clamp01(_stateMachine.ElapsedTime / castTime);
+        }
+
+        /// <summary>
+        /// 判定帧事件第二订阅者：按 SwordQiConfig 生成剑气（挥击中段，与近战判定同帧）。
+        /// 伤害数据从 SkillData.Damage 拷贝并填充上下文，防共享实例被后续施放污染。
+        /// </summary>
+        private void OnSwordQiFrame(int frameIndex)
+        {
+            if (_swordQiSpawned) return;
+
+            var cfg = _skillData.SwordQi;
+            if (cfg == null || cfg.Prefab == null) return;
+            if (frameIndex != cfg.SpawnFrameIndex) return;
+
+            _swordQiSpawned = true;
+
+            var damage = _skillData.Damage?.Clone();
+            if (damage == null)
+            {
+                Debug.LogWarning("[SkillExecutor] SwordQi config set but skill has no DamageBlock, skip spawn");
+                return;
+            }
+
+            SkillDamageHelper.FillDamageContext(damage, _skillData.SkillId, frameIndex + 1, cfg.Effect, _owner.Stats);
+            damage.CalculatedDamage *= cfg.DamagePercent;
+
+            Vector3 origin = _owner.transform.position + _owner.transform.TransformDirection(cfg.SpawnOffset);
+            Vector3 dir = _owner.transform.forward;
+            dir.y = 0f;
+            dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : _owner.transform.forward;
+
+            SwordQiSpawner.Spawn(cfg, damage, origin, dir);
+
+            EventBus.Emit(new SwordQiSpawnedEvent
+            {
+                CasterId = _owner.transform.GetInstanceID(),
+                SkillId = _skillData.SkillId,
+                Origin = origin,
+                Direction = dir,
+                Speed = cfg.Speed,
+                Range = cfg.Range
+            });
         }
 
         private void OnHitboxTriggered(int frameIndex)

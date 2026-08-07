@@ -17,6 +17,13 @@ namespace GameSys.EditorTests
             field.SetValue(target, value);
         }
 
+        public static object GetField(object target, string fieldName)
+        {
+            var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.IsNotNull(field, $"Field {fieldName} not found on {target.GetType().Name}");
+            return field.GetValue(target);
+        }
+
         public class FakeTarget : IEffectTarget
         {
             public Transform transform { get; }
