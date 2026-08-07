@@ -25,7 +25,7 @@
 方案选型：轻量剑气组件 + 挂接技能执行事件（**不**走 `ProjectileSkillData`——其语义为独立技能弹体且缺 DamageBlock 字段；**不**改 `SkillStateMachine`——触发全部发生在 `SkillExecutor` 订阅层）。
 
 ```
-ComboSkillData (竖劈)
+SkillData 基类 (竖劈 = BA_Heavy, InstantSkillData)
   └─ SwordQiConfig（可选字段，null = 不发射剑气）
         └─ 预制体 / 速度 / 射程 / 判定半径 / 伤害倍率 / 生成帧索引 / 生成偏移 / EffectBlock
                 │ 判定帧时刻触发
@@ -84,17 +84,19 @@ public static class SkillDamageHelper
 
 `SkillExecutor.ApplyDamage` 重构为调用此帮助类（**行为不变**），`SwordQiProjectile` 复用，保证 `MonsterTakeDamageEvent` 等依赖字段语义一致。（`IEffectStats` 即 `IEffectTarget.Stats` 的属性类型。）
 
-### 4. `ComboSkillData` 扩展
+### 4. `SkillData` 基类扩展
 
 ```csharp
-[SerializeField] SwordQiConfig _swordQi;  // null = 普攻不发射剑气
+[SerializeField] protected SwordQiConfig _swordQi;  // null = 技能不发射剑气
 public SwordQiConfig SwordQi => _swordQi;
 ```
+
+竖劈（`BA_Heavy.asset`，SkillID 10002，InstantSkillData）挂上即可；与 `_dashDistance` 同类通用能力，默认 null 不影响其他技能。
 
 ### 5. `SkillExecutor` 扩展
 
 - 新增第二订阅者：`_stateMachine.OnHitboxFrame += OnSwordQiFrame;`
-- `OnSwordQiFrame(int frameIndex)`：`!_swordQiSpawned && _skillData is ComboSkillData combo && combo.SwordQi != null && frameIndex == combo.SwordQi.SpawnFrameIndex` 时生成剑气，置 `_swordQiSpawned = true`（判定帧同一帧内可能多次触发，防重复生成）
+- `OnSwordQiFrame(int frameIndex)`：`!_swordQiSpawned && _skillData.SwordQi != null && frameIndex == _skillData.SwordQi.SpawnFrameIndex` 时生成剑气，置 `_swordQiSpawned = true`（判定帧同一帧内可能多次触发，防重复生成）
 - `_swordQiSpawned` 在 `TryStart()` 复位（连击链多次施放）
 
 ### 6. `SwordQiSpawnedEvent`（EventBus 事件，新增）
