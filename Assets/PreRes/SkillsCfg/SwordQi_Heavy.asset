@@ -15,7 +15,7 @@ MonoBehaviour:
   _prefab: {fileID: 1495778426187589966, guid: ed7e48c150f4bcc44aad5941f94c3d28, type: 3}
   _speed: 18
   _range: 12
-  _detectRadius: 1
+  _detectRadius: 2
   _damagePercent: 1
   _spawnFrameIndex: 0
   _spawnOffset: {x: 0.8, y: 0.6, z: 0.6}
