@@ -92,6 +92,11 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] protected DamageBlock _damage;
         public DamageBlock Damage => _damage;
 
+        [Header("=== Sword Qi ===")]
+        [Tooltip("技能挥出时附加的剑气配置（null = 不发射剑气）")]
+        [SerializeField] protected SwordQiConfig _swordQi;
+        public SwordQiConfig SwordQi => _swordQi;
+
         public AnimationClip GetMainAnimationClip()
         {
             return _releaseClip ?? _castClip;
