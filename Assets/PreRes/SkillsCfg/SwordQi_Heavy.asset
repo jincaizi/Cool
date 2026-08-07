@@ -18,7 +18,7 @@ MonoBehaviour:
   _detectRadius: 1
   _damagePercent: 1
   _spawnFrameIndex: 0
-  _spawnOffset: {x: 0.8, y: 1, z: 0.6}
+  _spawnOffset: {x: 0.8, y: 0.6, z: 0.6}
   _effect:
     _applyEffects: []
     _knockbackForce: 0

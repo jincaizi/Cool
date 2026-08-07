@@ -69,6 +69,26 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_sword_qi_spawner_pool_root_under_game_root_container()
+        {
+            // Arrange
+            var prefab = CreateQiPrefab();
+            _gos.Add(prefab);
+            var cfg = CreateConfig(prefab);
+
+            // Act
+            SwordQiSpawner.Spawn(cfg, DamageBlock.CreateDefault(10f, 0f), Vector3.zero, Vector3.forward);
+
+            // Assert
+            var poolRoot = GameObject.Find("SwordQiPool");
+            Assert.IsNotNull(poolRoot, "池根应存在");
+            var container = GameObject.Find("GameRoot");
+            Assert.IsNotNull(container, "场景容器 GameRoot 应被创建");
+            Assert.AreSame(container.transform, poolRoot.transform.parent,
+                           "池根应挂在 GameRoot 容器下（不散落在场景根）");
+        }
+
+        [Test]
         public void test_sword_qi_spawner_skips_when_prefab_missing()
         {
             // Arrange
