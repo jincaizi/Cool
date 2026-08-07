@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9acafbccd98f6484da8355cdece7514a, type: 3}
   m_Name: BA_Heavy
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   _skillId: 10002
   _skillName: Heavy Attack
-  _description: 
+  _description:
   _icon: {fileID: 0}
   _skillType: 0
   _quality: 1
