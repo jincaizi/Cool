@@ -115,6 +115,31 @@ namespace Hotfix.GameSystems.Skills.Data
             return damage;
         }
 
+        /// <summary>
+        /// 深拷贝伤害块（剑气等长生命周期弹体持有私有拷贝，防止共享实例被后续施放污染）
+        /// </summary>
+        public DamageBlock Clone()
+        {
+            return new DamageBlock
+            {
+                _baseDamage = _baseDamage,
+                _attackRatio = _attackRatio,
+                _scalingAttribute = _scalingAttribute,
+                _damageType = _damageType,
+                _criticalRateBonus = _criticalRateBonus,
+                _criticalDamageBonus = _criticalDamageBonus,
+                _isTrueDamage = _isTrueDamage,
+                _armorPenetration = _armorPenetration,
+                _knockbackForce = _knockbackForce,
+                _isDOT = _isDOT,
+                _tickInterval = _tickInterval,
+                _totalTicks = _totalTicks,
+                SkillId = SkillId,
+                ComboIndex = ComboIndex,
+                CalculatedDamage = CalculatedDamage,
+            };
+        }
+
         public static DamageBlock CreateDefault(float baseDamage, float attackRatio = 1f)
         {
             return new DamageBlock
