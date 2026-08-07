@@ -23,7 +23,15 @@ namespace Hotfix.GameSystems.Sys3C.Core.Pool
             if (_pool.Count > 0)
             {
                 instance = _pool.Dequeue();
-                instance.gameObject.SetActive(true);
+                // 场景切换销毁后池内残留伪实例（Unity 重载 == null 为 true）
+                if (instance == null)
+                {
+                    instance = CreateNew();
+                }
+                else
+                {
+                    instance.gameObject.SetActive(true);
+                }
             }
             else
             {
