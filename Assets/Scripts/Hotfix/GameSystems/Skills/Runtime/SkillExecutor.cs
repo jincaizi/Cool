@@ -521,22 +521,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
             var damageBlock = _skillData.Damage;
             if (damageBlock == null) return;
 
-            float damage = damageBlock.CalculateFinalDamage(_owner.Stats);
+            SkillDamageHelper.FillDamageContext(damageBlock, _skillData.SkillId, frameIndex + 1,
+                                                GetEffect(), _owner.Stats);
+
+            // 蓄力/执行阶段伤害加成（技能特有逻辑，保留在执行器内）
             if (CurrentSubState == SkillSubState.Charging || CurrentSubState == SkillSubState.Execution)
-                damage *= 1f + GetChargeProgress() * 0.5f;
+                damageBlock.CalculatedDamage *= 1f + GetChargeProgress() * 0.5f;
 
             _lastDamageBlock = damageBlock;
-
-            // Set runtime skill context so MonsterEntity.TakeDamage can emit
-            // MonsterTakeDamageEvent with correct SkillId/ComboIndex
-            damageBlock.SkillId = _skillData.SkillId;
-            damageBlock.ComboIndex = frameIndex + 1;
-            damageBlock.CalculatedDamage = damage;
-
-            // Set knockback force from EffectBlock if present (overrides DamageBlock default)
-            var effect = GetEffect();
-            if (effect != null && effect.KnockbackForce > 0)
-                damageBlock.KnockbackForce = effect.KnockbackForce;
 
             // Route through IDamageable for unified feedback path
             if (target is IDamageable damageable)
@@ -546,7 +538,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
             else
             {
-                target.Heal(-damage);
+                target.Heal(-damageBlock.CalculatedDamage);
             }
         }
 
