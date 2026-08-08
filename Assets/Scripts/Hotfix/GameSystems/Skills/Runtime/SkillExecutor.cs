@@ -6,6 +6,7 @@ using Hotfix.GameSystems.Skills.Effect;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Events;
 using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Skills.Runtime.Projectile;
 using Hotfix.GameSystems.Skills.Runtime.SwordQi;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 
@@ -40,6 +41,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly SpinSkillData _spinData;
         private SpinHitTracker _spinHitTracker;
         private bool _swordQiSpawned;
+        private readonly ProjectileSkillData _projectileData;
+        private bool _projectileSpawned;
 
         // 回调
         public event Action<int> OnHitboxFrame;              // 判定帧触发
@@ -65,6 +68,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _skillData = data;
             _interruptionMatrix = interruptionMatrix ?? new SkillInterruptionMatrix();
             _spinData = data as SpinSkillData;
+            _projectileData = data as ProjectileSkillData;
             _stateMachine = new SkillStateMachine(data);
 
             _stateMachine.OnHitboxFrame += OnHitboxTriggered;
@@ -111,6 +115,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public bool TryStart()
         {
             _swordQiSpawned = false; // 每次施放复位（连击链多次施放）
+            _projectileSpawned = false; // 每次施放复位（连击链多次施放）
             _chargeProgressAtRelease = 0f; // 防御性复位（防未来直接进入 Execution 的路径读到旧值）
             bool started = _stateMachine.TryStart();
             if (started && _skillData is ChargedSkillData)
@@ -271,6 +276,40 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 Direction = dir,
                 Speed = cfg.Speed,
                 Range = cfg.Range
+            });
+        }
+
+        /// <summary>
+        /// 火球生成：Execution 进入时同步生成（施法前摇由 Execution 动画时长表达）。
+        /// 伤害从 SkillData.Damage 克隆并填充上下文，防共享实例被后续施放污染（同剑气）。
+        /// </summary>
+        private void SpawnFireball()
+        {
+            var damage = _skillData.Damage?.Clone();
+            if (damage == null)
+            {
+                Debug.LogWarning("[SkillExecutor] Projectile skill has no DamageBlock, skip spawn");
+                return;
+            }
+
+            SkillDamageHelper.FillDamageContext(damage, _skillData.SkillId, 1, GetEffect(), _owner.Stats);
+
+            Vector3 origin = _owner.transform.position
+                             + _owner.transform.TransformDirection(_projectileData.SpawnOffset);
+            Vector3 dir = _owner.transform.forward;
+            dir.y = 0f;
+            dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : _owner.transform.forward;
+
+            FireballSpawner.Spawn(_projectileData, damage, origin, dir);
+
+            EventBus.Emit(new FireballSpawnedEvent
+            {
+                CasterId = _owner.transform.GetInstanceID(),
+                SkillId = _skillData.SkillId,
+                Origin = origin,
+                Direction = dir,
+                Speed = _projectileData.ProjectileSpeed,
+                Range = _projectileData.ProjectileRange
             });
         }
 
@@ -462,6 +501,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
             {
                 Vector3 dashDir = _owner.transform.forward;
                 _dashComponent.StartDash(dashDir, _skillData.DashDistance, _skillData.DashDuration);
+            }
+
+            if (newState == SkillSubState.Execution && _projectileData != null && !_projectileSpawned)
+            {
+                _projectileSpawned = true;
+                SpawnFireball();
             }
         }
 
