@@ -19,6 +19,9 @@ namespace Hotfix.GameSystems.Skills.Runtime.Meteor
         private ComponentPool<MeteorStrike> _pool;
         private readonly System.Collections.Generic.HashSet<int> _hitIds = new();
 
+        /// <summary>爆炸检测中心相对落点的垂直偏移（脚踝高度）</summary>
+        private const float AnkleHeightOffset = 1f;
+
         public void OnSpawn(MeteorConfig config, DamageBlock damage, Vector3 impactPoint,
                             ComponentPool<MeteorStrike> pool)
         {
@@ -53,7 +56,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.Meteor
             if (_exploded) return;
 
             // 爆炸检测中心：落点 +1m（脚踝高度），否则站地目标打不到
-            Vector3 center = _impactPoint + Vector3.up * 1f;
+            Vector3 center = _impactPoint + Vector3.up * AnkleHeightOffset;
             var targets = PhysicsRegistry.Instance.FindNearby(center, _config.ExplosionRadius, EntityType.Monster);
             foreach (var target in targets)
             {

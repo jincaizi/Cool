@@ -105,16 +105,16 @@ namespace GameSys.EditorTests
         [Test]
         public void test_meteor_explosion_center_is_one_meter_above_impact()
         {
-            // Arrange（目标站在地面上，y=0；爆炸中心在落点 y+1 → 必须命中）
+            // 目标在落点正上方 4.1m：无 +1m 偏移时 4.1 > 4 不中；有偏移时距中心 3.1 < 4 必中——判别脚踝高度偏移
             var target = new FakeDamageable(NewGo("Target").transform);
-            target.Transform.position = new Vector3(3.5f, 0f, 0f); // 水平 3.5m < 半径 4m
+            target.Transform.position = new Vector3(0f, 4.1f, 0f);
             Register(target);
             var strike = CreateStrike(CreateConfig(0.8f, 4f), Vector3.zero);
 
             // Act
             strike.Tick(0.9f);
 
-            // Assert（水平距离 3.5m + 垂直差 1m → 距爆炸中心 √(3.5²+1²)≈3.64m < 4m）
+            // Assert（垂直差 4.1m - 偏移 1m → 距爆炸中心 3.1m < 4m）
             Assert.AreEqual(1, target.HitCount, "爆炸中心在脚踝高度，站地目标必须命中");
         }
 
