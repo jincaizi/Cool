@@ -16,7 +16,7 @@ MonoBehaviour:
   _skillName: "\u9668\u77F3\u672F"
   _description: 
   _icon: {fileID: 0}
-  _skillType: 0
+  _skillType: 1
   _quality: 1
   _manaCost: 0
   _cooldown: 25
