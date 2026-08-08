@@ -111,6 +111,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public bool TryStart()
         {
             _swordQiSpawned = false; // 每次施放复位（连击链多次施放）
+            _chargeProgressAtRelease = 0f; // 防御性复位（防未来直接进入 Execution 的路径读到旧值）
             bool started = _stateMachine.TryStart();
             if (started && _skillData is ChargedSkillData)
             {
@@ -269,7 +270,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             var targets = DetectTargets();
 
-            // 蓄力期判定帧仅用于动画/VFX 同步，不结算伤害（ChargeBlast 爆炸只在 Execution 判定帧）
+            // 蓄力期判定帧不结算伤害（ChargeBlast 爆炸只在 Execution 判定帧；蓄力期帧事件由 OnSwordQiFrame/OnHitConfirm 链路消费）
             if (CurrentSubState == SkillSubState.Charging)
                 return;
 
@@ -562,7 +563,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             float radius = shape.AreaRadius;
             if (_skillData is ChargedSkillData && CurrentSubState == SkillSubState.Execution)
             {
-                float areaScale = ((ChargedSkillData)_skillData).GetAreaScaleForCharge(_stateMachine.ChargeProgressAtRelease);
+                float areaScale = ((ChargedSkillData)_skillData).GetAreaScaleForCharge(_chargeProgressAtRelease);
                 radius = shape.AreaRadius * areaScale;
             }
 

@@ -16,11 +16,13 @@ namespace GameSys.EditorTests
         private readonly List<GameObject> _gos = new List<GameObject>();
         private GameObject _ownerGo;
         private int _releasedCount;
+        private bool _lastEventFullCharge;
 
         [SetUp]
         public void SetUp()
         {
             _releasedCount = 0;
+            _lastEventFullCharge = false;
             EventBus.Subscribe<SkillReleasedEvent>(OnReleased);
         }
 
@@ -33,7 +35,7 @@ namespace GameSys.EditorTests
             _gos.Clear();
         }
 
-        private void OnReleased(SkillReleasedEvent e) { _releasedCount++; }
+        private void OnReleased(SkillReleasedEvent e) { _releasedCount++; _lastEventFullCharge = e.IsFullCharge; }
 
         /// <summary>
         /// 物理命中假目标：执行器 AOE 检测走 Physics.OverlapSphere（碰撞体 + IEffectTarget 组件），
@@ -155,7 +157,9 @@ namespace GameSys.EditorTests
             DriveToCharging(executor, machine, 0.15f);
             var target = NewTarget("Target", new Vector3(1.5f, 0f, 0f));
 
-            // Act（蓄力中判定帧）
+            // Act（蓄力中判定帧 ×3——无守卫时第 3 帧必然结算伤害）
+            RaiseHitboxFrame(executor, 0);
+            RaiseHitboxFrame(executor, 0);
             RaiseHitboxFrame(executor, 0);
 
             // Assert（蓄力期不结算伤害）
@@ -200,6 +204,7 @@ namespace GameSys.EditorTests
 
             // Assert（满蓄力标志写入，不再是死字段恒 false）
             Assert.IsTrue((bool)TestHelpers.GetField(executor, "_wasFullCharge"), "满蓄力应标记 _wasFullCharge");
+            Assert.IsTrue(_lastEventFullCharge, "释放事件应携带 IsFullCharge = true");
         }
 
         [Test]
