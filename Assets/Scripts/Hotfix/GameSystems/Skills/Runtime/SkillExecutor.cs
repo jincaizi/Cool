@@ -137,6 +137,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
+        /// 蓄力技能：松开按钮提前释放（转发到状态机）
+        /// </summary>
+        public bool Release()
+        {
+            return _stateMachine.Release();
+        }
+
+        /// <summary>
         /// 每帧更新
         /// </summary>
         public void Update(float deltaTime)

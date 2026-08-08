@@ -86,6 +86,21 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
+        /// 蓄力技能：松开按钮提前释放（由输入层在键松开时调用）。
+        /// 仅当指定技能正在蓄力时生效。
+        /// </summary>
+        public bool TryReleaseCharge(int skillId)
+        {
+            if (_currentSkill != null
+                && _currentSkill.SkillId == skillId
+                && _currentSkill.CurrentSubState == SkillSubState.Charging)
+            {
+                return _currentSkill.Release();
+            }
+            return false;
+        }
+
+        /// <summary>
         /// 处理技能输入
         /// </summary>
         public void HandleInput(SkillInput input)
