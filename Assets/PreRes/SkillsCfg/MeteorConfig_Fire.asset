@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09115b05b5916494b8f8ad84b80fbafa, type: 3}
   m_Name: MeteorConfig_Fire
   m_EditorClassIdentifier: 
-  _prefab: {fileID: 0}
+  _prefab: {fileID: 5428562495768576299, guid: 80996830e907f7247b59e1db7901ee6c, type: 3}
   _warnDuration: 0.8
   _explosionRadius: 4
   _damagePercent: 1
-  _impactVFX: {fileID: 0}
+  _impactVFX: {fileID: 8223544276348313739, guid: 64db375ab7bf7ff498de7921e6688de6, type: 3}
   _effect:
     _applyEffects: []
     _knockbackForce: 0

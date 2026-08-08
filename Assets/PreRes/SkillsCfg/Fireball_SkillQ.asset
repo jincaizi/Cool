@@ -46,7 +46,7 @@ MonoBehaviour:
     _totalTicks: 5
   _swordQi: {fileID: 0}
   _meteor: {fileID: 0}
-  _projectilePrefab: {fileID: 0}
+  _projectilePrefab: {fileID: 1778120549347450391, guid: 53cee73c7b658e448b5a07959e760729, type: 3}
   _projectileSpeed: 18
   _projectileRange: 15
   _projectilePierce: 0
@@ -64,7 +64,7 @@ MonoBehaviour:
     _statusValue: 0
   _presentation:
     _castVFX: {fileID: 0}
-    _releaseVFX: {fileID: 0}
+    _releaseVFX: {fileID: 1879104418078124788, guid: d4911513e0f93b14099396df0708003d, type: 3}
     _castSFX: {fileID: 0}
     _hitStopDuration: 0
     _showCastingBar: 1
