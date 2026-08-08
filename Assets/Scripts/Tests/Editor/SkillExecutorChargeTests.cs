@@ -244,5 +244,28 @@ namespace GameSys.EditorTests
             // Assert（打断必须补发释放事件，VFX 才能熄灭）
             Assert.AreEqual(1, _releasedCount, "蓄力打断应补发 SkillReleasedEvent");
         }
+
+        [Test]
+        public void test_charge_blast_execution_hitbox_settles_at_30fps()
+        {
+            // Arrange（30fps 帧步长 0.0333s：固定 0.05s 窗口仅容纳 2 帧，连续 3 帧检测才能结算伤害）
+            var data = CreateChargedData();
+            var executor = CreateExecutor(data);
+            var machine = (FakeTimeMachine)TestHelpers.GetField(executor, "_stateMachine");
+            DriveToCharging(executor, machine, 0.15f);
+            var target = NewTarget("Target", new Vector3(1.5f, 0f, 0f)); // 目标提前就位：Release 当帧（elapsed=0）即计入连续检测
+            machine.Now = 0.45f;
+            machine.Release();      // 松开释放 → Execution（蓄力 0.3s，进度 0.15）
+            executor.Update(0.01f); // elapsed=0 触发判定帧 → 检测 1
+            Assert.AreEqual(SkillSubState.Execution, executor.CurrentSubState);
+
+            // Act（30fps 帧步长推进：固定窗口下第 3 帧落在 0.05s 之外 → 连续计数重置永不结算；
+            //      帧率自适应窗口（max(0.05, 3×deltaTime)=0.1）容纳 3 帧 → 伤害结算）
+            machine.Now = 0.4833f; executor.Update(0.0333f); // 帧 2（elapsed 0.0333）→ 检测 2
+            machine.Now = 0.5166f; executor.Update(0.0333f); // 帧 3（elapsed 0.0666）→ 检测 3 → 结算伤害
+
+            // Assert（30fps 下 3 帧连续命中 → 伤害必须结算）
+            Assert.AreEqual(1, target.HitCount, "30fps 下判定窗口须容纳 3 帧，伤害必须结算");
+        }
     }
 }

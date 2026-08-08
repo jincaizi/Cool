@@ -23,6 +23,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly bool _isSpin;
         private readonly SpinSkillData _spinData;
         private float _nextTickTime;
+        private float _lastDeltaTime;
 
         private event Action<SkillSubState> _onStateChanged;
         private event Action<int> _onHitboxFrame;
@@ -102,6 +103,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         public void Update(float deltaTime)
         {
+            _lastDeltaTime = deltaTime;
             if (_stateStartTime < 0) return;
             _elapsedTime = GetCurrentTime() - _stateStartTime;
 
@@ -284,8 +286,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 for (int i = 0; i < hitboxTimings.Length; i++)
                 {
                     float hitboxTime = castTime + hitboxTimings[i];
+                    // 帧率自适应判定窗口：保证 ~3 帧落入窗口（60fps 下等于 0.05s，行为不变；
+                    // 30fps 下 3×0.0333≈0.1s，连续 3 帧检测仍能结算伤害——修复 30fps 蓄力爆炸无伤害）
+                    float window = Mathf.Max(0.05f, _lastDeltaTime * 3f);
                     if (Approximately(_elapsedTime, hitboxTime) ||
-                        (_elapsedTime > hitboxTime && _elapsedTime < hitboxTime + 0.05f))
+                        (_elapsedTime > hitboxTime && _elapsedTime < hitboxTime + window))
                     {
                         _onHitboxFrame?.Invoke(i);
                         _onHitConfirm?.Invoke();
