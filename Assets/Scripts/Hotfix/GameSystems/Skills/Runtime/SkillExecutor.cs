@@ -35,6 +35,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private IEffectTarget _targetCharacter;
         private IDashComponent _dashComponent;
         private bool _wasFullCharge;
+        private float _chargeProgressAtRelease;
         private DamageBlock _lastDamageBlock;
         private readonly SpinSkillData _spinData;
         private SpinHitTracker _spinHitTracker;
@@ -186,6 +187,15 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
+        /// 蓄力伤害倍率：按释放进度查数据曲线（1.0 → 曲线末端值）
+        /// </summary>
+        private float GetDamageScaleForCharge(float progress)
+        {
+            if (!(_skillData is ChargedSkillData charged)) return 1f;
+            return charged.GetDamageScaleForCharge(progress);
+        }
+
+        /// <summary>
         /// 获取引导进度 [0, 1]
         /// </summary>
         public float GetChannelProgress()
@@ -258,6 +268,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private void OnHitboxTriggered(int frameIndex)
         {
             var targets = DetectTargets();
+
+            // 蓄力期判定帧仅用于动画/VFX 同步，不结算伤害（ChargeBlast 爆炸只在 Execution 判定帧）
+            if (CurrentSubState == SkillSubState.Charging)
+                return;
 
             if (_spinData != null)
             {
@@ -399,6 +413,16 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 });
                 _spinHitTracker?.Clear();
             }
+            else if (_skillData is ChargedSkillData)
+            {
+                // 蓄力中被打断：补发释放事件，武器 VFX 才能熄灭
+                EventBus.Emit(new SkillReleasedEvent
+                {
+                    SkillId = _skillData.SkillId,
+                    IsFullCharge = false,
+                    CasterId = _owner.transform.GetInstanceID()
+                });
+            }
             _consecutiveHits?.Clear();
             OnSkillInterrupted?.Invoke(source);
         }
@@ -412,6 +436,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             if (newState == SkillSubState.Execution && _skillData is ChargedSkillData)
             {
+                // 记录释放瞬间进度与满蓄力标记（判定帧结算与 SkillHitTargetEvent 使用）
+                _chargeProgressAtRelease = _stateMachine.ChargeProgressAtRelease;
+                _wasFullCharge = _chargeProgressAtRelease >= 1f;
                 EventBus.Emit(new SkillReleasedEvent
                 {
                     SkillId = _skillData.SkillId,
@@ -531,11 +558,19 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 ? _targetCharacter.transform.position
                 : _owner.transform.position;
 
+            // 蓄力技能：Execution 阶段按释放进度放大 AOE 半径
+            float radius = shape.AreaRadius;
+            if (_skillData is ChargedSkillData && CurrentSubState == SkillSubState.Execution)
+            {
+                float areaScale = ((ChargedSkillData)_skillData).GetAreaScaleForCharge(_stateMachine.ChargeProgressAtRelease);
+                radius = shape.AreaRadius * areaScale;
+            }
+
             if (shape.TargetType == TargetType.AOE_Cone)
                 DetectConeTargets(center, targets, shape);
             else
             {
-                int count = Physics.OverlapSphereNonAlloc(center, shape.AreaRadius, s_AoeBuffer, shape.TargetMask);
+                int count = Physics.OverlapSphereNonAlloc(center, radius, s_AoeBuffer, shape.TargetMask);
                 for (int i = 0; i < count; i++)
                 {
                     if (s_AoeBuffer[i].TryGetComponent(out IEffectTarget target) && target != _owner && !targets.Contains(target))
@@ -570,9 +605,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
             SkillDamageHelper.FillDamageContext(damageBlock, _skillData.SkillId, frameIndex + 1,
                                                 GetEffect(), _owner.Stats);
 
-            // 蓄力/执行阶段伤害加成（技能特有逻辑，保留在执行器内）
-            if (CurrentSubState == SkillSubState.Charging || CurrentSubState == SkillSubState.Execution)
-                damageBlock.CalculatedDamage *= 1f + GetChargeProgress() * 0.5f;
+            // 蓄力技能：释放瞬间按实际进度 × 曲线结算（修复原硬编码 1.5x 且 Execution 态取 0 的 bug）
+            if (_skillData is ChargedSkillData)
+                damageBlock.CalculatedDamage *= GetDamageScaleForCharge(_chargeProgressAtRelease);
 
             _lastDamageBlock = damageBlock;
 
