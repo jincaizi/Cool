@@ -159,7 +159,17 @@
 
 可测性说明：`SkillStateMachine.GetCurrentTime()` 为 `protected virtual`，测试可子类重写假时钟，无需改生产代码。
 
-## 8. 审核记录（两轮代码审核 + 专家全审的修正汇总）
+## 8. 实施偏差记录（实现计划定稿时对本文的修正）
+
+| # | 偏差 | 原因 |
+|---|---|---|
+| 1 | 火球/陨石生成时机：Execution 进入时同步生成（原定 `_spawnDelay` 延迟生成） | 执行器无注入时钟，延迟生成不可测；同步生成与剑气模式同构 |
+| 2 | 目标检测统一走 `PhysicsRegistry.FindNearby`（取消 `_targetMask` 字段） | 与剑气投射物保持一致 |
+| 3 | 爆炸伤害统一全额（取消"爆炸目标 0.5 倍率"拆分） | 简化；调优交给资产 DamageBlock |
+| 4 | `AnimHashes` 不新增常量 | Animator trigger 由资产字符串驱动，无需 hash |
+| 5 | 删除 `_isCharging` 死字段 | Release() 取代其语义 |
+
+## 9. 审核记录（两轮代码审核 + 专家全审的修正汇总）
 
 | # | 修正 |
 |---|---|
