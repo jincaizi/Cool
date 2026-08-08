@@ -241,18 +241,39 @@ namespace Hotfix.GameSystems.Sys3C
                     }
                 }
 
-                // R 松开 → 蓄力技能提前释放（按住蓄力，松开发射）
-                if (!_inputManager.IsSkill3Held())
+                if (_inputManager.IsSkillFireballPressed())
                 {
-                    _skillCoordinator.TryReleaseCharge(GetSkillRId());
+                    int fireballId = GetSkillFireballId();
+                    if (fireballId > 0)
+                    {
+                        var input = SkillInput.SkillToPosition(fireballId,
+                            transform.position + transform.forward * 5f);
+                        _skillCoordinator.HandleInput(input);
+                    }
                 }
 
-                if (_inputManager.IsSkillUltimatePressed())
+                // 2键按住蓄力，松开释放（蓄力炎爆）
+                if (_inputManager.IsSkillChargeBlastPressed())
                 {
-                    int ultimateId = (int)Skills.Definition.SkillID.Ultimate;
-                    if (ultimateId > 0)
+                    int chargeId = GetSkillChargeBlastId();
+                    if (chargeId > 0)
                     {
-                        var input = SkillInput.SkillToPosition(ultimateId,
+                        var input = SkillInput.SkillToPosition(chargeId,
+                            transform.position + transform.forward * 5f);
+                        _skillCoordinator.HandleInput(input);
+                    }
+                }
+                if (!_inputManager.IsSkillChargeBlastHeld())
+                {
+                    _skillCoordinator.TryReleaseCharge(GetSkillChargeBlastId());
+                }
+
+                if (_inputManager.IsSkillMeteorPressed())
+                {
+                    int meteorId = (int)Skills.Definition.SkillID.Ultimate;
+                    if (meteorId > 0)
+                    {
+                        var input = SkillInput.SkillToPosition(meteorId,
                             transform.position + transform.forward * 12f);
                         _skillCoordinator.HandleInput(input);
                     }
@@ -337,6 +358,8 @@ namespace Hotfix.GameSystems.Sys3C
         private int GetBasicAttackSkillId() => (int)SkillID.LightAttack;
         private int GetSkillQId() => (int)SkillID.SkillQ;
         private int GetSkillRId() => (int)SkillID.SkillR;
+        private int GetSkillFireballId() => (int)SkillID.Fireball;
+        private int GetSkillChargeBlastId() => (int)SkillID.ChargeBlast;
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
             => ((IDamageable)this).TakeDamage(data, hitDirection, HitContact.None);

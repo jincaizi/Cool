@@ -25,7 +25,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private bool _jumpConsumed;
         private bool _skill2Consumed;
         private bool _skill3Consumed;
-        private bool _skill4Consumed;
+        private bool _skillFireballConsumed;
+        private bool _skillChargeBlastConsumed;
+        private bool _skillMeteorConsumed;
 
         // Attack button hold tracking
         private bool _attackHeld;
@@ -46,7 +48,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _jumpConsumed = false;
             _skill2Consumed = false;
             _skill3Consumed = false;
-            _skill4Consumed = false;
+            _skillFireballConsumed = false;
+            _skillChargeBlastConsumed = false;
+            _skillMeteorConsumed = false;
             _lastReleaseDuration = -1f;
             _attackJustPressed = false;
 
@@ -217,22 +221,50 @@ namespace Hotfix.GameSystems.Sys3C.Input
         }
 
         /// <summary>
-        /// 3技能按住（R键，持续状态）— 蓄力技能长按
+        /// 火球术按下（1键）
         /// </summary>
-        public bool IsSkill3Held()
+        public bool IsSkillFireballPressed()
         {
-            return UnityInput.GetKey(KeyCode.R);
+            bool pressed = UnityInput.GetKeyDown(KeyCode.Alpha1);
+            if (pressed && !_skillFireballConsumed)
+            {
+                _skillFireballConsumed = true;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
-        /// 4技能按下（U键）- 大招（移动端后续接 UI 按钮，模式同 SetDefendHeld）
+        /// 蓄力炎爆按下（2键）— 按住蓄力
         /// </summary>
-        public bool IsSkillUltimatePressed()
+        public bool IsSkillChargeBlastPressed()
         {
-            bool pressed = UnityInput.GetKeyDown(KeyCode.U);
-            if (pressed && !_skill4Consumed)
+            bool pressed = UnityInput.GetKeyDown(KeyCode.Alpha2);
+            if (pressed && !_skillChargeBlastConsumed)
             {
-                _skill4Consumed = true;
+                _skillChargeBlastConsumed = true;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 蓄力炎爆按住（2键，持续状态）
+        /// </summary>
+        public bool IsSkillChargeBlastHeld()
+        {
+            return UnityInput.GetKey(KeyCode.Alpha2);
+        }
+
+        /// <summary>
+        /// 陨石术按下（3键）- 大招
+        /// </summary>
+        public bool IsSkillMeteorPressed()
+        {
+            bool pressed = UnityInput.GetKeyDown(KeyCode.Alpha3);
+            if (pressed && !_skillMeteorConsumed)
+            {
+                _skillMeteorConsumed = true;
                 return true;
             }
             return false;

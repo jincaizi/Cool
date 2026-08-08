@@ -30,6 +30,8 @@ namespace Hotfix.GameSystems.Skills.Definition
         BasicAttack3 = 10003,
         SkillQ = 20001,
         SkillR = 20002,
+        Fireball = 20003,
+        ChargeBlast = 20004,
         Ultimate = 30001,
     }
 }

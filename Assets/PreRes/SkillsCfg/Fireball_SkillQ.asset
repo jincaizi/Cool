@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7276fb7918d087648aa4342c91846abf, type: 3}
   m_Name: Fireball_SkillQ
   m_EditorClassIdentifier: 
-  _skillId: 20001
+  _skillId: 20003
   _skillName: "\u706B\u7403\u672F"
   _description: 
   _icon: {fileID: 0}
@@ -21,7 +21,7 @@ MonoBehaviour:
   _manaCost: 0
   _cooldown: 3
   _staminaCost: 0
-  _animatorTrigger: SkillQ
+  _animatorTrigger: Fireball
   _castClip: {fileID: 0}
   _releaseClip: {fileID: 0}
   _dashDistance: 0
