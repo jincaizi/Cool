@@ -133,5 +133,76 @@ namespace GameSys.EditorTests
             // Assert
             Assert.AreEqual(0, Object.FindObjectsOfType<MeteorStrike>().Length, "无配置不生成陨石");
         }
+
+        [Test]
+        public void test_skill_executor_meteor_spawns_only_once_per_activation()
+        {
+            // Arrange
+            var prefab = NewGo("MeteorPrefab");
+            prefab.SetActive(false);
+            prefab.AddComponent<MeteorStrike>();
+            var data = ScriptableObject.CreateInstance<InstantSkillData>();
+            TestHelpers.SetField(data, "_skillId", 30001);
+            TestHelpers.SetField(data, "_damage", DamageBlock.CreateDefault(100f, 0f));
+            TestHelpers.SetField(data, "_meteor", CreateConfig(prefab));
+            var executor = CreateExecutor(data);
+
+            // Act（完成后再 TryStart：状态机拒绝重复启动，不得重复生成）
+            executor.TryStart();
+            executor.ForceComplete();
+            bool second = executor.TryStart();
+
+            // Assert
+            Assert.IsFalse(second, "Completed 后不可重复启动同一执行器");
+            Assert.AreEqual(1, _spawnEventCount, "事件只发一次");
+            int active = 0;
+            foreach (var s in Object.FindObjectsOfType<MeteorStrike>())
+                if (s.gameObject.activeSelf) active++;
+            Assert.AreEqual(1, active, "每次施放恰好 1 个预警");
+        }
+
+        [Test]
+        public void test_skill_executor_meteor_skipped_when_prefab_missing()
+        {
+            // Arrange（有配置但预制体为空）
+            var data = ScriptableObject.CreateInstance<InstantSkillData>();
+            TestHelpers.SetField(data, "_skillId", 30001);
+            TestHelpers.SetField(data, "_damage", DamageBlock.CreateDefault(100f, 0f));
+            TestHelpers.SetField(data, "_meteor", CreateConfig(null));
+            var executor = CreateExecutor(data);
+
+            // Act
+            executor.TryStart();
+
+            // Assert（缺预制体不生成、不发假快照）
+            Assert.AreEqual(0, Object.FindObjectsOfType<MeteorStrike>().Length, "缺预制体不生成陨石");
+            Assert.AreEqual(0, _spawnEventCount, "缺预制体不发 MeteorSpawnedEvent 假快照");
+        }
+
+        [Test]
+        public void test_skill_executor_meteor_fallback_impact_is_forward_twelve_meters()
+        {
+            // Arrange（不设置目标位置；角色面朝 +Z）
+            var prefab = NewGo("MeteorPrefab");
+            prefab.SetActive(false);
+            prefab.AddComponent<MeteorStrike>();
+            var data = ScriptableObject.CreateInstance<InstantSkillData>();
+            TestHelpers.SetField(data, "_skillId", 30001);
+            TestHelpers.SetField(data, "_damage", DamageBlock.CreateDefault(100f, 0f));
+            TestHelpers.SetField(data, "_meteor", CreateConfig(prefab));
+            _ownerGo = new GameObject("MeteorOwner");
+            _ownerGo.transform.position = Vector3.zero;
+            _ownerGo.transform.rotation = Quaternion.identity;
+            var owner = new TestHelpers.FakeTarget(_ownerGo.transform);
+            var executor = new SkillExecutor(owner, data);
+
+            // Act
+            executor.TryStart();
+
+            // Assert（落点 = 面向前方 12m）
+            var strike = FindActiveStrike();
+            Assert.IsNotNull(strike, "应生成 1 个活跃预警");
+            Assert.AreEqual(new Vector3(0f, 0f, 12f), strike.transform.position);
+        }
     }
 }

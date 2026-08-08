@@ -342,7 +342,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 return;
             }
 
-            SkillDamageHelper.FillDamageContext(damage, _skillData.SkillId, 1, GetEffect(), _owner.Stats);
+            SkillDamageHelper.FillDamageContext(damage, _skillData.SkillId, 1, cfg.Effect ?? GetEffect(), _owner.Stats);
             damage.CalculatedDamage *= cfg.DamagePercent;
 
             Vector3 impact = _targetPosition;
