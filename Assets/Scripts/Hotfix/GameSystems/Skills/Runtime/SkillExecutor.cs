@@ -285,6 +285,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         private void SpawnFireball()
         {
+            if (_projectileData.ProjectilePrefab == null)
+            {
+                Debug.LogWarning("[SkillExecutor] Projectile skill has no prefab, skip spawn");
+                return;
+            }
+
             var damage = _skillData.Damage?.Clone();
             if (damage == null)
             {

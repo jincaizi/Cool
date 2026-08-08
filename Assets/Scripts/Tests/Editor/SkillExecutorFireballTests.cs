@@ -120,5 +120,20 @@ namespace GameSys.EditorTests
             // Assert
             Assert.AreEqual(0, Object.FindObjectsOfType<FireballProjectile>().Length, "非投射物技能不生成火球");
         }
+
+        [Test]
+        public void test_skill_executor_fireball_skipped_when_prefab_missing()
+        {
+            // Arrange（有投射物数据但预制体为空）
+            var data = CreateFireballData(null);
+            var executor = CreateExecutor(data);
+
+            // Act
+            executor.TryStart();
+
+            // Assert（缺预制体不生成、不发假快照）
+            Assert.AreEqual(0, Object.FindObjectsOfType<FireballProjectile>().Length, "缺预制体不生成火球");
+            Assert.AreEqual(0, _spawnEventCount, "缺预制体不发 FireballSpawnedEvent 假快照");
+        }
     }
 }
