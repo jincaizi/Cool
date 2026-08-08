@@ -6,6 +6,7 @@ using Hotfix.GameSystems.Skills.Effect;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Events;
 using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Skills.Runtime.Meteor;
 using Hotfix.GameSystems.Skills.Runtime.Projectile;
 using Hotfix.GameSystems.Skills.Runtime.SwordQi;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
@@ -43,6 +44,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private bool _swordQiSpawned;
         private readonly ProjectileSkillData _projectileData;
         private bool _projectileSpawned;
+        private bool _meteorSpawned;
 
         // 回调
         public event Action<int> OnHitboxFrame;              // 判定帧触发
@@ -116,6 +118,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             _swordQiSpawned = false; // 每次施放复位（连击链多次施放）
             _projectileSpawned = false; // 每次施放复位（连击链多次施放）
+            _meteorSpawned = false; // 每次施放复位（连击链多次施放）
             _chargeProgressAtRelease = 0f; // 防御性复位（防未来直接进入 Execution 的路径读到旧值）
             bool started = _stateMachine.TryStart();
             if (started && _skillData is ChargedSkillData)
@@ -319,6 +322,43 @@ namespace Hotfix.GameSystems.Skills.Runtime
             });
         }
 
+        /// <summary>
+        /// 陨石生成：Execution 进入时同步生成预警（落点 = 施放时目标位置，缺失时面向前方 12m）。
+        /// 伤害克隆 + 倍率，防共享实例污染（同剑气）。
+        /// </summary>
+        private void SpawnMeteor()
+        {
+            var cfg = _skillData.Meteor;
+            if (cfg.Prefab == null)
+            {
+                Debug.LogWarning("[SkillExecutor] Meteor config has no prefab, skip spawn");
+                return;
+            }
+
+            var damage = _skillData.Damage?.Clone();
+            if (damage == null)
+            {
+                Debug.LogWarning("[SkillExecutor] Meteor config set but skill has no DamageBlock, skip spawn");
+                return;
+            }
+
+            SkillDamageHelper.FillDamageContext(damage, _skillData.SkillId, 1, GetEffect(), _owner.Stats);
+            damage.CalculatedDamage *= cfg.DamagePercent;
+
+            Vector3 impact = _targetPosition;
+            if (impact.sqrMagnitude < 0.0001f)
+                impact = _owner.transform.position + _owner.transform.forward * 12f;
+
+            MeteorSpawner.Spawn(cfg, damage, impact);
+
+            EventBus.Emit(new MeteorSpawnedEvent
+            {
+                CasterId = _owner.transform.GetInstanceID(),
+                SkillId = _skillData.SkillId,
+                ImpactPoint = impact
+            });
+        }
+
         private void OnHitboxTriggered(int frameIndex)
         {
             var targets = DetectTargets();
@@ -513,6 +553,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
             {
                 _projectileSpawned = true;
                 SpawnFireball();
+            }
+
+            if (newState == SkillSubState.Execution && _skillData.Meteor != null && !_meteorSpawned)
+            {
+                _meteorSpawned = true;
+                SpawnMeteor();
             }
         }
 
