@@ -1,6 +1,7 @@
 using System;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
+using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Runtime
 {
@@ -11,7 +12,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private float _stateStartTime;
         private float _elapsedTime;
         private float _chargeStartTime;
-        private bool _isCharging;
         private int _currentTick;
         private float _lastTickTime;
 
@@ -81,7 +81,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (_isCharged)
             {
                 TransitionTo(SkillSubState.Casting);
-                _isCharging = true;
                 _chargeStartTime = GetCurrentTime();
             }
             else if (_isChanneled)
@@ -163,7 +162,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             float chargeTime = GetCurrentTime() - _chargeStartTime;
 
-            // Fire hitbox frames at intervals during charging (e.g. spin attack ticks)
+            // 蓄力期判定帧（ChargeBlast 资产配置空数组 = 蓄力期不结算伤害）
             float[] hitboxTimings = GetHitboxTimings();
             if (hitboxTimings != null)
             {
@@ -179,9 +178,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
 
             if (chargeTime >= _chargedData.MaxChargeTime)
+            {
+                ChargeProgressAtRelease = 1f;
                 TransitionTo(SkillSubState.Execution);
-            else if (!_isCharging && chargeTime >= _chargedData.MinChargeTime)
-                TransitionTo(SkillSubState.Execution);
+            }
         }
 
         private void UpdateSpinning()
@@ -203,6 +203,25 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             if (_elapsedTime >= _spinData.MaxDuration)
                 Complete();
+        }
+
+        /// <summary>
+        /// 释放瞬间的蓄力进度 [0,1]（Charging → Execution 转换前写入，供结算倍率使用）
+        /// </summary>
+        public float ChargeProgressAtRelease { get; private set; }
+
+        /// <summary>
+        /// 蓄力技能：松开按钮提前释放（任意时刻有效，进度按实际蓄力缩放）。
+        /// 仅在 Charging 态生效，其余状态返回 false（幂等）。
+        /// </summary>
+        public bool Release()
+        {
+            if (_currentState != SkillSubState.Charging || _chargedData == null)
+                return false;
+            ChargeProgressAtRelease = Mathf.Clamp01(
+                (GetCurrentTime() - _chargeStartTime) / _chargedData.MaxChargeTime);
+            TransitionTo(SkillSubState.Execution);
+            return true;
         }
 
         /// <summary>
