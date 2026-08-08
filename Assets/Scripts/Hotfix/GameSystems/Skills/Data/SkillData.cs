@@ -97,6 +97,11 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] protected SwordQiConfig _swordQi;
         public SwordQiConfig SwordQi => _swordQi;
 
+        [Header("=== Meteor ===")]
+        [Tooltip("技能施放时附加的陨石配置（null = 不召唤陨石）")]
+        [SerializeField] protected MeteorConfig _meteor;
+        public MeteorConfig Meteor => _meteor;
+
         public AnimationClip GetMainAnimationClip()
         {
             return _releaseClip ?? _castClip;
