@@ -2483,9 +2483,10 @@ MonoBehaviour:
     m_Bits: 1
   _characterSkills:
   - {fileID: 11400000, guid: 6bf27e3186c5f3843b9849ae688b9342, type: 2}
-  - {fileID: 11400000, guid: b06e148ae03949143b7aae64510b577f, type: 2}
-  - {fileID: 11400000, guid: dc7464ed9c966754c85c31c7e0ca3cfd, type: 2}
   - {fileID: 11400000, guid: 628bf11dddf838b47bbdeb27b434d591, type: 2}
+  - {fileID: 11400000, guid: 66f8b64c950c3864db7adb3e209c2f35, type: 2}
+  - {fileID: 11400000, guid: dc981350929e9214884ae0f3b65f07e7, type: 2}
+  - {fileID: 11400000, guid: f2ac16cf2097d684a8ce0fd669d80286, type: 2}
 --- !u!114 &1883701550781263365
 MonoBehaviour:
   m_ObjectHideFlags: 0
