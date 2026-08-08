@@ -25,6 +25,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private bool _jumpConsumed;
         private bool _skill2Consumed;
         private bool _skill3Consumed;
+        private bool _skill4Consumed;
 
         // Attack button hold tracking
         private bool _attackHeld;
@@ -45,6 +46,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _jumpConsumed = false;
             _skill2Consumed = false;
             _skill3Consumed = false;
+            _skill4Consumed = false;
             _lastReleaseDuration = -1f;
             _attackJustPressed = false;
 
@@ -209,6 +211,28 @@ namespace Hotfix.GameSystems.Sys3C.Input
             if (pressed && !_skill3Consumed)
             {
                 _skill3Consumed = true;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 3技能按住（R键，持续状态）— 蓄力技能长按
+        /// </summary>
+        public bool IsSkill3Held()
+        {
+            return UnityInput.GetKey(KeyCode.R);
+        }
+
+        /// <summary>
+        /// 4技能按下（U键）- 大招（移动端后续接 UI 按钮，模式同 SetDefendHeld）
+        /// </summary>
+        public bool IsSkillUltimatePressed()
+        {
+            bool pressed = UnityInput.GetKeyDown(KeyCode.U);
+            if (pressed && !_skill4Consumed)
+            {
+                _skill4Consumed = true;
                 return true;
             }
             return false;

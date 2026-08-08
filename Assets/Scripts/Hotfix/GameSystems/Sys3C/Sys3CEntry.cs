@@ -240,6 +240,23 @@ namespace Hotfix.GameSystems.Sys3C
                         _skillCoordinator.HandleInput(input);
                     }
                 }
+
+                // R 松开 → 蓄力技能提前释放（按住蓄力，松开发射）
+                if (!_inputManager.IsSkill3Held())
+                {
+                    _skillCoordinator.TryReleaseCharge(GetSkillRId());
+                }
+
+                if (_inputManager.IsSkillUltimatePressed())
+                {
+                    int ultimateId = (int)Skills.Definition.SkillID.Ultimate;
+                    if (ultimateId > 0)
+                    {
+                        var input = SkillInput.SkillToPosition(ultimateId,
+                            transform.position + transform.forward * 12f);
+                        _skillCoordinator.HandleInput(input);
+                    }
+                }
             }
 
         }
