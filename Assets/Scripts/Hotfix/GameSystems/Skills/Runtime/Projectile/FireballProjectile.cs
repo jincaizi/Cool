@@ -92,6 +92,13 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
                     ApplyDamage(target);
                 }
             }
+
+            // 命中爆炸特效：一次性实例化 + 自动销毁（不受 EnableVFX 门控——gameplay 表现同陨石）
+            if (_data.Presentation != null && _data.Presentation.ReleaseVFX != null)
+            {
+                var vfx = Object.Instantiate(_data.Presentation.ReleaseVFX, hitPos, Quaternion.identity);
+                Destroy(vfx, 1.5f);
+            }
             Release();
         }
 

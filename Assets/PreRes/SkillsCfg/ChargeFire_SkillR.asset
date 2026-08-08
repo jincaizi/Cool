@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f7ba06c46ef894048b17eac0403c8713, type: 3}
-  m_Name: ChargeFire_SkillR
+  m_Name: 
   m_EditorClassIdentifier: 
-  _skillId: 20002
-  _skillName: "\u84C4\u529B\u708E\u7206"
+  _skillId: 0
+  _skillName: 
   _description: 
   _icon: {fileID: 0}
   _skillType: 2
   _quality: 1
   _manaCost: 0
-  _cooldown: 6
+  _cooldown: 0
   _staminaCost: 0
-  _animatorTrigger: ChargeBlast
+  _animatorTrigger: 
   _castClip: {fileID: 0}
   _releaseClip: {fileID: 0}
   _dashDistance: 0
@@ -32,9 +32,9 @@ MonoBehaviour:
   _canCancelIntoBasicAttack: 1
   _canCancelIntoOtherSkill: 0
   _damage:
-    _baseDamage: 40
-    _attackRatio: 1.5
-    _scalingAttribute: 1
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
     _damageType: 0
     _criticalRateBonus: 0
     _criticalDamageBonus: 0
@@ -57,15 +57,15 @@ MonoBehaviour:
       time: 0
       value: 1
       inSlope: 0
-      outSlope: 0.5
+      outSlope: 1
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
       time: 1
-      value: 1.5
-      inSlope: 0.5
+      value: 2
+      inSlope: 1
       outSlope: 0
       tangentMode: 0
       weightedMode: 0
@@ -101,21 +101,21 @@ MonoBehaviour:
   _canMoveWhileCharging: 1
   _canRotateWhileCharging: 1
   _shape:
-    _targetType: 1
+    _targetType: 0
     _range: 2
     _angle: 120
     _angleStart: 0
     _angleEnd: 90
     _innerRadius: 0.5
     _innerAngle: 60
-    _areaRadius: 2
+    _areaRadius: 0
     _width: 1
     _stopAtFirst: 0
     _targetMask:
       serializedVersion: 2
       m_Bits: 4294967295
     _hitboxTimings:
-    - 0
+    - 0.3
   _effect:
     _applyEffects: []
     _knockbackForce: 0
@@ -126,7 +126,7 @@ MonoBehaviour:
     _statusValue: 0
   _presentation:
     _castVFX: {fileID: 0}
-    _releaseVFX: {fileID: 0}
+    _releaseVFX: {fileID: 3099483362486490233, guid: b42790c0c89283e4484b6f03691d8cb1, type: 3}
     _castSFX: {fileID: 0}
     _hitStopDuration: 0
     _showCastingBar: 1

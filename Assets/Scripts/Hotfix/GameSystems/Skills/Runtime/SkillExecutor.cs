@@ -539,6 +539,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     IsFullCharge = _wasFullCharge,
                     CasterId = _owner.transform.GetInstanceID()
                 });
+
+                // 释放爆炸特效：一次性实例化 + 自动销毁（不受 EnableVFX 门控）
+                var pres = GetPresentation();
+                if (pres?.ReleaseVFX != null)
+                {
+                    var vfx = UnityEngine.Object.Instantiate(pres.ReleaseVFX, _owner.transform.position, Quaternion.identity);
+                    UnityEngine.Object.Destroy(vfx, 1.5f);
+                }
             }
 
             if (newState == SkillSubState.Execution &&

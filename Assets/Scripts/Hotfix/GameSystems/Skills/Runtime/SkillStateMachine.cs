@@ -164,7 +164,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             float chargeTime = GetCurrentTime() - _chargeStartTime;
 
-            // 蓄力期判定帧（ChargeBlast 资产配置空数组 = 蓄力期不结算伤害）
+            // 蓄力期判定帧事件（伤害结算由执行器的 Charging 守卫拦截——ChargeBlast 爆炸只在 Execution 判定帧）
             float[] hitboxTimings = GetHitboxTimings();
             if (hitboxTimings != null)
             {

@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9acafbccd98f6484da8355cdece7514a, type: 3}
-  m_Name: Meteor_Ultimate
+  m_Name: 
   m_EditorClassIdentifier: 
-  _skillId: 30001
-  _skillName: "\u9668\u77F3\u672F"
+  _skillId: 0
+  _skillName: 
   _description: 
   _icon: {fileID: 0}
-  _skillType: 1
+  _skillType: 0
   _quality: 1
   _manaCost: 0
-  _cooldown: 25
+  _cooldown: 0
   _staminaCost: 0
-  _animatorTrigger: Ultimate
+  _animatorTrigger: 
   _castClip: {fileID: 0}
   _releaseClip: {fileID: 0}
   _dashDistance: 0
@@ -32,9 +32,9 @@ MonoBehaviour:
   _canCancelIntoBasicAttack: 1
   _canCancelIntoOtherSkill: 0
   _damage:
-    _baseDamage: 80
-    _attackRatio: 2.5
-    _scalingAttribute: 1
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
     _damageType: 0
     _criticalRateBonus: 0
     _criticalDamageBonus: 0
@@ -45,7 +45,7 @@ MonoBehaviour:
     _tickInterval: 1
     _totalTicks: 5
   _swordQi: {fileID: 0}
-  _meteor: {fileID: 11400000, guid: 24a99e1f295ad1945827a57de4395d5b, type: 2}
+  _meteor: {fileID: 0}
   _shape:
     _targetType: 0
     _range: 2
@@ -60,8 +60,7 @@ MonoBehaviour:
     _targetMask:
       serializedVersion: 2
       m_Bits: 4294967295
-    _hitboxTimings:
-    - 0.3
+    _hitboxTimings: []
   _effect:
     _applyEffects: []
     _knockbackForce: 0
