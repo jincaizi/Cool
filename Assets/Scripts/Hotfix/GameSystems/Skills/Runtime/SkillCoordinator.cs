@@ -520,8 +520,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
                                        || _currentSkill.Data is InstantSkillData,
                 SkillSubState.Channeling =>
                     (_currentSkill.Data as ChanneledSkillData)?.CanMoveWhileChanneling ?? false,
-                SkillSubState.Charging =>
-                    (_currentSkill.Data as ChargedSkillData)?.CanMoveWhileCharging ?? false,
+                SkillSubState.Charging => _currentSkill.Data switch
+                {
+                    ChargedSkillData c => c.CanMoveWhileCharging,
+                    ProjectileSkillData p => p.CanMoveWhileCharging,
+                    _ => false
+                },
                 SkillSubState.Spinning => true,
                 _ => false
             };
@@ -540,8 +544,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 SkillSubState.Casting => true,
                 SkillSubState.Execution => _currentSkill.Data is ChargedSkillData,
                 SkillSubState.Recovery => _currentSkill.Data is ChargedSkillData,
-                SkillSubState.Charging =>
-                    (_currentSkill.Data as ChargedSkillData)?.CanRotateWhileCharging ?? true,
+                SkillSubState.Charging => _currentSkill.Data switch
+                {
+                    ChargedSkillData c => c.CanRotateWhileCharging,
+                    ProjectileSkillData p => p.CanRotateWhileCharging,
+                    _ => true
+                },
                 SkillSubState.Spinning => true,
                 _ => false
             };

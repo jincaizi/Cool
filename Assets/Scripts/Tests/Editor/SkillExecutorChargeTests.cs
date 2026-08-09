@@ -246,6 +246,31 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_charge_progress_for_chargeable_projectile()
+        {
+            // Arrange（可蓄力投射物 max 2s：蓄力进度按 ElapsedTime/2 计算）
+            var data = ScriptableObject.CreateInstance<ProjectileSkillData>();
+            TestHelpers.SetField(data, "_maxChargeTime", 2f);
+            TestHelpers.SetField(data, "_skillId", 20003);
+            _ownerGo = new GameObject("FireballOwner");
+            _ownerGo.transform.position = Vector3.zero;
+            var executor = new SkillExecutor(new TestHelpers.FakeTarget(_ownerGo.transform), data);
+            var machine = new FakeTimeMachine(data);
+            InjectMachine(executor, machine);
+            executor.TryStart();
+            machine.Now = 0.15f; // Casting 0.1s → 进入 Charging
+            executor.Update(0.01f);
+            Assert.AreEqual(SkillSubState.Charging, executor.CurrentSubState);
+
+            // Act（蓄力 1.0s）
+            machine.Now = 1.15f;
+            executor.Update(0.01f);
+
+            // Assert（进度 1.0/2.0 = 0.5）
+            Assert.AreEqual(0.5f, executor.GetChargeProgress(), 0.001f);
+        }
+
+        [Test]
         public void test_charge_blast_execution_hitbox_settles_at_30fps()
         {
             // Arrange（30fps 帧步长 0.0333s：固定 0.05s 窗口仅容纳 2 帧，连续 3 帧检测才能结算伤害）

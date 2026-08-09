@@ -24,6 +24,14 @@ namespace GameSys.EditorTests
             return data;
         }
 
+        /// <summary>投射物数据：maxChargeTime > 0 = 可蓄力投射物（火球蓄力抛投）</summary>
+        private static ProjectileSkillData CreateProjectileData(float maxCharge)
+        {
+            var data = ScriptableObject.CreateInstance<ProjectileSkillData>();
+            TestHelpers.SetField(data, "_maxChargeTime", maxCharge);
+            return data;
+        }
+
         /// <summary>TryStart 后推进到蓄力阶段（Casting 0.1s 硬编码）</summary>
         private static void AdvanceToCharging(FakeTimeMachine machine)
         {
@@ -112,6 +120,50 @@ namespace GameSys.EditorTests
 
             // Act（再次 Release）
             Assert.IsFalse(machine.Release(), "已释放后 Release 幂等无效");
+        }
+
+        [Test]
+        public void test_chargeable_projectile_release_fires_immediately()
+        {
+            // Arrange（可蓄力投射物：max 2s，轻点 1 键 → 蓄力 0.25s 后松开）
+            var machine = new FakeTimeMachine(CreateProjectileData(2f));
+            AdvanceToCharging(machine);
+            machine.Now = 0.40f; // 蓄力 0.25s
+            machine.Update(0.01f);
+
+            // Act（松开立即释放）
+            bool released = machine.Release();
+
+            // Assert（立即进 Execution，进度 = 实际蓄力/最大）
+            Assert.IsTrue(released, "可蓄力投射物松开应立即释放");
+            Assert.AreEqual(SkillSubState.Execution, machine.CurrentState);
+            Assert.AreEqual(0.125f, machine.ChargeProgressAtRelease, 0.001f); // 0.25/2.0
+        }
+
+        [Test]
+        public void test_chargeable_projectile_auto_release_at_max()
+        {
+            // Arrange（满蓄力 2s 自动抛出）
+            var machine = new FakeTimeMachine(CreateProjectileData(2f));
+            AdvanceToCharging(machine);
+            machine.Now = 2.15f; // 蓄力 ≥ max 2.0
+            machine.Update(0.01f);
+
+            // Assert（自动释放，进度 = 1）
+            Assert.AreEqual(SkillSubState.Execution, machine.CurrentState);
+            Assert.AreEqual(1f, machine.ChargeProgressAtRelease, 0.001f);
+        }
+
+        [Test]
+        public void test_non_chargeable_projectile_skips_charge()
+        {
+            // Arrange（maxChargeTime = 0：非蓄力投射物，按下即发射——保持原瞬时行为）
+            var machine = new FakeTimeMachine(CreateProjectileData(0f));
+
+            // Act & Assert（跳过 Casting/Charging，直接 Execution）
+            Assert.IsTrue(machine.TryStart());
+            Assert.AreEqual(SkillSubState.Execution, machine.CurrentState);
+            Assert.IsFalse(machine.Release(), "非蓄力投射物 Release 无效");
         }
     }
 }

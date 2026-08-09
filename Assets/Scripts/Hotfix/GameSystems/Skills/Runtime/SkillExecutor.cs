@@ -191,16 +191,16 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
-        /// 获取蓄力进度 [0, 1]
+        /// 获取蓄力进度 [0, 1]（蓄力技能与可蓄力投射物共用）
         /// </summary>
         public float GetChargeProgress()
         {
             if (CurrentSubState != SkillSubState.Charging)
                 return CurrentSubState == SkillSubState.Completed ? 1f : 0f;
 
-            var charged = _skillData as ChargedSkillData;
-            if (charged == null) return 1f;
-            return Mathf.Clamp01(_stateMachine.ElapsedTime / charged.MaxChargeTime);
+            float maxCharge = (_skillData as ChargedSkillData)?.MaxChargeTime
+                              ?? (_skillData as ProjectileSkillData)?.MaxChargeTime ?? 1f;
+            return Mathf.Clamp01(_stateMachine.ElapsedTime / maxCharge);
         }
 
         /// <summary>

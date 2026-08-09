@@ -50,6 +50,8 @@ namespace GameSys.EditorTests
             so.FindProperty("_projectilePrefab").objectReferenceValue = prefab;
             so.FindProperty("_projectileSpeed").floatValue = 18f;
             so.FindProperty("_projectileRange").floatValue = 15f;
+            // 非蓄力投射物（maxChargeTime = 0）：按下即发射，Execution 进入即生成火球
+            so.FindProperty("_maxChargeTime").floatValue = 0f;
             so.ApplyModifiedProperties();
             TestHelpers.SetField(data, "_skillId", 20001);
             TestHelpers.SetField(data, "_damage", DamageBlock.CreateDefault(50f, 0f));

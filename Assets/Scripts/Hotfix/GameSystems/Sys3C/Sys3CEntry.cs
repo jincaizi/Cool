@@ -138,6 +138,21 @@ namespace Hotfix.GameSystems.Sys3C
             var command = _inputManager.GetMoveCommand(cameraForward);
 
             _cc.Update(command);
+
+            // 蓄力中无移动输入时，角色朝向跟随相机（拖动鼠标调整抛投方向）
+            if (_skillCoordinator.CurrentSubState == Skills.Definition.SkillSubState.Charging
+                && _skillCoordinator.CanRotate()
+                && !_inputManager.IsMoving())
+            {
+                Vector3 camFwd = _camera != null ? _camera.transform.forward : transform.forward;
+                camFwd.y = 0f;
+                if (camFwd.sqrMagnitude > 0.0001f)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation,
+                        Quaternion.LookRotation(camFwd.normalized), 10f * Time.deltaTime);
+                }
+            }
+
             ApplyPushVector();
             _fsmManager.Update(Time.deltaTime);
             _skillCoordinator.Update(Time.deltaTime);
@@ -250,6 +265,12 @@ namespace Hotfix.GameSystems.Sys3C
                             transform.position + transform.forward * 5f);
                         _skillCoordinator.HandleInput(input);
                     }
+                }
+
+                // 1键松开 → 蓄力抛投（火球）
+                if (!_inputManager.IsSkillFireballHeld())
+                {
+                    _skillCoordinator.TryReleaseCharge(GetSkillFireballId());
                 }
 
                 // 2键按住蓄力，松开释放（蓄力炎爆）

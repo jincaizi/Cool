@@ -20,6 +20,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly bool _isChanneled;
         private readonly ChargedSkillData _chargedData;
         private readonly ChanneledSkillData _channeledData;
+        private readonly ProjectileSkillData _projectileData;
         private readonly bool _isSpin;
         private readonly SpinSkillData _spinData;
         private float _nextTickTime;
@@ -65,7 +66,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _skillData = data;
             _chargedData = data as ChargedSkillData;
             _channeledData = data as ChanneledSkillData;
-            _isCharged = _chargedData != null;
+            _projectileData = data as ProjectileSkillData;
+            _isCharged = _chargedData != null
+                         || (_projectileData != null && _projectileData.MaxChargeTime > 0f);
             _isChanneled = _channeledData != null;
             _spinData = data as SpinSkillData;
             _isSpin = _spinData != null;
@@ -136,7 +139,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void UpdateCasting()
         {
-            float castTime = _channeledData?.CastTime ?? (_chargedData != null ? 0.1f : 0f);
+            float castTime = _channeledData?.CastTime ?? (_isCharged ? 0.1f : 0f);
             if (_elapsedTime >= castTime)
             {
                 if (_isCharged)
@@ -160,7 +163,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void UpdateCharging()
         {
-            if (_chargedData == null) { Complete(); return; }
+            if (MaxChargeTime <= 0f) { Complete(); return; }
 
             float chargeTime = GetCurrentTime() - _chargeStartTime;
 
@@ -179,7 +182,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 }
             }
 
-            if (chargeTime >= _chargedData.MaxChargeTime)
+            if (chargeTime >= MaxChargeTime)
             {
                 ChargeProgressAtRelease = 1f;
                 TransitionTo(SkillSubState.Execution);
@@ -212,16 +215,19 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public float ChargeProgressAtRelease { get; private set; }
 
+        /// <summary>蓄力上限（秒）：蓄力技能与可蓄力投射物共用；0 = 不可蓄力</summary>
+        private float MaxChargeTime => _chargedData?.MaxChargeTime ?? _projectileData?.MaxChargeTime ?? 0f;
+
         /// <summary>
         /// 蓄力技能：松开按钮提前释放（任意时刻有效，进度按实际蓄力缩放）。
         /// 仅在 Charging 态生效，其余状态返回 false（幂等）。
         /// </summary>
         public bool Release()
         {
-            if (_currentState != SkillSubState.Charging || _chargedData == null)
+            if (_currentState != SkillSubState.Charging || MaxChargeTime <= 0f)
                 return false;
             ChargeProgressAtRelease = Mathf.Clamp01(
-                (GetCurrentTime() - _chargeStartTime) / _chargedData.MaxChargeTime);
+                (GetCurrentTime() - _chargeStartTime) / MaxChargeTime);
             TransitionTo(SkillSubState.Execution);
             return true;
         }

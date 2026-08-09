@@ -235,6 +235,14 @@ namespace Hotfix.GameSystems.Sys3C.Input
         }
 
         /// <summary>
+        /// 火球术按住（1键，持续状态）— 蓄力瞄准
+        /// </summary>
+        public bool IsSkillFireballHeld()
+        {
+            return UnityInput.GetKey(KeyCode.Alpha1);
+        }
+
+        /// <summary>
         /// 蓄力炎爆按下（2键）— 按住蓄力
         /// </summary>
         public bool IsSkillChargeBlastPressed()

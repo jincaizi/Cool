@@ -38,6 +38,27 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] private float _explosionRadius = 1.5f;
         public float ExplosionRadius => _explosionRadius;
 
+        [Header("=== Charge (Aim & Throw) ===")]
+        [Tooltip("蓄力最小时间(秒)")]
+        [SerializeField] private float _minChargeTime = 0.3f;
+        public float MinChargeTime => _minChargeTime;
+
+        [Tooltip("蓄力最大时间(秒)，0 = 非蓄力投射物（按下即发射）")]
+        [SerializeField] private float _maxChargeTime = 2f;
+        public float MaxChargeTime => _maxChargeTime;
+
+        [Tooltip("蓄力阶段是否可以移动?")]
+        [SerializeField] private bool _canMoveWhileCharging = true;
+        public bool CanMoveWhileCharging => _canMoveWhileCharging;
+
+        [Tooltip("蓄力阶段是否可以旋转?")]
+        [SerializeField] private bool _canRotateWhileCharging = true;
+        public bool CanRotateWhileCharging => _canRotateWhileCharging;
+
+        [Tooltip("弹道重力加速度(米/秒²)")]
+        [SerializeField] private float _projectileGravity = 9.8f;
+        public float ProjectileGravity => _projectileGravity;
+
         [Header("=== Config Blocks ===")]
         [SerializeField] private EffectBlock _effect;
         public EffectBlock Effect => _effect;
