@@ -221,5 +221,23 @@ namespace GameSys.EditorTests
             Assert.AreEqual(0, groundTarget.HitCount, "弹道中段不应命中正下方地面目标");
             Assert.IsTrue(fb.gameObject.activeSelf, "中段飞行不应回池");
         }
+
+        [Test]
+        public void test_fireball_explodes_on_target_at_landing_point()
+        {
+            // Arrange（目标恰好站在落点地面：落地爆炸与其重叠，命中且只结算一次）
+            var target = new FakeDamageable(NewGo("Target").transform);
+            target.Transform.position = new Vector3(0f, 0.01f, 15f); // 落点 (0, ~0, 15)
+            Register(target);
+            var fb = CreateProjectile(CreateData(18f, 15f), new Vector3(0f, 1.2f, 0f), Vector3.forward);
+
+            // Act（完整飞行至落地）
+            for (int i = 0; i < 200 && fb.gameObject.activeSelf; i++)
+                fb.Tick(0.01f);
+
+            // Assert（落地爆炸命中落点目标；回池）
+            Assert.AreEqual(1, target.HitCount, "落点目标应被落地爆炸命中一次");
+            Assert.IsFalse(fb.gameObject.activeSelf, "落地后应回池");
+        }
     }
 }

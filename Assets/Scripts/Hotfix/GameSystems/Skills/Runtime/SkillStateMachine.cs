@@ -163,7 +163,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void UpdateCharging()
         {
-            if (MaxChargeTime <= 0f) { Complete(); return; }
+            if (!_isCharged) { Complete(); return; }
 
             float chargeTime = GetCurrentTime() - _chargeStartTime;
 
@@ -224,7 +224,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public bool Release()
         {
-            if (_currentState != SkillSubState.Charging || MaxChargeTime <= 0f)
+            if (_currentState != SkillSubState.Charging || !_isCharged)
                 return false;
             ChargeProgressAtRelease = Mathf.Clamp01(
                 (GetCurrentTime() - _chargeStartTime) / MaxChargeTime);

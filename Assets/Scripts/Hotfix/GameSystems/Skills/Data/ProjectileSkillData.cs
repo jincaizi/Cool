@@ -39,12 +39,8 @@ namespace Hotfix.GameSystems.Skills.Data
         public float ExplosionRadius => _explosionRadius;
 
         [Header("=== Charge (Aim & Throw) ===")]
-        [Tooltip("蓄力最小时间(秒)")]
-        [SerializeField] private float _minChargeTime = 0.3f;
-        public float MinChargeTime => _minChargeTime;
-
         [Tooltip("蓄力最大时间(秒)，0 = 非蓄力投射物（按下即发射）")]
-        [SerializeField] private float _maxChargeTime = 2f;
+        [SerializeField] private float _maxChargeTime = 0f;
         public float MaxChargeTime => _maxChargeTime;
 
         [Tooltip("蓄力阶段是否可以移动?")]
