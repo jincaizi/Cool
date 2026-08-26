@@ -12,7 +12,7 @@
 |---|---|
 | 最终形态 | 大世界 MMO（同屏可达数十人，需要 AOI 兴趣管理） |
 | 服务器 | 独立 C# .NET 8 项目，与客户端**同仓库**（`Cool/Server/`），复用 KCP 会话层 |
-| 移动权威模型 | **B+：客户端权威移动 + 服务端合理性校验纠偏**（见 §4-D1 说明） |
+| 移动权威模型 | **B+：客户端权威移动 + 服务端合理性校验纠偏**（完整决策记录见 §6） |
 | 硬性要求 | ① 少返工 ② KCP+UDP 不变 ③ 客户端服务端代码最大化共用 ④ 技术先进且优缺点明示 |
 
 ### 已排除的方向
@@ -32,8 +32,8 @@ E:\CodeForJob\Cool\                      ← 单仓库
  │    ├─ SyncCore\                       ★ 共享逻辑：独立 asmdef，零 UnityEngine 依赖，
  │    │                                    列入 HybridCLR 热更程序集清单
  │    │    （时钟同步 / 移动校验规则 / AOI 格子 / CombatRules）
- │    └─ SyncLayer\                      客户端专属（Dispatcher/ClockSync/RemoteEntityRegistry/
- │                                         MovementPolicy 注入点），Hotfix 层可热修
+ │    └─ SyncLayer\                      客户端专属（Dispatcher/ClockSync采样调度[复用SyncCore算法]/
+ │                                         RemoteEntityRegistry/MovementPolicy 注入点），Hotfix 层可热修
  └─ Server\                              .NET 8 控制台服务器
        csproj 用 <Compile Include> 链接上述两个 ★ 目录的同一批源文件
 
@@ -44,7 +44,7 @@ E:\CodeForJob\Cool\                      ← 单仓库
 
 | 代码 | 归属 | 理由 |
 |---|---|---|
-| Protocol、SyncCore | 共享目录，两端编译同一份 | 校验规则两边不同源 = 作弊温床 + 行为分裂 |
+| Protocol、SyncCore | 共享目录，两端编译同一份 | 校验规则两边不同源 = 作弊温床 + 行为分裂；时钟同步**算法**（D3 纯函数部分）在 SyncCore，采样调度在客户端 SyncLayer |
 | SyncLayer | 客户端 Hotfix | bug 高发区走热更，不发版就能修 |
 | KcpNet + NetChannelAdapter | 客户端 AOT | Unity 传输依赖，不需要热更 |
 | SessionManager/ZoneManager/TickLoop/BotRunner/NpcBrain | 服务端独有 | 纯 .NET 世界 |
@@ -76,6 +76,7 @@ E:\CodeForJob\Cool\                      ← 单仓库
 - 远程插值延迟**基准 2 ticks ≈ 133ms**（Valve/Gasser 经典模型），授权 D2 自适应在 [2,4] ticks 带宽内动态调整。
 - 本地玩家位置上报：客户端以约 66ms **本地定时器节流**发送 `PositionSyncRequest`，**不依赖也不等待服务器 tick 相位**。
 - 参数归入现有 GlobalGameSettings 配置体系（2026-05-19 spec），不另造配置轮子。
+- **调参总规则（全局适用）**：所有联机调参——速度上限、瞬移/偏差阈值、插值延迟带宽、AOI 分级半径与频率、beacon 周期——均进 GlobalGameSettings，本文档只定机制不锁死数值；实现阶段以压测数据标定。
 - **代价**：渲染看到的他人慢约 0.13s——状态同步固有代价，换取画面永不抽搐。
 
 ### D2 · KCP 可靠流的队头阻塞（本路线图最大固有约束）
@@ -153,7 +154,7 @@ E:\CodeForJob\Cool\                      ← 单仓库
 - 九宫格 AoiGrid 替换 PerceptionFilter 占位实现。
 - 分级更新频率：近 15Hz / 中 8Hz / 远 4Hz；视野进出事件驱动远程实体生成销毁；迟滞边界防 entity 反复进出闪烁。
 - BotRunner 压测：100~200 个移动 bot。
-- **验收**：压测下单客户端带宽控制在预设目标内、帧率不塌；"走近现身/走远消失"无抖动。带宽超标则启用坐标量化（D5 条件项）。
+- **验收**：带宽门禁 = 按"可见实体数 × 平均快照字节 × 对应更新频率"公式折算的量化目标（P3 开工时计算并写入 GlobalGameSettings 作为硬门禁），实测达标且帧率不塌；"走近现身/走远消失"无抖动。带宽超标则启用坐标量化（D5 条件项）。
 
 ### P4 技能与战斗同步（规模：大）
 
@@ -201,7 +202,7 @@ E:\CodeForJob\Cool\                      ← 单仓库
 
 | 要求 | 达成机制 |
 |---|---|
-| 少返工 | B+ 模型规避确定性回放深坑；F2 分层冻结协议；PerceptionFilter 接口占位先行 |
+| 少返工 | B+ 模型规避确定性回放深坑；§3 协议规则层冻结；PerceptionFilter 接口占位先行 |
 | KCP+UDP 不变 | AOT 传输层零改动，仅收编消息定义 |
 | 双端共用最大化 | Protocol/SyncCore 双 asmdef 共享源码 + 单仓库原子提交 |
 | 先进且明白 | AOI/增量位掩码/自适应 jitter buffer/min-filter 时钟——每个决策附代价条款（D1-D6） |
