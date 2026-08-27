@@ -25,7 +25,9 @@ namespace Hotfix.GameSystems.Skills.Definition
         Recovery,       // 收招硬直
         Cancelled,      // 被打断
         Completed,      // 正常完成
-        Spinning        // 持续旋转中（末尾追加：该枚举经 SkillNetworkSync 线格式序列化，禁止中部插入）
+        // 序列化顺序即线格式顺序：新增成员只能追加到末尾（未来网络层沿用此约定，
+        // 见 docs/superpowers/specs/2026-08-27-network-sync-design.md）
+        Spinning        // 持续旋转中
     }
 
     /// <summary>

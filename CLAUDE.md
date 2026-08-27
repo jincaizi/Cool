@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Unity MMO Client Project
 
 ## Project Overview
-Unity 2022 LTS MMO client with server integration planned. Code assisted by Claude Code.The release target is the mobile platform.
+Unity 2022 LTS MMO client with server integration planned. Code assisted by Claude Code. The release target is the mobile platform.
 
 ## Tech Stack
 - Unity: 2022.3.25f1 (LTS)
