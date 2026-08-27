@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Cool.Protocol;
 using Xunit;
 
@@ -22,8 +23,18 @@ public class RegistryCompletenessTests
     }
 
     [Fact]
-    public void EchoPair_Ids_DoNotCollide()
+    public void Registry_Maps_Are_Consistent()
     {
-        Assert.NotEqual((ushort)MessageId.EchoRequest, (ushort)MessageId.EchoResponse);
+        var ids = (MessageId[])Enum.GetValues(typeof(MessageId));
+        var forward = ids.ToDictionary(id => id, id => MessageTypeRegistry.GetMessageType(id)!);
+
+        // 正向：每个 id 都能取到类型
+        Assert.All(forward, kv => Assert.NotNull(kv.Value));
+        // 反向：每个类型都能取回原 id
+        foreach (var kv in forward)
+            Assert.Equal(kv.Key, MessageTypeRegistry.GetMessageId(kv.Value));
+
+        // id 数值无重复（枚举手滑防线）
+        Assert.Equal(ids.Length, ids.Select(i => (ushort)i).Distinct().Count());
     }
 }

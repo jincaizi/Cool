@@ -47,6 +47,8 @@ public class CodecRoundtripTests
         Assert.Equal(source.ZoneId, request.ZoneId);
         Assert.Equal(source.DeviceInfo, request.DeviceInfo);
         Assert.Equal(source.ProtocolVersion, request.ProtocolVersion);
+        Assert.Equal(source.PasswordHash, request.PasswordHash);
+        Assert.Equal(source.ClientVersion, request.ClientVersion);
     }
 
     [Fact]
@@ -67,6 +69,9 @@ public class CodecRoundtripTests
         Assert.Equal(source.Y, sync.Y, 4);
         Assert.Equal(source.Z, sync.Z, 4);
         Assert.Equal(source.Sequence, sync.Sequence);
+        Assert.Equal(source.Rotation, sync.Rotation, 4);
+        Assert.Equal(source.Speed, sync.Speed, 4);
+        Assert.Equal(source.Timestamp, sync.Timestamp);
     }
 
     [Fact]
@@ -86,6 +91,74 @@ public class CodecRoundtripTests
     public void Decode_UnregisteredId_Throws()
     {
         var bytes = new byte[ProtocolConstants.HeaderSize]; // 全零头 = 无效消息
-        Assert.ThrowsAny<Exception>(() => MessageCodec.Decode(bytes));
+        Assert.Throws<InvalidOperationException>(() => MessageCodec.Decode(bytes));
+    }
+
+    [Fact]
+    public void Encode_PayloadOverUShort_Throws()
+    {
+        var big = new BroadcastMessage { Content = new string('x', 70000) };
+        Assert.Throws<ArgumentException>(() =>
+            MessageCodec.EncodeToArray(MessageId.BroadcastMessage, big));
+    }
+
+    [Fact]
+    public void Encode_EncryptedFlagWithoutKey_Throws()
+    {
+        var msg = new EchoRequest { ClientTimestamp = 1L };
+        Assert.Throws<ArgumentException>(() =>
+            MessageCodec.EncodeToArray(MessageId.EchoRequest, msg, MessageFlags.Encrypted));
+    }
+
+    [Fact]
+    public void Encode_UnregisteredMessageId_Throws()
+    {
+        var msg = new EchoRequest { ClientTimestamp = 1L };
+        Assert.Throws<ArgumentException>(() =>
+            MessageCodec.EncodeToArray((MessageId)9999, msg));
+    }
+
+    [Fact]
+    public void Decode_TooShortData_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => MessageCodec.Decode(new byte[ProtocolConstants.HeaderSize - 1]));
+    }
+
+    [Fact]
+    public void Decode_LengthMismatch_Throws()
+    {
+        // 头部声明 10 字节负载，实际负载 0 字节
+        var data = new byte[ProtocolConstants.HeaderSize];
+        BitConverter.GetBytes((ushort)10).CopyTo(data, 3);
+        Assert.Throws<ArgumentException>(() => MessageCodec.Decode(data));
+    }
+
+    [Fact]
+    public void TryDecode_Malformed_ReturnsFalse()
+    {
+        Assert.False(MessageCodec.TryDecode(new byte[2], out _));
+    }
+
+    [Fact]
+    public void Roundtrip_CompressTrue_PassthroughSurvives()
+    {
+        var source = new EchoResponse { ClientTimestamp = 7L, ServerTimestamp = 8L };
+        var encoded = MessageCodec.EncodeToArray(MessageId.EchoResponse, source, MessageFlags.None, compress: true);
+        var (_, decoded) = MessageCodec.Decode(encoded);
+        var response = Assert.IsType<EchoResponse>(decoded);
+        Assert.Equal(7L, response.ClientTimestamp);
+        Assert.Equal(8L, response.ServerTimestamp);
+        // compress 标志位已被置上（直通压缩沿袭现状，P1 换真实实现时本测试守门）
+        Assert.Equal(MessageFlags.Compressed, (MessageFlags)encoded[0] & MessageFlags.Compressed);
+    }
+
+    [Fact]
+    public void Roundtrip_EncryptedWithKey_Survives()
+    {
+        var key = new byte[] { 1, 2, 3, 4 };
+        var source = new EchoRequest { ClientTimestamp = 99L };
+        var encoded = MessageCodec.EncodeToArray(MessageId.EchoRequest, source, MessageFlags.Encrypted, key);
+        var (_, decoded) = MessageCodec.Decode(encoded, key);
+        Assert.Equal(99L, Assert.IsType<EchoRequest>(decoded).ClientTimestamp);
     }
 }

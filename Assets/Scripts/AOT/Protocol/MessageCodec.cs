@@ -24,7 +24,7 @@ namespace Cool.Protocol
     }
 
     /// <summary>
-    /// 消息编解码器 —— 全仓库唯一一份（规则层 v1：
+    /// 消息编解码器 —— 收编目标：全仓库唯一一份（P0 过渡期与 Server/MessageCodec.cs 旧实现并存；flag 位语义以本文件为准，T5/T7 收编后唯一性生效）（规则层 v1：
     /// header[flags(1)|messageId(2 LE)|length(2 LE)] + protobuf 负载）
     /// </summary>
     public static class MessageCodec
@@ -37,6 +37,12 @@ namespace Cool.Protocol
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
             if (writer == null) throw new ArgumentNullException(nameof(writer));
+
+            if ((flags & MessageFlags.Encrypted) != 0 && (encryptionKey == null || encryptionKey.Length == 0))
+                throw new ArgumentException("MessageFlags.Encrypted requires a non-empty encryptionKey", nameof(encryptionKey));
+
+            if (!MessageTypeRegistry.IsRegistered(messageId))
+                throw new ArgumentException($"Message ID not registered: {(ushort)messageId}", nameof(messageId));
 
             byte[] payload;
             using (var memoryStream = new MemoryStream())
@@ -56,6 +62,9 @@ namespace Cool.Protocol
                 payload = Encrypt(payload, encryptionKey);
             }
 
+            if (payload.Length > ushort.MaxValue)
+                throw new ArgumentException($"Message payload too large: {payload.Length} bytes (max {ushort.MaxValue})", nameof(message));
+
             var headerSpan = writer.GetSpan(HeaderSize);
             headerSpan[0] = (byte)flags;
             BitConverter.TryWriteBytes(headerSpan.Slice(1), (ushort)messageId);
@@ -69,7 +78,7 @@ namespace Cool.Protocol
             return HeaderSize + payload.Length;
         }
 
-        /// <summary>解码消息</summary>
+        /// <summary>解码消息。调用方每次只应传入单帧完整字节（多帧缓冲须先分帧；本方法不消费尾随字节）</summary>
         public static (MessageId messageId, IMessage message) Decode(byte[] data, byte[]? encryptionKey = null)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
@@ -118,7 +127,10 @@ namespace Cool.Protocol
                 result = Decode(data, encryptionKey);
                 return true;
             }
-            catch
+            catch (Exception ex) when (ex is ArgumentException
+                                    || ex is InvalidOperationException
+                                    || ex is System.IO.EndOfStreamException
+                                    || ex is ProtoBuf.ProtoException)
             {
                 return false;
             }
@@ -217,7 +229,7 @@ namespace Cool.Protocol
             => _messageIdToType.Keys.Select(id => (MessageId)id);
     }
 
-    /// <summary>ArrayBufferWriter 实现（.NET Standard 2.0 兼容，沿袭现状）</summary>
+    /// <summary>ArrayBufferWriter 实现（非泛型 IBufferWriter 实现，沿袭 Unity 侧现状）</summary>
     public sealed class ArrayBufferWriter : IBufferWriter<byte>
     {
         private byte[] _buffer;
