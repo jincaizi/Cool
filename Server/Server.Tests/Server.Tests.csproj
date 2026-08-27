@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Cool.Protocol.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <!-- 共享源码唯一真相源：编译 Assets 内 Protocol 目录的同批文件 -->
+  <ItemGroup>
+    <Compile Include="..\..\Assets\Scripts\AOT\Protocol\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <!-- 版本必须与 Unity 侧 Assets/Packages/protobuf-net.3.2.56 一致（spec §3） -->
+    <PackageReference Include="protobuf-net" Version="3.2.56" />
+  </ItemGroup>
+
+</Project>

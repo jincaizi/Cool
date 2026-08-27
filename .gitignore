@@ -77,6 +77,9 @@ Cool.sln.DotSettings.user
 # .NET build artifacts
 Server/bin/
 Server/obj/
+Server/Server.Tests/bin/
 
 # Server3C.csproj is hand-authored (not Unity-generated)
 !Server/Server3C.csproj
+# Server.Tests.csproj is hand-authored (not Unity-generated)
+!Server/Server.Tests/Server.Tests.csproj

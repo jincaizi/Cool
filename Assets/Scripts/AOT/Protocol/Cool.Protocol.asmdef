@@ -1,0 +1,10 @@
+{
+    "name": "Cool.Protocol",
+    "rootNamespace": "Cool.Protocol",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "versionDefines": [],
+    "noEngineReferences": false
+}
