@@ -29,6 +29,12 @@ namespace KcpServer
                     ServerTimestamp = DateTime.UtcNow.Ticks
                 };
                 await _server.SendToSessionAsync(session, MessageId.LoginResponse, reject);
+                await _server.SendToSessionAsync(session, MessageId.Kick, new Kick
+                {
+                    Reason = "ProtocolVersionMismatch",
+                    KickType = 0,
+                    AllowReconnectAfter = 0
+                });
                 _logger.LogWarning($"Rejected login from {session.RemoteEndPoint}: protocol version {request.ProtocolVersion}");
                 return;
             }
