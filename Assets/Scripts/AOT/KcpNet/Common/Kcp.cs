@@ -98,6 +98,9 @@ namespace KcpNet
 
             // 创建 KCP - 使用 Kcp<Segment> API
             _kcp = new System.Net.Sockets.Kcp.Kcp<System.Net.Sockets.Kcp.KcpSegment>(conv, _callbackHandler, _callbackHandler);
+            // Kcp 2.7.0 的基类不会初始化 SegmentManager（为 null），首次 Send/Input 会 NRE；
+            // 与库内 SimpleSegManager.Kcp 子类保持一致，显式指定默认段管理器
+            _kcp.SegmentManager = System.Net.Sockets.Kcp.SimpleSegManager.Default;
         }
 
         /// <summary>

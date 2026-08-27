@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -172,7 +173,7 @@ namespace KcpServer
             try
             {
                 // 查找或创建会话
-                var session = FindOrCreateSession(remoteEndPoint);
+                var session = FindOrCreateSession(remoteEndPoint, data);
                 if (session == null) return;
 
                 // KCP 数据包
@@ -185,7 +186,7 @@ namespace KcpServer
             }
         }
 
-        private KcpServerSession? FindOrCreateSession(EndPoint remoteEndPoint)
+        private KcpServerSession? FindOrCreateSession(EndPoint remoteEndPoint, byte[] firstPacket)
         {
             // 查找现有会话
             foreach (var s in _sessions.Values)
@@ -198,7 +199,11 @@ namespace KcpServer
 
             // 创建新会话
             long sessionId = Interlocked.Increment(ref _nextSessionId);
-            var session = new KcpServerSession(sessionId, remoteEndPoint, _udpServer!, _logger);
+            // 从客户端首包解析 KCP conv（头部前 4 字节 LE），双端 conv 必须一致否则 KCP 丢包
+            uint? kcpConv = firstPacket != null && firstPacket.Length >= 24
+                ? BinaryPrimitives.ReadUInt32LittleEndian(firstPacket)
+                : null;
+            var session = new KcpServerSession(sessionId, remoteEndPoint, _udpServer!, _logger, kcpConv);
 
             // 订阅会话事件
             session.DataReceived += OnSessionDataReceived;

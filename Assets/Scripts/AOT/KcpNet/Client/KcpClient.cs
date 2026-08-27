@@ -32,6 +32,33 @@ namespace KcpNet
             : base(sessionId, remoteEndPoint, transport, options, logger)
         {
             _messageExecutor = messageExecutor ?? throw new ArgumentNullException(nameof(messageExecutor));
+
+            // NetworkDriverLoop 与会话接收循环会竞争消费同一 socket 的 ReceiveKcpAsync：
+            // 当驱动循环先抢到数据报时，解码后的消息只会经 Transport.DataReceived 送达，
+            // 不订阅该事件会导致消息被静默丢弃（echo 冒烟测试偶发超时的根因）
+            if (Transport is KcpTransportBase transportBase)
+            {
+                transportBase.DataReceived += OnTransportDataReceived;
+            }
+        }
+
+        /// <summary>
+        /// 驱动循环接收路径：解码数据报并走统一的消息分发
+        /// </summary>
+        private void OnTransportDataReceived(object sender, byte[] data)
+        {
+            try
+            {
+                var (_, message) = MessageCodec.Decode(data);
+                if (message != null)
+                {
+                    HandleServerMessage(message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to decode transport data");
+            }
         }
 
         /// <summary>

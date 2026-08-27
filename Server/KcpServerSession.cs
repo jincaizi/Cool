@@ -117,7 +117,7 @@ namespace KcpServer
         public event EventHandler? Disconnected;
         public event EventHandler<Exception>? Error;
 
-        public KcpServerSession(long sessionId, EndPoint remoteEndPoint, Socket socket, ILogger logger)
+        public KcpServerSession(long sessionId, EndPoint remoteEndPoint, Socket socket, ILogger logger, uint? kcpConv = null)
         {
             _sessionId = sessionId;
             _remoteEndPoint = remoteEndPoint;
@@ -128,7 +128,12 @@ namespace KcpServer
             _callbackHandler = new KcpCallbackHandler(socket, remoteEndPoint, logger);
 
             // 创建 KCP - 使用 Kcp<Segment> API
-            _kcp = new System.Net.Sockets.Kcp.Kcp<System.Net.Sockets.Kcp.KcpSegment>((uint)sessionId, _callbackHandler, _callbackHandler);
+            // KCP 协议要求双端 conv 一致（KcpCore.Input 严格校验 conv != conv_ 即丢包），
+            // 因此必须采用客户端首包中的 conv，而不是本地会话计数
+            _kcp = new System.Net.Sockets.Kcp.Kcp<System.Net.Sockets.Kcp.KcpSegment>(kcpConv ?? (uint)sessionId, _callbackHandler, _callbackHandler);
+            // Kcp 2.7.0 的基类不会初始化 SegmentManager（为 null），首次 Send/Input 会 NRE；
+            // 与库内 SimpleSegManager.Kcp 子类保持一致，显式指定默认段管理器
+            _kcp.SegmentManager = System.Net.Sockets.Kcp.SimpleSegManager.Default;
 
             // 配置 KCP - 使用接口方法
             _kcp.WndSize(SendWindowSize, ReceiveWindowSize);
