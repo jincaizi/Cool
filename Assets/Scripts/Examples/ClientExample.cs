@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using KcpNet;
+using Cool.Protocol;
 
 namespace Examples
 {
@@ -309,7 +310,7 @@ namespace Examples
 
             if (response.Success)
             {
-                Console.WriteLine($"用户ID: {response.UserId}, 会话令牌: {response.SessionToken}");
+                Console.WriteLine($"用户ID: {response.PlayerId}, 会话令牌: {response.SessionToken}");
 
                 // 登录成功后可以开始发送其他消息
                 // 例如：请求玩家列表、发送就绪状态等

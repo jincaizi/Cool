@@ -1,7 +1,9 @@
 {
     "name": "KcpNet",
     "rootNamespace": "KcpNet",
-    "references": [],
+    "references": [
+        "Cool.Protocol"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

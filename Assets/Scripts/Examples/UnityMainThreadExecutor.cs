@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using UnityEngine;
+using Cool.Protocol;
 
 namespace Examples
 {
@@ -149,7 +150,7 @@ namespace Examples
                     Debug.Log("已连接到服务器");
 
                     // 发送登录请求
-                    var loginRequest = new KcpNet.LoginRequest
+                    var loginRequest = new LoginRequest
                     {
                         Username = "UnityPlayer",
                         PasswordHash = "hash",
@@ -157,7 +158,7 @@ namespace Examples
                         DeviceInfo = SystemInfo.deviceModel
                     };
 
-                    await client.SendAsync(loginRequest, KcpNet.MessageFlags.Reliable);
+                    await client.SendAsync(loginRequest, MessageFlags.Reliable);
                     Debug.Log("已发送登录请求");
                 }
                 catch (Exception ex)

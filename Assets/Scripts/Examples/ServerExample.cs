@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using KcpNet;
+using Cool.Protocol;
 
 namespace Examples
 {
@@ -138,7 +139,7 @@ namespace Examples
             {
                 Success = isAuthenticated,
                 Message = isAuthenticated ? "登录成功" : "用户名或密码错误",
-                UserId = isAuthenticated ? GenerateUserId() : 0,
+                PlayerId = isAuthenticated ? GenerateUserId() : 0,
                 SessionToken = isAuthenticated ? GenerateSessionToken() : string.Empty,
                 ServerTimestamp = DateTime.UtcNow.Ticks
             };
@@ -148,7 +149,7 @@ namespace Examples
 
             if (isAuthenticated)
             {
-                Console.WriteLine($"用户 {request.Username} 登录成功，分配用户ID: {response.UserId}");
+                Console.WriteLine($"用户 {request.Username} 登录成功，分配用户ID: {response.PlayerId}");
 
                 // 发送欢迎消息
                 var welcomeChat = new ChatMessage
