@@ -152,6 +152,7 @@ namespace Examples
                     // 发送登录请求
                     var loginRequest = new LoginRequest
                     {
+                        ProtocolVersion = ProtocolConstants.ProtocolVersion,
                         Username = "UnityPlayer",
                         PasswordHash = "hash",
                         ClientVersion = Application.version,

@@ -125,6 +125,7 @@ namespace Examples
             {
                 var loginRequest = new LoginRequest
                 {
+                    ProtocolVersion = ProtocolConstants.ProtocolVersion,
                     Username = $"Player_{DateTime.UtcNow.Ticks % 1000}",
                     PasswordHash = "md5_hash_placeholder", // 实际应用中应该使用真正的密码哈希
                     ClientVersion = "1.0.0",
