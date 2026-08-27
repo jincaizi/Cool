@@ -4,7 +4,7 @@ using Hotfix.GameSystems.Sys3C.Character;
 namespace Hotfix.GameSystems.Sys3C.Network
 {
     /// <summary>
-    /// 移动策略接口
+    /// 移动策略接口 —— P2 注入面：NetMovementPolicy 将在此接线（spec §2；当前无调用方属预期，勿删）
     /// </summary>
     public interface IMovementPolicy
     {

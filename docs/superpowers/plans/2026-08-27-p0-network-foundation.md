@@ -1935,3 +1935,27 @@ git commit -m "docs(protocol): governance readme - rule layer v1, wire format, d
 ## P1-P5 后续计划边界
 
 本计划不含：TickLoop/SnapshotAssembler/PerceptionFilter/ClockSync/预测和解/AOI/CombatRules/BotRunner（各属 P1-P5 独立计划）。R2 强制条款与 D2 KCP 消息模式确认 → **列入 P1 计划首两项任务**。
+
+---
+
+## 执行偏差记录（终审 `b4da18d` 已逐项确认，READY for P1）
+
+| # | 计划原文 | 实际执行 | 性质 |
+|---|---|---|---|
+| 1 | T2/T4 `GlobalUsings.cs` | C#9 无 global using（CS8773）→ KcpNet 5 文件 + Examples 3 文件逐文件 `using Cool.Protocol;`；Server 侧 net8 保留 global using | 语法约束强制 |
+| 2 | T4 NUnit `Assert.IsAssignableFrom<T>` | Unity 内置 NUnit 3.5.1 该断言返回 void → `Assert.That(decoded, Is.InstanceOf<EchoResponse>())` + 强转 | 框架差异适配 |
+| 3 | T3 测试 10 项 | 评审加固后 18 项（payload 上限/Encrypted 无 key/未注册 id 编码/too-short/length-mismatch/TryDecode/compress+encrypt 往返/注册表一致性） | 评审驱动加固 |
+| 4 | T3 Files 清单 | 漏列 RemoteSync.cs（正文有完整内容，文件已建） | 计划笔误，已落实 |
+| 5 | T5 `MessageCodec.Encode(...)` 调用 | 旧签名随旧 codec 删除 → `EncodeToArray`（wire 字节等价） | 编译强制 |
+| 6 | T5 csproj | 追加 `<Compile Remove="Server.Tests\**" />`（SDK 默认 glob 吞测试源，47 错实验复现） | 潜在缺陷显式修复 |
+| 7 | T6 冒烟模板 | 补 EchoRequest 发送 + `using NUnit.Framework;`；帧数上限改挂钟 30s（测试运行器帧率不可靠） | 计划模板缺陷修正 |
+| 8 | **T6 超范围：`9b22f84` 传输栈三修** | SegmentManager 从未初始化（发送必 NRE，DLL 反编译实锤）/ KCP conv 不匹配（服务器采纳客户端首包 conv）/ 客户端双路径收包竞争（驱动循环抢包后静默丢失）→ 单消费者收敛 | **预存传输栈从未真正跑通的证据**；opus 级深审追认（根因/最小性/无双重处理/2/2 复现） |
+| 9 | T7 计划内在矛盾 | spec"删 NetworkBridge"与"保留 MovementPolicy 现状"冲突（PredictionMovementPolicy 持有 NetworkBridge 字段）→ 裁决：整删死类，保留 IMovementPolicy+LocalMovementPolicy 注入面；CharacterController.cs 另删 11 行编译级死引用；用户预存的 L46 一行改动受保护未卷入 | 裁决记录 |
+| 10 | T8 评审遗留 | SkillState/SwordQi 两条指向已删类的误导注释改指向 spec；CLAUDE.md 空格微修 | 评审驱动 |
+
+## 终审产出：P1 必办清单（MUST-DO-P1）
+
+1. **R2 主循环规则**：现 Server3C 为 IO 线程先行 + Task.Run 散布，P1 SessionManager/TickLoop 必须建立单线程世界状态独占 + 无锁队列收包
+2. **D2 KCP 消息模式确认落档**：实践中消息边界保持成立，但无成文确认；P1 需写入确认记录 + 对 `wndSize*MTU` 的最大消息尺寸守卫
+3. **FindOrCreateSession 竞态 + O(n) 端点扫描**：P1 SessionManager 验收标准显式覆盖
+4. **conv 分配策略**：当前全客户端 conv=0 单客户端可用；P1 双客户端/重连验收前需唯一 conv 规则（并文档化 SessionId 与 kcpConv 的语义分叉）

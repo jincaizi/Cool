@@ -24,7 +24,7 @@ namespace Cool.Protocol
     }
 
     /// <summary>
-    /// 消息编解码器 —— 收编目标：全仓库唯一一份（P0 过渡期与 Server/MessageCodec.cs 旧实现并存；flag 位语义以本文件为准，T5/T7 收编后唯一性生效）（规则层 v1：
+    /// 消息编解码器 —— 全仓库唯一一份（P0-T5/T7 已收编两侧旧实现；flag 位语义以本文件为准）（规则层 v1：
     /// header[flags(1)|messageId(2 LE)|length(2 LE)] + protobuf 负载）
     /// </summary>
     public static class MessageCodec
