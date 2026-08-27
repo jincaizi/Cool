@@ -136,11 +136,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.BaseState = state;
         }
 
-        // Network integration
-        private NetworkPrediction _prediction;
-        private NetworkBridge _bridge;
-        private uint _currentSequence;
-
         public CharacterController(
             Transform transform,
             UnityEngine.CharacterController controller,
@@ -159,12 +154,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 IsDead = false,
                 RequestJump = false
             };
-        }
-
-        public void InitializeNetwork(NetworkBridge bridge)
-        {
-            _bridge = bridge;
-            _prediction = new NetworkPrediction();
         }
 
         public void RequestJump()

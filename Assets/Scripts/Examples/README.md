@@ -105,7 +105,7 @@ private async Task HandleLoginRequest(KcpSession session, LoginRequest request, 
     {
         Success = isAuthenticated,
         Message = isAuthenticated ? "登录成功" : "认证失败",
-        UserId = isAuthenticated ? GenerateUserId() : 0,
+        PlayerId = isAuthenticated ? GenerateUserId() : 0,
         SessionToken = isAuthenticated ? GenerateSessionToken() : string.Empty,
         ServerTimestamp = DateTime.UtcNow.Ticks
     };

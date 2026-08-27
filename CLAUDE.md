@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Unity MMO Client Project
 
 ## Project Overview
-Unity 2022 LTS MMO client with server integration planned. Code assisted by Claude Code.
+Unity 2022 LTS MMO client with server integration planned. Code assisted by Claude Code.The release target is the mobile platform.
 
 ## Tech Stack
 - Unity: 2022.3.25f1 (LTS)
@@ -116,10 +116,7 @@ Animator三层Layer架构：
 ### Network Sync
 
 位于 `Sys3C/Network/`:
-- `NetworkBridge` - 网络桥接
-- `NetworkPrediction` - 客户端预测
-- `PositionInterpolator` - 位置插值
-- `SkillNetworkSync` - 技能网络同步
+- 网络同步草稿桩已于 P0 清理（NetworkBridge/NetworkPrediction/PositionInterpolator/SkillNetworkSync），共享协议层见 `Assets/Scripts/AOT/Protocol/`，路线图见 `docs/superpowers/specs/2026-08-27-network-sync-design.md`
 - `MovementPolicy` - 移动策略
 
 ### Adapters (适配器模式)

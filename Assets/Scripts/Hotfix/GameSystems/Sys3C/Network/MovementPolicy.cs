@@ -35,35 +35,4 @@ namespace Hotfix.GameSystems.Sys3C.Network
         }
     }
 
-    /// <summary>
-    /// 预测模式（客户端预测 + 服务端校正）
-    /// </summary>
-    public class PredictionMovementPolicy : IMovementPolicy
-    {
-        private readonly Hotfix.GameSystems.Sys3C.Character.CharacterController _controller;
-        private readonly NetworkBridge _bridge;
-        private uint _sequence;
-
-        public PredictionMovementPolicy(Hotfix.GameSystems.Sys3C.Character.CharacterController controller, NetworkBridge bridge)
-        {
-            _controller = controller;
-            _bridge = bridge;
-        }
-
-        public void Update(MoveCommand command)
-        {
-            // 执行本地物理
-            _controller.Update(command);
-
-            // 发送位置同步（等AOT层实现SendPositionSync）
-            // _bridge.SendPositionSync(_controller.Data.Position, _controller.Data.Rotation, command.Speed);
-
-            _sequence++;
-        }
-
-        public void ApplyServerCorrection(Vector3 position, Quaternion rotation)
-        {
-            _controller.ApplyServerPosition(position, rotation);
-        }
-    }
 }
