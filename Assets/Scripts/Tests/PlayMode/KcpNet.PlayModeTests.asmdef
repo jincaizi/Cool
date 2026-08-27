@@ -1,0 +1,17 @@
+{
+    "name": "KcpNet.PlayModeTests",
+    "rootNamespace": "KcpNet.PlayModeTests",
+    "references": [
+        "KcpNet",
+        "Cool.Protocol"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "autoReferenced": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
