@@ -74,3 +74,9 @@ App.config
 # Project specific
 Cool.sln.DotSettings.user
 .fake
+# .NET build artifacts
+Server/bin/
+Server/obj/
+
+# Server3C.csproj is hand-authored (not Unity-generated)
+!Server/Server3C.csproj
