@@ -216,7 +216,7 @@ namespace KcpServer
         /// </summary>
         public void Send(MessageId messageId, IMessage message, MessageFlags flags = MessageFlags.Reliable)
         {
-            var data = MessageCodec.Encode(messageId, message, flags);
+            var data = MessageCodec.EncodeToArray(messageId, message, flags);
             Send(data, 0, data.Length);
         }
 

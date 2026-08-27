@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Assets\Scripts\AOT\Protocol\**\*.cs" />
+    <!-- 默认 glob 会误吞子目录测试工程（测试文件引用 xunit，应用工程未引用），显式剔除 -->
+    <Compile Remove="Server.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Kcp" Version="2.7.0" />
     <PackageReference Include="protobuf-net" Version="3.2.56" />
   </ItemGroup>

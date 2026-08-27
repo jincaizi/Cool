@@ -13,6 +13,7 @@ namespace KcpServer
         private readonly RoomManager _roomManager;
         private readonly LoginHandler _loginHandler;
         private readonly PositionSyncHandler _positionSyncHandler;
+        private readonly EchoHandler _echoHandler;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         private Socket? _udpServer;
@@ -40,6 +41,7 @@ namespace KcpServer
             _roomManager = new RoomManager(new RoomManagerConfig());
             _loginHandler = new LoginHandler(this, _roomManager, _logger);
             _positionSyncHandler = new PositionSyncHandler(this, _roomManager, _logger);
+            _echoHandler = new EchoHandler(this, _logger);
         }
 
         public Task StartAsync(int port, CancellationToken cancellationToken = default)
@@ -232,6 +234,10 @@ namespace KcpServer
 
                     case PositionSyncRequest posSync:
                         await _positionSyncHandler.HandlePositionSyncAsync(session, posSync);
+                        break;
+
+                    case EchoRequest echoRequest:
+                        await _echoHandler.HandleEchoAsync(session, echoRequest);
                         break;
 
                     case Heartbeat heartbeat:

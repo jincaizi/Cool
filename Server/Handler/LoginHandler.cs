@@ -20,6 +20,19 @@ namespace KcpServer
 
         public async Task HandleLoginAsync(KcpServerSession session, LoginRequest request)
         {
+            if (request.ProtocolVersion != ProtocolConstants.ProtocolVersion)
+            {
+                var reject = new LoginResponse
+                {
+                    Success = false,
+                    Message = $"Protocol version mismatch: client={request.ProtocolVersion}, server={ProtocolConstants.ProtocolVersion}",
+                    ServerTimestamp = DateTime.UtcNow.Ticks
+                };
+                await _server.SendToSessionAsync(session, MessageId.LoginResponse, reject);
+                _logger.LogWarning($"Rejected login from {session.RemoteEndPoint}: protocol version {request.ProtocolVersion}");
+                return;
+            }
+
             _logger.LogInformation($"Login attempt: {request.Username} from {session.RemoteEndPoint}");
 
             long playerId = Interlocked.Increment(ref _nextPlayerId);
@@ -28,7 +41,7 @@ namespace KcpServer
             {
                 PlayerName = request.Username,
                 IsLoggedIn = true,
-                Position = new Vector3(request.X, request.Y, request.Z)
+                Position = new Vector3(0f, 0f, 0f)
             };
 
             _server.BindPlayerToSession(playerId, session);
