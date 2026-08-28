@@ -43,5 +43,54 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             long serverTime = algo.ToServerTime(t1 + 1_000_000L);
             Assert.AreEqual(t1 + 1_000_000L, serverTime);
         }
+
+        [Test]
+        public void Outlier_With_Asymmetric_Delay_Is_Rejected()
+        {
+            var algo = new ClockSyncAlgorithm(8);
+            long t1 = 1_000_000_000L;
+            for (int i = 0; i < 7; i++)
+            {
+                algo.AddSample(t1, t1 + 1_000_000L + 250_000L, t1 + 500_000L);
+                t1 += 1_000_000L;
+            }
+            // 离群：rtt = 9M，offset = 5M − 9M/2 = 0.5M（与正常 1M 偏离）
+            algo.AddSample(t1, t1 + 5_000_000L, t1 + 9_000_000L);
+
+            Assert.IsTrue(algo.HasConverged);
+            Assert.AreEqual(1_000_000L, algo.OffsetTicks); // min-filter 选正常样本
+        }
+
+        [Test]
+        public void Window_Rolls_Over_And_Evicts_Oldest()
+        {
+            var algo = new ClockSyncAlgorithm(4);
+            long t1 = 1_000_000L;
+            for (int i = 0; i < 4; i++)
+            {
+                algo.AddSample(t1, t1 + 500_000L, t1 + 1_000_000L); // rtt=1M, offset=0
+                t1 += 1_000_000L;
+            }
+            Assert.AreEqual(0L, algo.OffsetTicks);
+
+            // 第 5 个：rtt=100k（更小）offset=3M → 应被选中；且最旧样本被剔除
+            algo.AddSample(t1, t1 + 3_050_000L, t1 + 100_000L); // rtt=100k, offset=3M
+            Assert.AreEqual(3_000_000L, algo.OffsetTicks);
+            Assert.IsTrue(algo.HasConverged);
+        }
+
+        [Test]
+        public void Negative_Rtt_Sample_Is_Ignored()
+        {
+            var algo = new ClockSyncAlgorithm(8);
+            long t1 = 1_000_000L;
+            algo.AddSample(t1, t1 + 500_000L, t1 + 1_000_000L); // 正常：offset=0
+            algo.AddSample(t1 + 2_000_000L, t1 + 2_500_000L, t1 + 1_000_000L); // rtt 为负（时钟回跳）
+
+            Assert.AreEqual(0L, algo.OffsetTicks);   // 负样本被忽略
+            Assert.IsFalse(algo.HasConverged);       // 样本数未增加
+            algo.AddSample(t1 + 3_000_000L, t1 + 3_500_000L, t1 + 4_000_000L); // rtt=1M offset=0
+            Assert.IsFalse(algo.HasConverged);       // 仍 2 个有效样本（8 窗）
+        }
     }
 }

@@ -34,7 +34,7 @@ namespace KcpServer
         private readonly EntityStore _entityStore = new EntityStore();
         private readonly SnapshotAssembler _snapshotAssembler = new SnapshotAssembler();
         private readonly IPerceptionFilter _perceptionFilter = new AllVisiblePerceptionFilter();
-        private const uint BeaconIntervalTicks = 4; // 4Hz beacon（15Hz tick）
+        private const uint BeaconIntervalTicks = 4; // 3.75Hz beacon（每 4 tick 一次，15Hz tick）
 
         // 超时配置
         private readonly TimeSpan _sessionTimeout = TimeSpan.FromSeconds(300);

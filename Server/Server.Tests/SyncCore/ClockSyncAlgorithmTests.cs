@@ -49,4 +49,57 @@ public class ClockSyncAlgorithmTests
         // offset=0（两端时钟对齐）：墙钟 t1+1M 即服务器时钟 t1+1M
         Assert.Equal(t1 + 1_000_000L, serverTime);
     }
+
+    /// <summary>
+    /// 离群样本 RTT 巨大（9M）且 offset 偏离（0.5M vs 正常 1M）；
+    /// min-filter 按 RTT 选择，必须仍返回正常样本的 1M（平均/末样本规则会失败）。
+    /// </summary>
+    [Fact]
+    public void Outlier_With_Asymmetric_Delay_Is_Rejected()
+    {
+        var algo = new ClockSyncAlgorithm(8);
+        long t1 = 1_000_000_000L;
+        for (int i = 0; i < 7; i++)
+        {
+            algo.AddSample(t1, t1 + 1_000_000L + 250_000L, t1 + 500_000L);
+            t1 += 1_000_000L;
+        }
+        // 离群：rtt = 9M，offset = 5M − 9M/2 = 0.5M（与正常 1M 偏离）
+        algo.AddSample(t1, t1 + 5_000_000L, t1 + 9_000_000L);
+
+        Assert.True(algo.HasConverged);
+        Assert.Equal(1_000_000L, algo.OffsetTicks); // min-filter 选正常样本
+    }
+
+    [Fact]
+    public void Window_Rolls_Over_And_Evicts_Oldest()
+    {
+        var algo = new ClockSyncAlgorithm(4);
+        long t1 = 1_000_000L;
+        for (int i = 0; i < 4; i++)
+        {
+            algo.AddSample(t1, t1 + 500_000L, t1 + 1_000_000L); // rtt=1M, offset=0
+            t1 += 1_000_000L;
+        }
+        Assert.Equal(0L, algo.OffsetTicks);
+
+        // 第 5 个：rtt=100k（更小）offset=3M → 应被选中；且最旧样本被剔除
+        algo.AddSample(t1, t1 + 3_050_000L, t1 + 100_000L); // rtt=100k, offset=3M
+        Assert.Equal(3_000_000L, algo.OffsetTicks);
+        Assert.True(algo.HasConverged);
+    }
+
+    [Fact]
+    public void Negative_Rtt_Sample_Is_Ignored()
+    {
+        var algo = new ClockSyncAlgorithm(8);
+        long t1 = 1_000_000L;
+        algo.AddSample(t1, t1 + 500_000L, t1 + 1_000_000L); // 正常：offset=0
+        algo.AddSample(t1 + 2_000_000L, t1 + 2_500_000L, t1 + 1_000_000L); // rtt 为负（时钟回跳）
+
+        Assert.Equal(0L, algo.OffsetTicks);   // 负样本被忽略
+        Assert.False(algo.HasConverged);      // 样本数未增加
+        algo.AddSample(t1 + 3_000_000L, t1 + 3_500_000L, t1 + 4_000_000L); // rtt=1M offset=0
+        Assert.False(algo.HasConverged);      // 仍 2 个有效样本（8 窗）
+    }
 }

@@ -11,6 +11,7 @@ namespace Cool.SyncCore
     ///   t3 = 客户端收到响应时刻（墙钟）
     ///   offset = (t2 − t1 + t2 − t3) / 2
     ///   rtt = t3 − t1
+    /// 非线程安全：单实例供单消费者（每客户端一个 ClockSyncDriver）；跨线程读需外部同步。
     /// </summary>
     public sealed class ClockSyncAlgorithm
     {
@@ -34,9 +35,15 @@ namespace Cool.SyncCore
         public void AddSample(long clientSendTicks, long serverEchoTicks, long clientReceiveTicks)
         {
             long rtt = clientReceiveTicks - clientSendTicks;
+            if (rtt <= 0) return; // 时钟回跳/乱序样本：拒绝（min-filter 会偏爱最小 RTT）
+
             long offset = serverEchoTicks - clientSendTicks - rtt / 2;
 
             _samples.Add(new Sample { Rtt = rtt, Offset = offset });
+
+            // 滑窗溢出（先剔除再扫描：窗口外样本不参与 min-filter）
+            if (_samples.Count > _windowSize)
+                _samples.RemoveAt(0);
 
             // min-filter：滑窗内取 RTT 最小样本的偏移
             Sample best = _samples[0];
@@ -50,10 +57,6 @@ namespace Cool.SyncCore
             SmoothedOffsetTicks = _samples.Count == 1
                 ? best.Offset
                 : SmoothedOffsetTicks + (best.Offset - SmoothedOffsetTicks) * 3 / 10;
-
-            // 滑窗溢出
-            if (_samples.Count > _windowSize)
-                _samples.RemoveAt(0);
         }
 
         /// <summary>客户端墙钟 → 服务器时钟（ticks）</summary>
