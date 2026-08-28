@@ -278,8 +278,8 @@ namespace KcpServer
 ```csharp
         private Socket? _sendSocket;
 
-        /// <summary>发送 socket（由 SessionManager 注入；会话不持有 socket 生命周期）</summary>
-        public Socket? SendSocket { get; set; }
+        /// <summary>发送 socket（由 SessionManager 注入；会话不持有 socket 生命周期）。只读——注入唯一入口为 SetSendSocket</summary>
+        public Socket? SendSocket => _sendSocket;
 
         public uint KcpConv { get; }
 
@@ -322,7 +322,7 @@ namespace KcpServer
         // 简化：KcpCallbackHandler 持有 Func<Socket?> _sendSocketProvider，由 SessionManager 注入
 ```
 
-（实现提示：为最小改动，KcpCallbackHandler 增加 `public Func<Socket?>? SendSocketProvider { get; set; }`，Output 中取其值发送；SessionManager 创建会话后设置 `session.SendSocket = udpSocket; session.Callback.SendSocketProvider = () => session.SendSocket;`——`_callbackHandler` 保持 private，故在 KcpServerSession 增加 `public void SetSendSocket(Socket socket)` 方法做两处注入。）
+（实现提示：为最小改动，KcpCallbackHandler 增加 `public Func<Socket?>? SendSocketProvider { get; set; }`，Output 中取其值发送；KcpServerSession 增加唯一注入入口 `public void SetSendSocket(Socket socket)`：设置 `_sendSocket = socket` 并同时给 `_callbackHandler.SendSocketProvider` 赋值（lambda 捕获会话实例）。外部只允许经 SetSendSocket 注入，不允许直接改属性。）
 
 - [ ] **Step 5: 运行确认通过**
 
@@ -332,14 +332,67 @@ dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
 
 Expected: 22 passed（Baseline 18 + SessionManager 4）。若 SessionManagerTests 依赖的 `_manager.Dispose()` 与 session 后台 UpdateLoop 存在关闭时序问题（Dispose 后日志异常），在 SessionManager.Dispose 中先 CloseAsync 再 Dispose（按测试输出调整，保持测试绿即可）。
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Server3C 会话管理切换（本任务内必做——KcpServerSession 构造签名变更后 Server3C 无法编译）**
 
-```bash
-git add Server/Session Server/Server.Tests Server/KcpServerSession.cs
-git commit -m "feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling"
+改 `Server/Server3C.cs`（同步修正调用点，使项目恢复可编译）：
+
+6a. 字段区：删除 `_sessions`（`ConcurrentDictionary<long, KcpServerSession>`）与 `_nextSessionId`（SessionManager 接管）；**保留** `_sessionIdToPlayerId` / `_playerIdToSessionId` / `_playerIdToSession`（`GetPlayerId`/`UnbindPlayer`/`GetSession` 依赖，绑定查询用途不变）。新增：
+
+```csharp
+        private readonly SessionManager _sessionManager;
 ```
 
-（Server3C 的集成改造留到 Task 2 一并做——本任务只落地 SessionManager 类与 KcpServerSession 解耦，Server3C 保持可编译状态即可。若 Server3C 因构造函数签名变化编译失败，在本任务内顺手修正其调用点。）
+构造函数：
+
+```csharp
+            _sessionManager = new SessionManager(logger);
+```
+
+`ActiveSessionCount` 改为 `_sessionManager.SessionCount`。
+
+6b. `FindOrCreateSession` 方法整体删除，`HandlePacket` 改为：
+
+```csharp
+        private void HandlePacket(EndPoint remoteEndPoint, byte[] data)
+        {
+            try
+            {
+                var session = _sessionManager.GetOrCreateSession(remoteEndPoint, data);
+                if (session == null) return;
+
+                if (session.SendSocket == null)
+                    session.SetSendSocket(_udpServer!);
+
+                session.HandleUdpPacket(data, data.Length);
+                session.UpdateActivity();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error handling packet");
+            }
+        }
+```
+
+6c. `StopAsync` 中 `foreach (var s in _sessions.Values)` 改为 `foreach (var s in _sessionManager.AllSessions)`；`_sessions.Clear()` 删除。
+
+6d. `OnSessionDisconnected` 中 `_sessions.TryRemove(session.SessionId, out _)` 改为 `_sessionManager.RemoveByEndpoint(session.RemoteEndPoint)`。
+
+6e. `Dispose()` 中 `foreach (var s in _sessions.Values)` 块改为 `_sessionManager.Dispose();`（事件退订逻辑由 SessionManager 的会话清理覆盖，`Disconnected -=` 等在会话 Dispose 前可保留原样——以编译与既有行为为准，最小改动）。
+
+6f. 构建验证：
+
+```bash
+dotnet build E:/CodeForJob/Cool/Server/Server3C.csproj -v q
+```
+
+Expected: 0 Errors。
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add Server/Session Server/Server.Tests Server/KcpServerSession.cs Server/Server3C.cs
+git commit -m "feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling"
+```
 
 ---
 
@@ -446,8 +499,10 @@ namespace KcpServer
     {
         private readonly TimeSpan _tickInterval;
         private readonly Action<T> _handler;
+        private readonly Action<long>? _onTick;
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+        private readonly ConcurrentQueue<Action> _actionQueue = new ConcurrentQueue<Action>();
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private Task? _loopTask;
         private long _tickCount;
@@ -456,11 +511,12 @@ namespace KcpServer
         /// <summary>已执行 tick 数（供 WorldSnapshot.Tick 复用）</summary>
         public long TickCount => Interlocked.Read(ref _tickCount);
 
-        public GameLoop(TimeSpan tickInterval, Action<T> handler, ILogger logger)
+        public GameLoop(TimeSpan tickInterval, Action<T> handler, ILogger logger, Action<long>? onTick = null)
         {
             _tickInterval = tickInterval;
             _handler = handler;
             _logger = logger;
+            _onTick = onTick;
         }
 
         public void Start()
@@ -473,6 +529,16 @@ namespace KcpServer
         {
             if (_disposed) return;
             _queue.Enqueue(packet);
+        }
+
+        /// <summary>
+        /// 入队一个动作（在主循环线程执行）——供非主循环线程的清理/断开路径
+        /// 触达世界状态（R2：世界状态只允许主循环线程直写）
+        /// </summary>
+        public void EnqueueAction(Action action)
+        {
+            if (_disposed) return;
+            _actionQueue.Enqueue(action);
         }
 
         public async Task Stop()
@@ -488,14 +554,22 @@ namespace KcpServer
             {
                 var started = DateTime.UtcNow;
 
-                // 清空当前队列（单线程独占语义：处理期间新入队留待下一 tick）
+                // 先 drain 动作队列（断开/清理等世界状态变更），再 drain 数据队列
+                while (_actionQueue.TryDequeue(out var action))
+                {
+                    try { action(); }
+                    catch (Exception ex) { _logger.LogError(ex, "GameLoop action error"); }
+                }
+
+                // 清空当前数据队列（单线程独占语义：处理期间新入队留待下一 tick）
                 while (_queue.TryDequeue(out var packet))
                 {
                     try { _handler(packet); }
                     catch (Exception ex) { _logger.LogError(ex, "GameLoop handler error"); }
                 }
 
-                Interlocked.Increment(ref _tickCount);
+                long tick = Interlocked.Increment(ref _tickCount);
+                _onTick?.Invoke(tick);
 
                 var elapsed = DateTime.UtcNow - started;
                 var remaining = _tickInterval - elapsed;
@@ -605,7 +679,34 @@ Expected: 26 passed（22 + GameLoop 2）。
         }
 ```
 
-5g. `CleanupLoop` 的超时会话清理改用 `_sessionManager`（按端点删除——需要端点：`s.RemoteEndPoint`）。
+5g. `CleanupLoop` 的超时会话清理改用 `_sessionManager` 并按 R2 经 `EnqueueAction` 入主循环（CleanupLoop 在 30s 独立线程，**不得直写世界状态**）：
+
+```csharp
+                    foreach (var s in _sessionManager.AllSessions)
+                    {
+                        if (s.IsTimedOut(_sessionTimeout))
+                        {
+                            timeoutSessions.Add(s);
+                        }
+                    }
+
+                    foreach (var s in timeoutSessions)
+                    {
+                        _logger.LogInformation($"Session {s.SessionId} timed out");
+                        _gameLoop.EnqueueAction(async () =>
+                        {
+                            await _loginHandler.HandleDisconnectAsync(s);
+                        });
+                        _gameLoop.EnqueueAction(() =>
+                        {
+                            _sessionManager.RemoveByEndpoint(s.RemoteEndPoint);
+                        });
+                        await s.CloseAsync("Timeout");
+                        s.Dispose();
+                    }
+```
+
+（`async () =>` lambda 内 `HandleDisconnectAsync` 的 await 实际为同步完成——SendToSessionAsync 内部无真实 IO await；行为与原来一致但执行点移至主循环线程。）
 
 - [ ] **Step 6: KcpServerSession.UpdateLoop 收敛**
 
@@ -721,7 +822,8 @@ public class WorldSnapshotTests
 
         var first = snap.Entities[0];
         Assert.Equal(7L, first.PlayerId);
-        Assert.Equal(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.ActionState, first.FieldMask);
+        // 两侧统一 cast 为 ushort（xUnit 泛型推断要求同类型）
+        Assert.Equal((ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.ActionState), first.FieldMask);
         Assert.Equal(1.5f, first.X, 4);
         Assert.Equal(3, first.ActionState);
     }
@@ -1254,15 +1356,7 @@ Expected: 36 passed（32 + SnapshotAssembler 4）。
 
 - [ ] **Step 8: TickLoop 广播集成（GameLoop 钩子 + LoginHandler 注册）**
 
-8a. `Server/GameLoop.cs` 增加广播回调字段（构造追加可选参数）：
-
-```csharp
-        private readonly System.Action<long>? _onTick;
-        // 构造签名：GameLoop(TimeSpan tickInterval, Action<T> handler, ILogger logger, Action<long>? onTick = null)
-        // LoopAsync 中 Interlocked.Increment 后：_onTick?.Invoke(Interlocked.Read(ref _tickCount));
-```
-
-8b. `Server3C.cs` 构造 GameLoop 时挂上广播链，并新增字段与装配：
+8a. `GameLoop` 已具备 onTick 钩子与动作队列（T2 落地）——`Server3C.cs` 构造 GameLoop 时直接挂广播链，并新增字段与装配：
 
 ```csharp
         private readonly EntityStore _entityStore = new EntityStore();
@@ -1321,7 +1415,20 @@ Expected: 36 passed（32 + SnapshotAssembler 4）。
         }
 ```
 
-`LoginHandler.HandleDisconnectAsync` 的清理路径追加 `_server.UnregisterEntity(playerId.Value);`（在 TryRemovePlayer 之后）。
+`LoginHandler.HandleDisconnectAsync` 的清理路径追加 `_server.UnregisterEntity(playerId.Value);`（在 TryRemovePlayer 之后）。**断开入口线程化（R2 关键）**：`HandleDisconnectAsync` 由 `Server3C.OnSessionDisconnected` 触发——该事件在**会话线程**（CloseAsync 调用点）触发，直写 EntityStore 会并发违规。改 `Server3C.OnSessionDisconnected`：
+
+```csharp
+        private void OnSessionDisconnected(object? sender, EventArgs e)
+        {
+            if (sender is KcpServerSession session)
+            {
+                _logger.LogInformation($"Session {session.SessionId} disconnected");
+                // R2：世界状态变更一律经主循环动作队列
+                _gameLoop.EnqueueAction(() => { _ = _loginHandler.HandleDisconnectAsync(session); });
+                _gameLoop.EnqueueAction(() => _sessionManager.RemoveByEndpoint(session.RemoteEndPoint));
+            }
+        }
+```
 
 - [ ] **Step 9: 构建 + 测试 + echo 回归**
 
@@ -1402,7 +1509,8 @@ public class ClockSyncAlgorithmTests
         algo.AddSample(t1, t1 + 1_000_000L, t1 + 2_000_000L); // RTT 200ms，offset 0
 
         long serverTime = algo.ToServerTime(t1 + 1_000_000L);
-        Assert.Equal(t1 + 1_000_000L + 1_000_000L, serverTime); // 完全对齐时恰为 server 时钟
+        // offset=0（两端时钟对齐）：墙钟 t1+1M 即服务器时钟 t1+1M
+        Assert.Equal(t1 + 1_000_000L, serverTime);
     }
 }
 ```
@@ -1575,10 +1683,21 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             algo.AddSample(t1, t1 + 1_000_000L, t1 + 2_000_000L);
 
             long serverTime = algo.ToServerTime(t1 + 1_000_000L);
-            Assert.AreEqual(t1 + 2_000_000L, serverTime);
+            Assert.AreEqual(t1 + 1_000_000L, serverTime);
         }
     }
 }
+```
+
+0. **先修改** `Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef`——测试使用 `Cool.SyncCore`（SyncCore 程序集），references 追加 `"SyncCore"`：
+
+```json
+    "references": [
+        "GameSys",
+        "DataDefinition",
+        "Cool.Protocol",
+        "SyncCore"
+    ],
 ```
 
 1. Skill `assets-refresh` → 无编译错误（新 asmdef + 测试文件）
@@ -1707,14 +1826,9 @@ namespace KcpNet
         public void Send(MessageId messageId, IMessage message, MessageFlags flags = MessageFlags.Reliable)
         {
             if (_client == null || !_client.IsConnected) return;
-            try
-            {
-                _client.SendAsync(message, flags).GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                Error?.Invoke(ex);
-            }
+            // fire-and-forget：不在调用线程同步等待（Unity 主线程 SyncContext 下
+            // GetResult() 有死锁风险；KCP 发送本身同步完成，异步包装无长等待）
+            _ = _client.SendAsync(message, flags);
         }
 
         private void OnMessageReceived(object? sender, IMessage message)
@@ -1954,6 +2068,16 @@ git commit -m "feat(net): client adapter - INetworkClient over kcp, clock sync s
 
 （保留既有全部引用；Hotfix → AOT 引用方向合法。）
 
+**同时**修改 `Assets/Scripts/Tests/PlayMode/KcpNet.PlayModeTests.asmdef`（P0 所建）——T7/T8 测试使用 `Hotfix.GameSystems.SyncLayer`（GameSys 程序集），references 追加：
+
+```json
+    "references": [
+        "KcpNet",
+        "Cool.Protocol",
+        "GameSys"
+    ],
+```
+
 - [ ] **Step 2: MessageDispatcher**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/SyncLayer/MessageDispatcher.cs`（完整内容）：
@@ -2020,7 +2144,6 @@ namespace Hotfix.GameSystems.SyncLayer
     {
         private readonly ClockSyncAlgorithm _algorithm = new ClockSyncAlgorithm(8);
         private readonly Action<ClockSyncRequest> _sendRequest;
-        private readonly Action<float> _schedule; // 由宿主注入（Update 驱动）
         private float _timer;
         private int _burstCount;
         private bool _burstDone;
@@ -2030,10 +2153,9 @@ namespace Hotfix.GameSystems.SyncLayer
 
         public bool HasConverged => _algorithm.HasConverged;
 
-        public ClockSyncDriver(Action<ClockSyncRequest> sendRequest, Action<float> schedule)
+        public ClockSyncDriver(Action<ClockSyncRequest> sendRequest)
         {
             _sendRequest = sendRequest;
-            _schedule = schedule;
         }
 
         public void StartBurst()
@@ -2223,10 +2345,8 @@ namespace Hotfix.GameSystems.SyncLayer
             _remoteEntities = remoteEntities;
             _username = username;
 
-            // 采样调度：send 由驱动持有，schedule 走宿主 Update 驱动
             _clockSync = new ClockSyncDriver(
-                req => _client.Send(MessageId.ClockSyncRequest, req),
-                _ => { });
+                req => _client.Send(MessageId.ClockSyncRequest, req));
 
             _dispatcher.Subscribe(MessageId.LoginResponse, OnLoginResponse);
             _dispatcher.Subscribe(MessageId.ClockSyncResponse, OnClockSyncResponse);
@@ -2258,7 +2378,6 @@ namespace Hotfix.GameSystems.SyncLayer
                 DeviceInfo = "P1",
                 ProtocolVersion = ProtocolConstants.ProtocolVersion
             });
-            _clockSync.StartBurst();
         }
 
         public void Update(float deltaSeconds)
@@ -2282,6 +2401,9 @@ namespace Hotfix.GameSystems.SyncLayer
             ServerTickRateMs = response.ServerTickRateMs > 0 ? response.ServerTickRateMs : 67;
             SpawnPosition = new Vector3(response.SpawnX, response.SpawnY, response.SpawnZ);
             CurrentState = State.InWorld;
+
+            // 时钟采样突发从进世界才开始（Update 仅在 InWorld 驱动 Tick）
+            _clockSync.StartBurst();
 
             // 出生点定位（本地玩家表现接线留 P2；P1 以事件通知上层）
             OnEnterWorld?.Invoke();
@@ -2486,8 +2608,11 @@ namespace KcpNet.PlayModeTests
             var root = new GameObject("TwoClientRoot");
             var registryA = new RemoteEntityRegistry(root.transform);
             var registryB = new RemoteEntityRegistry(root.transform);
-            var ctxA = new Ctx { Manager = new ClientNetworkManager(ctxA.Adapter, registryA, "Player_A") };
-            var ctxB = new Ctx { Manager = new ClientNetworkManager(ctxB.Adapter, registryB, "Player_B") };
+            // 拆两行：对象初始化器内不可引用尚未赋值的 ctxA（CS0165）
+            var ctxA = new Ctx();
+            ctxA.Manager = new ClientNetworkManager(ctxA.Adapter, registryA, "Player_A");
+            var ctxB = new Ctx();
+            ctxB.Manager = new ClientNetworkManager(ctxB.Adapter, registryB, "Player_B");
 
             ctxA.Adapter.MessageReceived += (id, msg) => { if (id == MessageId.WorldSnapshot) ctxA.Snapshots.Add((WorldSnapshot)msg); };
             ctxB.Adapter.MessageReceived += (id, msg) => { if (id == MessageId.WorldSnapshot) ctxB.Snapshots.Add((WorldSnapshot)msg); };
@@ -2539,7 +2664,7 @@ namespace KcpNet.PlayModeTests
             if (!aSeesB) return (false, "A never saw B in WorldSnapshot");
 
             // —— 阶段 3：B 断线 → 重连（全新 Login）→ A 再次看到新实体 ——
-            await ctxB.Manager.Dispose(); // 全量关闭（socket 关闭即断线）
+            ctxB.Manager.Dispose(); // 全量关闭（Dispose 为同步方法；socket 关闭即断线）
             bool bDisconnected = false;
             for (int i = 0; i < 20 && !bDisconnected; i++)
             {
@@ -2548,7 +2673,8 @@ namespace KcpNet.PlayModeTests
             }
 
             ctxA.Snapshots.Clear();
-            var ctxC = new Ctx { Manager = new ClientNetworkManager(ctxC.Adapter, registryB, "Player_B_re") };
+            var ctxC = new Ctx();
+            ctxC.Manager = new ClientNetworkManager(ctxC.Adapter, registryB, "Player_B_re");
             ctxC.Adapter.MessageReceived += (id, msg) => { if (id == MessageId.WorldSnapshot) ctxC.Snapshots.Add((WorldSnapshot)msg); };
             ctxC.Manager.ConnectAndLogin("127.0.0.1", 8000);
             await WaitInWorld(ctxC.Manager, 10);
