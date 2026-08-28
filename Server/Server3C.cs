@@ -26,6 +26,9 @@ namespace KcpServer
         private readonly ConcurrentDictionary<long, long> _playerIdToSessionId = new ConcurrentDictionary<long, long>();
         private readonly ConcurrentDictionary<long, KcpServerSession> _playerIdToSession = new ConcurrentDictionary<long, KcpServerSession>();
 
+        // R2：唯一消费者线程独占世界状态；IO 线程只 Enqueue，不触碰状态
+        private readonly GameLoop<(EndPoint endpoint, byte[] data)> _gameLoop;
+
         // 超时配置
         private readonly TimeSpan _sessionTimeout = TimeSpan.FromSeconds(300);
         private readonly TimeSpan _heartbeatTimeout = TimeSpan.FromSeconds(30);
@@ -42,6 +45,12 @@ namespace KcpServer
             _loginHandler = new LoginHandler(this, _roomManager, _logger);
             _positionSyncHandler = new PositionSyncHandler(this, _roomManager, _logger);
             _echoHandler = new EchoHandler(this, _logger);
+
+            // R2：唯一消费者线程独占世界状态；handler 同步链内完成解码/分发/发送
+            _gameLoop = new GameLoop<(EndPoint, byte[])>(
+                TimeSpan.FromMilliseconds(66),   // ~15Hz
+                packet => HandlePacket(packet.Item1, packet.Item2),
+                logger);
         }
 
         public Task StartAsync(int port, CancellationToken cancellationToken = default)
@@ -53,6 +62,7 @@ namespace KcpServer
             _udpServer.Bind(new IPEndPoint(IPAddress.Any, port));
 
             _receiveTask = Task.Run(() => ReceiveLoop(_cts.Token), _cts.Token);
+            _gameLoop.Start();
             _cleanupTask = Task.Run(() => CleanupLoop(_cts.Token), _cts.Token);
 
             _logger.LogInformation($"Server3C started on port {port} with KCP protocol");
@@ -76,6 +86,9 @@ namespace KcpServer
 
             if (_receiveTask != null)
                 await _receiveTask.WaitAsync(TimeSpan.FromSeconds(5));
+
+            await _gameLoop.Stop();
+
             if (_cleanupTask != null)
                 await _cleanupTask.WaitAsync(TimeSpan.FromSeconds(5));
 
@@ -145,7 +158,7 @@ namespace KcpServer
                         {
                             var data = new byte[bytesRead];
                             Array.Copy(buffer, 0, data, 0, bytesRead);
-                            _ = Task.Run(() => HandlePacket(remoteEndPoint, data), cancellationToken);
+                            _gameLoop.Enqueue((remoteEndPoint, data));
                         }
                     }
                     else
@@ -197,7 +210,7 @@ namespace KcpServer
         {
             if (sender is KcpServerSession session)
             {
-                _ = Task.Run(() => ProcessPacket(session, data));
+                ProcessPacket(session, data);
             }
         }
 
@@ -282,12 +295,11 @@ namespace KcpServer
                     foreach (var s in timeoutSessions)
                     {
                         _logger.LogInformation($"Session {s.SessionId} timed out");
-                        _sessionManager.RemoveByEndpoint(s.RemoteEndPoint);
+                        // 世界状态变更统一入主循环执行（R2：清理线程不得直写世界状态）
+                        _gameLoop.EnqueueAction(() => { _ = _loginHandler.HandleDisconnectAsync(s); });
+                        _gameLoop.EnqueueAction(() => _sessionManager.RemoveByEndpoint(s.RemoteEndPoint));
                         await s.CloseAsync("Timeout");
                         s.Dispose();
-
-                        // 处理断开
-                        await _loginHandler.HandleDisconnectAsync(s);
                     }
 
                     // 清理空房间

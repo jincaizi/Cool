@@ -276,9 +276,7 @@ namespace KcpServer
                     {
                         _kcp.Update(DateTimeOffset.UtcNow);
                     }
-
-                    // 尝试接收数据
-                    ReceiveFromKcp();
+                    // 接收统一走 HandleUdpPacket（主循环线程）——此处不再 ReceiveFromKcp
 
                     await Task.Delay(Interval, cancellationToken);
                 }
