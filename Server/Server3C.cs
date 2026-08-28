@@ -328,6 +328,9 @@ namespace KcpServer
             _disposed = true;
             _cts.Cancel();
 
+            // 停掉主循环（不走 StopAsync 直接 Dispose 时防止循环线程泄漏）
+            _gameLoop.Dispose();
+
             // SessionManager 内部 Dispose 各会话（事件退订随会话引用一并释放）
             _sessionManager.Dispose();
 
