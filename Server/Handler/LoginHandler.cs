@@ -35,6 +35,8 @@ namespace KcpServer
                     KickType = 0,
                     AllowReconnectAfter = 0
                 });
+                // 版本拒绝后关闭会话：CloseAsync 触发 Disconnected → 清理路径（会话被正常回收而非挂到超时）
+                await session.CloseAsync("ProtocolVersionMismatch");
                 _logger.LogWarning($"Rejected login from {session.RemoteEndPoint}: protocol version {request.ProtocolVersion}");
                 return;
             }

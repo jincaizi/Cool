@@ -117,6 +117,11 @@ namespace KcpNet
 
                 return null;
             }
+            catch (ObjectDisposedException)
+            {
+                // socket 已释放（Dispose 路径）：静默返回，外层接收循环依 IsConnected 退出，不再空转抛错
+                return null;
+            }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Failed to receive data via KCP");
@@ -147,8 +152,8 @@ namespace KcpNet
             if (!IsConnected)
                 throw new InvalidOperationException("Not connected");
 
-            // 轮询接收数据
-            while (!cancellationToken.IsCancellationRequested)
+            // 轮询接收数据（IsConnected：Close/Dispose 后 _state != Connected，循环退出，防止已释放 socket 上空转）
+            while (!cancellationToken.IsCancellationRequested && IsConnected)
             {
                 var data = await ReceiveKcpAsync().ConfigureAwait(false);
                 if (data != null && data.Length > 0)

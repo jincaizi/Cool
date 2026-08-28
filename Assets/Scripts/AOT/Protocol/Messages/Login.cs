@@ -4,7 +4,7 @@ namespace Cool.Protocol
 {
     /// <summary>
     /// 登录请求（v1 合并版：原 KcpNet 版与 KcpServer 版字段并集；
-    /// 丢弃服务端旧版 X/Y/Z 出生点字段，出生点由 P1 EnterWorld 承担）
+    /// 出生点由登录响应携带——决策 D1，见 docs/superpowers/plans/2026-08-28-p1-network-framework.md）
     /// </summary>
     [ProtoContract]
     public class LoginRequest : IMessage

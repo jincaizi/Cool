@@ -29,7 +29,6 @@
 | **CharacterController** | 物理/移动/状态控制 |
 | **AnimationDriver** | Animator 参数驱动 |
 | **ThirdPersonCameraController** | 第三人称相机 |
-| **NetworkPrediction** | 客户端预测 (待集成) |
 
 ---
 
@@ -328,45 +327,12 @@ WASD → GetAxisRaw → 标准化 Vector3
 
 ---
 
-## 8. 网络同步
+## 网络
 
-### 8.1 NetworkPrediction
-
-客户端预测与服务端校验。
-
-```csharp
-class NetworkPrediction
-{
-    // 预测帧记录
-    void RecordPredictedFrame(sequence, position, rotation)
-
-    // 服务端校验
-    bool ValidateAndCorrect(serverSeq, serverPos, serverRot,
-                            out correctedPos, out correctedRot)
-}
-```
-
-### 8.2 MovementPolicy
-
-移动策略接口，支持本地和网络模式。
-
-```csharp
-interface IMovementPolicy
-{
-    void Update(MoveCommand command);
-    void ApplyServerCorrection(position, rotation);
-}
-
-// 本地模式
-class LocalMovementPolicy : IMovementPolicy
-
-// 预测模式
-class PredictionMovementPolicy : IMovementPolicy
-```
-
-### 8.3 NetworkBridge
-
-网络桥接，待与 AOT 层 KCP 集成。
+网络同步能力自 P0 起移出 Sys3C：共享协议层 `Assets/Scripts/AOT/Protocol/`（双端同源），
+客户端 SyncLayer `Assets/Scripts/Hotfix/GameSystems/SyncLayer/`，服务端见 `Server/`。
+路线图与阶段规划见 `docs/superpowers/specs/2026-08-27-network-sync-design.md`。
+移动同步（NetMovementPolicy 注入）属 P2。
 
 ---
 
@@ -388,9 +354,6 @@ Sys3CEntry
   ├── AnimationDriver ──→ Animator
   │
   ├── ThirdPersonCameraController ──→ Camera
-  │
-  └── MovementPolicy (Local/Prediction)
-        └── NetworkBridge (待集成)
 ```
 
 ### 数据流
@@ -399,7 +362,7 @@ Sys3CEntry
 每帧:
   InputManager.Update()
     ↓
-  MoveCommand → MovementPolicy.Update()
+  MoveCommand
     ↓
   CharacterController.Update(command) → CharacterData 更新
     ↓
@@ -438,11 +401,8 @@ Sys3CEntry
 | InputManager.cs | 管理器 | 输入管理/命令转换 |
 | KeyboardInputAdapter.cs | 适配器 | 键盘输入 |
 | JoystickInputAdapter.cs | 适配器 | 手柄输入 |
-| **Network** | | |
-| NetworkPrediction.cs | 预测 | 客户端预测 |
-| NetworkBridge.cs | 桥接 | 网络桥接 (待集成) |
-| PositionInterpolator.cs | 插值 | 位置插值 |
-| MovementPolicy.cs | 策略 | 移动策略接口 |
+| **网络同步** | | |
+| （移出 Sys3C） | | 协议 `Assets/Scripts/AOT/Protocol/`，客户端 `SyncLayer/`，服务端 `Server/`（P0 起） |
 | **Camera** | | |
 | ThirdPersonCameraController.cs | 控制器 | 第三人称相机 |
 | **Skill** | | |
@@ -468,13 +428,10 @@ Sys3CEntry
 | 跳跃系统 | ✅ | 完整实现 |
 | 适配器模式 | ✅ | CharacterController 集成其他系统 |
 | 相机跟随 | ✅ | ThirdPersonCameraController |
-| 网络预测 | ⚠️ | 框架就绪，待 AOT 集成 |
-| 其他玩家插值 | ⚠️ | PositionInterpolator 就绪 |
+| 网络同步 | ✅ | P1 完成（移出 Sys3C：AOT/Protocol 双端同源，客户端 SyncLayer，服务端 Server/） |
 
 ### 11.2 待集成项
 
-- AOT 层 KCP 网络集成
-- 其他玩家位置同步
 - 碰撞/受击反馈 (HitManager 框架)
 
 ---

@@ -220,6 +220,10 @@ namespace KcpServer
                 {
                     break;
                 }
+                catch (System.Net.Sockets.SocketException ex) when (ex.SocketErrorCode == System.Net.Sockets.SocketError.ConnectionReset)
+                {
+                    // UDP 端口不可达（ICMP）——静默忽略（P0 终审 SHOULD 项）
+                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error in receive loop");
