@@ -3,7 +3,8 @@
     "rootNamespace": "KcpNet.PlayModeTests",
     "references": [
         "KcpNet",
-        "Cool.Protocol"
+        "Cool.Protocol",
+        "GameSys"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

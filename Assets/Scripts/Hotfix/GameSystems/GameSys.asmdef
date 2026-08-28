@@ -9,7 +9,10 @@
         "Unity.ResourceManager",
         "Unity.InputSystem",
         "Core",
-        "DataDefinition"
+        "DataDefinition",
+        "KcpNet",
+        "SyncCore",
+        "Cool.Protocol"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
