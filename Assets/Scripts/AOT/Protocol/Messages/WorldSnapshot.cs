@@ -14,11 +14,11 @@ namespace Cool.Protocol
         Position = 1 << 0,
         Rotation = 1 << 1,
         Speed = 1 << 2,
-        /// <summary>动作/战斗状态（攻击中/受击/眩晕…，spec F3a 首日含入；P1 恒为 0，P2 客户端上报后填充）</summary>
+        /// <summary>动作/战斗状态（攻击中/受击/眩晕…，spec D5 首日含入；P1 恒为 0，P2 定义语义并填充）</summary>
         ActionState = 1 << 3
     }
 
-    /// <summary>实体快照（内嵌于 WorldSnapshot，不单独注册消息 ID）</summary>
+    /// <summary>实体快照（内嵌于 WorldSnapshot，不单独注册消息 ID；内嵌类型非线上消息，实现标记接口仅为协议层惯例）</summary>
     [ProtoContract]
     public class EntitySnapshot : IMessage
     {
@@ -55,6 +55,8 @@ namespace Cool.Protocol
 
     /// <summary>
     /// 世界快照广播（服务器 → 客户端，TickLoop 每 tick 组装）
+    /// 与遗留 RemotePlayerSync/RoomSync（P0 房间广播）并存：P1 阶段两者皆活，
+    /// 客户端 SyncLayer 以 WorldSnapshot 为准；遗留消息留待 P2 退役（勿新增消费方）。
     /// </summary>
     [ProtoContract]
     public class WorldSnapshot : IMessage
@@ -67,7 +69,7 @@ namespace Cool.Protocol
         [ProtoMember(2)]
         public long ServerTimestamp { get; set; }
 
-        /// <summary>本 tick 的脏实体快照（全静时为空列表）</summary>
+        /// <summary>本 tick 的实体快照（脏实体全字段 + 静止实体 4Hz beacon；全静时本消息不发送）</summary>
         [ProtoMember(3)]
         public List<EntitySnapshot> Entities { get; set; } = new List<EntitySnapshot>();
     }

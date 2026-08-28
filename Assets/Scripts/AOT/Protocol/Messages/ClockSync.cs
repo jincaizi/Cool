@@ -4,8 +4,9 @@ namespace Cool.Protocol
 {
     /// <summary>
     /// 时钟同步请求（客户端 → 服务器）。
-    /// ClientTimestamp 语义：发送时刻的**客户端墙钟**（唯一允许墙钟的例外消息——
-    /// 时钟同步的目标正是测量墙钟与服务器时钟的偏移，见 spec D3）。
+    /// ClientTimestamp 语义：发送时刻的**客户端墙钟**——时间戳治理规则（spec §3）
+    /// 的显式例外：时钟同步的目标正是测量墙钟与服务器时钟的偏移（spec D3）。
+    /// 例外仅限本消息与 ClockSyncResponse；其余消息仍禁墙钟。
     /// </summary>
     [ProtoContract]
     public class ClockSyncRequest : IMessage

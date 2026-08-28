@@ -50,7 +50,17 @@ public class WorldSnapshotTests
         // 两侧统一 cast 为 ushort（xUnit 泛型推断要求同类型）
         Assert.Equal((ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.ActionState), first.FieldMask);
         Assert.Equal(1.5f, first.X, 4);
+        Assert.Equal(0.25f, first.Y, 4);
+        Assert.Equal(-3.75f, first.Z, 4);
+        Assert.Equal(90f, first.Rotation, 4);
+        Assert.Equal(0f, first.Speed, 4);
+        Assert.Equal(1234U, first.Tick);
         Assert.Equal(3, first.ActionState);
+
+        var second = snap.Entities[1];
+        Assert.Equal(9L, second.PlayerId);
+        Assert.Equal((ushort)EntityFieldMask.Position, second.FieldMask);
+        Assert.Equal(10f, second.X, 4);
     }
 
     [Fact]
@@ -93,6 +103,8 @@ public class WorldSnapshotTests
         var resp = Assert.IsType<LoginResponse>(decoded);
         Assert.Equal(67L, resp.ServerTickRateMs);
         Assert.Equal(3f, resp.SpawnX, 4);
+        Assert.Equal(1f, resp.SpawnY, 4);
+        Assert.Equal(-2f, resp.SpawnZ, 4);
         Assert.Equal(45f, resp.SpawnRotation, 4);
     }
 }

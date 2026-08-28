@@ -64,11 +64,11 @@ namespace Cool.Protocol
         [ProtoMember(6)]
         public long ServerTimestamp { get; set; }
 
-        /// <summary>服务器 tick 间隔（毫秒；客户端据此换算插值窗口，spec D1）</summary>
+        /// <summary>服务器 tick 间隔（毫秒；客户端据此换算插值窗口，spec D1）；0 = 未设置，客户端回退默认（T7 消费者 67ms 兜底）</summary>
         [ProtoMember(7)]
         public long ServerTickRateMs { get; set; }
 
-        /// <summary>出生点 X（EnterWorld 语义并入登录响应，决策 D1）</summary>
+        /// <summary>出生点 X（EnterWorld 语义并入登录响应，P1 计划决策 D1）</summary>
         [ProtoMember(8)]
         public float SpawnX { get; set; }
 
