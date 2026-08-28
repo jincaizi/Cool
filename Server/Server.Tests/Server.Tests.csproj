@@ -13,6 +13,11 @@
     <Compile Include="..\..\Assets\Scripts\AOT\Protocol\**\*.cs" />
   </ItemGroup>
 
+  <!-- 共享 SyncCore（与客户端 asmdef 同批源文件） -->
+  <ItemGroup>
+    <Compile Include="..\..\Assets\Scripts\Hotfix\GameSystems\SyncCore\**\*.cs" />
+  </ItemGroup>
+
   <!-- 服务端应用层源码（Program.cs 排除：含 Main，与测试宿主冲突；Server.Tests 自目录排除：SDK 默认 glob 已含；
        obj/bin 排除：生成文件含重复程序集特性） -->
   <ItemGroup>

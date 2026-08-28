@@ -1,0 +1,10 @@
+{
+    "name": "SyncCore",
+    "rootNamespace": "Cool.SyncCore",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "versionDefines": [],
+    "noEngineReferences": true
+}

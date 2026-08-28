@@ -4,7 +4,8 @@
     "references": [
         "GameSys",
         "DataDefinition",
-        "Cool.Protocol"
+        "Cool.Protocol",
+        "SyncCore"
     ],
     "includePlatforms": [
         "Editor"
