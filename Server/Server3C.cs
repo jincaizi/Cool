@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -168,17 +169,22 @@ namespace KcpServer
             allEntities.AddRange(beacons);
             if (allEntities.Count == 0) return; // 全静世界：不发快照（带宽省）
 
-            var snapshot = new WorldSnapshot
-            {
-                Tick = tick,
-                ServerTimestamp = System.DateTime.UtcNow.Ticks,
-                Entities = allEntities
-            };
-
             foreach (var observer in _entityStore.All)
             {
                 if (!_playerIdToSession.TryGetValue(observer.PlayerId, out var session)) continue;
-                session.Send(MessageId.WorldSnapshot, snapshot);
+
+                // 按感知过滤契约组装可见集（P1 全量占位 = 除自身外全体；P3 AoiGrid 替换）
+                var visibleIds = _perceptionFilter.GetVisiblePlayerIds(observer.PlayerId, _entityStore.All);
+                var visible = allEntities.Where(e => System.Array.IndexOf(visibleIds, e.PlayerId) >= 0).ToList();
+                if (visible.Count == 0) continue;
+
+                var observerSnapshot = new WorldSnapshot
+                {
+                    Tick = tick,
+                    ServerTimestamp = System.DateTime.UtcNow.Ticks,
+                    Entities = visible
+                };
+                session.Send(MessageId.WorldSnapshot, observerSnapshot);
             }
         }
 

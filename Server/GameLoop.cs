@@ -84,7 +84,8 @@ namespace KcpServer
                 }
 
                 long tick = Interlocked.Increment(ref _tickCount);
-                _onTick?.Invoke(tick);
+                try { _onTick?.Invoke(tick); }
+                catch (Exception ex) { _logger.LogError(ex, "GameLoop onTick error"); }
 
                 var elapsed = DateTime.UtcNow - started;
                 var remaining = _tickInterval - elapsed;
