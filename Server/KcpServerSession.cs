@@ -105,6 +105,7 @@ namespace KcpServer
         private KcpSessionState _state = KcpSessionState.Connecting;
         private bool _disposed;
         private DateTime _lastActivityTime;
+        private DateTime _lastReceiveTime;
         private Task? _updateTask;
         private readonly object _sendLock = new object();
 
@@ -114,6 +115,10 @@ namespace KcpServer
         private const int Interval = 10;
         private const int FastResend = 2;
         private const int Mtu = 1400;
+
+        /// <summary>静默超时：超过该时长未收到客户端任何包即判定断线（UDP 无显式断开通知；
+        /// 客户端心跳 5s，连失 3 个心跳窗口判死）</summary>
+        private static readonly TimeSpan PeerSilenceTimeout = TimeSpan.FromSeconds(15);
 
         private volatile Socket? _sendSocket;
         private bool _wired;
@@ -157,6 +162,7 @@ namespace KcpServer
             _kcp.SetMtu(Mtu);
 
             _lastActivityTime = DateTime.UtcNow;
+            _lastReceiveTime = DateTime.UtcNow;
             _state = KcpSessionState.Connected;
 
             // 启动 KCP 更新循环
@@ -197,6 +203,7 @@ namespace KcpServer
                 // 输入到 KCP
                 _kcp.Input(new ReadOnlySpan<byte>(data, 0, length));
                 _lastActivityTime = DateTime.UtcNow;
+                _lastReceiveTime = DateTime.UtcNow;
 
                 // 尝试接收 KCP 数据
                 ReceiveFromKcp();
@@ -272,9 +279,20 @@ namespace KcpServer
             {
                 try
                 {
+                    bool silent = false;
                     lock (_sendLock)
                     {
                         _kcp.Update(DateTimeOffset.UtcNow);
+                        // 静默检测：仅按收包计时（Send 刷新 activity 会掩盖死端）
+                        if (DateTime.UtcNow - _lastReceiveTime > PeerSilenceTimeout)
+                            silent = true;
+                    }
+                    if (silent)
+                    {
+                        _logger.LogWarning($"Session {_sessionId} silent for {PeerSilenceTimeout.TotalSeconds:0}s - closing");
+                        // 本循环内不可 await（CloseAsync 会等待本循环任务）；fire-and-forget 后 break 使任务即刻完成
+                        _ = CloseAsync("PeerSilence");
+                        break;
                     }
                     // 接收统一走 HandleUdpPacket（主循环线程）——此处不再 ReceiveFromKcp
 

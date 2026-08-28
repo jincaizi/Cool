@@ -22,6 +22,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly string _username;
         private readonly System.Collections.Concurrent.ConcurrentQueue<WorldSnapshot> _pendingSnapshots =
             new System.Collections.Concurrent.ConcurrentQueue<WorldSnapshot>();
+        private readonly System.Collections.Concurrent.ConcurrentQueue<long> _pendingLeaves =
+            new System.Collections.Concurrent.ConcurrentQueue<long>();
 
         public State CurrentState { get; private set; } = State.Disconnected;
         public long LocalPlayerId { get; private set; }
@@ -89,6 +91,12 @@ namespace Hotfix.GameSystems.SyncLayer
                     _remoteEntities.ApplySnapshot(entity);
                 }
             }
+
+            // 主线程消费离场通知（Object.Destroy 必须主线程，同快照封送机制）
+            while (_pendingLeaves.TryDequeue(out var playerId))
+            {
+                _remoteEntities.Remove(playerId);
+            }
         }
 
         private void OnLoginResponse(IMessage message)
@@ -127,8 +135,8 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void OnPlayerLeave(IMessage message)
         {
-            var leave = (PlayerLeaveRoom)message;
-            _remoteEntities.Remove(leave.PlayerId);
+            // 回调线程（网络驱动）只入队；Unity API 消费留主线程 Update
+            _pendingLeaves.Enqueue(((PlayerLeaveRoom)message).PlayerId);
         }
 
         private void OnSocketDisconnected(string reason)
