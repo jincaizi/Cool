@@ -63,5 +63,25 @@ namespace Cool.Protocol
         /// <summary>服务器时间戳（时间戳语义：发送时刻的服务器时钟，spec §3）</summary>
         [ProtoMember(6)]
         public long ServerTimestamp { get; set; }
+
+        /// <summary>服务器 tick 间隔（毫秒；客户端据此换算插值窗口，spec D1）</summary>
+        [ProtoMember(7)]
+        public long ServerTickRateMs { get; set; }
+
+        /// <summary>出生点 X（EnterWorld 语义并入登录响应，决策 D1）</summary>
+        [ProtoMember(8)]
+        public float SpawnX { get; set; }
+
+        /// <summary>出生点 Y</summary>
+        [ProtoMember(9)]
+        public float SpawnY { get; set; }
+
+        /// <summary>出生点 Z</summary>
+        [ProtoMember(10)]
+        public float SpawnZ { get; set; }
+
+        /// <summary>出生朝向（Y 轴欧拉角）</summary>
+        [ProtoMember(11)]
+        public float SpawnRotation { get; set; }
     }
 }

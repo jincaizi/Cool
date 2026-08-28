@@ -182,8 +182,11 @@ namespace Cool.Protocol
             RegisterMessageType(MessageId.ShutdownNotification, typeof(ShutdownNotification));
             RegisterMessageType(MessageId.EchoRequest, typeof(EchoRequest));
             RegisterMessageType(MessageId.EchoResponse, typeof(EchoResponse));
+            RegisterMessageType(MessageId.ClockSyncRequest, typeof(ClockSyncRequest));
+            RegisterMessageType(MessageId.ClockSyncResponse, typeof(ClockSyncResponse));
             RegisterMessageType(MessageId.PositionSyncRequest, typeof(PositionSyncRequest));
             RegisterMessageType(MessageId.PositionSyncResponse, typeof(PositionSyncResponse));
+            RegisterMessageType(MessageId.WorldSnapshot, typeof(WorldSnapshot));
             RegisterMessageType(MessageId.ChatMessage, typeof(ChatMessage));
             RegisterMessageType(MessageId.BroadcastMessage, typeof(BroadcastMessage));
             RegisterMessageType(MessageId.RemotePlayerSync, typeof(RemotePlayerSync));

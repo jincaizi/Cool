@@ -19,9 +19,18 @@ namespace Cool.Protocol
         EchoRequest = 7,
         EchoResponse = 8,
 
+        /// <summary>时钟同步请求（v1 追加）</summary>
+        ClockSyncRequest = 9,
+
+        /// <summary>时钟同步响应（v1 追加）</summary>
+        ClockSyncResponse = 10,
+
         // ========== 位置同步 (100-199) ==========
         PositionSyncRequest = 100,
         PositionSyncResponse = 101,
+
+        /// <summary>世界快照广播（v1 追加；服务器 → 客户端，15Hz）</summary>
+        WorldSnapshot = 110,
 
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,
