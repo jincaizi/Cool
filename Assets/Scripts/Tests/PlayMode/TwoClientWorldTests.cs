@@ -38,7 +38,7 @@ namespace KcpNet.PlayModeTests
             ctxA.Adapter.MessageReceived += (id, msg) => { if (id == MessageId.WorldSnapshot) ctxA.Snapshots.Add((WorldSnapshot)msg); };
             ctxB.Adapter.MessageReceived += (id, msg) => { if (id == MessageId.WorldSnapshot) ctxB.Snapshots.Add((WorldSnapshot)msg); };
 
-            var runTask = RunAsync(ctxA, ctxB, registryB, root);
+            var runTask = RunAsync(ctxA, ctxB, registryB);
             float elapsed = 0f;
             // 墙钟上限 120s：阶段 3.5 需等服务器静默检测（15s），帧数上限在高速帧率下不可靠
             while (!runTask.IsCompleted && elapsed < 120f)
@@ -57,7 +57,7 @@ namespace KcpNet.PlayModeTests
             Assert.IsTrue(ok, reason);
         }
 
-        private static async System.Threading.Tasks.Task<(bool, string)> RunAsync(Ctx ctxA, Ctx ctxB, RemoteEntityRegistry registryB, GameObject root)
+        private static async System.Threading.Tasks.Task<(bool, string)> RunAsync(Ctx ctxA, Ctx ctxB, RemoteEntityRegistry registryB)
         {
             // —— 阶段 1：双客户端登录 ——
             ctxA.Manager.ConnectAndLogin("127.0.0.1", 8000);
@@ -83,19 +83,55 @@ namespace KcpNet.PlayModeTests
             }
             if (!aSeesB) return (false, "A never saw B in WorldSnapshot");
 
-            // —— 阶段 3：B 断线 → 重连（全新 Login）→ A 再次看到新实体 ——
+            // —— 阶段 3：B 断线 → 重连 → 旧实体消失 → 新实体可见 ——
             ctxB.Manager.Dispose(); // 全量关闭（Dispose 为同步方法；socket 关闭即断线）
-
-            // A 端应收到 PlayerLeaveRoom 并移除 B 实体（主线程封送后 Remove 生效）
             ctxA.Snapshots.Clear();
-            var ctxC = new Ctx();
-            ctxC.Manager = new ClientNetworkManager(ctxC.Adapter, registryB, "Player_B_re");
-            ctxC.Adapter.MessageReceived += (id, msg) => { if (id == MessageId.WorldSnapshot) ctxC.Snapshots.Add((WorldSnapshot)msg); };
-            ctxC.Manager.ConnectAndLogin("127.0.0.1", 8000);
-            if (!await WaitInWorld(ctxC.Manager)) return (false, "reconnect login failed");
 
+            Ctx ctxC = null!;
             try
             {
+                ctxC = new Ctx();
+                ctxC.Manager = new ClientNetworkManager(ctxC.Adapter, registryB, "Player_B_re");
+                ctxC.Adapter.MessageReceived += (id, msg) => { if (id == MessageId.WorldSnapshot) ctxC.Snapshots.Add((WorldSnapshot)msg); };
+                ctxC.Manager.ConnectAndLogin("127.0.0.1", 8000);
+                if (!await WaitInWorld(ctxC.Manager)) return (false, "reconnect login failed");
+
+                // —— 阶段 3.5：旧 B 必须在最近连续 N 条快照中缺席 ——
+                // 快照流有间隙：无脏实体且 beacon 未到期时整 tick 不发（约 3.75Hz beacon 流），
+                // 空轮不是缺席证据——只按“实际新到的快照”计数；B 存活时任何快照必含 B
+                //（beacon 每 4 tick 含全部实体），故连续 5 条 B-less 快照才能证明
+                // PeerSilence → 注销 → 广播停止的整链（单条 {C}-only 脏快照会假绿）
+                bool oldBDisappeared = false;
+                int consecutiveAbsent = 0;
+                const int requiredConsecutive = 5; // 5 条连续快照（≈1.3s@3.75Hz beacon 流）
+                float phase35Elapsed = 0f;
+                while (!oldBDisappeared && phase35Elapsed < 25f) // 至多 25s（静默检测 15s + 广播余量）
+                {
+                    ctxA.Manager.Update(0.05f);
+                    int countBefore = ctxA.Snapshots.Count;
+                    await System.Threading.Tasks.Task.Delay(100);
+                    phase35Elapsed += 0.1f;
+
+                    // 只检查本轮新到的快照；空轮（beacon 间隙无快照）不计入缺席计数
+                    bool sawOldB = false;
+                    for (int i = countBefore; i < ctxA.Snapshots.Count; i++)
+                    {
+                        if (ctxA.Snapshots[i].Entities.Exists(e => e.PlayerId == ctxB.Manager.LocalPlayerId))
+                        {
+                            sawOldB = true;
+                            break;
+                        }
+                    }
+                    int newSnapshots = ctxA.Snapshots.Count - countBefore;
+                    if (newSnapshots > 0)
+                        consecutiveAbsent = sawOldB ? 0 : consecutiveAbsent + newSnapshots;
+
+                    if (consecutiveAbsent >= requiredConsecutive)
+                        oldBDisappeared = true;
+                }
+                if (!oldBDisappeared) return (false, "old B entity never disappeared from A snapshots");
+
+                // —— 阶段 4：A 再次看到新实体 ——
                 bool aSeesNewB = false;
                 for (int i = 0; i < 40 && !aSeesNewB; i++)
                 {
@@ -113,30 +149,11 @@ namespace KcpNet.PlayModeTests
                 }
                 if (!aSeesNewB) return (false, "A never saw reconnected B");
 
-                // —— 阶段 3.5：A 应观察到旧 B 实体被移除（服务器 15s 静默检测 → PlayerLeaveRoom 封送 → 快照不再含旧 id）——
-                long oldBId = ctxB.Manager.LocalPlayerId;
-                bool aSeesOldBRemoved = false;
-                for (int i = 0; i < 250 && !aSeesOldBRemoved; i++) // 至多 25s（静默检测 15s + 广播余量）
-                {
-                    ctxA.Manager.Update(0.05f);
-                    ctxC.Manager.Update(0.05f);
-                    await System.Threading.Tasks.Task.Delay(100);
-                    foreach (var snap in ctxA.Snapshots)
-                    {
-                        if (!snap.Entities.Exists(e => e.PlayerId == oldBId))
-                        {
-                            aSeesOldBRemoved = true;
-                            break;
-                        }
-                    }
-                }
-                if (!aSeesOldBRemoved) return (false, "A never saw old B removed after disconnect");
-
                 return (true, "ok");
             }
             finally
             {
-                ctxC.Manager.Dispose(); // 重连客户端必须收尾关闭，否则服务器留幽灵会话
+                ctxC?.Manager.Dispose(); // 全失败路径兜底：重连客户端不泄漏（否则服务器留幽灵会话）
             }
         }
 
