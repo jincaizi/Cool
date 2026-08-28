@@ -20,15 +20,15 @@
 
 - 服务器：`dotnet run --project Server/Server3C.csproj -- 8000`（一台机器跑一个即可，
   两客户端连 127.0.0.1:8000）
-- 客户端连接入口：P1 阶段为 PlayMode 测试（TwoClientWorldTests）或挂
-  `ClientNetworkManager` 的宿主脚本；游戏 UI 登录接线在后续阶段
+- 客户端连接入口：P1 阶段为 PlayMode 测试（TwoClientWorldTests）；手动双开需自写
+  宿主 MonoBehaviour 每帧调 ClientNetworkManager.Update（登录 UI 接线属后续阶段）
 - 两个 Editor 的 `Assets` 目录互相独立——改代码需同步（ParrelSync 自动同步；
   手动双开需自行复制或双份编辑）
 
 ## 验收清单（双开手测）
 
 1. 两个 Editor 各自登录进同 Zone（服务器日志出现两行 `Player N logged in`）
-2. A 场景中出现 B 的胶囊体占位（RemoteEntityRegistry 生成）；B 移动时 A 端位置更新
-   （P1 为快照直接定位，无插值——P2 平滑；P1 阶段位置恒为出生点）
+2. A 场景中出现 B 的胶囊体占位（RemoteEntityRegistry 生成；P1 位置恒为出生点，
+   移动同步属 P2）
 3. 关掉 B → 约 15s 后 A 端 B 实体消失（服务器 PeerSilence 检测窗口，T8 落地）；
    B 重开重连 → A 端 B 重新出现

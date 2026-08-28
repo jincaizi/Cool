@@ -35,6 +35,10 @@ namespace KcpServer
                     KickType = 0,
                     AllowReconnectAfter = 0
                 });
+                // KCP Send 仅入队 snd_queue，Flush 在会话 update loop（10ms/周期）执行——
+                // 等待一个 flush 窗口（50ms = 5 个周期）再关闭，确保 reject+kick 真正上线
+                //（否则 CloseAsync 取消 CTS 后队列被丢弃，客户端静默挂起）
+                await Task.Delay(TimeSpan.FromMilliseconds(50));
                 // 版本拒绝后关闭会话：CloseAsync 触发 Disconnected → 清理路径（会话被正常回收而非挂到超时）
                 await session.CloseAsync("ProtocolVersionMismatch");
                 _logger.LogWarning($"Rejected login from {session.RemoteEndPoint}: protocol version {request.ProtocolVersion}");
