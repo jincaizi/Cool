@@ -15,6 +15,7 @@ namespace KcpServer
         private readonly LoginHandler _loginHandler;
         private readonly PositionSyncHandler _positionSyncHandler;
         private readonly EchoHandler _echoHandler;
+        private readonly ClockSyncHandler _clockSyncHandler;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         private Socket? _udpServer;
@@ -52,6 +53,7 @@ namespace KcpServer
             _loginHandler = new LoginHandler(this, _roomManager, _logger);
             _positionSyncHandler = new PositionSyncHandler(this, _roomManager, _logger);
             _echoHandler = new EchoHandler(this, _logger);
+            _clockSyncHandler = new ClockSyncHandler(this, _logger);
 
             // R2：唯一消费者线程独占世界状态；handler 同步链内完成解码/分发/发送
             _gameLoop = new GameLoop<(EndPoint, byte[])>(
@@ -281,6 +283,10 @@ namespace KcpServer
 
                     case EchoRequest echoRequest:
                         await _echoHandler.HandleEchoAsync(session, echoRequest);
+                        break;
+
+                    case ClockSyncRequest clockSync:
+                        await _clockSyncHandler.HandleClockSyncAsync(session, clockSync);
                         break;
 
                     case Heartbeat heartbeat:
