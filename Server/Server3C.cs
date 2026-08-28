@@ -29,6 +29,12 @@ namespace KcpServer
         // R2：唯一消费者线程独占世界状态；IO 线程只 Enqueue，不触碰状态
         private readonly GameLoop<(EndPoint endpoint, byte[] data)> _gameLoop;
 
+        // T4：世界快照广播链（主循环独占访问）
+        private readonly EntityStore _entityStore = new EntityStore();
+        private readonly SnapshotAssembler _snapshotAssembler = new SnapshotAssembler();
+        private readonly IPerceptionFilter _perceptionFilter = new AllVisiblePerceptionFilter();
+        private const uint BeaconIntervalTicks = 4; // 4Hz beacon（15Hz tick）
+
         // 超时配置
         private readonly TimeSpan _sessionTimeout = TimeSpan.FromSeconds(300);
         private readonly TimeSpan _heartbeatTimeout = TimeSpan.FromSeconds(30);
@@ -50,7 +56,8 @@ namespace KcpServer
             _gameLoop = new GameLoop<(EndPoint, byte[])>(
                 TimeSpan.FromMilliseconds(66),   // ~15Hz
                 packet => HandlePacket(packet.Item1, packet.Item2),
-                logger);
+                logger,
+                tick => BroadcastWorldSnapshot((uint)tick));
         }
 
         public Task StartAsync(int port, CancellationToken cancellationToken = default)
@@ -114,6 +121,16 @@ namespace KcpServer
             _playerIdToSession.TryRemove(playerId, out _);
         }
 
+        public void RegisterEntity(long playerId, string playerName)
+        {
+            _entityStore.AddPlayer(playerId, playerName);
+        }
+
+        public void UnregisterEntity(long playerId)
+        {
+            _entityStore.RemovePlayer(playerId);
+        }
+
         public long? GetPlayerId(KcpServerSession session)
         {
             return _sessionIdToPlayerId.TryGetValue(session.SessionId, out var playerId) ? playerId : null;
@@ -138,6 +155,31 @@ namespace KcpServer
                 _logger.LogError(ex, $"Failed to send message to session {session.SessionId}");
             }
             return Task.CompletedTask;
+        }
+
+        /// <summary>每 tick 广播世界快照（脏实体 + beacon；广播给各玩家的可见集）</summary>
+        private void BroadcastWorldSnapshot(uint tick)
+        {
+            var dirty = _snapshotAssembler.BuildDirtySnapshot(_entityStore, tick);
+            var beacons = _snapshotAssembler.BuildBeaconSnapshot(_entityStore, tick, BeaconIntervalTicks);
+
+            var allEntities = new System.Collections.Generic.List<Cool.Protocol.EntitySnapshot>(dirty.Count + beacons.Count);
+            allEntities.AddRange(dirty);
+            allEntities.AddRange(beacons);
+            if (allEntities.Count == 0) return; // 全静世界：不发快照（带宽省）
+
+            var snapshot = new WorldSnapshot
+            {
+                Tick = tick,
+                ServerTimestamp = System.DateTime.UtcNow.Ticks,
+                Entities = allEntities
+            };
+
+            foreach (var observer in _entityStore.All)
+            {
+                if (!_playerIdToSession.TryGetValue(observer.PlayerId, out var session)) continue;
+                session.Send(MessageId.WorldSnapshot, snapshot);
+            }
         }
 
         private async Task ReceiveLoop(CancellationToken cancellationToken)
@@ -252,17 +294,14 @@ namespace KcpServer
             }
         }
 
-        private async void OnSessionDisconnected(object? sender, EventArgs e)
+        private void OnSessionDisconnected(object? sender, EventArgs e)
         {
             if (sender is KcpServerSession session)
             {
                 _logger.LogInformation($"Session {session.SessionId} disconnected");
-
-                // 通知处理器
-                await _loginHandler.HandleDisconnectAsync(session);
-
-                // 移除会话
-                _sessionManager.RemoveByEndpoint(session.RemoteEndPoint);
+                // R2：世界状态变更一律经主循环动作队列
+                _gameLoop.EnqueueAction(() => { _ = _loginHandler.HandleDisconnectAsync(session); });
+                _gameLoop.EnqueueAction(() => _sessionManager.RemoveByEndpoint(session.RemoteEndPoint));
             }
         }
 
@@ -295,15 +334,13 @@ namespace KcpServer
                     foreach (var s in timeoutSessions)
                     {
                         _logger.LogInformation($"Session {s.SessionId} timed out");
-                        // 世界状态变更统一入主循环执行（R2：清理线程不得直写世界状态）
-                        _gameLoop.EnqueueAction(() => { _ = _loginHandler.HandleDisconnectAsync(s); });
-                        _gameLoop.EnqueueAction(() => _sessionManager.RemoveByEndpoint(s.RemoteEndPoint));
+                        // 断开清理统一走事件路径（CloseAsync 同步触发 Disconnected → OnSessionDisconnected 入队），避免双执行
                         await s.CloseAsync("Timeout");
                         s.Dispose();
                     }
 
-                    // 清理空房间
-                    _roomManager.CleanupEmptyRooms();
+                    // 清理空房间（R2：经主循环）
+                    _gameLoop.EnqueueAction(() => _roomManager.CleanupEmptyRooms());
 
                     if (PlayerCount > 0)
                     {

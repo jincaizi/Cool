@@ -18,6 +18,12 @@ namespace KcpServer
         public uint LastReceivedSequence { get; internal set; }
         public Vector3 LastValidPosition { get; internal set; }
         public long LastValidTimestamp { get; internal set; }
+
+        /// <summary>脏标记：位置等同步字段在最近一次快照后发生变化（主循环独占访问）</summary>
+        public bool IsDirty { get; internal set; }
+
+        /// <summary>上次进入快照的 tick（beacon 判定用）</summary>
+        public uint LastSnapshotTick { get; internal set; }
         public bool IsLoggedIn { get; internal set; }
         public DateTime LastActiveTime { get; internal set; }
 
@@ -37,6 +43,7 @@ namespace KcpServer
             LastUpdateTimestamp = timestamp;
             LastReceivedSequence = sequence;
             LastActiveTime = DateTime.UtcNow;
+            IsDirty = true;
         }
 
         public void AcknowledgeSequence(uint sequence)
