@@ -57,10 +57,11 @@ namespace KcpNet.PlayModeTests
 
             manager.ConnectAndLogin("127.0.0.1", 8000);
 
-            // 等待进世界
+            // 等待进世界（每帧驱动 manager.Update 消费快照队列——主线程封送）
             float elapsed = 0f;
             while (manager.CurrentState != ClientNetworkManager.State.InWorld && elapsed < 10f)
             {
+                manager.Update(0.05f);
                 await System.Threading.Tasks.Task.Delay(50);
                 elapsed += 0.05f;
             }
@@ -75,11 +76,13 @@ namespace KcpNet.PlayModeTests
             result.PlayerId = manager.LocalPlayerId;
             result.ZoneId = manager.ZoneId;
 
-            // 等待至少一条快照（单客户端时快照可为空——登录闭环本身是主验收）
-            await System.Threading.Tasks.Task.Delay(500);
-
-            // 驱动时钟同步采样（进程内快速推进：直接调 Update 若干次）
-            for (int i = 0; i < 50; i++) manager.Update(0.2f);
+            // 等待至少一条快照（单客户端时快照可为空——登录闭环本身是主验收）；
+            // 同时驱动时钟同步采样（原 50×Update(0.2f) 合并于此：0.2s/样本 → 2s 覆盖突发 8 样本）
+            for (int i = 0; i < 10; i++)
+            {
+                manager.Update(0.2f);
+                await System.Threading.Tasks.Task.Delay(50);
+            }
 
             result.Success = true;
             manager.Dispose();

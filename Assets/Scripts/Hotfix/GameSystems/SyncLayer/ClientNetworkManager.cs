@@ -20,6 +20,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly ClockSyncDriver _clockSync;
         private readonly RemoteEntityRegistry _remoteEntities;
         private readonly string _username;
+        private readonly System.Collections.Concurrent.ConcurrentQueue<WorldSnapshot> _pendingSnapshots =
+            new System.Collections.Concurrent.ConcurrentQueue<WorldSnapshot>();
 
         public State CurrentState { get; private set; } = State.Disconnected;
         public long LocalPlayerId { get; private set; }
@@ -74,8 +76,19 @@ namespace Hotfix.GameSystems.SyncLayer
 
         public void Update(float deltaSeconds)
         {
-            if (CurrentState == State.InWorld)
-                _clockSync.Tick(deltaSeconds);
+            if (CurrentState != State.InWorld) return;
+
+            _clockSync.Tick(deltaSeconds);
+
+            // 主线程消费快照（RemoteEntityRegistry 的 Unity API 必须主线程）
+            while (_pendingSnapshots.TryDequeue(out var snapshot))
+            {
+                foreach (var entity in snapshot.Entities)
+                {
+                    if (entity.PlayerId == LocalPlayerId) continue; // 本地玩家跳过
+                    _remoteEntities.ApplySnapshot(entity);
+                }
+            }
         }
 
         private void OnLoginResponse(IMessage message)
@@ -108,12 +121,8 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void OnWorldSnapshot(IMessage message)
         {
-            var snapshot = (WorldSnapshot)message;
-            foreach (var entity in snapshot.Entities)
-            {
-                if (entity.PlayerId == LocalPlayerId) continue; // 本地玩家跳过
-                _remoteEntities.ApplySnapshot(entity);
-            }
+            // 回调线程（网络驱动）：只入队，Unity API 消费留主线程 Update
+            _pendingSnapshots.Enqueue((WorldSnapshot)message);
         }
 
         private void OnPlayerLeave(IMessage message)
