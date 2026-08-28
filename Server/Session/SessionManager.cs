@@ -24,9 +24,6 @@ namespace KcpServer
         public int SessionCount => _sessions.Count;
         public IEnumerable<KcpServerSession> AllSessions => _sessions.Values;
 
-        /// <summary>新会话建立（仅胜者触发一次；Server3C 借此做事件接线，避免重复订阅）</summary>
-        public event Action<KcpServerSession>? SessionCreated;
-
         public SessionManager(ILogger logger)
         {
             _logger = logger;
@@ -58,7 +55,6 @@ namespace KcpServer
             }
 
             _logger.LogInformation($"New KCP session: {sessionId} from {remoteEndPoint} (conv={kcpConv})");
-            SessionCreated?.Invoke(winner);
             return winner;
         }
 

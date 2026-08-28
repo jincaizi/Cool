@@ -36,6 +36,10 @@ namespace KcpServer
                 {
                     socket.SendTo(span.ToArray(), SocketFlags.None, _remoteEndPoint);
                 }
+                else
+                {
+                    _logger.LogWarning("KCP output dropped: send socket not injected");
+                }
             }
             catch (Exception ex)
             {
@@ -111,7 +115,9 @@ namespace KcpServer
         private const int FastResend = 2;
         private const int Mtu = 1400;
 
-        private Socket? _sendSocket;
+        private volatile Socket? _sendSocket;
+        private bool _wired;
+        private Action? _wireAction;
 
         /// <summary>发送 socket（由 SessionManager 注入；会话不持有 socket 生命周期）。只读——注入唯一入口为 SetSendSocket</summary>
         public Socket? SendSocket => _sendSocket;
@@ -164,6 +170,19 @@ namespace KcpServer
         {
             _sendSocket = socket;
             _callbackHandler.SendSocketProvider = () => _sendSocket;
+        }
+
+        /// <summary>幂等接线：保证事件订阅先于任何包处理（消除发布-订阅窗口竞态）。
+        /// 与 KCP 更新循环同锁（_sendLock），互斥于 _kcp.Update/TryRecv → 接线完成后才可能有 DataReceived</summary>
+        public void EnsureWired(Action wireAction)
+        {
+            lock (_sendLock)
+            {
+                if (_wired) return;
+                _wired = true;
+                _wireAction = wireAction;
+                wireAction();
+            }
         }
 
         /// <summary>

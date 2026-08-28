@@ -38,8 +38,6 @@ namespace KcpServer
         {
             _logger = logger;
             _sessionManager = new SessionManager(logger);
-            // 新会话事件接线：等价于旧 FindOrCreateSession 内的一次性订阅（SessionManager 仅对胜者触发一次）
-            _sessionManager.SessionCreated += OnSessionCreated;
             _roomManager = new RoomManager(new RoomManagerConfig());
             _loginHandler = new LoginHandler(this, _roomManager, _logger);
             _positionSyncHandler = new PositionSyncHandler(this, _roomManager, _logger);
@@ -178,6 +176,14 @@ namespace KcpServer
                 if (session.SendSocket == null)
                     session.SetSendSocket(_udpServer!);
 
+                // 幂等接线：事件订阅先于任何包处理（消除发布-订阅窗口竞态）
+                session.EnsureWired(() =>
+                {
+                    session.DataReceived += OnSessionDataReceived;
+                    session.Disconnected += OnSessionDisconnected;
+                    session.Error += OnSessionError;
+                });
+
                 session.HandleUdpPacket(data, data.Length);
                 session.UpdateActivity();
             }
@@ -185,13 +191,6 @@ namespace KcpServer
             {
                 _logger.LogError(ex, "Error handling packet");
             }
-        }
-
-        private void OnSessionCreated(KcpServerSession session)
-        {
-            session.DataReceived += OnSessionDataReceived;
-            session.Disconnected += OnSessionDisconnected;
-            session.Error += OnSessionError;
         }
 
         private void OnSessionDataReceived(object? sender, byte[] data)

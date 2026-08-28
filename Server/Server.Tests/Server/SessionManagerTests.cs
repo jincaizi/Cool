@@ -39,6 +39,9 @@ public class SessionManagerTests : IDisposable
         Task.WaitAll(tasks.ToArray());
 
         Assert.Equal(1, _manager.SessionCount);
+        // 并发首包全部解析到同一实例（无重复创建）
+        var winner = sessions[0];
+        Assert.All(sessions, s => Assert.Same(winner, s));
     }
 
     [Fact]
@@ -82,17 +85,4 @@ public class SessionManagerTests : IDisposable
         BitConverter.GetBytes(conv).CopyTo(data, 0);
         return data;
     }
-}
-
-public sealed class TestLogger : ILogger
-{
-    public bool IsEnabled(LogLevel level) => true;
-    public void Log(LogLevel level, Exception? exception, string message, params object[] args) { }
-    public void LogDebug(string message, params object[] args) { }
-    public void LogInformation(string message, params object[] args) { }
-    public void LogWarning(string message, params object[] args) { }
-    public void LogError(string message, params object[] args) { }
-    public void LogError(Exception ex, string message, params object[] args) { }
-    public void LogCritical(string message, params object[] args) { }
-    public void LogCritical(Exception ex, string message, params object[] args) { }
 }
