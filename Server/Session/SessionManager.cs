@@ -12,7 +12,7 @@ namespace KcpServer
     /// 会话管理器 —— 收敛 Server3C 散落的会话查找/创建/绑定
     /// （P0 终审 MUST-DO-3：消除 O(n) 端点扫描与 check-then-create 竞态；
     /// conv 采纳策略：服务器采纳客户端首包 conv，见 KcpServerSession）
-    /// 线程安全：IO 线程唯一访问点（GetOrCreateSession），会话内发送由 _sendLock 保证
+    /// 线程安全：GetOrCreateSession 由主循环线程调用（R2 后）；会话内发送由 _sendLock 保证
     /// </summary>
     public sealed class SessionManager : IDisposable
     {

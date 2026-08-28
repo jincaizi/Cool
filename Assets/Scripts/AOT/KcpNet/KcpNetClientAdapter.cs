@@ -8,8 +8,9 @@ namespace KcpNet
     /// <summary>
     /// INetworkClient 的 KCP 实现 —— 封装 KcpClient：
     /// 唯一 conv（时间戳派生，P0 MUST-DO-4）；消息解码后经 MessageId 事件上抛。
-    /// 回调线程：DirectMessageExecutor 直发（P1 测试期）——回调发生在网络驱动线程，
-    /// 涉及 UnityEngine API 的消费方须自行封送主线程（T7 起换 UnityMainThreadExecutor）。
+    /// 回调线程：DirectMessageExecutor 直发（P1 测试期）——回调发生在网络驱动线程；
+    /// 涉及 UnityEngine API 的消费方须封送主线程（P1 客户端经 ClientNetworkManager 的
+    /// pending 队列在 Update 中主线程消费；生产可换 UnityMainThreadExecutor）。
     /// </summary>
     public sealed class KcpNetClientAdapter : INetworkClient
     {

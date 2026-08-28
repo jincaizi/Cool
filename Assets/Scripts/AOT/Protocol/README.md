@@ -52,3 +52,14 @@ grep 'protobuf-net' Server/Server3C.csproj
 dotnet run --project Server/Server3C.csproj -- 8000
 # 终端 2（Unity 内）：unity-mcp tests-run(PlayMode, class=EchoSmokeTests)
 ```
+
+## D2 消息模式确认记录（P0 MUST-DO-2 关闭项，2026-08-28）
+
+**KCP 传输保持消息边界**：本协议层依赖"每帧 = 一条完整消息"（Decode 单帧契约）。
+实证：P1 双客户端验收（TwoClientWorldTests 两连绿 + 服务器日志）在 Kcp 2.7.0 上
+运行消息边界保持成立——KCP 分段发送/重组不破坏单帧语义，Decode 未遇跨帧。
+
+- 服务器单消息上限：wire 格式硬限 `ushort.MaxValue`（65535B，MessageCodec.Encode 守卫）；
+  设计上限另有 KCP `wndSize × MTU`（32×1400 = 44800B）约束——超限消息 KCP 分段，
+  重组后仍保持边界。P2 如需收紧上限，改动点：`MessageCodec.Encode` 的 payload 守卫。
+- 反模式禁令：禁止在 KCP 上叠加第二条不可靠通道（spec D2 反贪心条款）。

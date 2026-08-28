@@ -1430,6 +1430,16 @@ Expected: 36 passed（32 + SnapshotAssembler 4）。
         }
 ```
 
+**T2 质量审查补充项（并入本任务）：**
+1. **`CleanupLoop` 的 `_roomManager.CleanupEmptyRooms()` 也要经 `EnqueueAction`**（T2 审查发现：清理线程直写房间状态与主循环并发，ConcurrentDictionary 下无崩溃但可能出现"玩家加入刚被销毁的房间"瞬时不一致）：
+
+```csharp
+                    // 清理空房间（R2：经主循环）
+                    _gameLoop.EnqueueAction(() => _roomManager.CleanupEmptyRooms());
+```
+
+2. **超时路径去重**：`CleanupLoop` 中已 EnqueueAction 的 `HandleDisconnectAsync`/`RemoveByEndpoint` 两条动作在 `OnSessionDisconnected` 迁移入队后构成双重执行（CloseAsync 同步触发 Disconnected → 事件路径先执行一次 + 队列路径再执行一次）。幂等守卫下无重复广播，但应**删除 CleanupLoop 中的这两条 EnqueueAction**，仅保留 `CloseAsync("Timeout")` + `Dispose()`（断开清理统一走事件路径）。
+
 - [ ] **Step 9: 构建 + 测试 + echo 回归**
 
 ```bash
@@ -2905,3 +2915,25 @@ git commit -m "docs: p1 execution record - acceptance evidence + drift log"
 ## 规模说明
 
 10 个任务，覆盖服务端框架（T1-T4）、共享算法（T5）、客户端框架（T6-T7）、端到端验收（T8）、收尾（T9-T10）。每个任务独立可验收：T1-T5/T9 为纯代码+单测，T6-T8 为 PlayMode 冒烟（需服务器进程，联调依赖如常）。
+
+---
+
+## 执行偏差记录（终审 `fb546dc` 后确认，READY for P2）
+
+**验收终态（终验五连，2026-08-28 独立复现）**：dotnet build 0 Errors；Server.Tests 39/39；Unity EditMode 145/145；PlayMode EchoSmokeTests + TwoClientWorldTests 均 Passed；端口释放。spec §5-P1 四项验收：双客户端同 Zone 两实体注册 ✓ / ClockSync ±10ms（算法层已验证，PlayMode 端到端实测值未记录——P2 补记）/ 断线重连重建 ✓（连续缺席判别 + PeerSilence）/ 联调落地 ✓（指南 + ParrelSync 失败兜底）。
+
+| # | 计划原文 | 实际执行 | 性质 |
+|---|---|---|---|
+| 1 | T1 计划盲点：6b HandlePacket 丢失事件订阅 | SessionCreated 事件（GetOrAdd 胜者触发）→ 审查后改为 **EnsureWired 幂等接线**（`_sendLock` 内，接线先于任何包处理——发布-订阅窗口竞态结构性消除）；Server3C 切换并入 T1（构造签名变更编译强制） | 计划缺陷修复 ×2 |
+| 2 | T2 GameLoop 计划代码 | `Task.Delay` 在 Stop() 取消时抛 TaskCanceledException 逃逸 → 崩优雅停机——补 OCE catch（与 KcpServerSession 同款）；节流测试测 handler 计数（空队列永不触发，计划测试逻辑错）→ 改 TickCount；新增 Stop 回归测试；Server3C.Dispose 补 `_gameLoop.Dispose()` | 计划缺陷修复 ×3 |
+| 3 | T3 协议追加 | 纯追加零代码偏差；审查驱动治理层修正（墙钟例外入治理文档/WorldSnapshot 契约/双快照共存说明/F3a 幻影引用） | 审查驱动 |
+| 4 | T4 广播集成 | 测试命名实参 `observer:` vs 接口 `observerPlayerId`（CS1739）修正；审查驱动：onTick 未守卫（tick 循环单点故障）→ try/catch；感知契约违约（文档"不含自身"代码发全体）→ 按观察者过滤接线 | 计划缺陷 + 审查驱动 |
+| 5 | T5 SyncCore | ToServerTime 测试期望值算错（A7 修正）；审查驱动：负 RTT 被 min-filter 偏爱（移动端时间回跳）→ 拒绝守卫；evict-before-scan；离群测试判别力（审查处方 5.5M−4.5M=1M 算术错，实现者改 5.0M 兑现意图） | 计划缺陷 + 审查驱动 |
+| 6 | T6 适配层 | conv 未上线（KcpClientTransport 缺 sessionId → conv 0）→ 传参（服务器日志实证 conv=303945325）；ConnectAsync 泄漏旧客户端 → dispose-on-reconnect；接口"主线程回调"声称失实 → 诚实化；closed-port 负路径不可行（KCP/UDP 连未监听端口"成功"——ICMP 被吞）→ 非法 host 确定性失败 | 计划缺陷 + 审查驱动 + 实测语义 |
+| 7 | T7 SyncLayer | StartBurst 时机（A9：进世界才起 burst）、删 _schedule（A10）、PlayMode asmdef 补 GameSys（A11）；**主线程封送**（快照/离开队列在 Update drain——T8 双客户端必踩的跨线程 Unity API） | 审查驱动 + 前置预护 |
+| 8 | **T8 超范围服务器修复**：UDP 死对端检测缺陷 | 客户端关 socket 无线上通知 + Send() 刷新活动时间 → 服务器永不检测断线，旧实体永久广播（验收首跑"假通过"被阶段 3.5 戳穿）→ `KcpServerSession._lastReceiveTime`（仅入站）+ 15s 静默（3×5s 心跳）→ CloseAsync("PeerSilence") | **验收暴露的预存缺陷**（opus 级深审追认：根因/死锁规避/层级合适/无双关） |
+| 9 | T8 测试判别力 | 阶段 3.5 连续缺席判定（~75% 空转发现）；空轮询假绿（快照流间隙）→ 按实际新到快照计数；ctxC 泄漏路径 finally；帧上限改挂钟 120s | 假绿刺杀 ×2 |
+| 10 | T9 收尾 | **flush 窗口回归**：KCP Send 仅入队、CloseAsync 取消 CTS → reject+kick 永不上线（版本不匹配客户端静默挂起）→ Kick 后 50ms（5×flush 周期）再关 + 版本拒绝路径测试（含对照组，39/39）；传输 teardown 修复（ODE 被内部吞 → IsConnected 退出条件）；ParrelSync 网络不可达 → 文档兜底 | 真功能回归修复 + 审查驱动 |
+| 11 | 终审关闭项 | **D2 消息模式确认**：P1 双客户端运行（T8 两连绿）实证消息边界保持成立——确认记录落档 Protocol README（见 `Assets/Scripts/AOT/Protocol/README.md`）；wndSize×MTU 守卫由既有 wire 硬限（ushort.MaxValue）覆盖，P2 按需收紧 | 终审关闭 |
+
+**P2 必办清单（终审 MUST-DO-P2）**：① EntityStore/PositionSyncHandler 实例分裂——快照链休眠（位置恒 (0,0,0)），P2 必须接线或统一存储；② AddPlayer 注册即标脏；③ per-observer 编码 O(n²) 随 AOI 优化；④ 移动数据流 Unreliable 评估；⑤ ClockSync ±10ms PlayMode 端到端实测值补记；⑥ `_wireAction` 死存储清理或复用（重连重接线）。
