@@ -34,6 +34,33 @@ namespace KcpNet.PlayModeTests
             var result = runTask.Result;
             Assert.IsTrue(result.Success, $"adapter failed: {result.FailureReason}");
             Assert.IsNotNull(result.Response, "no ClockSyncResponse captured");
+            Assert.Greater(result.Response.ServerTimestamp, 0,
+                "server timestamp semantics violated (spec §3)");
+        }
+
+        [UnityTest]
+        public IEnumerator Connect_To_Invalid_Host_Fails_With_Error()
+        {
+            // 实测（console 探针）：本 KCP 栈客户端无握手等待——UDP connect 到未监听端口
+            // 立即成功（connected=true、无 Error 事件；ICMP 不可达在驱动循环内被吞掉），
+            // 故 closed-port 负路径无法按字面断言；改用非法 host（IPAddress.Parse 抛
+            // FormatException）确定性快速失败，覆盖同一适配器失败路径：Error 事件 + 返回 false。
+            var runTask = Task.Run(async () =>
+            {
+                using var adapter = new KcpNetClientAdapter();
+                bool errorRaised = false;
+                adapter.Error += _ => errorRaised = true;
+                var connected = await adapter.ConnectAsync("not-an-ip", 8000);
+                return (connected, errorRaised);
+            });
+
+            int frames = 0;
+            while (!runTask.IsCompleted && frames < 1800) { frames++; yield return null; }
+
+            Assert.IsTrue(runTask.IsCompleted, "connect-fail test timed out");
+            var (connected, errorRaised) = runTask.Result;
+            Assert.IsFalse(connected, "connect to invalid host must fail");
+            Assert.IsTrue(errorRaised, "Error event must fire on connect failure");
         }
 
         private static async Task<SmokeResult> RunAsync()

@@ -18,7 +18,8 @@ namespace KcpNet
 
         void Send(MessageId messageId, IMessage message, MessageFlags flags = MessageFlags.Reliable);
 
-        /// <summary>消息接收事件（主线程回调：内部经 UnityMainThreadExecutor）</summary>
+        /// <summary>消息接收事件（回调线程：当前实现为 Direct executor——网络驱动线程；
+        /// 生产环境应换 UnityMainThreadExecutor 由宿主每帧泵送，见 KcpNetClientAdapter 注释）</summary>
         event Action<MessageId, IMessage>? MessageReceived;
 
         event Action<string>? Disconnected;

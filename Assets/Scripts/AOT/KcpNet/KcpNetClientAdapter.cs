@@ -8,6 +8,8 @@ namespace KcpNet
     /// <summary>
     /// INetworkClient 的 KCP 实现 —— 封装 KcpClient：
     /// 唯一 conv（时间戳派生，P0 MUST-DO-4）；消息解码后经 MessageId 事件上抛。
+    /// 回调线程：DirectMessageExecutor 直发（P1 测试期）——回调发生在网络驱动线程，
+    /// 涉及 UnityEngine API 的消费方须自行封送主线程（T7 起换 UnityMainThreadExecutor）。
     /// </summary>
     public sealed class KcpNetClientAdapter : INetworkClient
     {
@@ -29,6 +31,16 @@ namespace KcpNet
 
         public async Task<bool> ConnectAsync(string host, int port)
         {
+            // 先释放旧连接（重连路径：防双连接并发投递 + 驱动循环泄漏）
+            if (_client != null)
+            {
+                _client.MessageReceived -= OnMessageReceived;
+                _client.Disconnected -= OnDisconnected;
+                _client.Error -= OnError;
+                _client.Dispose();
+                _client = null;
+            }
+
             try
             {
                 // 唯一 conv：时间戳截断（与服务器首包采纳机制配合）
@@ -36,7 +48,7 @@ namespace KcpNet
                 _client = new KcpClient(
                     (long)conv,
                     new IPEndPoint(IPAddress.Parse(host), port),
-                    new KcpClientTransport(_options, _logger),
+                    new KcpClientTransport(_options, _logger, conv),
                     _options,
                     _logger,
                     DirectMessageExecutor.Instance);
@@ -63,7 +75,11 @@ namespace KcpNet
 
         public void Send(MessageId messageId, IMessage message, MessageFlags flags = MessageFlags.Reliable)
         {
-            if (_client == null || !_client.IsConnected) return;
+            if (_client == null || !_client.IsConnected)
+            {
+                _logger.LogDebug("Send dropped: not connected");
+                return;
+            }
             // fire-and-forget：不在调用线程同步等待（Unity 主线程 SyncContext 下
             // GetResult() 有死锁风险；KCP 发送本身同步完成，异步包装无长等待）
             _ = _client.SendAsync(message, flags);

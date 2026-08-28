@@ -24,6 +24,7 @@ namespace KcpServer
                 ClientTimestamp = request.ClientTimestamp,
                 ServerTimestamp = DateTime.UtcNow.Ticks
             };
+            _logger.LogInformation($"ClockSync for session {session.SessionId}");
             return _server.SendToSessionAsync(session, MessageId.ClockSyncResponse, response);
         }
     }
