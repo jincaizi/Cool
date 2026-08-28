@@ -1,5 +1,4 @@
 using System;
-using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -20,10 +19,9 @@ namespace KcpServer
         private Socket? _udpServer;
         private Task? _receiveTask;
         private Task? _cleanupTask;
-        private long _nextSessionId = 1;
         private bool _disposed;
 
-        private readonly ConcurrentDictionary<long, KcpServerSession> _sessions = new ConcurrentDictionary<long, KcpServerSession>();
+        private readonly SessionManager _sessionManager;
         private readonly ConcurrentDictionary<long, long> _sessionIdToPlayerId = new ConcurrentDictionary<long, long>();
         private readonly ConcurrentDictionary<long, long> _playerIdToSessionId = new ConcurrentDictionary<long, long>();
         private readonly ConcurrentDictionary<long, KcpServerSession> _playerIdToSession = new ConcurrentDictionary<long, KcpServerSession>();
@@ -34,11 +32,14 @@ namespace KcpServer
 
         public RoomManager RoomManager => _roomManager;
         public int PlayerCount => _roomManager.TotalPlayerCount;
-        public int ActiveSessionCount => _sessions.Count;
+        public int ActiveSessionCount => _sessionManager.SessionCount;
 
         public Server3C(ILogger logger)
         {
             _logger = logger;
+            _sessionManager = new SessionManager(logger);
+            // 新会话事件接线：等价于旧 FindOrCreateSession 内的一次性订阅（SessionManager 仅对胜者触发一次）
+            _sessionManager.SessionCreated += OnSessionCreated;
             _roomManager = new RoomManager(new RoomManagerConfig());
             _loginHandler = new LoginHandler(this, _roomManager, _logger);
             _positionSyncHandler = new PositionSyncHandler(this, _roomManager, _logger);
@@ -69,12 +70,11 @@ namespace KcpServer
             _cts.Cancel();
 
             // 关闭所有会话
-            foreach (var s in _sessions.Values)
+            foreach (var s in _sessionManager.AllSessions)
             {
                 await s.CloseAsync("ServerShutdown");
                 s.Dispose();
             }
-            _sessions.Clear();
 
             if (_receiveTask != null)
                 await _receiveTask.WaitAsync(TimeSpan.FromSeconds(5));
@@ -168,15 +168,16 @@ namespace KcpServer
             _logger.LogInformation("Receive loop stopped");
         }
 
-        private async Task HandlePacket(EndPoint remoteEndPoint, byte[] data)
+        private void HandlePacket(EndPoint remoteEndPoint, byte[] data)
         {
             try
             {
-                // 查找或创建会话
-                var session = FindOrCreateSession(remoteEndPoint, data);
+                var session = _sessionManager.GetOrCreateSession(remoteEndPoint, data);
                 if (session == null) return;
 
-                // KCP 数据包
+                if (session.SendSocket == null)
+                    session.SetSendSocket(_udpServer!);
+
                 session.HandleUdpPacket(data, data.Length);
                 session.UpdateActivity();
             }
@@ -186,34 +187,11 @@ namespace KcpServer
             }
         }
 
-        private KcpServerSession? FindOrCreateSession(EndPoint remoteEndPoint, byte[] firstPacket)
+        private void OnSessionCreated(KcpServerSession session)
         {
-            // 查找现有会话
-            foreach (var s in _sessions.Values)
-            {
-                if (s.RemoteEndPoint.Equals(remoteEndPoint))
-                {
-                    return s;
-                }
-            }
-
-            // 创建新会话
-            long sessionId = Interlocked.Increment(ref _nextSessionId);
-            // 从客户端首包解析 KCP conv（头部前 4 字节 LE），双端 conv 必须一致否则 KCP 丢包
-            uint? kcpConv = firstPacket != null && firstPacket.Length >= 24
-                ? BinaryPrimitives.ReadUInt32LittleEndian(firstPacket)
-                : null;
-            var session = new KcpServerSession(sessionId, remoteEndPoint, _udpServer!, _logger, kcpConv);
-
-            // 订阅会话事件
             session.DataReceived += OnSessionDataReceived;
             session.Disconnected += OnSessionDisconnected;
             session.Error += OnSessionError;
-
-            _sessions[sessionId] = session;
-            _logger.LogInformation($"New KCP session: {sessionId} from {remoteEndPoint}");
-
-            return session;
         }
 
         private void OnSessionDataReceived(object? sender, byte[] data)
@@ -272,7 +250,7 @@ namespace KcpServer
                 await _loginHandler.HandleDisconnectAsync(session);
 
                 // 移除会话
-                _sessions.TryRemove(session.SessionId, out _);
+                _sessionManager.RemoveByEndpoint(session.RemoteEndPoint);
             }
         }
 
@@ -294,7 +272,7 @@ namespace KcpServer
 
                     // 清理超时会话
                     var timeoutSessions = new System.Collections.Generic.List<KcpServerSession>();
-                    foreach (var s in _sessions.Values)
+                    foreach (var s in _sessionManager.AllSessions)
                     {
                         if (s.IsTimedOut(_sessionTimeout))
                         {
@@ -305,7 +283,7 @@ namespace KcpServer
                     foreach (var s in timeoutSessions)
                     {
                         _logger.LogInformation($"Session {s.SessionId} timed out");
-                        _sessions.TryRemove(s.SessionId, out _);
+                        _sessionManager.RemoveByEndpoint(s.RemoteEndPoint);
                         await s.CloseAsync("Timeout");
                         s.Dispose();
 
@@ -339,14 +317,8 @@ namespace KcpServer
             _disposed = true;
             _cts.Cancel();
 
-            foreach (var s in _sessions.Values)
-            {
-                s.DataReceived -= OnSessionDataReceived;
-                s.Disconnected -= OnSessionDisconnected;
-                s.Error -= OnSessionError;
-                s.Dispose();
-            }
-            _sessions.Clear();
+            // SessionManager 内部 Dispose 各会话（事件退订随会话引用一并释放）
+            _sessionManager.Dispose();
 
             _cts.Dispose();
         }

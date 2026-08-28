@@ -13,12 +13,20 @@
     <Compile Include="..\..\Assets\Scripts\AOT\Protocol\**\*.cs" />
   </ItemGroup>
 
+  <!-- 服务端应用层源码（Program.cs 排除：含 Main，与测试宿主冲突；Server.Tests 自目录排除：SDK 默认 glob 已含；
+       obj/bin 排除：生成文件含重复程序集特性） -->
+  <ItemGroup>
+    <Compile Include="..\**\*.cs" Exclude="..\Program.cs;..\Server.Tests\**\*.cs;..\**\obj\**\*.cs;..\**\bin\**\*.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <!-- 版本必须与 Unity 侧 Assets/Packages/protobuf-net.3.2.56 一致（spec §3） -->
     <PackageReference Include="protobuf-net" Version="3.2.56" />
+    <!-- 与服务端 Server3C.csproj 同版本 -->
+    <PackageReference Include="Kcp" Version="2.7.0" />
   </ItemGroup>
 
 </Project>

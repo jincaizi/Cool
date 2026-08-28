@@ -12,14 +12,15 @@ namespace KcpServer
     /// </summary>
     public sealed class KcpCallbackHandler : System.Net.Sockets.Kcp.IKcpCallback, System.Net.Sockets.Kcp.IRentable
     {
-        private readonly Socket _socket;
         private readonly EndPoint _remoteEndPoint;
         private readonly ILogger _logger;
         private readonly byte[] _buffer;
 
-        public KcpCallbackHandler(Socket socket, EndPoint remoteEndPoint, ILogger logger, int bufferSize = 65536)
+        /// <summary>发送 socket 提供者（由 KcpServerSession.SetSendSocket 注入）</summary>
+        public Func<System.Net.Sockets.Socket?>? SendSocketProvider { get; set; }
+
+        public KcpCallbackHandler(EndPoint remoteEndPoint, ILogger logger, int bufferSize = 65536)
         {
-            _socket = socket;
             _remoteEndPoint = remoteEndPoint;
             _logger = logger;
             _buffer = new byte[bufferSize];
@@ -30,8 +31,11 @@ namespace KcpServer
             try
             {
                 var span = buffer.Memory.Span.Slice(0, avalidLength);
-                var data = span.ToArray();
-                _socket.SendTo(data, SocketFlags.None, _remoteEndPoint);
+                var socket = SendSocketProvider?.Invoke();
+                if (socket != null)
+                {
+                    socket.SendTo(span.ToArray(), SocketFlags.None, _remoteEndPoint);
+                }
             }
             catch (Exception ex)
             {
@@ -89,7 +93,6 @@ namespace KcpServer
     {
         private readonly long _sessionId;
         private readonly EndPoint _remoteEndPoint;
-        private readonly Socket _socket;
         private readonly System.Net.Sockets.Kcp.Kcp<System.Net.Sockets.Kcp.KcpSegment> _kcp;
         private readonly KcpCallbackHandler _callbackHandler;
         private readonly ILogger _logger;
@@ -108,6 +111,13 @@ namespace KcpServer
         private const int FastResend = 2;
         private const int Mtu = 1400;
 
+        private Socket? _sendSocket;
+
+        /// <summary>发送 socket（由 SessionManager 注入；会话不持有 socket 生命周期）。只读——注入唯一入口为 SetSendSocket</summary>
+        public Socket? SendSocket => _sendSocket;
+
+        public uint KcpConv { get; }
+
         public long SessionId => _sessionId;
         public EndPoint RemoteEndPoint => _remoteEndPoint;
         public bool IsConnected => _state == KcpSessionState.Connected;
@@ -117,15 +127,15 @@ namespace KcpServer
         public event EventHandler? Disconnected;
         public event EventHandler<Exception>? Error;
 
-        public KcpServerSession(long sessionId, EndPoint remoteEndPoint, Socket socket, ILogger logger, uint? kcpConv = null)
+        public KcpServerSession(long sessionId, EndPoint remoteEndPoint, uint? kcpConv, ILogger logger)
         {
             _sessionId = sessionId;
             _remoteEndPoint = remoteEndPoint;
-            _socket = socket;
             _logger = logger;
+            KcpConv = kcpConv ?? 0;
 
             // 创建回调处理器
-            _callbackHandler = new KcpCallbackHandler(socket, remoteEndPoint, logger);
+            _callbackHandler = new KcpCallbackHandler(remoteEndPoint, logger);
 
             // 创建 KCP - 使用 Kcp<Segment> API
             // KCP 协议要求双端 conv 一致（KcpCore.Input 严格校验 conv != conv_ 即丢包），
@@ -147,6 +157,13 @@ namespace KcpServer
             _updateTask = Task.Run(() => UpdateLoopAsync(_cts.Token));
 
             _logger.LogInformation($"KcpServerSession created: {_sessionId} from {_remoteEndPoint}");
+        }
+
+        /// <summary>唯一注入入口：发送 socket + 回调输出通路</summary>
+        public void SetSendSocket(System.Net.Sockets.Socket socket)
+        {
+            _sendSocket = socket;
+            _callbackHandler.SendSocketProvider = () => _sendSocket;
         }
 
         /// <summary>
