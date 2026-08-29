@@ -68,13 +68,14 @@ public class MovementValidatorTests
     public void Teleport_Over_Limit_Corrected_To_Plausible_Position()
     {
         // 1 秒内移动 100m（远超 15m/s × 1.2 容差）→ 纠偏到 prev + 方向 × MaxSpeed × dt
+        // dir = (100,0,0) 归一化 = (1,0,0)；权威位置 = 0 + (1,0,0) × 15 × 1.0s = (15, 0, 0)
         var result = MovementValidator.Validate(
             prev: new Vec3(0, 0, 0), next: new Vec3(100, 0, 0),
             rotation: 0f, speed: 5f,
             prevTimestamp: 0, nextTimestamp: 10_000_000L);
 
         Assert.True(result.NeedsCorrection);
-        Assert.InRange(result.AuthoritativePosition.X, 17.9f, 18.1f); // 15 × 1.0s × 1.2 内
+        Assert.InRange(result.AuthoritativePosition.X, 14.9f, 15.1f); // 15 × 1.0s
     }
 
     [Fact]
@@ -414,7 +415,7 @@ public class PredictionReconcilerTests
         Assert.Equal(60, reconciler.FrameCount); // 上限 60
 
         reconciler.Prune(50);
-        Assert.Equal(20, reconciler.FrameCount); // 仅保留 seq >= 50
+        Assert.Equal(21, reconciler.FrameCount); // 保留 seq 50..70 共 21 帧
         Assert.False(reconciler.TryGetCorrection(10, new Vec3(0, 0, 0), 0f, out _, out _));
     }
 }
@@ -629,16 +630,19 @@ namespace KcpServer
     /// </summary>
     public class PositionSyncHandler
     {
+        private readonly Server3C _server;
         private readonly ILogger _logger;
         private readonly EntityStore _entityStore;
 
-        public PositionSyncHandler(ILogger logger, EntityStore entityStore)
+        // Server3C 注入（LoginHandler 同款惯例——项目既有模式，不用委托 seam）
+        public PositionSyncHandler(Server3C server, ILogger logger, EntityStore entityStore)
         {
+            _server = server;
             _logger = logger;
             _entityStore = entityStore;
         }
 
-        /// <summary>核心校验+应用（可独立测试）</summary>
+        /// <summary>核心校验+应用（可独立测试——不依赖 Server3C 运行时）</summary>
         public MoveValidationResult ValidateAndApply(PositionSyncRequest request, PlayerState player)
         {
             var result = MovementValidator.Validate(
@@ -655,14 +659,14 @@ namespace KcpServer
             // UpdatePosition 已置 IsDirty（P1 T4）——WorldSnapshot 链自动携带
 
             if (result.NeedsCorrection)
-                _logger.LogWarning($"Player {player.PlayerId} corrected: speed={request.Speed} dist/s={result.AuthoritativePosition.Distance(new Vec3(player.Position.X, player.Position.Y, player.Position.Z))}");
+                _logger.LogWarning($"Player {player.PlayerId} corrected: speed={request.Speed}");
 
             return result;
         }
 
         public async Task HandlePositionSyncAsync(KcpServerSession session, PositionSyncRequest request)
         {
-            long? playerId = GetPlayerId(session);
+            long? playerId = _server.GetPlayerId(session);
             if (!playerId.HasValue)
             {
                 _logger.LogWarning($"PositionSync from unknown session {session.SessionId}");
@@ -689,32 +693,19 @@ namespace KcpServer
                 AuthoritativeRotation = result.AuthoritativeRotation
             };
 
-            await SendToSessionAsync(session, MessageId.PositionSyncResponse, response);
+            await _server.SendToSessionAsync(session, MessageId.PositionSyncResponse, response);
         }
-
-        // —— 以下两个方法经 Server3C 委托（保持 Handler 可独立测试）——
-        internal Func<KcpServerSession, long?>? PlayerIdResolver;
-        internal Func<KcpServerSession, MessageId, IMessage, Task>? Sender;
-
-        private long? GetPlayerId(KcpServerSession session)
-            => PlayerIdResolver?.Invoke(session);
-
-        private Task SendToSessionAsync(KcpServerSession session, MessageId id, IMessage msg)
-            => Sender?.Invoke(session, id, msg) ?? Task.CompletedTask;
     }
 }
 ```
 
-`Server3C.cs`：构造 `_positionSyncHandler = new PositionSyncHandler(logger, _entityStore);` + 装配委托：
+`Server3C.cs`：构造改为 `_positionSyncHandler = new PositionSyncHandler(this, logger, _entityStore);`（`_entityStore` 字段已在 P1 T4 存在 ✓；Server3C 构造不启动——测试可 `new Server3C(new TestLogger())` 后注入，T9-P1 已验证该模式）。
 
-```csharp
-            _positionSyncHandler.PlayerIdResolver = GetPlayerId;
-            _positionSyncHandler.Sender = SendToSessionAsync;
-```
-
-（`_entityStore` 字段已在 T4-P1 存在 ✓。）
+**测试文件对应调整**：`PositionSyncEntityStoreTests` 构造 `new PositionSyncHandler(new Server3C(new TestLogger()), new TestLogger(), store)`（Server3C 不 StartAsync ✓）；`Vec3ToKcp` 辅助删除（直接 `new Vector3(0, 0, 0)`——KcpServer.Vector3 构造签名按 `Server/Util/Vector3.cs` 核对）。
 
 **RemotePlayerSync 广播退役**：原 HandlePositionSyncAsync 中的 RemotePlayerSync 广播整段删除（WorldSnapshot 链接管——EntityStore MarkDirty → SnapshotAssembler 每 tick 组装）。`RemoteSync.cs` 协议定义保留（只加不删）。
+
+**RoomSync 登录下发退役（双轨清理一致）**：`LoginHandler.HandleLoginAsync` 中的 RoomSync 发送段删除（Room 存储的 PlayerState 位置在 T3 后成为陈旧数据源——新玩家看已在线玩家靠 EntityStore 注册标脏 → 下一 tick WorldSnapshot 广播 ✓；RoomSync 协议定义保留）。`GetAllRemotePlayerSync` 方法保留（Room 内部使用，无发送方后自然休眠）。
 
 **RegisterEntity 标脏（MUST-DO-2）**：`Server3C.RegisterEntity` 改为：
 
@@ -772,24 +763,29 @@ namespace Hotfix.GameSystems.SyncLayer
     /// 移动上报器 —— 本地角色即时模拟后的节流上报（spec B+）：
     /// 每 ServerTickRateMs 上报一次 PositionSyncRequest（seq 递增）；
     /// 预测帧交共享 PredictionReconciler；响应驱动纠偏查询。
+    /// 驱动点：ClientNetworkManager.Update（宿主每帧调）——与测试宿主解耦，
+    /// 不依赖真实 NetMovementPolicy。
     /// </summary>
     public sealed class MovementReporter
     {
         private readonly INetworkClient _client;
         private readonly Func<Vec3> _positionProvider;
         private readonly Func<float> _rotationProvider;
-        private readonly Predicter _predicter = new Predicter();
+        private readonly Func<float> _speedProvider;
+        private readonly PredictionReconciler _reconciler = new PredictionReconciler();
         private float _timer;
         private uint _sequence;
 
         /// <summary>最近一次上报的服务器时钟（纠偏用）</summary>
         public long LastServerTimestamp { get; private set; }
 
-        public MovementReporter(INetworkClient client, Func<Vec3> positionProvider, Func<float> rotationProvider)
+        public MovementReporter(INetworkClient client,
+            Func<Vec3> positionProvider, Func<float> rotationProvider, Func<float> speedProvider)
         {
             _client = client;
             _positionProvider = positionProvider;
             _rotationProvider = rotationProvider;
+            _speedProvider = speedProvider;
         }
 
         /// <summary>每帧驱动；reportIntervalSeconds = ServerTickRateMs/1000（默认 66ms）</summary>
@@ -810,13 +806,13 @@ namespace Hotfix.GameSystems.SyncLayer
             float rot = _rotationProvider();
             uint seq = ++_sequence;
 
-            _predicter.RecordFrame(seq, pos, rot);
+            _reconciler.RecordFrame(seq, pos, rot);
 
             _client.Send(MessageId.PositionSyncRequest, new PositionSyncRequest
             {
                 X = pos.X, Y = pos.Y, Z = pos.Z,
                 Rotation = rot,
-                Speed = 4f, // P2 简化：固定速度值；P3 随 MoveCommand.Speed 上报
+                Speed = _speedProvider(),
                 Timestamp = DateTime.UtcNow.Ticks,
                 Sequence = seq
             });
@@ -826,8 +822,8 @@ namespace Hotfix.GameSystems.SyncLayer
         public bool OnResponse(PositionSyncResponse response)
         {
             LastServerTimestamp = response.ServerTimestamp;
-            _predicter.Prune(response.AcknowledgedSequence);
-            return _predicter.TryGetCorrection(
+            _reconciler.Prune(response.AcknowledgedSequence);
+            return _reconciler.TryGetCorrection(
                 response.AcknowledgedSequence,
                 new Vec3(response.AuthoritativeX, response.AuthoritativeY, response.AuthoritativeZ),
                 response.AuthoritativeRotation,
@@ -839,11 +835,6 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private Vec3 _targetPosition;
         private float _targetRotation;
-    }
-
-    /// <summary>薄封装：PredictionReconciler 的客户端别名（避免与 SyncCore 直接耦合于 Hotfix 逻辑）</summary>
-    internal sealed class Predicter : PredictionReconciler
-    {
     }
 }
 ```
@@ -885,7 +876,8 @@ namespace Hotfix.GameSystems.Sys3C.Network
         public void Update(MoveCommand command)
         {
             _controller.Update(command);
-            _reporter.Tick(Time.deltaTime, _reportInterval);
+            // 上报节流由 ClientNetworkManager.Update 驱动（与测试宿主解耦）——
+            // policy 只管本地物理 + 拉回
 
             // 平滑拉回：每帧向纠偏目标收敛（偏移衰减，无跳变）
             if (_correcting)
@@ -928,10 +920,15 @@ namespace Hotfix.GameSystems.Sys3C.Network
 
         public MovementReporter? Reporter => _reporter;
 
-        /// <summary>装配移动上报（进世界后由宿主调用；传入本地角色数据源）</summary>
-        public void AttachMovementReporter(Func<Cool.SyncCore.Vec3> positionProvider, Func<float> rotationProvider)
+        /// <summary>
+        /// 装配移动上报（进世界后由宿主调用；传入本地角色数据源）。
+        /// speedProvider 必须反映真实移动速度（超速钳制链路依赖它——固定值会使纠偏测不到）。
+        /// 宿主接线：manager.OnCorrectionNeeded += (pos, rot) => policy.ApplyServerCorrection(pos, rot);
+        /// </summary>
+        public void AttachMovementReporter(Func<Cool.SyncCore.Vec3> positionProvider,
+            Func<float> rotationProvider, Func<float> speedProvider)
         {
-            _reporter = new MovementReporter(_client, positionProvider, rotationProvider);
+            _reporter = new MovementReporter(_client, positionProvider, rotationProvider, speedProvider);
             _dispatcher.Subscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
         }
 
@@ -948,6 +945,9 @@ namespace Hotfix.GameSystems.Sys3C.Network
         }
 
         public event Action<Vector3, Quaternion>? OnCorrectionNeeded;
+
+        // Update 内（时钟/快照 drain 后）驱动上报节流：
+        //     _reporter?.Tick(deltaSeconds, ServerTickRateMs / 1000f);
 ```
 
 （`OnCorrectionNeeded` 由宿主接线到 NetMovementPolicy.ApplyServerCorrection。）
@@ -995,6 +995,10 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Dictionary<long, List<Sample>> _buffers = new Dictionary<long, List<Sample>>();
         private const int MaxSamplesPerEntity = 16;
 
+        /// <summary>
+        /// 入样本。serverTicks = 所属 WorldSnapshot.ServerTimestamp（**绝对服务器时钟**——
+        /// 与 ClockSyncDriver.ToServerTime 同基准；不得用 tick 序号换算的相对基准，否则插值错乱）
+        /// </summary>
         public void AddSample(long playerId, long serverTicks, Vec3 position, float rotationY)
         {
             if (!_buffers.TryGetValue(playerId, out var samples))
@@ -1080,8 +1084,11 @@ namespace Hotfix.GameSystems.SyncLayer
             _interpolator = interpolator;
         }
 
-        /// <summary>快照入插值缓冲（不再直接定位）</summary>
-        public void ApplySnapshot(EntitySnapshot snapshot)
+        /// <summary>
+        /// 快照入插值缓冲（不再直接定位）。serverTicks = 所属 WorldSnapshot.ServerTimestamp
+        /// （绝对服务器时钟——同批实体同值，插值时间基准统一）
+        /// </summary>
+        public void ApplySnapshot(EntitySnapshot snapshot, long serverTicks)
         {
             if (!_views.TryGetValue(snapshot.PlayerId, out var view))
             {
@@ -1091,7 +1098,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Position) != 0)
             {
-                _interpolator.AddSample(snapshot.PlayerId, snapshot.Tick * 10_000_000L,
+                _interpolator.AddSample(snapshot.PlayerId, serverTicks,
                     new Cool.SyncCore.Vec3(snapshot.X, snapshot.Y, snapshot.Z), snapshot.Rotation);
             }
         }
@@ -1116,6 +1123,7 @@ namespace Hotfix.GameSystems.SyncLayer
 - [ ] **Step 3: ClientNetworkManager 驱动**
 
 `ClientNetworkManager.cs`：
+- **`OnWorldSnapshot` 修改**（P1 既有方法）：`_remoteEntities.ApplySnapshot(entity)` → `_remoteEntities.ApplySnapshot(entity, snapshot.ServerTimestamp)`（批级绝对服务器时钟——A8 修正）
 - 构造增加 `RemoteInterpolator`（或由宿主创建传入 registry 时带）——**设计**：`RemoteEntityRegistry` 自带 `RemoteInterpolator`（内部 new），暴露 `UpdateRender`；ClientNetworkManager.Update 里调用：
 
 ```csharp
@@ -1214,7 +1222,8 @@ namespace KcpNet.PlayModeTests
             ctxA.LocalPosition = Vector3.zero;
             ctxA.Manager.AttachMovementReporter(
                 () => new Cool.SyncCore.Vec3(ctxA.LocalPosition.x, ctxA.LocalPosition.y, ctxA.LocalPosition.z),
-                () => 0f);
+                () => 0f,
+                () => 4f); // 正常速度（纠偏链路另有超速用例）
 
             // A 端纠偏观察
             ctxA.Manager.OnCorrectionNeeded += (pos, rot) => ctxA.CorrectionSeen = true;
