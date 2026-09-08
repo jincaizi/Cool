@@ -73,18 +73,10 @@ namespace KcpServer
             };
             await _server.SendToSessionAsync(session, MessageId.LoginResponse, loginResponse);
 
-            // 发送房间同步
+            // RoomSync 登录下发退役（P2 T3）：新玩家看已在线玩家 = EntityStore 注册标脏 →
+            // 下一 tick WorldSnapshot 广播（Room 存储的 PlayerState 位置已成为陈旧数据源）
+
             var room = _roomManager.GetPlayerRoom(playerId);
-            if (room != null)
-            {
-                var roomSync = new RoomSync
-                {
-                    ZoneId = room.RoomId,
-                    Players = room.GetAllRemotePlayerSync(),
-                    ServerTimestamp = DateTime.UtcNow.Ticks
-                };
-                await _server.SendToSessionAsync(session, MessageId.RoomSync, roomSync);
-            }
 
             // 通知其他玩家
             if (room != null)

@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <Compile Include="..\Assets\Scripts\AOT\Protocol\**\*.cs" />
+    <!-- 共享 SyncCore（与客户端 asmdef 同批源文件）——T3 接线：应用工程编译共享校验规则 -->
+    <Compile Include="..\Assets\Scripts\Hotfix\GameSystems\SyncCore\**\*.cs" />
     <!-- 默认 glob 会误吞子目录测试工程（测试文件引用 xunit，应用工程未引用），显式剔除 -->
     <Compile Remove="Server.Tests\**" />
   </ItemGroup>

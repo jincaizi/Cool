@@ -51,7 +51,7 @@ namespace KcpServer
             _sessionManager = new SessionManager(logger);
             _roomManager = new RoomManager(new RoomManagerConfig());
             _loginHandler = new LoginHandler(this, _roomManager, _logger);
-            _positionSyncHandler = new PositionSyncHandler(this, _roomManager, _logger);
+            _positionSyncHandler = new PositionSyncHandler(this, _logger, _entityStore);
             _echoHandler = new EchoHandler(this, _logger);
             _clockSyncHandler = new ClockSyncHandler(this, _logger);
 
@@ -126,7 +126,8 @@ namespace KcpServer
 
         public void RegisterEntity(long playerId, string playerName)
         {
-            _entityStore.AddPlayer(playerId, playerName);
+            var player = _entityStore.AddPlayer(playerId, playerName);
+            _entityStore.MarkDirty(player); // 注册即标脏：首个快照立即携带新实体（MUST-DO-P2）
         }
 
         public void UnregisterEntity(long playerId)

@@ -77,26 +77,5 @@ namespace KcpServer
             state.UpdatePosition(position, rotation, speed, timestamp, sequence);
             return true;
         }
-
-        public List<RemotePlayerSync> GetAllRemotePlayerSync()
-        {
-            var result = new List<RemotePlayerSync>();
-            foreach (var kvp in _players)
-            {
-                var state = kvp.Value;
-                result.Add(new RemotePlayerSync
-                {
-                    PlayerId = state.PlayerId,
-                    X = state.Position.X,
-                    Y = state.Position.Y,
-                    Z = state.Position.Z,
-                    Rotation = state.Rotation,
-                    Speed = state.Speed,
-                    Timestamp = state.LastUpdateTimestamp,
-                    Sequence = state.LastReceivedSequence
-                });
-            }
-            return result;
-        }
     }
 }

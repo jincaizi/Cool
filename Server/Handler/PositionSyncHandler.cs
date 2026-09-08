@@ -1,23 +1,59 @@
 using System;
 using System.Threading.Tasks;
+using Cool.SyncCore;
 
 namespace KcpServer
 {
+    /// <summary>
+    /// 位置同步处理器 —— 校验（共享 MovementValidator）+ EntityStore 应用（P2 接线：
+    /// 快照链激活；RemotePlayerSync 双轨退役，广播统一走 WorldSnapshot）。
+    /// 主循环线程调用（ProcessPacket）。
+    /// </summary>
     public class PositionSyncHandler
     {
         private readonly Server3C _server;
-        private readonly RoomManager _roomManager;
         private readonly ILogger _logger;
+        private readonly EntityStore _entityStore;
 
-        private const float MAX_SPEED = 15f;
-        private const float MAX_TELEPORT_DISTANCE = 50f;
-        private const float MAX_JUMP_HEIGHT = 3f;
-
-        public PositionSyncHandler(Server3C server, RoomManager roomManager, ILogger logger)
+        // Server3C 注入（LoginHandler 同款惯例——项目既有模式，不用委托 seam）
+        public PositionSyncHandler(Server3C server, ILogger logger, EntityStore entityStore)
         {
             _server = server;
-            _roomManager = roomManager;
             _logger = logger;
+            _entityStore = entityStore;
+        }
+
+        /// <summary>核心校验+应用（可独立测试——不依赖 Server3C 运行时）</summary>
+        public MoveValidationResult ValidateAndApply(PositionSyncRequest request, PlayerState player)
+        {
+            var result = MovementValidator.Validate(
+                new Vec3(player.Position.X, player.Position.Y, player.Position.Z),
+                new Vec3(request.X, request.Y, request.Z),
+                request.Rotation, request.Speed,
+                player.LastUpdateTimestamp, request.Timestamp);
+
+            // 守卫回退：非有限输入时 validator 原样透传 rotation——回退到上次已知有限值，
+            // 防 NaN 旋转进 store → ack → 快照广播（守卫注释口径：杜绝 NaN 经广播扩散）
+            float authoritativeRotation = float.IsNaN(result.AuthoritativeRotation) || float.IsInfinity(result.AuthoritativeRotation)
+                ? player.Rotation
+                : result.AuthoritativeRotation;
+
+            player.UpdatePosition(
+                new Vector3(result.AuthoritativePosition.X, result.AuthoritativePosition.Y, result.AuthoritativePosition.Z),
+                authoritativeRotation,
+                result.ClampedSpeed,
+                request.Timestamp, request.Sequence);
+            // UpdatePosition 已置 IsDirty（P1 T4）——WorldSnapshot 链自动携带
+
+            if (result.NeedsCorrection)
+            {
+                if (result.ClampedSpeed != request.Speed)
+                    _logger.LogWarning($"Player {player.PlayerId} speed too high: {request.Speed} > {MovementValidator.MaxSpeed}, clamped to {result.ClampedSpeed}");
+                else
+                    _logger.LogWarning($"Player {player.PlayerId} position corrected: teleport/jump outside plausibility limits");
+            }
+
+            return result;
         }
 
         public async Task HandlePositionSyncAsync(KcpServerSession session, PositionSyncRequest request)
@@ -29,88 +65,28 @@ namespace KcpServer
                 return;
             }
 
-            var room = _roomManager.GetPlayerRoom(playerId.Value);
-            if (room == null)
+            var player = _entityStore.GetPlayer(playerId.Value);
+            if (player == null)
             {
-                _logger.LogWarning($"Player {playerId} not in any room");
+                _logger.LogWarning($"Player {playerId} entity not found");
                 return;
             }
 
-            var playerState = room.GetPlayerState(playerId.Value);
-            if (playerState == null)
-            {
-                _logger.LogWarning($"Player {playerId} state not found");
-                return;
-            }
+            var result = ValidateAndApply(request, player);
 
-            Vector3 newPosition = new Vector3(request.X, request.Y, request.Z);
-            float newRotation = request.Rotation;
-            float speed = request.Speed;
-            long timestamp = request.Timestamp;
-            uint sequence = request.Sequence;
-
-            bool needsCorrection = false;
-            Vector3 authoritativePosition = newPosition;
-            float authoritativeRotation = newRotation;
-
-            if (speed > MAX_SPEED)
-            {
-                _logger.LogWarning($"Player {playerId} speed too high: {speed} > {MAX_SPEED}");
-                speed = MAX_SPEED;
-                needsCorrection = true;
-            }
-
-            float distance = Vector3.Distance(playerState.Position, newPosition);
-            long timeDelta = timestamp - playerState.LastUpdateTimestamp;
-            float timeDeltaSeconds = timeDelta / (float)TimeSpan.TicksPerSecond;
-
-            if (timeDeltaSeconds > 0)
-            {
-                float maxPossibleDistance = MAX_SPEED * timeDeltaSeconds * 1.2f;
-                if (distance > maxPossibleDistance && distance > MAX_TELEPORT_DISTANCE)
-                {
-                    _logger.LogWarning($"Player {playerId} possible teleport: {distance}m in {timeDeltaSeconds}s");
-                    needsCorrection = true;
-                    authoritativePosition = playerState.Position + Vector3.forward * MAX_SPEED * timeDeltaSeconds;
-                }
-            }
-
-            float verticalDelta = newPosition.Y - playerState.Position.Y;
-            if (verticalDelta > MAX_JUMP_HEIGHT)
-            {
-                needsCorrection = true;
-            }
-
-            playerState.UpdatePosition(authoritativePosition, authoritativeRotation, speed, timestamp, sequence);
-
-            // 广播给其他玩家
-            var remoteSync = new RemotePlayerSync
-            {
-                PlayerId = playerId.Value,
-                X = playerState.Position.X,
-                Y = playerState.Position.Y,
-                Z = playerState.Position.Z,
-                Rotation = playerState.Rotation,
-                Speed = playerState.Speed,
-                Timestamp = timestamp,
-                Sequence = sequence
-            };
-
-            foreach (var otherSession in room.GetOtherPlayerSessions(playerId.Value))
-            {
-                await _server.SendToSessionAsync(otherSession, MessageId.RemotePlayerSync, remoteSync);
-            }
-
-            // 发送响应给客户端
             var response = new PositionSyncResponse
             {
-                AcknowledgedSequence = sequence,
+                AcknowledgedSequence = request.Sequence,
                 ServerTimestamp = DateTime.UtcNow.Ticks,
-                HasPositionCorrection = needsCorrection,
-                AuthoritativeX = authoritativePosition.X,
-                AuthoritativeY = authoritativePosition.Y,
-                AuthoritativeZ = authoritativePosition.Z,
-                AuthoritativeRotation = authoritativeRotation
+                HasPositionCorrection = result.NeedsCorrection,
+                AuthoritativeX = result.AuthoritativePosition.X,
+                AuthoritativeY = result.AuthoritativePosition.Y,
+                AuthoritativeZ = result.AuthoritativePosition.Z,
+                // ack 同守卫（ValidateAndApply 已落库回退值——回读 player.Rotation 即同值）：
+                // 防 NaN 旋转进纠偏 ack，污染客户端纠偏链路
+                AuthoritativeRotation = float.IsNaN(result.AuthoritativeRotation) || float.IsInfinity(result.AuthoritativeRotation)
+                    ? player.Rotation
+                    : result.AuthoritativeRotation
             };
 
             await _server.SendToSessionAsync(session, MessageId.PositionSyncResponse, response);
