@@ -24,16 +24,21 @@ namespace Hotfix.GameSystems.SyncLayer
             new System.Collections.Concurrent.ConcurrentQueue<WorldSnapshot>();
         private readonly System.Collections.Concurrent.ConcurrentQueue<long> _pendingLeaves =
             new System.Collections.Concurrent.ConcurrentQueue<long>();
+        private readonly System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse> _pendingResponses =
+            new System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse>();
+        private MovementReporter? _reporter;
 
         public State CurrentState { get; private set; } = State.Disconnected;
         public long LocalPlayerId { get; private set; }
         public string ZoneId { get; private set; } = string.Empty;
         public long ServerTickRateMs { get; private set; } = 67;
         public Vector3 SpawnPosition { get; private set; }
+        public MovementReporter? Reporter => _reporter;
 
         public event Action? OnEnterWorld;
         public event Action<string>? OnDisconnected;
         public event Action<string>? OnError;
+        public event Action<Vector3, Quaternion>? OnCorrectionNeeded;
 
         public ClientNetworkManager(INetworkClient client, RemoteEntityRegistry remoteEntities, string username)
         {
@@ -51,6 +56,25 @@ namespace Hotfix.GameSystems.SyncLayer
 
             _client.MessageReceived += _dispatcher.Dispatch;
             _client.Disconnected += OnSocketDisconnected;
+        }
+
+        /// <summary>
+        /// 装配移动上报（进世界后由宿主调用；传入本地角色数据源）。
+        /// speedProvider 必须反映真实移动速度（超速钳制链路依赖它——固定值会使纠偏测不到）。
+        /// 宿主接线：manager.OnCorrectionNeeded += (pos, rot) => policy.ApplyServerCorrection(pos, rot);
+        /// </summary>
+        public void AttachMovementReporter(Func<Cool.SyncCore.Vec3> positionProvider,
+            Func<float> rotationProvider, Func<float> speedProvider)
+        {
+            if (_reporter != null)
+            {
+                // 重复装配守卫：重连 = 全新 InWorld 流程（P1 D4），但防御双订阅——
+                // 二次 attach 会双订阅 dispatcher + 旧会话残留响应污染新会话对账
+                return;
+            }
+
+            _reporter = new MovementReporter(_client, positionProvider, rotationProvider, speedProvider);
+            _dispatcher.Subscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
         }
 
         public async void ConnectAndLogin(string host, int port)
@@ -97,6 +121,12 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 _remoteEntities.Remove(playerId);
             }
+
+            // 纠偏响应封送（主线程对账 + 事件——PredictionReconciler 非线程安全，见类注释）
+            DrainResponses();
+
+            // 上报节流（与测试宿主解耦：由 manager 驱动，非 policy）
+            _reporter?.Tick(deltaSeconds, (float)ServerTickRateMs / 1000f);
         }
 
         private void OnLoginResponse(IMessage message)
@@ -131,6 +161,29 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             // 回调线程（网络驱动）：只入队，Unity API 消费留主线程 Update
             _pendingSnapshots.Enqueue((WorldSnapshot)message);
+        }
+
+        private void OnPositionSyncResponse(IMessage message)
+        {
+            // 回调线程（网络驱动）：只入队——对账字典（PredictionReconciler._frames）与主线程
+            // RecordFrame 并发会竞态；且纠偏事件会触发 Unity Transform 写（必须主线程）。
+            // 纪律同 WorldSnapshot 封送（OnWorldSnapshot 同款模式）。
+            _pendingResponses.Enqueue((PositionSyncResponse)message);
+        }
+
+        /// <summary>主线程消费纠偏响应（Update 内、上报 Tick 前调用）</summary>
+        private void DrainResponses()
+        {
+            while (_pendingResponses.TryDequeue(out var response))
+            {
+                if (_reporter != null && _reporter.OnResponse(response))
+                {
+                    // 需要纠偏 → 上层经 NetMovementPolicy.ApplyServerCorrection 执行平滑拉回
+                    OnCorrectionNeeded?.Invoke(
+                        new Vector3(response.AuthoritativeX, response.AuthoritativeY, response.AuthoritativeZ),
+                        Quaternion.Euler(0f, response.AuthoritativeRotation, 0f));
+                }
+            }
         }
 
         private void OnPlayerLeave(IMessage message)

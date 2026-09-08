@@ -8,6 +8,7 @@ using Hotfix.GameSystems.Sys3C.Camera;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Sys3C.Network;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
@@ -47,6 +48,13 @@ namespace Hotfix.GameSystems.Sys3C
         private DefendModifier _defendModifier;
         private DefendConfig _defendConfig = DefendConfig.Default;
         private Collider _bodyCollider;
+        private IMovementPolicy _movementPolicy;
+
+        /// <summary>本地角色控制器（网络宿主装配上报数据源用）</summary>
+        public Hotfix.GameSystems.Sys3C.Character.CharacterController CoreController => _cc;
+
+        /// <summary>移动策略注入面（网络宿主可替换为 NetMovementPolicy）</summary>
+        public IMovementPolicy MovementPolicy { get => _movementPolicy; set => _movementPolicy = value; }
 
         private void Start()
         {
@@ -127,6 +135,10 @@ namespace Hotfix.GameSystems.Sys3C
             _attackHandler = GetComponent<CharacterAttackHandler>();
             if (_attackHandler == null)
                 _attackHandler = gameObject.AddComponent<CharacterAttackHandler>();
+
+            // 宿主可在 Start 前预置 NetMovementPolicy（Awake 阶段）——未预置才落本地默认
+            if (_movementPolicy == null)
+                _movementPolicy = new LocalMovementPolicy(_cc);
         }
 
         private void Update()
@@ -137,7 +149,7 @@ namespace Hotfix.GameSystems.Sys3C
             Vector3 cameraForward = _camera != null ? _camera.transform.forward : Vector3.forward;
             var command = _inputManager.GetMoveCommand(cameraForward);
 
-            _cc.Update(command);
+            _movementPolicy.Update(command);
 
             // 蓄力中无移动输入时，角色朝向跟随相机（拖动鼠标调整抛投方向）
             if (_skillCoordinator.CurrentSubState == Skills.Definition.SkillSubState.Charging
