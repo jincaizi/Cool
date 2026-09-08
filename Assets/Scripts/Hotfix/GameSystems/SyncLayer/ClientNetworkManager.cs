@@ -32,6 +32,12 @@ namespace Hotfix.GameSystems.SyncLayer
         public long LocalPlayerId { get; private set; }
         public string ZoneId { get; private set; } = string.Empty;
         public long ServerTickRateMs { get; private set; } = 67;
+        /// <summary>
+        /// 时钟平滑偏移（ticks）——暴露 smoothed offset（T6 抖动实测读）；
+        /// 插值渲染实际经 ToServerTime（时钟算法的 min-filter offset）驱动，
+        /// 两者数值不同步，勿混淆。
+        /// </summary>
+        public long ClockSmoothedOffsetTicks => _clockSync.SmoothedOffsetTicks;
         public Vector3 SpawnPosition { get; private set; }
         public MovementReporter? Reporter => _reporter;
 
@@ -112,7 +118,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 foreach (var entity in snapshot.Entities)
                 {
                     if (entity.PlayerId == LocalPlayerId) continue; // 本地玩家跳过
-                    _remoteEntities.ApplySnapshot(entity);
+                    _remoteEntities.ApplySnapshot(entity, snapshot.ServerTimestamp);
                 }
             }
 
@@ -127,6 +133,13 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // 上报节流（与测试宿主解耦：由 manager 驱动，非 policy）
             _reporter?.Tick(deltaSeconds, (float)ServerTickRateMs / 1000f);
+
+            // 插值渲染（服务器时钟基准：ClockSyncDriver.ToServerTime(本地墙钟) − 2 ticks 延迟）。
+            // 收敛前（首个 ClockSyncResponse 前）ToServerTime 以本地墙钟当服务器钟（偏移 0），
+            // spawn 瞬间短暂走 newest/oldest fallback，突发收敛（~1.6s）后正常——属预期退化，非缺陷
+            long nowServerTicks = _clockSync.ToServerTime(System.DateTime.UtcNow.Ticks);
+            long renderDelayTicks = ServerTickRateMs * 10_000L * 2; // 2 ticks（ServerTickRateMs 单位 ms）
+            _remoteEntities.UpdateRender(nowServerTicks, renderDelayTicks);
         }
 
         private void OnLoginResponse(IMessage message)
