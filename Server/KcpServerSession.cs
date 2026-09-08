@@ -122,7 +122,6 @@ namespace KcpServer
 
         private volatile Socket? _sendSocket;
         private bool _wired;
-        private Action? _wireAction;
 
         /// <summary>发送 socket（由 SessionManager 注入；会话不持有 socket 生命周期）。只读——注入唯一入口为 SetSendSocket</summary>
         public Socket? SendSocket => _sendSocket;
@@ -186,7 +185,6 @@ namespace KcpServer
             {
                 if (_wired) return;
                 _wired = true;
-                _wireAction = wireAction;
                 wireAction();
             }
         }

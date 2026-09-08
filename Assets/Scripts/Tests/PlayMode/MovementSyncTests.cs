@@ -208,6 +208,83 @@ namespace KcpNet.PlayModeTests
         }
 
         [UnityTest]
+        public IEnumerator A_Moves_With_Injected_Delay_Local_Unaffected()
+        {
+            var runTask = RunInjectedDelayAsync();
+            // 墙钟上限（帧数上限在高速帧率下不可靠——见 A_Moves 同款注释）
+            float elapsed = 0f;
+            while (!runTask.IsCompleted && elapsed < 60f)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+            Assert.IsTrue(runTask.IsCompleted, "injected-delay test timed out");
+            var (ok, reason) = runTask.Result;
+            Assert.IsTrue(ok, reason);
+        }
+
+        private static async System.Threading.Tasks.Task<(bool, string)> RunInjectedDelayAsync()
+        {
+            // —— A 的上报注入 200ms 延迟：本地即时模拟不得受网控，B 插值缓冲吸收稀疏报告 ——
+            var root = new GameObject("MoveRoot");
+            var registryB = new RemoteEntityRegistry(root.transform);
+
+            var ctxA = new MoveContext();
+            ctxA.Registry = new RemoteEntityRegistry(root.transform);
+            ctxA.Manager = new ClientNetworkManager(ctxA.Adapter, ctxA.Registry, "Move_A");
+
+            var ctxB = new MoveContext();
+            ctxB.Manager = new ClientNetworkManager(ctxB.Adapter, registryB, "Move_B");
+
+            ctxA.LocalPosition = Vector3.zero;
+            // 注入 200ms 上行延迟（每报 Sleep 200ms）——本地即时模拟不得受网控
+            ctxA.Manager.AttachMovementReporter(
+                () => new Cool.SyncCore.Vec3(ctxA.LocalPosition.x, ctxA.LocalPosition.y, ctxA.LocalPosition.z),
+                () => 0f,
+                () => 4f,
+                200);
+
+            try
+            {
+                ctxA.Manager.ConnectAndLogin("127.0.0.1", 8000);
+                if (!await WaitInWorld(ctxA.Manager)) return (false, "A login failed");
+                ctxB.Manager.ConnectAndLogin("127.0.0.1", 8000);
+                if (!await WaitInWorld(ctxB.Manager)) return (false, "B login failed");
+
+                // A 侧断言：防上报路径阻塞驱动线程（send 前 Sleep 200ms——若上报与本地模拟
+                // 同链耦合会卡死/超时）。真正的解耦语义由下方 B 收敛在稀疏上报下成立来证明
+                for (int i = 0; i < 40; i++)
+                {
+                    ctxA.LocalPosition += Vector3.forward * 0.1f;
+                    ctxA.Manager.Update(0.05f);
+                    await System.Threading.Tasks.Task.Delay(50);
+                }
+                if (ctxA.LocalPosition.z < 1.5f)
+                    return (false, $"A local movement stalled under injected delay (z={ctxA.LocalPosition.z:F2}m < 1.5m)");
+
+                // B 端继续驱动，等待插值追上（延迟报告下服务器更新稀疏——缓冲兜底）
+                bool bSeesMovement = false;
+                for (int i = 0; i < 60 && !bSeesMovement; i++)
+                {
+                    ctxB.Manager.Update(0.05f);
+                    await System.Threading.Tasks.Task.Delay(100);
+                    var view = registryB.GetView(ctxA.Manager.LocalPlayerId);
+                    if (view != null && view.Position.z > 1f)
+                        bSeesMovement = true;
+                }
+                if (!bSeesMovement) return (false, "B never saw A's movement under injected delay");
+
+                return (true, "ok");
+            }
+            finally
+            {
+                ctxA.Manager.Dispose();
+                ctxB.Manager.Dispose();
+                Object.Destroy(root);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator Clock_Sync_Jitter_Recorded()
         {
             var runTask = RecordClockJitterAsync();

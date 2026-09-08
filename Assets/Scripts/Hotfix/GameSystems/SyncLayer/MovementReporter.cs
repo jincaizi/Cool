@@ -11,6 +11,7 @@ namespace Hotfix.GameSystems.SyncLayer
     /// 预测帧交共享 PredictionReconciler；响应驱动纠偏查询。
     /// 驱动点：ClientNetworkManager.Update（宿主每帧调）——与测试宿主解耦，
     /// 不依赖真实 NetMovementPolicy。
+    /// 注入参数 injectedSendDelayMs 仅测试用（PlayMode 延迟注入验收；生产恒 0）。
     /// </summary>
     public sealed class MovementReporter
     {
@@ -18,6 +19,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Func<Vec3> _positionProvider;
         private readonly Func<float> _rotationProvider;
         private readonly Func<float> _speedProvider;
+        private readonly int _injectedSendDelayMs;
         private readonly PredictionReconciler _reconciler = new PredictionReconciler();
         private float _timer;
         private uint _sequence;
@@ -26,12 +28,14 @@ namespace Hotfix.GameSystems.SyncLayer
         public long LastServerTimestamp { get; private set; }
 
         public MovementReporter(INetworkClient client,
-            Func<Vec3> positionProvider, Func<float> rotationProvider, Func<float> speedProvider)
+            Func<Vec3> positionProvider, Func<float> rotationProvider, Func<float> speedProvider,
+            int injectedSendDelayMs = 0)
         {
             _client = client;
             _positionProvider = positionProvider;
             _rotationProvider = rotationProvider;
             _speedProvider = speedProvider;
+            _injectedSendDelayMs = injectedSendDelayMs;
         }
 
         /// <summary>每帧驱动；reportIntervalSeconds = ServerTickRateMs/1000（默认 66ms）</summary>
@@ -53,6 +57,10 @@ namespace Hotfix.GameSystems.SyncLayer
             uint seq = ++_sequence;
 
             _reconciler.RecordFrame(seq, pos, rot);
+
+            // 测试钩子：注入上行延迟（PlayMode 延迟注入验收用；生产恒 0）
+            if (_injectedSendDelayMs > 0)
+                System.Threading.Thread.Sleep(_injectedSendDelayMs);
 
             _client.Send(MessageId.PositionSyncRequest, new PositionSyncRequest
             {

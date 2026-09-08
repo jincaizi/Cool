@@ -32,3 +32,12 @@
    移动同步属 P2）
 3. 关掉 B → 约 15s 后 A 端 B 实体消失（服务器 PeerSilence 检测窗口，T8 落地）；
    B 重开重连 → A 端 B 重新出现
+
+## P2 移动同步验证（2026-08-28）
+
+- A 移动 → B 插值可见（MovementSyncTests；插值渲染延迟 = 2 ticks，时钟同步驱动）
+- **Unreliable 评估结论（MUST-DO-4 关闭）**：P2 位置流保持 Reliable + 最新生效语义
+  （服务器端只保留最新位置；KCP 无真实不可靠通道，MessageFlags 无 Unreliable 位——仅 Reserved 占位，未实现）。
+  P3 AOI 压测时如带宽超标再评估。
+- 延迟注入工具：PlayMode 测试用 `MovementReporter` 的 `injectedSendDelayMs` 构造参数
+  模拟上行延迟（MovementSyncTests 的 A_Moves_With_Injected_Delay_Local_Unaffected 传 200ms）

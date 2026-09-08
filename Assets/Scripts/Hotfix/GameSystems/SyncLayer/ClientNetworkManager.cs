@@ -70,7 +70,7 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 宿主接线：manager.OnCorrectionNeeded += (pos, rot) => policy.ApplyServerCorrection(pos, rot);
         /// </summary>
         public void AttachMovementReporter(Func<Cool.SyncCore.Vec3> positionProvider,
-            Func<float> rotationProvider, Func<float> speedProvider)
+            Func<float> rotationProvider, Func<float> speedProvider, int injectedSendDelayMs = 0)
         {
             if (_reporter != null)
             {
@@ -79,7 +79,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 return;
             }
 
-            _reporter = new MovementReporter(_client, positionProvider, rotationProvider, speedProvider);
+            _reporter = new MovementReporter(_client, positionProvider, rotationProvider, speedProvider, injectedSendDelayMs);
             _dispatcher.Subscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
         }
 
