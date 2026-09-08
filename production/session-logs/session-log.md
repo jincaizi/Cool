@@ -83139,3 +83139,2282 @@ task9_01_select_panel.png / task9_02_select_panel.png / task9_03_female_playing.
 1. **prefab 状态以 git 为准**：工作树文件可能被编辑器会话副作用污染（跨文件写入），验证前先 `git status`/`git diff` 对比基线，污染先 checkout 还原，不要在脏状态上"修复"。
 2. **自动化验证未覆盖攻击/武器组件**：Task 9 验证矩阵只查了相机绑定/动画/闪红，未断言根节点与 weapon_r 的组件 typeName 全集，导致删组件未被发现。已补实例级组件清单断言（本次复验矩阵可作为后续回归基线）。
 3. 任何"需要再修 prefab"的信号，先质疑数据来源是否来自被污染的工作树，再动手。
+## Session End: 20260805_080805
+### Commits
+e894261 docs: append execution record to character selection plan (post-plan fixes + restore)
+5d7ca8c fix: restore FemalePlayer.prefab to full mirror (revert destructive 4066722 changes)
+4066722 fix: wire Sys3CEntry + CharacterController and fix Animator controller on FemalePlayer prefab (found by Task 9 E2E verification)
+203ed74 fix: rebind player animator to HitStopManager via PlayerSpawnedEvent (runtime spawn regression)
+4636d4a feat: scene rework — spawner-driven player, spawn point, select-view camera
+c0e4880 feat: character select panel prefab + boot wiring in UIManager
+b5bb6fc feat: stripped preview prefabs + scene placement for character select
+01ef7bd fix: female player prefab — correct weapon bone path to OHS06, commit meta
+b258327 feat: female player prefab — full 3C wiring mirror of male player
+ec37abd fix: merge scene-side components into male player prefab (spawn parity baseline)
+dde4733 feat: character select panel + preview rotator (UI code)
+69dfb44 chore: commit auto-generated meta files for Task 2
+bf334ac feat: character selected event + player spawner (event-driven, idempotent)
+4248fbe feat: character gender enum + selection persistence service (PlayerPrefs)
+fc1e060 docs: character selection implementation plan (9 tasks)
+20e184b docs: refine character selection spec — preview prefab scope, panel-owned preview lifecycle, male prefab merge baseline
+be64df1 docs: character selection system design (dual prefab, 3C reuse, zero 3C changes)
+a7b62a2 docs: implementation plan for hit-flash mobile perf assessment (zero-code scope)
+94344db docs: hit-flash (damage tint) mobile performance assessment — no code change needed
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+---
+
+## Session End: 20260805_113017
+### Commits
+e894261 docs: append execution record to character selection plan (post-plan fixes + restore)
+5d7ca8c fix: restore FemalePlayer.prefab to full mirror (revert destructive 4066722 changes)
+4066722 fix: wire Sys3CEntry + CharacterController and fix Animator controller on FemalePlayer prefab (found by Task 9 E2E verification)
+203ed74 fix: rebind player animator to HitStopManager via PlayerSpawnedEvent (runtime spawn regression)
+4636d4a feat: scene rework — spawner-driven player, spawn point, select-view camera
+c0e4880 feat: character select panel prefab + boot wiring in UIManager
+b5bb6fc feat: stripped preview prefabs + scene placement for character select
+01ef7bd fix: female player prefab — correct weapon bone path to OHS06, commit meta
+b258327 feat: female player prefab — full 3C wiring mirror of male player
+ec37abd fix: merge scene-side components into male player prefab (spawn parity baseline)
+dde4733 feat: character select panel + preview rotator (UI code)
+69dfb44 chore: commit auto-generated meta files for Task 2
+bf334ac feat: character selected event + player spawner (event-driven, idempotent)
+4248fbe feat: character gender enum + selection persistence service (PlayerPrefs)
+fc1e060 docs: character selection implementation plan (9 tasks)
+20e184b docs: refine character selection spec — preview prefab scope, panel-owned preview lifecycle, male prefab merge baseline
+be64df1 docs: character selection system design (dual prefab, 3C reuse, zero 3C changes)
+a7b62a2 docs: implementation plan for hit-flash mobile perf assessment (zero-code scope)
+94344db docs: hit-flash (damage tint) mobile performance assessment — no code change needed
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260805_113122
+### Commits
+e894261 docs: append execution record to character selection plan (post-plan fixes + restore)
+5d7ca8c fix: restore FemalePlayer.prefab to full mirror (revert destructive 4066722 changes)
+4066722 fix: wire Sys3CEntry + CharacterController and fix Animator controller on FemalePlayer prefab (found by Task 9 E2E verification)
+203ed74 fix: rebind player animator to HitStopManager via PlayerSpawnedEvent (runtime spawn regression)
+4636d4a feat: scene rework — spawner-driven player, spawn point, select-view camera
+c0e4880 feat: character select panel prefab + boot wiring in UIManager
+b5bb6fc feat: stripped preview prefabs + scene placement for character select
+01ef7bd fix: female player prefab — correct weapon bone path to OHS06, commit meta
+b258327 feat: female player prefab — full 3C wiring mirror of male player
+ec37abd fix: merge scene-side components into male player prefab (spawn parity baseline)
+dde4733 feat: character select panel + preview rotator (UI code)
+69dfb44 chore: commit auto-generated meta files for Task 2
+bf334ac feat: character selected event + player spawner (event-driven, idempotent)
+4248fbe feat: character gender enum + selection persistence service (PlayerPrefs)
+fc1e060 docs: character selection implementation plan (9 tasks)
+20e184b docs: refine character selection spec — preview prefab scope, panel-owned preview lifecycle, male prefab merge baseline
+be64df1 docs: character selection system design (dual prefab, 3C reuse, zero 3C changes)
+a7b62a2 docs: implementation plan for hit-flash mobile perf assessment (zero-code scope)
+94344db docs: hit-flash (damage tint) mobile performance assessment — no code change needed
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260806_012656
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260806_012852
+### Commits
+d658d58 docs: character select scene rework implementation plan (6 tasks)
+245d369 docs: character select scene rework design — separate select scene, single-preview switching, spawn on scene load
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+---
+
+## Session: 20260806_024400 — Task 6 端到端验证（独立选人场景重构）
+### 验证矩阵（EditMode + 4 个 PlayMode 会话）
+| 验证项 | 结果 | 证据 |
+|--------|------|------|
+| Step1 EditMode 回归（66 测试） | PASS | tests-run Passed 66/66, Failed 0 |
+| Step2 面板出现（CharacterSelectPanel(Clone) under Canvas_Layer_Popup, active） | PASS | 场景根扫描 activeSelf=True |
+| Step2 UIManager 单例（DontDestroyOnLoad，来自选人场景） | PASS | GO scene=DontDestroyOnLoad active=True |
+| Step2 初始预览=Load()（无存档默认男） | PASS | Preview_Male active=True / Preview_Female active=False（根对象） |
+| Step2 女卡片点击 → FemaleHighlight 亮 + 预览切换 | PASS | 反射 _femaleButton.onClick.Invoke → _femaleHighlight=True/_maleHighlight=False，Preview_Female active=True / Preview_Male inactive |
+| Step2 确认 → 场景加载 DemoDay | PASS | 轮询 scene=DemoDay（frame 60990，<10s） |
+| Step2 组件全集抽查（FemalePlayer(Clone) 实例） | PASS | 根 12（11 要求 + InputManager）：Transform/Animator/CharacterController/Sys3CEntry/CharacterAttackHandler/MeleeWeapon/SkillFreezeEffector/IceBurstVFX/IceDecalVFX/FrostAuraVFX/HitFlashVFX；weapon_r 8（Transform + SlashTrailVFX/SwordGlowVFX/WeaponVFXController/WeaponTrailRenderer/WeaponSurfaceShader/WeaponMistParticles/WeaponMaterialProxy）；RingVisual 3（Transform/SpriteRenderer/SelectionRing, sprite=role_picSele）；_characterSkills.Length=4 |
+| Step2 相机 Target==玩家实例 | PASS | Target==FemalePlayer(Clone) |
+| Step2 HitStopManager._playerAnimator 非空 | PASS | 反射读 non-null |
+| Step2 PlayerHudPanel 存在 | PASS | PlayerHudPanel(Clone) active=True |
+| Step2 无预览残留 | PASS | previewResidueCount=0（无 Preview_* 对象） |
+| Step2 受击闪红（MonsterTakeDamageEvent 真实链路） | PASS | EventBus.Emit 不报错（console Error=0） |
+| Step3 双击保护（同帧 2× confirm） | PASS | 场景=DemoDay（单次加载），玩家实例=1，console 无 "already loaded" 类 Error |
+| Step4 持久化（再次 Play，初始预览=女） | PASS | Preview_Female active=True / Preview_Male inactive，_femaleHighlight=True |
+| Step5 dev 路径（直接 Play DemoDay） | PASS | 面板出现（UIManager 来自 DemoDay 场景根，转 DontDestroyOnLoad）；确认后 IsVisible=False/alpha=0（CanvasGroup 模式 GO 保持 active 属正常）；玩家=FemalePlayer(Clone)（Load()=女）；场景仍 DemoDay（未切换）；相机 Target 绑定；console 无 Error |
+| 每个 PlayMode 会话后 git 复核 | PASS | 无 scene/prefab 意外改动（CharacterSelect.unity / DemoDay.unity / 两 prefab 均干净） |
+
+### 组件全集抽查（硬性要求，实例级）
+- 根 12：Transform, Animator, CharacterController, Sys3CEntry, CharacterAttackHandler, MeleeWeapon, SkillFreezeEffector, IceBurstVFX, IceDecalVFX, FrostAuraVFX, HitFlashVFX, InputManager(运行期附加) — 11 项要求全部命中
+- weapon_r 8：Transform + 7 VFX（SlashTrailVFX, SwordGlowVFX, WeaponVFXController, WeaponTrailRenderer, WeaponSurfaceShader, WeaponMistParticles, WeaponMaterialProxy）
+- RingVisual 3：Transform + SpriteRenderer（sprite=role_picSele）+ SelectionRing
+- Sys3CEntry._characterSkills.Length == 4
+
+### 截图（production/verify/，不提交 git）
+select_flow_1_panel.png / select_flow_2_female_preview.png / select_flow_3_female_playing.png / select_double_click_1_demoday.png / select_persist_1_female_restored.png / select_dev_1_demoday_panel_closed.png
+（截图已程序化校验：1464x646 非空白、采样 154 色、营地地面绿/天空蓝/角色暗色；Read 工具本环境无法显示图片，视觉效果建议人工复核）
+
+### 需手动验证的遗留项
+- 移动/攻击/技能：InputManager 依赖真实键盘输入，无法脚本模拟 → 需手动验证女角色移动/普攻/技能 Q/R
+- 选人面板视觉/交互手感（卡片点击反馈、预览体旋转）建议人工过目 select_flow_1/2 截图
+
+### 备注
+- 工具可用性：editor-application-* / screenshot-game-view 未注册为 MCP 工具，经 unity-mcp-cli run-tool 调用（isPlaying 为正确参数名）。
+- GameObject.Find 不返回 inactive 对象：Preview_Female inactive 时 Find 返回 NULL，以根对象扫描为准。
+- CanvasGroup 模式下面板关闭后 GO 保持 active（alpha=0/IsVisible=False），不能以 activeSelf 判断关闭。
+- CLAUDE.md 有一行用户侧改动（项目概述补 "release target is mobile platform"），非本会话所为，未处理。
+### 会话结论
+- 所有自动化验证项 PASS；无阻塞；未发现需要修复的 bug。
+## Session End: 20260806_024801
+### Commits
+7680cb9 docs: append execution record to select-scene rework plan
+9410bd4 fix: remove preview models from DemoDay, reset camera to game view
+d070596 chore: strip navmesh components and redundant fire light from select scene
+f34acb4 feat: character select scene (camp backdrop, preview slot, stage controller wiring) + build settings
+e7260ea feat: player spawner Start fallback — spawn from saved selection on scene load
+d0cffeb feat: select stage controller — preview switching + game scene load
+73adaa6 feat: panel selection-changed/closed events + confirm re-entry guard
+d658d58 docs: character select scene rework implementation plan (6 tasks)
+245d369 docs: character select scene rework design — separate select scene, single-preview switching, spawn on scene load
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260806_030229
+### Commits
+7680cb9 docs: append execution record to select-scene rework plan
+9410bd4 fix: remove preview models from DemoDay, reset camera to game view
+d070596 chore: strip navmesh components and redundant fire light from select scene
+f34acb4 feat: character select scene (camp backdrop, preview slot, stage controller wiring) + build settings
+e7260ea feat: player spawner Start fallback — spawn from saved selection on scene load
+d0cffeb feat: select stage controller — preview switching + game scene load
+73adaa6 feat: panel selection-changed/closed events + confirm re-entry guard
+d658d58 docs: character select scene rework implementation plan (6 tasks)
+245d369 docs: character select scene rework design — separate select scene, single-preview switching, spawn on scene load
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260806_030351
+### Commits
+7680cb9 docs: append execution record to select-scene rework plan
+9410bd4 fix: remove preview models from DemoDay, reset camera to game view
+d070596 chore: strip navmesh components and redundant fire light from select scene
+f34acb4 feat: character select scene (camp backdrop, preview slot, stage controller wiring) + build settings
+e7260ea feat: player spawner Start fallback — spawn from saved selection on scene load
+d0cffeb feat: select stage controller — preview switching + game scene load
+73adaa6 feat: panel selection-changed/closed events + confirm re-entry guard
+d658d58 docs: character select scene rework implementation plan (6 tasks)
+245d369 docs: character select scene rework design — separate select scene, single-preview switching, spawn on scene load
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+
+---
+
+## Session: 20260806_0316 — Fix 3: 端到端验证（真实射线点击）
+### 目的
+Fix 1 (EventSystem, 5648f8e) + Fix 2 (紧凑布局, 2f08d43) 之后，用真实输入链路（EventSystem 射线 → GraphicRaycaster → Button）验证选人面板点击，不绕过输入系统。
+
+### Step 1: EditMode 回归
+- tests-run (EditMode): **66/66 Passed, 0 Failed** ✓
+
+### Step 2: PlayMode 真实射线点击（script-execute，走 EventSystem 射线链路）
+- 场景 CharacterSelect 打开 → PlayMode 进入
+- EventSystem.current != null, enabled=True, activeInHierarchy=True ✓
+- 面板: CharacterSelectPanel(Clone), Canvas_Layer_Popup, ScreenSpaceOverlay (worldCamera=null)
+- **射线命中断言** (EventSystem.current.RaycastAll, 卡片中心 WorldToScreenPoint):
+  - MaleCard center=(644.1, 268.7) → firstHit=MaleCard ✓
+  - FemaleCard center=(819.6, 268.7) → firstHit=FemaleCard ✓
+  - ConfirmButton center=(731.9, 100.0) → firstHit=ConfirmButton ✓
+- **女卡片真实点击** (ExecuteEvents pointerDown→pointerUp→pointerClick): raycast firstHit=FemaleCard → 点击后 MaleHighlight=False, FemaleHighlight=True ✓; Preview_Male=False, Preview_Female=True ✓ (事件链: pointer → Button.onClick → Select → OnSelectionChanged → SelectStageController.ApplyPreview)
+- **男卡片切回**: raycast firstHit=MaleCard → MaleHighlight=True, FemaleHighlight=False ✓; Preview_Male=True, Preview_Female=False ✓
+- **确认按钮**: raycast firstHit=ConfirmButton → 面板关闭 → 6s 内 activeScene=DemoDay (超时预算 10s) ✓; 玩家生成: DemoDay roots 含 MaleCharacterPBR(Clone)（确认前选中男）✓
+- 截图: production/verify/select_ui_1_female_clicked.png (1464x646, 点女卡片后), production/verify/select_ui_2_playing.png (进入 DemoDay 后)
+- 退出 PlayMode
+
+### Step 3: 布局视觉确认（PIL 程序化校验）
+- 对称性: 屏幕中心 x=732; |MaleCard.x-732|=87.9, |FemaleCard.x-732|=87.6, |ConfirmButton.x-732|=0.1 → 底部水平居中 ✓
+- 卡片区域像素内容: FemaleCard 区 mean_lum=126.3 std=46.2（选中高亮更亮）, MaleCard 区 74.6/22.4, Confirm 区 77.3/28.4, 同带背景参照 66.4/20.4 → 卡片/按钮均可见、可选中最亮 ✓
+- 顶部预览区 (y 0..220): mean_lum 96.8-98.0, 无面板遮挡 ✓
+- 卡片尺寸: 现 200×280 (运行时 rect 实测) vs 原 360×520 (git 2f08d43 确认) → 面积约 30%, 观感明显紧凑; ConfirmButton 220×70 vs 原 280×90
+
+### git 复核
+- Assets/Scenes/CharacterSelect.unity / CharacterSelectPanel.prefab / DemoDay.unity: **零改动** ✓
+- 无意外 prefab 变脏。未入库: production/verify/ 截图
+- 观察（非本特性）: ZhunYuan SDF.asset 新增字形（PlayMode 文本渲染产物）; CLAUDE.md 有他人新增 "release target is mobile" 一句
+## Session End: 20260806_031621
+### Commits
+c23c782 docs: append execution record to select UI fix plan
+2f08d43 fix: compact select panel layout — smaller cards bottom-centered (design-res units)
+5648f8e fix: add EventSystem to select scene (UI clicks had no input processing)
+4167a77 docs: select UI fix spec + plan (EventSystem root cause + compact layout)
+7680cb9 docs: append execution record to select-scene rework plan
+9410bd4 fix: remove preview models from DemoDay, reset camera to game view
+d070596 chore: strip navmesh components and redundant fire light from select scene
+f34acb4 feat: character select scene (camp backdrop, preview slot, stage controller wiring) + build settings
+e7260ea feat: player spawner Start fallback — spawn from saved selection on scene load
+d0cffeb feat: select stage controller — preview switching + game scene load
+73adaa6 feat: panel selection-changed/closed events + confirm re-entry guard
+d658d58 docs: character select scene rework implementation plan (6 tasks)
+245d369 docs: character select scene rework design — separate select scene, single-preview switching, spawn on scene load
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_080615
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_082238
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_082906
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_083351
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_084255
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_085356
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_085509
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_090535
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_090721
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_115348
+### Commits
+964de01 docs: fix sword qi spec — IEffectStats type + DamageBlock copy note
+bf1c61a docs: sword qi attack2 design (brainstorm approved)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_210009
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_210606
+### Commits
+fff599e docs: sword qi attack2 implementation plan (10 tasks, TDD)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_221233
+### Commits
+af06322 fix: pool prewarm instances inactive until Get (no visible residue at origin)
+2fcb23f docs: sync sword qi spec — SwordQi hook on SkillData base (BA_Heavy is InstantSkillData)
+46ea3e1 feat: sword qi prefab + config wired to heavy attack (BA_Heavy)
+791de2b feat: SkillExecutor spawns sword qi on hitbox frame (dedup, reset, network event)
+209c3fe feat: SwordQiSpawnedEvent (network sync hook, no subscribers yet)
+047824a feat: SwordQiSpawner — lazy pooled spawn entry with warn-and-skip
+e75af95 fix: ComponentPool.Get guards destroyed instances (scene-unload residue)
+0a54237 feat: SwordQiProjectile — linear flight, band detection, per-target dedup, pool release
+3e7b2ef feat: SwordQiConfig data + SkillData.SwordQi hook (base class, null = disabled)
+a359b4b refactor: extract SkillDamageHelper.FillDamageContext (shared by executor and sword qi)
+c116c6b chore: meta for SwordQiDamageBlockCloneTests
+7e5084a feat: DamageBlock.Clone for sword qi private damage copy
+fff599e docs: sword qi attack2 implementation plan (10 tasks, TDD)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_225612
+### Commits
+af06322 fix: pool prewarm instances inactive until Get (no visible residue at origin)
+2fcb23f docs: sync sword qi spec — SwordQi hook on SkillData base (BA_Heavy is InstantSkillData)
+46ea3e1 feat: sword qi prefab + config wired to heavy attack (BA_Heavy)
+791de2b feat: SkillExecutor spawns sword qi on hitbox frame (dedup, reset, network event)
+209c3fe feat: SwordQiSpawnedEvent (network sync hook, no subscribers yet)
+047824a feat: SwordQiSpawner — lazy pooled spawn entry with warn-and-skip
+e75af95 fix: ComponentPool.Get guards destroyed instances (scene-unload residue)
+0a54237 feat: SwordQiProjectile — linear flight, band detection, per-target dedup, pool release
+3e7b2ef feat: SwordQiConfig data + SkillData.SwordQi hook (base class, null = disabled)
+a359b4b refactor: extract SkillDamageHelper.FillDamageContext (shared by executor and sword qi)
+c116c6b chore: meta for SwordQiDamageBlockCloneTests
+7e5084a feat: DamageBlock.Clone for sword qi private damage copy
+fff599e docs: sword qi attack2 implementation plan (10 tasks, TDD)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQi/SwordQiSpawner.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_230302
+### Commits
+65c3d58 fix: rebuild SwordQi_Heavy + BA_Heavy assets via normal import pipeline
+af06322 fix: pool prewarm instances inactive until Get (no visible residue at origin)
+2fcb23f docs: sync sword qi spec — SwordQi hook on SkillData base (BA_Heavy is InstantSkillData)
+46ea3e1 feat: sword qi prefab + config wired to heavy attack (BA_Heavy)
+791de2b feat: SkillExecutor spawns sword qi on hitbox frame (dedup, reset, network event)
+209c3fe feat: SwordQiSpawnedEvent (network sync hook, no subscribers yet)
+047824a feat: SwordQiSpawner — lazy pooled spawn entry with warn-and-skip
+e75af95 fix: ComponentPool.Get guards destroyed instances (scene-unload residue)
+0a54237 feat: SwordQiProjectile — linear flight, band detection, per-target dedup, pool release
+3e7b2ef feat: SwordQiConfig data + SkillData.SwordQi hook (base class, null = disabled)
+a359b4b refactor: extract SkillDamageHelper.FillDamageContext (shared by executor and sword qi)
+c116c6b chore: meta for SwordQiDamageBlockCloneTests
+7e5084a feat: DamageBlock.Clone for sword qi private damage copy
+fff599e docs: sword qi attack2 implementation plan (10 tasks, TDD)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260807_231815
+### Commits
+0e1296b fix: sword qi pool root under GameRoot container + lower spawn height
+65c3d58 fix: rebuild SwordQi_Heavy + BA_Heavy assets via normal import pipeline
+af06322 fix: pool prewarm instances inactive until Get (no visible residue at origin)
+2fcb23f docs: sync sword qi spec — SwordQi hook on SkillData base (BA_Heavy is InstantSkillData)
+46ea3e1 feat: sword qi prefab + config wired to heavy attack (BA_Heavy)
+791de2b feat: SkillExecutor spawns sword qi on hitbox frame (dedup, reset, network event)
+209c3fe feat: SwordQiSpawnedEvent (network sync hook, no subscribers yet)
+047824a feat: SwordQiSpawner — lazy pooled spawn entry with warn-and-skip
+e75af95 fix: ComponentPool.Get guards destroyed instances (scene-unload residue)
+0a54237 feat: SwordQiProjectile — linear flight, band detection, per-target dedup, pool release
+3e7b2ef feat: SwordQiConfig data + SkillData.SwordQi hook (base class, null = disabled)
+a359b4b refactor: extract SkillDamageHelper.FillDamageContext (shared by executor and sword qi)
+c116c6b chore: meta for SwordQiDamageBlockCloneTests
+7e5084a feat: DamageBlock.Clone for sword qi private damage copy
+fff599e docs: sword qi attack2 implementation plan (10 tasks, TDD)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_054007
+### Commits
+0e1296b fix: sword qi pool root under GameRoot container + lower spawn height
+65c3d58 fix: rebuild SwordQi_Heavy + BA_Heavy assets via normal import pipeline
+af06322 fix: pool prewarm instances inactive until Get (no visible residue at origin)
+2fcb23f docs: sync sword qi spec — SwordQi hook on SkillData base (BA_Heavy is InstantSkillData)
+46ea3e1 feat: sword qi prefab + config wired to heavy attack (BA_Heavy)
+791de2b feat: SkillExecutor spawns sword qi on hitbox frame (dedup, reset, network event)
+209c3fe feat: SwordQiSpawnedEvent (network sync hook, no subscribers yet)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_054331
+### Commits
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+0e1296b fix: sword qi pool root under GameRoot container + lower spawn height
+65c3d58 fix: rebuild SwordQi_Heavy + BA_Heavy assets via normal import pipeline
+af06322 fix: pool prewarm instances inactive until Get (no visible residue at origin)
+2fcb23f docs: sync sword qi spec — SwordQi hook on SkillData base (BA_Heavy is InstantSkillData)
+46ea3e1 feat: sword qi prefab + config wired to heavy attack (BA_Heavy)
+791de2b feat: SkillExecutor spawns sword qi on hitbox frame (dedup, reset, network event)
+209c3fe feat: SwordQiSpawnedEvent (network sync hook, no subscribers yet)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_055113
+### Commits
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+0e1296b fix: sword qi pool root under GameRoot container + lower spawn height
+65c3d58 fix: rebuild SwordQi_Heavy + BA_Heavy assets via normal import pipeline
+af06322 fix: pool prewarm instances inactive until Get (no visible residue at origin)
+2fcb23f docs: sync sword qi spec — SwordQi hook on SkillData base (BA_Heavy is InstantSkillData)
+46ea3e1 feat: sword qi prefab + config wired to heavy attack (BA_Heavy)
+791de2b feat: SkillExecutor spawns sword qi on hitbox frame (dedup, reset, network event)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_063855
+### Commits
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+0e1296b fix: sword qi pool root under GameRoot container + lower spawn height
+65c3d58 fix: rebuild SwordQi_Heavy + BA_Heavy assets via normal import pipeline
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_073838
+### Commits
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_080256
+### Commits
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_080934
+### Commits
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_081025
+### Commits
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_085341
+### Commits
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_085446
+### Commits
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_110930
+### Commits
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_111403
+### Commits
+d3c83e7 docs: mage fire skills design — fireball / charge blast / meteor (3-skill batch, Q/R/Ult slots)
+4b37ffd fix: crescent arc vertical — ends top/bottom, bulge toward flight (matches vertical slash)
+0c08038 fix: crescent arc orientation — horizontal (ends left/right, bulge toward flight)
+bbe1f03 feat: sword qi visual upgrade — crescent arc + wider detect radius
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260808_230039
+### Commits
+1c3cdd3 docs: implementation plan — fire skills batch (TDD, 17 tasks)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scenes/CharacterSelect.unity
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260809_014023
+### Commits
+9b8bab5 docs: record implementation deviations in fire skills spec
+84e86b3 fix: play explosion VFX ungated (fireball + charge release); zero meteor melee shape; correct charging comment
+74db602 fix: frame-rate-adaptive hitbox window — Execution damage settles at 30fps (mobile target)
+3f64920 chore: remove leftover fire-skill VFX verification clones from CharacterSelect scene (T17 regression cleanup)
+21fdfc4 feat: wire fire skills into player prefabs (Q fireball, R charge blast, ult meteor)
+a857eff fix: fire skill prefabs — one-shot explosions (looping off, rate 0), real gradients, material assets
+559a302 feat: fire skill prefabs — fireball / meteor strike / explosion VFX + asset wiring
+d734f25 fix: Meteor_Ultimate skillType Instant (was Combo — interruption matrix dispatches on it)
+f6ecf32 feat: fire skill assets — Fireball_SkillQ / ChargeFire_SkillR / Meteor_Ultimate + MeteorConfig
+257bdfe feat: animator — ChargeBlast/Ultimate triggers + SkillR_charge/Ult states
+2b6d82d feat: input wiring — R hold-to-charge release, U ultimate key
+d4f1fcc fix: meteor uses cfg.Effect override (was dead); +reentrancy/prefab-guard/fallback tests
+8751c50 feat: meteor spawn hook on execution entry + MeteorSpawnedEvent snapshot
+8e3bb16 feat: MeteorSpawner — lazy pooled spawn entry (mirror FireballSpawner)
+76253fd test: meteor ankle-height discriminator (4.1m above impact); extract AnkleHeightOffset const
+fc16843 feat: meteor strike — warn decal, delayed impact AOE at ankle height, pooled
+48f4762 feat: MeteorConfig + SkillData.Meteor hook (mirror SwordQi config pattern)
+dc1b3dc fix: skip FireballSpawnedEvent when projectile prefab missing (parity with sword qi)
+4ae2d9f feat: fireball spawn hook on execution entry + FireballSpawnedEvent snapshot
+8555787 feat: FireballSpawner — lazy pooled spawn entry (mirror SwordQiSpawner)
+931d96f feat: fireball projectile — linear flight, explode-on-hit, pooled
+53b663f feat: ProjectileSkillData — spawnOffset/range/explosionRadius + OnValidate type guard
+f0a507c feat: SkillCoordinator.TryReleaseCharge + SkillExecutor.Release forwarding (release charged skill on key up)
+194586e test: strengthen charge guard discriminator (3 frames) + event contract assert; minor executor polish
+6dfcf6c fix: charge blast settlement — curve-scaled damage, charge-period guard, interrupt releases VFX event, radius scaling, _wasFullCharge
+06f3f3e feat: charge release — Release() + ChargeProgressAtRelease (fix dead release path)
+1c3cdd3 docs: implementation plan — fire skills batch (TDD, 17 tasks)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Fireball_SkillQ.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/RpgDuo/Animator/Character3C.controller
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260809_045440
+### Commits
+cb5ee93 feat: wire 7-skill array (Q thrust, R spin, 1 fireball, 2 charge blast, 3 meteor)
+91d5e89 feat: remap skills — Q/R restored (thrust/spin), mage skills on 1/2/3 + controller reimport
+9b8bab5 docs: record implementation deviations in fire skills spec
+84e86b3 fix: play explosion VFX ungated (fireball + charge release); zero meteor melee shape; correct charging comment
+74db602 fix: frame-rate-adaptive hitbox window — Execution damage settles at 30fps (mobile target)
+3f64920 chore: remove leftover fire-skill VFX verification clones from CharacterSelect scene (T17 regression cleanup)
+21fdfc4 feat: wire fire skills into player prefabs (Q fireball, R charge blast, ult meteor)
+a857eff fix: fire skill prefabs — one-shot explosions (looping off, rate 0), real gradients, material assets
+559a302 feat: fire skill prefabs — fireball / meteor strike / explosion VFX + asset wiring
+d734f25 fix: Meteor_Ultimate skillType Instant (was Combo — interruption matrix dispatches on it)
+f6ecf32 feat: fire skill assets — Fireball_SkillQ / ChargeFire_SkillR / Meteor_Ultimate + MeteorConfig
+257bdfe feat: animator — ChargeBlast/Ultimate triggers + SkillR_charge/Ult states
+2b6d82d feat: input wiring — R hold-to-charge release, U ultimate key
+d4f1fcc fix: meteor uses cfg.Effect override (was dead); +reentrancy/prefab-guard/fallback tests
+8751c50 feat: meteor spawn hook on execution entry + MeteorSpawnedEvent snapshot
+8e3bb16 feat: MeteorSpawner — lazy pooled spawn entry (mirror FireballSpawner)
+76253fd test: meteor ankle-height discriminator (4.1m above impact); extract AnkleHeightOffset const
+fc16843 feat: meteor strike — warn decal, delayed impact AOE at ankle height, pooled
+48f4762 feat: MeteorConfig + SkillData.Meteor hook (mirror SwordQi config pattern)
+dc1b3dc fix: skip FireballSpawnedEvent when projectile prefab missing (parity with sword qi)
+4ae2d9f feat: fireball spawn hook on execution entry + FireballSpawnedEvent snapshot
+8555787 feat: FireballSpawner — lazy pooled spawn entry (mirror SwordQiSpawner)
+931d96f feat: fireball projectile — linear flight, explode-on-hit, pooled
+53b663f feat: ProjectileSkillData — spawnOffset/range/explosionRadius + OnValidate type guard
+f0a507c feat: SkillCoordinator.TryReleaseCharge + SkillExecutor.Release forwarding (release charged skill on key up)
+194586e test: strengthen charge guard discriminator (3 frames) + event contract assert; minor executor polish
+6dfcf6c fix: charge blast settlement — curve-scaled damage, charge-period guard, interrupt releases VFX event, radius scaling, _wasFullCharge
+06f3f3e feat: charge release — Release() + ChargeProgressAtRelease (fix dead release path)
+1c3cdd3 docs: implementation plan — fire skills batch (TDD, 17 tasks)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260809_081523
+### Commits
+f43fb2a fix: drop dead MinChargeTime, default MaxChargeTime 0, _isCharged guard preserves charged-data semantics + landing-target test
+825000f feat: fireball hold-to-charge throw — parabolic arc to ground target, charge-while-aiming, face-camera during charge
+cb5ee93 feat: wire 7-skill array (Q thrust, R spin, 1 fireball, 2 charge blast, 3 meteor)
+91d5e89 feat: remap skills — Q/R restored (thrust/spin), mage skills on 1/2/3 + controller reimport
+9b8bab5 docs: record implementation deviations in fire skills spec
+84e86b3 fix: play explosion VFX ungated (fireball + charge release); zero meteor melee shape; correct charging comment
+74db602 fix: frame-rate-adaptive hitbox window — Execution damage settles at 30fps (mobile target)
+3f64920 chore: remove leftover fire-skill VFX verification clones from CharacterSelect scene (T17 regression cleanup)
+21fdfc4 feat: wire fire skills into player prefabs (Q fireball, R charge blast, ult meteor)
+a857eff fix: fire skill prefabs — one-shot explosions (looping off, rate 0), real gradients, material assets
+559a302 feat: fire skill prefabs — fireball / meteor strike / explosion VFX + asset wiring
+d734f25 fix: Meteor_Ultimate skillType Instant (was Combo — interruption matrix dispatches on it)
+f6ecf32 feat: fire skill assets — Fireball_SkillQ / ChargeFire_SkillR / Meteor_Ultimate + MeteorConfig
+257bdfe feat: animator — ChargeBlast/Ultimate triggers + SkillR_charge/Ult states
+2b6d82d feat: input wiring — R hold-to-charge release, U ultimate key
+d4f1fcc fix: meteor uses cfg.Effect override (was dead); +reentrancy/prefab-guard/fallback tests
+8751c50 feat: meteor spawn hook on execution entry + MeteorSpawnedEvent snapshot
+8e3bb16 feat: MeteorSpawner — lazy pooled spawn entry (mirror FireballSpawner)
+76253fd test: meteor ankle-height discriminator (4.1m above impact); extract AnkleHeightOffset const
+fc16843 feat: meteor strike — warn decal, delayed impact AOE at ankle height, pooled
+48f4762 feat: MeteorConfig + SkillData.Meteor hook (mirror SwordQi config pattern)
+dc1b3dc fix: skip FireballSpawnedEvent when projectile prefab missing (parity with sword qi)
+4ae2d9f feat: fireball spawn hook on execution entry + FireballSpawnedEvent snapshot
+8555787 feat: FireballSpawner — lazy pooled spawn entry (mirror SwordQiSpawner)
+931d96f feat: fireball projectile — linear flight, explode-on-hit, pooled
+53b663f feat: ProjectileSkillData — spawnOffset/range/explosionRadius + OnValidate type guard
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260813_073527
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260813_073845
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260813_074029
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260813_074431
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260813_081832
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260813_081851
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_065456
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_070729
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_070931
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_071657
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_072032
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_072359
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_072930
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_073426
+### Commits
+2414d00 docs: spec self-review fixes - cross-ref, ClockSync ownership, tunables governance rule, P3 bandwidth gate formula
+269d63f docs: network sync design spec - shared replication layer roadmap (B+ movement model, 6-phase plan)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260827_074859
+### Commits
+af5e99b docs: p0 network foundation implementation plan - shared protocol consolidation, echo acceptance
+2414d00 docs: spec self-review fixes - cross-ref, ClockSync ownership, tunables governance rule, P3 bandwidth gate formula
+269d63f docs: network sync design spec - shared replication layer roadmap (B+ movement model, 6-phase plan)
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260828_030035
+### Commits
+095a2b2 feat(protocol): shared assembly skeleton - rule-layer constants v1 frozen
+9cacf0e chore(server): ignore build artifacts, retarget net8.0
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260828_032945
+### Commits
+372d05e feat(protocol): unified message set v1 - single-source codec, registered messages, rules tests
+5e924cb fix(protocol): review hardening - track folder meta, strict implicit-usings guard, enforce engine-free asmdef
+095a2b2 feat(protocol): shared assembly skeleton - rule-layer constants v1 frozen
+9cacf0e chore(server): ignore build artifacts, retarget net8.0
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260828_033748
+### Commits
+b7e34d5 fix(protocol): review hardening - encode guards, malformed-input coverage, registry consistency test, comment accuracy
+372d05e feat(protocol): unified message set v1 - single-source codec, registered messages, rules tests
+5e924cb fix(protocol): review hardening - track folder meta, strict implicit-usings guard, enforce engine-free asmdef
+095a2b2 feat(protocol): shared assembly skeleton - rule-layer constants v1 frozen
+9cacf0e chore(server): ignore build artifacts, retarget net8.0
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260828_035651
+### Commits
+b7e34d5 fix(protocol): review hardening - encode guards, malformed-input coverage, registry consistency test, comment accuracy
+372d05e feat(protocol): unified message set v1 - single-source codec, registered messages, rules tests
+5e924cb fix(protocol): review hardening - track folder meta, strict implicit-usings guard, enforce engine-free asmdef
+095a2b2 feat(protocol): shared assembly skeleton - rule-layer constants v1 frozen
+9cacf0e chore(server): ignore build artifacts, retarget net8.0
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs
+Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs
+Assets/Scripts/AOT/KcpNet/Common/MessageDispatcher.cs
+Assets/Scripts/AOT/KcpNet/KcpNet.asmdef
+Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs
+Assets/Scripts/AOT/KcpNet/Server/KcpServerSession.cs
+Assets/Scripts/Examples/ClientExample.cs
+Assets/Scripts/Examples/ServerExample.cs
+Assets/Scripts/Examples/UnityMainThreadExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260828_054949
+### Commits
+23319bc chore(unity): track PlayMode tests folder meta
+70200f2 test(net): p0 acceptance - real-kcp echo roundtrip playmode smoke against live server
+9b22f84 fix(net): make real-kcp transport viable - init SegmentManager, adopt client conv, deliver driver-loop receives
+7a0dc2d fix(server): kick session after protocol version rejection
+1dca6d9 fix(examples): set protocol version on login requests per v1 handshake
+c777802 feat(server): consume shared Cool.Protocol - single codec, echo handler, protocol version handshake
+9796514 refactor(net): kcpnet consumes shared Cool.Protocol - explicit usings, examples userid rename, editmode regression green
+b7e34d5 fix(protocol): review hardening - encode guards, malformed-input coverage, registry consistency test, comment accuracy
+372d05e feat(protocol): unified message set v1 - single-source codec, registered messages, rules tests
+5e924cb fix(protocol): review hardening - track folder meta, strict implicit-usings guard, enforce engine-free asmdef
+095a2b2 feat(protocol): shared assembly skeleton - rule-layer constants v1 frozen
+9cacf0e chore(server): ignore build artifacts, retarget net8.0
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+CLAUDE.md
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260828_063407
+### Commits
+5c68c25 docs+chore: final-review cleanups - codec comment finality, p2 injection marker, plan drift record
+b4da18d chore(unity): track Protocol readme meta
+ecfef89 docs(protocol): governance readme + stale network comments repointed to spec
+e4fcbb3 chore(hotfix): remove network draft stubs per spec disposal list - dead prediction policy class removed, movementpolicy injection surface retained
+23319bc chore(unity): track PlayMode tests folder meta
+70200f2 test(net): p0 acceptance - real-kcp echo roundtrip playmode smoke against live server
+9b22f84 fix(net): make real-kcp transport viable - init SegmentManager, adopt client conv, deliver driver-loop receives
+7a0dc2d fix(server): kick session after protocol version rejection
+1dca6d9 fix(examples): set protocol version on login requests per v1 handshake
+c777802 feat(server): consume shared Cool.Protocol - single codec, echo handler, protocol version handshake
+9796514 refactor(net): kcpnet consumes shared Cool.Protocol - explicit usings, examples userid rename, editmode regression green
+b7e34d5 fix(protocol): review hardening - encode guards, malformed-input coverage, registry consistency test, comment accuracy
+372d05e feat(protocol): unified message set v1 - single-source codec, registered messages, rules tests
+5e924cb fix(protocol): review hardening - track folder meta, strict implicit-usings guard, enforce engine-free asmdef
+095a2b2 feat(protocol): shared assembly skeleton - rule-layer constants v1 frozen
+9cacf0e chore(server): ignore build artifacts, retarget net8.0
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_044520
+### Commits
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_045000
+### Commits
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_050408
+### Commits
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_050555
+### Commits
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_052357
+### Commits
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p1-network-framework.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_053315
+### Commits
+cc07603 feat(protocol): v1 additions - clock sync pair, world snapshot with entity field mask, login spawn+rate fields
+cea4b5b fix(server): stop game loop on dispose - prevent thread leak on non-stopasync shutdown
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p1-network-framework.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_054605
+### Commits
+101f3c2 feat(server): entity store + snapshot assembler + perception filter - tick broadcast with dirty/beacon encoding
+447aa71 docs(protocol): review accuracy - wall-clock exception governance, snapshot contract, dual-path coexistence notes
+cc07603 feat(protocol): v1 additions - clock sync pair, world snapshot with entity field mask, login spawn+rate fields
+cea4b5b fix(server): stop game loop on dispose - prevent thread leak on non-stopasync shutdown
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p1-network-framework.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_055442
+### Commits
+5ba82b4 feat(synccore): shared clock sync algorithm - min-filter + low-pass, dual-end tests green
+e3656ec fix(server): guard tick callback, honor perception filter per-observer contract
+101f3c2 feat(server): entity store + snapshot assembler + perception filter - tick broadcast with dirty/beacon encoding
+447aa71 docs(protocol): review accuracy - wall-clock exception governance, snapshot contract, dual-path coexistence notes
+cc07603 feat(protocol): v1 additions - clock sync pair, world snapshot with entity field mask, login spawn+rate fields
+cea4b5b fix(server): stop game loop on dispose - prevent thread leak on non-stopasync shutdown
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p1-network-framework.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_060955
+### Commits
+6f685ef feat(net): client adapter - INetworkClient over kcp, clock sync server handler, playmode smoke
+780c7df fix(synccore): reject negative rtt, evict-before-scan, filter-discriminating tests, thread contract doc
+5ba82b4 feat(synccore): shared clock sync algorithm - min-filter + low-pass, dual-end tests green
+e3656ec fix(server): guard tick callback, honor perception filter per-observer contract
+101f3c2 feat(server): entity store + snapshot assembler + perception filter - tick broadcast with dirty/beacon encoding
+447aa71 docs(protocol): review accuracy - wall-clock exception governance, snapshot contract, dual-path coexistence notes
+cc07603 feat(protocol): v1 additions - clock sync pair, world snapshot with entity field mask, login spawn+rate fields
+cea4b5b fix(server): stop game loop on dispose - prevent thread leak on non-stopasync shutdown
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p1-network-framework.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_061731
+### Commits
+b625470 chore(unity): track SyncLayer folder meta
+017a76e feat(synclayer): client framework - dispatcher, clock sync driver, remote entity registry, login state machine
+252ba66 fix(net): adapter hardening - dispose on reconnect, honest executor docs, real conv on wire, failure-path test
+6f685ef feat(net): client adapter - INetworkClient over kcp, clock sync server handler, playmode smoke
+780c7df fix(synccore): reject negative rtt, evict-before-scan, filter-discriminating tests, thread contract doc
+5ba82b4 feat(synccore): shared clock sync algorithm - min-filter + low-pass, dual-end tests green
+e3656ec fix(server): guard tick callback, honor perception filter per-observer contract
+101f3c2 feat(server): entity store + snapshot assembler + perception filter - tick broadcast with dirty/beacon encoding
+447aa71 docs(protocol): review accuracy - wall-clock exception governance, snapshot contract, dual-path coexistence notes
+cc07603 feat(protocol): v1 additions - clock sync pair, world snapshot with entity field mask, login spawn+rate fields
+cea4b5b fix(server): stop game loop on dispose - prevent thread leak on non-stopasync shutdown
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p1-network-framework.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_063727
+### Commits
+b9a82be test(net): p1 acceptance - dual clients see each other, reconnect rebuilds, world snapshot flow
+3964b11 fix(synclayer): main-thread snapshot consumption - pending queue drained in update, pre-t8 cross-thread unity api guard
+b625470 chore(unity): track SyncLayer folder meta
+017a76e feat(synclayer): client framework - dispatcher, clock sync driver, remote entity registry, login state machine
+252ba66 fix(net): adapter hardening - dispose on reconnect, honest executor docs, real conv on wire, failure-path test
+6f685ef feat(net): client adapter - INetworkClient over kcp, clock sync server handler, playmode smoke
+780c7df fix(synccore): reject negative rtt, evict-before-scan, filter-discriminating tests, thread contract doc
+5ba82b4 feat(synccore): shared clock sync algorithm - min-filter + low-pass, dual-end tests green
+e3656ec fix(server): guard tick callback, honor perception filter per-observer contract
+101f3c2 feat(server): entity store + snapshot assembler + perception filter - tick broadcast with dirty/beacon encoding
+447aa71 docs(protocol): review accuracy - wall-clock exception governance, snapshot contract, dual-path coexistence notes
+cc07603 feat(protocol): v1 additions - clock sync pair, world snapshot with entity field mask, login spawn+rate fields
+cea4b5b fix(server): stop game loop on dispose - prevent thread leak on non-stopasync shutdown
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p1-network-framework.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_065843
+### Commits
+69f015a chore(net): p1 polish - connectionreset suppression, kick session close, transport teardown fix, docs sync, dual-client guide
+2149fa3 test(net): strengthen p1 acceptance - consecutive-absence disconnect proof, leak-free failure paths
+b9a82be test(net): p1 acceptance - dual clients see each other, reconnect rebuilds, world snapshot flow
+3964b11 fix(synclayer): main-thread snapshot consumption - pending queue drained in update, pre-t8 cross-thread unity api guard
+b625470 chore(unity): track SyncLayer folder meta
+017a76e feat(synclayer): client framework - dispatcher, clock sync driver, remote entity registry, login state machine
+252ba66 fix(net): adapter hardening - dispose on reconnect, honest executor docs, real conv on wire, failure-path test
+6f685ef feat(net): client adapter - INetworkClient over kcp, clock sync server handler, playmode smoke
+780c7df fix(synccore): reject negative rtt, evict-before-scan, filter-discriminating tests, thread contract doc
+5ba82b4 feat(synccore): shared clock sync algorithm - min-filter + low-pass, dual-end tests green
+e3656ec fix(server): guard tick callback, honor perception filter per-observer contract
+101f3c2 feat(server): entity store + snapshot assembler + perception filter - tick broadcast with dirty/beacon encoding
+447aa71 docs(protocol): review accuracy - wall-clock exception governance, snapshot contract, dual-path coexistence notes
+cc07603 feat(protocol): v1 additions - clock sync pair, world snapshot with entity field mask, login spawn+rate fields
+cea4b5b fix(server): stop game loop on dispose - prevent thread leak on non-stopasync shutdown
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p1-network-framework.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_070853
+### Commits
+1c15468 docs: p1 execution record - acceptance evidence, drift log, d2 message-mode confirmation, comment freshness
+fb546dc fix(server): flush window before session close - version reject reaches client, mismatch-path test
+69f015a chore(net): p1 polish - connectionreset suppression, kick session close, transport teardown fix, docs sync, dual-client guide
+2149fa3 test(net): strengthen p1 acceptance - consecutive-absence disconnect proof, leak-free failure paths
+b9a82be test(net): p1 acceptance - dual clients see each other, reconnect rebuilds, world snapshot flow
+3964b11 fix(synclayer): main-thread snapshot consumption - pending queue drained in update, pre-t8 cross-thread unity api guard
+b625470 chore(unity): track SyncLayer folder meta
+017a76e feat(synclayer): client framework - dispatcher, clock sync driver, remote entity registry, login state machine
+252ba66 fix(net): adapter hardening - dispose on reconnect, honest executor docs, real conv on wire, failure-path test
+6f685ef feat(net): client adapter - INetworkClient over kcp, clock sync server handler, playmode smoke
+780c7df fix(synccore): reject negative rtt, evict-before-scan, filter-discriminating tests, thread contract doc
+5ba82b4 feat(synccore): shared clock sync algorithm - min-filter + low-pass, dual-end tests green
+e3656ec fix(server): guard tick callback, honor perception filter per-observer contract
+101f3c2 feat(server): entity store + snapshot assembler + perception filter - tick broadcast with dirty/beacon encoding
+447aa71 docs(protocol): review accuracy - wall-clock exception governance, snapshot contract, dual-path coexistence notes
+cc07603 feat(protocol): v1 additions - clock sync pair, world snapshot with entity field mask, login spawn+rate fields
+cea4b5b fix(server): stop game loop on dispose - prevent thread leak on non-stopasync shutdown
+5c5dd32 feat(server): game loop r2 - single-thread world state, io-thread packet queue, sync receive chain
+434e324 fix(server): race-safe session wiring - ensurewired idempotent subscription, volatile socket, test logger extraction
+3d3bdbd feat(server): session manager - atomic endpoint-keyed lookup, conv adoption, conv-session decoupling
+d641d84 docs: p1 plan review fixes - 14 findings (compile-level: t1 server3c coupling/t3 assert types/t5 offset math/t8 ctor+await; concurrency: disconnect-path R2 violation via action queue; logic: clock burst timing; asmdef refs; yagni)
+0820ab3 docs: p1 network framework implementation plan - game loop r2, session manager, snapshot pipeline, synclayer, dual-client acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_152723
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_153210
+### Commits
+55f3ba4 docs: p2 movement sync implementation plan - shared validator/reconciler, entitystore wiring, interpolation, dual-client movement acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260829_153729
+### Commits
+468aae1 docs: p2 plan review fixes - 10 findings (time-basis hard error in interpolation, speed-provider gap, assert math x2, driver point, handler ctor style, roomsync retirement, yagni, wiring docs)
+55f3ba4 docs: p2 movement sync implementation plan - shared validator/reconciler, entitystore wiring, interpolation, dual-client movement acceptance
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260831_195832
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260831_225546
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p2-movement-sync.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260903_005513
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+docs/superpowers/plans/2026-08-28-p2-movement-sync.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260909_071850
+### Commits
+5695273 docs(net): p2 closeout - plan checkboxes and deviation record, validator/protocol comment refresh
+2473a67 chore(net): p2 polish - wireaction dead storage removed, unreliable eval recorded, injected-delay acceptance
+09cd8c9 test(net): p2 acceptance - movement seen across clients via interpolation, clock jitter recorded
+b79ebf1 feat(synclayer): remote interpolator - snapshot buffer, 2-tick render delay, clock-synced interpolation
+e2ffa2a feat(synclayer): movement reporter + net movement policy - throttled reporting, prediction frames, smooth correction
+e3de605 feat(server): position sync to entity store - shared validator, snapshot chain live, legacy broadcast retired
+908e300 feat(synccore): prediction reconciler - seq-keyed frame ledger, threshold correction, dual-end tests green
+9602cb6 feat(synccore): movement validator - shared speed/teleport/jump rules, dual-end tests green
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+
+## P2 Movement Sync 执行摘要（2026-09-09，coordinator 记录）
+### Goal
+B+ 移动同步闭环：客户端即时模拟 + 节流上报 + 预测帧对账 + 平滑纠偏；服务器校验 + EntityStore 快照链；远程插值渲染；双客户端移动互见。零协议新增。
+### Acceptance Evidence
+- Server.Tests: 54/54（基线 39 + 15：validator 6 / reconciler 6 / entity-store 3）
+- Unity EditMode: 163/163（基线 145 + 18：validator 6 / reconciler 6 / interpolator 6）
+- PlayMode MovementSyncTests: 4/4 × 3 连跑全绿（60s 墙钟上限）——移动互见 / 100m 瞬移反作弊（max-observed-z < 60m）/ 200ms 延迟注入（本地模拟不受网控 + B 收敛）/ 时钟抖动实测
+- Clock jitter（loopback）: 5.84 / 10.99 / 11.17 / 11.49 / 12.50 / 36.72 ms（红线 50ms，4-8× 余量）
+- PlayMode 回归: TwoClientWorldTests / LoginEnterWorldTests 绿（RemoteEntityRegistry ctor 保持 1 参，零波纹）
+### Key Deviations from Plan（详见 plan 文件"执行偏差记录"段）
+- 3600 帧上限 → 60s 墙钟上限（编辑器 400-6000fps 下帧数上限只够 0.6-4s 墙钟）
+- A_Teleports B 断言改 max-observed-z < 60m（原 <10f 落在纠偏爬升噪声带）；ctxB.Registry NRE 修正
+- Review 关卡补强：NaN/∞ 输入守卫（validator/reconciler/handler rotation 回退）、beacon yaw 毒化修复（last-known carry）、AttachMovementReporter 重入守卫、NetMovementPolicy 旋转终止条件、_wireAction/RoomSync/GetAllRemotePlayerSync 清理
+- T7 延迟注入全版变体落地（未用逃生口版）
+### Follow-ups（P3，未执行）
+- 游戏内宿主接线（真实场景 AttachMovementReporter + NetMovementPolicy 切换）——验收由测试宿主覆盖
+- LoginResponse.ServerTickRateMs 服务器未填（客户端 fallback 67 vs 服务器 66ms，benign）
+- Room.UpdatePlayerPosition / NpcComponent 读 Room 位置 → AI 接线改喂 EntityStore
+- PlayerState LastValidPosition/AcknowledgeSequence 死 API；重连视图清理（P1 gap）
+- 真实角色（重力/物理/受击）下纠偏收敛验证——纯模拟测试覆盖不了，需世界场景宿主验证
