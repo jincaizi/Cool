@@ -54,9 +54,9 @@ namespace Cool.Protocol
     }
 
     /// <summary>
-    /// 世界快照广播（服务器 → 客户端，TickLoop 每 tick 组装）
-    /// 与遗留 RemotePlayerSync/RoomSync（P0 房间广播）并存：P1 阶段两者皆活，
-    /// 客户端 SyncLayer 以 WorldSnapshot 为准；遗留消息留待 P2 退役（勿新增消费方）。
+    /// 世界快照广播（服务器 → 客户端，TickLoop 每 tick 组装）——
+    /// P2 T3 起为唯一的位置广播通道（RemotePlayerSync/RoomSync 登录下发已退役，
+    /// 仅解码兼容保留，勿新增消费方）。
     /// </summary>
     [ProtoContract]
     public class WorldSnapshot : IMessage

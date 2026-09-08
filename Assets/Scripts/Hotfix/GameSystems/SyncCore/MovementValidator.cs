@@ -21,6 +21,13 @@ namespace Cool.SyncCore
     /// 移动校验规则（spec B+：客户端报位置 + 服务器合理性校验）——
     /// 判定逻辑从服务器 PositionSyncHandler 移植并共享；纠偏目标位置改进为
     /// 沿 next−prev 真实移动方向推算（原实现用固定 Z 轴，不按玩家朝向）。
+    ///
+    /// 已知限制（P2 决策，P3 反作弊再评估）：
+    /// ① 瞬移判定双门槛 `distance > MaxSpeed×dt×1.2 && distance > 50m`——正常上报窗口
+    ///    （dt &lt; 2.78s）内 50m 绝对门槛主导，时间基分支仅在单报 &gt;50m 时生效；
+    /// ② dt=0（时间戳未走）整段跳过瞬移检查（Zero_TimeDelta 测试固化该语义）；
+    /// ③ 时间戳完全由客户端上报——冻结/伪造时间戳可绕过瞬移检查（需服务端接收时刻或单调计数）；
+    /// ④ 跳高仅标记（NeedsCorrection=true）不钳制 Y——权威位置 = 客户端自报值，客户端侧无实际拉回。
     /// </summary>
     public static class MovementValidator
     {

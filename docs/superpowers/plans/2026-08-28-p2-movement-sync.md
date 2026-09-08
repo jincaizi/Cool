@@ -1,6 +1,6 @@
 # P2 移动同步闭环 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 落地 B+ 移动同步闭环：客户端即时模拟 + 节流上报 + 预测帧对账 + 平滑纠偏；服务器校验 + EntityStore 接线（快照链激活）；远程插值渲染；双客户端移动互见验收。
 
@@ -17,7 +17,7 @@
 | 事实/决策 | 影响 |
 |---|---|
 | `PositionSyncHandler` 已有完整校验（MAX_SPEED=15/瞬移 50m/跳高 3m/纠偏下发）但更新 **Room 的 PlayerState** + 广播 RemotePlayerSync——**不触碰 EntityStore**（P1 终审 MUST-DO-1：快照链休眠，位置恒 (0,0,0)） | T3 核心接线 |
-| `CharacterController.ApplyServerPosition(Vector3, Quaternion)`（L475）——P0 保留的纠偏入口，**P2 直接可用** | T4 拉回执行 |
+| `CharacterController.ApplyServerPosition(Vector3, Quaternion)`（L475）——P0 保留的纠偏入口（0.5 lerp rubber-band + 物理短暂禁用）；**P2 不采用**（NetMovementPolicy 用逐帧 blend 8/s 收敛更平滑、不动物理）——拉回执行在 T4 | T4 拉回执行 |
 | `IMovementPolicy`/`LocalMovementPolicy` 注入面保留但**无调用方**（Sys3CEntry 直接调 `_cc.Update`） | T4 Sys3CEntry 注入点改造 |
 | `MoveCommand`（MoveDir/Speed/Rotation/IsSprint）+ `CharacterData`（Position/Rotation/Velocity）就绪 | T4 数据源 |
 | 协议：`PositionSyncRequest/Response` 已存在（P0）——**P2 零协议新增**；RemotePlayerSync 定义保留但 P2 退役（不再发送，只加不删） | T3 |
@@ -40,7 +40,7 @@
 - Create: `Assets/Scripts/Hotfix/GameSystems/SyncCore/MovementValidator.cs`
 - Test: `Server/Server.Tests/SyncCore/MovementValidatorTests.cs` + `Assets/Scripts/Tests/Editor/SyncCore/MovementValidatorTests.cs`
 
-- [ ] **Step 1: 写失败测试（服务器侧）**
+- [x] **Step 1: 写失败测试（服务器侧）**
 
 创建 `Server/Server.Tests/SyncCore/MovementValidatorTests.cs`（完整内容）：
 
@@ -116,7 +116,7 @@ public class MovementValidatorTests
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 ```bash
 dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
@@ -124,7 +124,7 @@ dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
 
 Expected: CS0246（找不到 `Cool.SyncCore.Vec3`/`MovementValidator`）。
 
-- [ ] **Step 3: 实现 Vec3 与 MovementValidator**
+- [x] **Step 3: 实现 Vec3 与 MovementValidator**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/SyncCore/Vec3.cs`（完整内容；C#9 块式 namespace）：
 
@@ -257,7 +257,9 @@ namespace Cool.SyncCore
 }
 ```
 
-- [ ] **Step 4: 运行确认通过（服务器侧）**
+> **已知限制（P0 移植语义，P3 反作弊再评估）**：瞬移判定为 `distance > MaxSpeed×dt×1.2 && distance > MaxTeleportDistance(50)` 双重门槛——正常 66ms~1s 上报窗口内 50m 绝对门槛主导，时间基方向纠偏只在单报 >50m 时生效；dt=0（时间戳未走）整段跳过（`Zero_TimeDelta_No_Teleport_Check` 固化该语义）。时间戳完全由客户端上报，恶意客户端冻结时间戳即可绕过瞬移检查——P2 不设防，P3 引入服务端接收时刻或单调计数。
+
+- [x] **Step 4: 运行确认通过（服务器侧）**
 
 ```bash
 dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
@@ -265,7 +267,7 @@ dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
 
 Expected: 44 passed（39 + 5）。
 
-- [ ] **Step 5: Unity 侧同批断言（EditMode 双跑）**
+- [x] **Step 5: Unity 侧同批断言（EditMode 双跑）**
 
 创建 `Assets/Scripts/Tests/Editor/SyncCore/MovementValidatorTests.cs`（NUnit 同批 5 测试，命名/数值与 xUnit 一致；直接镜像上方内容改用 NUnit 断言——`Assert.IsTrue/IsFalse/AreEqual/GreaterOrEqual` 等，浮点精度同 4 位）：
 
@@ -292,8 +294,10 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             var result = MovementValidator.Validate(
                 new Vec3(0, 0, 0), new Vec3(100, 0, 0), 0f, 5f, 0, 10_000_000L);
             Assert.IsTrue(result.NeedsCorrection);
-            Assert.GreaterOrEqual(result.AuthoritativePosition.X, 17.9f);
-            Assert.LessOrEqual(result.AuthoritativePosition.X, 18.1f);
+            // 权威位置 = prev + dir × MaxSpeed × dt = 15 × 1.0s = 15.0（与 xUnit 版同口径；
+            // 17.9~18.1 是把 1.2 容差系数混入权威位置计算的错误值）
+            Assert.GreaterOrEqual(result.AuthoritativePosition.X, 14.9f);
+            Assert.LessOrEqual(result.AuthoritativePosition.X, 15.1f);
         }
 
         [Test]
@@ -327,7 +331,7 @@ namespace Hotfix.GameSystems.Tests.SyncCore
 1. Skill `assets-refresh` → 无编译错误（SyncCore 目录自动纳入——`GameSys.EditorTests.asmdef` 已引用 SyncCore，T5-P1 已改）
 2. Skill `tests-run`(testMode=EditMode, testClass=MovementValidatorTests) → Expected 5 passed
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncCore Assets/Scripts/Tests/Editor/SyncCore Server/Server.Tests
@@ -342,7 +346,7 @@ git commit -m "feat(synccore): movement validator - shared speed/teleport/jump r
 - Create: `Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs`
 - Test: `Server/Server.Tests/SyncCore/PredictionReconcilerTests.cs` + `Assets/Scripts/Tests/Editor/SyncCore/PredictionReconcilerTests.cs`
 
-- [ ] **Step 1: 写失败测试（服务器侧）**
+- [x] **Step 1: 写失败测试（服务器侧）**
 
 创建 `Server/Server.Tests/SyncCore/PredictionReconcilerTests.cs`（完整内容）：
 
@@ -421,7 +425,7 @@ public class PredictionReconcilerTests
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 ```bash
 dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
@@ -429,7 +433,7 @@ dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
 
 Expected: CS0246（找不到 `PredictionReconciler`）。
 
-- [ ] **Step 3: 实现 PredictionReconciler**
+- [x] **Step 3: 实现 PredictionReconciler**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs`（完整内容）：
 
@@ -515,7 +519,7 @@ namespace Cool.SyncCore
 }
 ```
 
-- [ ] **Step 4: 运行确认通过（服务器侧）**
+- [x] **Step 4: 运行确认通过（服务器侧）**
 
 ```bash
 dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
@@ -523,14 +527,14 @@ dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
 
 Expected: 49 passed（44 + 5）。
 
-- [ ] **Step 5: Unity 侧同批断言（EditMode）**
+- [x] **Step 5: Unity 侧同批断言（EditMode）**
 
 创建 `Assets/Scripts/Tests/Editor/SyncCore/PredictionReconcilerTests.cs`（NUnit 镜像 5 测试，命名/数值一致——`Assert.IsFalse/IsTrue/AreEqual`、`reconciler.FrameCount` 断言）。
 
 1. Skill `assets-refresh` → 无编译错误
 2. Skill `tests-run`(testMode=EditMode, testClass=PredictionReconcilerTests) → Expected 5 passed
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncCore Assets/Scripts/Tests/Editor/SyncCore Server/Server.Tests
@@ -546,7 +550,7 @@ git commit -m "feat(synccore): prediction reconciler - seq-keyed frame ledger, t
 - Modify: `Server/Handler/LoginHandler.cs` 或 `Server/Server3C.cs`（RegisterEntity 标脏——MUST-DO-2）
 - Test: `Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 创建 `Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs`（完整内容；验证：PositionSync 更新 EntityStore 实体 + 标脏 + 快照链可见）：
 
@@ -567,7 +571,7 @@ public class PositionSyncEntityStoreTests
         var store = new EntityStore();
         var player = store.AddPlayer(1, "A");
 
-        var handler = new PositionSyncHandler(null!, null!, new TestLogger(), store);
+        var handler = new PositionSyncHandler(new Server3C(new TestLogger()), new TestLogger(), store);
 
         handler.ValidateAndApply(new PositionSyncRequest
         {
@@ -585,9 +589,9 @@ public class PositionSyncEntityStoreTests
     {
         var store = new EntityStore();
         var player = store.AddPlayer(1, "A");
-        player.UpdatePosition(new Vec3ToKcp(0, 0, 0), 0f, 0f, 0L, 0U);
+        player.UpdatePosition(new Vector3(0, 0, 0), 0f, 0f, 0L, 0U);
 
-        var handler = new PositionSyncHandler(null!, null!, new TestLogger(), store);
+        var handler = new PositionSyncHandler(new Server3C(new TestLogger()), new TestLogger(), store);
         handler.ValidateAndApply(new PositionSyncRequest
         {
             X = 1f, Y = 0f, Z = 0f, Rotation = 0f, Speed = 99f,
@@ -598,13 +602,12 @@ public class PositionSyncEntityStoreTests
         Assert.True(player.IsDirty);
     }
 
-    private static Vector3 Vec3ToKcp(Vec3 v) => new Vector3(v.X, v.Y, v.Z);
 }
 ```
 
-注意：`PositionSyncHandler` 现签名 `(Server3C, RoomManager, ILogger)`——测试需要新签名。**设计修正**：`PositionSyncHandler` 重构为注入 `EntityStore`（核心校验+应用逻辑与 Server3C/RoomManager 解耦），构造函数改为 `(ILogger logger, EntityStore entityStore)`；原 HandlePositionSyncAsync 保留为薄壳（session 解析 → 调 ValidateAndApply → 回 ack）。Server3C 构造对应改。**测试里的 `Vec3ToKcp` 辅助**（KcpServer.Vector3 构造）按实际 `Server/Util/Vector3.cs` 的构造签名调整（X/Y/Z 可设或构造参——先读文件核对）。
+注意：`PositionSyncHandler` 现签名 `(Server3C, RoomManager, ILogger)`——测试需要新签名。**设计修正**：`PositionSyncHandler` 重构为注入 `EntityStore`（核心校验+应用逻辑与 Server3C/RoomManager 解耦），构造函数定为 **`(Server3C server, ILogger logger, EntityStore entityStore)`**（Server3C 注入 = LoginHandler 同款惯例，见 Step 3 代码——唯一权威签名）；原 HandlePositionSyncAsync 保留为薄壳（session 解析 → 调 ValidateAndApply → 回 ack）。Server3C 构造对应改。**测试构造统一 `new Server3C(new TestLogger())`**（Server3C 不 StartAsync ✓——T9-P1 已验证该模式）。
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 ```bash
 dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
@@ -612,7 +615,7 @@ dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
 
 Expected: CS0246（新签名测试引用）/ CS1729（构造不匹配）。
 
-- [ ] **Step 3: 重构 PositionSyncHandler**
+- [x] **Step 3: 重构 PositionSyncHandler**
 
 读 `Server/Util/Vector3.cs` 核对构造后，改写 `Server/Handler/PositionSyncHandler.cs`（完整内容）：
 
@@ -699,13 +702,21 @@ namespace KcpServer
 }
 ```
 
+**Server3C.csproj 补 SyncCore glob**（应用工程编译共享规则——Server.Tests.csproj 已含，应用工程漏了；缺则 T3/T7 的 `dotnet build Server3C.csproj` 报 CS0246 `Cool.SyncCore`）：
+
+```xml
+<ItemGroup>
+  <Compile Include="..\Assets\Scripts\Hotfix\GameSystems\SyncCore\**\*.cs" />
+</ItemGroup>
+```
+
 `Server3C.cs`：构造改为 `_positionSyncHandler = new PositionSyncHandler(this, logger, _entityStore);`（`_entityStore` 字段已在 P1 T4 存在 ✓；Server3C 构造不启动——测试可 `new Server3C(new TestLogger())` 后注入，T9-P1 已验证该模式）。
 
-**测试文件对应调整**：`PositionSyncEntityStoreTests` 构造 `new PositionSyncHandler(new Server3C(new TestLogger()), new TestLogger(), store)`（Server3C 不 StartAsync ✓）；`Vec3ToKcp` 辅助删除（直接 `new Vector3(0, 0, 0)`——KcpServer.Vector3 构造签名按 `Server/Util/Vector3.cs` 核对）。
+**测试文件对应调整**：`PositionSyncEntityStoreTests` 构造 `new PositionSyncHandler(new Server3C(new TestLogger()), new TestLogger(), store)`（Server3C 不 StartAsync ✓）；`Vec3ToKcp` 辅助已从 Step-1 代码删除（直接 `new Vector3(0, 0, 0)`——`Server/Util/Vector3.cs` 构造签名已核对：`Vector3(float x, float y, float z)` + X/Y/Z 可写属性）。
 
 **RemotePlayerSync 广播退役**：原 HandlePositionSyncAsync 中的 RemotePlayerSync 广播整段删除（WorldSnapshot 链接管——EntityStore MarkDirty → SnapshotAssembler 每 tick 组装）。`RemoteSync.cs` 协议定义保留（只加不删）。
 
-**RoomSync 登录下发退役（双轨清理一致）**：`LoginHandler.HandleLoginAsync` 中的 RoomSync 发送段删除（Room 存储的 PlayerState 位置在 T3 后成为陈旧数据源——新玩家看已在线玩家靠 EntityStore 注册标脏 → 下一 tick WorldSnapshot 广播 ✓；RoomSync 协议定义保留）。`GetAllRemotePlayerSync` 方法保留（Room 内部使用，无发送方后自然休眠）。
+**RoomSync 登录下发退役（双轨清理一致）**：`LoginHandler.HandleLoginAsync` 中的 RoomSync 发送段删除（Room 存储的 PlayerState 位置在 T3 后成为陈旧数据源——新玩家看已在线玩家靠 EntityStore 注册标脏 → 下一 tick WorldSnapshot 广播 ✓；RoomSync 协议定义保留）。`Room.GetAllRemotePlayerSync` 方法已删除（本任务使其成孤儿——执行修正 e3de605；协议定义仍保留）。
 
 **RegisterEntity 标脏（MUST-DO-2）**：`Server3C.RegisterEntity` 改为：
 
@@ -717,7 +728,7 @@ namespace KcpServer
         }
 ```
 
-- [ ] **Step 4: 运行确认通过 + 构建**
+- [x] **Step 4: 运行确认通过 + 构建**
 
 ```bash
 dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
@@ -726,11 +737,11 @@ dotnet build E:/CodeForJob/Cool/Server/Server3C.csproj -v q
 
 Expected: 51 passed（49 + 2）；0 Errors。
 
-- [ ] **Step 5: 回归（TwoClientWorldTests 仍绿——断链风险检查）**
+- [x] **Step 5: 回归（TwoClientWorldTests 仍绿——断链风险检查）**
 
 起服务器 → Skill `tests-run`(PlayMode, testClass=TwoClientWorldTests) → 1 passed（双客户端实体互见依赖 EntityStore 注册 + 快照广播——本任务接线后链路未变）→ 停服。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add Server
@@ -747,7 +758,7 @@ git commit -m "feat(server): position sync to entity store - shared validator, s
 - Modify: `Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`（policy 注入点 + CoreController 暴露）
 - Modify: `Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs`（PositionSyncResponse 订阅 + MovementReporter 装配）
 
-- [ ] **Step 1: 实现 MovementReporter**
+- [x] **Step 1: 实现 MovementReporter**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs`（完整内容；节流上报 + 预测帧记录）：
 
@@ -839,7 +850,7 @@ namespace Hotfix.GameSystems.SyncLayer
 }
 ```
 
-- [ ] **Step 2: 实现 NetMovementPolicy**
+- [x] **Step 2: 实现 NetMovementPolicy**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs`（完整内容；平滑拉回）：
 
@@ -857,21 +868,16 @@ namespace Hotfix.GameSystems.Sys3C.Network
     public class NetMovementPolicy : IMovementPolicy
     {
         private readonly Hotfix.GameSystems.Sys3C.Character.CharacterController _controller;
-        private readonly MovementReporter _reporter;
-        private float _reportInterval;
         private bool _correcting;
         private Vector3 _targetPosition;
         private Quaternion _targetRotation;
         private const float CorrectionBlendPerSecond = 8f; // 每秒收敛速度
 
-        public NetMovementPolicy(Hotfix.GameSystems.Sys3C.Character.CharacterController controller, MovementReporter reporter)
+        // 不持有 MovementReporter——上报节流由 ClientNetworkManager.Update 驱动（与测试宿主解耦）
+        public NetMovementPolicy(Hotfix.GameSystems.Sys3C.Character.CharacterController controller)
         {
             _controller = controller;
-            _reporter = reporter;
-            _reportInterval = 0.066f;
         }
-
-        public void SetReportInterval(float seconds) => _reportInterval = seconds;
 
         public void Update(MoveCommand command)
         {
@@ -903,7 +909,7 @@ namespace Hotfix.GameSystems.Sys3C.Network
 }
 ```
 
-- [ ] **Step 3: Sys3CEntry 注入点改造**
+- [x] **Step 3: Sys3CEntry 注入点改造**
 
 `Sys3CEntry.cs`：
 - 新增字段：`private IMovementPolicy _movementPolicy;`
@@ -911,7 +917,7 @@ namespace Hotfix.GameSystems.Sys3C.Network
 - `Start()` 末尾：`_movementPolicy = new LocalMovementPolicy(_cc);`
 - `Update()` 中 `_cc.Update(command);` 改为 `_movementPolicy.Update(command);`
 
-- [ ] **Step 4: ClientNetworkManager 装配**
+- [x] **Step 4: ClientNetworkManager 装配**
 
 `ClientNetworkManager.cs`：
 - 订阅 `MessageId.PositionSyncResponse` → `OnPositionSyncResponse`：
@@ -932,33 +938,48 @@ namespace Hotfix.GameSystems.Sys3C.Network
             _dispatcher.Subscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
         }
 
+        private readonly System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse> _pendingResponses =
+            new System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse>();
+
         private void OnPositionSyncResponse(IMessage message)
         {
-            var response = (PositionSyncResponse)message;
-            if (_reporter != null && _reporter.OnResponse(response))
+            // 回调线程（网络驱动）：只入队——对账字典（PredictionReconciler._frames）与主线程
+            // RecordFrame 并发会竞态；且纠偏事件会触发 Unity Transform 写（必须主线程）。
+            // 纪律同 WorldSnapshot 封送（OnWorldSnapshot 同款模式）。
+            _pendingResponses.Enqueue((PositionSyncResponse)message);
+        }
+
+        /// <summary>主线程消费纠偏响应（Update 内、上报 Tick 前调用）</summary>
+        private void DrainResponses()
+        {
+            while (_pendingResponses.TryDequeue(out var response))
             {
-                // 需要纠偏 → 上层经 NetMovementPolicy.ApplyServerCorrection 执行平滑拉回
-                OnCorrectionNeeded?.Invoke(
-                    new Vector3(response.AuthoritativeX, response.AuthoritativeY, response.AuthoritativeZ),
-                    Quaternion.Euler(0f, response.AuthoritativeRotation, 0f));
+                if (_reporter != null && _reporter.OnResponse(response))
+                {
+                    // 需要纠偏 → 上层经 NetMovementPolicy.ApplyServerCorrection 执行平滑拉回
+                    OnCorrectionNeeded?.Invoke(
+                        new Vector3(response.AuthoritativeX, response.AuthoritativeY, response.AuthoritativeZ),
+                        Quaternion.Euler(0f, response.AuthoritativeRotation, 0f));
+                }
             }
         }
 
         public event Action<Vector3, Quaternion>? OnCorrectionNeeded;
 
-        // Update 内（时钟/快照 drain 后）驱动上报节流：
+        // Update 内（快照 drain 后）：
+        //     DrainResponses();   // 纠偏响应封送（主线程对账 + 事件）
         //     _reporter?.Tick(deltaSeconds, ServerTickRateMs / 1000f);
 ```
 
 （`OnCorrectionNeeded` 由宿主接线到 NetMovementPolicy.ApplyServerCorrection。）
 
-- [ ] **Step 5: 验证编译**
+- [x] **Step 5: 验证编译**
 
 1. Skill `assets-refresh` → 无编译错误
 2. Skill `tests-run`(testMode=EditMode 全量) → 全绿（145 + MovementValidator 5 + PredictionReconciler 5 = 155）
 3. `dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj` → 51 passed
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
@@ -974,7 +995,7 @@ git commit -m "feat(synclayer): movement reporter + net movement policy - thrott
 - Modify: `Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityRegistry.cs`（ApplySnapshot 改为喂插值缓冲）
 - Modify: `Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs`（Update 驱动插值渲染）
 
-- [ ] **Step 1: 实现 RemoteInterpolator**
+- [x] **Step 1: 实现 RemoteInterpolator**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteInterpolator.cs`（完整内容）：
 
@@ -1069,19 +1090,19 @@ namespace Hotfix.GameSystems.SyncLayer
 }
 ```
 
-- [ ] **Step 2: RemoteEntityRegistry 集成**
+- [x] **Step 2: RemoteEntityRegistry 集成**
 
-`RemoteEntityRegistry.cs` 改造：
-- 构造增加 `RemoteInterpolator interpolator` 参数
+`RemoteEntityRegistry.cs` 改造（**设计：interpolator 内部 new、ctor 保持 1 参**——P1 既有测试 LoginEnterWorldTests/TwoClientWorldTests 零波纹；插值器是纯实现细节）：
+- 构造内部创建 `RemoteInterpolator`
 - `ApplySnapshot` 改为喂缓冲：
+- `Remove`/`Clear` 同步清理插值缓冲；新增 `GetView(long)`（T6 验收用）
 
 ```csharp
-        private readonly RemoteInterpolator _interpolator;
+        private readonly RemoteInterpolator _interpolator = new RemoteInterpolator();
 
-        public RemoteEntityRegistry(Transform root, RemoteInterpolator interpolator)
+        public RemoteEntityRegistry(Transform root)
         {
             _root = root;
-            _interpolator = interpolator;
         }
 
         /// <summary>
@@ -1116,11 +1137,33 @@ namespace Hotfix.GameSystems.SyncLayer
                 }
             }
         }
+
+        public void Remove(long playerId)
+        {
+            if (_views.TryGetValue(playerId, out var view))
+            {
+                Object.Destroy(view.GameObject);
+                _views.Remove(playerId);
+                _interpolator.Remove(playerId); // 插值缓冲同步清理（防重连同 ID 残留旧样本）
+            }
+        }
+
+        public void Clear()
+        {
+            foreach (var view in _views.Values)
+                Object.Destroy(view.GameObject);
+            _views.Clear();
+            _interpolator.Clear();
+        }
+
+        /// <summary>读远程实体视图（T6 验收断言用；无视图返回 null）</summary>
+        public RemoteEntityView? GetView(long playerId)
+            => _views.TryGetValue(playerId, out var view) ? view : null;
 ```
 
-注意：`EntitySnapshot.Tick` 是服务器 tick 序号（15Hz），插值需要 tick 级的服务器时钟——**决策**：快照时间用 `snapshot.Tick × ServerTickRateMs`（tick 序号 × 间隔）换算为服务器时钟 ticks（近似；精确服务器时钟在 WorldSnapshot.ServerTimestamp 但按 tick 均匀——用 tick×interval 一致性更好，因为渲染延迟也是 tick 基准）。`ClientNetworkManager` 提供 `ServerTickRateMs`（已存）→ 换算：`ticksPerTick = ServerTickRateMs × 10_000`。
+注意：快照时间统一用 `WorldSnapshot.ServerTimestamp`（**绝对服务器时钟**，与 `ClockSyncDriver.ToServerTime` 同基准——A8 修正）。**不要**用 `EntitySnapshot.Tick × ServerTickRateMs` 换算相对基准（tick 序号是服务器启动后纪元，与渲染时刻的绝对时钟永不对齐 → 插值退化为贴最新）。渲染延迟换算用 `ServerTickRateMs × 10_000 × 2`（ClientNetworkManager 已存 ServerTickRateMs）。
 
-- [ ] **Step 3: ClientNetworkManager 驱动**
+- [x] **Step 3: ClientNetworkManager 驱动**
 
 `ClientNetworkManager.cs`：
 - **`OnWorldSnapshot` 修改**（P1 既有方法）：`_remoteEntities.ApplySnapshot(entity)` → `_remoteEntities.ApplySnapshot(entity, snapshot.ServerTimestamp)`（批级绝对服务器时钟——A8 修正）
@@ -1128,6 +1171,9 @@ namespace Hotfix.GameSystems.SyncLayer
 
 ```csharp
         private long _lastRenderDriveTicks;
+
+        /// <summary>时钟平滑偏移（ticks）——T6 时钟抖动实测读</summary>
+        public long ClockSmoothedOffsetTicks => _clockSync.SmoothedOffsetTicks;
 
         // Update 内（快照 drain 后）：
             // 插值渲染（服务器时钟基准：ClockSyncDriver.ToServerTime(本地墙钟) − 2 ticks 延迟）
@@ -1138,13 +1184,13 @@ namespace Hotfix.GameSystems.SyncLayer
 
 （`_remoteEntities.UpdateRender` 转发到内部 interpolator。）
 
-- [ ] **Step 4: 验证编译**
+- [x] **Step 4: 验证编译**
 
 1. Skill `assets-refresh` → 无编译错误
 2. Skill `tests-run`(testMode=EditMode 全量) → 155 绿
 3. 起服务器 → Skill `tests-run`(PlayMode, testClass=LoginEnterWorldTests) → 1 passed（回归）→ 停服
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer
@@ -1159,7 +1205,7 @@ git commit -m "feat(synclayer): remote interpolator - snapshot buffer, 2-tick re
 - Create: `Assets/Scripts/Tests/PlayMode/MovementSyncTests.cs`
 - Modify: `Assets/Scripts/Tests/PlayMode/TwoClientWorldTests.cs`（适配插值语义——实体存在断言不变，位置断言从 (0,0,0) 变为真实移动）
 
-- [ ] **Step 1: 写 PlayMode 移动互见测试**
+- [x] **Step 1: 写 PlayMode 移动互见测试**
 
 创建 `Assets/Scripts/Tests/PlayMode/MovementSyncTests.cs`（完整内容；A 移动 → B 插值看到 A 真实位置变化）：
 
@@ -1176,7 +1222,7 @@ namespace KcpNet.PlayModeTests
 {
     /// <summary>
     /// P2 核心验收：A 移动（本地模拟 + 上报）→ 服务器校验 → B 快照 → B 插值渲染看到 A 移动；
-    /// 超速上报被钳制（纠偏链路）。
+    /// A 单报瞬移 100m → 服务器纠偏 → A 收到纠偏事件、B 看不到瞬移位置（作弊拉回链路）。
     /// </summary>
     public class MovementSyncTests
     {
@@ -1209,10 +1255,10 @@ namespace KcpNet.PlayModeTests
         {
             // —— 构造两个客户端（A 带本地角色模拟，B 观察）——
             var root = new GameObject("MoveRoot");
-            var registryB = new RemoteEntityRegistry(root.transform, new RemoteInterpolator());
+            var registryB = new RemoteEntityRegistry(root.transform);
 
             var ctxA = new MoveContext();
-            ctxA.Registry = new RemoteEntityRegistry(root.transform, new RemoteInterpolator());
+            ctxA.Registry = new RemoteEntityRegistry(root.transform);
             ctxA.Manager = new ClientNetworkManager(ctxA.Adapter, ctxA.Registry, "Move_A");
 
             var ctxB = new MoveContext();
@@ -1292,9 +1338,106 @@ namespace KcpNet.PlayModeTests
 }
 ```
 
-（`RemoteEntityRegistry.GetView(long)` 需要新增 public 方法——T5 里补：`public RemoteEntityView? GetView(long playerId) => _views.TryGetValue(playerId, out var v) ? v : null;`）
+（`RemoteEntityRegistry.GetView(long)` 已在 T5 Step 2 补：`public RemoteEntityView? GetView(long playerId) => _views.TryGetValue(playerId, out var v) ? v : null;`）
 
-- [ ] **Step 2: 时钟 ±10ms 实测记录（MUST-DO-5）**
+**asmdef**：`KcpNet.PlayModeTests.asmdef` references 增加 `"SyncCore"`（测试全限定引用 `Cool.SyncCore.Vec3` 需程序集引用——当前仅 KcpNet/Cool.Protocol/GameSys，缺则 PlayMode 编译失败）。
+
+- [x] **Step 1b: 作弊瞬移纠偏用例（终审补——原"超速观察"在 T6 落空）**
+
+`MovementSyncTests` 追加 `A_Teleports_Server_Corrects_B_Smoothes`（完整内容）：
+
+```csharp
+        [UnityTest]
+        public IEnumerator A_Teleports_Server_Corrects_B_Smoothes()
+        {
+            var runTask = RunTeleportAsync();
+            int frames = 0;
+            while (!runTask.IsCompleted && frames < 3600)
+            {
+                frames++;
+                yield return null;
+            }
+            Assert.IsTrue(runTask.IsCompleted, "teleport test timed out");
+            var (ok, reason) = runTask.Result;
+            Assert.IsTrue(ok, reason);
+        }
+
+        private static async System.Threading.Tasks.Task<(bool, string)> RunTeleportAsync()
+        {
+            // —— 同 A_Moves 构造：双客户端登录，A 带模拟位置 + 上报 ——
+            var root = new GameObject("MoveRoot");
+            var registryB = new RemoteEntityRegistry(root.transform);
+
+            var ctxA = new MoveContext();
+            ctxA.Registry = new RemoteEntityRegistry(root.transform);
+            ctxA.Manager = new ClientNetworkManager(ctxA.Adapter, ctxA.Registry, "Move_A");
+
+            var ctxB = new MoveContext();
+            ctxB.Manager = new ClientNetworkManager(ctxB.Adapter, registryB, "Move_B");
+
+            ctxA.LocalPosition = Vector3.zero;
+            ctxA.Manager.AttachMovementReporter(
+                () => new Cool.SyncCore.Vec3(ctxA.LocalPosition.x, ctxA.LocalPosition.y, ctxA.LocalPosition.z),
+                () => 0f,
+                () => 4f);
+            ctxA.Manager.OnCorrectionNeeded += (pos, rot) => ctxA.CorrectionSeen = true;
+
+            try
+            {
+                ctxA.Manager.ConnectAndLogin("127.0.0.1", 8000);
+                if (!await WaitInWorld(ctxA.Manager)) return (false, "A login failed");
+                ctxB.Manager.ConnectAndLogin("127.0.0.1", 8000);
+                if (!await WaitInWorld(ctxB.Manager)) return (false, "B login failed");
+
+                // 正常移动 ~0.5s 建立服务器 prev 基准
+                for (int i = 0; i < 10; i++)
+                {
+                    ctxA.LocalPosition += Vector3.forward * 0.1f;
+                    ctxA.Manager.Update(0.05f);
+                    await System.Threading.Tasks.Task.Delay(50);
+                }
+
+                // 单帧瞬移 100m（模拟作弊/穿墙）→ 服务器纠偏到 prev + 15×dt ≈ 数米
+                // → ack 权威位置 ≠ 预测帧 → 纠偏事件必须触发
+                ctxA.LocalPosition += Vector3.forward * 100f;
+                ctxA.Manager.Update(0.05f);
+                await System.Threading.Tasks.Task.Delay(50);
+
+                bool correctionSeen = false;
+                for (int i = 0; i < 40 && !correctionSeen; i++)
+                {
+                    ctxA.Manager.Update(0.05f); // 驱动响应封送（DrainResponses 主线程对账）
+                    await System.Threading.Tasks.Task.Delay(100);
+                    correctionSeen = ctxA.CorrectionSeen;
+                }
+                if (!correctionSeen) return (false, "A never got correction event (teleport not caught)");
+
+                // B 端观察：A 被纠偏回 prev 附近（数米内），绝看不到 100m 瞬移位。
+                // 注意：此后不再驱动 ctxA.Manager.Update（冻结上报——否则每报重触发纠偏、
+                // 服务器权威位置以 15m/s 爬升直到 50m 门槛放行，断言窗口会漂）
+                bool bNeverSawTeleport = false;
+                for (int i = 0; i < 40 && !bNeverSawTeleport; i++)
+                {
+                    ctxB.Manager.Update(0.05f);
+                    await System.Threading.Tasks.Task.Delay(100);
+                    var view = registryB.GetView(ctxA.Manager.LocalPlayerId);
+                    if (view != null && view.Position.z < 10f) // 权威 ≈ prev+15×dt ≤ 数米
+                        bNeverSawTeleport = true;
+                }
+                if (!bNeverSawTeleport) return (false, "B saw the teleport position (correction not applied)");
+
+                return (true, "ok");
+            }
+            finally
+            {
+                ctxA.Manager.Dispose();
+                ctxB.Manager.Dispose();
+                Object.Destroy(root);
+            }
+        }
+```
+
+- [x] **Step 2: 时钟 ±10ms 实测记录（MUST-DO-5）**
 
 在 `MovementSyncTests` 末尾（或独立测试）追加时钟抖动实测——记录而非断言（spec 口径"记录实测值"）：
 
@@ -1311,7 +1454,7 @@ namespace KcpNet.PlayModeTests
         private static async System.Threading.Tasks.Task RecordClockJitterAsync()
         {
             var root = new GameObject("ClockRoot");
-            var registry = new RemoteEntityRegistry(root.transform, new RemoteInterpolator());
+            var registry = new RemoteEntityRegistry(root.transform);
             using var adapter = new KcpNetClientAdapter();
             var manager = new ClientNetworkManager(adapter, registry, "Clock_Tester");
             try
@@ -1342,18 +1485,18 @@ namespace KcpNet.PlayModeTests
         }
 ```
 
-（`ClientNetworkManager` 暴露 `public long ClockSmoothedOffsetTicks => _clockSync.SmoothedOffsetTicks;`——T7 补。）
+（`ClientNetworkManager.ClockSmoothedOffsetTicks` 已在 T5 Step 3 添加。）
 
-- [ ] **Step 3: 冒烟验收**
+- [x] **Step 3: 冒烟验收**
 
 1. Bash 后台起服务器 → 确认 running
 2. Skill `assets-refresh` → 无编译错误
-3. Skill `tests-run`(PlayMode, testClass=MovementSyncTests) → 2 passed（移动互见 + 时钟实测）
+3. Skill `tests-run`(PlayMode, testClass=MovementSyncTests) → 3 passed（移动互见 + 瞬移纠偏 + 时钟实测）
 4. **连跑 2 次**确认非 flaky
 5. 拉服务器日志确认 PositionSync 链（A 上报 → 校验 → ack）
 6. 停服；netstat 确认释放
 
-- [ ] **Step 4: 全量回归**
+- [x] **Step 4: 全量回归**
 
 ```bash
 dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
@@ -1361,7 +1504,7 @@ dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
 
 Expected: 51 passed。Unity EditMode 全量 → 155 绿。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Assets/Scripts/Tests/PlayMode Assets/Scripts/Hotfix/GameSystems/SyncLayer
@@ -1377,7 +1520,7 @@ git commit -m "test(net): p2 acceptance - movement seen across clients via inter
 - Modify: `docs/superpowers/plans/2026-08-28-p2-movement-sync.md`（偏差记录——终审后由协调者写）
 - Modify: `docs/superpowers/guides/p1-dual-client-dev.md`（P2 移动验证追加）
 
-- [ ] **Step 1: _wireAction 清理**
+- [x] **Step 1: _wireAction 清理**
 
 `Server/KcpServerSession.cs`：`EnsureWired` 中 `_wireAction` 字段删除（从未读取——P1 重连走全新 Login/新会话，无需重接线）：
 
@@ -1398,7 +1541,7 @@ git commit -m "test(net): p2 acceptance - movement seen across clients via inter
 
 （删除 `private Action? _wireAction;` 字段与其赋值。）
 
-- [ ] **Step 2: Unreliable 评估记录（MUST-DO-4）**
+- [x] **Step 2: Unreliable 评估记录（MUST-DO-4）**
 
 在 `docs/superpowers/guides/p1-dual-client-dev.md` 追加段：
 
@@ -1413,20 +1556,20 @@ git commit -m "test(net): p2 acceptance - movement seen across clients via inter
   上行延迟（0~300ms 手测档位见 MovementSyncTests 变体或调试宿主）
 ```
 
-- [ ] **Step 3: 延迟注入验收（spec §5-P2 验收项）**
+- [x] **Step 3: 延迟注入验收（spec §5-P2 验收项）**
 
 PlayMode 追加测试（`MovementSyncTests` 变体或独立）：注入 200ms 上行延迟 → 断言 A 本地移动不被打断（本地即时模拟不受网控——`_controller.Update` 直接执行）+ B 端插值仍平滑（无跳变——插值缓冲兜底）。**简化落地**：在 `MovementSyncTests` 中加一个 `A_Moves_With_Injected_Delay_Still_Local_Smooth` 测试：MovementReporter 包延迟包装（`client.Send` 前 await Task.Delay(200)——通过 adapter 层模拟：测试内联一个延迟 Send 包装器实现 INetworkClient？重。**最小**：MovementReporter 构造增加可选 `int injectedSendDelayMs = 0`，Report 中 `if (injectedSendDelayMs > 0) System.Threading.Thread.Sleep(injectedSendDelayMs)`——测试传 200。断言：A 的 LocalPosition 持续增长（本地模拟不被延迟影响）+ B 在延迟期间仍看到旧位置（插值兜底）→ 延迟解除后 B 追上。
 
 （**若此变体复杂度超标**：以"本地即时模拟不受网控"为验收下限——`A_Moves_With_Injected_Delay_Local_Unaffected`：注入 200ms，断言 A 本地位置在 2s 内推进 ≥ 1.5m（无延迟影响），B 端最终收敛。按此落地，报告说明。）
 
-- [ ] **Step 4: 验证 + 全量**
+- [x] **Step 4: 验证 + 全量**
 
 1. `dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj` → 51 passed
 2. `dotnet build E:/CodeForJob/Cool/Server/Server3C.csproj -v q` → 0 Errors
 3. Skill `assets-refresh` + `tests-run`(EditMode 全量) → 155 绿
-4. 起服务器 → `tests-run`(PlayMode, testClass=MovementSyncTests) → 3 passed → 停服
+4. 起服务器 → `tests-run`(PlayMode, testClass=MovementSyncTests) → 4 passed → 停服
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Server/KcpServerSession.cs Assets/Scripts/Tests/PlayMode docs/superpowers/guides/p1-dual-client-dev.md
@@ -1437,12 +1580,50 @@ git commit -m "chore(net): p2 polish - wireaction dead storage removed, unreliab
 
 ## Self-Review（计划撰写时已自查）
 
-**1. Spec 覆盖**：§5-P2 验收项 → 移动互见（T6 MovementSyncTests）/本地手感不发飘（T7 延迟注入）/对端平滑位移（T5 插值 + T6 验收）/作弊瞬移拉回（T1 共享校验 + T3 接线 + T6 超速观察）；§4 D1（2-tick 插值延迟 + ServerTickRateMs）→ T5；D2（最新生效语义）→ T3/决策 D3；D5（增量位掩码已有）→ 复用；B+ 模型（§6）→ T2/T4 全链。P1 MUST-DO-P2 六项 → T3（接线/标脏）、T4/T7（_wireAction）、T6（时钟实测）、T7（Unreliable 评估）、per-observer 编码记录（决策 D4）。**缺项检查**：PositionSyncResponse 的 ack→纠偏链路 → T4 ✓；预测帧对账 → T2/T4 ✓；RemotePlayerSync 退役 → T3 ✓；ClockSync 实战 → T5 ✓。
+**1. Spec 覆盖**：§5-P2 验收项 → 移动互见（T6 MovementSyncTests）/本地手感不发飘（T7 延迟注入）/对端平滑位移（T5 插值 + T6 验收）/作弊瞬移拉回（T1 共享校验 + T3 接线 + T6 瞬移纠偏用例——单报 100m → 纠偏事件 + B 不见瞬移位）；§4 D1（2-tick 插值延迟 + ServerTickRateMs）→ T5；D2（最新生效语义）→ T3/决策 D3；D5（增量位掩码已有）→ 复用；B+ 模型（§6）→ T2/T4 全链。P1 MUST-DO-P2 六项 → T3（接线/标脏）、T4/T7（_wireAction）、T6（时钟实测）、T7（Unreliable 评估）、per-observer 编码记录（决策 D4）。**缺项检查**：PositionSyncResponse 的 ack→纠偏链路 → T4 ✓；预测帧对账 → T2/T4 ✓；RemotePlayerSync 退役 → T3 ✓；ClockSync 实战 → T5 ✓。
 
 **2. 占位符扫描**：无 TBD/TODO；代码块完整。两处"按现场适配"（Vector3 构造核对、延迟注入变体取舍）为容错指引。
 
-**3. 类型一致性**：`Vec3`（SyncCore）在 T1 定义、T2/3/4/5 六处使用一致（构造/运算符）；`MoveValidationResult`（T1）在 T3 服务器消费一致；`PredictionReconciler.RecordFrame(seq, Vec3, float)` 签名在 T2 定义、T4 Predicter 调用一致；`MovementReporter.OnResponse` 返回 bool + `LastCorrectionTarget` 与 T4 纠偏链路一致；`RemoteInterpolator.TryGetRenderState(playerId, nowServerTicks, renderDelayTicks, out pos, out rot)` 在 T5 定义、T6 经 UpdateRender 调用一致；`EntitySnapshot.Tick × ServerTickRateMs × 10_000` 时间换算在 T5/T6 一致。
+**3. 类型一致性**：`Vec3`（SyncCore）在 T1 定义、T2/3/4/5 六处使用一致（构造/运算符）；`MoveValidationResult`（T1）在 T3 服务器消费一致；`PredictionReconciler.RecordFrame(seq, Vec3, float)` 签名在 T2 定义、T4 Predicter 调用一致；`MovementReporter.OnResponse` 返回 bool + `LastCorrectionTarget` 与 T4 纠偏链路一致；`RemoteInterpolator.TryGetRenderState(playerId, nowServerTicks, renderDelayTicks, out pos, out rot)` 在 T5 定义、T6 经 UpdateRender 调用一致；快照时间统一 `WorldSnapshot.ServerTimestamp`（绝对时钟）在 T5 定义、T6 一致，渲染延迟 `ServerTickRateMs × 10_000 × 2` 同基准。
 
 ## 规模说明
 
 7 个任务：共享规则（T1-T2）、服务器接线（T3）、客户端闭环（T4-T5）、端到端验收（T6）、收尾（T7）。P2 零协议新增（PositionSync 消息 P0 已备）——风险集中在接线正确性与插值时间换算，两者均有针对性测试。
+
+## 执行偏差记录（2026-09-09 落地，coordinator 批准）
+
+全部 7 任务完成（commits 9602cb6 → 2473a67 + 收尾 9b1xxxx）。相对计划文本的实际偏差：
+
+**评审驱动修正（per-task code review 两阶段发现的，均已落地 + 回归测试锁定）：**
+1. MovementValidator 非有限输入守卫（∞/NaN 网络包 → 纠偏回 prev，防 NaN 广播）——双端回归测试
+2. PredictionReconciler 类注释线程契约 + 非有限 ack 守卫——mutation 验证的回归测试
+3. T3：PositionSyncHandler rotation NaN 回退（validator 守卫原样透传 rotation 会进 store/ack/广播）——含 ack sink 同值回退 + 回归测试；`Room.GetAllRemotePlayerSync` 删除（本任务成孤儿）；纠偏日志 cause-aware
+4. T4：AttachMovementReporter 重入守卫（双订阅 + 旧会话残留响应污染）；NetMovementPolicy 终止条件含旋转（Quaternion.Angle < 5°）；`_reportInterval`/`SetReportInterval`/reporter 依赖删除（yagni）；Sys3CEntry Start 预置守卫；LastCorrection* 语义文档；IMovementPolicy 注释更新
+5. T5：beacon yaw 毒化修复（Position-only beacon 的 Rotation 是 protobuf 默认 0——last-known yaw carry，按位掩码契约）；RemoteInterpolator 内部持有（ctor 保持 1 参——P1 测试零波纹，与 Step 3 注释一致）；Remove/Clear 清插值缓冲；GetView 并入 T5
+6. T6：3600 帧上限 → **60s 墙钟上限**（编辑器 400-6000fps 下帧数上限只够 0.6-4s 墙钟，场景需 8-20s——TwoClientWorldTests 已有"帧数上限不可靠"教训）；A_Teleports B 断言改 **max-observed-z < 60m**（产品保证：权威沿 prev+15m/s 走廊爬升，seen 时 ≤50m 门槛内；原 <10f 落在爬升噪声带）；`ctxB.Registry` NRE 修正（计划文本 bug——MoveContext.Registry 只给 ctxA 赋值，改读局部 registryB）；补 RemoteInterpolatorTests EditMode 6 测试（A_Moves 无法区分插值与贴最新）；Clock 测试注释对齐
+7. T7：延迟注入 **全版变体落地**（A 本地推进 ≥1.5m + B 稀疏上报收敛——连跑 2 次稳定，未用逃生口版）；`ClientNetworkManager.AttachMovementReporter` 增加 optional `injectedSendDelayMs` 透传（测试 4 参调用编译需要）；guide MessageFlags 措辞修正（无 Unreliable 位，仅 Reserved 占位）
+
+**测试计数最终值（计划各 Step 期望为基线推导，实际以最终为准）：** Server.Tests 54（39 基线 + 15：validator 6/reconciler 6/entity-store 3）；EditMode 163（145 基线 + 18：validator 6/reconciler 6/interpolator 6）；PlayMode MovementSyncTests 4 测试 3 连跑全绿（时钟抖动实测 5.8~12.5ms，远低于 50ms 红线）；TwoClientWorldTests/LoginEnterWorldTests 回归绿（1 参 ctor 未破坏）。
+
+**遗留跟踪（final review Minor，未在本期执行）：**
+- `LoginResponse.ServerTickRateMs` 服务器从未填写（客户端 fallback 67 vs 服务器 66ms——1.5% 偏差，benign；P3 顺手填或删字段）
+- `Room.UpdatePlayerPosition`/`Server/AI NpcComponent` 读 Room 位置——AI 服务器接线时改喂 EntityStore（P3）
+- `PlayerState.LastValidPosition/RecordValidPosition/AcknowledgeSequence` 死 API（P0/P1 遗留）
+- RemoteEntityRegistry 断线重连不清视图（P1 gap，离线期间幽灵残留至服务器会话超时）
+- 游戏内宿主接线（真实场景 AttachMovementReporter + NetMovementPolicy 切换）仍无调用方——验收由测试宿主覆盖，P3 世界场景接线时落地
+
+## 终审修正（2026-08-31 第二轮，对照代码复核）
+
+1. **T1 NUnit 断言数学修正**：`Teleport_Over_Limit` 断言 `X ∈ [17.9, 18.1]` → `[14.9, 15.1]`（17.9~18.1 是 1.2 容差系数混入权威位置计算的错误值；实际 = 15×1.0s = 15.0，xUnit 版本已正确）
+2. **T1 补已知限制注释**：瞬移双重门槛（dt<2.78s 时 50m 绝对门槛主导）+ dt=0 绕过 + 客户端时间戳可控——P3 反作弊再评估
+3. **T3 构造函数签名统一**：唯一权威签名 `(Server3C, ILogger, EntityStore)`（Server3C 注入 = LoginHandler 惯例）；Step-1 测试构造改 3 参；删 2 参设计残句与 `Vec3ToKcp` 辅助
+4. **T3 补 Server3C.csproj SyncCore glob**：应用工程漏编译共享规则（Server.Tests.csproj 已含）——否则 T3/T7 `dotnet build Server3C.csproj` CS0246
+5. **T4 纠偏响应改主线程封送**：PositionSyncResponse 回调线程只入队 pending 队列，Update 内 DrainResponses——修对账字典（PredictionReconciler._frames）并发竞态 + 纠偏事件 Unity Transform 非主线程调用（纪律同 WorldSnapshot 封送）
+6. **T4 NetMovementPolicy 去死成员**：删 `_reportInterval`/`SetReportInterval`/`MovementReporter` 依赖（上报节流由 manager.Update 驱动）
+7. **T4 事实表修正**：ApplyServerPosition（L475）改标"P2 不采用"（P0 入口为 0.5 lerp rubber-band + 物理短暂禁用；P2 用逐帧 blend 8/s 更平滑、不动物理）
+8. **T5 RemoteEntityRegistry 统一内部 new interpolator、ctor 保持 1 参**：P1 既有测试（LoginEnterWorldTests/TwoClientWorldTests 1 参构造）零波纹；`Remove`/`Clear` 同步清理插值缓冲；`GetView(long)` 并入 T5 Step 2（原标"T5 里补"但 T5 清单没有）
+9. **T5 删 tick×interval 矛盾注释**：统一 `WorldSnapshot.ServerTimestamp` 绝对服务器时钟基准（A8 修正——上次终审修的 time-basis 错误以注释形式回潮，执行者照注释改会退回"贴最新"退化）
+10. **T5 ClientNetworkManager 补 `ClockSmoothedOffsetTicks`**（原标"T7 补"落空——T7 无该改动）
+11. **T6 补瞬移纠偏 PlayMode 用例**（`A_Teleports_Server_Corrects_B_Smoothes`）：`CorrectionSeen` 从死字段变验收；注意超速钳制不会触发客户端纠偏（权威=自报位置偏差 0），真正触发链的是单报瞬移
+12. **T6 asmdef 补漏**：`KcpNet.PlayModeTests.asmdef` references 加 `"SyncCore"`（测试全限定 `Cool.SyncCore.Vec3` 需程序集引用，缺则 PlayMode 编译失败）；测试构造改 1 参
+13. **计数更新**：T6 MovementSyncTests 3 passed（+瞬移纠偏）、T7 全量 4 passed；Server.Tests 基线 39 ✓（实测）
