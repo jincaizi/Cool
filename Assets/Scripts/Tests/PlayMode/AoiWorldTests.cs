@@ -68,6 +68,8 @@ namespace KcpNet.PlayModeTests
                 {
                     ctx.Manager.Update(0.05f);
                     await System.Threading.Tasks.Task.Delay(200);
+                    if (ctx.Manager.CurrentState != ClientNetworkManager.State.InWorld)
+                        return (false, $"disconnected mid-observation at sample {i} (state={ctx.Manager.CurrentState})");
                     int count = ctx.Registry.Count;
                     if (count > peakCount)
                     {
@@ -86,7 +88,9 @@ namespace KcpNet.PlayModeTests
                 if (dropCount == 0)
                     return (false, $"registry count never dropped below peak {peakCount} in 60s (AOI despawn/expiry not working?)");
 
-                return (true, $"ok: saw {seenIds.Count} distinct bots, peak {peakCount}, {dropCount} drops");
+                string summary = $"ok: saw {seenIds.Count} distinct bots, peak {peakCount}, {dropCount} drops";
+                UnityEngine.Debug.Log($"[AoiWorldTests] {summary}");
+                return (true, summary);
             }
             finally
             {
