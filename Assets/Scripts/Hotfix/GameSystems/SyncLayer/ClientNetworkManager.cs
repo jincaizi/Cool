@@ -142,6 +142,12 @@ namespace Hotfix.GameSystems.SyncLayer
             long nowServerTicks = _clockSync.ToServerTime(System.DateTime.UtcNow.Ticks);
             long renderDelayTicks = ServerTickRateMs * 10_000L * 2; // 2 ticks（ServerTickRateMs 单位 ms）
             _remoteEntities.UpdateRender(nowServerTicks, renderDelayTicks);
+
+            // P3 AOI：缺席超时清理（视野外实体停流——1.2s 无快照销毁）。
+            // 时钟收敛前跳过：ToServerTime 未收敛时以本地墙钟充当服务器钟（偏移 0），
+            // 本机时钟快 >1.2s 会瞬间清空全部视图——收敛（~1.6s 突发）后才安全
+            if (_clockSync.HasConverged)
+                _remoteEntities.UpdateExpiry(nowServerTicks);
         }
 
         private void OnLoginResponse(IMessage message)
