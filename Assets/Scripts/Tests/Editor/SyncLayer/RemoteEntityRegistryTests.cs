@@ -75,7 +75,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
             // 实体 2 持续刷新到最后时刻（19M），1/3 停流于 1M
             _registry.ApplySnapshot(Snap(2, 11, 0), serverTicks: 19_000_000L);
-            _registry.UpdateExpiry(nowServerTicks: 20_000_000L); // 1/3 差 19s > 1.2s 删；2 差 1s 保留
+            _registry.UpdateExpiry(nowServerTicks: 20_000_000L); // 1/3 差 19M ticks = 1.9s > 1.2s 删；2 差 1M = 0.1s 保留
 
             Assert.AreEqual(1, _registry.Count);
             Assert.IsNotNull(_registry.GetView(2));
