@@ -14,10 +14,12 @@ namespace Hotfix.GameSystems.Sys3C.Animation
         public static readonly int Hit = Animator.StringToHash("Hit");
         public static readonly int Death = Animator.StringToHash("Death");
         public static readonly int Blend = Animator.StringToHash("Blend");
+        public static readonly int LocomotionSpeed = Animator.StringToHash("LocomotionSpeed");
         public static readonly int IsDefending = Animator.StringToHash("IsDefending");
 
         public const int BaseLayerIndex = 0;
         public const int AttackLayerIndex = 1;
         public const int HitLayerIndex = 2;
+        public const int DefendLayerIndex = 3;
     }
 }

@@ -43,7 +43,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         // 盾耐久
         private float _shieldDurability;
         private const float MaxShieldDurability = 50f;
-        private const float DefendSpeedMultiplier = 0.4f;
+        public const float DefendSpeedMultiplier = 0.4f;
 
         /// <summary>
         /// 技能/状态移动速度倍率（旋转减速等），每帧由外部设置

@@ -35,6 +35,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             // Initialize layer weights (was in deleted AnimationDriver constructor)
             _animator.SetLayerWeight(AnimHashes.AttackLayerIndex, 0f);
             _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 0f);
+            _animator.SetLayerWeight(AnimHashes.DefendLayerIndex, 0f);
 
             var transitionTable = new StateTransitionTable();
             _baseFSM = new BaseFSM(_animator, transitionTable);
@@ -78,6 +79,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             // （JumpEnd 完成回调依赖 Animator 播放完整剪辑，连跳时不可靠），
             // 一旦被门控跳过，Blend 会永远停在跳跃时清零的 0，腿部失去移动动画（漂移）。
             _animator.SetFloat(AnimHashes.Blend, data.MovementSpeed);
+            // 举盾时移动减速（0.4×），Locomotion 状态速度参数同步放慢走步循环，避免脚步滑步
+            _animator.SetFloat(AnimHashes.LocomotionSpeed,
+                _characterController.IsDefending
+                    ? Hotfix.GameSystems.Sys3C.Character.CharacterController.DefendSpeedMultiplier
+                    : 1f);
         }
 
         public bool TryJump()
@@ -111,17 +117,21 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
         public void EnterDefend()
         {
-            _baseFSM.LockState(BaseState.Defend);
+            // 举盾姿势放上半身蒙版层，Base层保持 Locomotion ——
+            // 否则锁 BaseState=Defend 会让 Animator 播静态全身剪辑，移动时腿部无动画
+            _animator.SetBool(AnimHashes.IsDefending, true);
+            _animator.SetLayerWeight(AnimHashes.DefendLayerIndex, 1f);
         }
 
         public void ExitDefend()
         {
-            _baseFSM.Unlock(BaseState.Idle);
+            _animator.SetBool(AnimHashes.IsDefending, false);
+            _animator.SetLayerWeight(AnimHashes.DefendLayerIndex, 0f);
         }
 
         public void HandleShieldBreak(HitData hitData)
         {
-            _baseFSM.Unlock(BaseState.Idle);
+            ExitDefend();
             _hitFSM.EnterHit(new HitData
             {
                 Damage = hitData.Damage,
