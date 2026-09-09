@@ -20,6 +20,9 @@ namespace KcpServer
         /// <summary>每发一个实体快照回调（Server3C 注入：写入该 observer 的 WorldSnapshot.Entities）</summary>
         public System.Action<long, EntitySnapshot>? OnEntityBroadcast { get; set; }
 
+        /// <summary>累计发送实体数（Server3C 每 tick 增量；日志统计用——T7）</summary>
+        public long TotalEntitySends;
+
         /// <summary>
         /// 为观察者组装本 tick 应广播的实体快照列表（AoiGrid 可见 + 带节拍/移动判定）。
         /// 每 tick 每 observer 调用一次。语义：移动实体按带频、静止实体 4 tick 保活

@@ -19,10 +19,28 @@ namespace KcpServer
                 port = argPort;
             }
 
+            // P3 压测模式：--bots N（N 个移动 bot 注册进世界——供 AoiWorldTests 带宽/视野验收）
+            int botCount = 0;
+            for (int i = 1; i < args.Length - 1; i++)
+            {
+                if (args[i] == "--bots" && int.TryParse(args[i + 1], out var n))
+                {
+                    botCount = n;
+                    break;
+                }
+            }
+
             Console.WriteLine($"Starting Server3C on port {port}...");
 
             var logger = new ConsoleLogger();
             _server = new Server3C(logger);
+
+            // bot 必须先于 StartAsync 注册（EntityStore 主循环独占——R2）
+            if (botCount > 0)
+            {
+                _server.EnableBots(botCount);
+                Console.WriteLine($"Bot mode: {botCount} bots registered");
+            }
 
             try
             {
