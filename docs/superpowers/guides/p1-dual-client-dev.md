@@ -41,3 +41,13 @@
   P3 AOI 压测时如带宽超标再评估。
 - 延迟注入工具：PlayMode 测试用 `MovementReporter` 的 `injectedSendDelayMs` 构造参数
   模拟上行延迟（MovementSyncTests 的 A_Moves_With_Injected_Delay_Local_Unaffected 传 200ms）
+
+## P3 AOI 验证（2026-09-10）
+
+- 起服（bot 压测模式）：`dotnet run --project Server/Server3C.csproj -- 8000 --bots 100`
+  （--bots N 必须在 StartAsync 前注册——R2 主循环独占）
+- AoiWorldTests（PlayMode）：bot 走近生成视图/走远缺席销毁——实测 60s 内 11 个不同 bot 过视野、
+  peak 4 并发、8 次 count 下降（saw 11/peak 4/drops 8）
+- 带宽门禁实测：单实体全字段快照 33B（T5 实测）；100 bot 场景观察者侧峰值 ~4.5KB/s——
+  门禁 100KB/s 的 20×+ 余量（[Aoi] 5s stat 日志留档）
+- 近带移动 15Hz/中 8Hz/远 4Hz + 静止 4Hz 保活；客户端缺席超时 1.2s

@@ -147,7 +147,9 @@ namespace KcpServer
         public void RegisterEntity(long playerId, string playerName)
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
-            _entityStore.MarkDirty(player); // 注册即标脏：首个快照立即携带新实体（MUST-DO-P2）
+            // AOI：实体立即可见靠 AoiGrid 首帧 + AoiBandScheduler HasSent=false（无需标脏）——
+            // MarkDirty 保留仅为 P2 测试语义（PositionSyncEntityStoreTests 断言 IsDirty）
+            _entityStore.MarkDirty(player);
         }
 
         public void UnregisterEntity(long playerId)

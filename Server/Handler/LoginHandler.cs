@@ -69,7 +69,8 @@ namespace KcpServer
                 Message = "Login successful",
                 PlayerId = playerId,
                 ZoneId = zoneId,
-                ServerTimestamp = DateTime.UtcNow.Ticks
+                ServerTimestamp = DateTime.UtcNow.Ticks,
+                ServerTickRateMs = 66 // 服务器 GameLoop 66ms（Server3C GameLoop ctor）——客户端据此换算插值窗口
             };
             await _server.SendToSessionAsync(session, MessageId.LoginResponse, loginResponse);
 

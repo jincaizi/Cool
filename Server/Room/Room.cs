@@ -63,19 +63,5 @@ namespace KcpServer
             return _sessions.Values.Where(s => s.SessionId != excludePlayerId).ToList();
         }
 
-        public IReadOnlyDictionary<long, PlayerState> GetOtherPlayerStates(long excludePlayerId)
-        {
-            return _players.Where(kv => kv.Key != excludePlayerId)
-                          .ToDictionary(kv => kv.Key, kv => kv.Value);
-        }
-
-        public bool UpdatePlayerPosition(long playerId, Vector3 position, float rotation, float speed, long timestamp, uint sequence)
-        {
-            if (!_players.TryGetValue(playerId, out var state))
-                return false;
-
-            state.UpdatePosition(position, rotation, speed, timestamp, sequence);
-            return true;
-        }
     }
 }

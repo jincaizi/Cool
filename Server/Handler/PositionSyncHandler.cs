@@ -43,7 +43,7 @@ namespace KcpServer
                 authoritativeRotation,
                 result.ClampedSpeed,
                 request.Timestamp, request.Sequence);
-            // UpdatePosition 已置 IsDirty（P1 T4）——WorldSnapshot 链自动携带
+            // UpdatePosition 置 IsDirty——保留（P2 测试语义）；AOI 广播按带节拍直接读当前位置，不依赖脏标记
 
             if (result.NeedsCorrection)
             {

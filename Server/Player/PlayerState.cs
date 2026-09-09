@@ -14,16 +14,11 @@ namespace KcpServer
         public float Rotation { get; internal set; }
         public float Speed { get; internal set; }
         public long LastUpdateTimestamp { get; internal set; }
-        public uint LastAcknowledgedSequence { get; internal set; }
         public uint LastReceivedSequence { get; internal set; }
-        public Vector3 LastValidPosition { get; internal set; }
-        public long LastValidTimestamp { get; internal set; }
 
         /// <summary>脏标记：位置等同步字段在最近一次快照后发生变化（主循环独占访问）</summary>
         public bool IsDirty { get; internal set; }
 
-        /// <summary>上次进入快照的 tick（beacon 判定用）</summary>
-        public uint LastSnapshotTick { get; internal set; }
         public bool IsLoggedIn { get; internal set; }
         public DateTime LastActiveTime { get; internal set; }
 
@@ -31,7 +26,6 @@ namespace KcpServer
         {
             PlayerId = playerId;
             Position = Vector3.zero;
-            LastValidPosition = Vector3.zero;
             LastActiveTime = DateTime.UtcNow;
         }
 
@@ -44,17 +38,6 @@ namespace KcpServer
             LastReceivedSequence = sequence;
             LastActiveTime = DateTime.UtcNow;
             IsDirty = true;
-        }
-
-        public void AcknowledgeSequence(uint sequence)
-        {
-            LastAcknowledgedSequence = sequence;
-        }
-
-        public void RecordValidPosition(Vector3 position, long timestamp)
-        {
-            LastValidPosition = position;
-            LastValidTimestamp = timestamp;
         }
     }
 }

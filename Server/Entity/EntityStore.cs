@@ -26,20 +26,5 @@ namespace KcpServer
             => _entities.TryGetValue(playerId, out var state) ? state : null;
 
         public void MarkDirty(PlayerState state) => state.IsDirty = true;
-
-        /// <summary>所有脏实体（构建后自动清脏）</summary>
-        public List<PlayerState> DrainDirty()
-        {
-            var result = new List<PlayerState>();
-            foreach (var state in _entities.Values)
-            {
-                if (state.IsDirty)
-                {
-                    state.IsDirty = false;
-                    result.Add(state);
-                }
-            }
-            return result;
-        }
     }
 }
