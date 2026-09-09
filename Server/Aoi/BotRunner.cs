@@ -43,7 +43,7 @@ namespace KcpServer
                 float z = (float)(_random.NextDouble() * 2 - 1) * WorldHalfExtent * 0.8f;
                 var player = _store.AddPlayer(id, $"Bot_{id}");
                 player.UpdatePosition(new Vector3(x, 0, z), 0f, 0f, 1L, 0U);
-                _store.MarkDirty(player); // 注册即标脏——首个快照携带（保 P2 语义）
+                // MarkDirty 保留（P2 测试语义）；AOI 可见性靠 grid 首帧 + scheduler 首槽，不依赖脏标记
                 var bot = new Bot { PlayerId = id };
                 RandomDir(bot);
                 _bots.Add(bot);
