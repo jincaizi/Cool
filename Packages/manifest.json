@@ -2,7 +2,7 @@
   "dependencies": {
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.github-glitchenzo.nugetforunity": "https://gitcode.com/gh_mirrors/nu/NuGetForUnity.git?path=/src/NuGetForUnity",
-    "com.ivanmurzak.unity.mcp": "0.81.0",
+    "com.ivanmurzak.unity.mcp": "0.86.3",
     "com.ivanmurzak.unity.mcp.animation": "1.1.37",
     "com.ivanmurzak.unity.mcp.particlesystem": "1.0.63",
     "com.unity.2d.sprite": "1.0.0",
