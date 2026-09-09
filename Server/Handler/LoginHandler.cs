@@ -115,6 +115,7 @@ namespace KcpServer
             _roomManager.TryRemovePlayer(playerId.Value);
             _server.UnbindPlayer(playerId.Value);
             _server.UnregisterEntity(playerId.Value);
+            _server.RemoveObserver(playerId.Value); // 断开清 observer AOI 视野/节拍状态
 
             if (room != null)
             {

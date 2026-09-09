@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -31,11 +30,9 @@ namespace KcpServer
         // R2：唯一消费者线程独占世界状态；IO 线程只 Enqueue，不触碰状态
         private readonly GameLoop<(EndPoint endpoint, byte[] data)> _gameLoop;
 
-        // T4：世界快照广播链（主循环独占访问）
+        // P3：per-observer 分级广播（AoiGrid 视野 + 带节拍/静止保活；主循环独占访问）
         private readonly EntityStore _entityStore = new EntityStore();
-        private readonly SnapshotAssembler _snapshotAssembler = new SnapshotAssembler();
-        private readonly IPerceptionFilter _perceptionFilter = new AllVisiblePerceptionFilter();
-        private const uint BeaconIntervalTicks = 4; // 3.75Hz beacon（每 4 tick 一次，15Hz tick）
+        private readonly AoiBroadcaster _aoi = new AoiBroadcaster();
 
         // 超时配置
         private readonly TimeSpan _sessionTimeout = TimeSpan.FromSeconds(300);
@@ -133,7 +130,11 @@ namespace KcpServer
         public void UnregisterEntity(long playerId)
         {
             _entityStore.RemovePlayer(playerId);
+            _aoi.RemoveEntity(playerId); // 注销清 AOI 状态：同 id 重登无残留视野迟滞/节拍
         }
+
+        /// <summary>观察者会话断开——清理其 AOI 视野/节拍状态</summary>
+        public void RemoveObserver(long playerId) => _aoi.RemoveObserver(playerId);
 
         public long? GetPlayerId(KcpServerSession session)
         {
@@ -161,31 +162,21 @@ namespace KcpServer
             return Task.CompletedTask;
         }
 
-        /// <summary>每 tick 广播世界快照（脏实体 + beacon；广播给各玩家的可见集）</summary>
+        /// <summary>每 tick 为各在线 observer 组装并广播其 AOI 可见快照（带节拍/静止保活）</summary>
         private void BroadcastWorldSnapshot(uint tick)
         {
-            var dirty = _snapshotAssembler.BuildDirtySnapshot(_entityStore, tick);
-            var beacons = _snapshotAssembler.BuildBeaconSnapshot(_entityStore, tick, BeaconIntervalTicks);
-
-            var allEntities = new System.Collections.Generic.List<Cool.Protocol.EntitySnapshot>(dirty.Count + beacons.Count);
-            allEntities.AddRange(dirty);
-            allEntities.AddRange(beacons);
-            if (allEntities.Count == 0) return; // 全静世界：不发快照（带宽省）
-
             foreach (var observer in _entityStore.All)
             {
                 if (!_playerIdToSession.TryGetValue(observer.PlayerId, out var session)) continue;
 
-                // 按感知过滤契约组装可见集（P1 全量占位 = 除自身外全体；P3 AoiGrid 替换）
-                var visibleIds = _perceptionFilter.GetVisiblePlayerIds(observer.PlayerId, _entityStore.All);
-                var visible = allEntities.Where(e => System.Array.IndexOf(visibleIds, e.PlayerId) >= 0).ToList();
-                if (visible.Count == 0) continue;
+                var entities = _aoi.BuildForObserver(observer, tick, _entityStore);
+                if (entities.Count == 0) continue; // 视野空：不发
 
                 var observerSnapshot = new WorldSnapshot
                 {
                     Tick = tick,
                     ServerTimestamp = System.DateTime.UtcNow.Ticks,
-                    Entities = visible
+                    Entities = entities
                 };
                 session.Send(MessageId.WorldSnapshot, observerSnapshot);
             }
