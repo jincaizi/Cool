@@ -85418,3 +85418,88 @@ B+ 移动同步闭环：客户端即时模拟 + 节流上报 + 预测帧对账 +
 - Room.UpdatePlayerPosition / NpcComponent 读 Room 位置 → AI 接线改喂 EntityStore
 - PlayerState LastValidPosition/AcknowledgeSequence 死 API；重连视图清理（P1 gap）
 - 真实角色（重力/物理/受击）下纠偏收敛验证——纯模拟测试覆盖不了，需世界场景宿主验证
+## Session End: 20260909_075548
+### Commits
+780eb6b docs(net): p2 execution summary in session log - acceptance evidence, deviations, follow-ups
+5695273 docs(net): p2 closeout - plan checkboxes and deviation record, validator/protocol comment refresh
+2473a67 chore(net): p2 polish - wireaction dead storage removed, unreliable eval recorded, injected-delay acceptance
+09cd8c9 test(net): p2 acceptance - movement seen across clients via interpolation, clock jitter recorded
+b79ebf1 feat(synclayer): remote interpolator - snapshot buffer, 2-tick render delay, clock-synced interpolation
+e2ffa2a feat(synclayer): movement reporter + net movement policy - throttled reporting, prediction frames, smooth correction
+e3de605 feat(server): position sync to entity store - shared validator, snapshot chain live, legacy broadcast retired
+908e300 feat(synccore): prediction reconciler - seq-keyed frame ledger, threshold correction, dual-end tests green
+9602cb6 feat(synccore): movement validator - shared speed/teleport/jump rules, dual-end tests green
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+---
+
+## Session End: 20260909_080358
+### Commits
+780eb6b docs(net): p2 execution summary in session log - acceptance evidence, deviations, follow-ups
+5695273 docs(net): p2 closeout - plan checkboxes and deviation record, validator/protocol comment refresh
+2473a67 chore(net): p2 polish - wireaction dead storage removed, unreliable eval recorded, injected-delay acceptance
+09cd8c9 test(net): p2 acceptance - movement seen across clients via interpolation, clock jitter recorded
+b79ebf1 feat(synclayer): remote interpolator - snapshot buffer, 2-tick render delay, clock-synced interpolation
+e2ffa2a feat(synclayer): movement reporter + net movement policy - throttled reporting, prediction frames, smooth correction
+e3de605 feat(server): position sync to entity store - shared validator, snapshot chain live, legacy broadcast retired
+908e300 feat(synccore): prediction reconciler - seq-keyed frame ledger, threshold correction, dual-end tests green
+9602cb6 feat(synccore): movement validator - shared speed/teleport/jump rules, dual-end tests green
+### Uncommitted Changes
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/SkillsCfg/Spin_SkillR.asset
+Assets/Scripts/Hotfix/GameSystems/Nameplate/NameplateRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Panel/CharacterSelect/CharacterSelectPanel.cs
+Packages/manifest.json
+Packages/packages-lock.json
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260910_040113
+### Commits
+064ac9b docs(net): reconnect-note corrected (smooth re-enter moved to p3 backlog), host wiring marked done in plan
+bcbe9a2 feat(synclayer): client network host - in-game wiring entry for movement reporting + smooth correction
+9a93c88 chore(assets): zhunyuan font glyph additions, mcp plugin bump to 7.5.2
+5d3d7dc fix(ui): nameplate hides behind camera, select-panel button highlight colors, skillr max duration 5s to 3s
+8261508 feat(3c): defend as upper-body layer override - locomotion-speed sync, no base-state lock
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+
+## P3 AOI 执行摘要（2026-09-10，coordinator 记录）
+### Goal（spec §5-P3）
+九宫格/半径推导网格 AOI 替换全量可见占位；分级更新（近 15/中 8/远 4Hz + 静止 4Hz 保活）；视野进出驱动生成/销毁（迟滞 80/90m + 客户端 1.2s 缺席超时）；BotRunner 100 bot 压测；带宽门禁。协议零改动。
+### Commits
+21830a2 T1 AoiGrid → 7f3a775 T2 AoiBandScheduler → cf5f62c T3 AoiBroadcaster（+SnapshotAssembler/PerceptionFilter 退役）→ 565fca8 T4 BotRunner → cedc5c1 T5 GlobalGameSettings 门禁 → d157554+15098ee T6 客户端缺席超时 → d88d965+fdc8267 T7 e2e（--bots + AoiWorldTests）→ c145e00 T8 收尾 → closeout docs
+### Acceptance Evidence
+- Server.Tests 79/79（54 − 4 旧 + 29 新）；EditMode 166/166；PlayMode MovementSync 4 + TwoClientWorld 1 + AoiWorldTests 1×3 连跑
+- AoiWorldTests 实测：60s 内 11 distinct bots 过视野、peak 4、8 drops（生成+销毁整链）
+- 带宽实测：单实体快照 33B；100 bot 场景峰值 ~1.6-4.5KB/s ≪ 100KB/s 门禁（20×+ 余量）
+- 坐标量化（D5 条件项）未触发 → backlog
+### Key Deviations（详见 plan 偏差记录）
+T1 测试坐标 bug + CellOf floor + 假绿修复；T3 MarkOutOfSight 缺口（计划自身测试抓到）；T5 实测 33B（估 60B）；T6 EditMode Destroy → DestroyView；T7 断线假绿守卫 + CLI timeout 300s
+### Final Review: READY_WITH_NOTES（Minor 注释陈旧——TwoClientWorldTests beacon 注释/PositionSync 测试消息/AoiBroadcaster OnEntityBroadcast doc——next-touch 时修）
+### P3 Backlog
+int16 坐标量化（未触发）；ClockSync 重连重 arm；真实角色模型渲染
