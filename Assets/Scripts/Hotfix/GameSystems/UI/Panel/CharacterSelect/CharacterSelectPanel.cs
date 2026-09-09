@@ -20,8 +20,10 @@ namespace Hotfix.GameSystems.UI
         [SerializeField] private Button _maleButton;
         [SerializeField] private Button _femaleButton;
         [SerializeField] private Button _confirmButton;
-        [SerializeField] private GameObject _maleHighlight;
-        [SerializeField] private GameObject _femaleHighlight;
+        /// <summary>选中按钮图片高亮色</summary>
+        [SerializeField] private Color _selectedColor = new Color(1f, 0.84f, 0.36f);
+        /// <summary>未选中按钮图片颜色</summary>
+        [SerializeField] private Color _normalColor = new Color(0.62f, 0.62f, 0.62f);
 
         /// <summary>选人切换事件（场景侧 SelectStageController 用于切换预览体）</summary>
         public event Action<CharacterGender> OnSelectionChanged;
@@ -55,8 +57,14 @@ namespace Hotfix.GameSystems.UI
 
         private void RefreshHighlight()
         {
-            if (_maleHighlight != null) _maleHighlight.SetActive(_selected == CharacterGender.Male);
-            if (_femaleHighlight != null) _femaleHighlight.SetActive(_selected == CharacterGender.Female);
+            SetButtonColor(_maleButton, _selected == CharacterGender.Male);
+            SetButtonColor(_femaleButton, _selected == CharacterGender.Female);
+        }
+
+        private void SetButtonColor(Button button, bool selected)
+        {
+            if (button == null || button.image == null) return;
+            button.image.color = selected ? _selectedColor : _normalColor;
         }
 
         private void Confirm()

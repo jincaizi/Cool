@@ -120,8 +120,13 @@ namespace Hotfix.GameSystems.Nameplate
 
                 var worldPos = entry.Owner.position + Vector3.up * (entry.Config.VerticalOffset >= 0 ? entry.Config.VerticalOffset : _settings.VerticalOffset);
                 var screenPos = camera.WorldToScreenPoint(worldPos);
-                if (screenPos.z > 0)
-                    entry.Root.transform.position = screenPos;
+                // 锚点在摄像机后方时隐藏，否则位置不更新会停留在旧值（如画布中心）导致名片钉在屏幕上
+                if (screenPos.z <= 0)
+                {
+                    entry.Root.SetActive(false);
+                    continue;
+                }
+                entry.Root.transform.position = screenPos;
 
                 float alpha = dist > _settings.FadeStartDistance
                     ? 1f - Mathf.Clamp01((dist - _settings.FadeStartDistance) / (cullEnd - _settings.FadeStartDistance))

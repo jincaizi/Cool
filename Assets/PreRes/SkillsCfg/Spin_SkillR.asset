@@ -45,7 +45,7 @@ MonoBehaviour:
     _tickInterval: 1
     _totalTicks: 5
   _minDuration: 1
-  _maxDuration: 5
+  _maxDuration: 3
   _tickInterval: 0.2
   _maxHitsPerTarget: 5
   _moveSpeedMultiplier: 0.5
