@@ -1605,12 +1605,13 @@ git commit -m "chore(net): p2 polish - wireaction dead storage removed, unreliab
 
 **测试计数最终值（计划各 Step 期望为基线推导，实际以最终为准）：** Server.Tests 54（39 基线 + 15：validator 6/reconciler 6/entity-store 3）；EditMode 163（145 基线 + 18：validator 6/reconciler 6/interpolator 6）；PlayMode MovementSyncTests 4 测试 3 连跑全绿（时钟抖动实测 5.8~12.5ms，远低于 50ms 红线）；TwoClientWorldTests/LoginEnterWorldTests 回归绿（1 参 ctor 未破坏）。
 
-**遗留跟踪（final review Minor，未在本期执行）：**
+**遗留跟踪（final review Minor + 收尾补充，未在本期执行）：**
 - `LoginResponse.ServerTickRateMs` 服务器从未填写（客户端 fallback 67 vs 服务器 66ms——1.5% 偏差，benign；P3 顺手填或删字段）
 - `Room.UpdatePlayerPosition`/`Server/AI NpcComponent` 读 Room 位置——AI 服务器接线时改喂 EntityStore（P3）
 - `PlayerState.LastValidPosition/RecordValidPosition/AcknowledgeSequence` 死 API（P0/P1 遗留）
 - RemoteEntityRegistry 断线重连不清视图（P1 gap，离线期间幽灵残留至服务器会话超时）
-- 游戏内宿主接线（真实场景 AttachMovementReporter + NetMovementPolicy 切换）仍无调用方——验收由测试宿主覆盖，P3 世界场景接线时落地
+- **EnterWorld 平滑重连**（保留现场不重登）：P1 注释原标"留 P2"但 P2 范围未含——已修注释（2026-09-10），P3 backlog 立项
+- ~~游戏内宿主接线~~ → **已落地**（2026-09-10，commit 附 ClientNetworkHost + `docs/superpowers/guides/p2-client-network-host.md`）——真实角色（重力/物理/受击）下纠偏收敛与登录流调用点仍待实机验证
 
 ## 终审修正（2026-08-31 第二轮，对照代码复核）
 

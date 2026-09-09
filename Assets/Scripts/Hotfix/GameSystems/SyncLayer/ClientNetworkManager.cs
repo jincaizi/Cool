@@ -8,8 +8,10 @@ namespace Hotfix.GameSystems.SyncLayer
 {
     /// <summary>
     /// 客户端网络管理器 —— 连接/登录/进世界/断线重连闭环（P1 决策 D4：
-    /// 重连 = 重新 Login 全流程；EnterWorld 平滑重连留 P2）。
-    /// 由宿主每帧调用 Update；事件 OnEnterWorld/OnDisconnected 供上层接线。
+    /// 重连 = 重新 Login 全流程）。由宿主每帧调用 Update；
+    /// 事件 OnEnterWorld/OnDisconnected 供上层接线。
+    /// 注：EnterWorld 平滑重连（保留现场不重登）原 P1 注释标"留 P2"但 P2 未承接——
+    /// 现为 P3 backlog 项（见 plan 偏差记录），勿按旧注释期待该能力。
     /// </summary>
     public sealed class ClientNetworkManager : IDisposable
     {
