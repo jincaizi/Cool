@@ -14,7 +14,9 @@ namespace KcpNet.PlayModeTests
     /// ① 双客户端伤害数字一致且以服务器为准（A 施法 → 双方 DamageResult 同值，B 余血 = 100 − 伤害）；
     /// ② 伪造越射程/未冷却技能被服务器拒绝（客户端无任何战斗消息到达；
     ///    服务器审计日志另留档 production/verify/cast-audit.log，见 Step 4）。
-    /// 双客户端同出生点 (0,0,0)——Single 自动目标零距离退化命中（D-P4-2a）。
+    /// 双客户端同出生点 (0,0,0)。施法用显式 TargetPlayerId（服务端显式目标按 id 精确匹配 +
+    /// 距离校验，防作弊不变）——类级连跑时上一测试的 ghost 实体（15s 静默窗口）会干扰
+    /// 自动目标选择（test-order interference）。
     /// </summary>
     public class CombatSyncTests
     {
@@ -106,10 +108,10 @@ namespace KcpNet.PlayModeTests
 
             if (!cheat)
             {
-                // —— 正常施法：Q（Single 3.5m，自动目标）——
+                // —— 正常施法：Q（Single 3.5m，显式目标 B）——
                 ctxA.Adapter.Send(MessageId.CastRequest, new CastRequest
                 {
-                    SkillId = 20001, TargetPlayerId = 0, Shape = SkillQShape()
+                    SkillId = 20001, TargetPlayerId = targetId, Shape = SkillQShape()
                 });
 
                 // 断言窗口 20s：A 收到 CastBroadcast，双方收到 DamageResult
@@ -155,11 +157,11 @@ namespace KcpNet.PlayModeTests
             // —— 作弊 2：连发两次 Q（冷却 6s 内）→ 仅第一次生效 ——
             ctxA.Adapter.Send(MessageId.CastRequest, new CastRequest
             {
-                SkillId = 20001, TargetPlayerId = 0, Shape = SkillQShape()
+                SkillId = 20001, TargetPlayerId = targetId, Shape = SkillQShape()
             });
             ctxA.Adapter.Send(MessageId.CastRequest, new CastRequest
             {
-                SkillId = 20001, TargetPlayerId = 0, Shape = SkillQShape()
+                SkillId = 20001, TargetPlayerId = targetId, Shape = SkillQShape()
             });
             for (int i = 0; i < 100; i++) // 20s
             {
