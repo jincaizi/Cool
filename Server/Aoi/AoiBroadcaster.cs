@@ -91,5 +91,9 @@ namespace KcpServer
             _scheduler.RemoveObserver(observerId);
             _lastVisible.Remove(observerId);
         }
+
+        /// <summary>观察者当前视野内实体（P4 CastHandler 广播范围复用 AoiGrid 迟滞视野语义）</summary>
+        public List<PlayerState> GetVisible(long observerId, EntityStore store)
+            => _grid.GetVisible(observerId, store.All);
     }
 }

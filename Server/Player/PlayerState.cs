@@ -16,6 +16,23 @@ namespace KcpServer
         public long LastUpdateTimestamp { get; internal set; }
         public uint LastReceivedSequence { get; internal set; }
 
+        /// <summary>P4 战斗状态（服务器权威；登录重建 PlayerState 即满血——无复活，见 D-P4-8）</summary>
+        public float Hp { get; internal set; } = 100f;
+        public float MaxHp { get; internal set; } = 100f;
+        public bool IsAlive => Hp > 0f;
+        private readonly System.Collections.Generic.Dictionary<int, uint> _lastCastTicks =
+            new System.Collections.Generic.Dictionary<int, uint>();
+
+        /// <summary>服务器权威扣血（命中裁决调用；可到负值——死亡判定唯一依据 IsAlive，无复活 D-P4-8）</summary>
+        public void ApplyDamage(float damage) => Hp -= damage;
+
+        /// <summary>记录技能最后施放 tick（冷却判定；主循环独占访问）</summary>
+        public void RecordCast(int skillId, uint tick) => _lastCastTicks[skillId] = tick;
+
+        /// <summary>冷却就绪判定（tick 差 ≥ 冷却 tick 数；无记录 = 就绪。uint wrap 安全：15Hz 下 ~9.1 年）</summary>
+        public bool IsCastReady(int skillId, uint tick, uint cooldownTicks)
+            => !_lastCastTicks.TryGetValue(skillId, out var last) || tick - last >= cooldownTicks;
+
         /// <summary>脏标记：位置等同步字段在最近一次快照后发生变化（主循环独占访问）</summary>
         public bool IsDirty { get; internal set; }
 

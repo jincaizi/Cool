@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,6 +35,9 @@ namespace KcpServer
         private readonly EntityStore _entityStore = new EntityStore();
         private readonly AoiBroadcaster _aoi = new AoiBroadcaster();
 
+        // P4：服务端权威战斗裁决（校验/命中/掷骰/扣血；广播经 CastHandler）
+        private readonly CastHandler _castHandler;
+
         private BotRunner? _botRunner;
 
         /// <summary>压测模式：注册 N 个 bot（无 session 假玩家）并在主循环 tick 推进。
@@ -53,6 +57,9 @@ namespace KcpServer
         public int PlayerCount => _roomManager.TotalPlayerCount;
         public int ActiveSessionCount => _sessionManager.SessionCount;
 
+        /// <summary>当前主循环 tick（P4 冷却判定基准——tick 回调首行更新）</summary>
+        public uint CurrentTick { get; private set; }
+
         public Server3C(ILogger logger)
         {
             _logger = logger;
@@ -62,6 +69,7 @@ namespace KcpServer
             _positionSyncHandler = new PositionSyncHandler(this, _logger, _entityStore);
             _echoHandler = new EchoHandler(this, _logger);
             _clockSyncHandler = new ClockSyncHandler(this, _logger);
+            _castHandler = new CastHandler(this, _logger, new CombatResolver(_entityStore));
 
             // R2：唯一消费者线程独占世界状态；handler 同步链内完成解码/分发/发送
             _gameLoop = new GameLoop<(EndPoint, byte[])>(
@@ -70,6 +78,7 @@ namespace KcpServer
                 logger,
                 tick =>
                 {
+                    CurrentTick = (uint)tick;
                     _botRunner?.Tick((uint)tick); // P3 压测：bot 群每 tick 游走
 
                     // 每 5s（75 tick）带宽统计日志——T7 验收口径（记录非断言）
@@ -160,6 +169,9 @@ namespace KcpServer
 
         /// <summary>观察者会话断开——清理其 AOI 视野/节拍状态</summary>
         public void RemoveObserver(long playerId) => _aoi.RemoveObserver(playerId);
+
+        /// <summary>观察者当前 AOI 可见实体（CastHandler 广播范围）</summary>
+        public List<PlayerState> GetVisiblePlayers(long observerId) => _aoi.GetVisible(observerId, _entityStore);
 
         public long? GetPlayerId(KcpServerSession session)
         {
@@ -309,6 +321,10 @@ namespace KcpServer
 
                     case ClockSyncRequest clockSync:
                         await _clockSyncHandler.HandleClockSyncAsync(session, clockSync);
+                        break;
+
+                    case CastRequest cast:
+                        await _castHandler.HandleCastAsync(session, cast);
                         break;
 
                     case Heartbeat heartbeat:
