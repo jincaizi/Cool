@@ -85503,3 +85503,38 @@ T1 测试坐标 bug + CellOf floor + 假绿修复；T3 MarkOutOfSight 缺口（�
 ### Final Review: READY_WITH_NOTES（Minor 注释陈旧——TwoClientWorldTests beacon 注释/PositionSync 测试消息/AoiBroadcaster OnEntityBroadcast doc——next-touch 时修）
 ### P3 Backlog
 int16 坐标量化（未触发）；ClockSync 重连重 arm；真实角色模型渲染
+## Session End: 20260910_055921
+### Commits
+cc3a7f3 docs(net): p3 execution summary in session log - acceptance evidence, deviations, follow-ups
+c4e5587 docs(aoi): p3 closeout - plan checkboxes, deviation/acceptance record, botrunner comment refresh
+c145e00 chore(aoi): p3 polish - tickrate filled, dead playerstate/room/entitystore api removed, docs synced
+fdc8267 test(aoi): harden e2e - mid-run disconnect guard, success stats emission
+d88d965 test(aoi): bot presence/absence e2e - spawn/expire driven by AOI visibility, band budget logged
+15098ee docs(net): fix 10x comment slip in expiry test, record clock re-arm backlog
+d157554 feat(synclayer): remote entity expiry - 1.2s snapshot-gap destroys out-of-sight views (AOI)
+cedc5c1 feat(aoi): bandwidth budget gate - measured entity bytes, GlobalGameSettings formula
+565fca8 feat(aoi): bot runner - deterministic moving entities for load testing
+cf5f62c feat(aoi): per-observer banded broadcast - AoiBroadcaster replaces store-level assembler and perception filter
+7f3a775 feat(aoi): distance-band scheduler - moving by band cadence, static 4-tick keepalive
+21830a2 feat(aoi): grid interest filter with hysteresis sight - radius-derived cells, remove-entity cleanup
+6793bfb docs: p3 plan - audit round 2 residuals fixed (leave-radius candidate range, discriminating tests, final-form snippets)
+9da600b docs: p3 plan audit fixes - sight-coverage wedge, scheduler static keepalive, expiry clock gate, bot ordering, cleanup list
+9e1373b docs: p3 aoi world implementation plan - nine-grid, banded broadcast, bot runner, bandwidth gate
+064ac9b docs(net): reconnect-note corrected (smooth re-enter moved to p3 backlog), host wiring marked done in plan
+bcbe9a2 feat(synclayer): client network host - in-game wiring entry for movement reporting + smooth correction
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+---
+
+## P4 技能与战斗同步执行摘要（2026-09-11，coordinator 记录）
+### Goal（spec §5-P4）
+CombatRules 双端同源规则表（4 技能资产实测值）+ HitResolver 几何裁决；CastRequest → 服务端权威校验（存活/冷却/形状上限/射程）→ D4 服务端掷骰 → DamageResult 双端一致；作弊拒绝留审计日志。协议只加不删（300-302）。
+### Commits
+03adbe9 T1 protocol → 6d76bd6+504d571+20a704b T2 SyncCore（含 NaN 守卫修复轮）→ 2226078 T3 服务端裁决 → 831affa+3cae680 T4 客户端桥 → 434b86f+6d0d6fa T5 e2e（含 ghost 干扰修复）→ T6 收尾
+### Acceptance Evidence
+- Server.Tests 115/115；EditMode 195/195；PlayMode CombatSyncTests 2/2 ×3 类级连跑 + MovementSync 4/TwoClientWorld 1/AoiWorld 1 回归
+- e2e：双端 DamageResult 伤害/余血逐位一致（域 {120,180}）；审计日志每次跑 shape-tampered ×1 + cooldown ×1（verify/cast-audit*.log 留档）
+### Key Deviations（详见 plan 偏差记录）
+T2 SkillEntry 构造不可变化 + 锥边点 1ulp 修正；T3 ApplyDamage 不钳（计划自身测试矛盾）；T4 EventBus 命名空间/asmdef 引用；T5 显式目标修复 test-order ghost 干扰
+### P4 Backlog
+P5 施法目标判别；投射物/蓄力/引导服务端化；PvP 格挡减伤服务端化；死亡/复活；ActionState；远程动画表现；命中方向字段

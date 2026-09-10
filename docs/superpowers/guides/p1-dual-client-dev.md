@@ -51,3 +51,19 @@
 - 带宽门禁实测：单实体全字段快照 33B（T5 实测）；100 bot 场景观察者侧峰值 ~4.5KB/s——
   门禁 100KB/s 的 20×+ 余量（[Aoi] 5s stat 日志留档）
 - 近带移动 15Hz/中 8Hz/远 4Hz + 静止 4Hz 保活；客户端缺席超时 1.2s
+
+## P4 技能/战斗同步验证（2026-09-11）
+
+- 起服（审计日志重定向留档——作弊拒绝证据）：
+  ```bash
+  dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 > E:/CodeForJob/Cool/production/verify/cast-audit.log 2>&1 &
+  ```
+- CombatSyncTests 类级运行（PlayMode 2 用例，需先起服；CLI 默认超时 60s 不够——加 `--timeout 300000`）：
+  ```bash
+  unity-mcp-cli run-tool tests-run --input '{"testMode":"PlayMode","testClass":"CombatSyncTests"}' --timeout 300000
+  ```
+- 审计日志 grep 口径（每轮 e2e 预期 `reason=shape-tampered` ×1 + `reason=cooldown` ×1）：
+  ```bash
+  grep "reason=" cast-audit.log | sort | uniq -c
+  ```
+- 停服：`netstat -ano | grep :8000 | awk '{print $NF}' | sort -u | xargs -r taskkill //PID {} //F`（确认端口释放：`netstat -ano | grep :8000 | wc -l` → 0）

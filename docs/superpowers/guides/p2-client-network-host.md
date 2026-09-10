@@ -57,3 +57,18 @@ netHost.OnDisconnected += reason => { /* 断线提示 */ };
 - 登录 UI/主城流程不存在——`Connect()` 的调用点由未来启动流提供
 - 远程实体断线残留：服务器静默检测（15s）前实体停流——客户端 1.2s 缺席超时先销毁（比服务器 15s 注销更快）
 - 真实角色（重力/物理/受击）下纠偏收敛需在此宿主上实机验证——P2 纯模拟测试覆盖不到
+
+## 战斗网络接线（P4，2026-09-11）
+
+`ClientNetworkHost` 进世界后（本地角色就绪路径）自动装配 `CombatNetworkBridge`：
+
+- **出站**：`SkillCoordinator.OnSkillActivated` → 表内 4 技能（10001/10002/20001/20002）发 `CastRequest`（形状随包上线，服务端按 CombatRules 校验上限）；表外技能不发——本地表现照常
+- **入站**：`DamageResult` → 命中本地玩家走 `Sys3CEntry.ApplyServerDamage` 直扣（受击/浮字走现有链）；命中远程实体发 `PlayerTakeDamageEvent` → 现有 FloatText 链自动飘字
+
+## 已知边界（P4）
+
+- PvP 伤害服务端权威：伤害数字以服务器 `DamageResult` 为准（D4 只有服务器掷骰）；本地怪物战斗保持本地权威
+- PvP 格挡/防御减伤未服务端化——`ApplyServerDamage` 直扣不结算格挡
+- 死亡无复活——HP 归零后重登重建满血
+- PvE 挥击跨界：表内技能打怪也会发 `CastRequest`，服务端自动目标可能命中附近玩家并消耗冷却（P5 前置施法目标判别 backlog）
+- `CastBroadcast` 表现占位仅日志（远程实体真实技能动画留 backlog）
