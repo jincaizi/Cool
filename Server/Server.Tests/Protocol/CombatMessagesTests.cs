@@ -46,6 +46,11 @@ public class CombatMessagesTests
                 {
                     TargetPlayerId = 2, Damage = 120f, IsCritical = false,
                     TargetRemainingHp = 0f, HitX = 1f, HitZ = 2f
+                },
+                new HitEntry
+                {
+                    TargetPlayerId = 3, Damage = 180f, IsCritical = true,
+                    TargetRemainingHp = 42f, HitX = 1f, HitZ = 2f
                 }
             }
         };
@@ -54,11 +59,15 @@ public class CombatMessagesTests
 
         Assert.Equal(MessageId.DamageResult, id);
         var damage = Assert.IsType<DamageResult>(decoded);
-        Assert.Single(damage.Hits);
+        Assert.Equal(2, damage.Hits.Count);
         Assert.Equal(2L, damage.Hits[0].TargetPlayerId);
         Assert.Equal(120f, damage.Hits[0].Damage, 4);
         Assert.False(damage.Hits[0].IsCritical);
         Assert.Equal(0f, damage.Hits[0].TargetRemainingHp, 4);
+        Assert.Equal(3L, damage.Hits[1].TargetPlayerId);
+        Assert.Equal(180f, damage.Hits[1].Damage, 4);
+        Assert.True(damage.Hits[1].IsCritical);
+        Assert.Equal(42f, damage.Hits[1].TargetRemainingHp, 4);
     }
 
     [Fact]

@@ -6,7 +6,8 @@ namespace Cool.Protocol
     /// <summary>
     /// 技能命中形状（spec §5-P4：判定几何两端同源）——数值契约：
     /// ShapeType 与客户端 ShapeBlock.TargetType 枚举同值（Single=0 / AOE_Circle=1 /
-    /// AOE_Cone=2 / AOE_Sector=3），Angle 为全角。只加不删：新形状字段追加高位 tag。
+    /// AOE_Cone=2 / AOE_Sector=3），Angle 为全角。只加不删：新形状字段追加高位 tag；
+    /// 客户端枚举另有 Self=4（P4 不用）。内嵌类型非线上消息，实现标记接口仅为协议层惯例
     /// </summary>
     [ProtoContract]
     public class HitShape : IMessage
@@ -48,7 +49,7 @@ namespace Cool.Protocol
         [ProtoMember(9)] public long ServerTimestamp { get; set; }
     }
 
-    /// <summary>单次命中结果（D4：战斗骰只有服务器掷——伤害值随消息下发，客户端不重算）</summary>
+    /// <summary>单次命中结果（D4：战斗骰只有服务器掷——伤害值随消息下发，客户端不重算）。内嵌类型非线上消息，实现标记接口仅为协议层惯例</summary>
     [ProtoContract]
     public class HitEntry : IMessage
     {
