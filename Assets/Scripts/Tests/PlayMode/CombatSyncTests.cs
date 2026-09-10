@@ -16,7 +16,8 @@ namespace KcpNet.PlayModeTests
     ///    服务器审计日志另留档 production/verify/cast-audit.log，见 Step 4）。
     /// 双客户端同出生点 (0,0,0)。施法用显式 TargetPlayerId（服务端显式目标按 id 精确匹配 +
     /// 距离校验，防作弊不变）——类级连跑时上一测试的 ghost 实体（15s 静默窗口）会干扰
-    /// 自动目标选择（test-order interference）。
+    /// 自动目标选择（test-order interference）。cheat-1（range 999）故意保留 TargetPlayerId=0：
+    /// 形状校验先于目标裁决，越射程在形状校验即拒绝，不涉及目标解析。
     /// </summary>
     public class CombatSyncTests
     {
@@ -46,13 +47,19 @@ namespace KcpNet.PlayModeTests
                 elapsed += Time.deltaTime;
                 yield return null;
             }
-            Assert.IsTrue(runTask.IsCompleted, "combat sync test timed out");
-            var (ok, reason) = runTask.Result;
-
-            ctxA.Manager.Dispose();
-            ctxB.Manager.Dispose();
-            Object.Destroy(root);
-            Assert.IsTrue(ok, reason);
+            try
+            {
+                Assert.IsTrue(runTask.IsCompleted, "combat sync test timed out");
+                var (ok, reason) = runTask.Result;
+                Assert.IsTrue(ok, reason);
+            }
+            finally
+            {
+                // 全失败路径兜底：双端 Dispose + 场景清理（否则服务器留幽灵会话）
+                ctxA.Manager.Dispose();
+                ctxB.Manager.Dispose();
+                Object.Destroy(root);
+            }
         }
 
         [UnityTest]
@@ -73,13 +80,19 @@ namespace KcpNet.PlayModeTests
                 elapsed += Time.deltaTime;
                 yield return null;
             }
-            Assert.IsTrue(runTask.IsCompleted, "combat cheat test timed out");
-            var (ok, reason) = runTask.Result;
-
-            ctxA.Manager.Dispose();
-            ctxB.Manager.Dispose();
-            Object.Destroy(root);
-            Assert.IsTrue(ok, reason);
+            try
+            {
+                Assert.IsTrue(runTask.IsCompleted, "combat cheat test timed out");
+                var (ok, reason) = runTask.Result;
+                Assert.IsTrue(ok, reason);
+            }
+            finally
+            {
+                // 全失败路径兜底：双端 Dispose + 场景清理（否则服务器留幽灵会话）
+                ctxA.Manager.Dispose();
+                ctxB.Manager.Dispose();
+                Object.Destroy(root);
+            }
         }
 
         private static void Capture(Ctx ctx)
@@ -114,7 +127,7 @@ namespace KcpNet.PlayModeTests
                     SkillId = 20001, TargetPlayerId = targetId, Shape = SkillQShape()
                 });
 
-                // 断言窗口 20s：A 收到 CastBroadcast，双方收到 DamageResult
+                // 断言窗口 10s：A 收到 CastBroadcast，双方收到 DamageResult
                 for (int i = 0; i < 100 && (ctxA.Damages.Count == 0 || ctxB.Damages.Count == 0); i++)
                 {
                     ctxA.Manager.Update(0.05f);
@@ -140,12 +153,12 @@ namespace KcpNet.PlayModeTests
                 return (true, $"ok: server damage {hitA.Damage} consistent on both clients (B remaining {hitA.TargetRemainingHp})");
             }
 
-            // —— 作弊 1：越射程（range 999）→ 服务器拒绝，双方 5s 内无任何战斗消息 ——
+            // —— 作弊 1：越射程（range 999）→ 服务器拒绝，双方 2.5s 内无任何战斗消息 ——
             ctxA.Adapter.Send(MessageId.CastRequest, new CastRequest
             {
                 SkillId = 20001, TargetPlayerId = 0, Shape = SkillQShape(range: 999f)
             });
-            for (int i = 0; i < 25; i++) // 5s
+            for (int i = 0; i < 25; i++) // 2.5s
             {
                 ctxA.Manager.Update(0.05f);
                 ctxB.Manager.Update(0.05f);
@@ -163,7 +176,7 @@ namespace KcpNet.PlayModeTests
             {
                 SkillId = 20001, TargetPlayerId = targetId, Shape = SkillQShape()
             });
-            for (int i = 0; i < 100; i++) // 20s
+            for (int i = 0; i < 100; i++) // 10s
             {
                 ctxA.Manager.Update(0.05f);
                 ctxB.Manager.Update(0.05f);

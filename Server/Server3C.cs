@@ -57,7 +57,7 @@ namespace KcpServer
         public int PlayerCount => _roomManager.TotalPlayerCount;
         public int ActiveSessionCount => _sessionManager.SessionCount;
 
-        /// <summary>当前主循环 tick（P4 冷却判定基准——tick 回调首行更新）</summary>
+        /// <summary>当前主循环 tick（packet 处理时比 lambda 已推进值落后一个迭代——冷却记录与判定同基准，语义不受影响；勿'修正'为实时值）</summary>
         public uint CurrentTick { get; private set; }
 
         public Server3C(ILogger logger)
