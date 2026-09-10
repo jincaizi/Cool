@@ -53,6 +53,9 @@ namespace Hotfix.GameSystems.Sys3C
         /// <summary>本地角色控制器（网络宿主装配上报数据源用）</summary>
         public Hotfix.GameSystems.Sys3C.Character.CharacterController CoreController => _cc;
 
+        /// <summary>技能协调器（P4 网络宿主装配战斗桥接入点）</summary>
+        public SkillCoordinator SkillCoordinator => _skillCoordinator;
+
         /// <summary>移动策略注入面（网络宿主可替换为 NetMovementPolicy）</summary>
         public IMovementPolicy MovementPolicy { get => _movementPolicy; set => _movementPolicy = value; }
 
@@ -393,6 +396,35 @@ namespace Hotfix.GameSystems.Sys3C
         private int GetSkillRId() => (int)SkillID.SkillR;
         private int GetSkillFireballId() => (int)SkillID.Fireball;
         private int GetSkillChargeBlastId() => (int)SkillID.ChargeBlast;
+
+        /// <summary>
+        /// P4 网络伤害入口（服务端权威——DamageResult 驱动）：绕过防御修正器直扣
+        /// （PvP 格挡减伤服务端化是 P4 backlog，D-P4-8），受击表现/HitFSM/浮字事件复用
+        /// 现有链路。怪物战斗（本地权威）不受影响。
+        /// </summary>
+        public void ApplyServerDamage(float damage, Vector3 hitDirection)
+        {
+            if (_currentHP <= 0) return;
+            _currentHP = Mathf.Max(0f, _currentHP - damage);
+
+            _fsmManager.HandleDamage(sourceId: -1, damage: damage, hitDirection: hitDirection,
+                knockbackForce: 0f);
+            if (_currentHP > 0)
+            {
+                EventBus.Emit(new PlayerTakeDamageEvent(
+                    gameObject.GetInstanceID(),
+                    transform.position + Vector3.up * 1.5f,
+                    HitZonePart.Torso,
+                    hitDirection,
+                    Mathf.CeilToInt(damage),
+                    Color.white));
+            }
+            if (_currentHP <= 0)
+            {
+                _skillCoordinator.ClearInputBuffer();
+                _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
+            }
+        }
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
             => ((IDamageable)this).TakeDamage(data, hitDirection, HitContact.None);

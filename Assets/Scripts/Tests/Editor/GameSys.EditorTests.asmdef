@@ -5,6 +5,7 @@
         "GameSys",
         "DataDefinition",
         "Cool.Protocol",
+        "KcpNet",
         "SyncCore"
     ],
     "includePlatforms": [

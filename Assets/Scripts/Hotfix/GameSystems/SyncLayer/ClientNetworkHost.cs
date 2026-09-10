@@ -1,5 +1,6 @@
 using System;
 using Cool.SyncCore;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Network;
 using KcpNet;
@@ -34,6 +35,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _attachFailed;
         private float _attachRetryTimer;
         private bool _entryLookedUp;
+        private CombatNetworkBridge? _combatBridge;
 
         public ClientNetworkManager? Manager => _manager;
         public RemoteEntityRegistry? RemoteEntities => _remoteEntities;
@@ -62,6 +64,8 @@ namespace Hotfix.GameSystems.SyncLayer
             // 进世界后装配本地角色（角色可能 Addressable 异步生成——就绪前每帧重试）
             if (_inWorld && !_attachFailed)
                 TryAttachLocalCharacter();
+
+            _combatBridge?.Update();
         }
 
         /// <summary>发起登录（幂等；可覆盖序列化默认值）。无需登录 UI——游戏启动流接线时调用</summary>
@@ -80,6 +84,13 @@ namespace Hotfix.GameSystems.SyncLayer
         public void Disconnect()
         {
             _manager?.Dispose();
+            if (_combatBridge != null && _adapter != null)
+            {
+                _adapter.MessageReceived -= _combatBridge.OnMessage;
+                if (_localEntry != null)
+                    _localEntry.SkillCoordinator.OnSkillActivated -= OnLocalSkillCast;
+                _combatBridge = null;
+            }
             _manager = null;
             _adapter = null;
             _connectRequested = false;
@@ -148,7 +159,21 @@ namespace Hotfix.GameSystems.SyncLayer
                 });
             _manager.OnCorrectionNeeded += _netPolicy.ApplyServerCorrection;
 
+            // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链
+            _combatBridge = new CombatNetworkBridge(_adapter!, () => _manager!.LocalPlayerId, _remoteEntities!,
+                (targetId, dmg, crit, dir) => _localEntry.ApplyServerDamage(dmg, dir));
+            _adapter!.MessageReceived += _combatBridge.OnMessage;
+            _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
+            _combatBridge.OnCastBroadcast += b =>
+                Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
+
             Debug.Log("[NetHost] 本地角色已接入移动上报（repoter + NetMovementPolicy）");
+        }
+
+        private void OnLocalSkillCast(SkillData skillData)
+        {
+            if (_combatBridge == null) return;
+            _combatBridge.NotifySkillCast(skillData.SkillId, HitShapeConverter.FromSkillData(skillData));
         }
 
         private void OnDestroy()
