@@ -24,9 +24,13 @@ namespace Cool.SyncCore
     /// 语义与客户端 AttackShape 对齐（XZ 平面；Angle 全角，半角余弦比较）：
     ///  - Single（显式 targetId）：距离 ≤ Range；
     ///  - Single（targetId=0，P4 客户端恒 0）：Range 内 + 施法者前方 ±Angle/2 锥内最近实体；
-    ///    零距离退化（dist≈0）视为锥内命中——客户端 normalized 零向量 NaN 漏判，服务端修正（D-P4-2a）；
+    ///    零距离退化（dist≈0）视为锥内命中——客户端 normalized 对零向量返回零向量（dot=0
+    ///    &lt; halfCos 漏判），服务端修正（D-P4-2a）；
     ///  - AOE_Circle：水平距离 ≤ AreaRadius。
-    /// 只返回 Alive 候选；caster 由调用方排除（不传入自身）。
+    /// ShapeType 非 1 一律按 Single 处理，调用方须先经 CombatRules.ValidateShape 校验形状合法性。
+    /// AOE 命中顺序 = 候选遍历顺序（非距离排序）。只返回 Alive 候选；caster 由调用方排除（不传入自身）。
+    /// yaw 为周期角（sin/cos 展开，天然 wrap 安全）。Math.Sin/Cos 在 .NET 8 与 Mono/IL2CPP 间
+    /// 不保证位级一致——命中裁决服务器权威，跨端微小差异无害。
     /// </summary>
     public static class HitResolver
     {

@@ -75,6 +75,45 @@ namespace Hotfix.GameSystems.Tests.SyncCore
         }
 
         [Test]
+        public void ValidateShape_Rejects_NaN_Range()
+        {
+            // 防 NaN 绕过：NaN 比较恒 false，可穿透全部上限检查
+            Assert.IsTrue(CombatRules.TryGet(20001, out var q));
+            var nan = new HitShape { ShapeType = 0, Range = float.NaN, Angle = 120f };
+            Assert.IsFalse(CombatRules.ValidateShape(nan, q));
+        }
+
+        [Test]
+        public void ValidateShape_Rejects_NaN_Angle()
+        {
+            Assert.IsTrue(CombatRules.TryGet(20001, out var q));
+            var nan = new HitShape { ShapeType = 0, Range = 3.5f, Angle = float.NaN };
+            Assert.IsFalse(CombatRules.ValidateShape(nan, q));
+        }
+
+        [Test]
+        public void ValidateShape_Rejects_Negative_Range()
+        {
+            // 负值只会削弱自己，但固化不变量：合法形状各字段非负
+            Assert.IsTrue(CombatRules.TryGet(20001, out var q));
+            var neg = new HitShape { ShapeType = 0, Range = -5f, Angle = 120f };
+            Assert.IsFalse(CombatRules.ValidateShape(neg, q));
+        }
+
+        [Test]
+        public void ValidateShape_Accepts_Exact_Boundary_Values()
+        {
+            // 含边界语义：恰好等于表上限不被拒
+            Assert.IsTrue(CombatRules.TryGet(20001, out var q));
+            var edge = new HitShape { ShapeType = 0, Range = 3.5f, Angle = 120f };
+            Assert.IsTrue(CombatRules.ValidateShape(edge, q));
+
+            Assert.IsTrue(CombatRules.TryGet(20002, out var r));
+            var edgeR = new HitShape { ShapeType = 1, AreaRadius = 2.5f };
+            Assert.IsTrue(CombatRules.ValidateShape(edgeR, r));
+        }
+
+        [Test]
         public void CooldownTicks_Rounds_Up_At_15Hz()
         {
             Assert.IsTrue(CombatRules.TryGet(10001, out var combo));

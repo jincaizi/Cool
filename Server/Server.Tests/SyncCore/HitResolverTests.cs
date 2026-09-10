@@ -30,6 +30,15 @@ public class HitResolverTests
     }
 
     [Fact]
+    public void Single_Explicit_Target_Exactly_At_Range_Hits()
+    {
+        // 距离恰为 Range（3.5，含边界）：dist == Range 不被拒
+        var candidates = new List<CombatCandidate> { C(2, 0f, 3.5f) };
+        var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates);
+        Assert.Equal(new long[] { 2 }, hits);
+    }
+
+    [Fact]
     public void Single_Explicit_Target_Out_Of_Range_Misses()
     {
         var candidates = new List<CombatCandidate> { C(2, 0f, 5f) };
@@ -77,6 +86,16 @@ public class HitResolverTests
         // yaw=90° → forward=(1,0,0)（+X）；仅 +X 侧实体在锥内
         var candidates = new List<CombatCandidate> { C(2, 2f, 0f), C(3, 0f, 2f) };
         var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 90f, 0, Single35, candidates);
+        Assert.Equal(new long[] { 2 }, hits);
+    }
+
+    [Fact]
+    public void Single_AutoTarget_Exactly_At_Cone_Edge_Hits()
+    {
+        // 锥边界恰 60°：(x,z)=(sin60°,cos60°) → dot == halfCos == 0.5f 位级相等（含边界语义）；
+        // 该点 dist=1.0 在 Range 内，隔离验证锥含边界（仅差 1 ulp 靠外的点会被拒）
+        var candidates = new List<CombatCandidate> { C(2, 0.8660254f, 0.5f) };
+        var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single35, candidates);
         Assert.Equal(new long[] { 2 }, hits);
     }
 

@@ -18,14 +18,28 @@ namespace Cool.SyncCore
     /// </summary>
     public sealed class SkillEntry
     {
-        public int SkillId;
-        public int ShapeType;        // HitShape.ShapeType（与客户端 TargetType 同值）
-        public float MaxRange;       // Single 距离上限
-        public float MaxAreaRadius;  // Circle 半径上限
-        public float MaxAngle;       // 锥形全角上限（与 ShapeBlock.Angle 同语义）
-        public float CooldownSeconds;
-        public float BaseDamage;
-        public float CriticalRate;
+        // getter-only：仅经构造函数赋值，共享表状态不可变
+        public int SkillId { get; }
+        public int ShapeType { get; }        // HitShape.ShapeType（与客户端 TargetType 同值）
+        public float MaxRange { get; }       // Single 距离上限
+        public float MaxAreaRadius { get; }  // Circle 半径上限
+        public float MaxAngle { get; }       // 锥形全角上限（与 ShapeBlock.Angle 同语义）
+        public float CooldownSeconds { get; }
+        public float BaseDamage { get; }
+        public float CriticalRate { get; }
+
+        public SkillEntry(int skillId, int shapeType, float maxRange, float maxAreaRadius,
+            float maxAngle, float cooldownSeconds, float baseDamage, float criticalRate)
+        {
+            SkillId = skillId;
+            ShapeType = shapeType;
+            MaxRange = maxRange;
+            MaxAreaRadius = maxAreaRadius;
+            MaxAngle = maxAngle;
+            CooldownSeconds = cooldownSeconds;
+            BaseDamage = baseDamage;
+            CriticalRate = criticalRate;
+        }
     }
 
     public static class CombatRules
@@ -35,10 +49,10 @@ namespace Cool.SyncCore
 
         private static readonly Dictionary<int, SkillEntry> Table = new Dictionary<int, SkillEntry>
         {
-            [10001] = new SkillEntry { SkillId = 10001, ShapeType = 0, MaxRange = 2f, MaxAreaRadius = 0f, MaxAngle = 120f, CooldownSeconds = 0f, BaseDamage = 50f, CriticalRate = 0.15f },
-            [10002] = new SkillEntry { SkillId = 10002, ShapeType = 0, MaxRange = 2.5f, MaxAreaRadius = 0f, MaxAngle = 120f, CooldownSeconds = 0.5f, BaseDamage = 90f, CriticalRate = 0.15f },
-            [20001] = new SkillEntry { SkillId = 20001, ShapeType = 0, MaxRange = 3.5f, MaxAreaRadius = 0f, MaxAngle = 120f, CooldownSeconds = 6f, BaseDamage = 120f, CriticalRate = 0.2f },
-            [20002] = new SkillEntry { SkillId = 20002, ShapeType = 1, MaxRange = 2f, MaxAreaRadius = 2.5f, MaxAngle = 120f, CooldownSeconds = 5f, BaseDamage = 160f, CriticalRate = 0.25f },
+            [10001] = new SkillEntry(skillId: 10001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0f, baseDamage: 50f, criticalRate: 0.15f),
+            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f),
+            [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f),
+            [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f),
         };
 
         public static bool IsSynced(int skillId) => Table.ContainsKey(skillId);
@@ -50,10 +64,15 @@ namespace Cool.SyncCore
             return false;
         }
 
-        /// <summary>形状合法性（防篡改扩大判定范围）：类型必须一致，Range/AreaRadius/Angle 不得超表上限</summary>
+        /// <summary>
+        /// 形状合法性（防篡改扩大判定范围）：类型必须一致，Range/AreaRadius/Angle 不得超表上限、
+        /// 不得为负；非有限值（NaN/Infinity）一律拒绝——防 NaN 绕过（NaN 比较恒 false，穿透全部上限检查）。
+        /// </summary>
         public static bool ValidateShape(HitShape shape, SkillEntry entry)
         {
             if (shape == null) return false;
+            if (!float.IsFinite(shape.Range) || !float.IsFinite(shape.Angle) || !float.IsFinite(shape.AreaRadius)) return false;
+            if (shape.Range < 0f || shape.AreaRadius < 0f || shape.Angle < 0f) return false;
             if (shape.ShapeType != entry.ShapeType) return false;
             if (shape.Range > entry.MaxRange + 0.01f) return false;
             if (shape.AreaRadius > entry.MaxAreaRadius + 0.01f) return false;
@@ -61,7 +80,7 @@ namespace Cool.SyncCore
             return true;
         }
 
-        /// <summary>冷却换算为 tick 数（15Hz 基准，向上取整）</summary>
+        /// <summary>冷却换算为 tick 数（15Hz 基准，向上取整）；表值静态且非负，uint 转换安全</summary>
         public static uint CooldownTicks(SkillEntry entry) =>
             (uint)Math.Ceiling(entry.CooldownSeconds * TickRateHz);
     }
