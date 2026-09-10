@@ -1,7 +1,9 @@
 {
     "name": "SyncCore",
     "rootNamespace": "Cool.SyncCore",
-    "references": [],
+    "references": [
+        "Cool.Protocol"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
