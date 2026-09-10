@@ -2158,20 +2158,20 @@ git commit -m "test(combat): skill combat e2e - dual-client damage consistency, 
 - Modify: `docs/superpowers/guides/p1-dual-client-dev.md`（P4 验证命令追加）
 - Modify: `docs/superpowers/specs/2026-08-27-network-sync-design.md`（P4 完成标注——如惯例）
 
-- [ ] **Step 1: 偏差记录（计划文件尾段）**
+- [x] **Step 1: 偏差记录（计划文件尾段）**
 
 计划文件追加"执行偏差与验收记录"段骨架（execution 时填充）：
 - 逐任务偏差（implementer 现场发现 + review 批准）
 - 验收证据（测试计数/审计日志/e2e 输出）
 - P4 backlog
 
-- [ ] **Step 2: guides 文档同步**
+- [x] **Step 2: guides 文档同步**
 
 `p2-client-network-host.md` 已知边界表追加 P4 段：技能施放链路（激活即发 CastRequest、表外技能本地表现不联网）、PvP 伤害服务端权威（DamageResult → ApplyServerDamage 直扣/远程浮字）、PvP 格挡减伤未服务端化、无复活。
 
 `p1-dual-client-dev.md` 追加 P4 段：起服命令（`dotnet run ... -- 8000 > production/verify/cast-audit.log 2>&1 &`）、CombatSyncTests 运行命令、审计日志 grep 口径。
 
-- [ ] **Step 3: 全量验证**
+- [x] **Step 3: 全量验证**
 
 ```bash
 dotnet test E:/CodeForJob/Cool/Server/Server.Tests/Server.Tests.csproj
@@ -2182,7 +2182,7 @@ unity-mcp-cli run-tool tests-run --input '{"testMode":"EditMode"}'
 
 Expected: 全绿；0 Errors。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add docs/superpowers/guides docs/superpowers/plans docs/superpowers/specs
