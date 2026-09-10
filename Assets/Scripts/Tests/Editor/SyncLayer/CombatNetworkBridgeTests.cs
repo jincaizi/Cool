@@ -162,6 +162,25 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void OnCastBroadcast_Raises_Event()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1, registry);
+            CastBroadcast captured = null!; // CastBroadcast 是 class——项目未开 nullable 上下文，不能用 struct 式 `?`/`.Value`
+            bridge.OnCastBroadcast += b => captured = b;
+
+            bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
+            {
+                SkillId = 20001, CasterPlayerId = 2, CasterX = 1f, CasterZ = 2f
+            });
+            bridge.Update();
+
+            Assert.NotNull(captured, "CastBroadcast 未触发事件");
+            Assert.AreEqual(20001, captured.SkillId);
+            Assert.AreEqual(2L, captured.CasterPlayerId);
+        }
+
+        [Test]
         public void OnMessage_Ignores_Non_Combat_Messages()
         {
             var registry = new RemoteEntityRegistry(_root.transform);

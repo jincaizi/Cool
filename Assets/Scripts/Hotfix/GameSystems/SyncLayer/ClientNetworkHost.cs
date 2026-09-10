@@ -84,13 +84,7 @@ namespace Hotfix.GameSystems.SyncLayer
         public void Disconnect()
         {
             _manager?.Dispose();
-            if (_combatBridge != null && _adapter != null)
-            {
-                _adapter.MessageReceived -= _combatBridge.OnMessage;
-                if (_localEntry != null)
-                    _localEntry.SkillCoordinator.OnSkillActivated -= OnLocalSkillCast;
-                _combatBridge = null;
-            }
+            DetachCombatBridge();
             _manager = null;
             _adapter = null;
             _connectRequested = false;
@@ -176,6 +170,19 @@ namespace Hotfix.GameSystems.SyncLayer
             _combatBridge.NotifySkillCast(skillData.SkillId, HitShapeConverter.FromSkillData(skillData));
         }
 
+        /// <summary>
+        /// 摘除战斗桥订阅（adapter 消息 + 本地技能事件）。Disconnect 与 OnDestroy 共用——
+        /// 宿主被销毁而本地 Sys3CEntry 存活时，避免桥对已销毁宿主留下悬空委托。
+        /// </summary>
+        private void DetachCombatBridge()
+        {
+            if (_combatBridge == null || _adapter == null) return;
+            _adapter.MessageReceived -= _combatBridge.OnMessage;
+            if (_localEntry != null)
+                _localEntry.SkillCoordinator.OnSkillActivated -= OnLocalSkillCast;
+            _combatBridge = null;
+        }
+
         private void OnDestroy()
         {
             if (_manager != null)
@@ -184,6 +191,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _manager.Dispose();
                 _manager = null;
             }
+            DetachCombatBridge();
         }
     }
 }
