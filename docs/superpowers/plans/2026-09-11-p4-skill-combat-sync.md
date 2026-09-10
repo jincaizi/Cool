@@ -2226,6 +2226,9 @@ git commit -m "docs(combat): p4 closeout - plan deviations, guide updates, backl
 - PvP 格挡/防御减伤服务端化（D-P4-8）；死亡广播/复活；快照 ActionState 填充
 - 远程实体真实技能动画（胶囊占位期仅 CastBroadcast 日志）；命中方向字段（只加不删追加）
 - 服务端 Random → 密码学随机（掷骰可预测理论面）；CastBroadcast 回显形状未校验字段清零（InnerRadius 等——纯表现面）；MaxHp 未消费（快照血条预留）；circle 技能伤害 bot 注释；production/verify/ 工件入 VCS 决策
+- 重登重置冷却（PlayerState 重建副作用——与 D-P4-8 满血同机制的反作弊缺口，P5 前记录）；HitResolver 无客户端内圈必中旁路（InnerRadius/InnerAngle 服务端未复刻——P5 PvP 落地前"两端同源"语义缺口）
+- PvP 联调期临时守卫建议（终审）：PvE 挥击跨界致合作玩家被友伤（P5 前置项）——若 P5 落地前有人双端联调，考虑临时 PvP 开关
+- 服务端冷却晚于客户端 ~latency+1 tick（授权摩擦：客户端合法重施被静默拒）；e2e 未走生产出站路径（桥/真实 Sys3CEntry 全链路留 P5 full-path e2e）
 
 ---
 
