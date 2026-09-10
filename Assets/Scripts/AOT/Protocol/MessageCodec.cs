@@ -187,6 +187,9 @@ namespace Cool.Protocol
             RegisterMessageType(MessageId.PositionSyncRequest, typeof(PositionSyncRequest));
             RegisterMessageType(MessageId.PositionSyncResponse, typeof(PositionSyncResponse));
             RegisterMessageType(MessageId.WorldSnapshot, typeof(WorldSnapshot));
+            RegisterMessageType(MessageId.CastRequest, typeof(CastRequest));
+            RegisterMessageType(MessageId.CastBroadcast, typeof(CastBroadcast));
+            RegisterMessageType(MessageId.DamageResult, typeof(DamageResult));
             RegisterMessageType(MessageId.ChatMessage, typeof(ChatMessage));
             RegisterMessageType(MessageId.BroadcastMessage, typeof(BroadcastMessage));
             RegisterMessageType(MessageId.RemotePlayerSync, typeof(RemotePlayerSync));

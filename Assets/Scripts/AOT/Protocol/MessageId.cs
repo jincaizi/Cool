@@ -3,7 +3,7 @@ namespace Cool.Protocol
     /// <summary>
     /// 消息 ID 枚举 —— wire 格式的数值契约，**值一旦发布不可更改**
     /// （spec §3：只加不删）。分段约定：1-99 系统 / 100-199 位置 /
-    /// 200-299 聊天 / 1000-1999 远程同步与房间 / 2000-2099 NPC。
+    /// 200-299 聊天 / 300-399 战斗 / 1000-1999 远程同步与房间 / 2000-2099 NPC。
     /// </summary>
     public enum MessageId : ushort
     {
@@ -31,6 +31,16 @@ namespace Cool.Protocol
 
         /// <summary>世界快照广播（v1 追加；服务器 → 客户端，15Hz）</summary>
         WorldSnapshot = 110,
+
+        // ========== 战斗 (300-399) ==========
+        /// <summary>施法请求（P4 追加；客户端 → 服务器）</summary>
+        CastRequest = 300,
+
+        /// <summary>施法广播（P4 追加；服务器 → caster 及视野观察者）</summary>
+        CastBroadcast = 301,
+
+        /// <summary>伤害结果（P4 追加；服务器 → caster + 受击者）</summary>
+        DamageResult = 302,
 
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,
