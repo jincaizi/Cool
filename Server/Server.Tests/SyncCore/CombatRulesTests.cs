@@ -125,4 +125,25 @@ public class CombatRulesTests
         Assert.True(CombatRules.TryGet(20002, out var r));
         Assert.Equal(75U, CombatRules.CooldownTicks(r));       // 5s × 15
     }
+
+    [Fact]
+    public void Monster_Skill_Entries_Are_Synced_And_Validated()
+    {
+        Assert.True(CombatRules.IsSynced(50001));
+        Assert.True(CombatRules.IsSynced(50002));
+
+        Assert.True(CombatRules.TryGet(50001, out var slime));
+        Assert.Equal(1.5f, slime.MaxRange);
+        Assert.Equal(10f, slime.BaseDamage);
+        Assert.Equal(0f, slime.CriticalRate);
+
+        Assert.True(CombatRules.TryGet(50002, out var wolf));
+        Assert.Equal(2f, wolf.MaxRange);
+        Assert.Equal(15f, wolf.BaseDamage);
+
+        Assert.True(CombatRules.ValidateShape(new HitShape { ShapeType = 0, Range = 1.5f, Angle = 120f }, slime));
+        Assert.False(CombatRules.ValidateShape(new HitShape { ShapeType = 0, Range = 1.6f, Angle = 120f }, slime));
+
+        Assert.Equal(15u, CombatRules.CooldownTicks(wolf)); // 1s @15Hz
+    }
 }

@@ -53,6 +53,12 @@ namespace Cool.SyncCore
             [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f),
             [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f),
             [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f),
+            // P5 怪物技能（表值 = Server/Config/monster_config.json 实测 2026-09-12：
+            //   Slime atk range 1.5 / Wolf atk range 2.0；伤害 Slime 10 / Wolf 15——旧 AiComponent 硬编码 10
+            //   从未生效（死代码+攻击缺陷），P5 首次生效即差异化（D-P5-2 平衡选择，偏差记录）；
+            //   cd 1s 与旧 SkillSystem 同值；怪物无暴击）
+            [50001] = new SkillEntry(skillId: 50001, shapeType: 0, maxRange: 1.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 10f, criticalRate: 0f),
+            [50002] = new SkillEntry(skillId: 50002, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 15f, criticalRate: 0f),
         };
 
         public static bool IsSynced(int skillId) => Table.ContainsKey(skillId);

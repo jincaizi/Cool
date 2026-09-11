@@ -15,7 +15,21 @@ namespace Cool.Protocol
         Rotation = 1 << 1,
         Speed = 1 << 2,
         /// <summary>动作/战斗状态（攻击中/受击/眩晕…，spec D5 首日含入；P1 恒为 0，P2 定义语义并填充）</summary>
-        ActionState = 1 << 3
+        ActionState = 1 << 3,
+        /// <summary>实体种类（EntityKind：0=Player/1=Npc）——P5 怪物入实体快照</summary>
+        Kind = 1 << 4,
+        /// <summary>Npc 模板 ID（Kind=Npc 时有效；玩家恒 0）——P5 客户端怪物渲染区分</summary>
+        TemplateId = 1 << 5
+    }
+
+    /// <summary>
+    /// 实体种类（EntitySnapshot.Kind）——P5 怪物服务端化。
+    /// 0=Player（protobuf 默认，旧客户端兼容），1=Npc 怪物。
+    /// </summary>
+    public enum EntityKind : byte
+    {
+        Player = 0,
+        Npc = 1
     }
 
     /// <summary>实体快照（内嵌于 WorldSnapshot，不单独注册消息 ID；内嵌类型非线上消息，实现标记接口仅为协议层惯例）</summary>
@@ -47,6 +61,14 @@ namespace Cool.Protocol
         /// <summary>动作/战斗状态标志（0=无，语义 P2 定义）</summary>
         [ProtoMember(8)]
         public byte ActionState { get; set; }
+
+        /// <summary>实体种类（EntityKind；protobuf 默认 0=Player）</summary>
+        [ProtoMember(10)]
+        public byte Kind { get; set; }
+
+        /// <summary>Npc 模板 ID（Kind=Npc 时有效；玩家恒 0）</summary>
+        [ProtoMember(11)]
+        public int TemplateId { get; set; }
 
         /// <summary>本快照对应的服务器 tick</summary>
         [ProtoMember(9)]

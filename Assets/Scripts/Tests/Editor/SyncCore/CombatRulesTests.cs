@@ -125,5 +125,26 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             Assert.IsTrue(CombatRules.TryGet(20002, out var r));
             Assert.AreEqual(75U, CombatRules.CooldownTicks(r));       // 5s × 15
         }
+
+        [Test]
+        public void Monster_Skill_Entries_Are_Synced_And_Validated()
+        {
+            Assert.IsTrue(CombatRules.IsSynced(50001));
+            Assert.IsTrue(CombatRules.IsSynced(50002));
+
+            Assert.IsTrue(CombatRules.TryGet(50001, out var slime));
+            Assert.AreEqual(1.5f, slime.MaxRange);
+            Assert.AreEqual(10f, slime.BaseDamage);
+            Assert.AreEqual(0f, slime.CriticalRate);
+
+            Assert.IsTrue(CombatRules.TryGet(50002, out var wolf));
+            Assert.AreEqual(2f, wolf.MaxRange);
+            Assert.AreEqual(15f, wolf.BaseDamage);
+
+            Assert.IsTrue(CombatRules.ValidateShape(new HitShape { ShapeType = 0, Range = 1.5f, Angle = 120f }, slime));
+            Assert.IsFalse(CombatRules.ValidateShape(new HitShape { ShapeType = 0, Range = 1.6f, Angle = 120f }, slime));
+
+            Assert.AreEqual(15u, CombatRules.CooldownTicks(wolf)); // 1s @15Hz
+        }
     }
 }
