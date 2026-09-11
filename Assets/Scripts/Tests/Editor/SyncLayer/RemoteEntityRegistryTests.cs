@@ -80,5 +80,64 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(1, _registry.Count);
             Assert.IsNotNull(_registry.GetView(2));
         }
+
+        [Test]
+        public void Npc_Snapshot_Creates_Monster_View_With_Template()
+        {
+            var root = new GameObject("NpcRoot");
+            var registry = new RemoteEntityRegistry(root.transform);
+            try
+            {
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2_000_001,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
+                        | EntityFieldMask.Kind | EntityFieldMask.TemplateId | EntityFieldMask.ActionState),
+                    X = 12f, Z = 3f, Rotation = 90f,
+                    Kind = (byte)EntityKind.Npc,
+                    TemplateId = 2,
+                    ActionState = (byte)NpcAnimationState.Run
+                }, serverTicks: 1_000L);
+
+                var view = registry.GetView(2_000_001);
+                Assert.IsNotNull(view);
+                Assert.AreEqual((byte)EntityKind.Npc, view!.Kind);
+                Assert.AreEqual(2, view.TemplateId);
+                Assert.AreEqual((byte)NpcAnimationState.Run, view.ActionState);
+                Assert.IsTrue(view.GameObject.name.Contains("Monster"), $"view name '{view.GameObject.name}' should mark monster");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void Player_Snapshot_Still_Creates_Player_View()
+        {
+            var root = new GameObject("PlayerRoot");
+            var registry = new RemoteEntityRegistry(root.transform);
+            try
+            {
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 5,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Kind),
+                    X = 1f, Z = 2f,
+                    Kind = (byte)EntityKind.Player
+                }, serverTicks: 1_000L);
+
+                var view = registry.GetView(5);
+                Assert.IsNotNull(view);
+                Assert.AreEqual((byte)EntityKind.Player, view!.Kind);
+                Assert.IsTrue(view.GameObject.name.Contains("RemotePlayer"));
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+            }
+        }
     }
 }

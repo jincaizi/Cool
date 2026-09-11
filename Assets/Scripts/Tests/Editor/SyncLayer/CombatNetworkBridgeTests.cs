@@ -191,5 +191,66 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
             Assert.AreEqual(0, _client.Sent.Count);
         }
+
+        [Test]
+        public void Monster_Source_Damage_To_Local_Player_Invokes_Local_Damage_Callback()
+        {
+            // 怪物攻击本地玩家（spec"打玩家触发 HitFSM 同步"链路）：SourcePlayerId=怪物 id
+            // → onDamageToLocalPlayer 回调（宿主接 ApplyServerDamage——HitFSM 入口）。
+            // 桥按 TargetPlayerId 匹配本地玩家——来源种类无关（既有逻辑，锁定回归）。
+            var registry = new RemoteEntityRegistry(_root.transform);
+            float sinkDamage = 0;
+            var bridge = new CombatNetworkBridge(_client, () => 7, registry,
+                (targetId, damage, isCritical, dir) => sinkDamage = damage);
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 2_000_001, SkillId = 50001,
+                Hits = { new HitEntry { TargetPlayerId = 7, Damage = 10f, IsCritical = false, TargetRemainingHp = 90f } }
+            });
+            bridge.Update();
+
+            Assert.AreEqual(10f, sinkDamage, 0.001f);
+        }
+
+        [Test]
+        public void Monster_Target_Damage_Emits_Float_Text_Over_Npc_View()
+        {
+            // 玩家打怪：DamageResult.TargetPlayerId = 怪物 id → 怪物视图（Npc 快照创建）飘字
+            // ——既有 PlayerTakeDamageEvent 链对 Npc 视图零改动生效（锁定回归）。
+            var registry = new RemoteEntityRegistry(_root.transform);
+            registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 2_000_001,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind | EntityFieldMask.TemplateId),
+                X = 1f, Y = 0f, Z = 2f,
+                Kind = (byte)EntityKind.Npc,
+                TemplateId = 1
+            }, serverTicks: 1_000_000L);
+            var view = registry.GetView(2_000_001);
+            Assert.NotNull(view, "Npc 视图未创建");
+
+            PlayerTakeDamageEvent? captured = null;
+            Action<PlayerTakeDamageEvent> handler = e => captured = e;
+            EventBus.Subscribe(handler);
+            try
+            {
+                var bridge = new CombatNetworkBridge(_client, () => 1, registry);
+                bridge.OnMessage(MessageId.DamageResult, new DamageResult
+                {
+                    SourcePlayerId = 1, SkillId = 10001,
+                    Hits = { new HitEntry { TargetPlayerId = 2_000_001, Damage = 50f, IsCritical = false, TargetRemainingHp = 50f } }
+                });
+                bridge.Update();
+
+                Assert.NotNull(captured, "怪物受击未发 PlayerTakeDamageEvent");
+                Assert.AreEqual(view.GameObject.GetInstanceID(), captured.Value.EntityId);
+                Assert.AreEqual(50, captured.Value.Damage);
+            }
+            finally
+            {
+                EventBus.Unsubscribe(handler);
+            }
+        }
     }
 }

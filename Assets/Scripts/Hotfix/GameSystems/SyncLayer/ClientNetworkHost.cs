@@ -161,6 +161,15 @@ namespace Hotfix.GameSystems.SyncLayer
             _combatBridge.OnCastBroadcast += b =>
                 Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
 
+            // P5：联网模式下怪物由服务器驱动——禁用场景内全部本地 MonsterSpawner
+            //（DemoDay 有 SlimeSpawner + TurtleShellSpawner 两个——单数 FindObjectOfType 会漏）
+            var localSpawners = FindObjectsOfType<Hotfix.GameSystems.Monster.MonsterSpawner>();
+            foreach (var spawner in localSpawners)
+            {
+                spawner.gameObject.SetActive(false);
+                Debug.Log($"[NetHost] 本地 MonsterSpawner 已禁用：{spawner.name}（服务器驱动怪物）");
+            }
+
             Debug.Log("[NetHost] 本地角色已接入移动上报（repoter + NetMovementPolicy）");
         }
 

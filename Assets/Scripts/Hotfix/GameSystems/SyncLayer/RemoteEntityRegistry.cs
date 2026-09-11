@@ -36,9 +36,12 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             if (!_views.TryGetValue(snapshot.PlayerId, out var view))
             {
-                view = CreateView(snapshot.PlayerId);
+                view = CreateView(snapshot.PlayerId, snapshot);
                 _views[snapshot.PlayerId] = view;
             }
+
+            // P5：Npc 动作状态（占位期仅存储供测试/上层观察——动画表现随真实模型 backlog）
+            view.ActionState = snapshot.ActionState;
 
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Position) != 0)
             {
@@ -124,19 +127,37 @@ namespace Hotfix.GameSystems.SyncLayer
                 Object.DestroyImmediate(go);
         }
 
-        private RemoteEntityView CreateView(long playerId)
+        private RemoteEntityView CreateView(long playerId, EntitySnapshot snapshot)
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            go.name = $"RemotePlayer_{playerId}";
-            go.transform.SetParent(_root, false);
-            return new RemoteEntityView(go);
+            // P5：Npc 视图 = 球体占位（玩家胶囊区分）；名称携带模板 id。
+            // 真实怪物模型/动画表现随 P3 backlog"真实角色模型渲染"落地（D-P5-7）。
+            // 注：不访问 Renderer 组件着色——非 MonoBehaviour 类禁用 GetComponent（项目规则）。
+            if (snapshot.Kind == (byte)EntityKind.Npc)
+            {
+                var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                go.name = $"Monster_{playerId}_T{snapshot.TemplateId}";
+                go.transform.SetParent(_root, false);
+                return new RemoteEntityView(go, snapshot.Kind, snapshot.TemplateId);
+            }
+
+            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            capsule.name = $"RemotePlayer_{playerId}";
+            capsule.transform.SetParent(_root, false);
+            return new RemoteEntityView(capsule);
         }
     }
 
-    /// <summary>远程实体渲染视图（P1 占位）</summary>
+    /// <summary>远程实体渲染视图（P1 占位；P5 加 Npc 元数据）</summary>
     public sealed class RemoteEntityView
     {
         public GameObject GameObject { get; }
+        /// <summary>实体种类（EntityKind；getter-only——Unity 无 IsExternalInit，禁用 init，P4 偏差同教训）</summary>
+        public byte Kind { get; }
+        /// <summary>Npc 模板 ID（Kind=Npc 时有效；玩家恒 0）</summary>
+        public int TemplateId { get; }
+        /// <summary>动作/战斗状态（Npc=NpcAnimationState；玩家恒 0）</summary>
+        public byte ActionState { get; set; }
+
         public Vector3 Position
         {
             get => GameObject.transform.position;
@@ -148,9 +169,11 @@ namespace Hotfix.GameSystems.SyncLayer
             set => GameObject.transform.rotation = value;
         }
 
-        public RemoteEntityView(GameObject go)
+        public RemoteEntityView(GameObject go, byte kind = 0, int templateId = 0)
         {
             GameObject = go;
+            Kind = kind;
+            TemplateId = templateId;
         }
     }
 }
