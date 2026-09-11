@@ -30,6 +30,17 @@ namespace KcpServer
                 }
             }
 
+            // P5 怪物模式：--monsters N（固定布局怪物——供 MonsterWorldTests 验收）
+            int monsterCount = 0;
+            for (int i = 1; i < args.Length - 1; i++)
+            {
+                if (args[i] == "--monsters" && int.TryParse(args[i + 1], out var m))
+                {
+                    monsterCount = m;
+                    break;
+                }
+            }
+
             Console.WriteLine($"Starting Server3C on port {port}...");
 
             var logger = new ConsoleLogger();
@@ -40,6 +51,12 @@ namespace KcpServer
             {
                 _server.EnableBots(botCount);
                 Console.WriteLine($"Bot mode: {botCount} bots registered");
+            }
+
+            if (monsterCount > 0)
+            {
+                _server.EnableMonsters(monsterCount);
+                Console.WriteLine($"Monster mode: {monsterCount} monsters spawned");
             }
 
             try

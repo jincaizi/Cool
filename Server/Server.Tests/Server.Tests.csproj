@@ -34,4 +34,9 @@
     <PackageReference Include="Kcp" Version="2.7.0" />
   </ItemGroup>
 
+  <!-- P5：怪物配置随构建复制——运行时按 AppContext.BaseDirectory/Config 解析（dotnet run/test 的 CWD 不可靠） -->
+  <ItemGroup>
+    <None Include="..\Config\monster_config.json" Link="Config\monster_config.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

@@ -59,13 +59,16 @@ namespace KcpServer
                     var snap = new EntitySnapshot
                     {
                         PlayerId = entity.PlayerId,
-                        FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed),
+                        FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed
+                            | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId),
                         X = entity.Position.X,
                         Y = entity.Position.Y,
                         Z = entity.Position.Z,
                         Rotation = entity.Rotation,
                         Speed = entity.Speed,
-                        ActionState = 0,
+                        Kind = entity.Kind,
+                        TemplateId = entity.TemplateId,
+                        ActionState = entity.ActionState,
                         Tick = tick
                     };
                     result.Add(snap);

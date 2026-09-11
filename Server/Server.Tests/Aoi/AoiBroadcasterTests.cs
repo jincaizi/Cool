@@ -90,7 +90,9 @@ public class AoiBroadcasterTests
         Assert.Equal(90f, captured.Rotation, 4);
         Assert.Equal(4f, captured.Speed, 4);
         Assert.Equal(1U, captured.Tick);
-        Assert.Equal((ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed), captured.FieldMask);
+        // P5：掩码高位追加 ActionState/Kind/TemplateId（只加不删——旧客户端忽略未知位）
+        Assert.Equal((ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed
+            | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId), captured.FieldMask);
     }
 
     [Fact]

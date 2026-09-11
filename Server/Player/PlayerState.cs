@@ -33,6 +33,15 @@ namespace KcpServer
         public bool IsCastReady(int skillId, uint tick, uint cooldownTicks)
             => !_lastCastTicks.TryGetValue(skillId, out var last) || tick - last >= cooldownTicks;
 
+        /// <summary>实体种类（EntityKind：0=Player 默认，1=Npc）——P5 怪物复用实体存储/AOI/快照链</summary>
+        public byte Kind { get; internal set; }
+
+        /// <summary>Npc 模板 ID（Kind=Npc 时有效；玩家恒 0）</summary>
+        public int TemplateId { get; internal set; }
+
+        /// <summary>动作/战斗状态（Npc=NpcAnimationState；玩家恒 0——D-P5-5 只做怪物侧）</summary>
+        public byte ActionState { get; internal set; }
+
         /// <summary>脏标记：位置等同步字段在最近一次快照后发生变化（主循环独占访问）</summary>
         public bool IsDirty { get; internal set; }
 

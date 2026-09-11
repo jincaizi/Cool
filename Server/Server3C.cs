@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using KcpServer.Monster; // P5：怪物模块（EnableMonsters/tick 接线）
 
 namespace KcpServer
 {
@@ -38,6 +39,10 @@ namespace KcpServer
         // P4：服务端权威战斗裁决（校验/命中/掷骰/扣血；广播经 CastHandler）
         private readonly CastHandler _castHandler;
 
+        // P5：服务端权威怪物（AI 决策 + 死亡重生；攻击裁决经 CombatResolver、广播经 CastHandler——T3）
+        private MonsterModule? _monsterModule;
+        private long _monsterIdSeed = MonsterModule.NpcIdSeed;
+
         private BotRunner? _botRunner;
 
         /// <summary>压测模式：注册 N 个 bot（无 session 假玩家）并在主循环 tick 推进。
@@ -47,6 +52,13 @@ namespace KcpServer
             long botIdSeed = 1_000_000;
             _botRunner = new BotRunner(_entityStore, () => System.Threading.Interlocked.Increment(ref botIdSeed));
             _botRunner.Spawn(count);
+        }
+
+        /// <summary>怪物模式：注册 N 个怪物（固定布局——T5 e2e 依赖）。必须在 StartAsync 之前调用</summary>
+        public void EnableMonsters(int count)
+        {
+            _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed));
+            _monsterModule.SpawnDefaultLayout(count);
         }
 
         // 超时配置
@@ -80,6 +92,14 @@ namespace KcpServer
                 {
                     CurrentTick = (uint)tick;
                     _botRunner?.Tick((uint)tick); // P3 压测：bot 群每 tick 游走
+
+                    // P5：怪物 AI tick + 死亡移除清 AOI（施法裁决 drain 在 T3 接线）
+                    if (_monsterModule != null)
+                    {
+                        _monsterModule.Tick((uint)tick);
+                        foreach (var npcId in _monsterModule.DrainRemovedNpcs())
+                            _aoi.RemoveEntity(npcId);
+                    }
 
                     // 每 5s（75 tick）带宽统计日志——T7 验收口径（记录非断言）
                     if (tick % 75 == 0)

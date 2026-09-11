@@ -11,7 +11,10 @@ namespace KcpServer.Config
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            // P5：MonsterData 全 public 字段——System.Text.Json 默认只反序列化属性，
+            // 不开此项则整表静默落 0（templateId=0 → 怪物配置全失）——T2 实测修复
+            IncludeFields = true
         };
 
         public static MonsterConfig LoadMonsterConfig(string path)
