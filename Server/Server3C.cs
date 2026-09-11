@@ -93,10 +93,15 @@ namespace KcpServer
                     CurrentTick = (uint)tick;
                     _botRunner?.Tick((uint)tick); // P3 压测：bot 群每 tick 游走
 
-                    // P5：怪物 AI tick + 死亡移除清 AOI（施法裁决 drain 在 T3 接线）
+                    // P5：怪物 AI tick → 攻击裁决 drain（同 tick 冷却记录即时生效）→ 死亡移除清 AOI
                     if (_monsterModule != null)
                     {
                         _monsterModule.Tick((uint)tick);
+                        foreach (var (npcId, request) in _monsterModule.DrainPendingCasts())
+                        {
+                            var resolution = _castHandler.Resolve(npcId, request, (uint)tick);
+                            _ = _castHandler.HandleNpcCastAsync(npcId, resolution); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
+                        }
                         foreach (var npcId in _monsterModule.DrainRemovedNpcs())
                             _aoi.RemoveEntity(npcId);
                     }
@@ -192,6 +197,22 @@ namespace KcpServer
 
         /// <summary>观察者当前 AOI 可见实体（CastHandler 广播范围）</summary>
         public List<PlayerState> GetVisiblePlayers(long observerId) => _aoi.GetVisible(observerId, _entityStore);
+
+        /// <summary>能看到指定实体的在线观察者（P5 怪物 CastBroadcast 范围——AoiGrid 迟滞视野复用；
+        /// O(N²) 每施法一次（外层遍历 × 每观察者 GetVisible O(N)）——怪物规模小可接受；实体量大时换反向索引（注释留痕））</summary>
+        public List<long> GetObserversOf(long entityId)
+        {
+            var result = new List<long>();
+            foreach (var observer in _entityStore.All)
+            {
+                if (observer.Kind != (byte)EntityKind.Player) continue;
+                if (!_playerIdToSession.ContainsKey(observer.PlayerId)) continue;
+                var visible = _aoi.GetVisible(observer.PlayerId, _entityStore);
+                foreach (var e in visible)
+                    if (e.PlayerId == entityId) { result.Add(observer.PlayerId); break; }
+            }
+            return result;
+        }
 
         public long? GetPlayerId(KcpServerSession session)
         {

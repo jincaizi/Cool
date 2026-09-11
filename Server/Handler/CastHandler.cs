@@ -45,11 +45,16 @@ namespace KcpServer
             if (!caster.IsCastReady(request.SkillId, tick, CombatRules.CooldownTicks(entry)))
                 return Reject(resolution, "cooldown");
 
-            // 候选 = 全部在线实体 − caster（数百实体规模毫秒级；AOI 粗筛留待实体量大时再上）
+            // 候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
+            //  玩家施法 → 玩家 + 怪物（PvE 挥击自动目标按锥内最近者自然命中怪物——
+            //    跨界误伤玩家 backlog 项落地；bot 压测实体同 P4 语义不排除）
+            //  怪物施法 → 仅已登录玩家（怪物互不打；bot 不可被怪物命中）
+            bool isNpcCaster = caster.Kind == (byte)EntityKind.Npc;
             var candidates = new List<CombatCandidate>();
             foreach (var p in _store.All)
             {
                 if (p.PlayerId == playerId) continue;
+                if (isNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
                 candidates.Add(new CombatCandidate(p.PlayerId,
                     new Vec3(p.Position.X, p.Position.Y, p.Position.Z), p.IsAlive));
             }
@@ -128,6 +133,10 @@ namespace KcpServer
             _resolver = resolver;
         }
 
+        /// <summary>裁决入口（P5 怪物施法复用——怪物无 session，Server3C tick 内直调）</summary>
+        public CombatResolver.CastResolution Resolve(long casterId, CastRequest request, uint tick)
+            => _resolver.ResolveCast(casterId, request, tick);
+
         public async Task HandleCastAsync(KcpServerSession session, CastRequest request)
         {
             long? playerId = _server.GetPlayerId(session);
@@ -173,6 +182,46 @@ namespace KcpServer
                 foreach (var recipientId in damageRecipients)
                 {
                     var s = _server.GetSession(recipientId);
+                    if (s != null)
+                        await _server.SendToSessionAsync(s, MessageId.DamageResult, result);
+                }
+            }
+        }
+
+        /// <summary>
+        /// P5 怪物施放广播（D-P5-4）：CastBroadcast → 怪物 AOI 视野内在线观察者
+        /// （第三方看技能表现）；DamageResult → 每个受击玩家（怪物无 session，caster 收件人跳过）。
+        /// 拒绝不广播（怪物被拒 = 服务器内部逻辑错误——审计日志 + 计数）。
+        /// </summary>
+        public async Task HandleNpcCastAsync(long npcId, CombatResolver.CastResolution resolution)
+        {
+            if (!resolution.Accepted || resolution.Broadcast == null)
+            {
+                RejectedCasts++;
+                _logger.LogWarning($"[Combat] npc cast rejected: npc={npcId} reason={resolution.RejectReason}");
+                return;
+            }
+
+            var castRecipients = _server.GetObserversOf(npcId);
+            foreach (var recipientId in castRecipients)
+            {
+                var s = _server.GetSession(recipientId);
+                if (s != null)
+                    await _server.SendToSessionAsync(s, MessageId.CastBroadcast, resolution.Broadcast);
+            }
+
+            if (resolution.Hits.Count > 0)
+            {
+                var result = new DamageResult
+                {
+                    SourcePlayerId = npcId,
+                    SkillId = resolution.Broadcast.SkillId,
+                    ServerTimestamp = DateTime.UtcNow.Ticks,
+                    Hits = resolution.Hits
+                };
+                foreach (var hit in resolution.Hits)
+                {
+                    var s = _server.GetSession(hit.TargetPlayerId);
                     if (s != null)
                         await _server.SendToSessionAsync(s, MessageId.DamageResult, result);
                 }
