@@ -111,12 +111,13 @@ namespace KcpNet.PlayModeTests
             // ② Slime(40,0,0) 巡逻：视图位置漂移 ≥ 1m（样本间隔采样）
             var monsterIds = new HashSet<long>();
             long? wolfId = null;
-            Vector3? slimeFirstPos = null;
-            float slimeDrift = 0f;
-            Vector3? lastSlimePos = null;
             float wolfMinDistToSpawn = float.MaxValue;
+            // 漂移按视图 id 分开累积——两个 Slime（±40m）共用一个变量会把彼此 ~160m 间距
+            // 当成漂移（T5 首轮假绿：8s 窗口报 6000m，而单个 Slime 8s 至多走 ~16m）
+            var slimeLastPos = new Dictionary<long, Vector3>();
+            var slimeDrift = new Dictionary<long, float>();
 
-            for (int i = 0; i < 300 && ctx.Damages.Count == 0; i++) // 300 × 200ms = 60s（收到伤害即提前出）
+            for (int i = 0; i < 300; i++) // 300 × 200ms = 60s（收到伤害即提前出，但保底 3s——见下）
             {
                 ctx.Manager.Update(0.05f);
                 await System.Threading.Tasks.Task.Delay(200);
@@ -138,17 +139,29 @@ namespace KcpNet.PlayModeTests
                         }
                         if (v.TemplateId == 1)
                         {
-                            if (!slimeFirstPos.HasValue) slimeFirstPos = v.Position;
-                            if (lastSlimePos.HasValue) slimeDrift += Vector3.Distance(lastSlimePos.Value, v.Position);
-                            lastSlimePos = v.Position;
+                            if (slimeLastPos.TryGetValue(view, out var lastSlime))
+                            {
+                                float d = Vector3.Distance(lastSlime, v.Position);
+                                slimeDrift[view] = (slimeDrift.TryGetValue(view, out var acc) ? acc : 0f) + d;
+                            }
+                            slimeLastPos[view] = v.Position;
                         }
                     }
                 }
+
+                // 伤害早退，但保底 15 采样（3s）：类级连跑第 2 次时狼已贴脸（ghost 位），命中可 <1s 到达，
+                // 3s 以下的采样窗会让 Slime 漂移（2m/s）逼近 1m 阈值 → 采样窗不足造成的偶发假 FAIL
+                if (ctx.Damages.Count > 0 && i >= 14) break;
             }
 
             if (monsterIds.Count == 0) return (false, "no monster views observed in 60s (Npc snapshot not working?)");
             if (wolfId == null) return (false, "wolf (template 2) never seen");
-            if (slimeDrift < 1f) return (false, $"slime patrol drift only {slimeDrift:F2}m in 60s (patrol not running?)");
+            float maxSlimeDrift = 0f;
+            foreach (var kv in slimeDrift)
+                if (kv.Value > maxSlimeDrift) maxSlimeDrift = kv.Value;
+            if (slimeDrift.Count == 0) return (false, "no slime sampled twice in 60s (patrol check impossible)");
+            if (maxSlimeDrift < 1f)
+                return (false, $"max slime patrol drift only {maxSlimeDrift:F2}m in 60s (patrol not running?)");
             if (ctx.Damages.Count == 0)
                 return (false, $"observer never took monster damage (aggro/attack not working? monsters={monsterIds.Count} " +
                                $"wolfMinDist={wolfMinDistToSpawn:F2} casts={ctx.CastBroadcasts} spawn={ctx.Manager.SpawnPosition})");
@@ -163,8 +176,9 @@ namespace KcpNet.PlayModeTests
             if (System.Math.Abs(hit.TargetRemainingHp - (100f - hit.Damage)) > 0.001f)
                 return (false, $"local remaining hp {hit.TargetRemainingHp} inconsistent");
 
-            string summary = $"ok: {monsterIds.Count} monsters seen, slime patrol drift {slimeDrift:F2}m, " +
-                             $"wolf {wolfId} hit observer for {hit.Damage} (hp {hit.TargetRemainingHp})";
+            string summary = $"ok: {monsterIds.Count} monsters seen, max slime patrol drift {maxSlimeDrift:F2}m " +
+                             $"(over {slimeDrift.Count} slimes), wolf {wolfId} hit observer for {hit.Damage} " +
+                             $"(hp {hit.TargetRemainingHp})";
             Debug.Log("[MonsterWorldTests] " + summary);
             return (true, summary);
         }

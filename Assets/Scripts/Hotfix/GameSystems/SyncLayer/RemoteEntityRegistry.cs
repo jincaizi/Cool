@@ -40,7 +40,9 @@ namespace Hotfix.GameSystems.SyncLayer
                 _views[snapshot.PlayerId] = view;
             }
 
-            // P5：Npc 动作状态（占位期仅存储供测试/上层观察——动画表现随真实模型 backlog）
+            // P5：Npc 动作状态（占位期仅存储供测试/上层观察——动画表现随真实模型 backlog）。
+            // 无条件覆盖安全前提：服务端唯一快照生产者（AoiBroadcaster.BuildForObserver）恒发全掩码；
+            // 若未来出现部分位快照，此处须改为按 FieldMask 位守卫（与 _lastKnownYaw 范式对齐）
             view.ActionState = snapshot.ActionState;
 
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Position) != 0)

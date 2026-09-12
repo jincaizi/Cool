@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cool.Protocol;
 using KcpServer.Monster;
 using Xunit;
@@ -104,5 +105,88 @@ public class MonsterModuleTests
         module.Tick(MonsterModule.DeathDisplayTicks + MonsterModule.RespawnTicks);
 
         Assert.Equal(4, module.Count); // 重生完成（Count 恢复）
+    }
+
+    [Fact]
+    public void Target_Lost_Triggers_Return_To_Spawn_And_Peace_Reset()
+    {
+        var (store, module) = Create();
+        LoginPlayer(store, 1, new Vector3(0f, 0f, 0f)); // Wolf[0] (12,0,0) 面向原点——开局即仇恨
+        long wolfId = MonsterModule.NpcIdSeed + 1;
+        var wolf = store.GetPlayer(wolfId)!;
+
+        for (uint t = 0; t < 200; t++) module.Tick(t);
+        Assert.Equal(AlertLevel.HOSTILE, module.GetState(wolfId)!.AlertLevel); // 前置：已获取仇恨
+        Assert.True(Vector3.Distance(wolf.Position, new Vector3(0f, 0f, 0f)) <= 2.5f,
+            "前置：狼应已追至攻击距离");
+
+        store.RemovePlayer(1); // 目标消失（离场/死亡移除——DetectTarget 目标丢失路径）
+
+        bool returnedToPeace = false;
+        for (uint t = 200; t < 400 && !returnedToPeace; t++)
+        {
+            module.Tick(t);
+            returnedToPeace = module.GetState(wolfId)!.AlertLevel == AlertLevel.PEACE;
+        }
+
+        Assert.True(returnedToPeace, "wolf should walk back to spawn and reset to PEACE after target loss");
+        float distToSpawn = Vector3.Distance(wolf.Position, new Vector3(12f, 0f, 0f));
+        Assert.True(distToSpawn <= 0.5f, $"wolf should be back at spawn, dist={distToSpawn}");
+    }
+
+    [Fact]
+    public void Hit_Stuns_Monster_For_Display_Window_Then_Resumes_Patrol()
+    {
+        var (store, module) = Create();
+        long slimeId = MonsterModule.NpcIdSeed + 2; // Slime (40,0,0)
+        var slime = store.GetPlayer(slimeId)!;
+
+        const uint t0 = 10;
+        for (uint t = 0; t < t0; t++) module.Tick(t);
+        Assert.Equal((byte)NpcAnimationState.Run, slime.ActionState); // 前置：巡逻移动中
+
+        slime.ApplyDamage(10f); // 玩家裁决扣血（T3 链）——HP 90 < LastHp 100 → 下一 tick 转 Hit
+        module.Tick(t0);
+        Assert.Equal((byte)NpcAnimationState.Hit, slime.ActionState);
+        var posAtHit = slime.Position;
+
+        // 硬直窗口（HitDisplayTicks：t0..t0+4）：行为树被跳过——位置冻结
+        for (uint t = t0 + 1; t < t0 + MonsterModule.HitDisplayTicks; t++)
+        {
+            module.Tick(t);
+            Assert.Equal(posAtHit.X, slime.Position.X);
+            Assert.Equal(posAtHit.Z, slime.Position.Z);
+        }
+
+        // 窗口过后恢复（位置重新变化——巡逻继续）
+        for (uint t = t0 + MonsterModule.HitDisplayTicks; t < t0 + MonsterModule.HitDisplayTicks + 10; t++)
+            module.Tick(t);
+        Assert.True(Vector3.Distance(posAtHit, slime.Position) > 0.1f,
+            "monster should resume moving after the hit window elapses");
+    }
+
+    [Fact]
+    public void Respawn_Uses_New_Id_And_Full_Hp()
+    {
+        var (store, module) = Create();
+        long slimeId = MonsterModule.NpcIdSeed + 2; // Slime (40,0,0)，config hp=100
+        var initialIds = new HashSet<long>();
+        foreach (var p in store.All) initialIds.Add(p.PlayerId);
+        Assert.Contains(slimeId, initialIds);
+
+        store.GetPlayer(slimeId)!.ApplyDamage(100f); // 致死
+        for (uint t = 0; t <= MonsterModule.DeathDisplayTicks + MonsterModule.RespawnTicks; t++)
+            module.Tick(t);
+
+        long? respawnedId = null;
+        foreach (var p in store.All)
+            if (p.Kind == (byte)EntityKind.Npc && !initialIds.Contains(p.PlayerId)) { respawnedId = p.PlayerId; break; }
+
+        Assert.NotNull(respawnedId);                        // 重生已发生（新实体入池）
+        Assert.NotEqual(slimeId, respawnedId!.Value);       // 新 id 而非复用（id 单调——缓存/AOI 键安全）
+        var respawned = store.GetPlayer(respawnedId.Value)!;
+        Assert.Equal(1, respawned.TemplateId);              // 同模板重生
+        Assert.Equal(respawned.MaxHp, respawned.Hp);        // 满血（HP 权威重置）
+        Assert.Equal(100f, respawned.Hp);                   // Slime config hp=100
     }
 }

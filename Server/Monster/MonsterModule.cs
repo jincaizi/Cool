@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cool.Protocol;
+using Cool.SyncCore;
 using KcpServer.Config;
 
 namespace KcpServer.Monster
@@ -83,11 +84,18 @@ namespace KcpServer.Monster
             if (!_templates.TryGetValue(templateId, out var config))
                 throw new ArgumentException($"Unknown monster template: {templateId}");
 
+            // 攻击技能 fail fast（终审 follow-up）：SkillIdOf 未映射模板已抛，这里再校验技能在
+            // CombatRules 表内——若拖到 BT Attack 才 TryGet 失败，怪物会在攻击距离静默冻结
+            //（零日志零计数，"npc cast rejected = 0" 的验收口径看不出这类死重）
+            int attackSkillId = SkillIdOf(templateId);
+            if (!CombatRules.TryGet(attackSkillId, out _))
+                throw new ArgumentException($"Monster skill {attackSkillId} (template {templateId}) missing from CombatRules table");
+
             long npcId = _nextNpcId();
             var entity = _store.AddNpc(npcId, $"{config.name}#{npcId}", templateId, config.hp, position);
             entity.Rotation = YawTowardOrigin(position);
 
-            var state = new MonsterState(npcId, templateId, config, SkillIdOf(templateId))
+            var state = new MonsterState(npcId, templateId, config, attackSkillId)
             {
                 Position = position,
                 Rotation = Quaternion.LookRotation(ForwardOf(entity.Rotation)),

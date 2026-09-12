@@ -63,7 +63,8 @@ namespace KcpServer.Monster
             m.Moving = false;
 
             // 冷却门（tick 基准——与 P4 玩家同机制；裁决在怪物 tick 后发生，记录即时生效）
-            if (!CombatRules.TryGet(m.AttackSkillId, out var entry)) return BtStatus.Failure; // 表缺失 = 配置错误
+            // 表缺失校验已前移 SpawnMonster（fail fast——避免在攻击距离静默冻结）；此处为防御分支，正常不可达
+            if (!CombatRules.TryGet(m.AttackSkillId, out var entry)) return BtStatus.Failure;
             if (!entity.IsCastReady(m.AttackSkillId, ctx.Tick, CombatRules.CooldownTicks(entry)))
                 return BtStatus.Running;
 
@@ -73,7 +74,7 @@ namespace KcpServer.Monster
                 TargetPlayerId = m.TargetId.Value, // 显式仇恨目标（HitResolver 按 id + 距离裁决，D-P5-4）
                 Shape = new HitShape
                 {
-                    ShapeType = 0, // Single——范围 = 表上限（ValidateShape 通过）
+                    ShapeType = 0, // Single——范围 = 配置 attackRange（须 ≤ 表上限——ValidateShape 校验）
                     Range = m.Config.attackRange,
                     Angle = 120f
                 }
