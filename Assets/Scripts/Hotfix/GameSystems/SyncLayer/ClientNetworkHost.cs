@@ -1,7 +1,9 @@
 using System;
 using Cool.SyncCore;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C;
+using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Network;
 using KcpNet;
 using UnityEngine;
@@ -10,11 +12,13 @@ namespace Hotfix.GameSystems.SyncLayer
 {
     /// <summary>
     /// 客户端网络宿主（挂载于世界场景的任意 GameObject）——游戏内网络接线的唯一入口：
-    /// 创建 adapter/manager/远程实体渲染根并每帧驱动；Connect() 登录进世界后，
-    /// 自动装配本地角色（Sys3CEntry）：MovementReporter 上报（节流 + 预测帧）、
-    /// NetMovementPolicy 接管移动与平滑纠偏。远程玩家以胶囊占位渲染（RemoteEntityRegistry）。
-    /// 接线步骤与边界见 docs/superpowers/guides/p2-client-network-host.md。
-    /// 单机模式零影响：不挂此组件或只挂不 Connect 即可纯本地游玩。
+    /// 创建 adapter/manager/远程实体渲染根并每帧驱动；联网模式（NetworkModeService）下
+    /// Start 自动 Connect()，登录进世界后自动装配本地角色（Sys3CEntry）：
+    /// MovementReporter 上报（节流 + 预测帧）、NetMovementPolicy 接管移动与平滑纠偏。
+    /// 远程玩家以胶囊占位、怪物以球体占位渲染（RemoteEntityRegistry）。
+    /// 本地角色被销毁重建（DemoDay 直跑时选人确认触发 PlayerSpawner 重建）经 PlayerSpawnedEvent 重装配。
+    /// 接线步骤与边界见 docs/superpowers/guides/p2-client-network-host.md 与 network-playtest.md。
+    /// 单机模式零影响：选单机或只挂不 Connect 即可纯本地游玩。
     /// </summary>
     public sealed class ClientNetworkHost : MonoBehaviour
     {
@@ -25,6 +29,10 @@ namespace Hotfix.GameSystems.SyncLayer
 
         [Header("本地角色（可选：留空则运行时查找场景内首个 Sys3CEntry）")]
         [SerializeField] private Sys3CEntry _localEntry;
+
+        [Header("调试")]
+        [Tooltip("屏幕左下角连接状态浮层（模式/状态/玩家 id/远程实体数）")]
+        [SerializeField] private bool _showDebugOverlay = true;
 
         private KcpNetClientAdapter? _adapter;
         private ClientNetworkManager? _manager;
@@ -54,6 +62,67 @@ namespace Hotfix.GameSystems.SyncLayer
             _remoteEntities = new RemoteEntityRegistry(root.transform);
         }
 
+        private void Start()
+        {
+            // 模式由选人面板选择并持久化（NetworkModeService）：联网 → 进世界自动连接；单机 → 完全不触网
+            if (NetworkModeService.Load() == NetworkMode.Online)
+            {
+                Debug.Log($"[NetHost] 联网模式——连接 {_serverHost}:{_serverPort}");
+                Connect();
+            }
+        }
+
+        private void OnEnable()
+        {
+            // 本地角色（重）生成通知——含 DemoDay 直跑时选人确认触发 PlayerSpawner 销毁重建
+            EventBus.Subscribe<PlayerSpawnedEvent>(OnPlayerSpawned);
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<PlayerSpawnedEvent>(OnPlayerSpawned);
+        }
+
+        /// <summary>
+        /// 本地角色（重）生成：整体重装配。旧装配（reporter provider/policy 纠偏订阅/战斗桥）
+        /// 指向已销毁对象——不摘会导致每帧 MissingReferenceException 且新角色永不上报。
+        /// 注意：不在回调里 FindObjectOfType&lt;Sys3CEntry&gt;——Destroy 帧末才生效会抓到垂死旧对象；
+        /// 事件载荷的 Animator 即新角色（与 PlayerSpawner 同款取组件方式）。
+        /// </summary>
+        private void OnPlayerSpawned(PlayerSpawnedEvent e)
+        {
+            if (e.PlayerAnimator == null) return;
+            var entry = e.PlayerAnimator.GetComponent<Sys3CEntry>();
+            if (entry == null) return;
+
+            ResetAttachment();
+            _localEntry = entry;
+            _entryLookedUp = true; // 已定位——Update 的重试逻辑直接装配新角色
+
+            // DemoDay 直跑路径：模式在选人面板确认时才落盘（宿主 Start 读到的仍是旧值/单机）——
+            // 玩家（重）生成即确认动作的副作用，此处补连接（正常流程 Start 已连，_connectRequested 守卫）
+            if (!_connectRequested && NetworkModeService.Load() == NetworkMode.Online)
+            {
+                Debug.Log($"[NetHost] 联网模式（选人确认）——连接 {_serverHost}:{_serverPort}");
+                Connect();
+            }
+        }
+
+        /// <summary>摘除本地角色装配（移动上报/纠偏订阅/战斗桥）——重装配前调用（幂等）</summary>
+        private void ResetAttachment()
+        {
+            if (_manager != null)
+            {
+                _manager.DetachMovementReporter();
+                if (_netPolicy != null)
+                    _manager.OnCorrectionNeeded -= _netPolicy.ApplyServerCorrection;
+            }
+            DetachCombatBridge();
+            _netPolicy = null;
+            _attachFailed = false;
+            _attachRetryTimer = 0f;
+        }
+
         private void Update()
         {
             if (_manager == null) return;
@@ -78,20 +147,38 @@ namespace Hotfix.GameSystems.SyncLayer
             _manager = new ClientNetworkManager(_adapter, _remoteEntities, username ?? _username);
             _manager.OnEnterWorld += HandleEnterWorld;
             _manager.OnDisconnected += reason => OnDisconnected?.Invoke(reason);
+            // 连接失败/登录被拒必须留日志——否则"无异常"会被误读为"已连上"（验收假阳性）
+            _manager.OnError += HandleError;
             _manager.ConnectAndLogin(host ?? _serverHost, port ?? _serverPort);
+        }
+
+        private void HandleError(string reason)
+        {
+            Debug.LogError("[NetHost] error: " + reason);
         }
 
         public void Disconnect()
         {
+            ResetAttachment();
             _manager?.Dispose();
-            DetachCombatBridge();
             _manager = null;
             _adapter = null;
             _connectRequested = false;
             _inWorld = false;
-            _netPolicy = null;
-            _attachFailed = false;
-            _attachRetryTimer = 0f;
+            _entryLookedUp = false;
+        }
+
+        /// <summary>屏幕左下角连接状态浮层（调试用——Inspector `_showDebugOverlay` 可关）</summary>
+        private void OnGUI()
+        {
+            if (!_showDebugOverlay) return;
+
+            var mode = NetworkModeService.Load() == NetworkMode.Online ? "联网" : "单机";
+            var state = _manager != null ? _manager.CurrentState.ToString() : "未连接";
+            long playerId = _manager != null ? _manager.LocalPlayerId : 0L;
+            int remoteCount = _remoteEntities != null ? _remoteEntities.Count : 0;
+            GUI.Box(new Rect(10f, Screen.height - 34f, 470f, 26f),
+                $"[Net] 模式={mode}  状态={state}  玩家id={playerId}  远程实体={remoteCount}");
         }
 
         private void HandleEnterWorld()

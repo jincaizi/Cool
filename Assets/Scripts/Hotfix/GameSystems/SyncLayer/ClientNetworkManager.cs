@@ -85,6 +85,17 @@ namespace Hotfix.GameSystems.SyncLayer
             _dispatcher.Subscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
         }
 
+        /// <summary>
+        /// 摘除移动上报（重装配支持——本地角色被销毁重建后须绑定新角色；
+        /// AttachMovementReporter 的防重守卫会让不做 Detach 的重装配静默失效）。幂等。
+        /// </summary>
+        public void DetachMovementReporter()
+        {
+            if (_reporter == null) return;
+            _reporter = null;
+            _dispatcher.Unsubscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
+        }
+
         public async void ConnectAndLogin(string host, int port)
         {
             CurrentState = State.Connecting;
