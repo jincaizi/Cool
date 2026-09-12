@@ -181,6 +181,10 @@ namespace KcpServer
         public void RegisterEntity(long playerId, string playerName)
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
+            // P5：登录标志置在 store 实例上——怪物感知（MonsterModule.DetectTarget）与
+            // 怪物施法候选（CastHandler）过滤读的是本实例；LoginHandler 自建实例只进 RoomManager。
+            // BotRunner 不经此路径（直接 AddPlayer）——压测 bot 保持非登录态（D-P5-3 语义）
+            player.IsLoggedIn = true;
             // AOI：实体立即可见靠 AoiGrid 首帧 + AoiBandScheduler HasSent=false（无需标脏）——
             // MarkDirty 保留仅为 P2 测试语义（PositionSyncEntityStoreTests 断言 IsDirty）
             _entityStore.MarkDirty(player);

@@ -19,12 +19,10 @@ namespace KcpNet.PlayModeTests
     /// 统计口径（非时序脆弱断言——同 AoiWorldTests 惯例）。
     /// 注：登录须显式 ConnectAndLogin（ClientNetworkManager.Update 非 InWorld 时早退，
     /// 不会自行建连）——计划文本漏写，按 AoiWorldTests/CombatSyncTests 惯例补上（偏差记录）。
-    /// 已知阻塞（T5 e2e 实测，产品侧缺陷，不在本测试文件范围内）：
-    /// 服务器 EntityStore 中的玩家实体 IsLoggedIn 恒为 false（LoginHandler 只在自建实例上置 true，
-    /// 而 MonsterModule/CastHandler 读的是 RegisterEntity→EntityStore.AddPlayer 的另一个实例）——
-    /// 于是 DetectTarget 的 `!p.IsLoggedIn` 过滤掉全部玩家，怪物只巡逻不感知（观察 60s：wolf
-    /// ActionState 恒 Run、casts=0、dmg=0，而 wolf 巡逻路径距观察者最近 ~2m 且朝向锥内）。
-    /// 修复（服务器侧一行：登录时在 store 实例上置 IsLoggedIn）后本测试应转绿。
+    /// 回归保护：本测试是服务器登录接线（RegisterEntity 在 EntityStore 实例上置 IsLoggedIn）的
+    /// 端到端锁定——该接线缺失时怪物感知（MonsterModule.DetectTarget 的 `!p.IsLoggedIn` 过滤）
+    /// 会静默失效：怪物只巡逻不感知（观察 60s：wolf ActionState 恒 Run、casts=0、dmg=0，
+    /// 而 wolf 巡逻路径距观察者最近 ~2m 且朝向在锥内）。P5 T5 验收发现并以修复落地。
     /// </summary>
     public class MonsterWorldTests
     {
