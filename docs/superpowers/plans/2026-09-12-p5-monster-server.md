@@ -2204,7 +2204,7 @@ git commit -m "docs(monster): p5 closeout - remove dead AI code, guides, session
 
 ## 执行偏差与验收记录（执行时回填，T6 Step 4）
 
-**Commits**: T1 cbc54f6 → T2 f9ff103 → T3 0e114e4 → T4 4f99433 → T5 68371cc + 修复 18c25b6
+**Commits**: T1 cbc54f6 → T2 f9ff103 → T3 0e114e4 → T4 4f99433 → T5 68371cc → 修复 18c25b6 → T6 bacaa44 → 终审修复 d3115ee
 
 **逐任务偏差**（执行时按 P4 惯例记录——implementer 现场发现 + review 批准）：
 1. T1（quality review 轮）：Wolf 伤害 15 注释出处不实（旧 AiComponent 对所有怪物硬编码 10，且死代码从未生效）——保留 15 为 P5 首次生效的差异化平衡选择（D-P5-2 已修正），注释改为准确出处并 amend（cbc54f6）
@@ -2223,14 +2223,20 @@ git commit -m "docs(monster): p5 closeout - remove dead AI code, guides, session
 14. T5：计划执行注意 #4 的 wolfId 脆弱点未触发（首个 wolf = 2_000_001 = Wolf[0]，即唯一能命中观察者那只）；审计留档 `production/verify/monster-audit.log` + 备份 `.monster-run.log`/`.coexist.log`/`.coexist-postfix.log`/`p5-regression-server.log`/`p5-regression-bots.log`
 15. T5（修复后）：**Step 3c 共存抽查作废**——修复前通过是因为怪物当时惰性（IsLoggedIn 缺陷）；修复后 `--monsters 4` 下 P4 `CombatSyncTests.Cheat_Casts_Are_Rejected` FAIL（`expected exactly 1 CastBroadcast after double-cast, got 3`——狼仇恨原点两名客户端，其合法 npc CastBroadcast 经 GetObserversOf 广播污染按消息条数的断言；日志 0 拒绝 ⇒ 那 2 条是合法 npc 施法）。**非产品缺陷**（怪物广播语义正确）——P4 测试的全局消息计数断言风格与共存世界不兼容：P4 回归只在干净服务器跑，共存鲁棒性（按 caster id 过滤断言）留 backlog。附：`TwoClients_Damage_Numbers_Match` 共存下 PASS 但脆弱（`TargetRemainingHp == 100 - Damage` 假设无其他伤害源）
 16. T5：服务器对 npc 施法**成功路径不打日志**（只记拒绝）——"npc cast rejected = 0" 须与测试 PASS 合读才是完整证据（客户端断言链：npc id 为源 + dmg 恒值 15 + 余血 85 精确——只有 npc 路径能产出）
+17. 终审（Important）：e2e 史莱姆巡逻断言**假绿**——`lastSlimePos` 单变量被两只史莱姆（±40m 均在 80m 视野）共用，每采样累积跨距 ~160m（实测打印 6000.10m/4558.61m，真实巡逻 8s 上限 ~16m），`slimeDrift < 1f` 永不触发 → 巡逻冻结仍会绿。修复：漂移按视图 id 分开累积（d3115ee）。**教训：聚合量跨实体共享变量是假绿高发 pattern**
+18. 终审（记录一致性）：偏差 10 承诺的字段掩码守卫注释未在 T6 落地（T6 未覆盖该文件）→ d3115ee 补注释钉住"唯一生产者恒全掩码"不变量
+19. 终审（记录一致性）：偏差 5 承诺的关键路径测试（Return 分支/受击硬直窗口/重生新 id）未落地（T3 只落冷却间距）→ d3115ee 补齐 3 测试（断言按现行实现语义一次通过，无需弱化）
+20. 终审（健壮性）：`MonsterBtActions.Attack` 缺表项时返回 Failure 致怪物在攻击距离永久静默冻结（零日志零计数）→ d3115ee 校验前移 `SpawnMonster` fail fast（抛 ArgumentException）；同文件"范围 = 表上限"注释修正
+21. d3115ee 测试测量窗偏差：早退条件由"收到首个伤害即出"改为"保底 15 采样（3s）后早退"——首次狼贴脸 ghost 位时 1.45s 窗测得漂移 1.32m 贴阈值（偶发假 FAIL 风险）；阈值/语义不变，仅保证测量窗公平（快路径 ~3.5s）
 
-**验收证据**（2026-09-12 实测）：
-- Server.Tests：**129/129**（P4 基线 115 + T1 3 + T2 4 + T3 7）
+**验收证据**（2026-09-12 实测，终审修复后最终态）：
+- Server.Tests：**132/132**（P4 基线 115 + T1 3 + T2 4 + T3 7 + 终审补 3）
 - EditMode：**200/200**（P4 基线 195 + T1 1 + T4 4）
-- PlayMode：**MonsterWorldTests 2/2 ×2 类级连跑全绿**（修复后 Run1 12.33s / Run2 10.47s；原 FAIL 用例收到首个 DamageResult 即提前出 ~8s，断言全值通过：SourcePlayerId=2_000_001、Damage=15.0、TargetRemainingHp=85.0 精确——感知→追击→施法→裁决→DamageResult 全链端到端）
+- PlayMode：**MonsterWorldTests 2/2 ×2 类级连跑全绿**（终审修复后 Run1 9.91s / Run2 12.34s；断言全值通过：SourcePlayerId=2_000_001、Damage=15.0、TargetRemainingHp=85.0 精确——感知→追击→施法→裁决→DamageResult 全链端到端；巡逻漂移真实值 max 9.69m/12.59m——修复前 6000m 系假绿 artifact 见偏差 17）
 - 回归（干净服务器）：MovementSync 4/4、TwoClientWorld 1/1、CombatSync 2/2、AoiWorld 1/1 全绿（AoiWorld 须 `--bots 100` 服务器——见偏差 13）
-- 服务器审计日志：`production/verify/monster-audit.log`（npc cast rejected = 0、任意 cast rejected = 0、ERROR = 0；与测试 PASS 合读——成功路径不打日志，见偏差 16）
+- 服务器审计日志：`production/verify/monster-audit.log`（npc cast rejected = 0、任意 cast rejected = 0、ERROR = 0、Monster mode: 4 monsters spawned；与测试 PASS 合读——成功路径不打日志，见偏差 16）
 - 协议只加不删 ✓（EntitySnapshot 10/11 号段追加；MessageId 2000-2003 保留）
+- 终审结论：**READY_WITH_NOTES** → 修复轮 d3115ee 落地后全部关闭
 
 **P5 backlog（记录未做）**：
 - 客户端真实目标 id 判别（D-P5-3 服务端候选集扩展已消除跨界误伤；客户端精确目标留后续）
