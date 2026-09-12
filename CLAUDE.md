@@ -267,4 +267,4 @@ Animator三层Layer架构：
 - [x] Camera System (ThirdPersonCameraController)
 - [x] VFX System (Weapon + Skill effects)
 - [x] Nameplate System (Entity display)
-- [ ] NPC Mirror system
+- [x] NPC Mirror system（P5 怪物服务端化：服务器 MonsterModule 行为树驱动 + 客户端 Npc 快照视图）

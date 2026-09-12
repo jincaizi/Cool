@@ -85538,3 +85538,125 @@ CombatRules 双端同源规则表（4 技能资产实测值）+ HitResolver 几�
 T2 SkillEntry 构造不可变化 + 锥边点 1ulp 修正；T3 ApplyDamage 不钳（计划自身测试矛盾）；T4 EventBus 命名空间/asmdef 引用；T5 显式目标修复 test-order ghost 干扰
 ### P4 Backlog
 P5 施法目标判别；投射物/蓄力/引导服务端化；PvP 格挡减伤服务端化；死亡/复活；ActionState；远程动画表现；命中方向字段
+## Session End: 20260911_035954
+### Commits
+7227a54 docs(combat): p4 final review backlog additions - relogin cooldown reset, inner-hit-zone gap, friendly-fire guard note
+59d9fa4 docs(combat): p4 plan final checkboxes + verification record
+469cc74 docs(combat): p4 guides + session log execution summary
+7d06992 docs(combat): p4 closeout - plan checkboxes, deviation/acceptance record, backlog
+71740dc chore(combat): p4 review follow-ups - e2e timeout-path disposal, wall-clock comments, tick doc precision
+6d0d6fa fix(combat): e2e uses explicit target - immune to ghost-entity auto-target interference in class runs
+434b86f test(combat): skill combat e2e - dual-client damage consistency, cheat rejection, audit log
+3cae680 fix(synclayer): t4 review follow-ups - bridge unhook on destroy, cast broadcast event test
+831affa feat(synclayer): combat network bridge - cast request on skill activation, server damage to existing hit/float-text chains
+2226078 feat(server): authoritative cast resolution - validation, hit resolve, server-side damage roll, broadcast
+20a704b fix(synccore): nan guard in shape validation, skill entry immutability, boundary tests
+504d571 feat(synccore): combat rules table + hit resolver - shared geometry, asset-matched values
+6d76bd6 chore(proto): t1 review minors - self=4 clause, nested-type convention comment, iscritical true roundtrip
+03adbe9 feat(proto): combat messages 300-range - hit shape, cast request/broadcast, damage result
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+---
+
+## Session End: 20260911_095549
+### Commits
+7227a54 docs(combat): p4 final review backlog additions - relogin cooldown reset, inner-hit-zone gap, friendly-fire guard note
+59d9fa4 docs(combat): p4 plan final checkboxes + verification record
+469cc74 docs(combat): p4 guides + session log execution summary
+7d06992 docs(combat): p4 closeout - plan checkboxes, deviation/acceptance record, backlog
+71740dc chore(combat): p4 review follow-ups - e2e timeout-path disposal, wall-clock comments, tick doc precision
+6d0d6fa fix(combat): e2e uses explicit target - immune to ghost-entity auto-target interference in class runs
+434b86f test(combat): skill combat e2e - dual-client damage consistency, cheat rejection, audit log
+3cae680 fix(synclayer): t4 review follow-ups - bridge unhook on destroy, cast broadcast event test
+831affa feat(synclayer): combat network bridge - cast request on skill activation, server damage to existing hit/float-text chains
+2226078 feat(server): authoritative cast resolution - validation, hit resolve, server-side damage roll, broadcast
+20a704b fix(synccore): nan guard in shape validation, skill entry immutability, boundary tests
+504d571 feat(synccore): combat rules table + hit resolver - shared geometry, asset-matched values
+6d76bd6 chore(proto): t1 review minors - self=4 clause, nested-type convention comment, iscritical true roundtrip
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260912_062041
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260912_063237
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260912_064944
+### Commits
+cbc54f6 feat(proto): p5 t1 - entity kind/template fields (add-only) + monster skills in CombatRules
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260912_072953
+### Commits
+873e0b6 feat(server): p5 t3 - npc combat integration - candidate policy (players hit npcs, npcs hit players only), npc cast broadcast to AOI observers
+f9ff103 feat(server): p5 t2 - MonsterModule with tick-driven behavior tree (patrol/chase/attack/return), death-respawn, --monsters CLI
+cbc54f6 feat(proto): p5 t1 - entity kind/template fields (add-only) + monster skills in CombatRules
+### Uncommitted Changes
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20260912_073330
+### Commits
+0e114e4 feat(server): p5 t3 - npc combat integration - candidate policy (players hit npcs, npcs hit players only), npc cast broadcast to AOI observers
+f9ff103 feat(server): p5 t2 - MonsterModule with tick-driven behavior tree (patrol/chase/attack/return), death-respawn, --monsters CLI
+cbc54f6 feat(proto): p5 t1 - entity kind/template fields (add-only) + monster skills in CombatRules
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260912_074424
+### Commits
+4964d40 feat(client): p5 t4 - npc remote views (sphere placeholder + template metadata), disable local MonsterSpawner in networked mode
+0e114e4 feat(server): p5 t3 - npc combat integration - candidate policy (players hit npcs, npcs hit players only), npc cast broadcast to AOI observers
+f9ff103 feat(server): p5 t2 - MonsterModule with tick-driven behavior tree (patrol/chase/attack/return), death-respawn, --monsters CLI
+cbc54f6 feat(proto): p5 t1 - entity kind/template fields (add-only) + monster skills in CombatRules
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20260912_081208
+### Commits
+68371cc test(monster): p5 e2e - server-driven patrol/chase/attack + reconnect world persistence
+4f99433 feat(client): p5 t4 - npc remote views (sphere placeholder + template metadata), disable local MonsterSpawner in networked mode
+0e114e4 feat(server): p5 t3 - npc combat integration - candidate policy (players hit npcs, npcs hit players only), npc cast broadcast to AOI observers
+f9ff103 feat(server): p5 t2 - MonsterModule with tick-driven behavior tree (patrol/chase/attack/return), death-respawn, --monsters CLI
+cbc54f6 feat(proto): p5 t1 - entity kind/template fields (add-only) + monster skills in CombatRules
+### Uncommitted Changes
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## P5 怪物服务端化执行摘要（2026-09-12，coordinator 记录）
+### Goal（spec §5-P5）
+怪物世界服务端权威化：AI 巡逻/仇恨追击/攻击在服务器主循环驱动，玩家断线怪物世界持续运转；怪物 HP/死亡/重生服务器裁决；打玩家触发 HitFSM 同步。
+### Commits
+cbc54f6 T1 协议（EntityKind/TemplateId 只加不删）+ 怪物技能入 CombatRules → f9ff103 T2 MonsterModule（tick 行为树/死亡重生/--monsters）→ 0e114e4 T3 战斗集成（候选集策略/怪物施法广播）→ 4f99433 T4 客户端 Npc 视图 + 禁用本地 MonsterSpawner → 68371cc T5 e2e + 18c25b6 修复（IsLoggedIn 登录接线缺陷——e2e 抓到的产品 Critical：怪物曾永远不感知玩家）
+### Acceptance Evidence
+- Server.Tests 129/129；EditMode 200/200
+- PlayMode MonsterWorldTests 2/2 ×2 类级连跑（感知→追击→施法→裁决→DamageResult 全链，dmg 15/余血 85 精确）；MovementSync/TwoClientWorld/CombatSync/AoiWorld 回归全绿（AoiWorld 须 --bots 100 服务器）
+- 审计日志 production/verify/monster-audit.log（npc cast rejected = 0，与测试 PASS 合读）
+### Key Deviations（详见 plan 偏差记录 16 条）
+T1 Wolf 伤害出处注释修正；T2 ConfigLoader IncludeFields 缺陷修复；T3 审计路径死代码修正 + 测试朝向修复；T4 FindObjectsOfType（DemoDay 双 spawner）；T5 IsLoggedIn 产品缺陷修复 + Step 3c 共存抽查作废（P4 全局计数断言与共存世界不兼容，非产品缺陷）
+### P5 Backlog
+玩家死亡/复活；投射物等玩家技能服务端化；AggroTable 仇恨排名；怪物真实模型；客户端目标判别；友伤残余边界；MonsterSpawner 清理（名牌残影/PhysRegistry）；P4 CombatSyncTests 共存鲁棒性；npc 施法正向日志
