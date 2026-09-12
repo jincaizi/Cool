@@ -1,0 +1,78 @@
+# 游戏内网络联调指南（单机 / 联网模式）
+
+> **它是什么**：把 P1-P5 网络同步接进真实游戏后的**实机联调步骤**——起服务器、选模式、进世界、看什么算成功。前置背景见 `p2-client-network-host.md`（宿主组件）与 `p5-monster-server.md`（服务器怪物）。
+
+## 一、起服务器
+
+```bash
+# 编译（一次）
+dotnet build E:/CodeForJob/Cool/Server/Server3C.csproj
+
+# 联网 + 服务器怪物（推荐联调用）
+dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --monsters 4
+
+# 纯联网（无服务器怪物，怪物走本地 MonsterSpawner）
+dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000
+
+# 压测模式（100 个游走 bot——用于验证远程玩家渲染）
+dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --bots 100
+```
+
+日志出现 `Server3C is running on port 8000` 即就绪。停止：Ctrl+C，或按端口找 PID 后 `taskkill //F //PID <pid>`。
+
+## 二、进游戏选模式
+
+1. Unity 打开 `Assets/Scenes/CharacterSelect.unity` 或直接打开 `Assets/SimpleLowPolyNature/Scenes/DemoDay.unity` 后 Play（两条路径都会弹出选人面板）
+2. 面板底部新增**单机 / 联网**两个按钮（男女卡片下方）——默认记住上次选择（PlayerPrefs `net.mode`，首次默认**单机**）
+3. 选"联网" → 点"确认"
+
+### 两种模式的差异
+
+| | 单机模式 | 联网模式 |
+|---|---|---|
+| 连接服务器 | 完全不触网 | 进世界后自动 `Connect()`（服务器地址/账号在 DemoDay 的 `Net` 对象 Inspector 配置，默认 `127.0.0.1:8000` / `Player`） |
+| 本地怪物 | `MonsterSpawner`（SlimeSpawner / TurtleShellSpawner）照常生成 | **全部禁用**——怪物由服务器驱动（球体占位渲染） |
+| 移动 | 纯本地 | 服务端纠偏（`NetMovementPolicy` 平滑拉回，超速/瞬移被拒） |
+| 战斗 | 全本地权威 | 表内技能（10001/10002/20001/20002）发 `CastRequest` → 服务器裁决 → `DamageResult` 驱动伤害/浮字 |
+
+## 三、进世界后看什么算成功
+
+屏幕**左下角调试浮层**（`Net` 对象 Inspector 的 `Show Debug Overlay` 可关）：
+
+```
+[Net] 模式=联网  状态=InWorld  玩家id=2  远程实体=4
+```
+
+- `状态`：`未连接` → `Connecting` → `LoggingIn` → **`InWorld`**（成功）
+- `远程实体`：服务器 AOI 视野内的实体数——`--monsters 4` 时出生点（距原点 18.5m）应看到 **4**（4 只怪都在 80m 视野内）
+- 控制台应出现（关键日志）：
+  - `[NetHost] 联网模式——连接 127.0.0.1:8000`
+  - `[NetHost] 本地 MonsterSpawner 已禁用：SlimeSpawner` / `TurtleShellSpawner`
+  - `[NetHost] 本地角色已接入移动上报（repoter + NetMovementPolicy）`
+  - 走近怪物后：`[NetHost] cast broadcast: caster=2000001 skill=50002`（怪物攻击的施法广播）
+
+### 实机体验要点
+
+- **开局狼不会立刻仇恨**：Wolf 在 (12,0,0)，玩家出生在 (10,0.16,−15.52)——距离 15.65m 略超检测半径 15m，**朝原点走近几步**（或等它巡逻靠近）就会被追击
+- 服务器驱动的怪物是**球体占位**（真实模型/动画是 backlog）；远程玩家是**胶囊占位**
+- 单客户端看不到其他玩家——用 `--bots 100` 服务器或第二客户端（见 `p1-dual-client-dev.md`）验证远程玩家链
+
+## 四、已知边界（实机评审时别误判为新 bug）
+
+- **本地怪物不回收**：联网模式禁用 `MonsterSpawner` 后，**禁用前已生成的本地怪物不会消失**（名牌残影 + 仍可被本地攻击命中）——P5 已记录 backlog，非回归
+- **断线不自动重连**：服务器重启/断线后浮层显示断开，需退出 PlayMode 重进（重连 = 全新登录流程；自动重连是 backlog）
+- **未连上时零日志？** 宿主已接 `OnError` 日志（`[NetHost] error:`），连接失败/登录被拒必有输出
+- **玩家重建自动重装配**：DemoDay 直跑时确认选人会触发 `PlayerSpawner` 销毁重建本地角色——宿主订阅 `PlayerSpawnedEvent` 重装配（移动上报/纠偏/战斗桥全部换绑新角色）
+
+## 五、曾修复的关键缺陷（2026-09-13，供排查参考）
+
+集成实机联调时发现并修复：**客户端 KCP 接收路径吞吐被压到 ~7.8 包/秒**（服务器发 15/秒），快照流滞后无界增长（实测 57s → 135s），AOI 远程实体因 1.2s 缺席超时被全部清空——表现为"进世界 3 秒后怪物视图消失"。
+
+根因与修复（`Assets/Scripts/AOT/KcpNet/`）：
+1. `KcpClientTransport.ReceiveKcpAsync` 把 `_kcp.TryRecv` 放在 `Socket.Available > 0` 分支内——无新包时 KCP 队列中已就绪的消息不被取走，**接收窗不释放，对端发送受阻**。改为：先把所有可用 UDP 包喂入 KCP，再**无条件** `TryRecv`。
+2. `KcpTransportBase.ProcessReceiveAsync` 每次调度只读一个包（旧实现）→ 改为单次调度内**循环排空**（上限 64 包防饥饿发送/更新）。
+3. `KcpTransportBase.NetworkDriverLoop` 专用线程模式下 `Task.Delay(1)` 续体需回线程池调度（实测延迟 ~190ms/次）→ 改为同步 `Thread.Sleep(1)`。
+
+修复后实测：客户端接收 **15.4 条/秒**（与服务器发送 15/秒匹配）、快照滞后 **20-39ms**（原 135 秒）、远程实体视图稳定持久。
+
+服务器侧同时补了可观测性：`KcpServerSession` 发送队列满丢包计数 + 警告日志（原先静默丢弃）、`[Aoi] 5s stat` 增列真实发送的 `snapshotMsgs/s`（原先只有实体数，无法区分"组装"与"真发"）。
