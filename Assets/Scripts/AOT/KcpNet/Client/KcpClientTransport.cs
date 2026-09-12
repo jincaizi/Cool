@@ -92,27 +92,28 @@ namespace KcpNet
 
             try
             {
-                // 接收UDP数据
-                if (Socket.Available > 0)
+                // 先喂入所有可用 UDP 包（KCP input），再独立尝试取应用消息。
+                // 2026-09-13 集成实机定位：旧实现把 TryRecv 放在 "Socket.Available > 0" 分支内——
+                // 无新包到达时 KCP 接收队列里**已就绪**的应用消息不会被取走，接收窗不释放，
+                // 对端发送因此受阻（实测服务器发 15 msg/s、客户端仅收 7.8/s，且 socket 无积压）。
+                while (Socket.Available > 0)
                 {
                     var buffer = new byte[Options.Mtu];
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     var bytesRead = Socket.ReceiveFrom(buffer, ref remoteEndPoint);
+                    if (bytesRead <= 0) break;
 
-                    if (bytesRead > 0)
-                    {
-                        // 输入到KCP
-                        _kcp.Input(buffer, 0, bytesRead);
+                    // 输入到KCP
+                    _kcp.Input(buffer, 0, bytesRead);
+                }
 
-                        // 从KCP读取数据
-                        var bufferWriter = new ArrayBufferWriter<byte>(65536);
-                        var recvCount = _kcp.TryRecv(bufferWriter);
+                // 从KCP读取数据（与是否收到新包无关——保证已就绪消息被取走）
+                var bufferWriter = new ArrayBufferWriter<byte>(65536);
+                var recvCount = _kcp.TryRecv(bufferWriter);
 
-                        if (recvCount > 0)
-                        {
-                            return bufferWriter.WrittenSpan.ToArray();
-                        }
-                    }
+                if (recvCount > 0)
+                {
+                    return bufferWriter.WrittenSpan.ToArray();
                 }
 
                 return null;

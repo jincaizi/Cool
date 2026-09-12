@@ -14,6 +14,9 @@ namespace KcpNet
     /// </summary>
     public abstract class KcpTransportBase : IKcpTransport
     {
+        /// <summary>单次网络调度最多处理的接收包数（排空 socket 缓冲；防止单次调度饥饿发送/更新路径）</summary>
+        private const int MaxReceiveBatchPerIteration = 64;
+
         private readonly ConcurrentQueue<byte[]> _sendQueue = new ConcurrentQueue<byte[]>();
         private readonly SemaphoreSlim _sendSemaphore = new SemaphoreSlim(0);
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
@@ -248,8 +251,15 @@ namespace KcpNet
                         lastUpdateTime = now;
                     }
 
-                    // 休眠以避免CPU占用过高
-                    await Task.Delay(1, _cts.Token).ConfigureAwait(false);
+                    // 休眠以避免CPU占用过高。专用线程模式用同步休眠：Task.Delay 的续体需回线程池
+                    // 调度，实测被延迟至 ~190ms/次，把驱动循环（含 KCP Update——ACK 生成与发送窗
+                    // 补充）压到 ~5 次/秒，服务器 32 段发送窗因此补不上、快照流滞后无界增长
+                    //（2026-09-13 集成实机定位：客户端接收 5~8 包/秒 vs 服务器发 15）。
+                    // 专用线程（UseDedicatedNetworkThread，默认 true）下同步休眠不占用池线程。
+                    if (_options.UseDedicatedNetworkThread)
+                        System.Threading.Thread.Sleep(1);
+                    else
+                        await Task.Delay(1, _cts.Token).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested)
                 {
@@ -292,15 +302,19 @@ namespace KcpNet
         }
 
         /// <summary>
-        /// 处理接收
+        /// 处理接收——单次调度内循环排空（2026-09-13 集成实机定位：旧实现每调度只读一个包 +
+        /// Task.Delay 续体回线程池调度，客户端实际吞吐被压到 ~5 包/秒；服务器 15Hz 快照流因此
+        /// 持续积压于 socket 缓冲、滞后无界增长，AOI 远程实体被 1.2s 缺席超时全部清空）。
+        /// 上限防单次调度饥饿发送/更新路径（64 包 ≫ 任一带宽下的两 tick 到达量）。
         /// </summary>
         private async Task ProcessReceiveAsync()
         {
             try
             {
-                var data = await ReceiveKcpAsync().ConfigureAwait(false);
-                if (data != null && data.Length > 0)
+                for (int i = 0; i < MaxReceiveBatchPerIteration; i++)
                 {
+                    var data = await ReceiveKcpAsync().ConfigureAwait(false);
+                    if (data == null || data.Length == 0) break;
                     OnDataReceived(data);
                 }
             }

@@ -45,6 +45,9 @@ namespace KcpServer
 
         private BotRunner? _botRunner;
 
+        /// <summary>诊断计数：5s 窗口内真实发送的 WorldSnapshot 消息数（与实体发送数区分——集成定位用）</summary>
+        private long _snapshotMessagesSent;
+
         /// <summary>压测模式：注册 N 个 bot（无 session 假玩家）并在主循环 tick 推进。
         /// 必须在 StartAsync 之前调用（bot 注册写 EntityStore——R2 主循环独占）</summary>
         public void EnableBots(int count)
@@ -109,8 +112,9 @@ namespace KcpServer
                     // 每 5s（75 tick）带宽统计日志——T7 验收口径（记录非断言）
                     if (tick % 75 == 0)
                     {
-                        _logger.LogInformation($"[Aoi] 5s stat: sends/s={_aoi.TotalEntitySends / 5f:F0}, est_bytes/s={_aoi.TotalEntitySends * 33f / 5f:F0}"); // 33B/entity 实测（T5）
+                        _logger.LogInformation($"[Aoi] 5s stat: sends/s={_aoi.TotalEntitySends / 5f:F0}, est_bytes/s={_aoi.TotalEntitySends * 33f / 5f:F0}, snapshotMsgs/s={_snapshotMessagesSent / 5f:F0}"); // 33B/entity 实测（T5）
                         _aoi.TotalEntitySends = 0;
+                        _snapshotMessagesSent = 0;
                     }
 
                     BroadcastWorldSnapshot((uint)tick);
@@ -254,6 +258,7 @@ namespace KcpServer
                 var entities = _aoi.BuildForObserver(observer, tick, _entityStore);
                 _aoi.TotalEntitySends += entities.Count; // T7 带宽统计累计（5s 日志后归零）
                 if (entities.Count == 0) continue; // 视野空：不发
+                _snapshotMessagesSent++; // 真实发送的 WorldSnapshot 消息数（5s 日志后归零——集成诊断）
 
                 var observerSnapshot = new WorldSnapshot
                 {

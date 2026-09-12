@@ -233,6 +233,12 @@ namespace KcpServer
             }
         }
 
+        /// <summary>成功入队 KCP 发送队列的段数（诊断计数）</summary>
+        public long QueuedSendCount;
+
+        /// <summary>因发送队列满被丢弃的段数（诊断计数——见 Send 内注释）</summary>
+        public long DroppedSendCount;
+
         /// <summary>
         /// 发送数据
         /// </summary>
@@ -246,6 +252,18 @@ namespace KcpServer
                 {
                     var result = _kcp.Send(new ReadOnlySpan<byte>(data, offset, length), null);
                     _lastActivityTime = DateTime.UtcNow;
+                    // 发送队列满 = 段被静默丢弃（对端 ACK/窗口补不上时发生）——必须留痕，
+                    // 否则表现为"服务器在发但客户端收不到"的隐性吞吐损失（2026-09-13 集成实机定位）
+                    if (result < 0)
+                    {
+                        DroppedSendCount++;
+                        if (DroppedSendCount % 100 == 1)
+                            _logger.LogWarning($"[KCP] send queue full — dropped segment #{DroppedSendCount} (session {_sessionId})");
+                    }
+                    else
+                    {
+                        QueuedSendCount++;
+                    }
                     return result >= 0 ? length : result;
                 }
             }
