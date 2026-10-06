@@ -102,7 +102,24 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                 StunDuration = stunDuration
             };
 
+            // 既有：免疫判定 / 扣韧性 / 发事件
             _stateCoordinator.HandleDamage(damageEvent);
+
+            // P6 ①：受击表现接线。DamageEvent 的字段与 HitData 同构（Damage/KnockbackForce/
+            // LaunchForce/StunDuration/HitDirection），直接映射，无需新增事件或协议。
+            // 与既有 HandleShieldBreak(:132)/TriggerHit(:144) 同款模式：EnterHit + 切 Hit 层。
+            var hitData = new HitData
+            {
+                Damage = damage,
+                HitDirection = hitDirection,
+                KnockbackForce = knockbackForce,
+                LaunchForce = launchForce,
+                StunDuration = stunDuration
+            };
+
+            // 返回值 false = 被更高优先级状态拒绝（已在更高优先级状态 / 已死亡）——尊重既有优先级，不切层
+            if (_hitFSM.EnterHit(hitData))
+                _stateCoordinator.SetActiveLayer(LayerType.Hit);
         }
 
         public void RequestDeath()
@@ -178,6 +195,9 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         {
             _animator.SetBool(AnimHashes.IsHit, false);
             _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 0f);
+            // P6 ①：把活动层交还 Base——与攻击流 Sys3CEntry.cs:390 的既有做法一致。
+            // 不归还则 ActiveLayer 滞留在 Hit，FSMManager.Update:67 的 isAttacking 读数失真。
+            _stateCoordinator.UnlockAndReturnToBase();
             OnHitCompleted?.Invoke();
         }
 
