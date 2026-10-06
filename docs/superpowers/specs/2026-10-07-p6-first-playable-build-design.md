@@ -184,17 +184,20 @@ HandleDamage(DamageEvent damage)
 
 ### ② 伤害结算帧率无关化
 
-**采用同文件已有的 `_currentTick` 游标模式**（与 `UpdateCharging` 一致），让每个判定窗口**只触发一次**：
+**采用同文件已有的游标模式**（与 `UpdateCharging` 同构），让每个判定窗口**只触发一次**：
 
 ```
 UpdateExecution
-  进入 Execution 时 _currentTick 归零
-  for (int i = _currentTick; i < hitboxTimings.Length; i++)
+  for (int i = _executionTimingCursor; i < hitboxTimings.Length; i++)
       window = Mathf.Max(0.05f, _lastDeltaTime * 3f)      // 保留既有自适应窗口宽度
       if (_elapsedTime 落在 [hitboxTime, hitboxTime + window) 内)
-          _currentTick = i + 1                            // 游标推进——本窗口不再触发
+          _executionTimingCursor = i + 1                  // 游标推进——本窗口不再触发
           _onHitboxFrame?.Invoke(i)
 ```
+
+**必须新增独立字段 `_executionTimingCursor`，不得复用 `_currentTick`**：`_currentTick` 已被 `UpdateCharging`（`:174-182`，蓄力期判定帧游标）和 `UpdateSpinning`（`:203-206`，每 tick 自增的旋转计数器）**两个语义不同的路径共用**。蓄力技能的状态链是 Charging → Execution，若复用同一字段，Charging 阶段推进过的值会带入 Execution，导致第二个阶段**少触发或跳过判定窗口**。独立字段彻底消除这层跨状态耦合。
+
+进入 Execution 状态时 `_executionTimingCursor` 归零。
 
 **下游同步简化**：`SkillExecutor.OnHitboxTriggered` 的非旋转分支**删除 `consecutiveRequired = 3` 与 `_consecutiveHits` 字典**，改为"每次调用对本帧检测到的每个目标结算一次"——因为调用本身已保证"每窗口恰好一次"。
 
@@ -302,7 +305,11 @@ DespawnAll()
 
 **现状**：`_serverHost` / `_serverPort` / `_username` 只有 Inspector 值（`ClientNetworkHost.cs:26-28`），但 `Connect(username, host, port)` 已支持覆盖（`:141-153`）——**接线口已存在**。
 
-**设计**：在既有**选人面板**（`Assets/Scenes/CharacterSelect.unity` / DemoDay 内的选人面板）的"单机 / 联网"按钮附近，增加服务器设置输入区：地址 / 端口 / 昵称。值存入 `PlayerPrefs`，默认 `127.0.0.1:8000 / Player`。`ClientNetworkHost.Start()` 读取并传给 `Connect()`。
+**设计**：在既有**选人面板**（`Assets/Scenes/CharacterSelect.unity` / DemoDay 内的选人面板）的"单机 / 联网"按钮附近，增加服务器设置输入区：地址 / 端口 / 昵称。值存入 `PlayerPrefs`，默认 `127.0.0.1:8000 / Player`。
+
+**读取时机（关键，勿踩已知坑）**：地址必须在**每次 `Connect()` 被调用的那一刻**从 `PlayerPrefs` 读取，**不能只在 `ClientNetworkHost.Start()` 里读一次**。
+
+原因：直接跑 `DemoDay` 场景时，选人面板的确认动作发生在 `Start()` **之后**——`ClientNetworkHost.cs:102-108` 的既有注释与 `_connectRequested` 守卫正是为这个时序打的补丁（`OnPlayerSpawned` 里补连接）。若地址在 `Start()` 固化，直接跑 DemoDay 的路径会**读到旧地址**，与既有缺陷同构。两条连接路径（`Start` 直连 / `OnPlayerSpawned` 补连）都必须拿到最新值。
 
 **为什么用游戏内输入而非配置文件**：收件人联网必须知道服务器地址。配置文件对非技术用户存在"找错文件 / 编码 / 权限"三重风险；输入框零风险。且 `NetworkModeService` 已用 `PlayerPrefs` 存模式，沿用同一机制，不引入新概念。
 
@@ -366,7 +373,9 @@ ClientNetworkHost 内部订阅自身 OnDisconnected
 出包 + 手工验收
 ```
 
-依赖关系：**④ → ①** 是硬依赖（无伤害则无受击可验）；**① → ⑦** 也是硬依赖（⑦ 复用 ① 打通的 `HitFSM` 链路与切层机制）。⑤ 与 ⑥ 同文件，合并改动。3.2 构建脚本应尽量早跑通一次（哪怕功能未完成），以尽早暴露打包风险。
+依赖关系：**④ → ①** 是硬依赖（无伤害则无受击可验）；**① → ⑦** 也是硬依赖（⑦ 复用 ① 打通的 `HitFSM` 链路与切层机制）。⑤ 与 ⑥ 同文件，合并改动。
+
+**3.2 构建脚本必须最先跑通一次（硬要求，不是"尽量"）**：在动任何战斗代码之前，先用当前代码出一个包并运行，确认打包链路本身可用。理由有二：① 打包是本批次最大的未知风险，早暴露才能早改路线；② 一次性改 7 处代码 + 首次打包，若打包失败将无法二分定位是"打包问题"还是"改动引入的问题"。**先拿到"当前代码能出包"这个基线**，之后每次改动都有对照。
 
 ## 8. 测试策略与验收
 
@@ -405,6 +414,9 @@ ClientNetworkHost 内部订阅自身 OnDisconnected
 | R4 | **受击接线后暴露"边被打边放技能"**——打断链（`SkillCoordinator.OnDamageTaken`）无调用者，本批次不接线 | 中 | **明确接受**：受击期间技能继续执行。若要修属 P8 范围；本批次只保证不出现双状态崩溃 |
 | R5 | 数值对齐后单机手感变化（Slime 600→100 HP） | 低 | 单机当前 0 伤害本就无手感；对齐后与联网一致 |
 | R6 | `DespawnAll()` 依赖 `MonsterEntity.OnDestroy` 的注销是否幂等 | 低 | 实现时确认；若不幂等则显式去重 |
+| R7 | **韧性双扣**：§3.4b 的两条并行路径若在同一次攻击中都触发，`StateCoordinator.HandleDamage` 会执行两次 → `_resistance` 扣两次（`StateCoordinator.cs:58-59`），破防速度翻倍 | 中 | **既有缺陷**，非本批次引入；但 ① 接线后受击表现变正常，玩家会更容易注意到破防异常。本批次**只登记不改**（改动会牵连韧性平衡，属 P7）。若验收时观察到频繁破防，提回处理 |
+| R8 | 判定窗口在极端帧率波动下仍可能被整窗跳过（窗口宽度按 `_lastDeltaTime` 计算，帧间隔突变时可能失配），导致该窗口伤害丢失 | 低 | ② 保留既有 `Mathf.Max(0.05f, deltaTime*3f)` 自适应宽度已覆盖常规波动；PC 帧率稳定，实测风险低。若验收发现丢伤害，再改为"时间点已过即补触发" |
+| R9 | §5.3 断线返回主界面若硬编码场景名，构建配置变更后会失效 | 低 | 场景名走显式常量/配置，不散落硬编码 |
 
 ## 10. 决策记录
 
@@ -417,7 +429,7 @@ ClientNetworkHost 内部订阅自身 OnDisconnected
 | D-P6-5 | 相机**做** SphereCast 防穿墙 | 贴墙穿模在 PC 上很刺眼，改动小 |
 | D-P6-6 | 地址配置用**游戏内输入**而非配置文件 | 非技术用户零风险；复用既有 `PlayerPrefs` 机制 |
 | D-P6-7 | 构建用 **Mono** 后端 | PC 评审包以出包快、风险低优先；IL2CPP 留待移动端 |
-| D-P6-8 | ② 采用 `_currentTick` 游标模式 | 同文件 `UpdateCharging` 已有先例，风格一致、改动最小 |
+| D-P6-8 | ② 采用游标模式，但**新增独立字段** `_executionTimingCursor` | 同文件 `UpdateCharging` 已有同构先例；但 `_currentTick` 已被 Charging/Spinning 两种语义共用，复用会引入跨状态耦合 |
 | D-P6-9 | 旋转技能（`UpdateSpinning`）不改 | 走独立时间门控路径，本就帧率无关 |
 | D-P6-10 | 受击**切层**，并在受击结束回 Base 层 | 不切层会让 Hit / Attack 两层同时驱动 Animator |
 | D-P6-11 | 怪物重生回**初始生成点**而非死亡位置 | 怪会追击玩家，按死亡位置重生会让怪群漂移出刷怪区 |
