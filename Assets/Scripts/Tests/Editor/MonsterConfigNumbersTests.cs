@@ -64,9 +64,20 @@ namespace GameSys.EditorTests
             var slime = Load(SlimePath);
             var turtle = Load(TurtlePath);
 
-            // Assert（击退为 0 时 EnterHit 只进最轻的 Hit 态，验收要求可见击退）
+            // Assert（非零语义：击退为 0 时 EnterHit 只进最轻的 Hit 态，验收要求可见击退）
             Assert.Greater(slime.AttackDamage.KnockbackForce, 0f, "史莱姆攻击须有击退");
             Assert.Greater(turtle.AttackDamage.KnockbackForce, 0f, "龟壳攻击须有击退");
+
+            // Assert（D-P6-11 具体值：AttackDamage 与 AttackEffect 是两条独立伤害路径，
+            //        各读各的源，两个块的击退都必须锁死，否则回退任一半测试均无感）
+            Assert.AreEqual(1.5f, slime.AttackDamage.KnockbackForce, 0.001f,
+                "史莱姆 AttackDamage 击退须为 1.5");
+            Assert.AreEqual(2.5f, turtle.AttackDamage.KnockbackForce, 0.001f,
+                "龟壳 AttackDamage 击退须为 2.5");
+            Assert.AreEqual(1.5f, slime.AttackEffect.KnockbackForce, 0.001f,
+                "史莱姆 AttackEffect 击退须为 1.5（曾为 0，与 AttackDamage 同值）");
+            Assert.AreEqual(2.5f, turtle.AttackEffect.KnockbackForce, 0.001f,
+                "龟壳 AttackEffect 击退须为 2.5（曾为 0，与 AttackDamage 同值）");
         }
     }
 }
