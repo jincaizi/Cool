@@ -15,8 +15,8 @@ MonoBehaviour:
   MonsterId: slime
   DisplayName: "\u53F2\u83B1\u59C6"
   Prefab: {fileID: 1931298151966786, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}
-  MaxHP: 600
-  AttackPower: 15
+  MaxHP: 100
+  AttackPower: 10
   Defense: 5
   MoveSpeed: 5
   DetectRange: 10
@@ -48,7 +48,7 @@ MonoBehaviour:
     _hitboxTimings:
     - 0.3
   AttackDamage:
-    _baseDamage: 0
+    _baseDamage: 10
     _attackRatio: 1
     _scalingAttribute: 0
     _damageType: 0
@@ -56,13 +56,13 @@ MonoBehaviour:
     _criticalDamageBonus: 0
     _isTrueDamage: 0
     _armorPenetration: 0
-    _knockbackForce: 0
+    _knockbackForce: 1.5
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
   AttackEffect:
     _applyEffects: []
-    _knockbackForce: 0
+    _knockbackForce: 1.5
     _launchForce: 0
     _stunDuration: 0
     _statusType: 0

@@ -15,8 +15,8 @@ MonoBehaviour:
   MonsterId: turtleshell
   DisplayName: "\u523A\u80CC\u9F9F"
   Prefab: {fileID: 1524411113276028, guid: e2aafa8770d34a9591b41bedf4e318ba, type: 3}
-  MaxHP: 1500
-  AttackPower: 10
+  MaxHP: 250
+  AttackPower: 8
   Defense: 5
   MoveSpeed: 2
   DetectRange: 8
@@ -48,7 +48,7 @@ MonoBehaviour:
     _hitboxTimings:
     - 0.3
   AttackDamage:
-    _baseDamage: 2
+    _baseDamage: 8
     _attackRatio: 1
     _scalingAttribute: 0
     _damageType: 0
@@ -56,7 +56,7 @@ MonoBehaviour:
     _criticalDamageBonus: 0
     _isTrueDamage: 0
     _armorPenetration: 0
-    _knockbackForce: 0
+    _knockbackForce: 2.5
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
@@ -69,7 +69,7 @@ MonoBehaviour:
       _stackingRule: 0
       _isTickEffect: 1
       _tickInterval: 0
-    _knockbackForce: 0
+    _knockbackForce: 2.5
     _launchForce: 0
     _stunDuration: 0
     _statusType: 0
