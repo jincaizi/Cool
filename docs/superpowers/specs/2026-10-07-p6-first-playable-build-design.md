@@ -159,16 +159,34 @@ spawner.gameObject.SetActive(false);   // 只停用，不销毁、不注销
 
 ### ① 受击反馈接线
 
-**改动点**：`StateCoordinator.HandleDamage`
+**改动点**：`FSMManager.HandleDamage`（**不是** `StateCoordinator.HandleDamage`）
+
+**为什么落在这里**：三条伤害路径——`PlayerHitZone.cs:35`、`Sys3CEntry.cs:410`（服务端伤害）、`Sys3CEntry.cs:512`（`IDamageable.TakeDamage`）——**全部经由 `FSMManager.HandleDamage`**，而 `StateCoordinator.HandleDamage` 只有一个真实调用者（`FSMManager.cs:105`）。且 `FSMManager`：
+
+- 持有**具体类型**的 `_hitFSM`（`FSMManager.cs:16`）——**不需要反射**
+- **已订阅** `_hitFSM.OnHitComplete`（`FSMManager.cs:55`）
+- **已有两处现成实现**了本设计要的模式（`HandleShieldBreak.cs:132-142`、`TriggerHit` :144-154，均为 `EnterHit` + `SetActiveLayer(Hit)`）——本项是对既有模式的复用，不是新发明
 
 ```
-HandleDamage(DamageEvent damage)
-  ├─ 免疫判定（既有，保留）
-  ├─ 扣韧性（既有，保留）
+FSMManager.HandleDamage                                              ← 改动点
+  ├─ 既有：构造 DamageEvent → StateCoordinator.HandleDamage(damageEvent)
+  │        （免疫判定 / 扣韧性 / 发事件——原样保留）
   ├─ 构造 HitData{ Damage, KnockbackForce, LaunchForce, StunDuration }   ← 新增
-  ├─ bool entered = HitFSM.EnterHit(hitData)                              ← 新增
-  └─ if (entered) SetActiveLayer(LayerType.Hit)                           ← 新增（关键）
+  ├─ bool entered = _hitFSM.EnterHit(hitData)                            ← 新增
+  └─ if (entered) _stateCoordinator.SetActiveLayer(LayerType.Hit)        ← 新增（关键）
+
+FSMManager.HandleHitComplete（:177-182）                              ← 改动点
+  ├─ 既有：IsHit=false + HitLayer 权重 0
+  └─ 新增：_stateCoordinator.UnlockAndReturnToBase()   // 受击结束回 Base 层
 ```
+
+**受击恢复的缺口**：`HandleHitComplete` 目前只关动画层（`IsHit=false` + HitLayer 权重 0），**不把 `_activeLayer` 交还 Base**。
+
+**准确的影响范围**（已核实，勿夸大）：`_activeLayer` 卡在 `Hit` **不会**让玩家永久失去控制权——下一次攻击激活时 `Sys3CEntry.cs:339` 的 `SetAttackLayerActive()` 会把它重置为 `Attack`，攻击结束再由 `:390` 的 `UnlockAndReturnToBase()` 交还 `Base`。攻击流自身是闭环的。
+
+真正的问题是**受击到下次攻击之间这段窗口** `ActiveLayer` 失真：`FSMManager.Update:67` 的 `isAttacking = ActiveLayer == Attack` 会读出错误的层，且受击层不会自行归位。补 `UnlockAndReturnToBase()` 与攻击流 `Sys3CEntry.cs:390` 的既有做法一致。
+
+**注意：`StateCoordinator.CanMove` / `CanAttack`（`:18-20`）是全项目无消费者的死属性**——实现时不要依赖它们的语义做判断。（同名的 `SkillData.CanMoveWhileCharging`、`Weapon.CanAttack()` 是另外的东西。）
 
 **为什么必须切层**：`HitFSM` 是独立层，而 `_activeLayer` 决定 `CanMove` / `CanAttack`（`:18-20`）。若不切层，会出现"`_activeLayer` 仍是 Attack、`HitFSM` 却在播受击"的矛盾态——**Hit 层与 Attack 层同时驱动 Animator**，视觉撕裂。
 
