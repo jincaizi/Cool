@@ -3,6 +3,7 @@ using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,6 +24,12 @@ namespace Hotfix.GameSystems.UI
         [SerializeField] private Button _soloButton;
         [SerializeField] private Button _netButton;
         [SerializeField] private Button _confirmButton;
+        [Header("服务器设置（联网模式用）")]
+        [SerializeField] private TMP_InputField _hostInput;
+        [SerializeField] private TMP_InputField _portInput;
+        [SerializeField] private TMP_InputField _usernameInput;
+        [Tooltip("服务器设置整块容器——单机模式下隐藏")]
+        [SerializeField] private GameObject _serverSettingsRoot;
         /// <summary>选中按钮图片高亮色</summary>
         [SerializeField] private Color _selectedColor = new Color(1f, 0.84f, 0.36f);
         /// <summary>未选中按钮图片颜色</summary>
@@ -52,7 +59,11 @@ namespace Hotfix.GameSystems.UI
             base.OnShow();
             _selected = CharacterSelectionService.Load();
             _mode = NetworkModeService.Load();
+            if (_hostInput != null) _hostInput.text = NetworkModeService.LoadHost();
+            if (_portInput != null) _portInput.text = NetworkModeService.LoadPort().ToString();
+            if (_usernameInput != null) _usernameInput.text = NetworkModeService.LoadUsername();
             RefreshHighlight();
+            RefreshServerSettingsVisibility();
         }
 
         private void Select(CharacterGender gender)
@@ -66,6 +77,14 @@ namespace Hotfix.GameSystems.UI
         {
             _mode = mode;
             RefreshHighlight();
+            RefreshServerSettingsVisibility();
+        }
+
+        /// <summary>服务器设置区仅联网模式可见（单机下无地址可填）</summary>
+        private void RefreshServerSettingsVisibility()
+        {
+            if (_serverSettingsRoot != null)
+                _serverSettingsRoot.SetActive(_mode == NetworkMode.Online);
         }
 
         private void RefreshHighlight()
@@ -87,6 +106,10 @@ namespace Hotfix.GameSystems.UI
             if (_closing) return;
             _closing = true;
             CharacterSelectionService.Save(_selected);
+            NetworkModeService.SaveConnection(
+                _hostInput != null ? _hostInput.text : NetworkModeService.DefaultHost,
+                _portInput != null ? _portInput.text : NetworkModeService.DefaultPort.ToString(),
+                _usernameInput != null ? _usernameInput.text : NetworkModeService.DefaultUsername);
             NetworkModeService.Save(_mode);
             EventBus.Emit(new CharacterSelectedEvent(_selected));
             CloseSelf();

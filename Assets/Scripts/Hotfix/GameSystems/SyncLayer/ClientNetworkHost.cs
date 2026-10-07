@@ -23,6 +23,8 @@ namespace Hotfix.GameSystems.SyncLayer
     public sealed class ClientNetworkHost : MonoBehaviour
     {
         [Header("服务器")]
+        // 以下三个字段**不再是连接来源**（D-P6-17）：Connect 每次调用时从 NetworkModeService
+        // （PlayerPrefs "net.host"/"net.port"/"net.username"）解析。仅作 Inspector 兜底与默认值参考保留。
         [SerializeField] private string _serverHost = "127.0.0.1";
         [SerializeField] private int _serverPort = 8000;
         [SerializeField] private string _username = "Player";
@@ -67,7 +69,7 @@ namespace Hotfix.GameSystems.SyncLayer
             // 模式由选人面板选择并持久化（NetworkModeService）：联网 → 进世界自动连接；单机 → 完全不触网
             if (NetworkModeService.Load() == NetworkMode.Online)
             {
-                Debug.Log($"[NetHost] 联网模式——连接 {_serverHost}:{_serverPort}");
+                Debug.Log($"[NetHost] 联网模式——连接 {NetworkModeService.LoadHost()}:{NetworkModeService.LoadPort()}");
                 Connect();
             }
         }
@@ -103,7 +105,7 @@ namespace Hotfix.GameSystems.SyncLayer
             // 玩家（重）生成即确认动作的副作用，此处补连接（正常流程 Start 已连，_connectRequested 守卫）
             if (!_connectRequested && NetworkModeService.Load() == NetworkMode.Online)
             {
-                Debug.Log($"[NetHost] 联网模式（选人确认）——连接 {_serverHost}:{_serverPort}");
+                Debug.Log($"[NetHost] 联网模式（选人确认）——连接 {NetworkModeService.LoadHost()}:{NetworkModeService.LoadPort()}");
                 Connect();
             }
         }
@@ -137,19 +139,28 @@ namespace Hotfix.GameSystems.SyncLayer
             _combatBridge?.Update();
         }
 
-        /// <summary>发起登录（幂等；可覆盖序列化默认值）。无需登录 UI——游戏启动流接线时调用</summary>
+        /// <summary>
+        /// 发起登录（幂等）。连接参数**每次调用时**从 PlayerPrefs 读取——
+        /// 不能只在 Start() 固化：直接跑 DemoDay 时选人确认发生在 Start() 之后
+        /// （见 OnPlayerSpawned 的补连接逻辑），固化会读到旧地址（D-P6-17）。
+        /// 显式传入的参数优先，供测试与代码路径覆盖。
+        /// </summary>
         public void Connect(string? username = null, string? host = null, int? port = null)
         {
             if (_connectRequested || _remoteEntities == null) return;
             _connectRequested = true;
 
+            string resolvedHost = host ?? NetworkModeService.LoadHost();
+            int resolvedPort = port ?? NetworkModeService.LoadPort();
+            string resolvedUser = username ?? NetworkModeService.LoadUsername();
+
             _adapter = new KcpNetClientAdapter();
-            _manager = new ClientNetworkManager(_adapter, _remoteEntities, username ?? _username);
+            _manager = new ClientNetworkManager(_adapter, _remoteEntities, resolvedUser);
             _manager.OnEnterWorld += HandleEnterWorld;
             _manager.OnDisconnected += reason => OnDisconnected?.Invoke(reason);
             // 连接失败/登录被拒必须留日志——否则"无异常"会被误读为"已连上"（验收假阳性）
             _manager.OnError += HandleError;
-            _manager.ConnectAndLogin(host ?? _serverHost, port ?? _serverPort);
+            _manager.ConnectAndLogin(resolvedHost, resolvedPort);
         }
 
         private void HandleError(string reason)
