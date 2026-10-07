@@ -24,13 +24,19 @@ dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --bots 10
 
 1. Unity 打开 `Assets/Scenes/CharacterSelect.unity` 或直接打开 `Assets/SimpleLowPolyNature/Scenes/DemoDay.unity` 后 Play（两条路径都会弹出选人面板）
 2. 面板底部新增**单机 / 联网**两个按钮（男女卡片下方）——默认记住上次选择（PlayerPrefs `net.mode`，首次默认**单机**）
-3. 选"联网" → 点"确认"
+3. 选"联网" → 面板下方展开**服务器设置区**：填写**服务器地址 / 端口 / 昵称**
+   （默认 `127.0.0.1` / `8000` / `Player`；非法输入回落默认值——端口非 1-65535 或地址留空时）
+4. 点"确认"进世界
+
+连接参数持久化在 PlayerPrefs（`net.host` / `net.port` / `net.username`），下次打开自动回填。
+**注意**：DemoDay 的 `Net` 对象 Inspector 上的 `_serverHost/_serverPort/_username` **不再是连接来源**
+（D-P6-17）——`Connect()` 每次从 PlayerPrefs 解析，Inspector 值仅作默认值参考。
 
 ### 两种模式的差异
 
 | | 单机模式 | 联网模式 |
 |---|---|---|
-| 连接服务器 | 完全不触网 | 进世界后自动 `Connect()`（服务器地址/账号在 DemoDay 的 `Net` 对象 Inspector 配置，默认 `127.0.0.1:8000` / `Player`） |
+| 连接服务器 | 完全不触网 | 进世界后自动 `Connect()`（地址/端口/昵称来自选人面板填写并持久化，默认 `127.0.0.1:8000` / `Player`） |
 | 本地怪物 | `MonsterSpawner`（SlimeSpawner / TurtleShellSpawner）照常生成 | **全部禁用**——怪物由服务器驱动（球体占位渲染） |
 | 移动 | 纯本地 | 服务端纠偏（`NetMovementPolicy` 平滑拉回，超速/瞬移被拒） |
 | 战斗 | 全本地权威 | 表内技能（10001/10002/20001/20002）发 `CastRequest` → 服务器裁决 → `DamageResult` 驱动伤害/浮字 |
@@ -59,8 +65,7 @@ dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --bots 10
 
 ## 四、已知边界（实机评审时别误判为新 bug）
 
-- **本地怪物不回收**：联网模式禁用 `MonsterSpawner` 后，**禁用前已生成的本地怪物不会消失**（名牌残影 + 仍可被本地攻击命中）——P5 已记录 backlog，非回归
-- **断线不自动重连**：服务器重启/断线后浮层显示断开，需退出 PlayMode 重进（重连 = 全新登录流程；自动重连是 backlog）
+- **断线会提示并自动返回选人界面，但不自动重连**：服务器重启/断线（或连接失败/登录被拒）时屏幕中部提示 3 秒后自动回选人界面，可重新选模式再连（重连 = 全新登录流程；自动重连是 backlog）
 - **未连上时零日志？** 宿主已接 `OnError` 日志（`[NetHost] error:`），连接失败/登录被拒必有输出
 - **玩家重建自动重装配**：DemoDay 直跑时确认选人会触发 `PlayerSpawner` 销毁重建本地角色——宿主订阅 `PlayerSpawnedEvent` 重装配（移动上报/纠偏/战斗桥全部换绑新角色）
 

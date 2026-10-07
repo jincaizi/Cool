@@ -1843,7 +1843,198 @@ components do not exist."
 
 ## 执行偏差与验收记录（执行时回填，Task 10 Step 6）
 
-> 待执行时填写。格式与 P4/P5 计划一致：逐任务列 commit、偏差（含现场发现与处理）、测试实际通过数、验收实测结果。
+**Commits**（BASE `4b8f29f` → HEAD）:
+T1 `d4d43d9` → T2 `0b20a41`/修复 `554c060` → T3 `2ad0e8c`/改计划 `6277581`/修复 `062dee6`/订正计划 `839e6fb`
+→ T4 `bceca76`/改计划 `44dfb49`/门禁 `e8e34f2`/订正计划 `74b84c0` → T5 `727ab77` → T6 `55af995`/订正计划 `5d607d6`
+→ T7 `6954a22` → T8 `a011632` → T9 `56b532e`/修复 `6dca21c`/订正计划 `7e68d3f`
+→ T10（本轮文档收尾）
+
+**逐任务偏差**（执行时按 P4/P5 惯例记录——implementer 现场发现 + review 批准）：
+
+1. **T1（关键流程偏差）**：计划的出包路径是 MCP `script-execute`，实测该工具**无重试幂等性**——
+   `BuildPipeline.BuildPlayer` 阻塞主线程致 HTTP 响应超时，客户端 60s 超时后**自动重试 7 次**，
+   构建实际执行 **8 遍**（耗时 39.93s/13.57s/3.70s…；8 次 `summary.totalSize` 完全相同，产物有效）。
+   → 结论：命令行/CI 出包不得依赖该路径。T10 据此改走 **batchmode `-executeMethod`**（见偏差 22）。
+2. **T1**：提交比计划多含 `BuildScript.cs.meta`（Unity 刷新生成，含 GUID；`.gitignore` 明确要求入库）。
+3. **T1**：构建后 Unity VS Editor 包重生成 `.csproj` 时抛 `IOException`（外部进程持文件锁）；
+   与构建结果无关，列为环境观察项。
+4. **T2**：review 指出测试只锁了 `D-P6-11` 的一半（`AttackEffect.KnockbackForce` 与具体值 1.5/2.5 未断言）
+   → 修复轮 `554c060` 两边都钉死。
+5. **T2**：`DuoMonsterConfig.asset` 存在同类 0 伤害，但该资产 guid 在场景/Prefab 中引用数 **0**、不在任何刷怪列表
+   → 判定非 P6 范围，不修（已记录）。
+6. **T2（给 T10 的核对结论）**：DemoDay 两个刷怪组正好指向本次修的两个 `MonsterConfig`
+   （SlimeConfig `071183ac` / TurtleShellConfig `f5e15c08`），单机验收路径成立。
+7. **T2（承重提示）**：`MonsterConfig.AttackEffect` 在**怪物攻击路径上无消费者**
+   （`MonsterAttackState` 只传 `AttackDamage`）——`AttackEffect._knockbackForce` 是"上了膛未接线"。
+   单机可见击退只由 `AttackDamage._knockbackForce` 保证（两处都已设 1.5/2.5，故验收成立）。
+8. **T3（落地假设被证伪）**：计划的 `new FSMManager(null, null)` **两处 NRE**——
+   `FSMManager.cs:36 _animator.SetLayerWeight` 与 `:47 _characterController.SetStateCoordinator`
+   （后者是普通 C# 类，非 MonoBehaviour）。最终宿主换为
+   `GameObject + Animator + UnityEngine.CharacterController + 真 CharacterController`。
+9. **T3（review 抓到 Important，两条路径）**：无条件 `UnlockAndReturnToBase` 会覆盖已走掉的层——
+   (a) 受击期间开技能（层→Attack，当前可达）；(b) 致死受击清掉死亡锁（T4 落地后可达，承重）。
+   → 人类裁定"两处都修"：T3 加守卫（`062dee6`）+ T4 死亡时调 `HitFSM.EnterDeath()`。计划据此新增
+   `D-P6-21`（归还层守卫）+ `D-P6-22`（死亡态分离）。控制者补充：单看 `ActiveLayer==Hit` 挡不住 (b)，
+   因为 `HandleDeath()` 自己就 `SetActiveLayer(Hit)`——必须同时判 `HitState.Death`。
+10. **T3（计划理由订正）**：`D-P6-21` 的 `CurrentState != Death` 半句经双方独立核实为**当前不可达**
+    （`OnHitComplete` 唯一触发点在 `Recover()` 内、已被 `!= Death` 包住）。保留为惰性防御，
+    真实防护是 `D-P6-22`；计划理由已订正（`839e6fb`）。
+11. **T3（给 T4 的警告）**：计划 T4 测试用 `ApplyServerDamage(9999f)` 杀玩家，会命中
+    `HitFSM.cs:212` 的 `Damage>=9999 → Death` **秒杀旁路**（正是 `D-P6-4` 禁止的那条，绕开 `LockState`），
+    从而**掩盖 `D-P6-22` 是否生效** → T4 实际改用 **150 vs maxHP 100**，让死亡走正规路径。
+12. **T4（关键现场发现，纠正前置结论）**：实现者探针实测发现——死后
+    `dead=True hitState=Death layer=Hit` 但 `ccLockMovement=False`，**按住 W 十帧仍位移 0.12m、
+    技能仍能起手**（反例成立）。→ 判定为 correctness-bearing，**在 review 前**即处理：
+    新增 `D-P6-23`（死亡期移动/战斗输入门禁，`44dfb49`）并派单落地（`e8e34f2`，红→绿 3/3）。
+13. **T4**：计划文本 bug——测试片段误写 `_entry.Controller.LockMovement`（`FSMManager` 上无该成员）
+    → 订正为 `_entry.CoreController.LockMovement`（`74b84c0`；实现者本来就用对了）。
+14. **T4（三项落地偏差，均已披露）**：① 死亡测试伤害 9999f→150f（见偏差 11）；
+    ② `CharacterController` 位置写入需 `enabled=false → 写 → true`（Unity 吞掉了裸写）；
+    ③ 测试 prefab 从 `FemalePlayer.prefab` 做成 **Prefab Variant**（DemoDay 场景内没有玩家对象，运行时生成）；
+    ④ `EvaluateLocalDeath` 接在 **3 个** HP 写入点（计划 2 个 + 盾破早退分支）。
+15. **T5（计划的代码不编译）**：计划写的 `Spawn(Groups[groupIndex], origin)` 类型不符
+    （`SpawnGroup` 不是 `MonsterConfig`）。若改用两参重载，ledger 会把重生怪记入 `-1` 组
+    → **每只怪只能重生一次、刷怪区单调变空**。实际落地 `Spawn(Groups[groupIndex].Config, origin, groupIndex)`
+    ——审查者独立推演确认该写法**优于简报字面**，且与"按组记账"一致。
+16. **T5**：按控制者指示删掉 2 行手动 unregister 及其孤立 using（订阅累积改由 `MonsterEntity.Init` 清空事件根治）。
+    审查者独立验证：唯一订阅者 + 两条生成路径都过 `Init` + 池永不入池；场景内无手摆 `MonsterEntity`
+    （guid 全 `*.unity` 检索零命中）→ `DespawnAll` + `OnDestroy` 覆盖全部本地怪物。
+17. **T6（测试取值自相矛盾）**：计划的 `_hitboxTimings = 0.05f` 与采样起点 `Now = 0.15f` 冲突——
+    窗口落在采样区间**之前**，逐字版对本次修复**完全不敏感**（审查者独立推演确认，并指出报告里的 0/0/1
+    应为 0/0/0，实质结论更强）→ 改为 `0.3f`（= `ShapeBlock` 出厂默认 = 实装资产 `BA_Combo1` 同值），
+    判别力来自未改动的窗口宽度，测试意图未变。按新语义更新既有断言 2 条（只去掉旧 `consecutiveRequired=3`
+    的仪式调用，断言行逐字节相同——审查者逐字节核对确认**不是削弱**）。
+18. **T6（⚠️ 承重潜在影响，见 backlog A）**：删除 `consecutiveRequired = 3` 改变了**引导技能
+    （ChanneledSkillData）**路径的伤害频率——旧门控要求"连续 3 次判定事件"，即引导技能原本约
+    **每 3 个 tick 结算一次**，删除后变成**每 tick 一次（≥3× 伤害）**。当前无可观察影响
+    （`Assets/PreRes/SkillsCfg/` 下 6 个技能资产均单窗口且无引导技能），但**引导技能落地时须据此复核**。
+19. **T7（工具链选择有证据）**：防穿墙选 `SphereCastAll` + 按层级剔除 Target 自身，因为项目**无可用玩家层**
+    ——`TagManager` 自定义层槽 6-31 全空，玩家根在无名层 9，其 57 个子对象与整个 DemoDay 几何同在 `Default(0)`，
+    掩码无法区分。审查者核对：既有相机数值（Distance=8/Height=2/PositionDamping=5/RotationDamping=8、
+    Lerp/Slerp 式）**逐行一字未动**；取**最小合法 distance** 而非 `hits[0]`（写错会退化成"贴脑后"，此处没写错）。
+20. **T7（流程失败，已记录）**：`task-7-brief.md` **未生成**（控制者遗漏），实现者改从派单正文 + 计划原文取需求
+    ——结果正确但流程不合规。已补齐 7/8/9/10 四份简报。
+21. **T8（计划路径错误 + 工具链陷阱）**：
+    ① 计划说改 `Assets/Scenes/CharacterSelect.unity`，实际场景里**根本没有选人面板**——面板经
+    `UIManager.RegisterFromPrefab("Prefabs/UI/CharacterSelectPanel")` 从 Resources 加载，
+    落点 `Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab`（改场景会是无效果空改动，未改）。
+    ② 刻意扩展：`SelectMode` 之外补 `RefreshServerSettingsVisibility()` 由 `OnShow` 也调一次
+    （否则首次打开时设置区保持烘焙态 = 可见）。
+    ③ **工具链陷阱**：`script-execute` + `PrefabUtility.SaveAsPrefabAsset` 写 prefab，保存后读回全绿，
+    但下一次 `tests-run`（前置 `AssetDatabase.Refresh`）把文件**整体还原成 HEAD 原始字节**（复现 2 次）。
+    解法：YAML 落到 `Assets/` 外、外部写入覆盖、再 `assets-refresh`。
+    → 已更新项目记忆 `unity-mcp-script-execute-asset-trap`（原只记 SO 资产，现泛化到 prefab）。
+22. **T9（review 两处 Important，人类裁定）**：① 连接失败/登录被拒**无返回路径**且文案指向不可达界面；
+    ② 文案缺 `<地址>:<端口>`。裁定"加，复用现有机制"——`HandleError` 也置 `_pendingReturnToMenu`，
+    复用断线的"提示 3 秒后回选人界面"；仍不做重试按钮。计划据此新增 `D-P6-24`（`7e68d3f`），修复 `6dca21c`。
+23. **T10（本轮，出包方式变更）**：计划的 `script-execute` 路径因偏差 1 弃用，改用
+    **batchmode CLI**（`-batchmode -quit -executeMethod Cool.EditorTools.BuildScript.BuildWindows`）。
+    实测该实例化方式**不能与已打开的编辑器共存**（`Multiple Unity instances cannot open the same project.`
+    → `Fatal Error` + 崩溃退出），故流程为：**先跑完三套测试 → 优雅关闭编辑器 → batchmode 出包**。
+    出包**单次执行成功**（无重试、无重复构建），耗时 28.23s。
+24. **T10（batchmode 首次编译的瞬时假错）**：日志中有一条
+    `MonsterSpawner.cs(23,26): error CS0246: 'SpawnLedger' could not be found`——这是增量构建图
+    未把 T5 新增的 `SpawnLedger.cs` 纳入响应文件所致；紧接着 Tundra `requires additional run (2.99 seconds,
+    59 items updated)` 重跑，第二次编译成功（仅有 warning），构建继续。**产物有效**：
+    包内 `GameSys.dll` 334,336 B（比基线 329,216 B **增大** 5,120 B），且用字符串检索在包内确认了
+    `SpawnLedger`/`DespawnAll`/`NetworkModeService`/`SaveConnection`/`_pendingReturnToMenu`/
+    `EvaluateLocalDeath`/`Physics.SphereCastAll` 七个符号——**9 处改动确实进了包**。
+25. **T10（出包前后的陈旧产物防护）**：因偏差 1 的遗留风险（`BuildScript` 失败时不清输出目录，
+    旧产物留存 → 人工可能验到陈旧二进制），本轮出包**先把旧产物改名为
+    `Build/Windows-baseline-pre-task10/`** 再构建，确保"构建失败 = 目录为空"而不是"留着旧包"。
+    新包验证通过后尝试删除该备份目录——**被权限系统拒绝，目录仍在**，已在人工清单 §0 顶部显式警告。
+26. **T10（CLAUDE.md 修正范围超出计划表格 2 处，均为实测证伪）**：计划表列了 4 行，实际改到了 **6 处**——
+    多出的两处同属"实测证伪"且与原 4 处同一节：
+    ① `UIDataBinding` / `ViewModelBase`（UI 框架节）——`grep -rn` 全 `Assets/Scripts` **零命中**，与
+    Loading/Toast/Tips/Confirm 同属"文档有、代码无"；
+    ② Current Status 行的"三层FSM"（与 3C 节同一错误表述）。
+    另核对**未被证伪、故未改**的表述：`StateCoordinator 通过反射调用各 FSM`（`StateCoordinator.cs:69/90/126`
+    确有 `GetType().GetMethod(...).Invoke(...)`）；`MovementPolicy`、`EventBus`、`AnimationDriver` 等均在。
+
+**验收证据**（2026-10-07 实测）：
+
+- **重新出包（T10 Step 1）**：`[Build] 出包成功: E:/CodeForJob/Cool/Build/Windows/CoolP6.exe
+  size=141067432B time=00:00:28.2327141`，进程退出码 **0**，**单次执行**（batchmode CLI，无重试）。
+  包内文件数 **362**（与基线逐文件比对**完全一致**，无缺失/新增）；仅 8 个文件大小变动，
+  其中 `GameSys.dll` +5,120 B（代码净增）、`globalgamemanagers` +15,592 B，其余为二进制资产的
+  重序列化/压缩波动 → 净 **−23,340 B**（141,090,772 → 141,067,432）。
+  → **结论：9 处改动未破坏打包。**
+- **Server.Tests**：**132/132**（`dotnet test Server/Server.Tests/Server.Tests.csproj`；与 P5 基线一致，本批次未动服务端）
+- **EditMode**：**217/217**（P5 基线 200 + T2 4 + T3 4 + T4 3 + T5 5 + T6 3 − 更新既有 2）
+- **PlayMode**：**17/17（三套服务器配置的并集，全绿）**——
+  | 服务器配置 | 结果 | 红的用例 |
+  |---|---|---|
+  | 无服务器 | **5/17** | 12 条网络用例（**既有基线**，非回归） |
+  | `--bots 100` | **15/17** | `MonsterWorldTests` ×2（需 `--monsters`） |
+  | `--bots 100 --monsters 4` | **17/17** | 无 |
+- **PlayMode 口径说明（供后续复跑者）**：单次通跑**拿不到** 17/17——不同用例对服务器配置**互斥**
+  （`AoiWorldTests` 要 bots、`MonsterWorldTests` 要 monsters，而 `CombatSyncTests`/`MovementSyncTests`/
+  `TwoClientWorldTests` 按消息条数做**全局**断言，有怪物在场即被污染）。故**并集**才是正确口径。
+  经 `unity-mcp-cli` 调用需 `--timeout 900000`（默认 60s 会在 Unity 仍在跑时丢结果）。
+  跑完已 `taskkill` 服务器进程（两轮，端口 8000 已确认释放）。
+- **与计划预期的差异**：计划 T10 Step 2 预期 PlayMode"全绿（+PlayerDeathRespawnTests 2 个）"——
+  实际该套件是 **17 条**（不是 2 条），且有 12 条必红（无服务器时）；本批次新增的是
+  `PlayerDeathRespawnTests` **3** 条（计划写 2 条）。Step 2(a)(b) 的预期数字（132 / 200+12）与实际
+  （132 / 217）一致。
+- **已知的既有红测**：`CombatSyncTests.Cheat_Casts_Are_Rejected_Server_Side` 在 `--bots` 配置下曾红
+  （P5 偏差 15 登记的"P4 CombatSyncTests 共存鲁棒性"，非本批次引入）；本轮 `--bots 100` 单独跑时它 **PASS**，
+  `--bots 100 --monsters 4` 下也 **PASS** → 表现为**偶发**，与 P5 的"共存污染"归因一致。
+
+**T10 Step 3 / Step 4 — 待人工执行**（子代理不能执行：不得启动 GUI 程序、无法注入输入、需目视判断）：
+- **Step 3 十条验收**（包可运行 / 单机零配置 / 打怪反馈 / 被打反馈 / 怪物能打死玩家 / 死后复活 /
+  刷怪不爆炸 10 分钟 / 相机可转不穿墙 / 联网可配地址 / 断线有出口）
+- **Step 4 数值节奏复核**（Slime 应 2 刀、TurtleShell 应 5 刀）
+- 连同前 9 个任务累积的人工项（T1 包可运行、T3 受击动画目视、T4 死亡期输入门禁、T7 相机、T8 服务端设置区、
+  T9 断线/连接失败/**登录被拒**），已**合并整理为一份可照做的清单**：
+  `.superpowers/sdd/2026-10-07-p6-first-playable-build/PENDING-HUMAN.md`（共 **17 项**人工项 + §E 只读参考）。
+  该目录 gitignore，不入库。
+- **清单是"最终态"**：出包与三套自动化测试均已在生成清单前完成，拿到即可逐条执行。
+  ⚠️ 其中"登录被拒"一项需临时改 `ProtocolConstants.ProtocolVersion` 一行（清单 C3 给了
+  "先冻结服务器二进制、再改客户端版本"的顺序说明与还原步骤）。
+
+**P6 执行中新发现的 backlog 项**：
+
+- **A（⚠️ 承重）引导技能伤害频率 ×3**：T6 删除 `consecutiveRequired = 3` 后，
+  `ChanneledSkillData` 路径的伤害从"约每 3 个 tick 一次"变为"每 tick 一次"。当前不可观察
+  （6 个技能资产均单窗口、无引导技能），**引导技能落地时必须据此复核平衡**。
+- **B（工具链）`script-execute` 无重试幂等性**：任何客户端自动重试都会重复执行副作用
+  （实测出包跑了 8 遍）。长耗时/有副作用的操作应走 batchmode `-executeMethod`。
+- **C（工具链）script-execute + PrefabUtility 写 prefab 会被 `AssetDatabase.Refresh` 整体回滚**
+  （复现 2 次）；解法是 YAML 落盘在 `Assets/` 外 + 外部覆盖 + `assets-refresh`。已写进项目记忆。
+- **D（出包）`BuildScript` 失败时不清输出目录**：旧产物留存会让"人工验收"验到陈旧二进制。
+  本轮靠手工改名规避；**建议后续在 `BuildWindows()` 开头清/校验输出目录**（T10 未改代码，仅文档记录）。
+- **E（出包）batchmode 与已打开编辑器互斥**：同一工程不能双开（`Multiple Unity instances...` → 崩溃退出）。
+  自动化出包流程须先 `unity-mcp-cli close` 优雅关闭编辑器。
+- **F（出包）增量构建图可能漏掉新增 .cs**：batchmode 冷启时出现瞬时 `CS0246`（见偏差 24），
+  Tundra 自动重跑后自愈。**判据不要只看日志有没有 error，要看最终 `[Build] 出包成功` +
+  包内符号检索**；若要在 CI 上 fail-fast，应让构建前强制一次完整编译。
+- **G（代码）`MonsterSpawner` 两参 `Spawn` 重载是静默陷阱**：全仓无 C# 调用者，一旦被调用
+  怪会记入 `-1` 组 → 死亡后永不重生且**无日志**。建议删重载 / 加 `LogWarning` / 改 `int?`。
+- **H（测试）`MonsterSpawner` "重生再死回吐原组"路径无测试锁死**（改回两参重载时 5 条测试仍全绿而刷怪区静默变空）。
+- **I（测试）死亡期的施法/攻击门禁无自动化覆盖**（纯输入驱动，PlayMode 不能注入按键）——
+  只能人工验（已在 PENDING-HUMAN A5）。
+- **J（代码）`HitFSM.Update(float)` 全项目无调用者**：受击状态只能靠动画回调链结束
+  （`HitStateBehaviour → FSMManager.HandleHitAnimationCompleted → HitFSM.OnAnimationEnd → Recover`）。
+  链路一断角色卡受击态——已写入人工清单 A4 的排查线索。
+- **K（代码）`SkillExecutor._consecutiveHits` 成死字段**（T6 删除逻辑的孤儿，两处 `?.Clear()` 恒空操作）；
+  `SkillStateMachine.cs:306` 注释丢了唯一的历史凭据（"30fps 下 3×0.0333≈0.1s"）。
+- **L（代码）`HitFSM` 秒杀旁路仍可达**：`HandleDamage` 透传原始 damage，使 `HitFSM.cs:212`
+  的 `Damage >= 9999 → Death` 旁路（绕开 `HandleDeath` 的 `LockState`）重新可达；当前无生产调用方。
+- **M（代码）死亡期若干边角**：`CleanupSkillAnimation` 无条件清 `LockMovement`（引导/蓄力中被杀可位移一帧）；
+  `ApplyPushVector`/`ApplyHitDisplacement` 绕过 `LockMovement`（尸体可被推挤）；复活时 `_velocity` 未重置；
+  `CharacterData.IsDead` 全程 false（第二个死亡真值源未闭环）；`LockRotation` 未并入 `_isDead`。
+- **N（代码）联网失败路径与调试浮层耦合**：T9 的状态框落在 `if (!_showDebugOverlay) return;` 之内——
+  关掉调试位会**连带关掉全部屏幕出口**。当前 DemoDay 序列化为开启，属潜伏耦合。
+- **O（代码）单一状态槽被覆盖**：登录被拒时 `LoginResponse{Success:false}` 与 `Kick`、`Close` 三事件在途，
+  端点文案毫秒级被"与服务器断开"覆盖（返回路径不受影响）。
+- **P（代码）`NetworkModeService.SaveConnection` 回落分支无测试覆盖**（与计划钉死的 217 基线冲突的张力已记录）。
+- **Q（相机）每帧一次 `RaycastHit[]` 分配**（移动端目标常态 GC）；非玩家重叠体会把相机压到
+  `MinCameraDistance`；`CameraCollisionMask = ~0` 含非几何层；`SnapToTarget()` 不含防穿墙。
+- **R（数值）怪物 `AttackEffect._knockbackForce` 无消费者**（"上了膛未接线"，见偏差 7）；
+  `MonsterConfig.AttackPower` 改动无断言、仅作 `AttackDamage` 为空时的兜底。
+- **S（素材）测试专用 `PlayerEntryForTest.prefab` 放在 `Assets/Resources/` → 随 P6 包发布**
+  （增量仅一个文本 prefab，审查判定不构成需修缺陷）。
+- **T（继承自 P5）**：`CombatSyncTests` 共存鲁棒性（按消息条数全局断言）——见"已知的既有红测"。
 
 ---
 

@@ -11,7 +11,8 @@ Unity 2022 LTS MMO client with server integration planned. Code assisted by Clau
 - Unity: 2022.3.25f1 (LTS)
 - Networking: KCP + Protobuf
 - Resource Management: Addressable
-- Hotfix: HybridCLR (code hot-reload)
+- Hotfix: 无 —— HybridCLR 未安装（`Packages/manifest.json` 无该包，`Assets/HybridCLRData` 不存在）；
+  `Hotfix.*` 只是普通 asmdef 程序集，**没有代码热重载能力**
 - UI: UGUI-based custom framework
 
 ---
@@ -32,14 +33,14 @@ Unity 2022 LTS MMO client with server integration planned. Code assisted by Clau
 
 ### Code Organization
 
-HybridCLR AOT + Hotfix architecture:
+AOT + Hotfix 程序集划分（**无 HybridCLR 热更**，见技术栈）:
 
 **AOT Layer** (compiled by IL2CPP, not hot-reloadable):
 - `Assets/Scripts/AOT/Core/Resource/` - ResourceManager, HandleEntry, Res
 - `Assets/Scripts/AOT/KcpNet/` - KCP networking (Client/Server/Common)
 - `Assets/Scripts/AOT/DataDefinition/` - GameConsts, GameSettings
 
-**Hotfix Layer** (compiled to DLL, hot-reloadable):
+**Hotfix Layer** (普通 asmdef 程序集，编译为 DLL，**不具热更能力**):
 - `Assets/Scripts/Hotfix/GameSystems/Sys3C/` - 3C系统 (Character, Control, Camera)
 - `Assets/Scripts/Hotfix/GameSystems/Skills/` - 技能系统
 - `Assets/Scripts/Hotfix/GameSystems/Bag/` - 背包系统
@@ -56,13 +57,14 @@ HybridCLR AOT + Hotfix architecture:
 
 ## 3C System (Character, Control, Camera)
 
-三层FSM架构，位于 `Assets/Scripts/Hotfix/GameSystems/Sys3C/`:
+三层状态架构（Base / Attack / Hit），位于 `Assets/Scripts/Hotfix/GameSystems/Sys3C/`。
+**只有两层有 FSM 类**（BaseFSM、HitFSM）——攻击层没有 `AttackFSM`，由 `StateCoordinator` + `SkillCoordinator` 驱动。
 
 ### Core Components
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| `FSMManager` | `FSM/` | 协调 BaseFSM、AttackFSM、HitFSM |
+| `FSMManager` | `FSM/` | 协调 BaseFSM、HitFSM（**无 AttackFSM**） |
 | `StateCoordinator` | `Core/` | 层间协调，通过反射调用各FSM |
 | `CharacterController` | `Character/` | 物理移动、重力、跳跃、伤害处理 |
 | `AnimationDriver` | `Animation/` | Animator参数驱动，FSM与Animator桥梁 |
@@ -75,10 +77,10 @@ HybridCLR AOT + Hotfix architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      FSMManager                             │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
-│  │   BaseFSM   │  │  AttackFSM  │  │   HitFSM    │         │
-│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│                       FSMManager                            │
+│  ┌─────────────┐                    ┌─────────────┐         │
+│  │   BaseFSM   │                    │   HitFSM    │         │
+│  └─────────────┘                    └─────────────┘         │
 └─────────────────────────────────────────────────────────────┘
         │                │                │
    LayerType.Base   LayerType.Attack  LayerType.Hit
@@ -87,14 +89,17 @@ HybridCLR AOT + Hotfix architecture:
    JumpStart/Air/End  /SkillR          Launched/Dizzy/Down
 ```
 
+中间那格**没有 FSM 类**：攻击层由 `StateCoordinator` + `SkillCoordinator` 驱动
+（`FSM/AttackState.cs` 只剩 2 值枚举 `Idle`/`Attacking`，仅用于驱动 Animator 整型参数）。
+
 **BaseFSM** (`FSM/BaseFSM.cs`):
 - States: Idle, Move, Sprint, JumpStart, JumpAir, JumpEnd, Death
 - 攻击状态下限制Base层状态转换，只允许跳跃相关
 
-**AttackFSM** (`FSM/AttackState.cs`):
-- States: Idle, Attack1, Attack2, SkillQ, SkillR_Start, SkillR_Loop
-- 普攻连击系统、霸体机制、技能超时保护
-- 集成 SkillDashComponent 实现突进
+**攻击层**（**无 `AttackFSM` 类**）：
+- `FSM/AttackState.cs` 只剩 2 值枚举 `Idle` / `Attacking`，仅作为 Animator 整型参数（`AnimHashes.AttackState`）
+- 层切换走 `StateCoordinator.SetAttackLayerActive()`，由 `SkillCoordinator` 经 `Sys3CEntry` 在技能激活时调用
+- 普攻连击、霸体、技能超时保护与 `SkillDashComponent` 突进均在技能系统内实现，不在 FSM 里
 
 **HitFSM** (`FSM/HitFSM.cs`):
 - States: None, Hit, Knockback, Launched, Dizzy, Down, GetUp, Death
@@ -201,15 +206,14 @@ Animator三层Layer架构：
 ## UI Framework
 
 位于 `Assets/Scripts/Hotfix/GameSystems/UI/`:
-- `UIManager` - UI管理器
-- `UIPanel` - 面板基类
-- `UIDataBinding` - 数据绑定
-- `ViewModelBase` - ViewModel基类
-- `UIAnimation` / `SequenceBuilder` / `UIAnimPreset` - 动画系统
-- `UITweenExtensions` - 补间动画扩展
-- `ScreenAdapter` - 屏幕适配
-- Components: Loading, Toast, Tips, Confirm
-- Panels: HUD/TargetPanel
+- `Core/UIManager` - UI管理器
+- `Core/UIPanel` - 面板基类
+- `Core/ScreenAdapter` - 屏幕适配
+- `Animation/UIAnimation` / `Animation/SequenceBuilder` / `Animation/UIAnimPreset` - 动画系统
+- `Animation/UITweenExtensions` - 补间动画扩展
+- Panels（3 个，全部经 `UIManager.RegisterFromPrefab` 从 `Assets/Resources/Prefabs/UI/` 加载，
+  **不在场景里**）：`Panel/CharacterSelect/CharacterSelectPanel`、`Panel/HUD/PlayerHudPanel`、`Panel/HUD/TargetPanel`
+- 已无 `UIDataBinding` / `ViewModelBase` / Loading / Toast / Tips / Confirm（这些类与组件均不存在）
 
 ---
 
@@ -257,7 +261,7 @@ Animator三层Layer架构：
 ## Current Status
 
 - [x] KCP + protobuf networking
-- [x] 3C System (三层FSM + CharacterController + AnimationDriver)
+- [x] 3C System (Base/Hit 两层 FSM + StateCoordinator 攻击层 + CharacterController + AnimationDriver)
 - [x] Skill System (技能Q/R + 突进组件 + 数据层)
 - [x] Hit System (受击/击退/倒地/死亡)
 - [x] UI Framework
