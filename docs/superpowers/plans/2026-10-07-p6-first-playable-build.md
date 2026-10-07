@@ -36,6 +36,7 @@
 | **D-P6-20** | 打断链 | **本批次不接线** `SkillCoordinator.OnDamageTaken`。受击期间技能继续执行——明确接受，属 P8 范围 |
 | **D-P6-21** | 归还层守卫 | `HandleHitComplete` 的 `UnlockAndReturnToBase()` **必须加守卫**：仅当 `ActiveLayer == Hit` **且** `HitFSM.CurrentState != Death` 时归还。**修订 D-P6-5**（原为无条件归还）。由 Task 3 审查发现，人类裁定"两处都修"。原因：受击期间技能激活会把层设为 `Attack`（`Sys3CEntry.cs:339`，该路径无受击态门禁），无条件归还会把攻击层打回 Base → `isAttacking` 失真 → 攻击可被跳跃取消。<br>**执行期更正（实现者实测）**：`ActiveLayer == Hit` 那半句是**实际生效**的守卫；`CurrentState != Death` 那半句**当前不可达**——`OnHitComplete` 唯一触发点 `HitFSM.cs:284` 在 `Recover()` 内且被 `if (_currentState != HitState.Death)` 包住、并**先** `TransitionTo(None)` 再 invoke，故 `HandleHitComplete` 执行时状态必为 `None`。**死亡路径的真正防护是 D-P6-22**（Task 4 调 `EnterDeath()` 让 `Recover()` 自行短路），不是这里。该半句作为防御性检查保留（无损），已记入延后 minor 清单待最终审查甄别 |
 | **D-P6-22** | 死亡态分离 | 本地死亡时**必须同时**调 `FSMManager.HitFSM.EnterDeath()`，不能只调 `RequestDeath()`。否则受击剪辑播完时 `HitFSM.Recover()` 仍会执行（它只挡 `HitState.Death`），触发 `OnHitComplete` → 清掉死亡锁 → 死者被解锁。**与 D-P6-4 不冲突**：D-P6-4 禁的是 `EnterHit(Damage=9999)` 秒杀旁路；`EnterDeath()`（`HitFSM.cs:244-251`）是专门方法，会正确发出 `DeathEvent` |
+| **D-P6-23** | 死亡门禁 | 本地死亡必须**显式**锁移动与战斗输入：`_cc.LockMovement = _isDead \|\| !_skillCoordinator.CanMove();` + `HandleInput()` 开头 `if (_isDead) return;`。**为什么必须显式**：`StateCoordinator.CanMove` 是全项目无消费者的死属性（D-P6-6），既有的 `LockMovement` 只读 `_skillCoordinator.CanMove()`，而 `HandleInput` 无死亡门禁 → "进了 Death 态但照样能跑能放技能"。<br>**由 Task 4 实现者的 DONE_WITH_CONCERNS 暴露**：原 Task 4 设计只规定了"进 Death 态"，未规定如何阻止移动/施法，导致测试全绿而验收表第 5 条（"HP 归零后不能移动"）不达标——属计划自身的需求—验收缺口，非范围扩张 |
 
 **Out of P6（显式排除，防范围蔓延）**：属性缩放接线（`_attackRatio`/`Stats` 注入）、等级/经验/掉落（P7）、投射物/蓄力/大招服务端化、**联网的**死亡/复活/胜负判定（P8）、移动端输入与摇杆、真实角色/怪物模型与动画、自动重连、AggroTable、反作弊收紧、`PlayerHitZone` 补扣血逻辑、旋转技能改造、打断链接线。
 
@@ -627,6 +628,19 @@ namespace GameSys.PlayModeTests
             // Assert
             Assert.AreEqual(HitState.Death, _entry.Controller.HitFSM.CurrentState,
                 "HP 归零必须进入 Death 态——曾什么都不发生，玩家仍能移动施法");
+        }
+
+        [UnityTest]
+        public IEnumerator test_dead_player_has_movement_locked()
+        {
+            // Arrange & Act
+            _entry.ApplyServerDamage(150f, Vector3.back);
+            yield return null;
+
+            // Assert（验收表第 5 条："HP 归零后……不能移动"）
+            Assert.IsTrue(_entry.IsDead, "应处于死亡状态");
+            Assert.IsTrue(_entry.Controller.LockMovement,
+                "死亡时必须锁定移动——StateCoordinator.CanMove 无消费者（D-P6-6），靠 _isDead 显式并入");
         }
 
         [UnityTest]
