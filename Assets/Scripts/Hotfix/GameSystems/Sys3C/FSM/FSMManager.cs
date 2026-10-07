@@ -197,7 +197,19 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 0f);
             // P6 ①：把活动层交还 Base——与攻击流 Sys3CEntry.cs:390 的既有做法一致。
             // 不归还则 ActiveLayer 滞留在 Hit，FSMManager.Update:67 的 isAttacking 读数失真。
-            _stateCoordinator.UnlockAndReturnToBase();
+            //
+            // 守卫（D-P6-21）：只在受击层**仍是当前活动层**且**未死亡**时归还。
+            // 少了这个守卫会覆盖已经走掉的层——受击期间技能激活会把层设为 Attack
+            // （Sys3CEntry.cs:339，该路径无受击态门禁，D-P6-20 明确接受），
+            // 此时无条件归还会把攻击层打回 Base，使攻击可被跳跃取消。
+            // 同时判 HitState.Death：死亡时 HandleDeath 自己就把层设为 Hit
+            // （StateCoordinator.cs:67），单看层守卫会放行并清掉死亡锁。
+            if (_stateCoordinator.ActiveLayer == LayerType.Hit
+                && _hitFSM.CurrentState != HitState.Death)
+            {
+                _stateCoordinator.UnlockAndReturnToBase();
+            }
+
             OnHitCompleted?.Invoke();
         }
 

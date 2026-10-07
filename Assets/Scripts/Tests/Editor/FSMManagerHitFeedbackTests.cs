@@ -83,5 +83,21 @@ namespace GameSys.EditorTests
             Assert.AreEqual(LayerType.Base, _fsm.Coordinator.ActiveLayer,
                 "受击结束必须把活动层交还 Base");
         }
+
+        [Test]
+        public void test_hit_recovery_does_not_override_a_layer_that_moved_on()
+        {
+            // Arrange（受击期间技能激活把层设为 Attack——该路径无受击态门禁，D-P6-20 明确接受）
+            _fsm.HandleDamage(sourceId: -1, damage: 10f, hitDirection: Vector3.back, knockbackForce: 1.5f);
+            _fsm.Coordinator.SetAttackLayerActive();
+            Assert.AreEqual(LayerType.Attack, _fsm.Coordinator.ActiveLayer);
+
+            // Act（受击动画播完）
+            _fsm.HitFSM.Recover();
+
+            // Assert（D-P6-21 守卫：层已走掉时不得覆盖，否则攻击可被跳跃取消）
+            Assert.AreEqual(LayerType.Attack, _fsm.Coordinator.ActiveLayer,
+                "受击结束时若层已切到 Attack，不得打回 Base");
+        }
     }
 }
