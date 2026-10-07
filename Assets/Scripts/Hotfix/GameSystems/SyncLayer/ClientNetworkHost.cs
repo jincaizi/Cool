@@ -55,6 +55,11 @@ namespace Hotfix.GameSystems.SyncLayer
         private float _statusMessageUntil;     // 显示截止时刻（Time.unscaledTime）
         private bool _pendingReturnToMenu;
 
+        // 本次 Connect 实际解析出的端点——连接失败时上屏（收件人看不到 Console；
+        // 读这里而非 PlayerPrefs：Connect 的参数可被显式覆盖，只有这里才是真正尝试的地址）
+        private string _resolvedHost = string.Empty;
+        private int _resolvedPort;
+
         public ClientNetworkManager? Manager => _manager;
         public RemoteEntityRegistry? RemoteEntities => _remoteEntities;
         public bool IsInWorld => _inWorld;
@@ -170,6 +175,9 @@ namespace Hotfix.GameSystems.SyncLayer
             int resolvedPort = port ?? NetworkModeService.LoadPort();
             string resolvedUser = username ?? NetworkModeService.LoadUsername();
 
+            _resolvedHost = resolvedHost;
+            _resolvedPort = resolvedPort;
+
             _adapter = new KcpNetClientAdapter();
             _manager = new ClientNetworkManager(_adapter, _remoteEntities, resolvedUser);
             _manager.OnEnterWorld += HandleEnterWorld;
@@ -179,11 +187,17 @@ namespace Hotfix.GameSystems.SyncLayer
             _manager.ConnectAndLogin(resolvedHost, resolvedPort);
         }
 
-        /// <summary>连接失败/登录被拒——评审看不到 Console，必须显示到屏幕上</summary>
+        /// <summary>
+        /// 连接失败/登录被拒——评审看不到 Console，必须显示到屏幕上。
+        /// 文案带上**本次实际尝试的端点**（reason 是管理器内部串，不含端点）；
+        /// 同断线一样给出返回路径：玩家此刻停在世界场景，提示里指的选人界面否则不可达。
+        /// </summary>
         private void HandleError(string reason)
         {
             Debug.LogError("[NetHost] error: " + reason);
-            ShowStatus("连接失败：" + reason + "（可在选人界面修改服务器地址）");
+            ShowStatus("连接失败：" + _resolvedHost + ":" + _resolvedPort
+                + "（" + reason + "，可在选人界面修改服务器地址）");
+            _pendingReturnToMenu = true;
         }
 
         /// <summary>
