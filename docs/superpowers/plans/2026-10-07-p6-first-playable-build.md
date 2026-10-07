@@ -34,6 +34,8 @@
 | **D-P6-18** | 死亡守门 | ⑦ 由"是否联网模式"守卫，联网下**不自行判定死亡**（联网 HP 由服务端 `PlayerState.Hp` 权威持有，客户端自作判断会与服务端打架） |
 | **D-P6-19** | 复活参数 | 倒计时 **3 秒**，回满 `_maxHP`，传送回出生点 |
 | **D-P6-20** | 打断链 | **本批次不接线** `SkillCoordinator.OnDamageTaken`。受击期间技能继续执行——明确接受，属 P8 范围 |
+| **D-P6-21** | 归还层守卫 | `HandleHitComplete` 的 `UnlockAndReturnToBase()` **必须加守卫**：仅当 `ActiveLayer == Hit` **且** `HitFSM.CurrentState != Death` 时归还。**修订 D-P6-5**（原为无条件归还）。由 Task 3 审查发现，人类裁定"两处都修"。原因：受击期间技能激活会把层设为 `Attack`（`Sys3CEntry.cs:339`，该路径无受击态门禁），无条件归还会把攻击层打回 Base → `isAttacking` 失真 → 攻击可被跳跃取消。单独的 `ActiveLayer == Hit` 守卫不足以挡住死亡路径——`HandleDeath()` 自己就把层设为 Hit（`StateCoordinator.cs:67`），故必须同时判 `HitState.Death` |
+| **D-P6-22** | 死亡态分离 | 本地死亡时**必须同时**调 `FSMManager.HitFSM.EnterDeath()`，不能只调 `RequestDeath()`。否则受击剪辑播完时 `HitFSM.Recover()` 仍会执行（它只挡 `HitState.Death`），触发 `OnHitComplete` → 清掉死亡锁 → 死者被解锁。**与 D-P6-4 不冲突**：D-P6-4 禁的是 `EnterHit(Damage=9999)` 秒杀旁路；`EnterDeath()`（`HitFSM.cs:244-251`）是专门方法，会正确发出 `DeathEvent` |
 
 **Out of P6（显式排除，防范围蔓延）**：属性缩放接线（`_attackRatio`/`Stats` 注入）、等级/经验/掉落（P7）、投射物/蓄力/大招服务端化、**联网的**死亡/复活/胜负判定（P8）、移动端输入与摇杆、真实角色/怪物模型与动画、自动重连、AggroTable、反作弊收紧、`PlayerHitZone` 补扣血逻辑、旋转技能改造、打断链接线。
 
@@ -440,16 +442,34 @@ namespace GameSys.EditorTests
             Assert.AreEqual(LayerType.Base, _fsm.Coordinator.ActiveLayer,
                 "受击结束必须把活动层交还 Base");
         }
+
+        [Test]
+        public void test_hit_recovery_does_not_override_a_layer_that_moved_on()
+        {
+            // Arrange（受击期间技能激活把层设为 Attack——该路径无受击态门禁，D-P6-20 明确接受）
+            _fsm.HandleDamage(sourceId: -1, damage: 10f, hitDirection: Vector3.back, knockbackForce: 1.5f);
+            _fsm.Coordinator.SetAttackLayerActive();
+            Assert.AreEqual(LayerType.Attack, _fsm.Coordinator.ActiveLayer);
+
+            // Act（受击动画播完）
+            _fsm.HitFSM.Recover();
+
+            // Assert（D-P6-21 守卫：层已走掉时不得覆盖，否则攻击可被跳跃取消）
+            Assert.AreEqual(LayerType.Attack, _fsm.Coordinator.ActiveLayer,
+                "受击结束时若层已切到 Attack，不得打回 Base");
+        }
     }
 }
 ```
+
+> **D-P6-22（死亡态分离）的测试不在本任务**：它属于 Task 4——Task 4 的 PlayMode 测试已断言"HP 归零必须进入 `HitState.Death`"，而 `StateCoordinator.HandleDeath()` 单独并不会让 `HitFSM` 进 Death 态，所以那条断言本身就是 D-P6-22 的 red-first 测试。不要在本任务重复覆盖。
 
 > **注**：`FSMManager` 构造会调 `Animator.SetLayerWeight`。若 `null` Animator 抛 `NullReferenceException`，改用 `new GameObject().AddComponent<Animator>()` 构造，并在 `TearDown` 中 `Object.DestroyImmediate`。实现时以实际行为为准，勿猜。
 
 - [ ] **Step 2: 运行测试验证失败**
 
 运行 `tests-run`，`mode=EditMode`，`testClass=FSMManagerHitFeedbackTests`
-预期：`test_handled_damage_enters_hit_state`、`test_handled_damage_sets_active_layer_to_hit`、`test_knockback_damage_enters_knockback_state`、`test_hit_recovery_returns_layer_to_base` 全部 FAIL（`HandleDamage` 目前完全不碰 HitFSM）。
+预期：`test_handled_damage_enters_hit_state`、`test_handled_damage_sets_active_layer_to_hit`、`test_knockback_damage_enters_knockback_state`、`test_hit_recovery_returns_layer_to_base`、`test_hit_recovery_does_not_override_a_layer_that_moved_on` 全部 FAIL（`HandleDamage` 目前完全不碰 HitFSM；最后一条同时锁定 D-P6-21 的守卫）。
 
 - [ ] **Step 3: 在 HandleDamage 中接线**
 
@@ -497,17 +517,30 @@ namespace GameSys.EditorTests
         {
             _animator.SetBool(AnimHashes.IsHit, false);
             _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 0f);
+
             // P6 ①：把活动层交还 Base——与攻击流 Sys3CEntry.cs:390 的既有做法一致。
             // 不归还则 ActiveLayer 滞留在 Hit，FSMManager.Update:67 的 isAttacking 读数失真。
-            _stateCoordinator.UnlockAndReturnToBase();
+            //
+            // 守卫（D-P6-21）：只在受击层**仍是当前活动层**且**未死亡**时归还。
+            // 少了这个守卫会覆盖已经走掉的层——受击期间技能激活会把层设为 Attack
+            // （Sys3CEntry.cs:339，该路径无受击态门禁，D-P6-20 明确接受），
+            // 此时无条件归还会把攻击层打回 Base，使攻击可被跳跃取消。
+            if (_stateCoordinator.ActiveLayer == LayerType.Hit
+                && _hitFSM.CurrentState != HitState.Death)
+            {
+                _stateCoordinator.UnlockAndReturnToBase();
+            }
+
             OnHitCompleted?.Invoke();
         }
 ```
 
+> **为何要同时判 `HitState.Death`**：死亡后 `StateCoordinator.HandleDeath()` 自己就会 `SetActiveLayer(Hit)`（`StateCoordinator.cs:67`），所以单看 `ActiveLayer == Hit` 守卫会放行，仍会把死亡锁清掉。死亡态的拦截由 Task 4 的 `HitFSM.EnterDeath()`（D-P6-22）与这里的 `CurrentState != Death` 共同保证。
+
 - [ ] **Step 5: 运行测试验证通过**
 
 运行 `tests-run`，`mode=EditMode`，`testClass=FSMManagerHitFeedbackTests`
-预期：4/4 PASS。
+预期：5/5 PASS。
 
 - [ ] **Step 6: 跑全量 EditMode 回归**
 
@@ -663,6 +696,13 @@ namespace GameSys.PlayModeTests
             // 走 HandleDeath（含 SetActiveLayer(Hit) + LockState），不走 EnterHit(Damage=9999)
             // ——后者是秒杀旁路，不执行 LockState，会留下"死亡但能动"的坏状态（D-P6-4）。
             _fsmManager.RequestDeath();
+
+            // D-P6-22：**必须同时**让 HitFSM 进入 Death 态。
+            // 否则受击剪辑播完时 HitFSM.Recover() 仍会执行（它只挡 HitState.Death，此刻不是），
+            // 触发 OnHitComplete → HandleHitComplete → 把死亡锁清掉——死者被解锁。
+            // 这与 D-P6-4 不冲突：被禁的是 EnterHit(Damage=9999) 那条秒杀旁路；
+            // EnterDeath()（HitFSM.cs:244-251）是专门方法，会正确发出 DeathEvent。
+            _fsmManager.HitFSM.EnterDeath();
         }
 
         private void TickRespawn(float deltaTime)
