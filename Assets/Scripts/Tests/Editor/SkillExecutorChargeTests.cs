@@ -180,9 +180,7 @@ namespace GameSys.EditorTests
             Assert.AreEqual(SkillSubState.Execution, executor.CurrentSubState);
             var target = NewTarget("Target", new Vector3(1.5f, 0f, 0f));
 
-            // Act（Execution 判定帧 ×3：非旋转路径连续 3 帧判定才结算伤害）
-            RaiseHitboxFrame(executor, 0);
-            RaiseHitboxFrame(executor, 0);
+            // Act（Execution 判定帧 ×1：P6 ② 后状态机保证每个判定窗口只触发一次，单帧即结算）
             RaiseHitboxFrame(executor, 0);
 
             // Assert（100 × curve(0.5)=1.5 → 150）
@@ -220,9 +218,7 @@ namespace GameSys.EditorTests
             executor.Update(0.01f);
             var target = NewTarget("Target", new Vector3(2.6f, 0f, 0f));
 
-            // Act（满蓄力 → 半径 2×1.5=3m；连续 3 帧判定结算）
-            RaiseHitboxFrame(executor, 0);
-            RaiseHitboxFrame(executor, 0);
+            // Act（满蓄力 → 半径 2×1.5=3m；单帧判定即结算）
             RaiseHitboxFrame(executor, 0);
 
             // Assert（缩放后半径 3m + 碰撞体半径 0.5m → 触及 2.6m 目标）

@@ -15,6 +15,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private int _currentTick;
         private float _lastTickTime;
 
+        /// <summary>
+        /// P6 ②：Execution 阶段的判定窗口游标——保证每个窗口只触发一次。
+        /// 独立于 _currentTick：后者被 UpdateCharging（蓄力期游标）与
+        /// UpdateSpinning（每 tick 自增）共用，复用会让蓄力链 Charging→Execution
+        /// 之间串味（蓄力阶段推进的值带入 Execution 会跳过判定窗口）。
+        /// </summary>
+        private int _executionTimingCursor;
+
         // Cached type checks
         private readonly bool _isCharged;
         private readonly bool _isChanneled;
@@ -289,15 +297,18 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (hitboxTimings != null)
             {
                 float castTime = _channeledData?.CastTime ?? 0f;
-                for (int i = 0; i < hitboxTimings.Length; i++)
+                // P6 ②：游标从上次触发的下一个窗口开始，保证每个窗口只触发一次。
+                // 原实现在窗口内每帧都 Invoke，靠下游 consecutiveRequired=3 抵消——
+                // 60fps 恰好 3 帧结算 1 次，120fps 6 帧结算 2 次（伤害翻倍）。
+                for (int i = _executionTimingCursor; i < hitboxTimings.Length; i++)
                 {
                     float hitboxTime = castTime + hitboxTimings[i];
-                    // 帧率自适应判定窗口：保证 ~3 帧落入窗口（60fps 下等于 0.05s，行为不变；
-                    // 30fps 下 3×0.0333≈0.1s，连续 3 帧检测仍能结算伤害——修复 30fps 蓄力爆炸无伤害）
+                    // 帧率自适应判定窗口：保证低帧率下窗口仍能被采到（保留既有语义）
                     float window = Mathf.Max(0.05f, _lastDeltaTime * 3f);
                     if (Approximately(_elapsedTime, hitboxTime) ||
                         (_elapsedTime > hitboxTime && _elapsedTime < hitboxTime + window))
                     {
+                        _executionTimingCursor = i + 1;   // 本窗口已消费，不再触发
                         _onHitboxFrame?.Invoke(i);
                         _onHitConfirm?.Invoke();
                     }
@@ -342,6 +353,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void TransitionTo(SkillSubState newState)
         {
+            if (newState == SkillSubState.Execution)
+                _executionTimingCursor = 0;   // P6 ②：每次进入 Execution 重新开始判定
             _currentState = newState;
             _stateStartTime = GetCurrentTime();
             _elapsedTime = 0f;

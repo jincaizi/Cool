@@ -32,7 +32,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private Vector3 _attackDirection;
         private System.Collections.Generic.Dictionary<int, int> _consecutiveHits;
         private readonly List<IEffectTarget> _cachedTargets = new List<IEffectTarget>();
-        private readonly List<int> _cachedToRemove = new List<int>();
         private readonly List<IEffectTarget> _cachedDamagedTargets = new List<IEffectTarget>();
         private IEffectTarget _targetCharacter;
         private IDashComponent _dashComponent;
@@ -373,42 +372,18 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 return;
             }
             // 以下为现有非旋转逻辑（保持不变）
-            // Consecutive hit tracking: only deal damage every 3rd consecutive detection per target
-            const int consecutiveRequired = 3;
-            if (_consecutiveHits == null)
-                _consecutiveHits = new System.Collections.Generic.Dictionary<int, int>();
-
-            // Reset counts for targets no longer detected this tick
-            var toRemove = _cachedToRemove;
-            toRemove.Clear();
-            foreach (var kv in _consecutiveHits)
-            {
-                bool stillHit = false;
-                foreach (var t in targets)
-                {
-                    if (t.transform.GetInstanceID() == kv.Key) { stillHit = true; break; }
-                }
-                if (!stillHit) toRemove.Add(kv.Key);
-            }
-            foreach (var id in toRemove) _consecutiveHits.Remove(id);
-
+            // P6 ②：删除 consecutiveRequired=3 与 _consecutiveHits。
+            // 状态机已保证"每个判定窗口恰好触发一次"，此处只需对本帧检测到的目标各结算一次。
+            // 原实现依赖连续 3 帧检测，使结算次数随帧率变化（60fps 1 次 / 120fps 2 次），
+            // 且掉帧跳过窗口时会静默丢失伤害。
             var damagedTargets = _cachedDamagedTargets;
             damagedTargets.Clear();
             foreach (var target in targets)
             {
-                int id = target.transform.GetInstanceID();
-                _consecutiveHits.TryGetValue(id, out int count);
-                count++;
-                _consecutiveHits[id] = count;
-
-                if (count >= consecutiveRequired)
-                {
-                    _consecutiveHits[id] = 0;
-                    ApplyDamage(target, frameIndex);
-                    ApplyEffects(target);
-                    OnTargetHit?.Invoke(target);
-                    damagedTargets.Add(target);
-                }
+                ApplyDamage(target, frameIndex);
+                ApplyEffects(target);
+                OnTargetHit?.Invoke(target);
+                damagedTargets.Add(target);
             }
 
             OnHitboxFrame?.Invoke(frameIndex);
