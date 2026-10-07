@@ -1848,7 +1848,9 @@ components do not exist."
 T1 `d4d43d9` → T2 `0b20a41`/修复 `554c060` → T3 `2ad0e8c`/改计划 `6277581`/修复 `062dee6`/订正计划 `839e6fb`
 → T4 `bceca76`/改计划 `44dfb49`/门禁 `e8e34f2`/订正计划 `74b84c0` → T5 `727ab77` → T6 `55af995`/订正计划 `5d607d6`
 → T7 `6954a22` → T8 `a011632` → T9 `56b532e`/修复 `6dca21c`/订正计划 `7e68d3f`
-→ T10 `61cf382`（文档收尾）+ T10 修复轮 1（本记录的数字订正；哈希即本文件当前所在的最新 commit，
+→ T10 `61cf382`（文档收尾）+ T10 修复轮 1（本记录的数字订正）
+→ **最终修复轮** `dbfd934`（覆盖整分支审查：C1 的 A+C + I1–I6；含下方「最终修复轮」小节与 CLAUDE.md /
+playtest 指南的同步订正）+ 订正轮 2（本记录的数字回填；哈希即本文件当前所在的最新 commit，
 `git log --oneline -1 -- docs/superpowers/plans/2026-10-07-p6-first-playable-build.md` 可查）。
 
 **逐任务偏差**（执行时按 P4/P5 惯例记录——implementer 现场发现 + review 批准）：
