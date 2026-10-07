@@ -7,6 +7,7 @@ using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Network;
 using KcpNet;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Hotfix.GameSystems.SyncLayer
 {
@@ -22,6 +23,9 @@ namespace Hotfix.GameSystems.SyncLayer
     /// </summary>
     public sealed class ClientNetworkHost : MonoBehaviour
     {
+        /// <summary>断线返回的目标场景——必须与 BuildScript.Scenes[0] 一致</summary>
+        private const string MainMenuSceneName = "CharacterSelect";
+
         [Header("服务器")]
         // 以下三个字段**不再是连接来源**（D-P6-17）：Connect 每次调用时从 NetworkModeService
         // （PlayerPrefs "net.host"/"net.port"/"net.username"）解析。仅作 Inspector 兜底与默认值参考保留。
@@ -46,6 +50,10 @@ namespace Hotfix.GameSystems.SyncLayer
         private float _attachRetryTimer;
         private bool _entryLookedUp;
         private CombatNetworkBridge? _combatBridge;
+
+        private string? _statusMessage;        // 屏幕浮层上的错误/断线文本
+        private float _statusMessageUntil;     // 显示截止时刻（Time.unscaledTime）
+        private bool _pendingReturnToMenu;
 
         public ClientNetworkManager? Manager => _manager;
         public RemoteEntityRegistry? RemoteEntities => _remoteEntities;
@@ -127,6 +135,14 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void Update()
         {
+            if (_pendingReturnToMenu && Time.unscaledTime >= _statusMessageUntil)
+            {
+                _pendingReturnToMenu = false;
+                Disconnect();                                   // 清理 adapter / 战斗桥 / 装配
+                SceneManager.LoadScene(MainMenuSceneName);
+                return;
+            }
+
             if (_manager == null) return;
 
             // 每帧驱动：时钟采样/快照封送/纠偏响应/上报节流/插值渲染（manager 内部编排）
@@ -157,15 +173,37 @@ namespace Hotfix.GameSystems.SyncLayer
             _adapter = new KcpNetClientAdapter();
             _manager = new ClientNetworkManager(_adapter, _remoteEntities, resolvedUser);
             _manager.OnEnterWorld += HandleEnterWorld;
-            _manager.OnDisconnected += reason => OnDisconnected?.Invoke(reason);
+            _manager.OnDisconnected += HandleDisconnected;
             // 连接失败/登录被拒必须留日志——否则"无异常"会被误读为"已连上"（验收假阳性）
             _manager.OnError += HandleError;
             _manager.ConnectAndLogin(resolvedHost, resolvedPort);
         }
 
+        /// <summary>连接失败/登录被拒——评审看不到 Console，必须显示到屏幕上</summary>
         private void HandleError(string reason)
         {
             Debug.LogError("[NetHost] error: " + reason);
+            ShowStatus("连接失败：" + reason + "（可在选人界面修改服务器地址）");
+        }
+
+        /// <summary>
+        /// P6 3.3：断线处理——评审看不到 Console，必须有屏幕可见出口。
+        /// 先停留 3 秒显示原因（否则立刻跳场景玩家看不到任何反馈），再回选人界面。
+        /// 不做自动重连（backlog）。
+        /// </summary>
+        private void HandleDisconnected(string reason)
+        {
+            Debug.LogWarning("[NetHost] 断线: " + reason);
+            OnDisconnected?.Invoke(reason);
+            ShowStatus("与服务器断开：" + reason + "，即将返回主界面");
+            _pendingReturnToMenu = true;
+        }
+
+        /// <summary>连接失败 / 登录被拒——同样必须有屏幕出口</summary>
+        private void ShowStatus(string message)
+        {
+            _statusMessage = message;
+            _statusMessageUntil = Time.unscaledTime + 3f;
         }
 
         public void Disconnect()
@@ -190,6 +228,17 @@ namespace Hotfix.GameSystems.SyncLayer
             int remoteCount = _remoteEntities != null ? _remoteEntities.Count : 0;
             GUI.Box(new Rect(10f, Screen.height - 34f, 470f, 26f),
                 $"[Net] 模式={mode}  状态={state}  玩家id={playerId}  远程实体={remoteCount}");
+
+            if (_statusMessage != null && Time.unscaledTime < _statusMessageUntil)
+            {
+                var style = new GUIStyle(GUI.skin.box)
+                {
+                    fontSize = 16,
+                    alignment = TextAnchor.MiddleCenter,
+                    wordWrap = true
+                };
+                GUI.Box(new Rect(0f, Screen.height * 0.35f, Screen.width, 64f), _statusMessage, style);
+            }
         }
 
         private void HandleEnterWorld()
