@@ -171,6 +171,10 @@ namespace Hotfix.GameSystems.Sys3C
             TickRespawn(Time.deltaTime);
 
             _inputManager.Update();
+            // P6 ③：相机旋转接线——HandleRotationInput 此前全项目零调用者，相机角度永远停在初始值。
+            // 键鼠/手柄的观察输入由 InputManager 的 adapter 提供（PC 形态无需触屏适配）。
+            if (_camera != null)
+                _camera.HandleRotationInput(_inputManager.GetCameraRotationInput());
             HandleInput();
 
             Vector3 cameraForward = _camera != null ? _camera.transform.forward : Vector3.forward;
@@ -231,9 +235,6 @@ namespace Hotfix.GameSystems.Sys3C
             {
                 CleanupSkillAnimation();
             }
-
-            if (_camera != null)
-                _camera.Update();
         }
 
         private void HandleInput()
