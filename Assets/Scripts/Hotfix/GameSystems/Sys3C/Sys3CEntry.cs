@@ -9,6 +9,7 @@ using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Network;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
@@ -23,6 +24,21 @@ namespace Hotfix.GameSystems.Sys3C
         [Header("Health")]
         [SerializeField] private float _maxHP = 100f;
         private float _currentHP;
+
+        [Header("Respawn")]
+        [Tooltip("死亡后复活倒计时（秒）")]
+        [SerializeField] private float _respawnDelay = 3f;
+        [Tooltip("复活点（出生点）。零值 = 出生时按生成位置记录（D-P6-13：回初始生成点，不是死亡位置）")]
+        [SerializeField] private Vector3 _spawnPoint;
+
+        private float _respawnTimer;
+        private bool _isDead;
+
+        public float MaxHp => _maxHP;
+        public float CurrentHp => _currentHP;
+        public FSMManager Controller => _fsmManager;
+        public bool IsDead => _isDead;
+        public Vector3 SpawnPoint { get => _spawnPoint; set => _spawnPoint = value; }
 
         bool IDamageable.IsAlive => _currentHP > 0;
         Transform IDamageable.Transform => transform;
@@ -62,6 +78,12 @@ namespace Hotfix.GameSystems.Sys3C
         private void Start()
         {
             _currentHP = _maxHP;
+
+            // D-P6-13：复活回初始生成点。未显式配置时按出生位置记录
+            // （PlayerSpawner 在出生点实例化，Start 时 transform.position 即出生点）。
+            if (_spawnPoint == Vector3.zero)
+                _spawnPoint = transform.position;
+
             PhysicsRegistry.Instance.Register(this, EntityType.Player);
 
             if (CharacterController == null)
@@ -146,6 +168,8 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void Update()
         {
+            TickRespawn(Time.deltaTime);
+
             _inputManager.Update();
             HandleInput();
 
@@ -424,6 +448,8 @@ namespace Hotfix.GameSystems.Sys3C
                 _skillCoordinator.ClearInputBuffer();
                 _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
             }
+
+            EvaluateLocalDeath();
         }
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
@@ -491,6 +517,7 @@ namespace Hotfix.GameSystems.Sys3C
                         _skillCoordinator.ClearInputBuffer();
                         _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
                     }
+                    EvaluateLocalDeath();
                     return;
                 }
 
@@ -532,7 +559,57 @@ namespace Hotfix.GameSystems.Sys3C
                 _skillCoordinator.ClearInputBuffer();
                 _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
             }
+
+            EvaluateLocalDeath();
         }
+
+        /// <summary>
+        /// P6 ⑦：单机本地死亡判定。仅单机模式生效——联网模式下玩家 HP 由服务端
+        /// PlayerState 权威持有，客户端自作判断会与服务端打架（D-P6-18）。
+        /// </summary>
+        private void EvaluateLocalDeath()
+        {
+            if (IsOnlineMode()) return;      // 联网：交给服务端，见 D-P6-18
+            if (_isDead) return;
+            if (_currentHP > 0f) return;
+
+            _isDead = true;
+            _respawnTimer = _respawnDelay;
+
+            // 走 HandleDeath（含 SetActiveLayer(Hit) + LockState），不走 EnterHit(Damage=9999)
+            // ——后者是秒杀旁路，不执行 LockState，会留下"死亡但能动"的坏状态（D-P6-4）。
+            _fsmManager.RequestDeath();
+
+            // D-P6-22：**必须同时**让 HitFSM 进入 Death 态。
+            // 否则受击剪辑播完时 HitFSM.Recover() 仍会执行（它只挡 HitState.Death，此刻不是），
+            // 触发 OnHitComplete → HandleHitComplete → 把死亡锁清掉——死者被解锁。
+            // 这与 D-P6-4 不冲突：被禁的是 EnterHit(Damage=9999) 那条秒杀旁路；
+            // EnterDeath()（HitFSM.cs:244-251）是专门方法，会正确发出 DeathEvent。
+            _fsmManager.HitFSM.EnterDeath();
+        }
+
+        private void TickRespawn(float deltaTime)
+        {
+            if (!_isDead) return;
+
+            _respawnTimer -= deltaTime;
+            if (_respawnTimer > 0f) return;
+
+            _isDead = false;
+            _currentHP = _maxHP;
+            _fsmManager.HitFSM.Resurrect();
+            _fsmManager.RequestResurrect();
+
+            // 传送须先禁用 CharacterController：直接写 transform.position 会被它的内部位置
+            // 在下一帧 Move() 时吃掉（实测：写 (5,0,5) 下一帧回到 (0,-0.05,0)，复活点丢失）。
+            // 禁/启后再写是 Unity 的标准传送做法，实测生效。
+            CharacterController.enabled = false;
+            transform.position = _spawnPoint;
+            CharacterController.enabled = true;
+        }
+
+        private static bool IsOnlineMode()
+            => NetworkModeService.Load() == NetworkMode.Online;
 
         private void OnDestroy()
         {
