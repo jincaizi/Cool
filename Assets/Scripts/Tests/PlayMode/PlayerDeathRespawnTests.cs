@@ -65,6 +65,21 @@ namespace GameSys.PlayModeTests
         }
 
         [UnityTest]
+        public IEnumerator test_dead_player_has_movement_locked()
+        {
+            // Arrange & Act
+            _entry.ApplyServerDamage(LethalDamage, Vector3.back);
+            yield return null;
+
+            // Assert（验收表第 5 条："HP 归零后……不能移动"）
+            // 断言的是移动代码真正读的那个锁（CharacterController.ApplyHorizontalMovement
+            // 只看 _cc.LockMovement），不是无消费者的 StateCoordinator.CanMove。
+            Assert.IsTrue(_entry.IsDead, "应处于死亡状态");
+            Assert.IsTrue(_entry.CoreController.LockMovement,
+                "死亡时必须锁定移动——StateCoordinator.CanMove 全项目无消费者，靠 _isDead 显式并入");
+        }
+
+        [UnityTest]
         public IEnumerator test_respawn_restores_hp_and_layer()
         {
             // Arrange
@@ -79,6 +94,8 @@ namespace GameSys.PlayModeTests
             // Assert
             Assert.AreEqual(maxHp, _entry.CurrentHp, 0.01f, "复活应回满 HP");
             Assert.AreEqual(HitState.None, _entry.Controller.HitFSM.CurrentState, "复活应回到 None 态");
+            // _isDead 归假后两处门禁自动让位，无需额外"解锁"代码
+            Assert.IsFalse(_entry.CoreController.LockMovement, "复活后死亡移动锁应自动解除");
             Assert.AreEqual(Hotfix.GameSystems.Sys3C.Core.LayerType.Base,
                 _entry.Controller.Coordinator.ActiveLayer, "复活应把活动层交还 Base");
 

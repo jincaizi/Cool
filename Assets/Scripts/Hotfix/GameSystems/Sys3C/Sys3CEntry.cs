@@ -199,7 +199,9 @@ namespace Hotfix.GameSystems.Sys3C
 
             // Dynamic movement/rotation control: respect skill settings
             _cc.LockRotation = !_skillCoordinator.CanRotate();
-            _cc.LockMovement = !_skillCoordinator.CanMove();
+            // P6 ⑦：死亡也必须锁移动。StateCoordinator.CanMove 是全项目无消费者的死属性
+            // （D-P6-6），不能指望它；这里显式并入 _isDead。
+            _cc.LockMovement = _isDead || !_skillCoordinator.CanMove();
             _cc.MoveSpeedScale = _skillCoordinator.GetMoveSpeedMultiplier();
 
             // Detect when skill leaves looping state (Charging/Channeling → Execution)
@@ -236,6 +238,9 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void HandleInput()
         {
+            // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）
+            if (_isDead) return;
+
             // 防御处理（按住右键举盾，松开放下）
             if (_inputManager.IsDefendHeld())
             {
