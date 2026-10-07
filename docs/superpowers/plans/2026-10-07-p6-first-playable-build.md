@@ -639,7 +639,7 @@ namespace GameSys.PlayModeTests
 
             // Assert（验收表第 5 条："HP 归零后……不能移动"）
             Assert.IsTrue(_entry.IsDead, "应处于死亡状态");
-            Assert.IsTrue(_entry.Controller.LockMovement,
+            Assert.IsTrue(_entry.CoreController.LockMovement,
                 "死亡时必须锁定移动——StateCoordinator.CanMove 无消费者（D-P6-6），靠 _isDead 显式并入");
         }
 
