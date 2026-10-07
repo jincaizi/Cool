@@ -70,6 +70,27 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_hit_state_ends_by_timer_when_animation_callback_never_fires()
+        {
+            // Arrange（本 fixture 的 Animator 没有 controller → StateMachineBehaviour 回调永不触发，
+            // 正是"受击动画回调链断掉"的最坏情况）
+            _fsm.HandleDamage(sourceId: -1, damage: 10f, hitDirection: Vector3.back, knockbackForce: 1.5f);
+            Assert.AreEqual(HitState.Knockback, _fsm.HitFSM.CurrentState);
+
+            // Act（驱动足够长的时间——KnockbackDuration = 0.5s）
+            for (int i = 0; i < 40; i++) _fsm.Update(1f / 60f);
+
+            // Assert（C1 的 A 半：FSMManager.Update 必须驱动 HitFSM.Update 的计时器。
+            // 此前它全项目零调用者 → 回调链一断就永久卡在 Knockback：
+            // GetKnockbackDisplacement 每帧返回非零位移（角色持续滑行），
+            // 且优先 70 拒绝之后的一切命中（等于免疫受击）。）
+            Assert.AreEqual(HitState.None, _fsm.HitFSM.CurrentState,
+                "受击态必须能被计时器兜底结束，不能只依赖动画回调链");
+            Assert.AreEqual(LayerType.Base, _fsm.Coordinator.ActiveLayer,
+                "兜底结束后活动层同样要交还 Base");
+        }
+
+        [Test]
         public void test_hit_recovery_returns_layer_to_base()
         {
             // Arrange

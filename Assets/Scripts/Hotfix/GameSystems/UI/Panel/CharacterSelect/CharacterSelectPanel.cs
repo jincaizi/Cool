@@ -106,10 +106,13 @@ namespace Hotfix.GameSystems.UI
             if (_closing) return;
             _closing = true;
             CharacterSelectionService.Save(_selected);
-            NetworkModeService.SaveConnection(
-                _hostInput != null ? _hostInput.text : NetworkModeService.DefaultHost,
-                _portInput != null ? _portInput.text : NetworkModeService.DefaultPort.ToString(),
-                _usernameInput != null ? _usernameInput.text : NetworkModeService.DefaultUsername);
+            // 输入框绑定丢失时**跳过写入**，不能回落写默认值——那会把玩家存过的服务器地址
+            // 静默重置回 127.0.0.1，下次连接打到本机且没有任何提示。
+            if (_hostInput != null && _portInput != null && _usernameInput != null)
+            {
+                NetworkModeService.SaveConnection(
+                    _hostInput.text, _portInput.text, _usernameInput.text);
+            }
             NetworkModeService.Save(_mode);
             EventBus.Emit(new CharacterSelectedEvent(_selected));
             CloseSelf();

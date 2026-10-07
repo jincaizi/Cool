@@ -30,7 +30,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
         // 目标检测
         private Vector3 _targetPosition;
         private Vector3 _attackDirection;
-        private System.Collections.Generic.Dictionary<int, int> _consecutiveHits;
         private readonly List<IEffectTarget> _cachedTargets = new List<IEffectTarget>();
         private readonly List<IEffectTarget> _cachedDamagedTargets = new List<IEffectTarget>();
         private IEffectTarget _targetCharacter;
@@ -466,7 +465,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 });
                 _spinHitTracker?.Clear();
             }
-            _consecutiveHits?.Clear();
             OnSkillCompleted?.Invoke();
         }
 
@@ -492,7 +490,6 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     CasterId = _owner.transform.GetInstanceID()
                 });
             }
-            _consecutiveHits?.Clear();
             OnSkillInterrupted?.Invoke(source);
         }
 

@@ -111,7 +111,7 @@ AOT + Hotfix 程序集划分（**无 HybridCLR 热更**，见技术栈）:
 Animator三层Layer架构：
 - **Base Layer (index 0)**: Locomotion Blend Tree (Idle/Walk/Sprint)
 - **Attack Layer (index 1)**: 普通攻击连击、技能Q/R动画
-- **Hit Layer (index 2)**: 受击/击退/倒地/死亡动画
+- **Hit Layer (index 2)**: 受击/防御受击/眩晕动画（`Hit`/`DefendHit`/`Dizzy` 三态可达；击退复用 `Hit` 剪辑；**无 Knockback/Launched 状态，Death/Down/GetUp 无入边转移**——倒地/死亡/浮空的表现层未做）
 
 回调通过 `StateMachineBehaviour` (`Animation/StateBehaviours/`):
 - `BaseStateBehaviour` - Base层动画完成回调
@@ -263,7 +263,7 @@ Animator三层Layer架构：
 - [x] KCP + protobuf networking
 - [x] 3C System (Base/Hit 两层 FSM + StateCoordinator 攻击层 + CharacterController + AnimationDriver)
 - [x] Skill System (技能Q/R + 突进组件 + 数据层)
-- [x] Hit System (受击/击退/倒地/死亡)
+- [x] Hit System (受击/击退/倒地/死亡)（**表现层只打通了受击/击退/防御受击/眩晕**：Hit 层无 `Knockback`/`Launched` 状态，`Death`/`Down`/`GetUp` 无入边转移，`Death`/`IsDead` 参数在 controller 里不存在 → 倒地/死亡/浮空无动画，属 backlog）
 - [x] UI Framework
 - [x] Bag System
 - [x] Monster System (AI + Behaviour + Spawner)

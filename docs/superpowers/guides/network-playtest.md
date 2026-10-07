@@ -43,7 +43,8 @@ dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --bots 10
 
 ## 三、进世界后看什么算成功
 
-屏幕**左下角调试浮层**（`Net` 对象 Inspector 的 `Show Debug Overlay` 可关）：
+屏幕**左下角调试浮层**（`Net` 对象 Inspector 的 `Show Debug Overlay` 可关——
+**它只关这一条浮层**；屏幕中部的错误/断线提示不在此开关内，见 §四）：
 
 ```
 [Net] 模式=联网  状态=InWorld  玩家id=2  远程实体=4
@@ -65,7 +66,9 @@ dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --bots 10
 
 ## 四、已知边界（实机评审时别误判为新 bug）
 
-- **断线会提示并自动返回选人界面，但不自动重连**：服务器重启/断线（或连接失败/登录被拒）时屏幕中部提示 3 秒后自动回选人界面，可重新选模式再连（重连 = 全新登录流程；自动重连是 backlog）
+- **断线会提示并自动返回选人界面，但不自动重连**：服务器重启/断线（或连接失败/登录被拒）时屏幕中部提示 3 秒后自动回选人界面，可重新选模式再连（重连 = 全新登录流程；自动重连是 backlog）。
+  该提示**不受 `Show Debug Overlay` 开关影响**（`OnGUI` 里它排在 `_showDebugOverlay` 守卫之前）
+  ——关掉调试浮层只会关掉左下角那条状态条，屏幕出口仍在
 - **未连上时零日志？** 宿主已接 `OnError` 日志（`[NetHost] error:`），连接失败/登录被拒必有输出
 - **玩家重建自动重装配**：DemoDay 直跑时确认选人会触发 `PlayerSpawner` 销毁重建本地角色——宿主订阅 `PlayerSpawnedEvent` 重装配（移动上报/纠偏/战斗桥全部换绑新角色）
 

@@ -412,7 +412,9 @@ namespace Hotfix.GameSystems.Sys3C
             Animator.ResetTrigger(AnimHashes.Attack);
             Animator.SetLayerWeight(1, 0f);
             Animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Idle);
-            _cc.LockMovement = false;
+            // 死亡瞬间（死亡伤害同时打断了技能）不能在这里把移动锁清掉一帧——
+            // 保留 _isDead 的锁，其余情况与旧行为一致。
+            _cc.LockMovement = _isDead;
             _cc.LockRotation = false;
 
             _skillCoordinator.CurrentSkill?.ForceComplete();

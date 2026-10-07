@@ -356,6 +356,11 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     break;
 
                 case HitState.Knockback:
+                    // C1（C）：Hit 层**没有** Knockback 状态，也不消费 HitState==2——
+                    // 只设整数会让层权重抬起却停在无 motion 的 Empty（受击动画一个都不播，
+                    // 且唯一能结束受击态的动画回调 HitStateBehaviour 也不认 Empty）。
+                    // 复用现成的 `Empty --(trigger Hit)--> Hit` 转移，让击退位移与受击动画同时拿到。
+                    _animator.SetTrigger(AnimHashes.Hit);
                     _animator.SetInteger(AnimHashes.HitState, (int)HitState.Knockback);
                     _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 1f);
                     // 计算击退速度

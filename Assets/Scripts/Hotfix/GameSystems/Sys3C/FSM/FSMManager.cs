@@ -67,6 +67,14 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             bool isAttacking = _stateCoordinator.ActiveLayer == LayerType.Attack;
 
             _baseFSM.Update(data, isAttacking);
+
+            // C1（A）：驱动 HitFSM 的计时器与击退衰减。
+            // 此前全项目零调用者——受击态只能靠动画回调链结束
+            // （HitStateBehaviour → HandleHitAnimationCompleted → HitFSM.OnAnimationEnd → Recover），
+            // 链一断就永久卡在受击态：每帧返回非零位移（GetKnockbackDisplacement）让角色持续滑行，
+            // 且优先级判定拒绝之后的一切命中（等于免疫受击）。
+            _hitFSM.Update(deltaTime);
+
             _stateCoordinator.Update(deltaTime);
 
             UpdateBlendParameter(data);

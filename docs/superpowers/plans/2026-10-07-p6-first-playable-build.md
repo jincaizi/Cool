@@ -2062,6 +2062,101 @@ T1 `d4d43d9` → T2 `0b20a41`/修复 `554c060` → T3 `2ad0e8c`/改计划 `62775
 
 ---
 
+## 最终修复轮（覆盖整分支审查：1 处 Critical + I1–I6）
+
+> **背景**：10 个任务各自的审查全过后，**覆盖整分支的最终审查**发现 1 处 Critical——它跨
+> Task 2/3/4 与 Animator 资产，只有全局视角才能看到。人类裁定修法为 **A+C**，并要求一并处理
+> I1–I6。本轮**运行时代码改动无新增符号**（只调既有方法、复用既有 Animator 转移），
+> 故包内证据以"文件集合 + `GameSys.dll` 大小 + 差异闭合"为准（与偏差 24 的 T3 同款）。
+
+27. **C1（Critical，人类裁定 A+C）——"被打没反应 + 角色一直漂 + 之后免疫受击"**：
+    Task 2 把 `_knockbackForce` 设为 1.5/2.5，使 `kb = KnockbackForce × 部位倍率 ∈ [1.05, 3.75]`
+    **恒 > 0**，于是 Task 3 接线的 `EnterHit` **每次都进 `HitState.Knockback`、永远不进 `Hit`**。
+    而 `HitFSM.TransitionTo(Knockback)` 只 `SetInteger(HitState, 2)` + 抬层权重，**不触发 `Hit` trigger**；
+    `Character3C.controller` 的 Hit 层**没有 Knockback 状态**、也不消费 `HitState==2`，
+    其 Default 是**无 motion 的 `Empty`** → 权重抬起但受击动画一个都不播；
+    `HitStateBehaviour.IsHitState` 不含 `Empty` → **唯一能结束受击态的回调不触发**；
+    而 `HitFSM.Update(float)`（计时兜底）**全仓库零调用者** → **永久停在 Knockback**：
+    `GetKnockbackDisplacement()` 每帧返回非零位移，被 `CharacterController.ApplyHitDisplacement()`
+    （每帧无条件调用、不受 `LockMovement` 约束）消费 → **角色永久滑行**；停在 Priority 70 后
+    `EnterHit` 的 `newPriority <= Priority` 判定**拒绝之后的一切命中** → **之后免疫受击僵直**。
+    这是**新增的可见回归**，直接击穿验收 ③"被打有受击/击退表现"。修法：
+    - **A（止血）**：`FSMManager.Update` 增 `_hitFSM.Update(deltaTime);`——受击计时器与击退衰减首次被驱动。
+    - **C（补播剪辑）**：`HitFSM.TransitionTo` 的 Knockback 分支**同时触发 `Hit` trigger**，
+      复用现成的 `Empty --(trigger Hit)--> Hit` 转移（`m_TransitionDuration: 0`、`m_HasExitTime: 0`），
+      让"击退位移"与"受击动画"两块都拿到。
+    - **时长（A+C 的必要副作用，审查者点名）**：`HitDuration`/`KnockbackDuration` 此前**从未被验证**
+      （一直是惰性的）。**实测 Hit 状态所用剪辑时长 = 0.4667 s**
+      （Hit 层 `Hit` 状态 → `GetHit01_SwordAndShield.fbx` 的 `GetHit01_SwordAndShield` 剪辑；
+      由契约测试用真实 Animator 读出，不硬编码资产名），据此两者都设 **0.5 s**（留 1 帧余量），
+      使计时器成为**超时兜底**而非截断器。（`Hit` 状态另有动画回调在归一化 0.9 ≈ 0.42 s 处先结束，
+      与 0.5 s 兜底不冲突。）
+28. **I6-1（契约测试，本轮最有价值的产出）**：新增 `HitAnimatorContractTests`（EditMode，4 条）——
+    用**真实 Animator（加载 `Character3C.controller`）+ 真实 HitFSM** 驱动，断言"进入受击态后
+    Hit 层**真的在播一个剪辑**"（`GetCurrentAnimatorClipInfo` 非空；轮询而非固定帧数，
+    因为 `Empty→Hit` 是 0 s 过渡而 AnyState→Dizzy/DefendHit 是 0.25 s），外加
+    ①`AnimHashes.HitLayerIndex` 指向的层名必须是 `Hit`；②**实测剪辑时长 ≤ 两个 duration**；
+    ③每个非 `None` 的 `HitState` 必须"被覆盖"或"登记进 `KnownBacklogStates`"
+    （`Launched`/`Down`/`GetUp`/`Death` = I1 的现状；新增受击态时必须二选一）。
+    **红→绿证据**（同一份测试代码，只回退被测代码）：回退 A+C → `Knockback` 用例红
+    （"进入 Knockback 后 Hit 层必须真的在播剪辑，实际播了 0 个"）、恢复 → 4/4 绿。
+    另在 `FSMManagerHitFeedbackTests` 补 1 条锁 **A 半**：动画回调永不触发时受击态必须靠计时器
+    走出去（回退 A → 红："Expected: None But was: Knockback"；恢复 → 绿）。
+29. **I6-2（真实致死入口）**：`PlayerDeathRespawnTests` 新增
+    `test_monster_damage_entry_kills_the_player`——走 `IDamageable.TakeDamage(DamageBlock, dir)`，
+    即怪物 `MonsterAttackState.ResolveDamage` 的实际路径（原三条死亡用例都走 `ApplyServerDamage`）。
+    用史莱姆实弹（10 伤害 ×10 击）打空 100 HP，断言 `IsDead` 与 `HitState.Death`。
+30. **I2（`HandleError` 置位顺序）**：`_pendingReturnToMenu = true;` 提到 `ShowStatus(...)` **之前**。
+    该回调经 `DirectMessageExecutor` 跑在**网络驱动线程**，而 `ShowStatus` 读 `Time.unscaledTime`
+    是 Unity API；若它抛异常，返回路径此前**永远建立不起来**——正是 §6/D-P6-24 要消灭的"卡住"。
+    最坏情况退化为"无提示但 3 秒后仍回到选人界面"，不再卡死。
+31. **I3（屏幕出口被绑在调试开关内）**：`OnGUI` 的状态框那段搬到 `if (!_showDebugOverlay) return;`
+    **之前**（它此前被关在调试开关之内，关掉调试位会连带关掉全部屏幕出口，而验收 ⑥/⑨ 与
+    C2/C3/C5 全依赖它）；`docs/superpowers/guides/network-playtest.md` §三/§四 的自相矛盾一并订正。
+32. **I4（静默陷阱）**：删掉 `MonsterSpawner` 的两参 `Spawn` 重载（固定 `groupIndex: -1`，
+    而重生循环对 `< 0` 直接 `continue` → 用它生成的怪死亡后永不重生、且无日志；全仓无 C# 调用者）。
+    对应 backlog G。
+33. **I1（仅文档，不改代码）**：Hit 层 `Death` 状态**无任何入边转移**，且 `AnimHashes.Death` /
+    `AnimHashes.IsDead` 两个参数在 controller 里**不存在**（参数共 16 个）→ **死亡无视觉表现**。
+    `PENDING-HUMAN.md` A5 的原判据"观察是否进入**死亡表现**（倒地/死亡动画）"人工照做**必然误判为失败**，
+    已改为 P6 的实际承诺（**不能移动 / 不能施法 / 约 3 秒后满血回出生点**）并注明死亡动画属 backlog；
+    A4 的排查线索补上"计时兜底"这**第二条**结束路径；D1 括注更新（自动化已能证明"在播"，
+    但仍需目视）。`CLAUDE.md` 的 "Hit System (受击/击退/倒地/死亡)" 与 "Hit Layer (index 2)"
+    两行加括注（表现层只打通了 受击/击退/防御受击/眩晕）。
+34. **顺手修 3 项**：① `Sys3CEntry.CleanupSkillAnimation` 的无条件 `_cc.LockMovement = false;` 改
+    `= _isDead;`（死亡瞬间清锁一帧）；② `SkillExecutor` 删 `_consecutiveHits` 死字段与两处恒空的
+    `?.Clear()`（CLAUDE.md 规则 3 的孤儿，对应 backlog K）；③ `CharacterSelectPanel.Confirm` 在
+    输入框绑定丢失时**跳过写入**（原回落写默认值会把玩家存过的地址静默重置成 `127.0.0.1`）。
+35. **I5（人类裁定"先不动，列入 backlog"）**：`Assets/PreRes/Font/ZhunYuan SDF.asset` 有未提交改动
+    （+419/−80，正是新 UI 标签的字表）。本轮**未纳入提交**——属既有工作区的未提交状态，
+    与本轮修复无关，是否入库由人类单独决定。
+
+**最终修复轮验收证据**：
+
+- **契约测试红→绿**：见偏差 28（同一份测试代码，只回退被测代码）。
+- **EditMode**：**222 / 222**（= 原 217 + 契约 4 + 计时常量 1）。
+- **PlayMode**（三套配置并集 = **18 / 18** 全绿）：无服务器 **6/18**、`--bots 100` **16/18**
+  （红 2 条 = `MonsterWorldTests` 需 `--monsters`）、`--bots 100 --monsters 4` **18/18**。
+  跑完已 `taskkill` 服务器（两轮，端口 8000 确认释放）。
+- **Server.Tests**：**132 / 132**（本轮未动服务端）。
+- **重新出包**：batchmode CLI **单次执行**（出包前已优雅关闭编辑器，见 backlog E），
+  2026-10-07 **18:24** —— `[Build] 出包成功: E:/CodeForJob/Cool/Build/Windows/CoolP6.exe
+  size=141067432B time=00:00:13.2042501`，进程退出码 **0**。
+  包内文件 **362**（集合与基线一致）；**只有 2 个文件被重写**——`CoolP6_Data/Managed/GameSys.dll`
+  与 `CoolP6_Data/boot.config`（其余 360 个文件 mtime 保持不变 = Unity 增量拷贝的预期形态）；
+  `GameSys.dll` 大小 **334,336 B（与上一轮逐字节相同**——本轮只改代码且未跨 512B 对齐边界，
+  故**大小不再构成判据**，改用 mtime = 18:24）。
+  **包内代码已用 `ilspycmd` 反编译逐条核对**（比字符串检索更强的正向证据；本轮无新符号，
+  与偏差 24 的 T3 同款困境）：
+  ① `FSMConfig.HitDuration = 0.5f` / `KnockbackDuration = 0.5f`；
+  ② `FSMManager.Update` 内 **有** `_hitFSM.Update(deltaTime);`；
+  ③ `HitFSM.TransitionTo` 的 `HitState.Knockback` 分支内 **有** `_animator.SetTrigger(AnimHashes.Hit);`。
+  另：包内 `GameSys.dll` 已**不含** `_consecutiveHits`（00:45 基线包中含，实测 1 次命中）——
+  与"只重写了 2 个文件"共同证明该程序集是**当轮源码的新编译产物**，不是陈旧拷贝。
+  → **结论：C1 的 A/C 两处改动与时长修正确实进了交付包。**
+
+---
+
 ## Self-Review（撰写自查）
 
 **1. 规格覆盖度**——spec 的 7 处改造点 + 3 件交付物均有对应任务：

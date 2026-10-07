@@ -195,9 +195,15 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleError(string reason)
         {
             Debug.LogError("[NetHost] error: " + reason);
+
+            // I2：先把返回路径立起来，再上屏。
+            // 本回调经 DirectMessageExecutor 在**网络驱动线程**触发（KcpNetClientAdapter.cs:55），
+            // 而 ShowStatus 读 Time.unscaledTime——一旦它触发 Unity 的线程检查抛异常，
+            // 后面这行就永远执行不到，玩家停在 DemoDay 且没有任何出口（正是 §6/D-P6-24 要消灭的"卡住"）。
+            _pendingReturnToMenu = true;
+
             ShowStatus("连接失败：" + _resolvedHost + ":" + _resolvedPort
                 + "（" + reason + "，可在选人界面修改服务器地址）");
-            _pendingReturnToMenu = true;
         }
 
         /// <summary>
@@ -231,18 +237,11 @@ namespace Hotfix.GameSystems.SyncLayer
             _entryLookedUp = false;
         }
 
-        /// <summary>屏幕左下角连接状态浮层（调试用——Inspector `_showDebugOverlay` 可关）</summary>
         private void OnGUI()
         {
-            if (!_showDebugOverlay) return;
-
-            var mode = NetworkModeService.Load() == NetworkMode.Online ? "联网" : "单机";
-            var state = _manager != null ? _manager.CurrentState.ToString() : "未连接";
-            long playerId = _manager != null ? _manager.LocalPlayerId : 0L;
-            int remoteCount = _remoteEntities != null ? _remoteEntities.Count : 0;
-            GUI.Box(new Rect(10f, Screen.height - 34f, 470f, 26f),
-                $"[Net] 模式={mode}  状态={state}  玩家id={playerId}  远程实体={remoteCount}");
-
+            // I3：屏幕中部提示（连接失败/断线的唯一可见出口，验收 ⑥/⑨ 依赖它）
+            // **必须**放在 `_showDebugOverlay` 守卫之前——它此前被关在调试开关之内，
+            // 关掉调试位会连带关掉全部屏幕出口（而 §四/指南 承诺的是"屏幕中部提示"）。
             if (_statusMessage != null && Time.unscaledTime < _statusMessageUntil)
             {
                 var style = new GUIStyle(GUI.skin.box)
@@ -253,6 +252,16 @@ namespace Hotfix.GameSystems.SyncLayer
                 };
                 GUI.Box(new Rect(0f, Screen.height * 0.35f, Screen.width, 64f), _statusMessage, style);
             }
+
+            // 屏幕左下角连接状态浮层（调试用——Inspector `_showDebugOverlay` 可关）
+            if (!_showDebugOverlay) return;
+
+            var mode = NetworkModeService.Load() == NetworkMode.Online ? "联网" : "单机";
+            var state = _manager != null ? _manager.CurrentState.ToString() : "未连接";
+            long playerId = _manager != null ? _manager.LocalPlayerId : 0L;
+            int remoteCount = _remoteEntities != null ? _remoteEntities.Count : 0;
+            GUI.Box(new Rect(10f, Screen.height - 34f, 470f, 26f),
+                $"[Net] 模式={mode}  状态={state}  玩家id={playerId}  远程实体={remoteCount}");
         }
 
         private void HandleEnterWorld()

@@ -89,9 +89,8 @@ namespace Hotfix.GameSystems.Monster
             }
         }
 
-        public MonsterEntity Spawn(MonsterConfig config, Vector3 position)
-            => Spawn(config, position, groupIndex: -1);
-
+        // I4：两参重载已删。它固定传 groupIndex: -1，而重生循环对 groupIndex < 0 直接 continue
+        // ——用它生成的怪死亡后永不重生、且没有任何日志（静默陷阱）。全仓无 C# 调用者。
         public MonsterEntity Spawn(MonsterConfig config, Vector3 position, int groupIndex)
         {
             if (config.Prefab == null)

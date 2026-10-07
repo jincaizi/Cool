@@ -14,12 +14,15 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public float MaxResistance = 100f;
 
         [Header("HitFSM 状态时长")]
-        // Normal hit stagger duration
-        [Tooltip("普通受击僵直时长")]
-        public float HitDuration = 0.2f;
-        // Knockback state duration
-        [Tooltip("击退状态时长")]
-        public float KnockbackDuration = 0.4f;
+        // Normal hit stagger duration（0.5s = 实测 Hit 剪辑 0.4667s 之上留 ~1 帧余量）。
+        // C1：HitFSM.Update 此前零调用者，这两个值是惰性的、从未被验证；一旦被驱动，
+        // 低于剪辑时长就会把受击动画拦腰截断——计时器的职责是**超时兜底**，不是截断器。
+        // 契约测试 HitAnimatorContractTests.test_hit_durations_are_at_least_the_hit_clip_length 锁死。
+        [Tooltip("普通受击僵直时长（须 ≥ Hit 剪辑时长）")]
+        public float HitDuration = 0.5f;
+        // Knockback state duration（Knockback 复用同一条 Hit 剪辑，故同样 ≥ 其时长）
+        [Tooltip("击退状态时长（须 ≥ Hit 剪辑时长）")]
+        public float KnockbackDuration = 0.5f;
         // Launched state duration
         [Tooltip("浮空状态时长")]
         public float LaunchedDuration = 1.0f;

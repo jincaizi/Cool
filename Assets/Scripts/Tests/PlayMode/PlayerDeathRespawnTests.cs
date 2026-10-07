@@ -1,6 +1,8 @@
 using System.Collections;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.FSM;
 using NUnit.Framework;
 using UnityEngine;
@@ -62,6 +64,32 @@ namespace GameSys.PlayModeTests
             // Assert
             Assert.AreEqual(HitState.Death, _entry.Controller.HitFSM.CurrentState,
                 "HP 归零必须进入 Death 态——曾什么都不发生，玩家仍能移动施法");
+        }
+
+        /// <summary>
+        /// 真实致死入口：单机实际打玩家的路径是怪物
+        /// `MonsterAttackState.ResolveDamage` → `IDamageable.TakeDamage(DamageBlock, dir)`
+        /// （MonsterAttackState.cs:82 的 `t.TakeDamage(damage, dir)`）。
+        /// 本文件其余用例都走 `ApplyServerDamage`（联网 DamageResult 入口），单机这条链上
+        /// 挂着 HitZoneClassifier 部位倍率、防御修正器与 EvaluateLocalDeath，此前无人覆盖。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator test_monster_damage_entry_kills_the_player()
+        {
+            // Arrange（史莱姆的实弹：BaseDamage 10 / KnockbackForce 1.5；玩家 100 HP → 10 击）
+            var slimeDamage = DamageBlock.CreateDefault(10f);
+            slimeDamage.KnockbackForce = 1.5f;
+
+            // Act（怪物每次出手结算一次命中）
+            for (int i = 0; i < 10; i++)
+                ((IDamageable)_entry).TakeDamage(slimeDamage, Vector3.back);
+            yield return null;
+
+            // Assert
+            Assert.AreEqual(0f, _entry.CurrentHp, 0.01f, "10 击 × 10 伤害应打空 100 HP");
+            Assert.IsTrue(_entry.IsDead, "经 IDamageable.TakeDamage 致死必须进入死亡状态");
+            Assert.AreEqual(HitState.Death, _entry.Controller.HitFSM.CurrentState,
+                "单机致死链（怪物 → TakeDamage → EvaluateLocalDeath → EnterDeath）必须走到 Death 态");
         }
 
         [UnityTest]
