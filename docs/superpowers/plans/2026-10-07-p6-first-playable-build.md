@@ -1843,11 +1843,13 @@ components do not exist."
 
 ## 执行偏差与验收记录（执行时回填，Task 10 Step 6）
 
-**Commits**（BASE `4b8f29f` → HEAD）:
+**Commits**（BASE `4b8f29f` → `61cf382` 共 **20** 个 = `git rev-list --count 4b8f29f..61cf382`；
+其中 T1–T9 共 19 个、T10 文档收尾 1 个）:
 T1 `d4d43d9` → T2 `0b20a41`/修复 `554c060` → T3 `2ad0e8c`/改计划 `6277581`/修复 `062dee6`/订正计划 `839e6fb`
 → T4 `bceca76`/改计划 `44dfb49`/门禁 `e8e34f2`/订正计划 `74b84c0` → T5 `727ab77` → T6 `55af995`/订正计划 `5d607d6`
 → T7 `6954a22` → T8 `a011632` → T9 `56b532e`/修复 `6dca21c`/订正计划 `7e68d3f`
-→ T10（本轮文档收尾）
+→ T10 `61cf382`（文档收尾）+ T10 修复轮 1（本记录的数字订正；哈希即本文件当前所在的最新 commit，
+`git log --oneline -1 -- docs/superpowers/plans/2026-10-07-p6-first-playable-build.md` 可查）。
 
 **逐任务偏差**（执行时按 P4/P5 惯例记录——implementer 现场发现 + review 批准）：
 
@@ -1907,7 +1909,13 @@ T1 `d4d43d9` → T2 `0b20a41`/修复 `554c060` → T3 `2ad0e8c`/改计划 `62775
 18. **T6（⚠️ 承重潜在影响，见 backlog A）**：删除 `consecutiveRequired = 3` 改变了**引导技能
     （ChanneledSkillData）**路径的伤害频率——旧门控要求"连续 3 次判定事件"，即引导技能原本约
     **每 3 个 tick 结算一次**，删除后变成**每 tick 一次（≥3× 伤害）**。当前无可观察影响
-    （`Assets/PreRes/SkillsCfg/` 下 6 个技能资产均单窗口且无引导技能），但**引导技能落地时须据此复核**。
+    （`Assets/PreRes/SkillsCfg/` 下 **9 个 .asset** = 7 个 `SkillData` 派生
+    （`BA_Combo1`/`BA_Heavy`/`Instant_SkillQ`/`Meteor_Ultimate`/`ChargeFire_SkillR`/`Fireball_SkillQ`/`Spin_SkillR`）
+    + 2 个配置型（`MeteorConfig_Fire`/`SwordQi_Heavy`）。**无一是引导技能**：9 个资产的 `m_Script` guid
+    均不等于 `ChanneledSkillData`（`5f0ec4a572cd0894cb6771d958a22afa`），且全 `Assets/` 树引用该 guid 的
+    `.asset`/`.prefab`/`.unity` 为 **0 个**。**亦无多窗口**：含 `_hitboxTimings` 的 6 个资产中，
+    `BA_Combo1`/`BA_Heavy`/`ChargeFire_SkillR`/`Instant_SkillQ` 各 **1** 个、`Meteor_Ultimate`/`Spin_SkillR`
+    各 **0** 个，**没有任何资产 >1**），但**引导技能落地时须据此复核**。
 19. **T7（工具链选择有证据）**：防穿墙选 `SphereCastAll` + 按层级剔除 Target 自身，因为项目**无可用玩家层**
     ——`TagManager` 自定义层槽 6-31 全空，玩家根在无名层 9，其 57 个子对象与整个 DemoDay 几何同在 `Default(0)`，
     掩码无法区分。审查者核对：既有相机数值（Distance=8/Height=2/PositionDamping=5/RotationDamping=8、
@@ -1937,14 +1945,24 @@ T1 `d4d43d9` → T2 `0b20a41`/修复 `554c060` → T3 `2ad0e8c`/改计划 `62775
     未把 T5 新增的 `SpawnLedger.cs` 纳入响应文件所致；紧接着 Tundra `requires additional run (2.99 seconds,
     59 items updated)` 重跑，第二次编译成功（仅有 warning），构建继续。**产物有效**：
     包内 `GameSys.dll` 334,336 B（比基线 329,216 B **增大** 5,120 B），且用字符串检索在包内确认了
-    `SpawnLedger`/`DespawnAll`/`NetworkModeService`/`SaveConnection`/`_pendingReturnToMenu`/
-    `EvaluateLocalDeath`/`Physics.SphereCastAll` 七个符号——**9 处改动确实进了包**。
+    **8 个符号、覆盖 6 个任务**：`EvaluateLocalDeath`(T4)、`SpawnLedger`(T5)、`DespawnAll`(T5)、
+    `_executionTimingCursor`(T6)、`Physics.SphereCastAll`(T7)、`NetworkModeService`(T8)、
+    `SaveConnection`(T8)、`_pendingReturnToMenu`(T9)。
+    **符号级证据只覆盖 T4–T9 六个任务**；未覆盖的三个各有其因，由**间接证据**背书：
+    T1（构建脚本）是 **Editor 程序集**，按设计不进包；T2（怪物数值）改的是 `.asset`，落在
+    `resources.assets`（+77,876 B）里；T3（受击接线）调的是既有方法（`HitFSM.EnterHit`），无新符号可检索。
+    间接佐证 = 362 个文件与基线**集合完全一致**、9 个变动文件里 `GameSys.dll` **按预期增大**、
+    且 9 个变动文件的大小差**求和恰好等于 −23,340 B**（与 `summary.totalSize` 吻合）。
+    → 结论：**9 处改动确实进了包**（6 处符号级 + 3 处间接）。
 25. **T10（出包前后的陈旧产物防护）**：因偏差 1 的遗留风险（`BuildScript` 失败时不清输出目录，
     旧产物留存 → 人工可能验到陈旧二进制），本轮出包**先把旧产物改名为
     `Build/Windows-baseline-pre-task10/`** 再构建，确保"构建失败 = 目录为空"而不是"留着旧包"。
     新包验证通过后尝试删除该备份目录——**被权限系统拒绝，目录仍在**，已在人工清单 §0 顶部显式警告。
-26. **T10（CLAUDE.md 修正范围超出计划表格 2 处，均为实测证伪）**：计划表列了 4 行，实际改到了 **6 处**——
-    多出的两处同属"实测证伪"且与原 4 处同一节：
+26. **T10（CLAUDE.md 修正范围超出计划表格 2 处，均为实测证伪）**：计划 Task 10 Step 5(b) 的表只有
+    **3 行**（技术栈 / 3C 系统 / UI 框架），实际落地 **9 个改动点**——口径 =
+    `git diff 7e68d3f 61cf382 -- CLAUDE.md` 的 **7 个 hunk**，其中 2 个 hunk 各含 2 个独立改动点，
+    故 3 行展开为 9 点（numstat **+27 / −23**）。其中 **2 处针对计划表未点名的表述**：
+    一处落在计划已覆盖的节内、一处落在计划表未提及的节：
     ① `UIDataBinding` / `ViewModelBase`（UI 框架节）——`grep -rn` 全 `Assets/Scripts` **零命中**，与
     Loading/Toast/Tips/Confirm 同属"文档有、代码无"；
     ② Current Status 行的"三层FSM"（与 3C 节同一错误表述）。
@@ -1955,12 +1973,18 @@ T1 `d4d43d9` → T2 `0b20a41`/修复 `554c060` → T3 `2ad0e8c`/改计划 `62775
 
 - **重新出包（T10 Step 1）**：`[Build] 出包成功: E:/CodeForJob/Cool/Build/Windows/CoolP6.exe
   size=141067432B time=00:00:28.2327141`，进程退出码 **0**，**单次执行**（batchmode CLI，无重试）。
-  包内文件数 **362**（与基线逐文件比对**完全一致**，无缺失/新增）；仅 8 个文件大小变动，
-  其中 `GameSys.dll` +5,120 B（代码净增）、`globalgamemanagers` +15,592 B，其余为二进制资产的
-  重序列化/压缩波动 → 净 **−23,340 B**（141,090,772 → 141,067,432）。
+  包内文件数 **362**（与基线逐文件比对**集合完全一致**，无缺失/新增）；**9 个文件**大小变动
+  （`GameSys.dll` **+5,120**、`unity_builtin_extra` **−3,920**、`globalgamemanagers` **+15,592**、
+  `globalgamemanagers.assets` **+288**、`level0.resS` **−73,184**、`resources.assets` **+77,876**、
+  `resources.assets.resS` **+1,392**、`sharedassets1.assets` **−45,112**、`sharedassets1.assets.resS` **−1,392**），
+  除 `GameSys.dll` 是代码净增外其余均为二进制资产的重序列化/压缩波动；
+  9 个差值**求和 = −23,340** = `summary.totalSize` 差值（141,090,772 → 141,067,432），逐字节闭合。
   → **结论：9 处改动未破坏打包。**
 - **Server.Tests**：**132/132**（`dotnet test Server/Server.Tests/Server.Tests.csproj`；与 P5 基线一致，本批次未动服务端）
-- **EditMode**：**217/217**（P5 基线 200 + T2 4 + T3 4 + T4 3 + T5 5 + T6 3 − 更新既有 2）
+- **EditMode**：**217/217**（P5 基线 200 + T2 4 + T3 5 + T5 5 + T6 3 = 217；**T4 的 3 条属 PlayMode**
+  （`PlayerDeathRespawnTests`），不计入本求和；**无删除**——`SkillExecutorChargeTests` 只是 2 条既有用例
+  各删 2 行仪式调用，**条数不变**。逐文件：T2 `MonsterConfigNumbersTests` 4、T3 `FSMManagerHitFeedbackTests` 5、
+  T5 `SpawnLedgerTests` 5、T6 `SkillStateMachineHitboxWindowTests` 3）
 - **PlayMode**：**17/17（三套服务器配置的并集，全绿）**——
   | 服务器配置 | 结果 | 红的用例 |
   |---|---|---|
@@ -1996,7 +2020,7 @@ T1 `d4d43d9` → T2 `0b20a41`/修复 `554c060` → T3 `2ad0e8c`/改计划 `62775
 
 - **A（⚠️ 承重）引导技能伤害频率 ×3**：T6 删除 `consecutiveRequired = 3` 后，
   `ChanneledSkillData` 路径的伤害从"约每 3 个 tick 一次"变为"每 tick 一次"。当前不可观察
-  （6 个技能资产均单窗口、无引导技能），**引导技能落地时必须据此复核平衡**。
+  （`Assets/PreRes/SkillsCfg/` 9 个资产中无引导技能，见偏差 18 的口径），**引导技能落地时必须据此复核平衡**。
 - **B（工具链）`script-execute` 无重试幂等性**：任何客户端自动重试都会重复执行副作用
   （实测出包跑了 8 遍）。长耗时/有副作用的操作应走 batchmode `-executeMethod`。
 - **C（工具链）script-execute + PrefabUtility 写 prefab 会被 `AssetDatabase.Refresh` 整体回滚**
