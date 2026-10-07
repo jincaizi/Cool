@@ -15,7 +15,9 @@
 | F4 | `INetworkClient.cs` 位于 `Assets/Scripts/AOT/KcpNet/`，即**住在 `KcpNet` 程序集内** | 见 F6——这是本设计的核心阻塞点 |
 | F5 | `KcpNet.asmdef` 的 `includePlatforms` / `excludePlatforms` **均为空** → 所有平台都编译；而 `KcpClientTransport` 使用 `System.Net.Sockets` | WebGL 无 `System.Net.Sockets` → **WebGL 构建编译失败** |
 | F6 | `GameSys.asmdef`（Hotfix）`references: ["KcpNet"]`，且 5 个文件 `using KcpNet`；`ClientNetworkHost.cs:181` 直接 `new KcpNetClientAdapter()` | 抽象被实现绑架：只要 `GameSys` 引用 `KcpNet`，WebGL 就**打不出包** |
-| F7 | `IInputAdapter` 抽象**已存在**（`KeyboardInputAdapter.cs:8`），`JoystickInputAdapter` **已实现**（`JoystickInputAdapter.cs:8`）但全项目**从未实例化**（`InputManager.cs:40` 硬编码 `new KeyboardInputAdapter()`） | 移动端输入是"加实现 + 按平台注入"，不是重写 |
+| **F10** | `KcpNet` 里对 `System.Net.Sockets` 的依赖**贯穿 6 个文件**——`Client/KcpClientTransport`、`Common/KcpTransportBase`、**`Common/Kcp.cs`（KCP 算法本体，实现 `System.Net.Sockets.Kcp.IKcpCallback`）**，以及 `Server/` 下 3 个给 PlayMode 用的进程内服务器文件 | 排除整个 `KcpNet` 程序集是**唯一**能解除 `System.Net.Sockets` 的办法；靠 `#if` 掏空体积很大 |
+| **F11** | **asmdef 的引用不能按平台条件化**。若 `GameSys` 不引用 `KcpNet`，则 **PC 端也看不到** `KcpNetClientAdapter`；而"平台专属 provider 程序集 + 场景注入"绕不开——`DemoDay` 场景是 PC 与 WebGL **共享**的，挂不下两种平台专属 provider | 原定的"排除程序集 + 移除引用"两动作**行不通**，T1 形态据此修正（见 D-W2） |
+| F7 | `IInputAdapter` 抽象**已存在且干净**（5 个成员，`KeyboardInputAdapter.cs:8`）。但 `JoystickInputAdapter`（71 行）**不是可用实现**——它读 `Horizontal_Joystick` / `Vertical_Joystick` / `Mouse X_Joystick` 三个轴，而 `ProjectSettings/InputManager.asset` 里**这三个轴都不存在**（实测），`GetAxisRaw` 对未定义轴会**抛异常**；且它第 27 行 `input.normalized` 丢弃模拟量（P6 审查点过同一个坑）。全项目从未实例化它（`InputManager.cs:40` 硬编码 `new KeyboardInputAdapter()`） | **抽象可复用，实现要重写**——不是"接线" |
 | F8 | `MessageFlags` 定义在 `Cool.Protocol`（`MessageCodec` 签名使用它），该程序集无 socket 依赖 | `Cool.Protocol` 是搬运 `INetworkClient` 的落点 |
 | F9 | 服务端业务代码只把 session 当**不透明句柄**传给 `SendToSessionAsync`；但 `Server3C.cs` 有 8 处 `KcpServerSession` 具体类型引用，`SessionManager.cs` 整个围绕它写 | 服务端需抽 `IServerSession`（机械替换） |
 
@@ -90,14 +92,14 @@
 | # | 组件 | 位置 | 职责 | 可独立测试 |
 |---|---|---|---|---|
 | C1 | `INetworkClient`（搬运） | `AOT/Protocol/` | 传输抽象，供两端实现 | 编译即验证 |
-| C2 | `KcpNet.asmdef` 平台排除 | `AOT/KcpNet/` | `excludePlatforms: ["WebGL"]` | 构建即验证 |
-| C3 | adapter 工厂 | `Hotfix/.../SyncLayer/` | 按平台返回 KCP 或 WS 适配器 | EditMode |
+| C2 | 6 个 socket 文件加 `#if !UNITY_WEBGL` | `AOT/KcpNet/` | `KcpClientTransport` / `KcpTransportBase` / `Kcp.cs` / `Server/` 下 3 个 | 构建即验证 |
+| C3 | adapter 平台选择 | `Hotfix/.../SyncLayer/ClientNetworkHost` | `#if UNITY_WEBGL` → `WebSocketClientAdapter`，否则 `KcpNetClientAdapter` | 构建即验证 |
 | C4 | `WebSocketClientAdapter` | `AOT/WebSocketNet/`（新程序集） | `INetworkClient` 的 WS 实现：连接、收发、心跳、事件 | ✅ **EditMode 可测**——`ClientWebSocket` 在编辑器里可用，只有 WebGL 构建不可用 |
 | C5 | `WebGLWebSocket.jslib` | `Assets/Plugins/WebGL/` | C#↔浏览器 `WebSocket` 的唯一边界 | ⚠️ 人工（R2） |
 | C6 | `IServerSession`（抽取） | `Server/` | 业务需要的会话契约：`SessionId` / `Send(MessageId, IMessage, MessageFlags)` / `IsConnected` / `LastActivityTime` | 既有测试即验证 |
 | C7 | `WebSocketServerSession` | `Server/` | `System.Net.WebSockets` 收发（比 KCP 版简单——TCP 自带流控） | Server.Tests |
 | C8 | `WebSocketServerListener` | `Server/` | 接受 WS → 建会话 → 喂 `ProcessPacket` | ⚠️ 集成测 |
-| C9 | `MobileInputAdapter` + 摇杆/按钮 UI | `Hotfix/.../Sys3C/Input/` + UI | 触屏输入，**实现既有的 `IInputAdapter`** | EditMode（模拟量解析） |
+| C9 | `JoystickInputAdapter` **重写** + UI 摇杆/按钮 | `Hotfix/.../Sys3C/Input/` + UI | 触屏输入：UI 摇杆组件提供 `Vector2`，适配器读它并**保留模拟量**（不 normalize）；**`IInputAdapter` 契约不变** | EditMode（模拟量解析） |
 | C10 | `TouchCameraInput` | `Hotfix/.../Sys3C/Camera/` | 触屏拖拽 → 既有 `HandleRotationInput` | ⚠️ 真机人工 |
 | C11 | `WebGLBuildScript` | `Assets/Scripts/Editor/` | WebGL 构建 + 打包 | ⚠️ 人工 |
 | C12 | 部署 | 仓库外 | 静态托管 + WSS 域名 + 证书 | ⚠️ 人工（R3） |
@@ -121,7 +123,7 @@
 
 | # | 任务 | 规模 | 验收 |
 |---|---|---|---|
-| **T1** | `INetworkClient` 搬到 `Cool.Protocol`；`KcpNet.asmdef` 排除 WebGL；`GameSys` **移除**对 `KcpNet` 的引用（`Cool.Protocol` 已在引用列表中，无需新增）；5 个文件的 `using KcpNet` 改一行；`ClientNetworkHost` 改为经工厂创建 adapter。<br>**实现注意**：`KcpNet.PlayModeTests.asmdef` 引用了 `KcpNet`——测试程序集不进 player 构建，故**不阻塞 WebGL 出包**，但可能产生编辑器告警，实现时确认一次 | 中 | ① 原 PC/Editor 构建与全部测试**照常通过**；② **WebGL 平台能编译**（空场景构建足以证明引用链不再阻塞；真实场景的 WebGL 构建在 T4/T9 验证） |
+| **T1** | `INetworkClient` 搬到 `Cool.Protocol`（命名空间随之改为 `Cool.Protocol`）；`KcpNet` 下 6 个 socket 文件加 `#if !UNITY_WEBGL`；`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选择 adapter；新增 `WebSocketNet` 程序集（**所有平台**，先放一个占位实现供 T3 填充）。<br>**注意**：`GameSys.asmdef` 的 `KcpNet` 引用**保留不动**；`KcpNet.PlayModeTests.asmdef` 亦不动 | 中 | ① 原 PC/Editor 构建与全部测试**照常通过**；② **WebGL 平台能编译**（空场景构建足以证明 `System.Net.Sockets` 不再是阻塞；真实场景的 WebGL 构建在 T4/T9 验证） |
 
 ### L1 · 打通 WS 通道（面试官"能连上"）
 
@@ -136,7 +138,7 @@
 
 | # | 任务 | 规模 | 验收 |
 |---|---|---|---|
-| **T6** | `MobileInputAdapter` + 摇杆/攻击/技能/跳跃 UI | 中 | 手机浏览器能移动、攻击、放技能；**摇杆模拟量不被 normalize 丢弃**（P6 审查点出过这个坑） |
+| **T6** | UI 摇杆/按钮 + **重写** `JoystickInputAdapter` 读它 | 中 | 手机浏览器能移动、攻击、放技能；**摇杆模拟量不被 normalize 丢弃**；`IInputAdapter` 契约与 `KeyboardInputAdapter` 均不受影响 |
 | **T7** | `TouchCameraInput` | 小 | 手机浏览器能拖屏转视角（复用 P6 的 `HandleRotationInput`） |
 
 ### L3 · 让"声称面"在浏览器里成立
@@ -183,9 +185,9 @@
 | # | 决策 | 理由 |
 |---|---|---|
 | **D-W1** | 优先 **WebGL 网页版**，微信小游戏延后 | 两者技术代价几乎相同（同一套 WSS 通道），但小游戏额外需要微信账号 + 类目审核 + 域名备案——**那是可能卡住整个计划的、不可控的非技术依赖**。网页版只要一个域名 |
-| **D-W2** | `INetworkClient` **搬到 `Cool.Protocol`**（成员签名一字不改） | 接口住在 `KcpNet` 程序集里，而 `KcpNet` 依赖 `System.Net.Sockets` → `GameSys` 引用它 → **WebGL 根本打不出包**。搬家是保住"抽象接口不改"这条约束的**前提**，不是违反它 |
+| **D-W2** | `INetworkClient` **搬到 `Cool.Protocol`**（成员签名一字不改）。**但 `KcpNet.asmdef` 不排除 WebGL、`GameSys` 保留对 `KcpNet` 的引用**——改为在这 6 个 socket 文件内加 `#if !UNITY_WEBGL`，并由 `ClientNetworkHost` 用 `#if UNITY_WEBGL` 选择 adapter | **写计划时实测推翻了原方案的另两个动作**：asmdef 引用不可平台条件化（F11），排除程序集会让 PC 端也引用不到；而平台专属 provider 程序集需要场景注入，但 `DemoDay` 是 PC/WebGL 共享场景，挂不下两种 provider。<br>**代价**：`KcpNet` 在 WebGL 下是**空壳程序集**（编译进去、无 socket 实现）——体积与编译时间的代价，非正确性代价。**收益**：零场景改动、零注册表、零 link.xml |
 | **D-W3** | 服务端**同进程双栈**（UDP/KCP + WS） | `IServerSession` 抽取是 WS 路径本来就要做的，双栈几乎白送；且让"PC 端 + 浏览器端同场"成为 AOI/战斗的活证据 |
 | **D-W4** | **不做包体优化，也不测量首屏加载**（人类裁定） | 先落地 WebGL 形态；后期清理未使用资源后再优化。**代价**：后期优化没有 before 数可对照，且 R1 在面试前始终是不可估的未知数 |
-| **D-W5** | 移动端输入**复用既有 `IInputAdapter` 抽象** | 接口与 `JoystickInputAdapter` 都已存在，只是从未实例化（F7）。这是"加实现 + 按平台注入" |
+| **D-W5** | 移动端输入**复用既有 `IInputAdapter` 抽象**，但**重写实现** | 抽象（5 成员）可复用、`KeyboardInputAdapter` 不受影响；`JoystickInputAdapter` 读的三个 legacy 轴不存在（F7），调用即抛异常，且丢弃模拟量。T6 要建真实 UI 摇杆并让它驱动适配器——**`IInputAdapter` 契约不变** |
 | **D-W6** | WebGL 的验证**分层**：逻辑进 EditMode，jslib/浏览器留人工 | 承认 WebGL 不可自动化，但把可测的部分最大化 |
 | **D-W7** | 演示形态下**不做鉴权** | 人类已选"面试官自己玩"，加鉴权会把 URL 分发变成账号分发，得不偿失。风险在 R3 显式登记 |
