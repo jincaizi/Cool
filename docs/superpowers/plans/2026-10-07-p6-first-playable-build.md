@@ -1178,11 +1178,15 @@ namespace GameSys.EditorTests
             protected override float GetCurrentTime() => Now;
         }
 
-        /// <summary>一个判定窗口落在 0.05s 的连击技能</summary>
+        /// <summary>一个判定窗口落在 0.3s 的连击技能</summary>
         private static ComboSkillData CreateComboWithSingleWindow()
         {
             var shape = new ShapeBlock();
-            TestHelpers.SetField(shape, "_hitboxTimings", new[] { 0.05f });
+            // 执行期更正：原写 0.05f 与采样起点 Now=0.15f 自相矛盾——窗口 (0.05, 0.10) 落在
+            // 采样区间之前，逐字版 60/120/30fps 全部采不到（对本次修复完全不敏感，不是有效
+            // 回归测试）。取 0.3f = ShapeBlock 出厂默认值，也与实装资产 BA_Combo1 的
+            // _hitboxTimings 同值。判别力来自窗口宽度 max(0.05, 3dt)（未改动），与 timing 偏移量无关。
+            TestHelpers.SetField(shape, "_hitboxTimings", new[] { 0.3f });
 
             var data = ScriptableObject.CreateInstance<ComboSkillData>();
             TestHelpers.SetField(data, "_shape", shape);
