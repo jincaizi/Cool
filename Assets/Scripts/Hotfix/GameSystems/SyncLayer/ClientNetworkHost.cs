@@ -253,6 +253,9 @@ namespace Hotfix.GameSystems.SyncLayer
             var localSpawners = FindObjectsOfType<Hotfix.GameSystems.Monster.MonsterSpawner>();
             foreach (var spawner in localSpawners)
             {
+                // P6 ⑥：必须真销毁，不能只 SetActive(false)——PhysicsRegistry 只查 IsAlive
+                // 不查 activeInHierarchy，停用后怪物仍可被打中，且名牌残影
+                spawner.DespawnAll();
                 spawner.gameObject.SetActive(false);
                 Debug.Log($"[NetHost] 本地 MonsterSpawner 已禁用：{spawner.name}（服务器驱动怪物）");
             }

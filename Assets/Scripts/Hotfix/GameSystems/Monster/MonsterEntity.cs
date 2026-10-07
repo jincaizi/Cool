@@ -66,6 +66,10 @@ namespace Hotfix.GameSystems.Monster
 
         public void Init(MonsterConfig config, Vector3 spawnPoint)
         {
+            // P6 ⑤：池化复用的对象会带着上一轮的订阅——必须清空，
+            // 否则 MonsterSpawner 每次生成 += 会累积成多处理器。
+            OnDeathComplete = null;
+
             _config = config;
             _spawnPoint = spawnPoint;
 
