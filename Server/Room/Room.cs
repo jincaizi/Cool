@@ -15,7 +15,7 @@ namespace KcpServer
         public DateTime CreatedAt { get; }
 
         private readonly ConcurrentDictionary<long, PlayerState> _players = new ConcurrentDictionary<long, PlayerState>();
-        private readonly ConcurrentDictionary<long, KcpServerSession> _sessions = new ConcurrentDictionary<long, KcpServerSession>();
+        private readonly ConcurrentDictionary<long, IServerSession> _sessions = new ConcurrentDictionary<long, IServerSession>();
 
         public Room(string roomId)
         {
@@ -23,7 +23,7 @@ namespace KcpServer
             CreatedAt = DateTime.UtcNow;
         }
 
-        public bool AddPlayer(long playerId, KcpServerSession session, PlayerState state)
+        public bool AddPlayer(long playerId, IServerSession session, PlayerState state)
         {
             if (!_players.TryAdd(playerId, state))
                 return false;
@@ -49,16 +49,16 @@ namespace KcpServer
             return _players.TryGetValue(playerId, out var state) ? state : null;
         }
 
-        public KcpServerSession? GetPlayerSession(long playerId)
+        public IServerSession? GetPlayerSession(long playerId)
         {
             return _sessions.TryGetValue(playerId, out var session) ? session : null;
         }
 
         public IReadOnlyDictionary<long, PlayerState> GetAllPlayerStates() => _players;
 
-        public IReadOnlyList<KcpServerSession> GetAllPlayerSessions() => _sessions.Values.ToList();
+        public IReadOnlyList<IServerSession> GetAllPlayerSessions() => _sessions.Values.ToList();
 
-        public IReadOnlyList<KcpServerSession> GetOtherPlayerSessions(long excludePlayerId)
+        public IReadOnlyList<IServerSession> GetOtherPlayerSessions(long excludePlayerId)
         {
             return _sessions.Values.Where(s => s.SessionId != excludePlayerId).ToList();
         }

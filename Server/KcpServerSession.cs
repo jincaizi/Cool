@@ -93,7 +93,7 @@ namespace KcpServer
     /// 服务端KCP会话 - 处理单个客户端的KCP连接
     /// 使用 Kcp 2.7.0 的 Kcp<Segment> API
     /// </summary>
-    public sealed class KcpServerSession : IDisposable
+    public sealed class KcpServerSession : IServerSession
     {
         private readonly long _sessionId;
         private readonly EndPoint _remoteEndPoint;

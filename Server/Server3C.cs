@@ -27,7 +27,7 @@ namespace KcpServer
         private readonly SessionManager _sessionManager;
         private readonly ConcurrentDictionary<long, long> _sessionIdToPlayerId = new ConcurrentDictionary<long, long>();
         private readonly ConcurrentDictionary<long, long> _playerIdToSessionId = new ConcurrentDictionary<long, long>();
-        private readonly ConcurrentDictionary<long, KcpServerSession> _playerIdToSession = new ConcurrentDictionary<long, KcpServerSession>();
+        private readonly ConcurrentDictionary<long, IServerSession> _playerIdToSession = new ConcurrentDictionary<long, IServerSession>();
 
         // R2：唯一消费者线程独占世界状态；IO 线程只 Enqueue，不触碰状态
         private readonly GameLoop<(EndPoint endpoint, byte[] data)> _gameLoop;
@@ -166,7 +166,7 @@ namespace KcpServer
             _logger.LogInformation("Server3C stopped");
         }
 
-        public void BindPlayerToSession(long playerId, KcpServerSession session)
+        public void BindPlayerToSession(long playerId, IServerSession session)
         {
             _playerIdToSessionId[playerId] = session.SessionId;
             _sessionIdToPlayerId[session.SessionId] = playerId;
@@ -222,17 +222,17 @@ namespace KcpServer
             return result;
         }
 
-        public long? GetPlayerId(KcpServerSession session)
+        public long? GetPlayerId(IServerSession session)
         {
             return _sessionIdToPlayerId.TryGetValue(session.SessionId, out var playerId) ? playerId : null;
         }
 
-        public KcpServerSession? GetSession(long playerId)
+        public IServerSession? GetSession(long playerId)
         {
             return _playerIdToSession.TryGetValue(playerId, out var session) ? session : null;
         }
 
-        public Task SendToSessionAsync(KcpServerSession session, MessageId messageId, IMessage message, MessageFlags flags = MessageFlags.Reliable)
+        public Task SendToSessionAsync(IServerSession session, MessageId messageId, IMessage message, MessageFlags flags = MessageFlags.Reliable)
         {
             if (_udpServer == null || !session.IsConnected)
                 return Task.CompletedTask;
@@ -246,6 +246,18 @@ namespace KcpServer
                 _logger.LogError(ex, $"Failed to send message to session {session.SessionId}");
             }
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 注册一个会话到事件链 —— 传输无关。
+        /// KCP 路径在 UDP 收包处内联接线（不属本次改动范围），
+        /// WebSocket 监听器建完会话后调用本方法。
+        /// </summary>
+        public void RegisterSession(IServerSession session)
+        {
+            session.DataReceived += OnSessionDataReceived;
+            session.Disconnected += OnSessionDisconnected;
+            session.Error += OnSessionError;
         }
 
         /// <summary>每 tick 为各在线 observer 组装并广播其 AOI 可见快照（带节拍/静止保活）</summary>
@@ -342,13 +354,13 @@ namespace KcpServer
 
         private void OnSessionDataReceived(object? sender, byte[] data)
         {
-            if (sender is KcpServerSession session)
+            if (sender is IServerSession session)
             {
                 ProcessPacket(session, data);
             }
         }
 
-        private async Task ProcessPacket(KcpServerSession session, byte[] data)
+        private async Task ProcessPacket(IServerSession session, byte[] data)
         {
             try
             {
@@ -396,18 +408,18 @@ namespace KcpServer
 
         private void OnSessionDisconnected(object? sender, EventArgs e)
         {
-            if (sender is KcpServerSession session)
+            if (sender is IServerSession session)
             {
                 _logger.LogInformation($"Session {session.SessionId} disconnected");
                 // R2：世界状态变更一律经主循环动作队列
                 _gameLoop.EnqueueAction(() => { _ = _loginHandler.HandleDisconnectAsync(session); });
-                _gameLoop.EnqueueAction(() => _sessionManager.RemoveByEndpoint(session.RemoteEndPoint));
+                _gameLoop.EnqueueAction(() => _sessionManager.RemoveById(session.SessionId));
             }
         }
 
         private void OnSessionError(object? sender, Exception ex)
         {
-            if (sender is KcpServerSession session)
+            if (sender is IServerSession session)
             {
                 _logger.LogError(ex, $"Session {session.SessionId} error");
             }
@@ -422,7 +434,7 @@ namespace KcpServer
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
                     // 清理超时会话
-                    var timeoutSessions = new System.Collections.Generic.List<KcpServerSession>();
+                    var timeoutSessions = new System.Collections.Generic.List<IServerSession>();
                     foreach (var s in _sessionManager.AllSessions)
                     {
                         if (s.IsTimedOut(_sessionTimeout))

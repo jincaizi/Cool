@@ -17,7 +17,7 @@ namespace KcpServer
             _logger = logger;
         }
 
-        public async Task HandleEchoAsync(KcpServerSession session, EchoRequest request)
+        public async Task HandleEchoAsync(IServerSession session, EchoRequest request)
         {
             var response = new EchoResponse
             {

@@ -56,7 +56,7 @@ namespace KcpServer
             return result;
         }
 
-        public async Task HandlePositionSyncAsync(KcpServerSession session, PositionSyncRequest request)
+        public async Task HandlePositionSyncAsync(IServerSession session, PositionSyncRequest request)
         {
             long? playerId = _server.GetPlayerId(session);
             if (!playerId.HasValue)

@@ -137,7 +137,7 @@ namespace KcpServer
         public CombatResolver.CastResolution Resolve(long casterId, CastRequest request, uint tick)
             => _resolver.ResolveCast(casterId, request, tick);
 
-        public async Task HandleCastAsync(KcpServerSession session, CastRequest request)
+        public async Task HandleCastAsync(IServerSession session, CastRequest request)
         {
             long? playerId = _server.GetPlayerId(session);
             if (!playerId.HasValue)

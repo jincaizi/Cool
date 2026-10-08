@@ -17,7 +17,7 @@ namespace KcpServer
             _logger = logger;
         }
 
-        public Task HandleClockSyncAsync(KcpServerSession session, ClockSyncRequest request)
+        public Task HandleClockSyncAsync(IServerSession session, ClockSyncRequest request)
         {
             var response = new Cool.Protocol.ClockSyncResponse
             {

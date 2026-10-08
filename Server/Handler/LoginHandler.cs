@@ -18,7 +18,7 @@ namespace KcpServer
             _logger = logger;
         }
 
-        public async Task HandleLoginAsync(KcpServerSession session, LoginRequest request)
+        public async Task HandleLoginAsync(IServerSession session, LoginRequest request)
         {
             if (request.ProtocolVersion != ProtocolConstants.ProtocolVersion)
             {
@@ -41,11 +41,11 @@ namespace KcpServer
                 await Task.Delay(TimeSpan.FromMilliseconds(50));
                 // 版本拒绝后关闭会话：CloseAsync 触发 Disconnected → 清理路径（会话被正常回收而非挂到超时）
                 await session.CloseAsync("ProtocolVersionMismatch");
-                _logger.LogWarning($"Rejected login from {session.RemoteEndPoint}: protocol version {request.ProtocolVersion}");
+                _logger.LogWarning($"Rejected login from session {session.SessionId}: protocol version {request.ProtocolVersion}");
                 return;
             }
 
-            _logger.LogInformation($"Login attempt: {request.Username} from {session.RemoteEndPoint}");
+            _logger.LogInformation($"Login attempt: {request.Username} from session {session.SessionId}");
 
             long playerId = Interlocked.Increment(ref _nextPlayerId);
 
@@ -103,7 +103,7 @@ namespace KcpServer
             _logger.LogInformation($"Player {playerId} ({request.Username}) logged in to zone {zoneId}");
         }
 
-        public async Task HandleDisconnectAsync(KcpServerSession session)
+        public async Task HandleDisconnectAsync(IServerSession session)
         {
             long? playerId = _server.GetPlayerId(session);
             if (!playerId.HasValue)

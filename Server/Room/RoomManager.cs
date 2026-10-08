@@ -63,7 +63,7 @@ namespace KcpServer
             return null;
         }
 
-        public bool TryAddPlayerToRoom(long playerId, KcpServerSession session, PlayerState state, string roomId)
+        public bool TryAddPlayerToRoom(long playerId, IServerSession session, PlayerState state, string roomId)
         {
             if (_playerRoomMap.TryGetValue(playerId, out var existingRoomId))
             {
@@ -93,7 +93,7 @@ namespace KcpServer
             return true;
         }
 
-        public bool TryChangePlayerZone(long playerId, KcpServerSession session, PlayerState state, string newZoneId)
+        public bool TryChangePlayerZone(long playerId, IServerSession session, PlayerState state, string newZoneId)
         {
             if (!_playerRoomMap.TryGetValue(playerId, out var oldZoneId))
                 return false;
