@@ -11,7 +11,7 @@
 |---|---|---|
 | F1 | `INetworkClient` 只有 **7 个成员**，且`ClientNetworkManager` / `CombatNetworkBridge` 依赖的是**接口**而非 `KcpClient`；测试里已有 `RecordingClient : INetworkClient` 假实现 | 抽象可用，加一条传输通道是"加实现"而非"重写" |
 | F2 | `MessageCodec`（305 行）是**纯静态** `Encode(…, IBufferWriter<byte>)` / `TryDecode(byte[])` | 编解码零改动 |
-| F3 | 应用**从未使用** KCP 的非可靠通道——`MessageFlags` 实际只用到 `Reliable`/`None`/`Encrypted`/`Compressed`，服务端 `SendToSessionAsync` 默认 `Reliable`，`WorldSnapshot` 亦按 `Reliable` 编码 | **WebSocket(TCP) 的语义与现有实际行为一致**，无"换 TCP 反而变差"的落差 |
+| F3 | 应用层**从未使用** KCP 的非可靠通道——4 个客户端发送点（`ClientNetworkManager.cs:58/111`、`CombatNetworkBridge.cs:49`、`MovementReporter.cs:65`）全部使用 `INetworkClient.Send` 的默认值 `MessageFlags.Reliable`；服务端 `SendToSessionAsync` 默认 `Reliable`；唯一非 Reliable 的用法在 `Assets/Scripts/Examples/`（示例代码，不进游戏） | ① **WebSocket(TCP) 的语义与现有实际行为一致**，无"换 TCP 反而变差"的落差；② 对"有序 + 可靠"的数据，KCP 相对 TCP 的唯一优势是更激进的 RTO（~100ms vs 200–300ms）——**队头阻塞两者都有**，不是 KCP 的优势。故"PC 走 KCP"不带来任何应用层收益（见 D-W11） |
 | F4 | `INetworkClient.cs` 位于 `Assets/Scripts/AOT/KcpNet/`，即**住在 `KcpNet` 程序集内** | 见 F6——这是本设计的核心阻塞点 |
 | F5 | `KcpNet.asmdef` 的 `includePlatforms` / `excludePlatforms` **均为空** → 所有平台都编译；而 `KcpClientTransport` 使用 `System.Net.Sockets` | WebGL 无 `System.Net.Sockets` → **WebGL 构建编译失败** |
 | F6 | `GameSys.asmdef`（Hotfix）`references: ["KcpNet"]`，且 5 个文件 `using KcpNet`；`ClientNetworkHost.cs:181` 直接 `new KcpNetClientAdapter()` | 抽象被实现绑架：只要 `GameSys` 引用 `KcpNet`，WebGL 就**打不出包** |
@@ -41,8 +41,8 @@
 
 | 层 | 内容 |
 |---|---|
-| **解除构建阻塞** | `INetworkClient` 搬到 `Cool.Protocol`；`KcpNet.asmdef` 排除 WebGL；`GameSys` 改引用；adapter 按平台创建 |
-| **传输通道** | 客户端 `WebSocketClientAdapter : INetworkClient` + `WebGLWebSocket.jslib` |
+| **解除构建阻塞** | `INetworkClient` 搬到 `Cool.Protocol`；`KcpNet` 下 6 个 socket 文件加 `#if !UNITY_WEBGL`；`ClientNetworkHost` 按平台选择 **channel**（adapter 两端统一）；新增 `WebSocketNet` 程序集（见 D-W2、D-W11） |
+| **传输通道** | **所有平台**的客户端都走 `WebSocketClientAdapter : INetworkClient`——PC/编辑器用 `DotNetWebSocketChannel`，WebGL 用 `WebGLWebSocket.jslib`；`KcpNetClientAdapter` 保留为第二实现但不再是默认（见 D-W11） |
 | **服务端双栈** | `IServerSession` 抽取 + `WebSocketServerSession` + `WebSocketServerListener`（与既有 UDP/KCP 同进程并存） |
 | **移动端输入** | `MobileInputAdapter`（摇杆）+ `TouchCameraInput`（触屏转视角）+ 攻击/技能/跳跃按钮 |
 | **交付** | WebGL 构建脚本 + 静态托管 + WSS 域名/证书 |
@@ -57,25 +57,28 @@
 ### 数据流
 
 ```
-[面试官的浏览器]
-  Unity WebGL 构建
-    WebSocketClientAdapter          ← 新增，实现 INetworkClient（成员签名一字不改）
-    MessageCodec                    ← 复用
-    ClientNetworkManager / CombatNetworkBridge / RemoteEntityRegistry / NetMovementPolicy  ← 复用
-    WebGLWebSocket.jslib            ← 新增，C# ↔ 浏览器 WebSocket API 的唯一边界
-  ─────────────────── WSS ───────────────────
+[面试官的浏览器]                          [你的 PC 构建（自我验证）]
+  Unity WebGL 构建                          Unity Standalone 构建
+    MessageCodec / ClientNetworkManager / CombatNetworkBridge /
+    RemoteEntityRegistry / NetMovementPolicy          ← 两端同一份，零改动
+    WebSocketClientAdapter : INetworkClient           ← 两端同一个适配器（成员签名一字不改）
+      ├─ WebGLWebSocketChannel → WebGLWebSocket.jslib ← 仅 WebGL（T4）
+      └─ DotNetWebSocketChannel（ClientWebSocket）    ← PC/编辑器（T3）
+  ──────────────────────── WSS / WS ────────────────────────
 [你的服务器 .NET 8，单进程双栈]
-  WebSocketServerListener  →  WebSocketServerSession : IServerSession   ← 新增
-  UdpSession / KcpServerSession : IServerSession                        ← 既有，原生客户端继续用
+  WebSocketServerListener → WebSocketServerSession : IServerSession   ← 新增，两端共用
+  UdpSession / KcpServerSession : IServerSession                      ← 既有，保留（KCP 代码本次不删）
         ↓ 两条来源汇入同一个 ProcessPacket（复用）
-  Handler / AoiGrid / EntityStore / CombatResolver / MonsterModule      ← 全部零改动
+  Handler / AoiGrid / EntityStore / CombatResolver / MonsterModule     ← 全部零改动
 ```
 
 ### 双栈为什么是白送的
 
 `IServerSession` 的抽取是 WS 路径**本来就必须做**的（`Server3C` 不能再依赖 `KcpServerSession` 具体类型）。抽完之后，两条传输来源汇入同一个既有的 `ProcessPacket(session, data)`——**没有额外的架构工作**。
 
-双栈带来的收益：PC 包与浏览器客户端**连同一个服务器进程**，演示时"PC 端 + 浏览器端同场"本身就是 AOI 同步与战斗裁决的活证据。
+双栈带来的收益：PC 构建与浏览器客户端**连同一个服务器进程、且走同一条 WS 通道**——演示时"PC 端 + 浏览器端同场"本身是 AOI 同步与战斗裁决的活证据；更重要的是，**在 PC 上做的自我验证与面试官在浏览器里跑的，是同一条代码路径**（D-W11）。
+
+> UDP/KCP 监听之所以保留，是"本次不删 KCP 代码"这条人类裁定（D-W11），**不是**因为它还被默认使用——默认路径已经全部是 WebSocket。
 
 ### 接口搬运的边界（重要）
 
@@ -83,7 +86,7 @@
 
 - `RecordingClient`（测试假实现）**不需要改**
 - `ClientNetworkManager` / `CombatNetworkBridge` 的构造与调用**不需要改**（只改一行 `using`）
-- 既有 `KcpNetClientAdapter` **不需要改**
+- 既有 `KcpNetClientAdapter` **不需要改**（保留为第二实现，但不再是 PC 默认——见 D-W11）
 
 搬家的目的正是**保住这条约束**——让它不再被 KCP 的实现细节与平台限制绑架。
 
@@ -93,7 +96,7 @@
 |---|---|---|---|---|
 | C1 | `INetworkClient`（搬运） | `AOT/Protocol/` | 传输抽象，供两端实现 | 编译即验证 |
 | C2 | 6 个 socket 文件加 `#if !UNITY_WEBGL` | `AOT/KcpNet/` | `KcpClientTransport` / `KcpTransportBase` / `Kcp.cs` / `Server/` 下 3 个 | 构建即验证 |
-| C3 | adapter 平台选择 | `Hotfix/.../SyncLayer/ClientNetworkHost` | `#if UNITY_WEBGL` → `WebSocketClientAdapter`，否则 `KcpNetClientAdapter` | 构建即验证 |
+| C3 | **channel** 平台选择 | `Hotfix/.../SyncLayer/ClientNetworkHost` | adapter **两端统一**为 `WebSocketClientAdapter`；`#if UNITY_WEBGL` → `WebGLWebSocketChannel`，否则 `DotNetWebSocketChannel` | 构建即验证 |
 | C4 | `WebSocketClientAdapter` | `AOT/WebSocketNet/`（新程序集） | `INetworkClient` 的 WS 实现：连接、收发、心跳、事件 | ✅ **EditMode 可测**——`ClientWebSocket` 在编辑器里可用，只有 WebGL 构建不可用 |
 | C5 | `WebGLWebSocket.jslib` | `Assets/Plugins/WebGL/` | C#↔浏览器 `WebSocket` 的唯一边界 | ⚠️ 人工（R2） |
 | C6 | `IServerSession`（抽取） | `Server/` | 业务需要的会话契约：`SessionId` / `Send(MessageId, IMessage, MessageFlags)` / `IsConnected` / `LastActivityTime` | 既有测试即验证 |
@@ -123,16 +126,16 @@
 
 | # | 任务 | 规模 | 验收 |
 |---|---|---|---|
-| **T1** | `INetworkClient` 搬到 `Cool.Protocol`（命名空间随之改为 `Cool.Protocol`）；`KcpNet` 下 6 个 socket 文件加 `#if !UNITY_WEBGL`；`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选择 adapter；新增 `WebSocketNet` 程序集（**所有平台**，先放一个占位实现供 T3 填充）。<br>**注意**：`GameSys.asmdef` 的 `KcpNet` 引用**保留不动**；`KcpNet.PlayModeTests.asmdef` 亦不动 | 中 | ① 原 PC/Editor 构建与全部测试**照常通过**；② **WebGL 平台能编译**（空场景构建足以证明 `System.Net.Sockets` 不再是阻塞；真实场景的 WebGL 构建在 T4/T9 验证） |
+| **T1** | `INetworkClient` 搬到 `Cool.Protocol`（命名空间随之改为 `Cool.Protocol`）；`KcpNet` 下 6 个 socket 文件加 `#if !UNITY_WEBGL`；`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选择 adapter（**过渡态**：T1 时 PC 侧仍是 KCP 占位，通道在 T3 补、PC 侧统一在 T4 完成——见 D-W11）；新增 `WebSocketNet` 程序集（**所有平台**，先放一个占位实现供 T3 填充）。<br>**注意**：`GameSys.asmdef` 的 `KcpNet` 引用**保留不动**；`KcpNet.PlayModeTests.asmdef` 亦不动 | 中 | ① 原 PC/Editor 构建与全部测试**照常通过**；② **WebGL 平台能编译**（空场景构建足以证明 `System.Net.Sockets` 不再是阻塞；真实场景的 WebGL 构建在 T4/T9 验证） |
 
 ### L1 · 打通 WS 通道（面试官"能连上"）
 
 | # | 任务 | 规模 | 验收 |
 |---|---|---|---|
 | **T2** | 抽 `IServerSession`，`Server3C`（8 处）与 `SessionManager` 改依赖接口 | 小 | Server.Tests 132/132 全绿（纯机械替换，行为不变） |
-| **T3** | `WebSocketClientAdapter : INetworkClient`（新程序集 `WebSocketNet`） | 中 | EditMode：对**本地 echo WS 服务器**跑通连接/收发/心跳/断开事件 |
-| **T4** | `WebGLWebSocket.jslib` + 在 WebGL 构建里跑通 echo | 中 | 浏览器打开 → echo 往返成功（**本任务的主要风险在 jslib 边界，R2**） |
-| **T5** | `WebSocketServerSession` + `WebSocketServerListener`（双栈） | 中 | 浏览器客户端 + PC 包**同时**连同一服务器，互相可见（AOI 双端渲染） |
+| **T3** | `WebSocketClientAdapter : INetworkClient` + `IWebSocketChannel` / `DotNetWebSocketChannel`（新程序集 `WebSocketNet`） | 中 | EditMode：经**假通道**（`FakeChannel`）跑通连接/收发/心跳/断开事件——真实往返由 T4（浏览器）与 T5（集成）覆盖 |
+| **T4** | `WebGLWebSocket.jslib` + 在 WebGL 构建里跑通 echo；**并把 PC 也切到 `WebSocketClientAdapter`（D-W11 的落点）** | 中 | 浏览器打开 → echo 往返成功（**本任务的主要风险在 jslib 边界，R2**）；切换后 PlayMode 并集仍 18/18（既有 PlayMode 测试直接构造 `KcpNetClientAdapter`，不经 `ClientNetworkHost`，故不受影响） |
+| **T5** | `WebSocketServerSession` + `WebSocketServerListener`（双栈） | 中 | 浏览器客户端 + PC 包**同时**连同一服务器（**两端都走 WS**），互相可见（AOI 双端渲染） |
 
 ### L2 · 让它在手机上能玩
 
@@ -160,10 +163,11 @@
 
 | 层 | 方式 |
 |---|---|
-| `WebSocketClientAdapter` 的逻辑（编解码、心跳、事件、重连） | **EditMode 单测**——`ClientWebSocket` 在编辑器里可用，只有 WebGL 构建不可用。对本地 echo server 跑 |
+| `WebSocketClientAdapter` 的逻辑（编解码、心跳、事件、重连） | **EditMode 单测**，经 `FakeChannel` 驱动（D-W8）——真实往返由 T4（浏览器 echo）与 T5（集成）覆盖 |
 | `IServerSession` 抽取 | 既有 Server.Tests 全绿即证明行为未变 |
 | `WebSocketServerSession` | Server.Tests 单测 |
 | `MobileInputAdapter` 的模拟量解析 | EditMode |
+| `ClientNetworkHost` 的接线 + PC 真实往返（`DotNetWebSocketChannel`） | **人工**——Editor 跑 `DemoDay` 或 PC 构建连真服务器（T5 Step 7 第 2 项）。9 个 PlayMode 测试全部直接构造 `KcpNetClientAdapter`，**覆盖不到**这条路径 |
 | **jslib 边界 + 浏览器运行时** | **人工**（不可自动化，这是本设计的已知缺口） |
 | 四条声称面 | **人工**，在真实浏览器里 |
 
@@ -191,3 +195,7 @@
 | **D-W5** | 移动端输入**复用既有 `IInputAdapter` 抽象**，但**重写实现** | 抽象（5 成员）可复用、`KeyboardInputAdapter` 不受影响；`JoystickInputAdapter` 读的三个 legacy 轴不存在（F7），调用即抛异常，且丢弃模拟量。T6 要建真实 UI 摇杆并让它驱动适配器——**`IInputAdapter` 契约不变** |
 | **D-W6** | WebGL 的验证**分层**：逻辑进 EditMode，jslib/浏览器留人工 | 承认 WebGL 不可自动化，但把可测的部分最大化 |
 | **D-W7** | 演示形态下**不做鉴权** | 人类已选"面试官自己玩"，加鉴权会把 URL 分发变成账号分发，得不偿失。风险在 R3 显式登记 |
+| **D-W8** | `WebSocketClientAdapter` 内部再分一层 `IWebSocketChannel` | WebGL 必须走 jslib（浏览器 API），而**编辑器里 `ClientWebSocket` 可用**——分层后适配器逻辑可在 EditMode 单测，只有 jslib 与浏览器运行时留人工（D-W6 的落点） |
+| **D-W9** | WS 上**一条消息 = 一个 WS 帧**，直接复用 `MessageCodec.Encode`/`TryDecode` | `MessageCodec` 完全与传输解耦（F2）；WS 本身是消息边界的，无需再做流式拆帧 |
+| **D-W10** | 应用**从未使用** KCP 的非可靠通道（全部 `MessageFlags.Reliable`） | 所以 WebSocket(TCP) 的语义与现有实际行为**一致**，不存在"换 TCP 反而变差"的落差（F3） |
+| **D-W11** | **两端统一走 WebSocket**：`WebSocketClientAdapter` 成为 PC 与 WebGL **唯一**的客户端传输；`KcpNetClientAdapter` 保留为第二实现但**不再是默认**（人类裁定："保留原有 kcp 代码，以后再删"） | **收益**：F3 表明 KCP 的不可靠通道是死代码，让它继续当 PC 默认是**零收益**；而统一之后 **PC 自我验证与浏览器演示走同一条代码路径**——旧形态下"在 PC 上验的每一件事，走的都是面试官那边不存在的那条路"，这正是"确保每个功能尽量少 bug"的落点。平台分叉也从"两条传输"降级为"两个 channel"。<br>**代价**：master 的 PC 传输与 P6 冻结包所用的 `KcpNetClientAdapter` 不再一致（冻结包不随 master 演进，接受）。<br>**面试口径**：不是"本来就用 WebSocket"，而是"实现了 KCP/UDP → 加 WebSocket 时发现应用层从未使用不可靠通道 → 把两端统一到一条路径" |

@@ -4,7 +4,7 @@
 
 **目标：** 让面试官用自己的设备打开一个 URL 就能玩到本项目，并能现场复现 P6 单机玩法、P4 服务端权威战斗、P3 AOI（`--bots 100`）、P5 怪物 AI 四条声称面。
 
-**架构：** 先解除 WebGL 的构建阻塞（`System.Net.Sockets` 在 WebGL 不存在，而 `KcpNet` 有 6 个文件依赖它）→ 新增一条 WebSocket 传输通道（客户端 `INetworkClient` 新实现 + 服务端 `IServerSession` 抽取与 WS 双栈），业务与同步逻辑零改动 → 补移动端触屏输入 → 在浏览器形态下复跑声称面验收 → 构建、部署、录屏。
+**架构：** 先解除 WebGL 的构建阻塞（`System.Net.Sockets` 在 WebGL 不存在，而 `KcpNet` 有 6 个文件依赖它）→ 新增一条 WebSocket 传输通道（客户端 `INetworkClient` 新实现 + 服务端 `IServerSession` 抽取与 WS 双栈），**并把 PC 也切到这条通道**（D-W11：两端共用同一个 `WebSocketClientAdapter`，只在最底层 channel 上按平台分叉），业务与同步逻辑零改动 → 补移动端触屏输入 → 在浏览器形态下复跑声称面验收 → 构建、部署、录屏。
 
 **技术栈：** Unity 2022.3.25f1（WebGL + IL2CPP）、浏览器 WebSocket API（经 `.jslib`）、.NET 8 服务端（`System.Net.WebSockets`，与既有 UDP/KCP 同进程双栈）、protobuf-net（既有 `MessageCodec` 复用）。
 
@@ -15,7 +15,7 @@
 | # | 决策 | 内容 |
 |---|------|------|
 | **D-W1** | 优先 **WebGL 网页版**，微信小游戏延后 | 两者技术代价几乎相同（同一套 WSS 通道），但小游戏额外需要微信账号 + 类目审核 + 域名备案——不可控的非技术依赖。网页版只要一个域名 |
-| **D-W2** | `INetworkClient` **搬到 `Cool.Protocol`**（成员签名一字不改）；**但 `KcpNet.asmdef` 不排除 WebGL、`GameSys` 保留对 `KcpNet` 的引用**——改为 6 个 socket 文件加 `#if !UNITY_WEBGL`，`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选 adapter | 写计划时实测推翻了"排除程序集 + 移除引用"：asmdef 引用**不可平台条件化**，移除后 PC 端也看不到 `KcpNetClientAdapter`；而平台专属 provider 程序集需要场景注入，但 `DemoDay` 是 PC/WebGL **共享**场景。**代价**：`KcpNet` 在 WebGL 下是空壳程序集（体积/编译时间，非正确性）。**收益**：零场景改动、零注册表、零 link.xml |
+| **D-W2** | `INetworkClient` **搬到 `Cool.Protocol`**（成员签名一字不改）；**但 `KcpNet.asmdef` 不排除 WebGL、`GameSys` 保留对 `KcpNet` 的引用**——改为 6 个 socket 文件加 `#if !UNITY_WEBGL`，`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选 **channel**（adapter 两端统一，见 D-W11） | 写计划时实测推翻了"排除程序集 + 移除引用"：asmdef 引用**不可平台条件化**，移除后 PC 端也看不到 `KcpNetClientAdapter`；而平台专属 provider 程序集需要场景注入，但 `DemoDay` 是 PC/WebGL **共享**场景。**代价**：`KcpNet` 在 WebGL 下是空壳程序集（体积/编译时间，非正确性）。**收益**：零场景改动、零注册表、零 link.xml |
 | **D-W3** | 服务端**同进程双栈**（UDP/KCP + WS） | `IServerSession` 抽取是 WS 路径本来就要做的，双栈几乎白送；且让"PC 端 + 浏览器端同场"成为 AOI/战斗的活证据 |
 | **D-W4** | **不做包体优化，也不测量首屏加载**（人类裁定） | 先落地 WebGL 形态；后期清理未使用资源后再优化。**代价**：后期优化没有 before 数可对照，且首屏加载在面试前始终是不可估的未知数 |
 | **D-W5** | 移动端输入**复用既有 `IInputAdapter` 抽象**，但**重写实现** | 抽象（5 成员）可复用、`KeyboardInputAdapter` 不受影响；`JoystickInputAdapter` 读的三个 legacy 轴**不存在**（实测），调用即抛异常，且 `normalized` 丢弃模拟量。T6 要建真实 UI 摇杆驱动适配器——**`IInputAdapter` 契约不变** |
@@ -24,6 +24,7 @@
 | **D-W8** | `WebSocketClientAdapter` 内部再分一层 `IWebSocketChannel` | WebGL 必须走 jslib（浏览器 API），而**编辑器里 `ClientWebSocket` 可用**——分层后适配器逻辑可在 EditMode 单测，只有 jslib 与浏览器运行时留人工（D-W6 的落点） |
 | **D-W9** | WS 上**一条消息 = 一个 WS 帧**，直接复用 `MessageCodec.Encode`/`TryDecode` | `MessageCodec` 完全与传输解耦（规格 F2）；WS 本身是消息边界的，无需再做流式拆帧 |
 | **D-W10** | 应用**从未使用** KCP 的非可靠通道（全部 `MessageFlags.Reliable`） | 所以 WebSocket(TCP) 的语义与现有实际行为**一致**，不存在"换 TCP 反而变差"的落差（规格 F3） |
+| **D-W11** | **两端统一走 WebSocket**：`WebSocketClientAdapter` 是 PC 与 WebGL **唯一**的客户端传输；`KcpNetClientAdapter` 保留为第二实现但**不再是默认**（人类裁定："保留原有 kcp 代码，以后再删"）。落点在 T4 Step 4 | **收益**：F3 表明 KCP 的不可靠通道是死代码，让它继续当 PC 默认是零收益；统一后 **PC 自我验证与浏览器演示走同一条代码路径**——旧形态下"在 PC 上验的每一件事，走的都是面试官那边不存在的那条路"。平台分叉从"两条传输"降级为"两个 channel"。<br>**代价**：master 的 PC 传输与 P6 冻结包所用的 `KcpNetClientAdapter` 不再一致（冻结包不随 master 演进，接受）。<br>**不影响 PlayMode**：9 个 PlayMode 测试全部**直接构造 `KcpNetClientAdapter`**，不经 `ClientNetworkHost`（已实测）——故 18/18 基线与 KCP 传输测试完全不受影响 |
 
 **Out of scope（显式排除，防范围蔓延）**：微信小游戏、P7 打怪升级、P8 PvP、P2 移动同步的现场演示、原生 Android/iOS 打包、包体优化与首屏加载测量、鉴权、聊天/背包/组队/交易、`Launched/Down/GetUp/Death` 的表现层补齐（P6 已登记 backlog）。
 
@@ -51,7 +52,7 @@
 | `Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketChannel.cs` | 创建 | jslib 实现（仅 WebGL） |
 | `Assets/Scripts/AOT/WebSocketNet/WebSocketClientAdapter.cs` | 创建 | `INetworkClient` 的 WS 实现 |
 | `Assets/Plugins/WebGL/WebGLWebSocket.jslib` | 创建 | C# ↔ 浏览器 WebSocket 的唯一 JS 边界 |
-| `Assets/Scripts/Tests/Editor/WebSocketNet/WebSocketClientAdapterTests.cs` | 创建 | 适配器行为单测（对本地 echo WS 服务器） |
+| `Assets/Scripts/Tests/Editor/WebSocketNet/WebSocketClientAdapterTests.cs` | 创建 | 适配器行为单测（经 `FakeChannel`，非真 socket——真实往返由 T4/T5 覆盖） |
 | `Server/IServerSession.cs` | 创建 | 业务真正需要的会话契约 |
 | `Server/KcpServerSession.cs` | 修改 | `: IServerSession` |
 | `Server/WebSocketServerSession.cs` | 创建 | `System.Net.WebSockets` 会话 |
@@ -97,7 +98,7 @@ git mv Assets/Scripts/AOT/KcpNet/INetworkClient.cs.meta Assets/Scripts/AOT/Proto
 
 | 文件 | 改动 |
 |---|---|
-| `Hotfix/.../SyncLayer/ClientNetworkHost.cs` | **保留** `using KcpNet;`（仍需 `KcpNetClientAdapter`）；**新增** `using Cool.Protocol;`（字段要用 `INetworkClient`） |
+| `Hotfix/.../SyncLayer/ClientNetworkHost.cs` | **保留** `using KcpNet;`（此刻仍需 `KcpNetClientAdapter`；**T4 Step 4 统一到 WS 后即失效，届时删除**）；**新增** `using Cool.Protocol;`（字段要用 `INetworkClient`） |
 | `Hotfix/.../SyncLayer/ClientNetworkManager.cs` | **删除** `using KcpNet;`（已 `using Cool.Protocol`） |
 | `Hotfix/.../SyncLayer/CombatNetworkBridge.cs` | **删除** `using KcpNet;`（已 `using Cool.Protocol`） |
 | `Hotfix/.../SyncLayer/MessageDispatcher.cs` | **删除** `using KcpNet;`（已 `using Cool.Protocol`） |
@@ -220,6 +221,8 @@ namespace WebSocketNet
 ```
 
 **并加 `using WebSocketNet;`**（仅 WebGL 分支用到，但 `using` 不能条件化——该程序集在所有平台都在，故安全）。
+
+> **本步是过渡形态，不是终态。** `WebSocketClientAdapter` 的构造函数参数在 T3 补（通道），PC 分支在 **T4 Step 4 改成 `DotNetWebSocketChannel`**（D-W11：两端统一走 WS）。本步的 `#else` 保持 KCP 是因为此刻还没有可用的 PC 侧 WebSocket 通道——中途态必须每一步都能编译。
 
 - [ ] **Step 7: 验证 PC/Editor 侧未回归**
 
@@ -887,12 +890,14 @@ namespace WebSocketNet
             _adapter = new WebSocketNet.WebSocketClientAdapter(
                 new WebSocketNet.WebGLWebSocketChannel());
 #else
-            // PC/编辑器走 KCP（既有路径，性能与既有验收一致）
+            // 过渡态：PC 侧 WebSocket 通道要等 T4 才接线（D-W11）
             _adapter = new KcpNetClientAdapter();
 #endif
 ```
 
 > `WebGLWebSocketChannel` 在 Task 4 创建。本步骤**先不要改这一行**——等 T4 完成再改，否则编译不过。本任务只到 Step 6 为止；`ClientNetworkHost` 的 WebGL 分支暂用 T1 的占位（`new WebSocketNet.WebSocketClientAdapter(...)` 的参数在 T4 补）。
+>
+> **`DotNetWebSocketChannel` 本步已创建（Step 6），但先不接进来。** 接线放在 T4 Step 4，理由是那里紧接着跑一次 PlayMode 回归（T4 Step 5）——行为变更与它的验证放在同一步，比跨任务追溯可靠。
 
 - [ ] **Step 8: 跑全量 EditMode 回归**
 
@@ -1200,22 +1205,38 @@ namespace WebSocketNet
 #endif
 ```
 
-- [ ] **Step 4: `ClientNetworkHost` 接上真实通道**
+- [ ] **Step 4: `ClientNetworkHost` 接上真实通道——并把 PC 也统一到 WS（D-W11 的落点）**
 
-把 Task 3 Step 7 里预留的那行补全（现在 `WebGLWebSocketChannel` 存在了）：
+把 Task 1 Step 6 / Task 3 Step 7 里预留的那两行补全。两端共用**同一个** `WebSocketClientAdapter`，只在最底层 channel 上按平台分叉：
 
 ```csharp
 #if UNITY_WEBGL
+            // WebGL 无 System.Net.Sockets —— 走浏览器 WebSocket
             _adapter = new WebSocketNet.WebSocketClientAdapter(
                 new WebSocketNet.WebGLWebSocketChannel());
 #else
-            _adapter = new KcpNetClientAdapter();
+            // D-W11：PC 也走 WebSocket（DotNetWebSocketChannel）。
+            // 应用层 4 个发送点全部使用默认的 MessageFlags.Reliable，KCP 的不可靠
+            // 通道从未被调用；保留它作为 PC 默认，只会让"自测路径"（PC=KCP）与
+            // "演示路径"（浏览器=WS）分叉——那正是最不该分叉的两条路。
+            _adapter = new WebSocketNet.WebSocketClientAdapter(
+                new WebSocketNet.DotNetWebSocketChannel());
 #endif
 ```
+
+**同时删掉 `ClientNetworkHost.cs` 顶部的 `using KcpNet;`**——本步之后该文件不再引用 `KcpNet` 的任何类型（`MessageId` / `MessageFlags` 都在 `Cool.Protocol`，字段类型是 `INetworkClient`），留着只是噪声。
+
+> **`KcpNet` 程序集与 `KcpNetClientAdapter` 都不删**（人类裁定："保留原有 kcp 代码，以后再删"）。`GameSys.asmdef` 对 `KcpNet` 的引用按 T1 保持不动，`KcpNet.PlayModeTests.asmdef` 亦然。
+>
+> 本步之后 `GameSys` 内确实已经没有 `KcpNet` 的使用者，那条引用变成多余——但**删除它零收益**：`KcpNet` 程序集无论有没有人引用，在 WebGL 下都要编译，T1 的守卫照旧必要。属于"以后再删"的范围。
 
 - [ ] **Step 5: 验证 Editor 侧未回归**
 
 `tests-run`，`testMode=EditMode` → 预期 **228/228**；三配置 PlayMode → 并集 **18/18**。
+
+> **为什么 PC 改了传输而 PlayMode 数字不变**：9 个 PlayMode 测试**全部直接构造 `KcpNetClientAdapter`**（`AdapterConnectTests.cs:50/69`、`AoiWorldTests.cs:19`、`CombatSyncTests.cs:26`、`LoginEnterWorldTests.cs:46`、`MonsterWorldTests.cs:31`、`MovementSyncTests.cs:18/305`、`TwoClientWorldTests.cs:21`），**没有任何一个经过 `ClientNetworkHost`**。所以 18/18 同时也证明了"KCP 传输本身没有被本步弄坏"。
+>
+> **代价要说清楚**：反过来也成立——PlayMode **覆盖不到** `ClientNetworkHost` 的接线，Step 4 改的那两行不在任何自动化测试里。它的真实覆盖在 **T5 Step 7**（Editor 走 WS 连真服务器进世界）与 **T8** 的浏览器验收；T5 之前不要把它当成已验证。
 
 - [ ] **Step 6: 出 WebGL 包并部署到本地做 echo 验证**
 
@@ -1253,7 +1274,18 @@ wasm heap grows.
 
 The bridge is a runtime-created hidden GameObject because SendMessage needs a
 target. Its method names must match the jslib strings exactly - that is the
-first thing to check if a callback never arrives."
+first thing to check if a callback never arrives.
+
+This commit also unifies the client transport (D-W11): PC now uses
+WebSocketClientAdapter with DotNetWebSocketChannel instead of
+KcpNetClientAdapter. The application layer only ever sends MessageFlags.Reliable
+- all four call sites take the default - so KCP's unreliable path was dead code,
+and keeping it as the PC default meant every self-verification run exercised a
+path the browser demo never touches. KCP stays in the tree as a second
+implementation of INetworkClient; nothing is deleted.
+
+PlayMode is unaffected: all nine tests construct KcpNetClientAdapter directly
+and never go through ClientNetworkHost."
 ```
 
 ---
@@ -1525,7 +1557,7 @@ namespace KcpServer
             _nextSessionId = nextSessionId;
         }
 
-        /// <summary>prefix 形如 "http://localhost:8000/"（本机开发）或 "http://+:8000/"（对外，需 URL ACL，见 Task 9）</summary>
+        /// <summary>prefix 形如 "http://127.0.0.1:8000/"（本机开发）或 "http://+:8000/"（对外，需 URL ACL，见 Task 9）</summary>
         public void Start(string prefix)
         {
             _listener.Prefixes.Add(prefix);
@@ -1581,10 +1613,12 @@ namespace KcpServer
             // D-W3：同进程双栈 —— UDP(KCP) 给原生客户端，TCP(WS) 给浏览器客户端
             var wsListener = new WebSocketServerListener(
                 server, logger, () => Interlocked.Increment(ref _wsSessionIdSeed));
-            wsListener.Start(wsPrefix);   // 默认 "http://localhost:8000/"
+            wsListener.Start(wsPrefix);   // 默认 "http://127.0.0.1:8000/"
 ```
 
-`wsPrefix` 从命令行参数取，默认 `http://localhost:8000/`（便于本机验证；对外部署的 URL ACL 见 Task 9）。
+`wsPrefix` 从命令行参数取，默认 `http://127.0.0.1:8000/`（便于本机验证；对外部署的 URL ACL 见 Task 9）。
+
+> **为什么默认是 `127.0.0.1` 而不是 `localhost`——这是 `HttpListener` 的一个经典坑**：prefix 的 host 段是**字面匹配**请求的 `Host` 头，`http://localhost:8000/` **不**接受发往 `http://127.0.0.1:8000/` 的请求（两者是不同字符串）。而本项目所有客户端都拨 `127.0.0.1`：PlayMode 测试用 `127.0.0.1:8000`、`WebSocketClientAdapter` 拼出的是 `ws://<host>:<port>/`。用 `localhost` 作 prefix 会得到一个**静默不匹配**——`HttpListener` 既不转发也不报错，客户端只看到连接被拒。prefix 必须与客户端实际拨的地址**逐字一致**。
 
 - [ ] **Step 7: 验证双栈共存**
 
@@ -1594,9 +1628,10 @@ dotnet run --project Server/Server3C.csproj -- 8000
 
 预期：日志同时出现 UDP 与 WS 两个监听已启动。然后：
 
-1. **PC 客户端**（既有 exe 或 Editor）连 `127.0.0.1:8000` → 能进世界（**证明 KCP 路径未被破坏**）
-2. **浏览器**（Task 4 的 WebGL 包）连同一服务器 → 也能进世界（**证明 WS 路径成立**）
-3. **两者同时在线** → 浏览器里能看到 PC 玩家、PC 里能看到浏览器玩家（**这是 D-W3 要的活证据**）
+1. **P6 冻结包**（走 KCP）连 `127.0.0.1:8000` → 能进世界（**证明 KCP 路径未被破坏**——那个包用的就是 `KcpNetClientAdapter`）
+2. **Editor 里跑 `DemoDay`**（D-W11 之后走 **WS**，`#if UNITY_WEBGL` 为假 → `DotNetWebSocketChannel`）连同一服务器 → 能进世界。**这是 `DotNetWebSocketChannel` 唯一的端到端验证点**——9 个 PlayMode 测试全部直接构造 `KcpNetClientAdapter`，覆盖不到它
+3. **浏览器**（Task 4 的 WebGL 包）连同一服务器 → 也能进世界（**证明 WS 路径在浏览器侧成立**）
+4. **2 与 3 同时在线** → 浏览器里能看到 Editor 玩家、Editor 里能看到浏览器玩家（**这是 D-W3 要的活证据**，也是 D-W11"两端同一条路径"的直观确认）
 
 - [ ] **Step 8: Commit**
 
@@ -2240,6 +2275,7 @@ discovered."
 | T2 `IServerSession`（C6） | Task 2 |
 | T3 `WebSocketClientAdapter`（C4） | Task 3 |
 | T4 jslib + 浏览器 echo（C5） | Task 4 |
+| D-W11 两端统一 WS（PC 也走 `WebSocketClientAdapter`） | Task 4 Step 4（落点）；Task 5 Step 7 第 2 项（验证） |
 | T5 WS 会话与监听（C7/C8） | Task 5 |
 | T6 触屏输入（C9） | Task 6 |
 | T7 触屏相机（C10） | Task 7 |
@@ -2255,6 +2291,7 @@ discovered."
 - **D-W2 的两个动作行不通**：asmdef 引用不可平台条件化；排除程序集会让 PC 端也引用不到 adapter。已改为 `#if` 守卫 + 平台选择（规格 F10/F11 记录）
 - **`JoystickInputAdapter` 不是"未接线"而是"会崩"**：它读的三个轴不存在（实测），`GetAxisRaw` 会抛异常。规格 F7/D-W5/C9/T6 已订正
 - **`RemoteEndPoint` 泄进业务**：`Server3C.OnSessionDisconnected` 用它从 `SessionManager` 移除会话，而 WS 无 EndPoint。Task 2 Step 4 改为按 `SessionId` 移除
+- **PC 默认走 KCP 是零收益，且让两条路径分叉**（人类裁定后修正）：实测 4 个客户端发送点（`ClientNetworkManager.cs:58/111`、`CombatNetworkBridge.cs:49`、`MovementReporter.cs:65`）全部取 `INetworkClient.Send` 的默认值 `MessageFlags.Reliable`——**KCP 的不可靠通道是死代码**，而队头阻塞对可靠有序数据是 KCP 与 TCP 共有的。原形态下"PC 自测走 KCP、演示走 WS"意味着**在 PC 上验的每一件事走的都是演示时不存在的那条路**。已改为 D-W11：两端统一走 WS，`KcpNetClientAdapter` 保留为第二实现（T4 Step 4 落点，T5 Step 7 第 2 项验证）
 
 **3. 占位符扫描**——已清除。Task 7 明确写了"若无代码改动则不产生提交"，避免制造空提交。
 
