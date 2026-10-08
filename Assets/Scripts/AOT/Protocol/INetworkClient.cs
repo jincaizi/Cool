@@ -1,7 +1,6 @@
 using System;
-using Cool.Protocol;
 
-namespace KcpNet
+namespace Cool.Protocol
 {
     /// <summary>
     /// 网络客户端接口 —— Hotfix SyncLayer 依赖此抽象（适配器模式，项目既有规范）；

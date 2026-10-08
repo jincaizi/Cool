@@ -1,3 +1,4 @@
+#if !UNITY_WEBGL
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -608,3 +609,4 @@ namespace KcpNet
         }
     }
 }
+#endif

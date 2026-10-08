@@ -1,3 +1,4 @@
+#if !UNITY_WEBGL
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
@@ -366,3 +367,4 @@ namespace KcpNet
         protected abstract Task UpdateKcpAsync(TimeSpan elapsed);
     }
 }
+#endif

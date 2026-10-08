@@ -5,7 +5,6 @@ using Cool.Protocol;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Events;
-using KcpNet;
 using NUnit.Framework;
 using UnityEngine;
 

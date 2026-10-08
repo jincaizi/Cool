@@ -1,4 +1,5 @@
 using System;
+using Cool.Protocol;
 using Cool.SyncCore;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
@@ -8,6 +9,7 @@ using Hotfix.GameSystems.Sys3C.Network;
 using KcpNet;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using WebSocketNet;
 
 namespace Hotfix.GameSystems.SyncLayer
 {
@@ -40,7 +42,8 @@ namespace Hotfix.GameSystems.SyncLayer
         [Tooltip("屏幕左下角连接状态浮层（模式/状态/玩家 id/远程实体数）")]
         [SerializeField] private bool _showDebugOverlay = true;
 
-        private KcpNetClientAdapter? _adapter;
+        // Task 1：字段类型改为接口——KCP 与 WS 两个实现共用
+        private INetworkClient? _adapter;
         private ClientNetworkManager? _manager;
         private RemoteEntityRegistry? _remoteEntities;
         private NetMovementPolicy? _netPolicy;
@@ -178,7 +181,12 @@ namespace Hotfix.GameSystems.SyncLayer
             _resolvedHost = resolvedHost;
             _resolvedPort = resolvedPort;
 
+#if UNITY_WEBGL
+            // WebGL 无 System.Net.Sockets，KCP 传输不可用 —— 走浏览器 WebSocket
+            _adapter = new WebSocketNet.WebSocketClientAdapter();
+#else
             _adapter = new KcpNetClientAdapter();
+#endif
             _manager = new ClientNetworkManager(_adapter, _remoteEntities, resolvedUser);
             _manager.OnEnterWorld += HandleEnterWorld;
             _manager.OnDisconnected += HandleDisconnected;

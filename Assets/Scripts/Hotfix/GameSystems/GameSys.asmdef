@@ -12,7 +12,8 @@
         "DataDefinition",
         "KcpNet",
         "SyncCore",
-        "Cool.Protocol"
+        "Cool.Protocol",
+        "WebSocketNet"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

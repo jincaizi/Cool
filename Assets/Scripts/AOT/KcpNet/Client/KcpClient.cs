@@ -1,3 +1,4 @@
+#if !UNITY_WEBGL
 using System;
 using System.Net;
 using System.Threading;
@@ -368,3 +369,4 @@ namespace KcpNet
         }
     }
 }
+#endif

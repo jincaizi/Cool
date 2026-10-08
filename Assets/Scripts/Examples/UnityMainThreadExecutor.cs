@@ -1,3 +1,4 @@
+#if !UNITY_WEBGL
 using System;
 using System.Collections.Concurrent;
 using UnityEngine;
@@ -237,3 +238,4 @@ namespace Examples
         }
     }
 }
+#endif

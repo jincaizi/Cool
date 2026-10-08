@@ -13,6 +13,9 @@
     "versionDefines": [],
     "noEngineReferences": false,
     "autoReferenced": false,
+    "defineConstraints": [
+        "!UNITY_WEBGL"
+    ],
     "optionalUnityReferences": [
         "TestAssemblies"
     ]

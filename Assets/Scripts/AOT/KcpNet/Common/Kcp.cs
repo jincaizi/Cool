@@ -1,3 +1,4 @@
+#if !UNITY_WEBGL
 // Kcp 2.7.0 wrapper for Unity client
 // Uses System.Net.Sockets.Kcp.Kcp<KcpSegment> API
 using System;
@@ -256,3 +257,4 @@ namespace KcpNet
         }
     }
 }
+#endif

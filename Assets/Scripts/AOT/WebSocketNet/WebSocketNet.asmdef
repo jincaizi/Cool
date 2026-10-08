@@ -1,0 +1,12 @@
+{
+    "name": "WebSocketNet",
+    "rootNamespace": "WebSocketNet",
+    "references": [
+        "Cool.Protocol"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,7 +1,6 @@
 using System;
 using Cool.Protocol;
 using Cool.SyncCore;
-using KcpNet;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.SyncLayer
