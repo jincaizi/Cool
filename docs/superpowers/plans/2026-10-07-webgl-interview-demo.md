@@ -15,7 +15,7 @@
 | # | 决策 | 内容 |
 |---|------|------|
 | **D-W1** | 优先 **WebGL 网页版**，微信小游戏延后 | 两者技术代价几乎相同（同一套 WSS 通道），但小游戏额外需要微信账号 + 类目审核 + 域名备案——不可控的非技术依赖。网页版只要一个域名 |
-| **D-W2** | `INetworkClient` **搬到 `Cool.Protocol`**（成员签名一字不改）；**但 `KcpNet.asmdef` 不排除 WebGL、`GameSys` 保留对 `KcpNet` 的引用**——改为 6 个 socket 文件加 `#if !UNITY_WEBGL`，`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选 **channel**（adapter 两端统一，见 D-W11） | 写计划时实测推翻了"排除程序集 + 移除引用"：asmdef 引用**不可平台条件化**，移除后 PC 端也看不到 `KcpNetClientAdapter`；而平台专属 provider 程序集需要场景注入，但 `DemoDay` 是 PC/WebGL **共享**场景。**代价**：`KcpNet` 在 WebGL 下是空壳程序集（体积/编译时间，非正确性）。**收益**：零场景改动、零注册表、零 link.xml |
+| **D-W2** | `INetworkClient` **搬到 `Cool.Protocol`**（成员签名一字不改）；**但 `KcpNet.asmdef` 不排除 WebGL、`GameSys` 保留对 `KcpNet` 的引用**——改为 `KcpNet` 内 **8 个**文件加 `#if !UNITY_WEBGL`（原以为 6 个，实测补出 `KcpClient.cs`），另加两处程序集层面处理（`PlayModeTests` 用 `defineConstraints`、`Examples` 3 文件加守卫），`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选 **channel**（adapter 两端统一，见 D-W11） | 写计划时实测推翻了"排除程序集 + 移除引用"：asmdef 引用**不可平台条件化**，移除后 PC 端也看不到 `KcpNetClientAdapter`；而平台专属 provider 程序集需要场景注入，但 `DemoDay` 是 PC/WebGL **共享**场景。**代价**：`KcpNet` 在 WebGL 下是空壳程序集（体积/编译时间，非正确性）。**收益**：零场景改动、零注册表、零 link.xml |
 | **D-W3** | 服务端**同进程双栈**（UDP/KCP + WS） | `IServerSession` 抽取是 WS 路径本来就要做的，双栈几乎白送；且让"PC 端 + 浏览器端同场"成为 AOI/战斗的活证据 |
 | **D-W4** | **不做包体优化，也不测量首屏加载**（人类裁定） | 先落地 WebGL 形态；后期清理未使用资源后再优化。**代价**：后期优化没有 before 数可对照，且首屏加载在面试前始终是不可估的未知数 |
 | **D-W5** | 移动端输入**复用既有 `IInputAdapter` 抽象**，但**重写实现** | 抽象（5 成员）可复用、`KeyboardInputAdapter` 不受影响；`JoystickInputAdapter` 读的三个 legacy 轴**不存在**（实测），调用即抛异常，且 `normalized` 丢弃模拟量。T6 要建真实 UI 摇杆驱动适配器——**`IInputAdapter` 契约不变** |
@@ -40,12 +40,16 @@
 |---|---|---|
 | `Assets/Scripts/AOT/Protocol/INetworkClient.cs` | **移动**（自 `AOT/KcpNet/`） | 传输抽象，命名空间改 `Cool.Protocol`；供 KCP 与 WS 两个实现共用 |
 | `Assets/Scripts/AOT/KcpNet/Client/KcpClientTransport.cs` | 修改 | 加 `#if !UNITY_WEBGL` |
+| `Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs` | 修改 | 同上（`:40` 判断 `Transport is KcpTransportBase`，基类被守卫 ⇒ 它必须一起守卫。**实测补出的第 8 个**） |
 | `Assets/Scripts/AOT/KcpNet/Common/KcpTransportBase.cs` | 修改 | 同上 |
 | `Assets/Scripts/AOT/KcpNet/Common/Kcp.cs` | 修改 | 同上（KCP 算法本体依赖 `System.Net.Sockets.Kcp`） |
 | `Assets/Scripts/AOT/KcpNet/Server/KcpListenerWrapper.cs` | 修改 | 同上 |
 | `Assets/Scripts/AOT/KcpNet/Server/KcpServer.cs` | 修改 | 同上 |
 | `Assets/Scripts/AOT/KcpNet/Server/KcpServerTransport.cs` | 修改 | 同上 |
-| `Assets/Scripts/AOT/KcpNet/KcpNetClientAdapter.cs` | 修改 | `#if !UNITY_WEBGL` 包住（它传递依赖上面三个客户端文件） |
+| `Assets/Scripts/AOT/KcpNet/KcpNetClientAdapter.cs` | 修改 | 同上（它传递依赖上面几个客户端文件） |
+| `Assets/Scripts/Tests/PlayMode/KcpNet.PlayModeTests.asmdef` | 修改 | 加 `"defineConstraints": ["!UNITY_WEBGL"]`——9 个测试直接 `new KcpNetClientAdapter()`。**不要用 `includePlatforms: ["Editor"]`**：那会把 `[UnityTest]` 重分类成 EditMode 测试（见自审 §2） |
+| `Assets/Scripts/Examples/{ClientExample,ServerExample,UnityMainThreadExecutor}.cs` | 修改 | 加 `#if !UNITY_WEBGL`（该目录**无 asmdef**，落在 Assembly-CSharp，WebGL 下同样编译） |
+| `Assets/Scripts/Hotfix/GameSystems/GameSys.asmdef` | 修改 | references 增加 `"WebSocketNet"`；`KcpNet` 引用**保留** |
 | `Assets/Scripts/AOT/WebSocketNet/WebSocketNet.asmdef` | 创建 | 新程序集，**所有平台**（WebGL 要编译它） |
 | `Assets/Scripts/AOT/WebSocketNet/IWebSocketChannel.cs` | 创建 | D-W8 的通道抽象 |
 | `Assets/Scripts/AOT/WebSocketNet/DotNetWebSocketChannel.cs` | 创建 | `ClientWebSocket` 实现（编辑器/原生） |
@@ -77,7 +81,8 @@
 
 **Files:**
 - 移动：`Assets/Scripts/AOT/KcpNet/INetworkClient.cs` → `Assets/Scripts/AOT/Protocol/INetworkClient.cs`（含 `.meta`）
-- 修改：`Assets/Scripts/AOT/KcpNet/` 下 7 个文件（6 个 socket 文件 + `KcpNetClientAdapter.cs`）
+- 修改：`Assets/Scripts/AOT/KcpNet/` 下 **8 个**文件（`KcpClientTransport` / **`KcpClient`** / `KcpTransportBase` / `Kcp.cs` / `Server/` 三个 / `KcpNetClientAdapter`）
+- 修改：`KcpNet.PlayModeTests.asmdef`（`defineConstraints`）+ `Assets/Scripts/Examples/` 3 个文件 + `GameSys.asmdef`（加 `WebSocketNet` 引用）
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/` 下 5 个文件的 `using`
 - 创建：`Assets/Scripts/AOT/WebSocketNet/`（asmdef + 占位适配器）
 - 测试：无新增（本任务由**编译与构建**验证）
@@ -114,12 +119,13 @@ git mv Assets/Scripts/AOT/KcpNet/INetworkClient.cs.meta Assets/Scripts/AOT/Proto
 
 ```
 Client/KcpClientTransport.cs
+Client/KcpClient.cs             ← 判断 Transport is KcpTransportBase，基类被守卫 ⇒ 必须一起守卫
 Common/KcpTransportBase.cs
 Common/Kcp.cs
 Server/KcpListenerWrapper.cs
 Server/KcpServer.cs
 Server/KcpServerTransport.cs
-KcpNetClientAdapter.cs          ← 传递依赖上面三个客户端文件，必须一起守卫
+KcpNetClientAdapter.cs          ← 传递依赖上面几个客户端文件，必须一起守卫
 ```
 
 写法（`using` 也要包进去，因为 `using System.Net.Sockets;` 本身就是 WebGL 不存在的）：
@@ -225,6 +231,8 @@ namespace WebSocketNet
 
 **并加 `using WebSocketNet;`**（仅 WebGL 分支用到，但 `using` 不能条件化——该程序集在所有平台都在，故安全）。
 
+**同时给 `Assets/Scripts/Hotfix/GameSystems/GameSys.asmdef` 的 `references` 增加 `"WebSocketNet"`**——没有它 `GameSys` 看不到 `WebSocketNet` 类型，上面那个 `using` 与 WebGL 分支必然 `CS0246`。asmdef 引用**不可条件化**，没有替代方案。`KcpNet` 引用保持不动。
+
 > **本步是过渡形态，不是终态。** `WebSocketClientAdapter` 的构造函数参数在 T3 补（通道），PC 分支在 **T4 Step 7 改成 `DotNetWebSocketChannel`**（D-W11：两端统一走 WS）。本步的 `#else` 保持 KCP 是因为此刻还没有可用的 PC 侧 WebSocket 通道——中途态必须每一步都能编译。
 
 - [ ] **Step 7: 验证 PC/Editor 侧未回归**
@@ -245,7 +253,9 @@ UnityEditor.EditorUserBuildSettings.SwitchActiveBuildTarget(
 
 预期：切换完成，Console **无编译错误**——特别确认**没有** `System.Net.Sockets` 相关的 `CS0246`（找不到类型）或 `CS0234`（命名空间不存在）。
 
-**若有该错误**：说明有文件漏加守卫（最可能是 `KcpNetClientAdapter.cs` 的传递依赖）。按错误信息定位并补上守卫，重跑本步。
+**若有该错误**：说明有文件漏加守卫。按错误信息定位并补上守卫，重跑本步。
+
+**不要以为守完 `KcpNet` 就结束了**——实测证明光守它不够。Console 里还会出现两类**程序集层面**的 CS0246（`KcpNet.PlayModeTests` 与 Assembly-CSharp/Examples 引用被守卫的类型）。它们不在本步的错误信息路径上，解法见上面的文件结构表。
 
 **验证完切回** StandaloneWindows64，以免影响后续任务：
 
@@ -259,25 +269,41 @@ UnityEditor.EditorUserBuildSettings.SwitchActiveBuildTarget(
 
 - [ ] **Step 9: Commit**
 
+> 提交信息用 heredoc 而不是 `-m "..."`：正文里有双引号（`["!UNITY_WEBGL"]`），用 `-m` 会被 shell 截断。
+
 ```bash
 git add -A Assets/Scripts Server
-git commit -m "build(webgl): unblock WebGL compilation - platform-guard the socket-bound KCP files
+git commit -F- <<'MSG'
+build(webgl): unblock WebGL compilation - platform-guard the socket-bound KCP code
 
-WebGL has no System.Net.Sockets, and KcpNet's dependency on it runs through
-seven files: KcpClientTransport, KcpTransportBase, Kcp.cs (the KCP algorithm
-itself implements System.Net.Sockets.Kcp.IKcpCallback), the three Server/ files
-that back the in-process server the PlayMode tests use, and KcpNetClientAdapter
-transitively. Guarding them with #if !UNITY_WEBGL lets the assembly compile
-everywhere.
+WebGL has no System.Net.Sockets. Eight files in KcpNet depend on it: the seven
+that were obvious (KcpClientTransport, KcpTransportBase, Kcp.cs, the three
+Server/ files that back the in-process server the PlayMode tests use, and
+KcpNetClientAdapter transitively) plus KcpClient, which only surfaced when the
+build target was actually switched - it evaluates 'Transport is
+KcpTransportBase', and the base class is itself guarded.
+
+Guarding KcpNet alone is not enough. Two assemblies outside it reference the
+guarded types and fail the same compile: KcpNet.PlayModeTests, whose nine tests
+construct KcpNetClientAdapter directly, and Assets/Scripts/Examples, which has
+no asmdef and so lands in Assembly-CSharp. The three example files get the same
+#if guard as KcpNet; they are self-contained and nothing outside Examples
+references them. The test assembly gets defineConstraints ["!UNITY_WEBGL"],
+which drops it from both the Editor and the Player assembly sets while a WebGL
+build target is active. includePlatforms ["Editor"] was tried first and
+rejected: Unity then compiles the assembly's [UnityTest]s as EditMode tests,
+turning the 222-test EditMode suite into 240 with 17 failures.
 
 INetworkClient moves to Cool.Protocol with its seven member signatures
 untouched, so both transports can share it and the abstraction is no longer
 owned by KCP. KcpOptions/ILogger/IMessageExecutor deliberately stay unguarded so
 the KcpNet namespace still exists under WebGL.
 
-GameSys keeps its KcpNet reference - asmdef references cannot be
-platform-conditional, and dropping it would hide KcpNetClientAdapter from PC
-builds too."
+GameSys gains a WebSocketNet reference and keeps its KcpNet one, both for the
+same reason: asmdef references cannot be platform-conditional. The first is
+needed for ClientNetworkHost's WebGL branch; dropping the second would hide
+KcpNetClientAdapter from PC builds too.
+MSG
 ```
 
 ---
@@ -382,7 +408,7 @@ namespace KcpServer
         }
 ```
 
-并把 `Server3C.cs:410` 那行改为：
+并把 `Server3C.cs:404` 那行改为：
 
 ```csharp
                 _gameLoop.EnqueueAction(() => _sessionManager.RemoveById(session.SessionId));
@@ -2742,6 +2768,19 @@ discovered."
 
 > 待执行时填写。格式与既有 P6 计划一致：逐任务列 commit、偏差（含现场发现与处理）、三套测试实际通过数、Task 8 的验收实测结果、本批次新发现的 backlog 项。
 
+### Task 1 现场发现（2026-10-09，commit 9b8c958）
+
+**计划的前提是错的：守完 `KcpNet` 解不开 WebGL 阻塞。** 本计划的文件清单原本基于静态阅读，实测（真的把构建目标切到 WebGL）暴露出三层问题：
+
+| # | 发现 | 处理 |
+|---|---|---|
+| 1 | `Client/KcpClient.cs:40` 判断 `Transport is KcpTransportBase`，基类被守卫 ⇒ **它必须一起守卫**。计划只点了 6+1 个文件 | 补第 8 个守卫（Step 8 条文已预授权） |
+| 2 | `KcpNet.PlayModeTests.asmdef`（`includePlatforms: []`）里 9 个测试直接 `new KcpNetClientAdapter()` ⇒ WebGL 下编译失败 | 加 `"defineConstraints": ["!UNITY_WEBGL"]` |
+| 3 | `Assets/Scripts/Examples/`（**无 asmdef**，落在 Assembly-CSharp）3 个文件引用 `KcpClient`/`KcpServer` ⇒ 同样失败 | 3 个文件各加 `#if !UNITY_WEBGL` |
+| 4 | `ClientNetworkHost` 新增 `using WebSocketNet;` ⇒ `GameSys.asmdef` 必须加 `"WebSocketNet"` 引用（asmdef 引用不可条件化） | 加引用；`KcpNet` 引用保留 |
+
+**一次被实测否决的裁定（值得记住，别再试）：** 发现 #2 的第一版解法是 `"includePlatforms": ["Editor"]`（当时以为 `GameSys.EditorTests` 是先例）。**实测不成立**——Unity Test Framework 按程序集的目标平台判定测试模式，Editor-only 程序集里的 `[UnityTest]` 会被**重分类为 EditMode 测试**：PlayMode 套件直接消失（`No tests found`），EditMode 从 222 变成 **240 / 17 失败**。`GameSys.EditorTests` 之所以是 Editor-only，是因为它**本来就是** EditMode 测试程序集——它是结论，不是范例。正确解法是 `defineConstraints`：它只影响编译，不动测试模式判定。
+
 ---
 
 ## Self-Review（撰写自查）
@@ -2785,7 +2824,7 @@ discovered."
 | `WebSocketNetState.*`（`create` / `get` / `enqueue` / `poll`） | Task 4 Step 1 | Task 4 Step 3 的 11 条 Node 测试 |
 | `IServerSession` | Task 2 Step 1 | Task 2 Step 2/3/5/6、Task 5 会话实现 |
 | `Server3C.RegisterSession` | Task 2 Step 6 | Task 5 Step 5 监听器 |
-| `SessionManager.RemoveById` | Task 2 Step 4 | Task 2 Step 4 的 `Server3C:410` |
+| `SessionManager.RemoveById` | Task 2 Step 4 | Task 2 Step 4 的 `Server3C.cs:404`（`OnSessionDisconnected` 内） |
 | `JoystickInputAdapter(Func<Vector2>, Func<Vector2>)` | Task 6 Step 3 | Task 6 Step 1 测试、Task 6 Step 6 binder |
 | `VirtualJoystick.Value` / `TouchLookArea.Delta` | Task 6 Step 5 | Task 6 Step 6 binder |
 

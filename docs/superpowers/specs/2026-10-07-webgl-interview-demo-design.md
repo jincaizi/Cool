@@ -15,7 +15,7 @@
 | F4 | `INetworkClient.cs` 位于 `Assets/Scripts/AOT/KcpNet/`，即**住在 `KcpNet` 程序集内** | 见 F6——这是本设计的核心阻塞点 |
 | F5 | `KcpNet.asmdef` 的 `includePlatforms` / `excludePlatforms` **均为空** → 所有平台都编译；而 `KcpClientTransport` 使用 `System.Net.Sockets` | WebGL 无 `System.Net.Sockets` → **WebGL 构建编译失败** |
 | F6 | `GameSys.asmdef`（Hotfix）`references: ["KcpNet"]`，且 5 个文件 `using KcpNet`；`ClientNetworkHost.cs:181` 直接 `new KcpNetClientAdapter()` | 抽象被实现绑架：只要 `GameSys` 引用 `KcpNet`，WebGL 就**打不出包** |
-| **F10** | `KcpNet` 里对 `System.Net.Sockets` 的依赖**贯穿 6 个文件**——`Client/KcpClientTransport`、`Common/KcpTransportBase`、**`Common/Kcp.cs`（KCP 算法本体，实现 `System.Net.Sockets.Kcp.IKcpCallback`）**，以及 `Server/` 下 3 个给 PlayMode 用的进程内服务器文件 | 排除整个 `KcpNet` 程序集是**唯一**能解除 `System.Net.Sockets` 的办法；靠 `#if` 掏空体积很大 |
+| **F10** | `KcpNet` 里对 `System.Net.Sockets` 的依赖**贯穿 8 个文件**——`Client/KcpClientTransport`、**`Client/KcpClient`（判断 `Transport is KcpTransportBase`，基类被守卫则它必须一起守卫）**、`Common/KcpTransportBase`、**`Common/Kcp.cs`（KCP 算法本体，实现 `System.Net.Sockets.Kcp.IKcpCallback`）**，以及 `Server/` 下 3 个给 PlayMode 用的进程内服务器文件 | 另有**两处程序集层面**的同类阻塞：`KcpNet.PlayModeTests`（9 个测试直接 `new KcpNetClientAdapter()`）与走 Assembly-CSharp 的 `Assets/Scripts/Examples/`。三处合起来才是"WebGL 能编译"的完整条件——**T1 执行时实测补出，写计划时的 6 文件估算不足**（见计划 §执行偏差记录） |
 | **F11** | **asmdef 的引用不能按平台条件化**。若 `GameSys` 不引用 `KcpNet`，则 **PC 端也看不到** `KcpNetClientAdapter`；而"平台专属 provider 程序集 + 场景注入"绕不开——`DemoDay` 场景是 PC 与 WebGL **共享**的，挂不下两种平台专属 provider | 原定的"排除程序集 + 移除引用"两动作**行不通**，T1 形态据此修正（见 D-W2） |
 | F7 | `IInputAdapter` 抽象**已存在且干净**（5 个成员，`KeyboardInputAdapter.cs:8`）。但 `JoystickInputAdapter`（71 行）**不是可用实现**——它读 `Horizontal_Joystick` / `Vertical_Joystick` / `Mouse X_Joystick` 三个轴，而 `ProjectSettings/InputManager.asset` 里**这三个轴都不存在**（实测），`GetAxisRaw` 对未定义轴会**抛异常**；且它第 27 行 `input.normalized` 丢弃模拟量（P6 审查点过同一个坑）。全项目从未实例化它（`InputManager.cs:40` 硬编码 `new KeyboardInputAdapter()`） | **抽象可复用，实现要重写**——不是"接线" |
 | F8 | `MessageFlags` 定义在 `Cool.Protocol`（`MessageCodec` 签名使用它），该程序集无 socket 依赖 | `Cool.Protocol` 是搬运 `INetworkClient` 的落点 |
@@ -41,7 +41,7 @@
 
 | 层 | 内容 |
 |---|---|
-| **解除构建阻塞** | `INetworkClient` 搬到 `Cool.Protocol`；`KcpNet` 下 6 个 socket 文件加 `#if !UNITY_WEBGL`；`ClientNetworkHost` 按平台选择 **channel**（adapter 两端统一）；新增 `WebSocketNet` 程序集（见 D-W2、D-W11） |
+| **解除构建阻塞** | `INetworkClient` 搬到 `Cool.Protocol`；`KcpNet` 内 **8 个**文件加 `#if !UNITY_WEBGL`；`KcpNet.PlayModeTests.asmdef` 加 `defineConstraints`；`Examples` 3 文件加守卫；`ClientNetworkHost` 按平台选择 **channel**（adapter 两端统一）；新增 `WebSocketNet` 程序集（见 D-W2、D-W11、F10） |
 | **传输通道** | **所有平台**的客户端都走 `WebSocketClientAdapter : INetworkClient`——PC/编辑器用 `DotNetWebSocketChannel`，WebGL 用 `WebGLWebSocket.jslib`；`KcpNetClientAdapter` 保留为第二实现但不再是默认（见 D-W11） |
 | **服务端双栈** | `IServerSession` 抽取 + `WebSocketServerSession` + `WebSocketServerListener`（与既有 UDP/KCP 同进程并存） |
 | **移动端输入** | `MobileInputAdapter`（摇杆）+ `TouchCameraInput`（触屏转视角）+ 攻击/技能/跳跃按钮 |
@@ -95,7 +95,8 @@
 | # | 组件 | 位置 | 职责 | 可独立测试 |
 |---|---|---|---|---|
 | C1 | `INetworkClient`（搬运） | `AOT/Protocol/` | 传输抽象，供两端实现 | 编译即验证 |
-| C2 | 6 个 socket 文件加 `#if !UNITY_WEBGL` | `AOT/KcpNet/` | `KcpClientTransport` / `KcpTransportBase` / `Kcp.cs` / `Server/` 下 3 个 | 构建即验证 |
+| C2 | 8 个文件加 `#if !UNITY_WEBGL` | `AOT/KcpNet/` | `KcpClientTransport` / `KcpClient` / `KcpTransportBase` / `Kcp.cs` / `Server/` 下 3 个 / `KcpNetClientAdapter` | 构建即验证 |
+| C2b | 程序集层面同类阻塞 | `PlayModeTests.asmdef`、`Examples/`、`GameSys.asmdef` | `defineConstraints` / `#if` 守卫 / 引用增补 | 构建即验证 |
 | C3 | **channel** 平台选择 | `Hotfix/.../SyncLayer/ClientNetworkHost` | adapter **两端统一**为 `WebSocketClientAdapter`；`#if UNITY_WEBGL` → `WebGLWebSocketChannel`，否则 `DotNetWebSocketChannel` | 构建即验证 |
 | C4 | `WebSocketClientAdapter` | `AOT/WebSocketNet/`（新程序集） | `INetworkClient` 的 WS 实现：连接、收发、心跳、事件 | ✅ **EditMode 可测**——`ClientWebSocket` 在编辑器里可用，只有 WebGL 构建不可用 |
 | C5 | `WebGLWebSocket.jslib` | `Assets/Plugins/WebGL/` | **单向**边界：C# → 浏览器 `WebSocket`（`Connect`/`Send`/`Poll`/`GetState`/`GetCloseCode`/`GetDropped`/`Close`）；JS 侧回调只改状态、**不回调 C#** | ✅ 状态机 **Node 单测**（`tests/webgl/`）；⚠️ 7 个入口函数与浏览器运行时人工（R2） |
@@ -126,7 +127,7 @@
 
 | # | 任务 | 规模 | 验收 |
 |---|---|---|---|
-| **T1** | `INetworkClient` 搬到 `Cool.Protocol`（命名空间随之改为 `Cool.Protocol`）；`KcpNet` 下 6 个 socket 文件加 `#if !UNITY_WEBGL`；`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选择 adapter（**过渡态**：T1 时 PC 侧仍是 KCP 占位，通道在 T3 补、PC 侧统一在 T4 完成——见 D-W11）；新增 `WebSocketNet` 程序集（**所有平台**，先放一个占位实现供 T3 填充）。<br>**注意**：`GameSys.asmdef` 的 `KcpNet` 引用**保留不动**；`KcpNet.PlayModeTests.asmdef` 亦不动 | 中 | ① 原 PC/Editor 构建与全部测试**照常通过**；② **WebGL 平台能编译**（空场景构建足以证明 `System.Net.Sockets` 不再是阻塞；真实场景的 WebGL 构建在 T4/T9 验证） |
+| **T1** | `INetworkClient` 搬到 `Cool.Protocol`（命名空间随之改为 `Cool.Protocol`）；`KcpNet` 内 **8 个**文件加 `#if !UNITY_WEBGL`；`KcpNet.PlayModeTests.asmdef` 加 `"defineConstraints": ["!UNITY_WEBGL"]`；`Assets/Scripts/Examples/` 3 个文件加守卫；`GameSys.asmdef` 加 `"WebSocketNet"` 引用；`ClientNetworkHost` 用 `#if UNITY_WEBGL` 选择 adapter（**过渡态**：T1 时 PC 侧仍是 KCP 占位，通道在 T3 补、PC 侧统一在 T4 完成——见 D-W11）；新增 `WebSocketNet` 程序集（**所有平台**，先放一个占位实现供 T3 填充）。<br>**注意**：`GameSys.asmdef` 的 `KcpNet` 引用**保留不动** | 中 | ① 原 PC/Editor 构建与全部测试**照常通过**；② **WebGL 平台能编译**（空场景构建足以证明 `System.Net.Sockets` 不再是阻塞；真实场景的 WebGL 构建在 T4/T9 验证） |
 
 ### L1 · 打通 WS 通道（面试官"能连上"）
 
@@ -190,7 +191,7 @@
 | # | 决策 | 理由 |
 |---|---|---|
 | **D-W1** | 优先 **WebGL 网页版**，微信小游戏延后 | 两者技术代价几乎相同（同一套 WSS 通道），但小游戏额外需要微信账号 + 类目审核 + 域名备案——**那是可能卡住整个计划的、不可控的非技术依赖**。网页版只要一个域名 |
-| **D-W2** | `INetworkClient` **搬到 `Cool.Protocol`**（成员签名一字不改）。**但 `KcpNet.asmdef` 不排除 WebGL、`GameSys` 保留对 `KcpNet` 的引用**——改为在这 6 个 socket 文件内加 `#if !UNITY_WEBGL`，并由 `ClientNetworkHost` 用 `#if UNITY_WEBGL` 选择 adapter | **写计划时实测推翻了原方案的另两个动作**：asmdef 引用不可平台条件化（F11），排除程序集会让 PC 端也引用不到；而平台专属 provider 程序集需要场景注入，但 `DemoDay` 是 PC/WebGL 共享场景，挂不下两种 provider。<br>**代价**：`KcpNet` 在 WebGL 下是**空壳程序集**（编译进去、无 socket 实现）——体积与编译时间的代价，非正确性代价。**收益**：零场景改动、零注册表、零 link.xml |
+| **D-W2** | `INetworkClient` **搬到 `Cool.Protocol`**（成员签名一字不改）。**但 `KcpNet.asmdef` 不排除 WebGL、`GameSys` 保留对 `KcpNet` 的引用**——改为在 `KcpNet` 内 **8 个**文件加 `#if !UNITY_WEBGL`（原估 6 个，执行时实测补出 `KcpClient.cs`），**外加两处程序集层面处理**（`PlayModeTests` 用 `defineConstraints`、`Examples` 3 文件加守卫），并由 `ClientNetworkHost` 用 `#if UNITY_WEBGL` 选择 adapter | **写计划时实测推翻了原方案的另两个动作**：asmdef 引用不可平台条件化（F11），排除程序集会让 PC 端也引用不到；而平台专属 provider 程序集需要场景注入，但 `DemoDay` 是 PC/WebGL 共享场景，挂不下两种 provider。<br>**代价**：`KcpNet` 在 WebGL 下是**空壳程序集**（编译进去、无 socket 实现）——体积与编译时间的代价，非正确性代价。**收益**：零场景改动、零注册表、零 link.xml |
 | **D-W3** | 服务端**同进程双栈**（UDP/KCP + WS） | `IServerSession` 抽取是 WS 路径本来就要做的，双栈几乎白送；且让"PC 端 + 浏览器端同场"成为 AOI/战斗的活证据 |
 | **D-W4** | **不做包体优化，也不测量首屏加载**（人类裁定） | 先落地 WebGL 形态；后期清理未使用资源后再优化。**代价**：后期优化没有 before 数可对照，且 R1 在面试前始终是不可估的未知数 |
 | **D-W5** | 移动端输入**复用既有 `IInputAdapter` 抽象**，但**重写实现** | 抽象（5 成员）可复用、`KeyboardInputAdapter` 不受影响；`JoystickInputAdapter` 读的三个 legacy 轴不存在（F7），调用即抛异常，且丢弃模拟量。T6 要建真实 UI 摇杆并让它驱动适配器——**`IInputAdapter` 契约不变** |
