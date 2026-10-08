@@ -98,7 +98,7 @@
 | C2 | 6 个 socket 文件加 `#if !UNITY_WEBGL` | `AOT/KcpNet/` | `KcpClientTransport` / `KcpTransportBase` / `Kcp.cs` / `Server/` 下 3 个 | 构建即验证 |
 | C3 | **channel** 平台选择 | `Hotfix/.../SyncLayer/ClientNetworkHost` | adapter **两端统一**为 `WebSocketClientAdapter`；`#if UNITY_WEBGL` → `WebGLWebSocketChannel`，否则 `DotNetWebSocketChannel` | 构建即验证 |
 | C4 | `WebSocketClientAdapter` | `AOT/WebSocketNet/`（新程序集） | `INetworkClient` 的 WS 实现：连接、收发、心跳、事件 | ✅ **EditMode 可测**——`ClientWebSocket` 在编辑器里可用，只有 WebGL 构建不可用 |
-| C5 | `WebGLWebSocket.jslib` | `Assets/Plugins/WebGL/` | C#↔浏览器 `WebSocket` 的唯一边界 | ⚠️ 人工（R2） |
+| C5 | `WebGLWebSocket.jslib` | `Assets/Plugins/WebGL/` | **单向**边界：C# → 浏览器 `WebSocket`（`Connect`/`Send`/`Poll`/`GetState`/`GetCloseCode`/`GetDropped`/`Close`）；JS 侧回调只改状态、**不回调 C#** | ✅ 状态机 **Node 单测**（`tests/webgl/`）；⚠️ 7 个入口函数与浏览器运行时人工（R2） |
 | C6 | `IServerSession`（抽取） | `Server/` | 业务需要的会话契约：`SessionId` / `Send(MessageId, IMessage, MessageFlags)` / `IsConnected` / `LastActivityTime` | 既有测试即验证 |
 | C7 | `WebSocketServerSession` | `Server/` | `System.Net.WebSockets` 收发（比 KCP 版简单——TCP 自带流控） | Server.Tests |
 | C8 | `WebSocketServerListener` | `Server/` | 接受 WS → 建会话 → 喂 `ProcessPacket` | ⚠️ 集成测 |
@@ -134,7 +134,7 @@
 |---|---|---|---|
 | **T2** | 抽 `IServerSession`，`Server3C`（8 处）与 `SessionManager` 改依赖接口 | 小 | Server.Tests 132/132 全绿（纯机械替换，行为不变） |
 | **T3** | `WebSocketClientAdapter : INetworkClient` + `IWebSocketChannel` / `DotNetWebSocketChannel`（新程序集 `WebSocketNet`） | 中 | EditMode：经**假通道**（`FakeChannel`）跑通连接/收发/心跳/断开事件——真实往返由 T4（浏览器）与 T5（集成）覆盖 |
-| **T4** | `WebGLWebSocket.jslib` + 在 WebGL 构建里跑通 echo；**并把 PC 也切到 `WebSocketClientAdapter`（D-W11 的落点）** | 中 | 浏览器打开 → echo 往返成功（**本任务的主要风险在 jslib 边界，R2**）；切换后 PlayMode 并集仍 18/18（既有 PlayMode 测试直接构造 `KcpNetClientAdapter`，不经 `ClientNetworkHost`，故不受影响） |
+| **T4** | `WebGLWebSocket.jslib`（**C# 拉模式，JS 不回调 C#**）+ 浏览器验证；**并把 PC 也切到 `WebSocketClientAdapter`（D-W11 的落点）** | 中 | ① `node --test tests/webgl/websocket-state.test.js` 全绿（状态机 11 条）；② 浏览器里 WS 帧**双向流动**（**本任务的主要风险在 jslib 边界，R2**）；③ 切换后 PlayMode 并集仍 18/18（既有 PlayMode 测试直接构造 `KcpNetClientAdapter`，不经 `ClientNetworkHost`，故不受影响） |
 | **T5** | `WebSocketServerSession` + `WebSocketServerListener`（双栈） | 中 | 浏览器客户端 + PC 包**同时**连同一服务器（**两端都走 WS**），互相可见（AOI 双端渲染） |
 
 ### L2 · 让它在手机上能玩
@@ -168,7 +168,8 @@
 | `WebSocketServerSession` | Server.Tests 单测 |
 | `MobileInputAdapter` 的模拟量解析 | EditMode |
 | `ClientNetworkHost` 的接线 + PC 真实往返（`DotNetWebSocketChannel`） | **人工**——Editor 跑 `DemoDay` 或 PC 构建连真服务器（T5 Step 7 第 2 项）。9 个 PlayMode 测试全部直接构造 `KcpNetClientAdapter`，**覆盖不到**这条路径 |
-| **jslib 边界 + 浏览器运行时** | **人工**（不可自动化，这是本设计的已知缺口） |
+| jslib 的**状态机**（入队 / 取帧 / 背压 / 队列上限 / 关闭码） | **Node 单测**（`node --test tests/webgl/websocket-state.test.js`，零依赖）——状态机把 heap 作为**参数**传入，因此不认识 Unity，可在 Node 里直接跑 |
+| jslib 的入口函数 + 浏览器运行时 | **人工**（7 个入口，除 `Connect` 外各 1-3 行——这就是全部的不可测残留） |
 | 四条声称面 | **人工**，在真实浏览器里 |
 
 **回归基线**：Server.Tests 132/132 · EditMode 222/222 · PlayMode 18/18（三配置并集）· PC 包照常可出。
@@ -178,7 +179,7 @@
 | # | 风险 | 影响 | 应对 |
 |---|---|---|---|
 | **R1** | **首屏加载时间**（包现 136MB） | "打开链接等 1 分钟"在面试里与崩溃同级 | 人类裁定：**本批次不做，也不测量**——先落地 WebGL 形态，后期清理未使用资源后再优化。**本设计不设缓解措施，风险被显式接受** |
-| **R2** | **jslib 边界**（C#↔JS 字符串封送、回调时机） | 本设计最容易卡住的纯技术点 | 有成熟第三方 WebSocket 插件可参照/采用；T4 单独成任务，失败早暴露 |
+| **R2** | **jslib 边界** | 本设计最容易卡住的纯技术点 | **反转跨界方向**：不让 JS 回调 C#——`gameInstance` 在 Unity 2020.1 就被移除（loader API 改名 `createUnityInstance`），而 `SendMessage` 还要字符串方法名且失败静默。改成 C# 每帧 `Poll`，跨界只剩 `DllImport` 一个方向。**状态机进 Node 单测**，入口函数缩到 7 个、除 `Connect` 外各 1-3 行。T4 单独成任务，失败早暴露 |
 | **R3** | **WSS 需要域名 + 证书** | 非技术依赖 | 比微信备案轻得多（一个域名 + Let's Encrypt）。**演示形态下不做鉴权**——公网暴露意味着任何人知道 URL 即可连，需在演示期接受并说明 |
 | **R4** | **手机端性能未知** | PC 上 `--bots 100` 能跑，手机浏览器不一定 | T8 明确记录手机端帧率；若跑不动，P3 的声称降级为"桌面浏览器演示" |
 | **R5** | **标签页后台 / 移动端杀标签** | 切 App 回来断线 | 列为已知边界话术（§5） |

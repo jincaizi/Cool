@@ -24,7 +24,7 @@
 | **D-W8** | `WebSocketClientAdapter` 内部再分一层 `IWebSocketChannel` | WebGL 必须走 jslib（浏览器 API），而**编辑器里 `ClientWebSocket` 可用**——分层后适配器逻辑可在 EditMode 单测，只有 jslib 与浏览器运行时留人工（D-W6 的落点） |
 | **D-W9** | WS 上**一条消息 = 一个 WS 帧**，直接复用 `MessageCodec.Encode`/`TryDecode` | `MessageCodec` 完全与传输解耦（规格 F2）；WS 本身是消息边界的，无需再做流式拆帧 |
 | **D-W10** | 应用**从未使用** KCP 的非可靠通道（全部 `MessageFlags.Reliable`） | 所以 WebSocket(TCP) 的语义与现有实际行为**一致**，不存在"换 TCP 反而变差"的落差（规格 F3） |
-| **D-W11** | **两端统一走 WebSocket**：`WebSocketClientAdapter` 是 PC 与 WebGL **唯一**的客户端传输；`KcpNetClientAdapter` 保留为第二实现但**不再是默认**（人类裁定："保留原有 kcp 代码，以后再删"）。落点在 T4 Step 4 | **收益**：F3 表明 KCP 的不可靠通道是死代码，让它继续当 PC 默认是零收益；统一后 **PC 自我验证与浏览器演示走同一条代码路径**——旧形态下"在 PC 上验的每一件事，走的都是面试官那边不存在的那条路"。平台分叉从"两条传输"降级为"两个 channel"。<br>**代价**：master 的 PC 传输与 P6 冻结包所用的 `KcpNetClientAdapter` 不再一致（冻结包不随 master 演进，接受）。<br>**不影响 PlayMode**：9 个 PlayMode 测试全部**直接构造 `KcpNetClientAdapter`**，不经 `ClientNetworkHost`（已实测）——故 18/18 基线与 KCP 传输测试完全不受影响 |
+| **D-W11** | **两端统一走 WebSocket**：`WebSocketClientAdapter` 是 PC 与 WebGL **唯一**的客户端传输；`KcpNetClientAdapter` 保留为第二实现但**不再是默认**（人类裁定："保留原有 kcp 代码，以后再删"）。落点在 T4 Step 7 | **收益**：F3 表明 KCP 的不可靠通道是死代码，让它继续当 PC 默认是零收益；统一后 **PC 自我验证与浏览器演示走同一条代码路径**——旧形态下"在 PC 上验的每一件事，走的都是面试官那边不存在的那条路"。平台分叉从"两条传输"降级为"两个 channel"。<br>**代价**：master 的 PC 传输与 P6 冻结包所用的 `KcpNetClientAdapter` 不再一致（冻结包不随 master 演进，接受）。<br>**不影响 PlayMode**：9 个 PlayMode 测试全部**直接构造 `KcpNetClientAdapter`**，不经 `ClientNetworkHost`（已实测）——故 18/18 基线与 KCP 传输测试完全不受影响 |
 
 **Out of scope（显式排除，防范围蔓延）**：微信小游戏、P7 打怪升级、P8 PvP、P2 移动同步的现场演示、原生 Android/iOS 打包、包体优化与首屏加载测量、鉴权、聊天/背包/组队/交易、`Launched/Down/GetUp/Death` 的表现层补齐（P6 已登记 backlog）。
 
@@ -49,9 +49,12 @@
 | `Assets/Scripts/AOT/WebSocketNet/WebSocketNet.asmdef` | 创建 | 新程序集，**所有平台**（WebGL 要编译它） |
 | `Assets/Scripts/AOT/WebSocketNet/IWebSocketChannel.cs` | 创建 | D-W8 的通道抽象 |
 | `Assets/Scripts/AOT/WebSocketNet/DotNetWebSocketChannel.cs` | 创建 | `ClientWebSocket` 实现（编辑器/原生） |
-| `Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketChannel.cs` | 创建 | jslib 实现（仅 WebGL） |
+| `Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketChannel.cs` | 创建 | jslib 实现（仅 WebGL）：**拉模式**，无背景接收循环 |
+| `Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketPump.cs` | 创建 | 隐藏 MonoBehaviour，每帧调 `WebGLWebSocketChannel.Pump()` |
 | `Assets/Scripts/AOT/WebSocketNet/WebSocketClientAdapter.cs` | 创建 | `INetworkClient` 的 WS 实现 |
-| `Assets/Plugins/WebGL/WebGLWebSocket.jslib` | 创建 | C# ↔ 浏览器 WebSocket 的唯一 JS 边界 |
+| `Assets/Plugins/WebGL/WebGLWebSocket.jslib` | 创建 | C# → 浏览器 WebSocket 的唯一边界（**没有反向**）；状态机 + 4 组入口 |
+| `tests/webgl/jslib-harness.js` | 创建 | 在 Node 里加载 `.jslib` 的假环境（`LibraryManager` / 假 `WebSocket` / 注入 heap） |
+| `tests/webgl/websocket-state.test.js` | 创建 | jslib 状态机单测（`node --test`，无依赖） |
 | `Assets/Scripts/Tests/Editor/WebSocketNet/WebSocketClientAdapterTests.cs` | 创建 | 适配器行为单测（经 `FakeChannel`，非真 socket——真实往返由 T4/T5 覆盖） |
 | `Server/IServerSession.cs` | 创建 | 业务真正需要的会话契约 |
 | `Server/KcpServerSession.cs` | 修改 | `: IServerSession` |
@@ -98,7 +101,7 @@ git mv Assets/Scripts/AOT/KcpNet/INetworkClient.cs.meta Assets/Scripts/AOT/Proto
 
 | 文件 | 改动 |
 |---|---|
-| `Hotfix/.../SyncLayer/ClientNetworkHost.cs` | **保留** `using KcpNet;`（此刻仍需 `KcpNetClientAdapter`；**T4 Step 4 统一到 WS 后即失效，届时删除**）；**新增** `using Cool.Protocol;`（字段要用 `INetworkClient`） |
+| `Hotfix/.../SyncLayer/ClientNetworkHost.cs` | **保留** `using KcpNet;`（此刻仍需 `KcpNetClientAdapter`；**T4 Step 7 统一到 WS 后即失效，届时删除**）；**新增** `using Cool.Protocol;`（字段要用 `INetworkClient`） |
 | `Hotfix/.../SyncLayer/ClientNetworkManager.cs` | **删除** `using KcpNet;`（已 `using Cool.Protocol`） |
 | `Hotfix/.../SyncLayer/CombatNetworkBridge.cs` | **删除** `using KcpNet;`（已 `using Cool.Protocol`） |
 | `Hotfix/.../SyncLayer/MessageDispatcher.cs` | **删除** `using KcpNet;`（已 `using Cool.Protocol`） |
@@ -222,7 +225,7 @@ namespace WebSocketNet
 
 **并加 `using WebSocketNet;`**（仅 WebGL 分支用到，但 `using` 不能条件化——该程序集在所有平台都在，故安全）。
 
-> **本步是过渡形态，不是终态。** `WebSocketClientAdapter` 的构造函数参数在 T3 补（通道），PC 分支在 **T4 Step 4 改成 `DotNetWebSocketChannel`**（D-W11：两端统一走 WS）。本步的 `#else` 保持 KCP 是因为此刻还没有可用的 PC 侧 WebSocket 通道——中途态必须每一步都能编译。
+> **本步是过渡形态，不是终态。** `WebSocketClientAdapter` 的构造函数参数在 T3 补（通道），PC 分支在 **T4 Step 7 改成 `DotNetWebSocketChannel`**（D-W11：两端统一走 WS）。本步的 `#else` 保持 KCP 是因为此刻还没有可用的 PC 侧 WebSocket 通道——中途态必须每一步都能编译。
 
 - [ ] **Step 7: 验证 PC/Editor 侧未回归**
 
@@ -481,7 +484,7 @@ namespace WebSocketNet
         /// <summary>发送一帧（一条消息一帧，见 D-W9）</summary>
         Task SendAsync(byte[] data, int offset, int length);
 
-        /// <summary>收到一帧（回调线程由实现决定；WebGL 下是浏览器事件线程）</summary>
+        /// <summary>收到一帧。回调线程由实现决定：DotNet 是后台接收循环线程，WebGL 是 Unity 主线程（帧泵）</summary>
         event Action<byte[]>? MessageReceived;
         event Action<string>? Closed;
         event Action<Exception>? Error;
@@ -897,7 +900,7 @@ namespace WebSocketNet
 
 > `WebGLWebSocketChannel` 在 Task 4 创建。本步骤**先不要改这一行**——等 T4 完成再改，否则编译不过。本任务只到 Step 6 为止；`ClientNetworkHost` 的 WebGL 分支暂用 T1 的占位（`new WebSocketNet.WebSocketClientAdapter(...)` 的参数在 T4 补）。
 >
-> **`DotNetWebSocketChannel` 本步已创建（Step 6），但先不接进来。** 接线放在 T4 Step 4，理由是那里紧接着跑一次 PlayMode 回归（T4 Step 5）——行为变更与它的验证放在同一步，比跨任务追溯可靠。
+> **`DotNetWebSocketChannel` 本步已创建（Step 6），但先不接进来。** 接线放在 T4 Step 7，理由是 T4 Step 9 紧接着跑一次 PlayMode 回归——行为变更与它的验证放在同一步，比跨任务追溯可靠。
 
 - [ ] **Step 8: 跑全量 EditMode 回归**
 
@@ -926,165 +929,416 @@ KCP transports are: System.Net.WebSockets does not exist there either."
 
 ---
 
-### Task 4: `WebGLWebSocket.jslib` + 浏览器 echo
+### Task 4: `WebGLWebSocket.jslib` + 浏览器验证
 
 **Files:**
 - 创建：`Assets/Plugins/WebGL/WebGLWebSocket.jslib`
 - 创建：`Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketChannel.cs`
-- 创建：`Assets/Scripts/AOT/WebSocketNet/WebSocketNetBridge.cs`（MonoBehaviour，JS 回调用）
-- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`（接上真实通道）
-- 修改：`Server/Program.cs`（起一个 WS echo，供本任务验证）
+- 创建：`Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketPump.cs`
+- 创建：`tests/webgl/jslib-harness.js`
+- 创建：`tests/webgl/websocket-state.test.js`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`（接上真实通道 + PC 统一到 WS）
+- 修改：`Server/Program.cs`（加 `--ws-echo` 通道自检开关）
+- 创建：`Server/WebSocketEchoListener.cs`（只回吐字节的 WS 端点，供本任务验证通道）
 
-**本任务是 R2 的落点，采用两条把风险压到最低的取舍：**
+**本任务是 R2 的落点。核心设计原则一句话：让 C# → JS 成为唯一的跨界方向。**
 
 | 方向 | 做法 | 为什么 |
 |---|---|---|
-| C# → JS（发送） | `[DllImport("__Internal")]` 传 `byte[]` | 这是**简单方向**：Unity 直接把数组封送成指针 |
-| JS → C#（接收） | **`SendMessage` + base64** | `dynCall` + `_malloc` + 手动 `dynCall_viii` 签名极易出错且难调试。base64 有 33% 开销，但演示消息量（15 帧/秒、几百字节）**完全无感** |
+| C# → JS（发送、取帧、查状态） | `[DllImport("__Internal")]` 传 `byte[]` / `int` | 这是**简单方向**：Unity 替你封送，没有名字要拼、没有生命周期要管 |
+| JS → C# | **不存在** | 见下 |
 
-- [ ] **Step 1: 写 jslib**
+**为什么不让 JS 回调 C#**（这不是"不够好"，是"跑不起来"）：
+
+1. `gameInstance` 在 **Unity 2020.1 就被移除**了——loader API 从 `UnityLoader.instantiate` 改成 `createUnityInstance`，实例只在 `createUnityInstance(...).then(...)` 之后存在。旧写法 `gameInstance.SendMessage(...)` 在 2022.3 上是 `ReferenceError`。
+2. 就算换成 `unityInstance`，`SendMessage` 仍然要求方法名**逐字匹配的字符串**，且失败是静默的（目标 GameObject 不存在时连控制台警告都没有）。
+3. `SendMessage` 只能传一个 `string`——这就是上一版方案要 base64 的原因（+33% 开销 + 逐字节字符串拼接）。
+4. `dynCall` + `_malloc` 那条路要走 `[MonoPInvokeCallback]` 与手写 dyncall 签名，错一个字符就是一种不透明的崩溃。
+
+**改成 C# 每帧去拉之后**：JS 侧的 `onmessage` 只把字节塞进队列，`onopen/onclose/onerror` 只改状态变量——**四个回调都不碰 Unity**。跨界只剩一个方向，且是不需要拼名字的那个。
+
+| | 旧方案（JS push） | 本方案（C# pull） |
+|---|---|---|
+| 接收 | `SendMessage`：字符串方法名、单参数、静默失败 | `WebSocketNet_Poll(handle, byte[] dest, int maxLen)` |
+| 编码 | base64（+33%） | 裸字节 |
+| C# 接收端 | `WebSocketNetBridge` MonoBehaviour + 4 个必须逐字匹配的公开方法 | **不存在** |
+| 建连 | `await Task.Delay(50)` 轮询 5 秒 | 轮询 `WebSocketNet_GetState(handle)`——**不依赖 WebGL 的 SynchronizationContext** |
+| 名字契约 | 4 个字符串 | **0 个** |
+| 不可测面积 | jslib 全文 + bridge 全文 | 7 个入口函数（除 `Connect` 外各 1-3 行；`Connect` 只做 `new WebSocket` + 挂 4 个回调） |
+
+> 顺带消掉的一个隐患：旧方案用 `Task.Delay` 等 open。WebGL 下它要靠 PlayerLoop 驱动的 SynchronizationContext 才会恢复——这条我写上一版时没有验证过，而一旦不成立，症状是"什么都没发生"。本方案不再有任何 `await` 定时器。
+
+- [ ] **Step 1: 写 jslib（状态机 + 7 个入口）**
 
 创建 `Assets/Plugins/WebGL/WebGLWebSocket.jslib`：
 
 ```javascript
 mergeInto(LibraryManager.library, {
+  // 全部状态住在 $WebSocketNetState 里。除 7 个入口函数外它不引用任何
+  // Unity/emscripten 全局——**heap 由参数传入**，所以状态机可以在 Node 里
+  // 直接单测（见 tests/webgl/websocket-state.test.js）。把不可测面积压到
+  // 最小的关键就在这一句：状态机不认识 Unity，入口函数不认识逻辑。
   $WebSocketNetState: {
     sockets: {},
     nextId: 1,
-    // JS 回调进入 Unity 的目标：运行时由 C# 侧创建的隐藏 GameObject
-    bridgeName: 'WebSocketNetBridge'
+    MAX_QUEUED_FRAMES: 256,
+
+    create: function (id, ws) {
+      var entry = {
+        ws: ws,
+        state: 0,        // 0=connecting 1=open 2=closed 3=failed
+        closeCode: 0,
+        queue: [],       // 每项一个 Uint8Array —— 一条消息 = 一个 WS 帧（D-W9）
+        dropped: 0
+      };
+      this.sockets[id] = entry;
+      return entry;
+    },
+
+    get: function (id) {
+      return Object.prototype.hasOwnProperty.call(this.sockets, id) ? this.sockets[id] : null;
+    },
+
+    enqueue: function (entry, bytes) {
+      entry.queue.push(bytes);
+      if (entry.queue.length > this.MAX_QUEUED_FRAMES) {
+        // 丢最旧的：积压到 256 帧说明 C# 已经很久没轮询，此时新数据才有价值。
+        // 丢的是内存，不丢的是"还能继续玩"。
+        entry.queue.shift();
+        entry.dropped++;
+      }
+    },
+
+    // 0 = 队列空；>0 = 写入的字节数；-1 = 该帧比缓冲大（**不出队**，C# 扩容后重试）
+    poll: function (entry, heap, destPtr, maxLen) {
+      if (entry.queue.length === 0) return 0;
+      var frame = entry.queue[0];
+      if (frame.length > maxLen) return -1;
+      heap.set(frame, destPtr);
+      entry.queue.shift();
+      return frame.length;
+    }
   },
 
   WebSocketNet_Connect: function (urlPtr) {
-    var url = UTF8ToString(urlPtr);
-    var id = WebSocketNetState.nextId++;
+    var ws;
     try {
-      var ws = new WebSocket(url);
+      ws = new WebSocket(UTF8ToString(urlPtr));
       ws.binaryType = 'arraybuffer';
     } catch (e) {
-      return -1;
+      return -1;                       // 非法 URL 等——构造期失败，同步返回
     }
-    WebSocketNetState.sockets[id] = ws;
+    var id = WebSocketNetState.nextId++;
+    var entry = WebSocketNetState.create(id, ws);
 
-    ws.onopen = function () {
-      gameInstance.SendMessage(WebSocketNetState.bridgeName, 'OnOpen', String(id));
-    };
+    // 三个回调都只改状态/入队，**不回调 C#**（本任务最重要的一条约束）
+    ws.onopen = function () { entry.state = 1; };
     ws.onmessage = function (ev) {
-      // 二进制帧 → base64 → SendMessage（见本任务开头的取舍表）
-      var bytes = new Uint8Array(ev.data);
-      var binary = '';
-      for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-      var b64 = btoa(binary);
-      gameInstance.SendMessage(WebSocketNetState.bridgeName, 'OnFrame', id + '|' + b64);
+      if (typeof ev.data === 'string') return;   // 服务端只发二进制帧；文本帧直接丢
+      WebSocketNetState.enqueue(entry, new Uint8Array(ev.data));
     };
     ws.onclose = function (ev) {
-      delete WebSocketNetState.sockets[id];
-      gameInstance.SendMessage(WebSocketNetState.bridgeName, 'OnClose', id + '|' + (ev.reason || 'closed'));
+      entry.state = 2;
+      entry.closeCode = ev.code || 0;
     };
     ws.onerror = function () {
-      gameInstance.SendMessage(WebSocketNetState.bridgeName, 'OnError', String(id));
+      if (entry.state !== 2) entry.state = 3;
     };
 
     return id;
   },
 
+  // C# 每帧调用（由 WebGLWebSocketPump 驱动）
+  WebSocketNet_Poll: function (handle, destPtr, maxLen) {
+    var entry = WebSocketNetState.get(handle);
+    if (!entry) return 0;
+    return WebSocketNetState.poll(entry, HEAPU8, destPtr, maxLen);
+  },
+
+  WebSocketNet_GetState: function (handle) {
+    var entry = WebSocketNetState.get(handle);
+    return entry ? entry.state : 2;    // 句柄不存在 ⇒ 按已关闭处理
+  },
+
+  WebSocketNet_GetCloseCode: function (handle) {
+    var entry = WebSocketNetState.get(handle);
+    return entry ? entry.closeCode : 0;
+  },
+
+  WebSocketNet_GetDropped: function (handle) {
+    var entry = WebSocketNetState.get(handle);
+    return entry ? entry.dropped : 0;
+  },
+
   WebSocketNet_Send: function (handle, dataPtr, length) {
-    var ws = WebSocketNetState.sockets[handle];
-    if (!ws || ws.readyState !== 1) return 0;
-    // 必须拷贝：HEAPU8 的视图在下次内存增长后会失效
+    var entry = WebSocketNetState.get(handle);
+    if (!entry || entry.state !== 1) return 0;
+    // 必须拷贝：HEAPU8 的视图在 wasm 堆增长后会失效
     var copy = new Uint8Array(length);
     copy.set(HEAPU8.subarray(dataPtr, dataPtr + length));
-    ws.send(copy);
+    entry.ws.send(copy);
     return 1;
   },
 
-  WebSocketNet_Close: function (handle, reasonPtr) {
-    var ws = WebSocketNetState.sockets[handle];
-    if (!ws) return;
-    ws.close(1000, reasonPtr ? UTF8ToString(reasonPtr) : 'normal');
+  WebSocketNet_Close: function (handle) {
+    var entry = WebSocketNetState.get(handle);
+    if (!entry) return;
+    try { entry.ws.close(1000, 'normal'); } catch (e) { /* 已经关了 */ }
     delete WebSocketNetState.sockets[handle];
-  },
-
-  WebSocketNet_IsOpen: function (handle) {
-    var ws = WebSocketNetState.sockets[handle];
-    return (ws && ws.readyState === 1) ? 1 : 0;
   }
 });
+
+// 浏览器控制台的自检钩子。Unity 的 framework.js 是包在闭包里的，$ 变量默认
+// 从 window 上够不着——没有这一行，"通道到底通没通"就只能靠 Network 面板猜。
+// 排查 Step 9 时：__wsnet.sockets[1].queue.length 在涨 = C# 没在轮询；
+// 恒为 0 且 state 不是 1 = 连接根本没建立。
+if (typeof window !== 'undefined') { window.__wsnet = WebSocketNetState; }
 ```
 
 > **`Assets/Plugins/WebGL/` 下的 `.jslib` 会被自动链接**，无需额外配置。但**注意**：目录里若同时存在 `.asmdef`，`.jslib` 的链接范围会受限——本目录不放 asmdef。
 
-- [ ] **Step 2: 写 JS 回调的 C# 接收端**
+- [ ] **Step 2: 写 Node 测试台**
 
-创建 `Assets/Scripts/AOT/WebSocketNet/WebSocketNetBridge.cs`：
+创建 `tests/webgl/jslib-harness.js`：
+
+```javascript
+// 把 .jslib 当普通 JS 载入 Node。
+// 加载期只提供它需要的两个全局（mergeInto / LibraryManager）；HEAPU8 与
+// UTF8ToString 只在函数体里出现，由测试按需注入——这正是状态机可测的原因。
+//
+// 注意 sandbox **故意不定义** gameInstance 与 SendMessage：一旦有人把
+// JS→C# 回调方向加回来，测试会当场以 ReferenceError 炸掉，而不是静默通过。
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+const JSLIB = path.join(__dirname, '..', '..', 'Assets', 'Plugins', 'WebGL', 'WebGLWebSocket.jslib');
+
+function loadJslib(globals) {
+  const sandbox = Object.assign({ console: console }, globals || {});
+
+  // 复刻 emscripten 的 mergeInto：$Foo 会被**提升成模块作用域里的 Foo**。
+  // 这一步不能省——入口函数里的 `WebSocketNetState.nextId++` 是自由变量引用，
+  // 真实构建里它在模块作用域内可以解析，而在这里必须真的挂成全局，
+  // 否则一调用就是 "WebSocketNetState is not defined"。
+  sandbox.LibraryManager = { library: {} };
+  sandbox.mergeInto = function (target, source) {
+    Object.keys(source).forEach(function (key) {
+      const name = key.charAt(0) === '$' ? key.slice(1) : key;
+      target[name] = source[key];
+    });
+  };
+
+  vm.createContext(sandbox);
+  vm.runInContext(fs.readFileSync(JSLIB, 'utf8'), sandbox, { filename: JSLIB });
+
+  const lib = sandbox.LibraryManager.library;
+  // 同上：把提升后的名字挂成全局（测试也用同一个名字读 MAX_QUEUED_FRAMES）
+  Object.keys(lib).forEach(function (key) {
+    if (!(key in sandbox)) sandbox[key] = lib[key];
+  });
+  return lib;
+}
+
+// 够用的假 WebSocket：测试自己决定何时触发 onopen/onmessage/onclose
+class FakeWebSocket {
+  constructor(url) {
+    this.url = url;
+    this.binaryType = '';
+    this.sent = [];
+    this.closedWith = null;
+    FakeWebSocket.instances.push(this);
+  }
+  send(data) { this.sent.push(data); }
+  close(code, reason) { this.closedWith = { code: code, reason: reason }; }
+}
+FakeWebSocket.instances = [];
+
+module.exports = { loadJslib, FakeWebSocket, JSLIB };
+```
+
+- [ ] **Step 3: 写状态机单测**
+
+创建 `tests/webgl/websocket-state.test.js`：
+
+```javascript
+// 运行：node --test tests/webgl/
+const test = require('node:test');
+const assert = require('node:assert');
+const fs = require('fs');
+const { loadJslib, FakeWebSocket, JSLIB } = require('./jslib-harness');
+
+const HEAP_SIZE = 4096;
+
+function setup() {
+  FakeWebSocket.instances = [];
+  const heap = new Uint8Array(HEAP_SIZE);
+  const lib = loadJslib({
+    WebSocket: FakeWebSocket,
+    HEAPU8: heap,
+    UTF8ToString: function () { return 'ws://127.0.0.1:8000/'; }
+  });
+  return { lib: lib, heap: heap };
+}
+
+function frame(bytes) { return Uint8Array.from(bytes); }
+
+test('回调期不碰 Unity：jslib 不引用任何 JS→C# 机制', () => {
+  const src = fs.readFileSync(JSLIB, 'utf8');
+  assert.ok(!/SendMessage/.test(src), 'jslib 不得使用 SendMessage');
+  assert.ok(!/gameInstance/.test(src), 'gameInstance 在 Unity 2020.1 已被移除');
+  assert.ok(!/dynCall/.test(src), 'dynCall 是刻意避开的易错方向');
+});
+
+test('Connect 返回句柄，onopen 前状态是 connecting', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  assert.ok(id > 0, 'handle 必须为正数');
+  assert.strictEqual(s.lib.WebSocketNet_GetState(id), 0);
+});
+
+test('onopen 后状态变 open，且能发送', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  const ws = FakeWebSocket.instances[0];
+  ws.onopen();
+
+  assert.strictEqual(s.lib.WebSocketNet_GetState(id), 1);
+  const payload = new Uint8Array([1, 2, 3]);
+  s.heap.set(payload, 64);
+  assert.strictEqual(s.lib.WebSocketNet_Send(id, 64, 3), 1);
+  assert.strictEqual(ws.sent.length, 1);
+});
+
+test('未 open 时 Send 返回 0 且不写 socket', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  const ws = FakeWebSocket.instances[0];
+  s.heap.set(new Uint8Array([9]), 64);
+
+  assert.strictEqual(s.lib.WebSocketNet_Send(id, 64, 1), 0);
+  assert.strictEqual(ws.sent.length, 0);
+});
+
+test('Poll 在队列空时返回 0', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 0, HEAP_SIZE), 0);
+});
+
+test('onmessage 入队，Poll 按序取出并把字节写进 heap', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  const ws = FakeWebSocket.instances[0];
+  ws.onmessage({ data: frame([10, 11]).buffer });
+  ws.onmessage({ data: frame([20]).buffer });
+
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 128, HEAP_SIZE), 2);
+  assert.deepStrictEqual(Array.from(s.heap.slice(128, 130)), [10, 11]);
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 128, HEAP_SIZE), 1);
+  assert.deepStrictEqual(Array.from(s.heap.slice(128, 129)), [20]);
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 128, HEAP_SIZE), 0, '取完应为空');
+});
+
+test('文本帧被丢弃，不会变成空数组污染队列', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  FakeWebSocket.instances[0].onmessage({ data: 'a text frame' });
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 0, HEAP_SIZE), 0);
+});
+
+test('帧大于缓冲时返回 -1 且不出队，扩容后可重取', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  FakeWebSocket.instances[0].onmessage({ data: frame([1, 2, 3, 4, 5]).buffer });
+
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 0, 4), -1, '太小应拒绝');
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 0, 5), 5, '扩容后应成功');
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 0, 5), 0, '成功后应出队');
+});
+
+test('队列超过上限时丢最旧的，并累加 dropped', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  const ws = FakeWebSocket.instances[0];
+  const limit = s.lib.WebSocketNetState.MAX_QUEUED_FRAMES;
+
+  for (let i = 0; i <= limit + 9; i++) ws.onmessage({ data: frame([i & 0xff]).buffer });
+
+  assert.strictEqual(s.lib.WebSocketNet_GetDropped(id), 10);
+  assert.strictEqual(s.lib.WebSocketNet_Poll(id, 0, HEAP_SIZE), 1);
+  assert.strictEqual(s.heap[0], 10, '队首应是被保留的第 10 条（前 10 条被丢）');
+});
+
+test('onclose 后状态变 closed 且 closeCode 透出', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  FakeWebSocket.instances[0].onclose({ code: 1006 });
+
+  assert.strictEqual(s.lib.WebSocketNet_GetState(id), 2);
+  assert.strictEqual(s.lib.WebSocketNet_GetCloseCode(id), 1006);
+});
+
+test('Close 之后再查句柄按已关闭处理，不会读到野数据', () => {
+  const s = setup();
+  const id = s.lib.WebSocketNet_Connect(0);
+  const ws = FakeWebSocket.instances[0];
+  ws.onopen();
+  s.lib.WebSocketNet_Close(id);
+
+  assert.deepStrictEqual(ws.closedWith, { code: 1000, reason: 'normal' });
+  assert.strictEqual(s.lib.WebSocketNet_GetState(id), 2);
+  assert.strictEqual(s.lib.WebSocketNet_Send(id, 0, 0), 0);
+});
+```
+
+> **注意 `$WebSocketNetState` 会被 emscripten 提升成一个全局**，所以测试里可以用 `lib.WebSocketNetState.MAX_QUEUED_FRAMES` 读到它。若实测取不到（emscripten 版本差异），把上限写死成 256 即可——**不改测试意图**。
+
+- [ ] **Step 4: 跑测试**
+
+```bash
+cd E:/CodeForJob/Cool && node --test tests/webgl/websocket-state.test.js
+```
+
+预期：**11 个测试全绿**，0 failed。
+
+> **命令要写全文件名。** `node --test tests/webgl/`（目录形式）在 Node v22.22.1 / Windows 上实测**不工作**——Node 把目录当模块解析，报 `MODULE_NOT_FOUND`，一个测试都不跑（`node --test` 不带参数会扫整个仓库，也不合适）。
+>
+> 这一步是本任务唯一一个**秒级反馈**的环节。本文件改任何逻辑都先跑它——不要靠出 WebGL 包（分钟级）来验状态机。
+
+- [ ] **Step 5: 写帧泵**
+
+创建 `Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketPump.cs`：
 
 ```csharp
 #if UNITY_WEBGL
-using System;
 using UnityEngine;
 
 namespace WebSocketNet
 {
     /// <summary>
-    /// jslib 经 SendMessage 进入 Unity 的唯一落点。
-    /// 必须是场景里的 GameObject（SendMessage 的目标），由 WebGLWebSocketChannel
-    /// 在首次用时创建并 DontDestroyOnLoad。
-    /// 三个方法名（OnOpen / OnFrame / OnClose / OnError）必须与 .jslib 里的字符串**逐字一致**。
+    /// WebGLWebSocketChannel 的帧泵。
+    ///
+    /// 浏览器的 WebSocket 回调只改 JS 侧状态，帧要由 C# 主动来取；那个"取"
+    /// 必须发生在 Unity 主线程上，所以这里挂一个隐藏的 Update。
+    ///
+    /// 单独成文件而不是内嵌类：Unity 对 MonoBehaviour 的约定是"一个文件一个
+    /// 同名类型"，两者不一致时 AddComponent 的行为不保证。
     /// </summary>
-    public sealed class WebSocketNetBridge : MonoBehaviour
+    internal sealed class WebGLWebSocketPump : MonoBehaviour
     {
-        internal static WebSocketNetBridge? Instance;
+        internal WebGLWebSocketChannel? Target;
 
-        internal event Action<int>? Opened;
-        internal event Action<int, byte[]>? Framed;
-        internal event Action<int, string>? Closed;
-        internal event Action<int>? Errored;
-
-        private void Awake()
+        private void Update()
         {
-            Instance = this;
-        }
-
-        // SendMessage 只支持单参数（string）——故载荷用 "handle|payload" 拼装
-        public void OnOpen(string payload)
-        {
-            if (int.TryParse(payload, out int handle)) Opened?.Invoke(handle);
-        }
-
-        public void OnFrame(string payload)
-        {
-            int sep = payload.IndexOf('|');
-            if (sep <= 0) return;
-            if (!int.TryParse(payload.Substring(0, sep), out int handle)) return;
-            try
-            {
-                byte[] data = Convert.FromBase64String(payload.Substring(sep + 1));
-                Framed?.Invoke(handle, data);
-            }
-            catch (FormatException)
-            {
-                Errored?.Invoke(handle);
-            }
-        }
-
-        public void OnClose(string payload)
-        {
-            int sep = payload.IndexOf('|');
-            if (sep <= 0) return;
-            if (!int.TryParse(payload.Substring(0, sep), out int handle)) return;
-            Closed?.Invoke(handle, payload.Substring(sep + 1));
-        }
-
-        public void OnError(string payload)
-        {
-            if (int.TryParse(payload, out int handle)) Errored?.Invoke(handle);
+            Target?.Pump();
         }
     }
 }
 #endif
 ```
 
-- [ ] **Step 3: 实现 `WebGLWebSocketChannel`**
+- [ ] **Step 6: 写 `WebGLWebSocketChannel`**
 
 创建 `Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketChannel.cs`：
 
@@ -1099,24 +1353,44 @@ namespace WebSocketNet
 {
     /// <summary>
     /// WebGL 平台通道 —— 经 .jslib 调用浏览器 WebSocket API。
-    /// 与 DotNetWebSocketChannel 是同一 IWebSocketChannel 的两个实现，
-    /// 因此 WebSocketClientAdapter 与其测试完全不需要区分平台。
+    ///
+    /// 与 DotNetWebSocketChannel 的关键区别：**没有后台接收循环**。浏览器的
+    /// WS 回调在 JS 侧只把帧塞进队列，C# 每帧经 Pump() 主动取。这样跨界只有
+    /// 一个方向（C# → JS），用不到 SendMessage / gameInstance / dynCall /
+    /// base64 —— 那条方向最容易写错，且错了最难查。
+    ///
     /// 平台守卫是必须的：本类引用 UnityEngine 且 .jslib 只在 WebGL 构建里存在。
     /// </summary>
     public sealed class WebGLWebSocketChannel : IWebSocketChannel
     {
         [DllImport("__Internal")] private static extern int WebSocketNet_Connect(string url);
+        // [Out] 是保险：若运行时改用临时缓冲编组 byte[]，写了也必须拷回来。
+        // （blittable 数组通常直接传托管内存指针，此时 [Out] 无额外开销）
+        [DllImport("__Internal")] private static extern int WebSocketNet_Poll(int handle, [Out] byte[] dest, int maxLen);
         [DllImport("__Internal")] private static extern int WebSocketNet_Send(int handle, byte[] data, int length);
-        [DllImport("__Internal")] private static extern void WebSocketNet_Close(int handle, string reason);
-        [DllImport("__Internal")] private static extern int WebSocketNet_IsOpen(int handle);
+        [DllImport("__Internal")] private static extern int WebSocketNet_GetState(int handle);
+        [DllImport("__Internal")] private static extern int WebSocketNet_GetCloseCode(int handle);
+        [DllImport("__Internal")] private static extern int WebSocketNet_GetDropped(int handle);
+        [DllImport("__Internal")] private static extern void WebSocketNet_Close(int handle);
 
-        private const int InvalidHandle = -1;
+        private const int StateOpen = 1;
+        private const int StateClosed = 2;
+        private const int StateFailed = 3;
 
-        private int _handle = InvalidHandle;
+        private const int InitialRecvBufferSize = 64 * 1024;
+        private const int MaxRecvBufferSize = 1024 * 1024;
+        private const float ConnectTimeoutSeconds = 5f;
+
+        private byte[] _recvBuffer = new byte[InitialRecvBufferSize];
+        private int _handle = -1;
         private bool _open;
-        private WebSocketNetBridge? _bridge;
+        private bool _terminalRaised;
+        private int _lastDropped;
+        private float _connectDeadline;
+        private TaskCompletionSource<bool>? _connectTcs;
+        private WebGLWebSocketPump? _pump;
 
-        public bool IsConnected => _open && _handle != InvalidHandle && WebSocketNet_IsOpen(_handle) == 1;
+        public bool IsConnected => _open && _handle >= 0 && WebSocketNet_GetState(_handle) == StateOpen;
 
         public event Action<byte[]>? MessageReceived;
         public event Action<string>? Closed;
@@ -1124,57 +1398,100 @@ namespace WebSocketNet
 
         public WebGLWebSocketChannel()
         {
-            var go = new GameObject("WebSocketNetBridge");
+            var go = new GameObject("WebGLWebSocketPump");
             UnityEngine.Object.DontDestroyOnLoad(go);
-            _bridge = go.AddComponent<WebSocketNetBridge>();
-
-            _bridge.Opened += h => { if (h == _handle) _open = true; };
-            _bridge.Framed += (h, data) => { if (h == _handle) MessageReceived?.Invoke(data); };
-            _bridge.Closed += (h, reason) =>
-            {
-                if (h != _handle) return;
-                _open = false;
-                Closed?.Invoke(reason);
-            };
-            _bridge.Errored += h =>
-            {
-                if (h != _handle) return;
-                Error?.Invoke(new Exception("WebSocket error in browser"));
-            };
+            _pump = go.AddComponent<WebGLWebSocketPump>();
+            _pump.Target = this;
         }
 
         public Task<bool> ConnectAsync(string uri)
         {
-            // 句柄在 Connect 返回时就已分配（JS 侧同步建 WebSocket 对象），
-            // 但 open 是异步事件 —— 这里等待到 _open 或超时。
             _handle = WebSocketNet_Connect(uri);
-            if (_handle == InvalidHandle)
+            if (_handle < 0)
             {
                 Error?.Invoke(new Exception("Failed to create browser WebSocket: " + uri));
                 return Task.FromResult(false);
             }
-            return WaitForOpenAsync();
+            _connectTcs = new TaskCompletionSource<bool>();
+            _connectDeadline = Time.realtimeSinceStartup + ConnectTimeoutSeconds;
+            // 这个 Task 由 Pump() 完成 —— 不用 Task.Delay，不依赖 WebGL 的
+            // SynchronizationContext（那条路我没验证过，而它一旦不成立就是"什么都
+            // 没发生"）
+            return _connectTcs.Task;
         }
 
-        private async Task<bool> WaitForOpenAsync()
+        /// <summary>由 WebGLWebSocketPump 每帧调用一次。</summary>
+        internal void Pump()
         {
-            const int timeoutMs = 5000;
-            int waited = 0;
-            while (!_open && waited < timeoutMs)
+            int handle = _handle;
+            if (handle < 0) return;
+
+            int state = WebSocketNet_GetState(handle);
+
+            if (!_open && state == StateOpen)
             {
-                await Task.Delay(50);
-                waited += 50;
+                _open = true;
+                _connectTcs?.TrySetResult(true);
+                _connectTcs = null;
             }
-            if (!_open) Error?.Invoke(new Exception("WebSocket open timed out: " + timeoutMs + "ms"));
-            return _open;
+
+            while (true)
+            {
+                int n = WebSocketNet_Poll(handle, _recvBuffer, _recvBuffer.Length);
+                if (n > 0)
+                {
+                    var frame = new byte[n];
+                    Buffer.BlockCopy(_recvBuffer, 0, frame, 0, n);
+                    MessageReceived?.Invoke(frame);
+                    continue;      // 订阅者可能在这期间 CloseAsync —— 下一轮 Poll 会返回 0
+                }
+                if (n == -1)
+                {
+                    // 单帧比缓冲还大：翻倍重试；到顶就当错误，避免死循环
+                    if (_recvBuffer.Length >= MaxRecvBufferSize)
+                    {
+                        Error?.Invoke(new Exception("WebSocket frame exceeds " + MaxRecvBufferSize + " bytes"));
+                        break;
+                    }
+                    _recvBuffer = new byte[Math.Min(_recvBuffer.Length * 2, MaxRecvBufferSize)];
+                    continue;
+                }
+                break;             // n == 0，队列已空
+            }
+
+            int dropped = WebSocketNet_GetDropped(handle);
+            if (dropped != _lastDropped)
+            {
+                _lastDropped = dropped;
+                Debug.LogWarning("[WebSocketNet] dropped " + dropped + " frame(s) - the pump fell behind");
+            }
+
+            if (state == StateClosed || state == StateFailed)
+            {
+                _open = false;
+                if (_terminalRaised) return;
+                _terminalRaised = true;
+                _connectTcs?.TrySetResult(false);
+                _connectTcs = null;
+                if (state == StateFailed) Error?.Invoke(new Exception("WebSocket failed in browser"));
+                Closed?.Invoke("close:" + WebSocketNet_GetCloseCode(handle));
+                return;
+            }
+
+            if (!_open && _connectTcs != null && Time.realtimeSinceStartup >= _connectDeadline)
+            {
+                _connectTcs.TrySetResult(false);
+                _connectTcs = null;
+                Error?.Invoke(new Exception("WebSocket open timed out: " + ConnectTimeoutSeconds + "s"));
+            }
         }
 
         public Task SendAsync(byte[] data, int offset, int length)
         {
-            if (!IsConnected) return Task.CompletedTask;
-            // offset 非 0 时先切片 —— jslib 只接受整数组 + 长度
+            if (!IsConnected) return Task.CompletedTask;   // 与 KcpNetClientAdapter 同语义：未连接静默丢弃
             if (offset != 0)
             {
+                // offset 非 0 时先切片 —— jslib 只接受整数组 + 长度
                 var slice = new byte[length];
                 Array.Copy(data, offset, slice, 0, length);
                 WebSocketNet_Send(_handle, slice, length);
@@ -1188,24 +1505,35 @@ namespace WebSocketNet
 
         public Task CloseAsync(string reason)
         {
-            if (_handle != InvalidHandle) WebSocketNet_Close(_handle, reason);
+            if (_handle >= 0)
+            {
+                WebSocketNet_Close(_handle);
+                _handle = -1;
+            }
             _open = false;
-            _handle = InvalidHandle;
+            _terminalRaised = true;
+            _connectTcs?.TrySetResult(false);
+            _connectTcs = null;
             return Task.CompletedTask;
         }
 
         public void Dispose()
         {
             CloseAsync("dispose").GetAwaiter().GetResult();
-            if (_bridge != null) UnityEngine.Object.Destroy(_bridge.gameObject);
-            _bridge = null;
+            if (_pump != null)
+            {
+                UnityEngine.Object.Destroy(_pump.gameObject);
+                _pump = null;
+            }
         }
     }
 }
 #endif
 ```
 
-- [ ] **Step 4: `ClientNetworkHost` 接上真实通道——并把 PC 也统一到 WS（D-W11 的落点）**
+> `IWebSocketChannel.CloseAsync(string reason)` 的 `reason` 在本实现里未使用——它要跨进 JS 才有意义，而 JS 侧的 `close(1000, 'normal')` 是固定文案。`DotNetWebSocketChannel` 才需要它。
+
+- [ ] **Step 7: `ClientNetworkHost` 接上真实通道——并把 PC 也统一到 WS（D-W11 的落点）**
 
 把 Task 1 Step 6 / Task 3 Step 7 里预留的那两行补全。两端共用**同一个** `WebSocketClientAdapter`，只在最底层 channel 上按平台分叉：
 
@@ -1230,51 +1558,202 @@ namespace WebSocketNet
 >
 > 本步之后 `GameSys` 内确实已经没有 `KcpNet` 的使用者，那条引用变成多余——但**删除它零收益**：`KcpNet` 程序集无论有没有人引用，在 WebGL 下都要编译，T1 的守卫照旧必要。属于"以后再删"的范围。
 
-- [ ] **Step 5: 验证 Editor 侧未回归**
+- [ ] **Step 8: `Program.cs` 加通道自检开关**
+
+创建 `Server/WebSocketEchoListener.cs`——一个只会原样回吐字节的 WS 端点，用来**单独**验证 jslib 通道，不牵扯游戏协议：
+
+```csharp
+using System;
+using System.Net;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace KcpServer
+{
+    /// <summary>
+    /// 只回吐字节的 WS 端点：收到什么就 SendAsync 回什么。
+    /// 用途是**单独**验证 WebGL 的 jslib 通道——它不理解任何游戏协议，
+    /// 所以判据是"字节双向流动"，不是"能进世界"（后者由 Task 5 的真监听验收）。
+    ///
+    /// 刻意不做分片聚合：这里回的是字节不是消息，逐块回吐正好是对的。
+    /// </summary>
+    public sealed class WebSocketEchoListener : IDisposable
+    {
+        private readonly HttpListener _listener = new HttpListener();
+        private readonly ILogger _logger;
+
+        public WebSocketEchoListener(ILogger logger) { _logger = logger; }
+
+        public void Start(string prefix)
+        {
+            _listener.Prefixes.Add(prefix);
+            _listener.Start();
+            _logger.LogInformation("WS echo listening on {Prefix}", prefix);
+            _ = AcceptLoopAsync();
+        }
+
+        private async Task AcceptLoopAsync()
+        {
+            while (_listener.IsListening)
+            {
+                HttpListenerContext context;
+                try { context = await _listener.GetContextAsync(); }
+                catch (Exception) { return; }             // 监听已停
+                _ = EchoAsync(context);
+            }
+        }
+
+        private async Task EchoAsync(HttpListenerContext context)
+        {
+            if (!context.Request.IsWebSocketRequest)
+            {
+                context.Response.StatusCode = 400;
+                context.Response.Close();
+                return;
+            }
+
+            WebSocket socket;
+            try { socket = (await context.AcceptWebSocketAsync(null)).WebSocket; }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("WS echo handshake failed: {Message}", ex.Message);
+                return;
+            }
+
+            var buffer = new byte[16 * 1024];
+            try
+            {
+                while (socket.State == WebSocketState.Open)
+                {
+                    var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    if (result.MessageType == WebSocketMessageType.Close) break;
+                    await socket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count),
+                        WebSocketMessageType.Binary, endOfMessage: true, CancellationToken.None);
+                }
+            }
+            catch (Exception ex) { _logger.LogDebug("WS echo ended: {Message}", ex.Message); }
+            finally
+            {
+                try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "echo done", CancellationToken.None); }
+                catch (Exception) { /* 对端已经断了 */ }
+                socket.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            try { _listener.Stop(); _listener.Close(); } catch (Exception) { /* 已停 */ }
+        }
+    }
+}
+```
+
+在 `Program.cs` 里按既有 `--bots` / `--monsters` 的同款写法加标志（**不要用 `args.Contains`，本文件没有 `using System.Linq`**）：
+
+```csharp
+            // --ws-echo：只回吐字节的 WS 端点，用于单独验证 WebGL 的 jslib 通道
+            bool wsEcho = false;
+            for (int i = 1; i < args.Length; i++)
+            {
+                if (args[i] == "--ws-echo") { wsEcho = true; break; }
+            }
+```
+
+在 `await _server.StartAsync(port);` **之后**启动它（UDP 与 TCP 同端口不冲突，D-W3），并在 `finally` 里释放：
+
+```csharp
+                if (wsEcho)
+                {
+                    _wsEcho = new WebSocketEchoListener(logger);
+                    _wsEcho.Start("http://127.0.0.1:" + port + "/");
+                }
+```
+
+```csharp
+            finally
+            {
+                _wsEcho?.Dispose();
+                if (_server != null) { /* 既有清理不动 */ }
+            }
+```
+
+并加字段：`private static WebSocketEchoListener? _wsEcho;`
+
+> **它不进演示路径，Task 5 也不删它**——部署之后用它区分"网络没通"和"游戏服务没起"，比翻服务端日志快。
+
+- [ ] **Step 9: 验证 Editor 侧未回归**
 
 `tests-run`，`testMode=EditMode` → 预期 **228/228**；三配置 PlayMode → 并集 **18/18**。
 
-> **为什么 PC 改了传输而 PlayMode 数字不变**：9 个 PlayMode 测试**全部直接构造 `KcpNetClientAdapter`**（`AdapterConnectTests.cs:50/69`、`AoiWorldTests.cs:19`、`CombatSyncTests.cs:26`、`LoginEnterWorldTests.cs:46`、`MonsterWorldTests.cs:31`、`MovementSyncTests.cs:18/305`、`TwoClientWorldTests.cs:21`），**没有任何一个经过 `ClientNetworkHost`**。所以 18/18 同时也证明了"KCP 传输本身没有被本步弄坏"。
+> **为什么 PC 改了传输而 PlayMode 数字不变**：9 个 PlayMode 测试**全部直接构造 `KcpNetClientAdapter`**（`AdapterConnectTests.cs:50/69`、`AoiWorldTests.cs:19`、`CombatSyncTests.cs:26`、`LoginEnterWorldTests.cs:46`、`MonsterWorldTests.cs:31`、`MovementSyncTests.cs:15/305`、`TwoClientWorldTests.cs:21`），**没有任何一个经过 `ClientNetworkHost`**。所以 18/18 同时也证明了"KCP 传输本身没有被本步弄坏"。
 >
-> **代价要说清楚**：反过来也成立——PlayMode **覆盖不到** `ClientNetworkHost` 的接线，Step 4 改的那两行不在任何自动化测试里。它的真实覆盖在 **T5 Step 7**（Editor 走 WS 连真服务器进世界）与 **T8** 的浏览器验收；T5 之前不要把它当成已验证。
+> **代价要说清楚**：反过来也成立——PlayMode **覆盖不到** `ClientNetworkHost` 的接线，Step 7 改的那两行不在任何自动化测试里。它的真实覆盖在 **Task 5 Step 7**（Editor 走 WS 连真服务器进世界）与 **Task 8** 的浏览器验收；Task 5 之前不要把它当成已验证。
 
-- [ ] **Step 6: 出 WebGL 包并部署到本地做 echo 验证**
+- [ ] **Step 10: 出 WebGL 包并在浏览器里验通道**
 
-用 T9 的 `WebGLBuildScript` 骨架（本步先建最小版）出包，用任意静态服务器托管（`python -m http.server` 即可），**同一台机器**上起一个 WS echo：
+用 Task 9 的 `WebGLBuildScript` 骨架（本步先建最小版）出包，用任意静态服务器托管（`python -m http.server` 即可），**同一台机器**上起 echo：
 
 ```bash
-# 用一个最简 echo 起在 8000（本步只验证传输，不接业务服务器）
-cd E:/CodeForJob/Cool && dotnet run --project Server/Server3C.csproj -- 8000
+# 静态服务器（WebGL 包所在目录）
+cd E:/CodeForJob/Cool/Build/WebGL && python -m http.server 8080
+
+# 另一个终端：游戏服务器 + WS echo（UDP 与 TCP 同端口不冲突）
+cd E:/CodeForJob/Cool && dotnet run --project Server/Server3C.csproj -- 8000 --ws-echo
 ```
 
 预期（**人工，浏览器**）：
-1. 打开 `http://localhost:8080`（静态服务器上的 WebGL 包）
-2. 控制台出现 `[NetHost] 联网模式——连接 127.0.0.1:8000`
-3. 左下浮层状态走到 **`InWorld`** 或至少 **`LoggingIn`**（能发出 LoginRequest 并收到响应即证明双向通了）
 
-> **本步的判据是"通道通"，不是"游戏能玩"** —— 完整玩法由 T8 验收。
->
-> 若 `InWorld` 走不到：按 R2 的路径排查——先在浏览器 Network 面板确认 WS 已建立（101 Switching Protocols），再看有没有帧在传。**jslib 的问题九成出在回调名拼写**（`OnFrame` / `OnClose` 必须与 C# 方法名逐字一致）。
+1. 打开 `http://localhost:8080`，包加载完
+2. 进入联网模式，控制台出现 `[NetHost] 联网模式——连接 127.0.0.1:8000`
+3. **Network 面板**：出现一条 WS 连接（`101 Switching Protocols`），且**两个方向的二进制帧计数都在涨**
 
-- [ ] **Step 7: Commit**
+> **本步的判据是"字节双向流动"，不是"能进世界"** —— echo 不理解游戏协议，`InWorld` 由 Task 5 Step 7 用真服务器验收。
+
+**排查顺序（按这个顺序走，别跳）**：
+
+| 症状 | 先看哪里 |
+|---|---|
+| Network 面板里根本没有 WS 连接 | `ClientNetworkHost` 的接线（Step 7）；控制台有没有 `Failed to create browser WebSocket` |
+| 有连接但一直在 connecting | 服务器端口/prefix 是否与客户端拨的地址一致 |
+| 连上了，帧只出不进 | 控制台执行 `__wsnet.sockets`：`queue.length` 在涨 = **C# 没在轮询**（pump 没挂上，或 `Pump()` 抛异常）；恒为 0 = JS 侧没收到帧 |
+| 一切正常但偶发丢帧 | 控制台看 `dropped`；`[WebSocketNet] dropped N frame(s)` 是 C# 侧的警告 |
+
+> **本方案的排查成本比 JS-push 方案低一个量级**：没有需要逐字匹配的方法名字符串，没有静默失败的 `SendMessage`。`__wsnet` 让"帧到底到没到 JS 侧"变成一次控制台求值。
+
+- [ ] **Step 11: Commit**
 
 ```bash
-git add Assets Server
-git commit -m "feat(webgl): browser WebSocket channel over a jslib bridge
+git add Assets/Scripts Assets/Plugins Server tests
+git commit -m "feat(webgl): browser WebSocket channel that pulls instead of being pushed to
 
-Two deliberate risk reductions, since this is where a WebGL port usually gets
-stuck. Outbound (C# to JS) passes a byte[] straight through DllImport, which
-Unity marshals for you. Inbound (JS to C#) uses SendMessage with base64 rather
-than dynCall plus manual _malloc and hand-written dyncall signatures - base64
-costs 33% on the wire, which is imperceptible at 15 frames per second with
-few-hundred-byte payloads, and it removes the part most likely to fail opaquely.
+The browser side never calls into C#. onmessage only enqueues bytes and
+onopen/onclose/onerror only set a state variable; C# drains the queue once per
+frame through WebGLWebSocketPump. So the only cross-boundary direction is C# to
+JS via DllImport, which Unity marshals for you - no SendMessage, no
+gameInstance, no dynCall, no base64.
+
+That matters because the alternative is broken, not merely awkward:
+gameInstance was removed in Unity 2020.1 (the loader API became
+createUnityInstance, and the instance only exists after its promise resolves),
+so gameInstance.SendMessage is a ReferenceError on 2022.3. Even with the right
+global, SendMessage takes one string and fails silently when the target method
+name does not match, which is why the previous design needed base64 on every
+inbound frame.
+
+The JS state machine takes the heap as a parameter, so it is unit-testable in
+Node - eleven tests under tests/webgl/ cover framing, backpressure, the
+oversize-frame retry, the queue cap and close codes. The untestable residue is
+seven entry functions, six of them one to three lines and the seventh only
+constructing the WebSocket and attaching four callbacks. The Node sandbox deliberately
+omits gameInstance and SendMessage, so reintroducing a JS-to-C# callback fails
+the suite instead of passing quietly.
 
 Frames are copied before ws.send because a HEAPU8 view is invalidated when the
 wasm heap grows.
 
-The bridge is a runtime-created hidden GameObject because SendMessage needs a
-target. Its method names must match the jslib strings exactly - that is the
-first thing to check if a callback never arrives.
+Connect no longer polls with Task.Delay: the connect Task completes from Pump,
+so nothing depends on WebGL's SynchronizationContext.
 
 This commit also unifies the client transport (D-W11): PC now uses
 WebSocketClientAdapter with DotNetWebSocketChannel instead of
@@ -2274,8 +2753,8 @@ discovered."
 | T1 解除构建阻塞（C1/C2/C3） | Task 1 |
 | T2 `IServerSession`（C6） | Task 2 |
 | T3 `WebSocketClientAdapter`（C4） | Task 3 |
-| T4 jslib + 浏览器 echo（C5） | Task 4 |
-| D-W11 两端统一 WS（PC 也走 `WebSocketClientAdapter`） | Task 4 Step 4（落点）；Task 5 Step 7 第 2 项（验证） |
+| T4 jslib + 浏览器验证（C5） | Task 4 |
+| D-W11 两端统一 WS（PC 也走 `WebSocketClientAdapter`） | Task 4 Step 7（落点）；Task 5 Step 7 第 2 项（验证） |
 | T5 WS 会话与监听（C7/C8） | Task 5 |
 | T6 触屏输入（C9） | Task 6 |
 | T7 触屏相机（C10） | Task 7 |
@@ -2284,14 +2763,14 @@ discovered."
 | T10 演示制品（C13） | Task 10 |
 | §5 错误处理 | 复用 P6 的屏幕出口；Web 特有两条进 T10 话术卡 |
 | §7 测试策略 | 各任务的测试步骤 + T3 的假通道分层 + T8 人工验收 |
-| §8 风险 | R2 在 T4 用两条取舍降险；R3 在 T9 runbook；R4 在 T8 Step 3 |
+| §8 风险 | R2 在 T4 用"反转跨界方向 + Node 单测状态机"降险；R3 在 T9 runbook；R4 在 T8 Step 3 |
 
 **2. 写计划过程中发现并修正的规格缺陷**（均已回改规格）：
 
 - **D-W2 的两个动作行不通**：asmdef 引用不可平台条件化；排除程序集会让 PC 端也引用不到 adapter。已改为 `#if` 守卫 + 平台选择（规格 F10/F11 记录）
 - **`JoystickInputAdapter` 不是"未接线"而是"会崩"**：它读的三个轴不存在（实测），`GetAxisRaw` 会抛异常。规格 F7/D-W5/C9/T6 已订正
 - **`RemoteEndPoint` 泄进业务**：`Server3C.OnSessionDisconnected` 用它从 `SessionManager` 移除会话，而 WS 无 EndPoint。Task 2 Step 4 改为按 `SessionId` 移除
-- **PC 默认走 KCP 是零收益，且让两条路径分叉**（人类裁定后修正）：实测 4 个客户端发送点（`ClientNetworkManager.cs:58/111`、`CombatNetworkBridge.cs:49`、`MovementReporter.cs:65`）全部取 `INetworkClient.Send` 的默认值 `MessageFlags.Reliable`——**KCP 的不可靠通道是死代码**，而队头阻塞对可靠有序数据是 KCP 与 TCP 共有的。原形态下"PC 自测走 KCP、演示走 WS"意味着**在 PC 上验的每一件事走的都是演示时不存在的那条路**。已改为 D-W11：两端统一走 WS，`KcpNetClientAdapter` 保留为第二实现（T4 Step 4 落点，T5 Step 7 第 2 项验证）
+- **PC 默认走 KCP 是零收益，且让两条路径分叉**（人类裁定后修正）：实测 4 个客户端发送点（`ClientNetworkManager.cs:58/111`、`CombatNetworkBridge.cs:49`、`MovementReporter.cs:65`）全部取 `INetworkClient.Send` 的默认值 `MessageFlags.Reliable`——**KCP 的不可靠通道是死代码**，而队头阻塞对可靠有序数据是 KCP 与 TCP 共有的。原形态下"PC 自测走 KCP、演示走 WS"意味着**在 PC 上验的每一件事走的都是演示时不存在的那条路**。已改为 D-W11：两端统一走 WS，`KcpNetClientAdapter` 保留为第二实现（T4 Step 7 落点，T5 Step 7 第 2 项验证）
 
 **3. 占位符扫描**——已清除。Task 7 明确写了"若无代码改动则不产生提交"，避免制造空提交。
 
@@ -2300,8 +2779,10 @@ discovered."
 | 符号 | 定义处 | 使用处 |
 |---|---|---|
 | `INetworkClient`（`Cool.Protocol`） | Task 1 Step 1 | Task 3 适配器、Task 1 Step 6 |
-| `IWebSocketChannel` / `DotNetWebSocketChannel` / `WebGLWebSocketChannel` | Task 3 Step 1/6、Task 4 Step 3 | Task 3 Step 4 适配器构造 |
-| `WebSocketNetBridge`（`OnFrame`/`OnClose`/`OnError`/`OnOpen`） | Task 4 Step 2 | Task 4 Step 1 的 jslib **字符串必须逐字一致** |
+| `IWebSocketChannel` / `DotNetWebSocketChannel` | Task 3 Step 1/6 | Task 3 Step 4 适配器构造 |
+| `WebGLWebSocketChannel` / `WebGLWebSocketPump` | Task 4 Step 6 / Step 5 | Task 4 Step 7 的接线 |
+| jslib 符号（`WebSocketNet_Connect` / `_Poll` / `_Send` / `_GetState` / `_GetCloseCode` / `_GetDropped` / `_Close`） | Task 4 Step 1 | Task 4 Step 6 的 `DllImport`——**名字必须逐字一致**（但这次是链接期符号，拼错是构建/首次调用就报的 `EntryPointNotFoundException`，不是 SendMessage 那种静默无反应） |
+| `WebSocketNetState.*`（`create` / `get` / `enqueue` / `poll`） | Task 4 Step 1 | Task 4 Step 3 的 11 条 Node 测试 |
 | `IServerSession` | Task 2 Step 1 | Task 2 Step 2/3/5/6、Task 5 会话实现 |
 | `Server3C.RegisterSession` | Task 2 Step 6 | Task 5 Step 5 监听器 |
 | `SessionManager.RemoveById` | Task 2 Step 4 | Task 2 Step 4 的 `Server3C:410` |
@@ -2317,7 +2798,9 @@ discovered."
 | `Program.cs` 的主循环结构 | `wsListener` 的启动点按实际插；关键是**在 UDP 启动之后、主循环之前** |
 | `Sys3CEntry.InputManager` 是私有字段 | 用同对象上的 `GetComponent<InputManager>()`（`:125` 已在用），或加只读访问器 |
 | Unity 已安装 WebGL 模块 | Task 1 Step 8 会失败并提示——**停下报 BLOCKED**，不跳过 |
-| `EchoRequest` / `EchoResponse` 的字段名 | 按实际类型改测试，**不改测试意图** |
+| **`[Out] byte[]` 能让 JS 写回托管数组**（T4 Step 6 的 `WebSocketNet_Poll`） | 这是 T4 里**唯一没有 Node 测试覆盖**的假设——Node 测的是状态机，不是封送。**首次出包时最先验它**：症状是"`__wsnet` 里队列在涨、C# 却一帧都收不到"。兜底：改用 `IntPtr` + `Marshal.AllocHGlobal` / `Marshal.Copy`——同样在"简单方向"内，只是多一次拷贝 |
+| `$WebSocketNetState` 在 Node 假环境里可达（T4 Step 3 读 `MAX_QUEUED_FRAMES`） | 若 emscripten 版本差异导致取不到，把上限写死 256——**不改测试意图** |
+| `WebGLWebSocketPump` 的 `Update` 确实被 Unity 调用 | 症状与上一条相反（队列不涨）。兜底：改成 `ClientNetworkHost.Update()` 里直调 `Pump()` |
 
 
 
