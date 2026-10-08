@@ -66,10 +66,12 @@
 | `Server/KcpServerSession.cs` | 修改 | `: IServerSession` |
 | `Server/WebSocketServerSession.cs` | 创建 | `System.Net.WebSockets` 会话 |
 | `Server/WebSocketServerListener.cs` | 创建 | WS 监听 → 建会话 → 喂 `ProcessPacket` |
-| `Server/Server3C.cs` | 修改 | 8 处 `KcpServerSession` → `IServerSession` |
+| `Server/Server3C.cs` | 修改 | 8 处 `KcpServerSession` → `IServerSession`；`RemoveByEndpoint` → `RemoveById`；新增 `RegisterSession` |
+| `Server/Handler/**`（5 个文件 / 6 个签名） | 修改 | 会话形参 → `IServerSession`（见 T2 Step 3） |
+| `Server/Room/Room.cs` + `RoomManager.cs` | 修改 | 同上（7 处） |
 | `Server/Session/SessionManager.cs` | 修改 | 同上（全部） |
 | `Server/Program.cs` | 修改 | 启动 WS 监听（与 UDP 并存） |
-| `Server/Server.Tests/**` | 修改 | 既有测试改用接口；新增 WS 会话单测 |
+| `Server/Server.Tests/**` | 修改 | **T2 阶段零改动**（既有 132 个即验收）；T5 阶段新增 WS 会话单测 |
 | `Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/JoystickInputAdapter.cs` | **重写** | 读 UI 摇杆，保留模拟量 |
 | `Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/MobileInputBinder.cs` | 创建 | 按平台注入适配器 |
 | 触屏 UI（摇杆/按钮） | 创建 | UGUI 组件 + 场景挂载 |
@@ -316,8 +318,10 @@ MSG
 - 创建：`Server/IServerSession.cs`
 - 修改：`Server/KcpServerSession.cs`（`:96` 加接口）
 - 修改：`Server/Server3C.cs`（8 处）
-- 修改：`Server/Session/SessionManager.cs`（全部）
-- 测试：既有 `Server.Tests` 即验收（行为不变）
+- 修改：`Server/Session/SessionManager.cs`
+- 修改：`Server/Handler/` 下 5 个文件**共 6 个方法签名**（`CastHandler:140` / `ClockSyncHandler:20` / `EchoHandler:20` / `LoginHandler:21` 与 **`:106`** / `PositionSyncHandler:59`）
+- 修改：`Server/Room/Room.cs`（5 处）+ `Server/Room/RoomManager.cs`（2 处）
+- 测试：**`Server/Server.Tests/` 一行都不许改**——"行为不变"的证据就在这里
 
 **为什么先做这个**：WS 路径要建自己的会话类型，而 `Server3C` 现在绑定在 `KcpServerSession` **具体类型**上。不抽接口，两条传输无法汇入同一个 `ProcessPacket`。
 
@@ -383,7 +387,7 @@ namespace KcpServer
 | `:351` | `ProcessPacket(KcpServerSession session, byte[] data)` | `IServerSession` |
 | `:425` | `List<KcpServerSession>` | `List<IServerSession>` |
 
-调用方（`CastHandler` / `LoginHandler` / `PositionSyncHandler` / `ClockSyncHandler` / `EchoHandler`）**只把 session 透传**，不需要改。
+**调用方必须跟着改——原稿写"只把 session 透传，不需要改"，经实测为假。** `ProcessPacket` 的形参一变成接口，5 个 Handler 的 6 个方法签名（含 `LoginHandler.HandleDisconnectAsync`）立刻 CS1503，并沿调用链传到 `RoomManager.TryAddPlayerToRoom` / `TryChangePlayerZone` → `Room.AddPlayer` / `_sessions`。**它们全在 `ProcessPacket` 下游，必须一起接口化**——只改一半（留几个形参是具体类型）等于本任务没做，因为 WS 会话永远到不了它们。
 
 - [ ] **Step 4: 修掉一个把 `RemoteEndPoint` 泄进业务的点（读码时发现）**
 
@@ -420,7 +424,9 @@ namespace KcpServer
 
 - [ ] **Step 5: `SessionManager` 改用接口**
 
-`Server/Session/SessionManager.cs`：`ConcurrentDictionary<string, KcpServerSession>` → `<string, IServerSession>`；`AllSessions`、`GetOrCreateSession`、`FindByEndpoint` 的返回类型同步改接口。
+`Server/Session/SessionManager.cs`：`ConcurrentDictionary<string, KcpServerSession>` → `<string, IServerSession>`；`AllSessions` → `IEnumerable<IServerSession>`；`FindByEndpoint` → `IServerSession?`。
+
+**但 `GetOrCreateSession` 保持返回 `KcpServerSession`**（原稿要求它也改接口，与 Step 6 的注自相矛盾）。理由：它吃 `EndPoint` 并采纳 KCP conv，**本身就是 UDP 专属入口**；返回具体类型之后，`Server3C.cs:320-337` 的 `SendSocket`/`SetSendSocket`/`EnsureWired`/`HandleUdpPacket` 与 `SessionManagerTests:53` 的 `.KcpConv` **都不用动**——否则既有测试必须改，而"测试零改动"是本任务的验收条件。字典内部需要转换，加注释说明不变式（`_sessions` 只由 UDP 入口写入）。
 
 **`GetOrCreateSession` 内部仍 `new KcpServerSession(...)`**——它是 KCP 监听器的入口点，构造具体类型是它的职责。
 
@@ -2782,6 +2788,22 @@ discovered."
 | 2 | `KcpNet.PlayModeTests.asmdef`（`includePlatforms: []`）里 9 个测试直接 `new KcpNetClientAdapter()` ⇒ WebGL 下编译失败 | 加 `"defineConstraints": ["!UNITY_WEBGL"]` |
 | 3 | `Assets/Scripts/Examples/`（**无 asmdef**，落在 Assembly-CSharp）3 个文件引用 `KcpClient`/`KcpServer` ⇒ 同样失败 | 3 个文件各加 `#if !UNITY_WEBGL` |
 | 4 | `ClientNetworkHost` 新增 `using WebSocketNet;` ⇒ `GameSys.asmdef` 必须加 `"WebSocketNet"` 引用（asmdef 引用不可条件化） | 加引用；`KcpNet` 引用保留 |
+
+### Task 2 现场发现（2026-10-09，commit 90f8969）
+
+**简报的文件清单再次不完整，而且 Step 5 与 Step 6 自相矛盾。** 按字面实现得到 10 个编译错误：
+
+| # | 简报说 | 实测 |
+|---|---|---|
+| 1 | "调用方**只把 session 透传**，不需要改" | `ProcessPacket` 形参一变，5 个 Handler 的 **6 个方法签名**立刻 CS1503（含简报没点到的 `LoginHandler.HandleDisconnectAsync:106`），并沿链传到 `RoomManager` → `Room._sessions`（共 7 处） |
+| 2 | Step 5 要求 `GetOrCreateSession` 也改返回接口 | 与 Step 6 的注（"UDP 收包处不属本次改动范围"）**直接冲突**：`Server3C.cs:320-337` 用的 `SendSocket`/`SetSendSocket`/`EnsureWired`/`HandleUdpPacket` 都不在接口上（4×CS1061），且 `SessionManagerTests.cs:53` 读 `.KcpConv` ⇒ **既有测试必须改**，而"测试零改动"正是本任务的验收条件 |
+| 3 | Step 4 只覆盖 `Server3C.cs:404` 的 `RemoteEndPoint` | `LoginHandler.cs:44` 与 `:48` 还有两处（日志） |
+
+**裁定 B（最终形状）**：`GetOrCreateSession` **保持返回 `KcpServerSession`**（它吃 `EndPoint` + 采纳 conv，本就是 UDP 专属入口），把接口铺到 `ProcessPacket` **下游**（Handler 6 个签名 + Room/RoomManager 7 处）；两处日志改 `SessionId`；`Server3C.cs:320-337` 的 UDP 路径与 `RemoveByEndpoint` 保持具体类型不动。
+
+**边界原则（本任务真正的收获）**：接口要盖住的是 **`ProcessPacket` 及其下游**；而 UDP 收包路径与 `GetOrCreateSession` 是**传输专属代码**，具体类型待在接口之外是正确的，不是遗漏。分界线画错任何一个方向都会出问题——画窄了 WS 到不了 Handler，画宽了既有测试要改。
+
+> **两次任务、两次文件清单不完整（T1 的 KcpClient/PlayModeTests/Examples，T2 的 Handler/Room）。** 本计划的文件清单来自静态阅读，应视为**假设**而非规格；真正的规格是各任务开头那句目标。后续任务遇到"清单外但编译必需"的改动，机械补漏按简报容错条文自行处理并报告；**只有涉及设计形状的选择才需要停下来问**。
 
 **一次被实测否决的裁定（值得记住，别再试）：** 发现 #2 的第一版解法是 `"includePlatforms": ["Editor"]`（当时以为 `GameSys.EditorTests` 是先例）。**实测不成立**——Unity Test Framework 按程序集的目标平台判定测试模式，Editor-only 程序集里的 `[UnityTest]` 会被**重分类为 EditMode 测试**：PlayMode 套件直接消失（`No tests found`），EditMode 从 222 变成 **240 / 17 失败**。`GameSys.EditorTests` 之所以是 Editor-only，是因为它**本来就是** EditMode 测试程序集——它是结论，不是范例。正确解法是 `defineConstraints`：它只影响编译，不动测试模式判定。
 
