@@ -32,6 +32,8 @@
 
 **回归基线（每任务后必须保持）**：Server.Tests **132/132** · EditMode **222/222** · PlayMode（三配置并集）**18/18** · PC 包照常可出。
 
+> **操作约束（T1 执行时发现）**：活动构建目标是 **WebGL 时，`KcpNet.PlayModeTests` 会被 `defineConstraints` 整个剔除**——此时跑 `tests-run`（PlayMode）会得到 `No tests found`，而不是失败。**这不代表环境坏了。** 这就是为什么每个切到 WebGL 验证的步骤后面都跟着"切回 StandaloneWindows64"：跑 PlayMode 前一定要确认 `activeBuildTarget` 是 Windows。
+
 ---
 
 ## 文件结构
@@ -1717,6 +1719,8 @@ namespace KcpServer
 > **代价要说清楚**：反过来也成立——PlayMode **覆盖不到** `ClientNetworkHost` 的接线，Step 7 改的那两行不在任何自动化测试里。它的真实覆盖在 **Task 5 Step 7**（Editor 走 WS 连真服务器进世界）与 **Task 8** 的浏览器验收；Task 5 之前不要把它当成已验证。
 
 - [ ] **Step 10: 出 WebGL 包并在浏览器里验通道**
+
+> **这是本计划第一次真正出 WebGL 包。** T1 只验证到"脚本编译通过"（切构建目标即可，不需要出包）。IL2CPP 转换这一层从未跑过——如果它在 `Assets/Packages/Kcp.2.7.0/lib/netstandard2.1/Kcp.dll` 上报错（那是个 `platformData: Any` 的预编译插件，内部就是 `System.Net.Sockets.Kcp`；WebGL 下已无人引用它的类型，理应被剔除），**兜底是给该 `.dll.meta` 加 `Exclude Platforms: WebGL`**。
 
 用 Task 9 的 `WebGLBuildScript` 骨架（本步先建最小版）出包，用任意静态服务器托管（`python -m http.server` 即可），**同一台机器**上起 echo：
 
