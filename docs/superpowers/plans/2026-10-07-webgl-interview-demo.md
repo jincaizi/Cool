@@ -2226,6 +2226,139 @@ UDP 8000 and TCP 8000 do not collide, so the demo runs one process."
 
 ---
 
+### Task 11: 修掉 IL2CPP 解不开 `List<T>` 成员的缺陷（**插队任务：依赖 T5，阻塞 T8**）
+
+> **为什么插队**：T5 验收时发现浏览器解不出 `WorldSnapshot`。专项诊断把根因**钉死在 protobuf-net 与 IL2CPP 的一个 icall 缺口**上（结论见下），它让 **AOI（P3）与战斗伤害（P4）两条声称在浏览器里不成立**——所以必须在 T8 的验收之前修掉。编号用 11 而不重排 6–10，是为了不动既有的交叉引用。
+
+**诊断结论（已钉死，非推测）**
+
+protobuf-net 3.2.56 判定"成员类型是不是集合"时会对成员类型跑 tuple 探测（`MetaType.ResolveTupleConstructor`），其中为识别 `init`-only setter 调用 `method.ReturnParameter.GetRequiredCustomModifiers()`（`MetaType.cs:1010`）→ **IL2CPP 的 icall `RuntimeParameterInfo::GetTypeModifiers` 未实现**（`RuntimeParameterInfo.cpp:23` `NOT_SUPPORTED`）→ `NotSupportedException`。
+
+**中招条件不是"哪个类型"，而是"有没有 `List<T>` 成员"**：`List<T>` 有 3 个公开构造 + 可写属性 `Capacity`/`Item`，正好过 tuple 探测的三个门槛；数组、接口类型、无参构造的 List 子类都过不了。
+
+**全仓恰好 3 个 `List<T>` 消息成员，全中招**：
+
+| 文件 | 成员 | 影响的声称 |
+|---|---|---|
+| `Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs:96` | `Entities` | **AOI（P3）** |
+| `Assets/Scripts/AOT/Protocol/Messages/Combat.cs:74` | `HitEntry Hits` | **战斗伤害结果（P4）** |
+| `Assets/Scripts/AOT/Protocol/Messages/Room.cs:70` | `RemotePlayerSync Players` | 房间玩家列表 |
+
+**已被实验排除的修法**（别再试）：预编译/protogen 模型（实测仍触发，触发点在两类模型共用的 `ValueMember`/`ApplyDefaultBehaviour`）、`link.xml`、玩家设置、升级 protobuf-net（3.2.8 / 3.2.30 / 3.3.21 都有这段代码）、运行期预热模型。
+
+**Files:**
+- 修改：`Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs`
+- 修改：`Assets/Scripts/AOT/Protocol/Messages/Combat.cs`
+- 修改：`Assets/Scripts/AOT/Protocol/Messages/Room.cs`
+- 修改：`Assets/Scripts/AOT/Protocol/MessageCodec.cs`
+- 修改：受 `IList<T>` 影响的调用点（诊断定位到 3 处，均在测试里，形如 `.Exists(...)` → `.Any(...)`）
+- 创建：`Assets/Scripts/Tests/Editor/Protocol/ProtocolShapeGuardTests.cs`
+
+- [ ] **Step 1: 三处声明改成 `IList<T>`**
+
+保留 `= new List<...>()` 初始化器（`IList<T>` 可赋值）。**不要改 `[ProtoMember]` 序号，不要改字段名**——线上字节格式不变（诊断已实测：`IList<T>` 2 条数据完整到达）。
+
+```csharp
+// WorldSnapshot.cs:96
+[ProtoMember(3)]
+public IList<EntitySnapshot> Entities { get; set; } = new List<EntitySnapshot>();
+
+// Combat.cs:74
+[ProtoMember(4)]
+public IList<HitEntry> Hits { get; set; } = new List<HitEntry>();
+
+// Room.cs:70
+public IList<RemotePlayerSync> Players { get; set; } = new List<RemotePlayerSync>();
+```
+
+- [ ] **Step 2: 修调用点**
+
+编译驱动：`List<T>` 专有成员（`.Exists` / `.Find` / `.RemoveAll` 等）在 `IList<T>` 上没有。逐个改成等价的 LINQ 写法（`.Exists(p)` → `.Any(p)`）。**只改必要的，不要顺手重构。**
+
+- [ ] **Step 3: `TryDecode` 补 `NotSupportedException` 并留痕**
+
+在 `Assets/Scripts/AOT/Protocol/MessageCodec.cs` 的 `TryDecode` catch 过滤器里补上 `NotSupportedException`——**这次它穿出去过，且症状是"静默看不见"而非报错**。
+
+⚠️ **约束**：`Cool.Protocol` 同时被 Unity 客户端与 .NET 服务端编译（`Server3C.csproj` 把 `Assets/Scripts/AOT/Protocol/**` 编进来），所以**不能引用 `UnityEngine`**。留痕机制你自己定（例如一个可选的 `Action<Exception>` 钩子，或让调用方在拿到 `false` 时记录），**但要在报告里说明为什么那么选**。
+
+- [ ] **Step 4: 写形状门禁测试**
+
+创建 `Assets/Scripts/Tests/Editor/Protocol/ProtocolShapeGuardTests.cs`：反射遍历 `Cool.Protocol` 程序集里的消息类型，断言**没有任何 `[ProtoMember]` 属性是 `List<T>`**。
+
+```csharp
+/// <summary>
+/// 形状门禁：Cool.Protocol 的消息成员不得声明为 List&lt;T&gt;。
+///
+/// 为什么需要它：protobuf-net 判定"成员是不是集合"时会跑 tuple 探测，其中为识别
+/// init-only setter 会调 ReturnParameter.GetRequiredCustomModifiers()，而 IL2CPP 的
+/// icall RuntimeParameterInfo::GetTypeModifiers 未实现 —— 运行时抛 NotSupportedException。
+/// 症状是**静默的**（解码失败、列表恒空），而现有全部测试都跑在 Mono/.NET 上，抓不到
+/// 这一类。所以用一条反射断言把这个形状规则钉住：IList&lt;T&gt; 不触发，List&lt;T&gt; 触发。
+/// </summary>
+```
+
+**判据**：这条测试在**改之前**必须红（三个已知成员全中），改之后必须绿。**在报告里给出改之前的 RED 输出**——这是它算不算门禁的唯一证据。
+
+- [ ] **Step 5: 跑回归**
+
+```bash
+dotnet test Server/Server.Tests/Server.Tests.csproj --nologo -v q
+```
+预期：**不低于 141/141**（本项目改了 Protocol，服务端也编它）。
+
+经 Unity MCP（`unity-mcp-cli run-tool tests-run --input '{"testMode":"EditMode"}' --timeout 600000`）：预期 **不低于 229/229 + 本任务新增**。
+三配置 PlayMode 并集 **18/18**。跑 PlayMode 前确认构建目标是 `StandaloneWindows64`。
+
+- [ ] **Step 6: 出 WebGL 包，在浏览器里验"能看见别人"**
+
+**这一步才是本任务真正的判据**——前面几步只是让它可以成立。
+
+用 `Assets/Scripts/Editor/WebGLBuildScript.cs` 出包，起双栈服务器（UDP + WS），用 **T4 留下的装置**（`production/verify/t4-webgl-cdp.js` 等）驱动浏览器，**同时**让 Editor 或第二个客户端在线，然后确认：
+
+1. 浏览器浮层的**远程实体数 > 0**（改之前恒为 0）
+2. 控制台**不再有** `NotSupportedException` / `RuntimeParameterInfo::GetTypeModifiers`
+3. 浏览器能看见对方移动（快照在持续应用）
+
+> 若第 1 条仍不成立，**停下来报 BLOCKED**——说明诊断的修法在真机上不奏效，需要另找路。不要用"控制台干净了"当作通过。
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add Assets
+git commit -F- <<'MSG'
+fix(protocol): declare message collections as IList so IL2CPP can decode them
+
+protobuf-net 3.2.56 decides whether a member type is a collection by running
+tuple detection on it, and to identify init-only setters that path calls
+ReturnParameter.GetRequiredCustomModifiers. IL2CPP's corresponding icall,
+RuntimeParameterInfo::GetTypeModifiers, is not implemented and throws
+NotSupportedException.
+
+That makes the trigger "does the member have type List<T>" rather than "which
+message is it": List<T> has three public constructors plus the writable
+Capacity and Item properties, which is enough to pass tuple detection, while
+arrays, interfaces and parameterless-constructor subclasses do not. Three
+members qualified: WorldSnapshot.Entities, DamageResult.Hits and
+RoomSync.Players - the first one meant the browser could never see another
+player, silently.
+
+Precompiled models do not help: the trigger is in ValueMember and
+ApplyDefaultBehaviour, which both model kinds share. Neither do link.xml, player
+settings or newer protobuf-net versions. IList<T> does not trigger it, and the
+wire format is unchanged.
+
+TryDecode now also catches NotSupportedException. It escaped once already and
+its symptom is silent missing data rather than an error, so it should leave a
+trace instead of propagating.
+
+The new shape guard is reflection over Cool.Protocol asserting no ProtoMember
+property is declared as List<T>. Every existing test runs on Mono or .NET and
+cannot see this class of failure.
+MSG
+```
+
+---
+
 ### Task 6: UI 摇杆 + 重写 `JoystickInputAdapter`
 
 **Files:**
