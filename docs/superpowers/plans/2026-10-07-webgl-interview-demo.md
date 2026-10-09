@@ -1835,6 +1835,15 @@ and never go through ClientNetworkHost."
 
 ### Task 5: `WebSocketServerSession` + `WebSocketServerListener`（双栈）
 
+> ⚠️ **开工前必读——业务发送路径上有一处 UDP 专属闸门。**
+> `Server3C.cs:242` 的 `SendToSessionAsync` 开头是：
+> ```csharp
+> if (_udpServer == null || !session.IsConnected) return Task.CompletedTask;
+> ```
+> **所有 Handler 都靠它回包**，而 `_udpServer` 只在 UDP 端口绑定成功后非空。也就是说：**如果以"不绑 UDP、只起 WS"的形态运行 `Server3C`，WebSocket 客户端的全部回包会被静默丢弃**——不报错、不异常，就是没有反应。
+> T5 Step 7 的验证形态是**双栈同起**（UDP + WS 都在），所以闸门为真、路径通；但你必须**知道它在那里**：若 Step 7 出现"WS 连上了但没有回包"，第一个要看的就是这个闸门，而不是 `WebSocketServerSession` 的收发实现。
+> 修不修它不在 T5 的范围（本任务的约束是"业务逻辑不改"）；要做的是**在报告里明确记录你观察到的形态**——是"双栈下正常"，还是"WS-only 下会丢包"。
+
 **Files:**
 - 创建：`Server/WebSocketServerSession.cs`
 - 创建：`Server/WebSocketServerListener.cs`
