@@ -30,7 +30,12 @@
 
 **验收目标（规格 §1）**：① 面试官用**自己的设备**打开 URL 就能玩；② P6 单机 / P4 / P3（`--bots 100`）/ P5 四条**在浏览器里现场可复现**；③ 无崩溃、无卡死、无需刷新；④ 有录屏兜底；⑤ 有"已知边界"话术卡。
 
-**回归基线（每任务后必须保持）**：Server.Tests **132/132** · EditMode **222/222** · PlayMode（三配置并集）**18/18** · PC 包照常可出。
+**回归基线（每任务后必须保持）**：Server.Tests **132→135** · EditMode **222→228** · PlayMode（三配置并集）**18/18** · PC 包照常可出。
+
+> **数字会随任务增长**（`→` 左边是 T1 前的原始基线，右边是新增测试后的当前值）：
+> Server.Tests 的 135 = 132 既有 + T2 的 3 条 `RegisterSession` 幂等测试；
+> EditMode 的 228 = 222 既有 + T3 的 6 条适配器测试。**每任务只需保证不低于当前值**，
+> 各任务自己的验收步骤里写的是该任务完成后的准确数字。
 
 > **操作约束（T1 执行时发现）**：活动构建目标是 **WebGL 时，`KcpNet.PlayModeTests` 会被 `defineConstraints` 整个剔除**——此时跑 `tests-run`（PlayMode）会得到 `No tests found`，而不是失败。**这不代表环境坏了。** 这就是为什么每个切到 WebGL 验证的步骤后面都跟着"切回 StandaloneWindows64"：跑 PlayMode 前一定要确认 `activeBuildTarget` 是 Windows。
 
