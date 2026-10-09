@@ -61,10 +61,19 @@ namespace WebSocketNet
 
         public Task<bool> ConnectAsync(string uri)
         {
+            // 重连：先清掉上一轮的连接态（DotNet 兄弟在同类位置清 _closed）。
+            // _terminalRaised 不复位 ⇒ 第二次连接即便握手成功，终结时也会在 Pump 的
+            // 第一道守卫上直接 return，Closed 永不触发；_lastDropped 不复位 ⇒ 假警告；
+            // _open 不复位 ⇒ Pump 里 `!_open && state == StateOpen` 恒为假，连接 Task
+            // 永不完成（只能等超时）。
+            _open = false;
+            _terminalRaised = false;
+            _lastDropped = 0;
+
             _handle = WebSocketNet_Connect(uri);
             if (_handle < 0)
             {
-                Error?.Invoke(new Exception("Failed to create browser WebSocket: " + uri));
+                InvokeConsumer(() => Error?.Invoke(new Exception("Failed to create browser WebSocket: " + uri)));
                 return Task.FromResult(false);
             }
             _connectTcs = new TaskCompletionSource<bool>();
@@ -105,7 +114,7 @@ namespace WebSocketNet
                     // 单帧比缓冲还大：翻倍重试；到顶就当错误，避免死循环
                     if (_recvBuffer.Length >= MaxRecvBufferSize)
                     {
-                        Error?.Invoke(new Exception("WebSocket frame exceeds " + MaxRecvBufferSize + " bytes"));
+                        InvokeConsumer(() => Error?.Invoke(new Exception("WebSocket frame exceeds " + MaxRecvBufferSize + " bytes")));
                         break;
                     }
                     _recvBuffer = new byte[Math.Min(_recvBuffer.Length * 2, MaxRecvBufferSize)];
@@ -128,8 +137,10 @@ namespace WebSocketNet
                 _terminalRaised = true;
                 _connectTcs?.TrySetResult(false);
                 _connectTcs = null;
-                if (state == StateFailed) Error?.Invoke(new Exception("WebSocket failed in browser"));
-                Closed?.Invoke("close:" + WebSocketNet_GetCloseCode(handle));
+                // Error 的消费者抛异常不得挡住 Closed —— 与 IWebSocketChannel 的契约一致
+                // （否则 _terminalRaised 已置位，这条连接的终结通知会被永久丢弃、不会重试）
+                if (state == StateFailed) InvokeConsumer(() => Error?.Invoke(new Exception("WebSocket failed in browser")));
+                InvokeConsumer(() => Closed?.Invoke("close:" + WebSocketNet_GetCloseCode(handle)));
                 return;
             }
 
@@ -137,7 +148,7 @@ namespace WebSocketNet
             {
                 _connectTcs.TrySetResult(false);
                 _connectTcs = null;
-                Error?.Invoke(new Exception("WebSocket open timed out: " + ConnectTimeoutSeconds + "s"));
+                InvokeConsumer(() => Error?.Invoke(new Exception("WebSocket open timed out: " + ConnectTimeoutSeconds + "s")));
             }
         }
 
@@ -179,6 +190,20 @@ namespace WebSocketNet
             {
                 UnityEngine.Object.Destroy(_pump.gameObject);
                 _pump = null;
+            }
+        }
+
+        /// <summary>
+        /// 调用消费者回调并吞掉消费者自身的异常 —— 它只反映订阅者的 bug，既不得终止帧泵，
+        /// 也不得挡住同一路径上的后续通知。仅留痕。（与 DotNetWebSocketChannel 同款）
+        /// </summary>
+        private static void InvokeConsumer(Action action)
+        {
+            try { action(); }
+            catch (Exception ex)
+            {
+                try { UnityEngine.Debug.LogError("[WebSocketNet] consumer callback threw: " + ex); }
+                catch { /* 日志通道不可用时也不中断 */ }
             }
         }
     }
