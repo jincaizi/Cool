@@ -20,6 +20,7 @@ namespace WebSocketNet
         private ClientWebSocket? _socket;
         private CancellationTokenSource? _cts;
         private bool _closed;   // RaiseClosed 已触发的权威否决位（见 IsConnected / RaiseClosed）
+        private int _generation;   // 每轮 ConnectAsync 递增——陈旧接收循环据此自我作废（见 ReceiveLoopAsync）
 
         public bool IsConnected => !_closed && _socket?.State == WebSocketState.Open;
 
@@ -32,10 +33,11 @@ namespace WebSocketNet
             _socket = new ClientWebSocket();
             _cts = new CancellationTokenSource();
             _closed = false;   // 重连：清掉上一轮的否决位，否则这条通道永远报未连接
+            int generation = ++_generation;   // 本轮代际——上一轮的接收循环从此无权再动本通道
             try
             {
                 await _socket.ConnectAsync(new Uri(uri), _cts.Token);
-                _ = ReceiveLoopAsync();   // fire-and-forget：接收循环独立于连接调用
+                _ = ReceiveLoopAsync(generation);   // fire-and-forget：接收循环独立于连接调用
                 return IsConnected;
             }
             catch (Exception ex)
@@ -45,21 +47,27 @@ namespace WebSocketNet
             }
         }
 
-        private async Task ReceiveLoopAsync()
+        private async Task ReceiveLoopAsync(int generation)
         {
+            // socket / token 取成本地量：字段属于"当前连接"，而本循环只属于传入的那一代。
+            // 否则 Dispose 后重连时，本循环会拿着**别人的** socket 继续读（详见 RaiseClosed）
+            var socket = _socket;
+            var token = _cts!.Token;
             var buffer = new byte[ReceiveBufferSize];
             var accumulated = new MemoryStream();
 
             try
             {
-                while (_socket != null && _socket.State == WebSocketState.Open)
+                while (generation == _generation && socket != null && socket.State == WebSocketState.Open)
                 {
-                    var result = await _socket.ReceiveAsync(
-                        new ArraySegment<byte>(buffer), _cts!.Token);
+                    var result = await socket.ReceiveAsync(
+                        new ArraySegment<byte>(buffer), token);
 
+                    // 等待期间通道被重连接管：本轮的消息与结论一概作废，不得惊动新一代
+                    if (generation != _generation) return;
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        RaiseClosed("closed by peer");
+                        RaiseClosed(generation, "closed by peer");
                         return;
                     }
 
@@ -77,9 +85,11 @@ namespace WebSocketNet
             catch (OperationCanceledException) { /* 主动关闭，非错误 */ }
             catch (Exception ex)
             {
+                // 陈旧循环的异常属于上一代：它既不是新连接的错，更不得把它判死
+                if (generation != _generation) return;
                 // Error 与 Closed 各自独立受保护：Error 的消费者抛异常也挡不住 Closed
                 InvokeConsumer(() => Error?.Invoke(ex));
-                RaiseClosed("receive loop terminated");
+                RaiseClosed(generation, "receive loop terminated");
             }
         }
 
@@ -90,9 +100,13 @@ namespace WebSocketNet
         /// ② 再 Abort 让底层状态与之一致（释放 socket、使 SendAsync 的闸门也合上，
         ///    否则会留下一个无人再读却仍可写的 open socket）；
         /// ③ 最后抛 Closed（经 InvokeConsumer，消费者抛异常不影响 ①② 已落定）。
+        /// generation 不是本代即直接返回：_closed 与 _socket 都属于"当前连接"，
+        /// 陈旧循环不持有它们的处置权（否则 Connect → Dispose → Connect 的竞争里，
+        /// 上一轮的收尾会把健康的新连接永久判死并 Abort 掉）。
         /// </summary>
-        private void RaiseClosed(string reason)
+        private void RaiseClosed(int generation, string reason)
         {
+            if (generation != _generation) return;
             _closed = true;
             try { _socket?.Abort(); }
             catch { /* Abort 失败不应挡住通知——IsConnected 已由 _closed 否决 */ }

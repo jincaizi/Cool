@@ -6,7 +6,6 @@ using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Network;
-using KcpNet;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WebSocketNet;
@@ -182,10 +181,16 @@ namespace Hotfix.GameSystems.SyncLayer
             _resolvedPort = resolvedPort;
 
 #if UNITY_WEBGL
-            // WebGL 无 System.Net.Sockets，KCP 传输不可用 —— 走浏览器 WebSocket
-            _adapter = new WebSocketNet.WebSocketClientAdapter();
+            // WebGL 无 System.Net.Sockets —— 走浏览器 WebSocket
+            _adapter = new WebSocketNet.WebSocketClientAdapter(
+                new WebSocketNet.WebGLWebSocketChannel());
 #else
-            _adapter = new KcpNetClientAdapter();
+            // D-W11：PC 也走 WebSocket（DotNetWebSocketChannel）。
+            // 应用层 4 个发送点全部使用默认的 MessageFlags.Reliable，KCP 的不可靠
+            // 通道从未被调用；保留它作为 PC 默认，只会让"自测路径"（PC=KCP）与
+            // "演示路径"（浏览器=WS）分叉——那正是最不该分叉的两条路。
+            _adapter = new WebSocketNet.WebSocketClientAdapter(
+                new WebSocketNet.DotNetWebSocketChannel());
 #endif
             _manager = new ClientNetworkManager(_adapter, _remoteEntities, resolvedUser);
             _manager.OnEnterWorld += HandleEnterWorld;

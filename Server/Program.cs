@@ -7,6 +7,7 @@ namespace KcpServer
     class Program
     {
         private static Server3C? _server;
+        private static WebSocketEchoListener? _wsEcho;
         private static readonly ManualResetEventSlim _shutdownEvent = new ManualResetEventSlim(false);
 
         static async Task Main(string[] args)
@@ -41,6 +42,13 @@ namespace KcpServer
                 }
             }
 
+            // --ws-echo：只回吐字节的 WS 端点，用于单独验证 WebGL 的 jslib 通道
+            bool wsEcho = false;
+            for (int i = 1; i < args.Length; i++)
+            {
+                if (args[i] == "--ws-echo") { wsEcho = true; break; }
+            }
+
             Console.WriteLine($"Starting Server3C on port {port}...");
 
             var logger = new ConsoleLogger();
@@ -63,6 +71,12 @@ namespace KcpServer
             {
                 await _server.StartAsync(port);
 
+                if (wsEcho)
+                {
+                    _wsEcho = new WebSocketEchoListener(logger);
+                    _wsEcho.Start("http://127.0.0.1:" + port + "/");
+                }
+
                 Console.WriteLine($"Server3C is running on port {port}");
                 Console.WriteLine("Press Ctrl+C to stop...");
 
@@ -78,6 +92,7 @@ namespace KcpServer
             }
             finally
             {
+                _wsEcho?.Dispose();
                 if (_server != null)
                 {
                     await _server.StopAsync();
