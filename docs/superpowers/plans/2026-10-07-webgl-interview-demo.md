@@ -999,6 +999,12 @@ KCP transports are: System.Net.WebSockets does not exist there either."
 
 ### Task 4: `WebGLWebSocket.jslib` + 浏览器验证
 
+> ⚠️ **开工前必读——`DotNetWebSocketChannel` 的接收循环有个代际缺陷（T3 修复轮引入）。**
+> `RaiseClosed`（`DotNetWebSocketChannel.cs:96-97`）无条件置权威位 `_closed = true` 并 `Abort()` **当前的** `_socket`；而接收循环读的是**可变的** `_socket` 字段、**没有代际标记**。
+> 触发路径：`ConnectAsync(A)` → `Dispose()` → `ConnectAsync(B)` → 循环 A 在 A 上抛**非** `OperationCanceledException` → 循环 A 的 `catch` 走到 `RaiseClosed` → 权威位把**健康的 B 永久判死**（`IsConnected` 恒 false、`SendAsync` 闸门永久合上），并 `Abort()` 掉 B。
+> `Dispose()` 会先 `Cancel()`，正常路径下循环 A 抛的是 `OperationCanceledException`（被第一条 `catch` 吃掉、不触发 `Closed`）——所以这是**竞争**而非必现。但 `Connect → Dispose → Connect` 在本应用里是**真实序列**（`ClientNetworkHost` 断开后允许重连）。
+> **本任务正是让这个类第一次被真正构造与接线**（T4 Step 7），所以它归这里处理：修法约 3 行（`Dispose` 里先摘除 `_socket` 字段，或给 `ConnectAsync` 加代际计数），形状自定，**但要在报告里说明为什么改后陈旧循环打不到新连接**。
+
 **Files:**
 - 创建：`Assets/Plugins/WebGL/WebGLWebSocket.jslib`
 - 创建：`Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketChannel.cs`
