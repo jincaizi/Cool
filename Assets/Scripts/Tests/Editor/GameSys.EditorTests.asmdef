@@ -6,7 +6,8 @@
         "DataDefinition",
         "Cool.Protocol",
         "KcpNet",
-        "SyncCore"
+        "SyncCore",
+        "WebSocketNet"
     ],
     "includePlatforms": [
         "Editor"
