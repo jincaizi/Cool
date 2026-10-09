@@ -24,6 +24,7 @@
 | **D-W8** | `WebSocketClientAdapter` 内部再分一层 `IWebSocketChannel` | WebGL 必须走 jslib（浏览器 API），而**编辑器里 `ClientWebSocket` 可用**——分层后适配器逻辑可在 EditMode 单测，只有 jslib 与浏览器运行时留人工（D-W6 的落点） |
 | **D-W9** | WS 上**一条消息 = 一个 WS 帧**，直接复用 `MessageCodec.Encode`/`TryDecode` | `MessageCodec` 完全与传输解耦（规格 F2）；WS 本身是消息边界的，无需再做流式拆帧 |
 | **D-W10** | 应用**从未使用** KCP 的非可靠通道（全部 `MessageFlags.Reliable`） | 所以 WebSocket(TCP) 的语义与现有实际行为**一致**，不存在"换 TCP 反而变差"的落差（规格 F3） |
+| **D-W12** | **WebGL 的托管裁剪设为 Disabled**（人类裁定；原值为 Low） | **实测**：Low 下 protobuf-net 在 IL2CPP 下推不出消息契约 → 登录帧一帧都发不出去，且**全程静默**（无异常、无 Console、屏幕无线索）。对照实验：只把裁剪改成 Disabled，同一份代码立刻帧双向跑通并进世界。<br>**为什么不用 link.xml**：它的失败模式**仍然是静默的**，而且以后新增消息类型或用到新的 protobuf 特性时可能复发——除非每次都恰好被浏览器帧计数装置覆盖到。Disabled 的失败模式是"包更大"，**可见、可测**。<br>**对 R1 的影响**：包体 136MB 主要是**资源**（D-W4 已裁定本批次不做资源清理），代码裁剪影响的是 wasm 那一小块。 |
 | **D-W11** | **两端统一走 WebSocket**：`WebSocketClientAdapter` 是 PC 与 WebGL **唯一**的客户端传输；`KcpNetClientAdapter` 保留为第二实现但**不再是默认**（人类裁定："保留原有 kcp 代码，以后再删"）。落点在 T4 Step 7 | **收益**：F3 表明 KCP 的不可靠通道是死代码，让它继续当 PC 默认是零收益；统一后 **PC 自我验证与浏览器演示走同一条代码路径**——旧形态下"在 PC 上验的每一件事，走的都是面试官那边不存在的那条路"。平台分叉从"两条传输"降级为"两个 channel"。<br>**代价**：master 的 PC 传输与 P6 冻结包所用的 `KcpNetClientAdapter` 不再一致（冻结包不随 master 演进，接受）。<br>**不影响 PlayMode**：9 个 PlayMode 测试全部**直接构造 `KcpNetClientAdapter`**，不经 `ClientNetworkHost`（已实测）——故 18/18 基线与 KCP 传输测试完全不受影响 |
 
 **Out of scope（显式排除，防范围蔓延）**：微信小游戏、P7 打怪升级、P8 PvP、P2 移动同步的现场演示、原生 Android/iOS 打包、包体优化与首屏加载测量、鉴权、聊天/背包/组队/交易、`Launched/Down/GetUp/Death` 的表现层补齐（P6 已登记 backlog）。
@@ -2843,6 +2844,30 @@ discovered."
 | 2 | `KcpNet.PlayModeTests.asmdef`（`includePlatforms: []`）里 9 个测试直接 `new KcpNetClientAdapter()` ⇒ WebGL 下编译失败 | 加 `"defineConstraints": ["!UNITY_WEBGL"]` |
 | 3 | `Assets/Scripts/Examples/`（**无 asmdef**，落在 Assembly-CSharp）3 个文件引用 `KcpClient`/`KcpServer` ⇒ 同样失败 | 3 个文件各加 `#if !UNITY_WEBGL` |
 | 4 | `ClientNetworkHost` 新增 `using WebSocketNet;` ⇒ `GameSys.asmdef` 必须加 `"WebSocketNet"` 引用（asmdef 引用不可条件化） | 加引用；`KcpNet` 引用保留 |
+
+### Task 4 现场发现（2026-10-10，commits 0046d1c + ab844b8）
+
+**浏览器验证第一次被自动化**——实现者用 headless Chrome + CDP + SwiftShader 驱动，无需人工。这是本批次意外收获的能力，T8/T9/T10 都该复用它。**装置已入库**：`production/verify/t4-webgl-cdp.js`（驱动）、`t4-webgl-inject.js`、`t4-webgl-ws-stub.js`（零依赖的 Node WS 服务端 stub）。
+
+**但要按它实际证明的范围引用**（第一轮审查的拆解，请照单收下，别再拔高）：
+
+| 它**证明了** | 它**没证明** |
+|---|---|
+| 真 IL2CPP WebGL 包里 jslib 通道**双向能流动**（本任务的核心断言） | "665/664 帧"是**帧计数**，不是逐字节比对——出站侧只有两帧的头尾 hex 抽查 |
+| **入站方向逐字节可信**：Node stub 手工拼的那一帧，被浏览器里的 C# `MessageCodec` 解成 `Success=True PlayerId=42` 并驱动到 InWorld；同一帧在 PC 上用真编解码器独立解出同样字段——encode/decode 是两套独立实现，假阳性被排除 | "进世界"是对着一个**硬编码返回合法 LoginResponse** 的 stub 达成的，stub 不解析客户端任何一帧 → 不能证明**登录帧语义**正确（真服务器归 T5） |
+| | >64KB 触发的 `-1` 扩容重试、以及背压丢帧两条路径，**在浏览器里从未被触发**（只有 Node 覆盖） |
+| | 软渲染，**不能得出任何画质/性能结论** |
+
+**另两处简报错误（已修）：**
+
+| # | 简报写 | 实测 |
+|---|---|---|
+| 1 | jslib 的 `$WebSocketNetState` 与 7 个入口照原样即可 | **必须加 `__deps` + `__postset`**——emscripten 的 jsifier 不扫函数体自由变量，原样代码出包后**状态对象整块丢失、`__wsnet` 钩子被丢弃，且构建期零提示**。这是 emscripten 的官方机制，没有更短的等价写法 |
+| 2 | `WebSocketEchoListener` 里 `_logger.LogInformation("WS echo listening on {Prefix}", prefix)` | 本项目的 `ILogger` 是 `string.Format` 风格、**不是结构化日志** → `--ws-echo` 一启动就 `FormatException` **崩掉整个服务端**。全仓 grep `Log*( "...{` 零命中，即项目里根本没有这种写法 |
+
+另：`Assets/Scripts/Editor/WebGLBuildScript.cs` 在 Step 10 被点名，但 T4 的 Files 清单漏列（机械补漏）。
+
+> **T4 的浏览器验证还暴露了一个流程教训**：第一轮那份验证**不可重放**（全仓搜 `remote-debugging-port`/`swiftshader` 零命中，帧数与 hex 证据全是报告叙述）。已要求装置落盘。**后续任何"在某处跑通了"的声明，装置必须一起进仓库**——否则它在面试前夜帮不了任何人。
 
 ### Task 3 现场发现（2026-10-09，commit 45a91ea）
 

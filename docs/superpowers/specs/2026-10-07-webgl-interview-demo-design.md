@@ -67,9 +67,15 @@
   ──────────────────────── WSS / WS ────────────────────────
 [你的服务器 .NET 8，单进程双栈]
   WebSocketServerListener → WebSocketServerSession : IServerSession   ← 新增，两端共用
-  UdpSession / KcpServerSession : IServerSession                      ← 既有，保留（KCP 代码本次不删）
+  KcpServerSession : IServerSession（T2）                              ← 既有，保留（KCP 代码本次不删）
         ↓ 两条来源汇入同一个 ProcessPacket（复用）
-  Handler / AoiGrid / EntityStore / CombatResolver / MonsterModule     ← 全部零改动
+  Handler×5 / Room / RoomManager : IServerSession                     ← T2 接口化（在 ProcessPacket 下游）
+  AoiGrid / EntityStore / CombatResolver / MonsterModule                ← 全部零改动
+
+  接口的边界：ProcessPacket **及其下游**全部走 IServerSession；
+  而 UDP 收包路径（Server3C:328-353 的 SendSocket/SetSendSocket/EnsureWired/
+  HandleUdpPacket）与 SessionManager.GetOrCreateSession 是**传输专属**代码，
+  保持 KcpServerSession 具体类型——画窄了 WS 到不了 Handler，画宽了既有测试要改。
 ```
 
 ### 双栈为什么是白送的
@@ -179,7 +185,7 @@
 
 | # | 风险 | 影响 | 应对 |
 |---|---|---|---|
-| **R1** | **首屏加载时间**（包现 136MB） | "打开链接等 1 分钟"在面试里与崩溃同级 | 人类裁定：**本批次不做，也不测量**——先落地 WebGL 形态，后期清理未使用资源后再优化。**本设计不设缓解措施，风险被显式接受** |
+| **R1** | **首屏加载时间**（包现 136MB） | "打开链接等 1 分钟"在面试里与崩溃同级 | 人类裁定：**本批次不做，也不测量**——先落地 WebGL 形态，后期清理未使用资源后再优化。**本设计不设缓解措施，风险被显式接受**。<br>**D-W12 把托管裁剪关掉会让 wasm 段变大**——但 136MB 主要由资源构成，代码段占比小，故对 R1 的影响远小于直觉；若后期真要优化，清理未使用资源（D-W4）是主要杠杆，不是裁剪 |
 | **R2** | **jslib 边界** | 本设计最容易卡住的纯技术点 | **反转跨界方向**：不让 JS 回调 C#——`gameInstance` 在 Unity 2020.1 就被移除（loader API 改名 `createUnityInstance`），而 `SendMessage` 还要字符串方法名且失败静默。改成 C# 每帧 `Poll`，跨界只剩 `DllImport` 一个方向。**状态机进 Node 单测**，入口函数缩到 7 个、除 `Connect` 外各 1-3 行。T4 单独成任务，失败早暴露 |
 | **R3** | **WSS 需要域名 + 证书** | 非技术依赖 | 比微信备案轻得多（一个域名 + Let's Encrypt）。**演示形态下不做鉴权**——公网暴露意味着任何人知道 URL 即可连，需在演示期接受并说明 |
 | **R4** | **手机端性能未知** | PC 上 `--bots 100` 能跑，手机浏览器不一定 | T8 明确记录手机端帧率；若跑不动，P3 的声称降级为"桌面浏览器演示" |
@@ -201,3 +207,4 @@
 | **D-W9** | WS 上**一条消息 = 一个 WS 帧**，直接复用 `MessageCodec.Encode`/`TryDecode` | `MessageCodec` 完全与传输解耦（F2）；WS 本身是消息边界的，无需再做流式拆帧 |
 | **D-W10** | 应用**从未使用** KCP 的非可靠通道（全部 `MessageFlags.Reliable`） | 所以 WebSocket(TCP) 的语义与现有实际行为**一致**，不存在"换 TCP 反而变差"的落差（F3） |
 | **D-W11** | **两端统一走 WebSocket**：`WebSocketClientAdapter` 成为 PC 与 WebGL **唯一**的客户端传输；`KcpNetClientAdapter` 保留为第二实现但**不再是默认**（人类裁定："保留原有 kcp 代码，以后再删"） | **收益**：F3 表明 KCP 的不可靠通道是死代码，让它继续当 PC 默认是**零收益**；而统一之后 **PC 自我验证与浏览器演示走同一条代码路径**——旧形态下"在 PC 上验的每一件事，走的都是面试官那边不存在的那条路"，这正是"确保每个功能尽量少 bug"的落点。平台分叉也从"两条传输"降级为"两个 channel"。<br>**代价**：master 的 PC 传输与 P6 冻结包所用的 `KcpNetClientAdapter` 不再一致（冻结包不随 master 演进，接受）。<br>**面试口径**：不是"本来就用 WebSocket"，而是"实现了 KCP/UDP → 加 WebSocket 时发现应用层从未使用不可靠通道 → 把两端统一到一条路径" |
+| **D-W12** | **WebGL 的托管裁剪设为 Disabled**（人类裁定；原值 Low） | **实测**：Low 下 protobuf-net 在 IL2CPP 下推不出消息契约 → 登录帧一帧都发不出去且**全程静默**（无异常、无 Console、屏幕无线索）；对照实验：只改裁剪等级，同一份代码立刻帧双向跑通并进世界。<br>**为什么不用 link.xml**：失败模式仍是**静默的**，且以后新增消息类型或用到新的 protobuf 特性时可能复发。Disabled 的失败模式是"包更大"——**可见、可测**。<br>**对 R1 的影响**：包体 136MB 主要是资源（D-W4），代码裁剪影响的是 wasm 那一小块。 |
