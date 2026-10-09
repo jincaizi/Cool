@@ -254,27 +254,28 @@ namespace KcpServer
         }
 
         /// <summary>
-        /// 注册一个会话到事件链 —— 传输无关。
-        /// KCP 路径在 UDP 收包处内联接线（不属本次改动范围），
-        /// WebSocket 监听器建完会话后调用本方法。
-        /// 幂等接线：同一会话重复注册只生效一次（消除发布-订阅窗口竞态）——与 KCP 路径 EnsureWired 同语义。
-        /// 不幂等会让 DataReceived 挂两遍 → 每个包被 ProcessPacket 处理两次（登录建两个 PlayerState、
-        /// 施法裁决两次）——是静默的状态污染，不是异常。簿记在 OnSessionDisconnected 释放。
-        /// </summary>
-        /// <summary>
         /// 会话 id 发号源（转发 SessionManager）—— WS 监听器建会话时取号。
         /// 必须与 KCP 共用同一个计数器：_sessionIdToPlayerId 与 RegisterSession 的幂等簿记
         /// 都按 SessionId 键控，两条传输各自发号必然撞号（详见 SessionManager.NextSessionId）
         /// </summary>
         public long NextSessionId() => _sessionManager.NextSessionId();
 
+        /// <summary>
+        /// 注册一个会话到事件链 —— 传输无关。
+        /// KCP 路径在 UDP 收包处内联接线（不属本次改动范围），
+        /// WebSocket 监听器建完会话后调用本方法。
+        /// 幂等接线：同一会话重复注册只生效一次（消除发布-订阅窗口竞态）——与 KCP 路径 EnsureWired 同语义。
+        /// 不幂等会让 DataReceived 挂两遍 → 每个包被 ProcessPacket 处理两次（登录建两个 PlayerState、
+        /// 施法裁决两次）——是静默的状态污染，不是异常。簿记在 OnSessionDisconnected 释放。
+        /// 入站包经 OnSessionDataReceivedEnqueued 投递到主循环 —— 本入口的调用方不是主循环线程。
+        /// </summary>
         public void RegisterSession(IServerSession session)
         {
             lock (_registerLock)
             {
                 if (!_registeredSessions.Add(session.SessionId)) return;
 
-                session.DataReceived += OnSessionDataReceived;
+                session.DataReceived += OnSessionDataReceivedEnqueued;
                 session.Disconnected += OnSessionDisconnected;
                 session.Error += OnSessionError;
             }
@@ -380,6 +381,21 @@ namespace KcpServer
             }
         }
 
+        /// <summary>
+        /// RegisterSession 路径的入站包处理器 —— 与 KCP 内联路径（OnSessionDataReceived）的差别
+        /// **只在哪个线程**：KCP 的 DataReceived 由主循环线程的 HandlePacket 触发，本入口由 WS 接收
+        /// 循环（线程池线程）触发。故此处只入队，处理交给唯一消费者线程（R2）——
+        /// 直接在 IO 线程上 ProcessPacket 会给世界状态开出第二条不受游戏循环管辖的并发入口
+        /// （主循环正在遍历 EntityStore/AOI 时被改）。两条路径各自保持自己的语义，终点都在主循环。
+        /// </summary>
+        private void OnSessionDataReceivedEnqueued(object? sender, byte[] data)
+        {
+            if (sender is IServerSession session)
+            {
+                _gameLoop.EnqueueAction(() => { _ = ProcessPacket(session, data); });
+            }
+        }
+
         private async Task ProcessPacket(IServerSession session, byte[] data)
         {
             try
@@ -436,10 +452,16 @@ namespace KcpServer
                 lock (_registerLock)
                 {
                     _registeredSessions.Remove(session.SessionId);
-                    session.DataReceived -= OnSessionDataReceived;
+                    session.DataReceived -= OnSessionDataReceived;          // KCP 内联路径
+                    session.DataReceived -= OnSessionDataReceivedEnqueued;  // RegisterSession 路径
                     session.Disconnected -= OnSessionDisconnected;
                     session.Error -= OnSessionError;
                 }
+                // 会话对象回收：断开是终态，此后无人在它身上收发。
+                // 不做的话 WS 会话的 drain 轮询（Task.Delay(2)）与 socket 会活到进程结束——
+                // 每次断开漏一个 500Hz 空转 + 一个未释放句柄（服务端长期运行时无界增长）。
+                // Dispose 幂等：KCP 路径既有的 StopAsync/CleanupLoop 再调一次是无害的。
+                session.Dispose();
                 // R2：世界状态变更一律经主循环动作队列
                 _gameLoop.EnqueueAction(() => { _ = _loginHandler.HandleDisconnectAsync(session); });
                 _gameLoop.EnqueueAction(() => _sessionManager.RemoveById(session.SessionId));

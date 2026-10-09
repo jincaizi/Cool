@@ -65,6 +65,20 @@ public class RegisterSessionTests : IDisposable
         Assert.Equal(1, session.DataReceivedSubscribers);
     }
 
+    [Fact]
+    public void RegisterSession_AfterDisconnect_DisposesSession()
+    {
+        var session = new FakeSession(sessionId: 1);
+        _server.RegisterSession(session);
+
+        session.RaiseDisconnected();
+
+        // 断开是终态：会话对象必须就地回收。不回收的话 WS 会话的 drain 轮询（Task.Delay(2)）
+        // 与 socket 会活到进程结束 —— 每次断开漏一个 500Hz 空转 + 一个未释放句柄，
+        // 服务端长期运行时无界增长（演示形态看不出来）。
+        Assert.True(session.Disposed);
+    }
+
     /// <summary>计数版假会话：把三个事件的订阅数暴露成断言点（无需真 socket）</summary>
     private sealed class FakeSession : IServerSession
     {
@@ -73,6 +87,9 @@ public class RegisterSessionTests : IDisposable
         public long SessionId { get; }
         public bool IsConnected => true;
         public DateTime LastActivityTime => DateTime.UtcNow;
+
+        /// <summary>是否被回收（断开路径应就地释放会话对象）</summary>
+        public bool Disposed { get; private set; }
 
         public event EventHandler<byte[]>? DataReceived;
         public event EventHandler? Disconnected;
@@ -90,6 +107,6 @@ public class RegisterSessionTests : IDisposable
         public void UpdateActivity() { }
         public bool IsTimedOut(TimeSpan timeout) => false;
         public Task CloseAsync(string reason = "Normal") => Task.CompletedTask;
-        public void Dispose() { }
+        public void Dispose() => Disposed = true;
     }
 }

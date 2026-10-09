@@ -41,18 +41,34 @@ namespace KcpServer
             while (_listener.IsListening && !ct.IsCancellationRequested)
             {
                 HttpListenerContext context;
-                try { context = await _listener.GetContextAsync(); }
-                catch (Exception) { return; }   // 监听器已停
-
-                if (!context.Request.IsWebSocketRequest)
+                try
                 {
-                    context.Response.StatusCode = 400;   // 只服务 WS，不服务 HTTP
-                    context.Response.Close();
+                    context = await _listener.GetContextAsync();
+                }
+                catch (Exception ex)
+                {
+                    // 只有"确实在关停"才是正常退出；其它异常必须留痕并继续接客——
+                    // 无日志地 return 会让整个 WS 入口永久死掉且零诊断（本 Task 是 _ = 丢弃的）
+                    if (ct.IsCancellationRequested || !_listener.IsListening)
+                    {
+                        _logger.LogInformation("WebSocket listener accept loop stopped");
+                        return;
+                    }
+                    _logger.LogError(ex, "WebSocket listener accept failed");
                     continue;
                 }
 
+                // 循环体整体包起来：非 WS 请求的 400 回应同样可能抛（客户端已消失时 Response.Close 会抛），
+                // 而逸出即整个接受循环静默终止
                 try
                 {
+                    if (!context.Request.IsWebSocketRequest)
+                    {
+                        context.Response.StatusCode = 400;   // 只服务 WS，不服务 HTTP
+                        context.Response.Close();
+                        continue;
+                    }
+
                     var wsContext = await context.AcceptWebSocketAsync(subProtocol: null);
                     var session = new WebSocketServerSession(_nextSessionId(), wsContext.WebSocket, _logger);
                     _server.RegisterSession(session);     // ← Task 2 Step 6 的接线点

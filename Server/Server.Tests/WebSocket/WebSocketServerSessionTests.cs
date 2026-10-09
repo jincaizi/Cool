@@ -55,6 +55,19 @@ namespace Server.Tests.WebSocketTests
         }
 
         [Fact]
+        public void Dispose_IsIdempotent()
+        {
+            var session = new WebSocketServerSession(1L, new FakeSocket(), new TestLogger());
+
+            // 断开路径会就地回收会话对象，收尾路径（StopAsync/CleanupLoop/监听器）可能再调一次——
+            // 重复 Cancel 已释放的 CTS 会抛，故 Dispose 必须幂等；且 Dispose 后一律不算连接
+            session.Dispose();
+            session.Dispose();
+
+            Assert.False(session.IsConnected);
+        }
+
+        [Fact]
         public void IsTimedOut_RespectsLastActivity()
         {
             using var session = new WebSocketServerSession(1L, new FakeSocket(), new TestLogger());

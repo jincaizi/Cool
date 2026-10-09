@@ -22,9 +22,12 @@ namespace KcpServer
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<byte[]> _sendQueue = new ConcurrentQueue<byte[]>();
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private bool _disposed;
 
         public long SessionId { get; }
-        public bool IsConnected => _socket.State == WebSocketState.Open;
+
+        /// <summary>权威否决位与 KcpServerSession/客户端通道同语义：Dispose 后一律不算连接（不依赖 socket.State 的行为）</summary>
+        public bool IsConnected => !_disposed && _socket.State == WebSocketState.Open;
         public DateTime LastActivityTime { get; private set; } = DateTime.UtcNow;
 
         /// <summary>待发队列深度（观测用，与 KcpServerSession.QueuedSendCount 同惯例）</summary>
@@ -116,8 +119,12 @@ namespace KcpServer
             finally { _cts.Cancel(); }
         }
 
+        /// <summary>幂等（与 KcpServerSession.Dispose 同惯例）：断开路径会就地回收，
+        /// 收尾路径（StopAsync/CleanupLoop/监听器）可能再调一次——重复 Cancel 已释放的 CTS 会抛</summary>
         public void Dispose()
         {
+            if (_disposed) return;
+            _disposed = true;
             _cts.Cancel();
             _cts.Dispose();
             try { _socket.Dispose(); } catch { }
