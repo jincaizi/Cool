@@ -519,6 +519,7 @@ Pure type substitution: no method body changed, so 132/132 green is the proof."
 - 创建：`Assets/Scripts/AOT/WebSocketNet/IWebSocketChannel.cs`
 - 创建：`Assets/Scripts/AOT/WebSocketNet/DotNetWebSocketChannel.cs`
 - 重写：`Assets/Scripts/AOT/WebSocketNet/WebSocketClientAdapter.cs`（填充 T1 的占位）
+- 修改：`Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef`（references 补 `"WebSocketNet"`——该 asmdef 就在 `Tests/Editor/` 根上、**递归覆盖子目录**，新的 `WebSocketNet/` 测试落在它里面）
 - 创建：`Assets/Scripts/Tests/Editor/WebSocketNet/WebSocketClientAdapterTests.cs`
 
 **分层理由（D-W8）**：WebGL 必须走 jslib，而**编辑器里 `ClientWebSocket` 可用**。把通道抽出来，适配器逻辑就能在 EditMode 单测，只有 jslib 与浏览器运行时留人工。
@@ -2836,6 +2837,19 @@ discovered."
 | 2 | `KcpNet.PlayModeTests.asmdef`（`includePlatforms: []`）里 9 个测试直接 `new KcpNetClientAdapter()` ⇒ WebGL 下编译失败 | 加 `"defineConstraints": ["!UNITY_WEBGL"]` |
 | 3 | `Assets/Scripts/Examples/`（**无 asmdef**，落在 Assembly-CSharp）3 个文件引用 `KcpClient`/`KcpServer` ⇒ 同样失败 | 3 个文件各加 `#if !UNITY_WEBGL` |
 | 4 | `ClientNetworkHost` 新增 `using WebSocketNet;` ⇒ `GameSys.asmdef` 必须加 `"WebSocketNet"` 引用（asmdef 引用不可条件化） | 加引用；`KcpNet` 引用保留 |
+
+### Task 3 现场发现（2026-10-09，commit 45a91ea）
+
+四处偏离简报，均已核实为**简报有误**而非实现者取巧：
+
+| # | 简报写 | 实测 |
+|---|---|---|
+| 1 | 6 条测试方法签名是 `public async Task test_xxx()` | **本项目测试框架 `com.unity.test-framework: 1.1.33` 不支持 async 测试方法**——6 条全红 `Method has non-void return value`。`Assets/Scripts/Tests/Editor/` 下 `public async Task` 测试方法数为 **0**（实测）。改为 `void` + `GetAwaiter().GetResult()`；测试名/结构/断言一字未改 |
+| 2 | `FakeChannel.RaiseClosed` 只触发 `Closed` | 它没有把 `IsConnected` 置 false，而适配器判 `State == Open`，于是第 5 条断言**不可能成立**。**修假通道**（假件必须忠实），断言原样保留 |
+| 3 | 测试用 `EchoRequest.Content` / `EchoResponse.Content` | 这两个类型没有 `Content` 字段 → 改用 `ClientTimestamp`/`ServerTimestamp`。简报自己的容错条文已授权（"不改测试意图"） |
+| 4 | Files 清单只有 `AOT/WebSocketNet/` + 测试文件 | `Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef` **就在 `Tests/Editor/` 根上、递归覆盖子目录**，新的 `WebSocketNet/` 测试落在该程序集内 → 必须补 `"WebSocketNet"` 引用 |
+
+> **第 1 条是通用陷阱，后续任何在 Unity 侧写测试的任务都要注意**：本项目 **`Server.Tests` 是 xunit**（原生支持 `async Task`），而 **Unity 侧是 NUnit 1.1.33**（不支持）。本计划里只有 T5 的 `WebSocketServerSessionTests` 是 `async Task`——它在 xunit 里，安全。
 
 ### Task 2 现场发现（2026-10-09，commit 90f8969）
 
