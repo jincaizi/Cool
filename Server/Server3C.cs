@@ -29,6 +29,11 @@ namespace KcpServer
         private readonly ConcurrentDictionary<long, long> _playerIdToSessionId = new ConcurrentDictionary<long, long>();
         private readonly ConcurrentDictionary<long, IServerSession> _playerIdToSession = new ConcurrentDictionary<long, IServerSession>();
 
+        // 已接线会话簿记（RegisterSession 幂等 + 断开释放，防无界增长）。
+        // 锁：RegisterSession 由 WS 监听器的接受连接任务调用（非主循环线程），断开路径同锁释放
+        private readonly object _registerLock = new object();
+        private readonly HashSet<long> _registeredSessions = new HashSet<long>();
+
         // R2：唯一消费者线程独占世界状态；IO 线程只 Enqueue，不触碰状态
         private readonly GameLoop<(EndPoint endpoint, byte[] data)> _gameLoop;
 
@@ -252,12 +257,20 @@ namespace KcpServer
         /// 注册一个会话到事件链 —— 传输无关。
         /// KCP 路径在 UDP 收包处内联接线（不属本次改动范围），
         /// WebSocket 监听器建完会话后调用本方法。
+        /// 幂等接线：同一会话重复注册只生效一次（消除发布-订阅窗口竞态）——与 KCP 路径 EnsureWired 同语义。
+        /// 不幂等会让 DataReceived 挂两遍 → 每个包被 ProcessPacket 处理两次（登录建两个 PlayerState、
+        /// 施法裁决两次）——是静默的状态污染，不是异常。簿记在 OnSessionDisconnected 释放。
         /// </summary>
         public void RegisterSession(IServerSession session)
         {
-            session.DataReceived += OnSessionDataReceived;
-            session.Disconnected += OnSessionDisconnected;
-            session.Error += OnSessionError;
+            lock (_registerLock)
+            {
+                if (!_registeredSessions.Add(session.SessionId)) return;
+
+                session.DataReceived += OnSessionDataReceived;
+                session.Disconnected += OnSessionDisconnected;
+                session.Error += OnSessionError;
+            }
         }
 
         /// <summary>每 tick 为各在线 observer 组装并广播其 AOI 可见快照（带节拍/静止保活）</summary>
@@ -411,6 +424,15 @@ namespace KcpServer
             if (sender is IServerSession session)
             {
                 _logger.LogInformation($"Session {session.SessionId} disconnected");
+                // 释放接线簿记并退订（防无界增长；同一会话对象断开后重新注册仍是干净的）——
+                // 簿记不是世界状态，就地释放，不经主循环
+                lock (_registerLock)
+                {
+                    _registeredSessions.Remove(session.SessionId);
+                    session.DataReceived -= OnSessionDataReceived;
+                    session.Disconnected -= OnSessionDisconnected;
+                    session.Error -= OnSessionError;
+                }
                 // R2：世界状态变更一律经主循环动作队列
                 _gameLoop.EnqueueAction(() => { _ = _loginHandler.HandleDisconnectAsync(session); });
                 _gameLoop.EnqueueAction(() => _sessionManager.RemoveById(session.SessionId));
