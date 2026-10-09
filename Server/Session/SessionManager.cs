@@ -30,6 +30,13 @@ namespace KcpServer
         }
 
         /// <summary>
+        /// 会话 id 发号源 —— **两条传输共用同一个计数器**（KCP 的 GetOrCreateSession 与 WS 监听器）。
+        /// 各自开计数器会从同一个起点撞号，而 Server3C 的 _sessionIdToPlayerId 与 RegisterSession
+        /// 的幂等簿记都按 SessionId 键控：撞号 = 玩家绑定串线 / 后注册的会话被静默吞掉。
+        /// </summary>
+        public long NextSessionId() => Interlocked.Increment(ref _nextSessionId);
+
+        /// <summary>
         /// 查找或原子创建会话（并发首包同端点 → 恰一个会话）
         /// </summary>
         public KcpServerSession GetOrCreateSession(EndPoint remoteEndPoint, byte[] firstPacket)

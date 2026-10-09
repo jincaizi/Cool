@@ -261,6 +261,13 @@ namespace KcpServer
         /// 不幂等会让 DataReceived 挂两遍 → 每个包被 ProcessPacket 处理两次（登录建两个 PlayerState、
         /// 施法裁决两次）——是静默的状态污染，不是异常。簿记在 OnSessionDisconnected 释放。
         /// </summary>
+        /// <summary>
+        /// 会话 id 发号源（转发 SessionManager）—— WS 监听器建会话时取号。
+        /// 必须与 KCP 共用同一个计数器：_sessionIdToPlayerId 与 RegisterSession 的幂等簿记
+        /// 都按 SessionId 键控，两条传输各自发号必然撞号（详见 SessionManager.NextSessionId）
+        /// </summary>
+        public long NextSessionId() => _sessionManager.NextSessionId();
+
         public void RegisterSession(IServerSession session)
         {
             lock (_registerLock)

@@ -8,6 +8,7 @@ namespace KcpServer
     {
         private static Server3C? _server;
         private static WebSocketEchoListener? _wsEcho;
+        private static WebSocketServerListener? _wsListener;
         private static readonly ManualResetEventSlim _shutdownEvent = new ManualResetEventSlim(false);
 
         static async Task Main(string[] args)
@@ -49,6 +50,20 @@ namespace KcpServer
                 if (args[i] == "--ws-echo") { wsEcho = true; break; }
             }
 
+            // --ws-prefix：WS 监听前缀。默认本机开发地址——HttpListener 的 host 段是**字面匹配**
+            // 请求 Host 头的，而客户端 WebSocketClientAdapter 拼的是 ws://<host>:<port>/、
+            // 本项目所有客户端都拨 127.0.0.1：写成 localhost 会得到一个**静默不匹配**
+            //（既不转发也不报错，客户端只看到连接被拒）。对外部署的 URL ACL 见 Task 9
+            string wsPrefix = "http://127.0.0.1:" + port + "/";
+            for (int i = 1; i < args.Length - 1; i++)
+            {
+                if (args[i] == "--ws-prefix" && args[i + 1].Length > 0)
+                {
+                    wsPrefix = args[i + 1];
+                    break;
+                }
+            }
+
             Console.WriteLine($"Starting Server3C on port {port}...");
 
             var logger = new ConsoleLogger();
@@ -71,10 +86,19 @@ namespace KcpServer
             {
                 await _server.StartAsync(port);
 
+                // D-W3：同进程双栈 —— UDP(KCP) 给原生客户端，TCP(WS) 给浏览器客户端
+                //（UDP 8000 与 TCP 8000 不冲突，一个进程即可）。两条来源都汇入同一 ProcessPacket。
+                // --ws-echo 是 T4 的纯字节回吐自检端点，与真监听抢同一个 TCP 端口
+                //（HttpListener 同一前缀只能注册一个监听器）——两者互斥，显式要求自检时让位给 echo
                 if (wsEcho)
                 {
                     _wsEcho = new WebSocketEchoListener(logger);
-                    _wsEcho.Start("http://127.0.0.1:" + port + "/");
+                    _wsEcho.Start(wsPrefix);
+                }
+                else
+                {
+                    _wsListener = new WebSocketServerListener(_server, logger, _server.NextSessionId);
+                    _wsListener.Start(wsPrefix);
                 }
 
                 Console.WriteLine($"Server3C is running on port {port}");
@@ -92,6 +116,7 @@ namespace KcpServer
             }
             finally
             {
+                _wsListener?.Dispose();
                 _wsEcho?.Dispose();
                 if (_server != null)
                 {
