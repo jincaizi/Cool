@@ -436,16 +436,44 @@ WS 监听器建完会话后要把它接进 `Server3C` 的事件链。现有 KCP 
 
 ```csharp
         /// <summary>
-        /// 注册一个会话到事件链 —— 传输无关。
-        /// KCP 路径在 UDP 收包处内联接线（不属本次改动范围），
+        /// 注册一个会话到事件链 —— 传输无关，且**幂等**。
+        /// KCP 路径在 UDP 收包处内联接线（用 KcpServerSession.EnsureWired，同样幂等），
         /// WebSocket 监听器建完会话后调用本方法。
+        /// 幂等是必需的：重复接线会让 DataReceived 触发两次 → 每个包被 ProcessPacket 处理两次
+        /// （LoginRequest 建两个 PlayerState、CastRequest 裁决两次），且是静默状态污染而非异常。
         /// </summary>
         public void RegisterSession(IServerSession session)
         {
-            session.DataReceived += OnSessionDataReceived;
-            session.Disconnected += OnSessionDisconnected;
-            session.Error += OnSessionError;
+            lock (_registerLock)
+            {
+                if (!_registeredSessions.Add(session.SessionId)) return;
+
+                session.DataReceived += OnSessionDataReceived;
+                session.Disconnected += OnSessionDisconnected;
+                session.Error += OnSessionError;
+            }
         }
+```
+
+字段（与 `_sessionIdToPlayerId` 那一组放一起）：
+
+```csharp
+        // 已接线会话簿记（RegisterSession 幂等 + 断开释放，防无界增长）。
+        // 锁：RegisterSession 由 WS 监听器的接受连接任务调用（非主循环线程），断开路径同锁释放
+        private readonly object _registerLock = new object();
+        private readonly HashSet<long> _registeredSessions = new HashSet<long>();
+```
+
+断开路径（`OnSessionDisconnected` 内，**就地释放，不入主循环**——簿记不是世界状态）：
+
+```csharp
+                lock (_registerLock)
+                {
+                    _registeredSessions.Remove(session.SessionId);
+                    session.DataReceived -= OnSessionDataReceived;
+                    session.Disconnected -= OnSessionDisconnected;
+                    session.Error -= OnSessionError;
+                }
 ```
 
 > `DataReceived` → `OnSessionDataReceived`（`:344`）→ `ProcessPacket` 这条链**本来就传输无关**——WS 会话只要触发 `DataReceived`，就自动汇入同一个 `ProcessPacket`。这正是 D-W3 说"双栈几乎白送"的原因。
@@ -2126,12 +2154,18 @@ namespace KcpServer
 
 ```csharp
             // D-W3：同进程双栈 —— UDP(KCP) 给原生客户端，TCP(WS) 给浏览器客户端
-            var wsListener = new WebSocketServerListener(
-                server, logger, () => Interlocked.Increment(ref _wsSessionIdSeed));
+            var wsListener = new WebSocketServerListener(server, logger, server.NextSessionId);
             wsListener.Start(wsPrefix);   // 默认 "http://127.0.0.1:8000/"
 ```
 
 `wsPrefix` 从命令行参数取，默认 `http://127.0.0.1:8000/`（便于本机验证；对外部署的 URL ACL 见 Task 9）。
+
+**会话 id 必须与 KCP 共用同一个发号源**（在 `SessionManager` 上加 `public long NextSessionId() => Interlocked.Increment(ref _nextSessionId);`，`Server3C` 上转出一个同名方法）。**不要**像原稿那样在 `Program.cs` 里自己开一个 `_wsSessionIdSeed` 计数器：
+
+- 两个计数器都从 1 起，同进程里**必然撞号**。
+- `Server3C._sessionIdToPlayerId` 是用 **`SessionId` 做键**的（`GetPlayerId(IServerSession)` 直接读 `session.SessionId`）。撞号 ⇒ 浏览器玩家与 KCP 玩家**共用同一条玩家绑定** ⇒ `GetPlayerId` 返回错的人、AOI 与战斗裁决跟着错。
+- `SessionManager.RemoveById` 是按 `SessionId` 遍历匹配的，撞号时会移除**先匹配到的那条**，可能是另一个会话。
+- 而 T2 给 `RegisterSession` 加的幂等守卫也是按 `SessionId` 键控的——撞号会让后注册的会话被**静默吞掉**，症状是"浏览器连上了但什么都不会发生"。
 
 > **为什么默认是 `127.0.0.1` 而不是 `localhost`——这是 `HttpListener` 的一个经典坑**：prefix 的 host 段是**字面匹配**请求的 `Host` 头，`http://localhost:8000/` **不**接受发往 `http://127.0.0.1:8000/` 的请求（两者是不同字符串）。而本项目所有客户端都拨 `127.0.0.1`：PlayMode 测试用 `127.0.0.1:8000`、`WebSocketClientAdapter` 拼出的是 `ws://<host>:<port>/`。用 `localhost` 作 prefix 会得到一个**静默不匹配**——`HttpListener` 既不转发也不报错，客户端只看到连接被拒。prefix 必须与客户端实际拨的地址**逐字一致**。
 
