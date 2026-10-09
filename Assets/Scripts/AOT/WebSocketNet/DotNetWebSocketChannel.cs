@@ -19,8 +19,9 @@ namespace WebSocketNet
 
         private ClientWebSocket? _socket;
         private CancellationTokenSource? _cts;
+        private bool _closed;   // RaiseClosed 已触发的权威否决位（见 IsConnected / RaiseClosed）
 
-        public bool IsConnected => _socket?.State == WebSocketState.Open;
+        public bool IsConnected => !_closed && _socket?.State == WebSocketState.Open;
 
         public event Action<byte[]>? MessageReceived;
         public event Action<string>? Closed;
@@ -30,6 +31,7 @@ namespace WebSocketNet
         {
             _socket = new ClientWebSocket();
             _cts = new CancellationTokenSource();
+            _closed = false;   // 重连：清掉上一轮的否决位，否则这条通道永远报未连接
             try
             {
                 await _socket.ConnectAsync(new Uri(uri), _cts.Token);
@@ -38,7 +40,7 @@ namespace WebSocketNet
             }
             catch (Exception ex)
             {
-                Error?.Invoke(ex);
+                InvokeConsumer(() => Error?.Invoke(ex));
                 return false;
             }
         }
@@ -57,7 +59,7 @@ namespace WebSocketNet
 
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        Closed?.Invoke("closed by peer");
+                        RaiseClosed("closed by peer");
                         return;
                     }
 
@@ -66,20 +68,55 @@ namespace WebSocketNet
 
                     var frame = accumulated.ToArray();
                     accumulated.SetLength(0);
-                    MessageReceived?.Invoke(frame);       // 一条消息一帧（D-W9）
+                    // 一条消息一帧（D-W9）。消费者的异常不得终止本循环——否则 State 仍 Open
+                    // 而无人再读，IsConnected 继续报 true，连接假活（ClientNetworkHost 明确预期
+                    // 消费者回调会抛：它在该线程上读 Time.unscaledTime）
+                    InvokeConsumer(() => MessageReceived?.Invoke(frame));
                 }
             }
             catch (OperationCanceledException) { /* 主动关闭，非错误 */ }
             catch (Exception ex)
             {
-                Error?.Invoke(ex);
-                Closed?.Invoke("receive loop terminated");
+                // Error 与 Closed 各自独立受保护：Error 的消费者抛异常也挡不住 Closed
+                InvokeConsumer(() => Error?.Invoke(ex));
+                RaiseClosed("receive loop terminated");
+            }
+        }
+
+        /// <summary>
+        /// 终结接收并通知上层。顺序即不变量：
+        /// ① 先置 <see cref="_closed"/>（权威否决位）——"Closed 触发时 IsConnected 必为 false"
+        ///    由此**按构造成立**，不依赖 Abort 是否成功、也不依赖状态恰好如此；
+        /// ② 再 Abort 让底层状态与之一致（释放 socket、使 SendAsync 的闸门也合上，
+        ///    否则会留下一个无人再读却仍可写的 open socket）；
+        /// ③ 最后抛 Closed（经 InvokeConsumer，消费者抛异常不影响 ①② 已落定）。
+        /// </summary>
+        private void RaiseClosed(string reason)
+        {
+            _closed = true;
+            try { _socket?.Abort(); }
+            catch { /* Abort 失败不应挡住通知——IsConnected 已由 _closed 否决 */ }
+            InvokeConsumer(() => Closed?.Invoke(reason));
+        }
+
+        /// <summary>
+        /// 调用消费者回调并吞掉消费者自身的异常——它只反映订阅者的 bug，既不得终止接收循环，
+        /// 也不得挡住同一路径上的后续通知。仅留痕。
+        /// </summary>
+        private static void InvokeConsumer(Action action)
+        {
+            try { action(); }
+            catch (Exception ex)
+            {
+                try { UnityEngine.Debug.LogError("[WebSocketNet] consumer callback threw: " + ex); }
+                catch { /* 日志通道不可用时也不中断 */ }
             }
         }
 
         public async Task SendAsync(byte[] data, int offset, int length)
         {
-            if (_socket == null || _socket.State != WebSocketState.Open) return;
+            // 闸门与 IsConnected 同源：_closed 一置，即便 Abort 未能改变 State 也不再放行
+            if (_closed || _socket == null || _socket.State != WebSocketState.Open) return;
             await _socket.SendAsync(
                 new ArraySegment<byte>(data, offset, length),
                 WebSocketMessageType.Binary, endOfMessage: true, _cts!.Token);

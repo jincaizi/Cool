@@ -99,6 +99,11 @@ namespace GameSys.EditorTests
             Assert.IsTrue(MessageCodec.TryDecode(channel.Sent[0], out var decoded));
             Assert.AreEqual(MessageId.EchoRequest, decoded.messageId);
             Assert.AreEqual(12345L, ((EchoRequest)decoded.message).ClientTimestamp);
+
+            // flags 必须编码进 wire 第 1 字节（MessageCodec 默认 None=0，适配器默认 Reliable=4）
+            // ——丢掉 flags 转发这条即红
+            Assert.AreEqual((byte)MessageFlags.Reliable, channel.Sent[0][0],
+                "适配器应把 flags 透传给 MessageCodec（默认 Reliable），而非用 None");
         }
 
         [Test]
@@ -180,6 +185,22 @@ namespace GameSys.EditorTests
 
             // Assert（与 KcpNetClientAdapter 的既有语义一致：未连接时静默丢弃）
             Assert.AreEqual(0, channel.Sent.Count);
+        }
+
+        [Test]
+        public void test_disconnect_forwards_reason_to_channel()
+        {
+            // Arrange
+            var channel = new FakeChannel();
+            var adapter = new WebSocketClientAdapter(channel);
+            adapter.ConnectAsync("127.0.0.1", 8000).GetAwaiter().GetResult();
+
+            // Act
+            adapter.DisconnectAsync("bye").GetAwaiter().GetResult();
+
+            // Assert（reason 必须透传到通道——退回 Task.CompletedTask 占位实现这条即红）
+            Assert.AreEqual("bye", channel.CloseReason);
+            Assert.IsFalse(adapter.IsConnected);
         }
     }
 }

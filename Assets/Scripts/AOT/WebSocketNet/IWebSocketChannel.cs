@@ -21,7 +21,16 @@ namespace WebSocketNet
 
         /// <summary>收到一帧。回调线程由实现决定：DotNet 是后台接收循环线程，WebGL 是 Unity 主线程（帧泵）</summary>
         event Action<byte[]>? MessageReceived;
+
+        /// <summary>
+        /// 连接终结（对端 Close / 接收循环异常）。
+        /// **触发时 <see cref="IsConnected"/> 必为 false** —— 实现须在抛出前让连接状态落定，
+        /// 不得依赖"消费者不抛"或"状态恰好如此"。假件与 WebGLWebSocketChannel 同此口径。
+        /// 回调线程同 MessageReceived。
+        /// </summary>
         event Action<string>? Closed;
+
+        /// <summary>错误留痕。实现须保证：本事件的消费者抛异常，不影响同路径上 Closed 的触发。</summary>
         event Action<Exception>? Error;
     }
 }
