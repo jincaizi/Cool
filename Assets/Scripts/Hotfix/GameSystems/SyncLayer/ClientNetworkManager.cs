@@ -63,6 +63,18 @@ namespace Hotfix.GameSystems.SyncLayer
 
             _client.MessageReceived += _dispatcher.Dispatch;
             _client.Disconnected += OnSocketDisconnected;
+            _client.Error += OnTransportError;
+        }
+
+        /// <summary>
+        /// 传输层留痕。adapter 的 Error 此前**无人订阅**——畸形帧/解码失败因此完全静默
+        /// （IL2CPP 下 WorldSnapshot 解不出来就是这么"没"的：不是报错，是列表恒空）。
+        /// 用 LogWarning 而非 LogError：单帧解不动不该中断会话，但必须留下线索；
+        /// ex.ToString() 带内层异常，装饰不了。
+        /// </summary>
+        private void OnTransportError(Exception ex)
+        {
+            Debug.LogWarning("[Net] transport: " + ex);
         }
 
         /// <summary>
@@ -233,6 +245,7 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             _client.MessageReceived -= _dispatcher.Dispatch;
             _client.Disconnected -= OnSocketDisconnected;
+            _client.Error -= OnTransportError;
             _remoteEntities.Clear();
             _client.Dispose();
         }

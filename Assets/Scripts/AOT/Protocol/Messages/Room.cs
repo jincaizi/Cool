@@ -65,9 +65,12 @@ namespace Cool.Protocol
         [ProtoMember(1)]
         public string ZoneId { get; set; } = string.Empty;
 
-        /// <summary>房间内其他玩家快照列表</summary>
+        /// <summary>
+        /// 房间内其他玩家快照列表。必须声明为 IList——List&lt;T&gt; 在 IL2CPP 上触发
+        /// protobuf-net tuple 探测的 icall 缺口（见 ProtocolShapeGuardTests）。
+        /// </summary>
         [ProtoMember(2)]
-        public List<RemotePlayerSync> Players { get; set; } = new List<RemotePlayerSync>();
+        public IList<RemotePlayerSync> Players { get; set; } = new List<RemotePlayerSync>();
 
         /// <summary>服务器时间戳</summary>
         [ProtoMember(3)]

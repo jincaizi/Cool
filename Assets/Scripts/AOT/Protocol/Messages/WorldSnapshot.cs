@@ -91,8 +91,12 @@ namespace Cool.Protocol
         [ProtoMember(2)]
         public long ServerTimestamp { get; set; }
 
-        /// <summary>本 tick 的实体快照（脏实体全字段 + 静止实体 4Hz beacon；全静时本消息不发送）</summary>
+        /// <summary>
+        /// 本 tick 的实体快照（脏实体全字段 + 静止实体 4Hz beacon；全静时本消息不发送）。
+        /// 必须声明为 IList：List&lt;T&gt; 会让 protobuf-net 的 tuple 探测在 IL2CPP 上抛
+        /// NotSupportedException（解码静默失败），门禁见 ProtocolShapeGuardTests。
+        /// </summary>
         [ProtoMember(3)]
-        public List<EntitySnapshot> Entities { get; set; } = new List<EntitySnapshot>();
+        public IList<EntitySnapshot> Entities { get; set; } = new List<EntitySnapshot>();
     }
 }

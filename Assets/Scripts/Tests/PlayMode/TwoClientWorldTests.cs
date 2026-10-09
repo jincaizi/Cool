@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cool.Protocol;
 using KcpNet;
 using Hotfix.GameSystems.SyncLayer;
@@ -74,7 +75,7 @@ namespace KcpNet.PlayModeTests
                 await System.Threading.Tasks.Task.Delay(100);
                 foreach (var snap in ctxA.Snapshots)
                 {
-                    if (snap.Entities.Exists(e => e.PlayerId == ctxB.Manager.LocalPlayerId))
+                    if (snap.Entities.Any(e => e.PlayerId == ctxB.Manager.LocalPlayerId))
                     {
                         aSeesB = true;
                         break;
@@ -116,7 +117,7 @@ namespace KcpNet.PlayModeTests
                     bool sawOldB = false;
                     for (int i = countBefore; i < ctxA.Snapshots.Count; i++)
                     {
-                        if (ctxA.Snapshots[i].Entities.Exists(e => e.PlayerId == ctxB.Manager.LocalPlayerId))
+                        if (ctxA.Snapshots[i].Entities.Any(e => e.PlayerId == ctxB.Manager.LocalPlayerId))
                         {
                             sawOldB = true;
                             break;
@@ -140,7 +141,7 @@ namespace KcpNet.PlayModeTests
                     await System.Threading.Tasks.Task.Delay(100);
                     foreach (var snap in ctxA.Snapshots)
                     {
-                        if (snap.Entities.Exists(e => e.PlayerId == ctxC.Manager.LocalPlayerId))
+                        if (snap.Entities.Any(e => e.PlayerId == ctxC.Manager.LocalPlayerId))
                         {
                             aSeesNewB = true;
                             break;

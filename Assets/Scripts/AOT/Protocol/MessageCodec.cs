@@ -118,10 +118,27 @@ namespace Cool.Protocol
             }
         }
 
-        /// <summary>尝试解码（失败返回 false 不抛异常）</summary>
+        /// <summary>尝试解码（失败返回 false 不抛异常）——需要知道失败原因时用下面的重载</summary>
         public static bool TryDecode(byte[] data, out (MessageId messageId, IMessage message) result, byte[]? encryptionKey = null)
+            => TryDecode(data, out result, out _, encryptionKey);
+
+        /// <summary>
+        /// 尝试解码，并给出失败原因（error 非 null 即失败）。
+        ///
+        /// 留痕机制：本程序集同时被 Unity 客户端与 .NET 服务端编译，两侧日志设施不同（且不得
+        /// 引用 UnityEngine），所以这里不打日志，只把异常交给调用方——调用方是唯一知道该往哪记
+        /// 的一方（客户端 → Unity 控制台，服务端 → ILogger）。
+        ///
+        /// NotSupportedException 必须留在捕获列表里：IL2CPP 的 icall
+        /// RuntimeParameterInfo::GetTypeModifiers 未实现，protobuf-net 的 tuple 探测会抛它。
+        /// 它曾穿透此处、直接炸在接收回调上，症状是 WorldSnapshot 恒解不出来（列表恒空，
+        /// 界面上什么都看不见）——失败必须留下原因，否则和"没收到"无从区分。
+        /// </summary>
+        public static bool TryDecode(byte[] data, out (MessageId messageId, IMessage message) result,
+            out Exception? error, byte[]? encryptionKey = null)
         {
             result = default;
+            error = null;
             try
             {
                 result = Decode(data, encryptionKey);
@@ -130,8 +147,10 @@ namespace Cool.Protocol
             catch (Exception ex) when (ex is ArgumentException
                                     || ex is InvalidOperationException
                                     || ex is System.IO.EndOfStreamException
-                                    || ex is ProtoBuf.ProtoException)
+                                    || ex is ProtoBuf.ProtoException
+                                    || ex is NotSupportedException)
             {
+                error = ex;
                 return false;
             }
         }

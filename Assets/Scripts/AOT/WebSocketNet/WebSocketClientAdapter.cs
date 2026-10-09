@@ -55,10 +55,11 @@ namespace WebSocketNet
 
         private void OnFrame(byte[] data)
         {
-            if (!MessageCodec.TryDecode(data, out var decoded))
+            if (!MessageCodec.TryDecode(data, out var decoded, out var decodeError))
             {
-                // 畸形帧留痕但不打断接收循环——静默吞掉会让排查无线索
-                Error?.Invoke(new InvalidOperationException("WebSocket frame failed to decode"));
+                // 畸形帧留痕但不打断接收循环——静默吞掉会让排查无线索。
+                // 原因必须带上（inner）：只有"解码失败"这四个字，等于回到无线索
+                Error?.Invoke(new InvalidOperationException("WebSocket frame failed to decode", decodeError));
                 return;
             }
             MessageReceived?.Invoke(decoded.messageId, decoded.message);

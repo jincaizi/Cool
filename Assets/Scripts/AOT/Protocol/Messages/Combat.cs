@@ -71,6 +71,7 @@ namespace Cool.Protocol
         [ProtoMember(1)] public long SourcePlayerId { get; set; }
         [ProtoMember(2)] public int SkillId { get; set; }
         [ProtoMember(3)] public long ServerTimestamp { get; set; }
-        [ProtoMember(4)] public List<HitEntry> Hits { get; set; } = new List<HitEntry>();
+        /// <summary>必须声明为 IList——List&lt;T&gt; 在 IL2CPP 上触发 protobuf-net tuple 探测的 icall 缺口（见 ProtocolShapeGuardTests）</summary>
+        [ProtoMember(4)] public IList<HitEntry> Hits { get; set; } = new List<HitEntry>();
     }
 }
