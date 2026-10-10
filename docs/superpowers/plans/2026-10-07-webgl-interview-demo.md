@@ -2740,6 +2740,9 @@ git commit -m "fix(camera): wire touch look input through to camera rotation"
 
 **Files:** 无（本任务是**验收**，不是实现）
 
+> ⚠️ **开工第一步必须是重新出包。** T7 核实过：盘上 `Build/WebGL` 的产物（`WebGL.data` / `.wasm` / `.framework.js`，10-10 07:03–07:06）**早于 T6 落地的全部触屏工作**（T6 功能 08:01、两轮修复 23:37 / 00:11）——字符串检索 `MobileUiRoot` / `TouchLookArea` / `VirtualJoystick` / `WebGLTouch_HasTouch` **全为 0**，而对照串 `DemoDay`(2) / `CharacterSelectPanel`(4) 在。
+> **直接拿这个包做真机验证会得到"假失败"**（触屏 UI 根本不在包里），而且会误导后续排查方向。所以 T8 的第一步是用 `Assets/Scripts/Editor/WebGLBuildScript.cs` 出一份**当前 master 的包**，再开始验收。
+
 **判据来源**：`docs/superpowers/guides/p6-human-acceptance.md`——取其中与四条声称面相关的项，在**浏览器**里逐条复现。**判据本身不变**，只是点击方式从键鼠变成触屏。
 
 - [ ] **Step 1: 起服务器（带怪物与 bot）**
