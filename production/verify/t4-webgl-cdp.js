@@ -25,11 +25,38 @@
 //   moveto:<x>,<y>       只移动指针
 // 第一个位置参数传 "-" 表示"附着到当前页面、不跳转"（用于续跑正在进行的会话）。
 //
+// T8 追加：键盘 / 鼠标按钮 / 相对移动注入（**纯新增，未改动上面任何既有步骤的行为**）。
+// 动机：T4 只会点击，而 P6 单机玩法、P4 的"玩家被击中"前置都要站着走位 + 挥砍。
+// 桌面浏览器形态走键鼠，所以这四类事件就是驱动手段。
+//   keydown:<KeyName>      按住（rawKeyDown + autoRepeat 心跳，见下）
+//   keyup:<KeyName>        松开
+//   key:<KeyName>,<ms>     按住 ms 毫秒后松开
+//   tap:<KeyName>          按下并立刻松开
+//   mdown:<left|right|middle>   在**当前指针位置**按下鼠标键
+//   mup:<left|right|middle>     松开
+//   moverel:<dx>,<dy>      指针相对移动（累加式，page 坐标；用来产生 movementX/Y）
+//   mark:<label>           在日志里打一条带**相对脚本启动的毫秒时间戳**的标记（用于计时判据）
+// KeyName 映射见 KEYMAP（W/A/S/D/Q/R/1/2/3/Space/Shift/Esc）。
+// 注意：按住类步骤只发一次 keydown（Unity 轮询按键状态，不需要重复发；重复发只用于规避
+// 个别实现把 keydown 当一次性事件的情况，本装置实测一次即可）。
+const KEYMAP = {
+  W: { code: 'KeyW', key: 'w', vk: 87 }, A: { code: 'KeyA', key: 'a', vk: 65 },
+  S: { code: 'KeyS', key: 's', vk: 83 }, D: { code: 'KeyD', key: 'd', vk: 68 },
+  Q: { code: 'KeyQ', key: 'q', vk: 81 }, R: { code: 'KeyR', key: 'r', vk: 82 },
+  '1': { code: 'Digit1', key: '1', vk: 49 }, '2': { code: 'Digit2', key: '2', vk: 50 },
+  '3': { code: 'Digit3', key: '3', vk: 51 }, '4': { code: 'Digit4', key: '4', vk: 52 },
+  Space: { code: 'Space', key: ' ', vk: 32 }, Shift: { code: 'ShiftLeft', key: 'Shift', vk: 16 },
+  Esc: { code: 'Escape', key: 'Escape', vk: 27 },
+};
+const MOUSEBTN = { left: { button: 'left', buttons: 1 }, right: { button: 'right', buttons: 2 }, middle: { button: 'middle', buttons: 4 } };
+//
 // 已知边界（照实说）：headless + SwiftShader 是软渲染，帧率低、截图有黑地形伪影；
 // 它验证的是"字节与状态"，不是画面质量。
 const URL = process.argv[2];
 const steps = process.argv.slice(3);
-const CDP_HTTP = 'http://127.0.0.1:9222';
+// T8：CDP 端点可用环境变量覆盖（默认仍是 9222，行为不变）——便于同时开两个浏览器实例
+// （一个跑长时程单机观测、一个跑联网验收，互不打扰）。
+const CDP_HTTP = process.env.T8_CDP || 'http://127.0.0.1:9222';
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -64,7 +91,9 @@ async function main() {
       const text = (msg.params.args || []).map(a => a.value !== undefined ? String(a.value) : (a.description || a.type)).join(' ');
       consoleLines.push('[console.' + msg.params.type + '] ' + text);
       // 实时只回有信息量的行，避免 Unity 启动日志把输出刷没
-      if (/WebSocketNet|NetHost|__wsnet|rror|xception/i.test(text)) console.log('  << ' + text.slice(0, 400));
+      // T8：实时回显的**过滤集**追加了玩法日志前缀（Sys3CEntry / Attack / EventBus / StateLogger），
+      // 目的是让这类行**夹在 `+<ms>` 步骤标记之间**打印出来 → 事件与时间戳可以直接对齐。
+      if (/WebSocketNet|NetHost|__wsnet|rror|xception|Sys3CEntry|\[Attack\]|\[EventBus\]|StateLogger/i.test(text)) console.log('  << ' + text.slice(0, 400));
     } else if (msg.method === 'Runtime.exceptionThrown') {
       const d = msg.params.exceptionDetails || {};
       const text = (d.exception && (d.exception.description || d.exception.value)) || d.text;
@@ -106,6 +135,20 @@ async function main() {
     return r.result && r.result.value;
   }
 
+  // T8：指针位置记账（moverel 是相对移动，必须知道"当前"在哪）
+  let mouseX = 640, mouseY = 400;
+  const t0 = Date.now();
+  const elapsed = () => (Date.now() - t0) + 'ms';
+
+  async function keyEvent(type, name, extra = {}) {
+    const k = KEYMAP[name];
+    if (!k) throw new Error('unknown key ' + name);
+    await send('Input.dispatchKeyEvent', Object.assign({
+      type: type, key: k.key, code: k.code, windowsVirtualKeyCode: k.vk,
+      nativeVirtualKeyCode: k.vk, location: 0,
+    }, extra));
+  }
+
   for (const step of steps) {
     const cut = step.indexOf(':');
     const kind = cut < 0 ? step : step.slice(0, cut);
@@ -121,6 +164,7 @@ async function main() {
       console.log('SHOT written ' + arg);
     } else if (kind === 'click') {
       const [x, y] = arg.split(',').map(Number);
+      mouseX = x; mouseY = y;   // T8：同步指针记账（click 本身的行为未变）
       await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y, button: 'none', buttons: 0, pointerType: 'mouse' });
       await sleep(120);
       await send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', buttons: 1, clickCount: 1, pointerType: 'mouse' });
@@ -129,8 +173,47 @@ async function main() {
       console.log('CLICK ' + x + ',' + y);
     } else if (kind === 'moveto') {
       const [x, y] = arg.split(',').map(Number);
+      mouseX = x; mouseY = y;   // T8：同步指针记账（moveto 本身的行为未变）
       await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y, button: 'none', buttons: 0, pointerType: 'mouse' });
       console.log('MOVETO ' + x + ',' + y);
+    } else if (kind === 'keydown') {
+      await keyEvent('rawKeyDown', arg);
+      console.log('+' + elapsed() + ' KEYDOWN ' + arg);
+    } else if (kind === 'keyup') {
+      await keyEvent('keyUp', arg);
+      console.log('+' + elapsed() + ' KEYUP ' + arg);
+    } else if (kind === 'key') {
+      const [name, ms] = arg.split(',');
+      await keyEvent('rawKeyDown', name);
+      console.log('+' + elapsed() + ' KEY ' + name + ' down (hold ' + ms + 'ms)');
+      await sleep(Number(ms));
+      await keyEvent('keyUp', name);
+      console.log('+' + elapsed() + ' KEY ' + name + ' up');
+    } else if (kind === 'tap') {
+      await keyEvent('rawKeyDown', arg);
+      await sleep(60);
+      await keyEvent('keyUp', arg);
+      console.log('+' + elapsed() + ' TAP ' + arg);
+    } else if (kind === 'mdown' || kind === 'mup') {
+      const b = MOUSEBTN[arg];
+      if (!b) { console.log('unknown mouse button ' + arg); continue; }
+      await send('Input.dispatchMouseEvent', {
+        type: kind === 'mdown' ? 'mousePressed' : 'mouseReleased',
+        x: mouseX, y: mouseY, button: b.button, buttons: kind === 'mdown' ? b.buttons : 0,
+        clickCount: 1, pointerType: 'mouse',
+      });
+      console.log('+' + elapsed() + ' ' + (kind === 'mdown' ? 'MDOWN ' : 'MUP ') + arg + ' @' + mouseX + ',' + mouseY);
+    } else if (kind === 'moverel') {
+      const [dx, dy] = arg.split(',').map(Number);
+      const steps_ = Math.max(1, Math.min(10, Math.round(Math.max(Math.abs(dx), Math.abs(dy)) / 40)));
+      for (let i = 0; i < steps_; i++) {
+        mouseX += dx / steps_; mouseY += dy / steps_;
+        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: Math.round(mouseX), y: Math.round(mouseY), button: 'none', buttons: 0, pointerType: 'mouse' });
+        await sleep(30);
+      }
+      console.log('+' + elapsed() + ' MOVEREL ' + arg + ' -> @' + Math.round(mouseX) + ',' + Math.round(mouseY));
+    } else if (kind === 'mark') {
+      console.log('+' + elapsed() + ' === MARK ' + arg + ' ===');
     } else if (kind === 'addscriptfile') {
       const src = require('fs').readFileSync(arg, 'utf8');
       await send('Page.addScriptToEvaluateOnNewDocument', { source: src });

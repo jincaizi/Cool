@@ -4,6 +4,13 @@
 //   __recvFrames / __recvBytes / __recvHead —— 服务端发来、进入 jslib onmessage 的帧
 //   __ws0                                   —— jslib 创建的那个 WebSocket 实例
 //   __unity                                 —— createUnityInstance 的结果（默认模板把它关在闭包里）
+// T8 追加（纯新增，不动上面的记账）：
+//   __recvHist / __sentHist  —— 按**协议 messageId** 分桶的收发计数。帧头格式是
+//     flags(1) + messageId(2, LE) + length(2, LE)，所以 id = b[1] | (b[2]<<8)。
+//     这是"某个具体消息类型到底有没有到过浏览器"的直接判据（比问"有没有异常"强得多）。
+//   __recvIds / __sentIds     —— 最近 400 条的 id 序列（看时序）。
+//   消息号见 Assets/Scripts/AOT/Protocol/MessageId.cs（DamageResult=302, CastBroadcast=301,
+//   WorldSnapshot=110, PositionSyncResponse=101, LoginResponse=2）。
 // 另：jslib 自己会挂 window.__wsnet（$WebSocketNetState 的 __postset），
 //   它给出 sockets[handle].state / queue.length / dropped，是"C# 有没有在轮询"的直接判据。
 (function () {
@@ -21,6 +28,13 @@
       window.__sentBytes = (window.__sentBytes || 0) + u.length;
       window.__sentHead = Array.prototype.slice.call(u.slice(0, 8))
         .map(function (b) { return b.toString(16).padStart(2, '0'); }).join(' ');
+      if (u.length >= 3) {
+        var id = u[1] | (u[2] << 8);
+        window.__sentHist = window.__sentHist || {};
+        window.__sentHist[id] = (window.__sentHist[id] || 0) + 1;
+        (window.__sentIds = window.__sentIds || []).push(id);
+        if (window.__sentIds.length > 400) window.__sentIds.shift();
+      }
     } catch (e) { window.__sentErr = String(e); }
     return origSend.call(this, data);
   };
@@ -38,6 +52,13 @@
             window.__recvBytes = (window.__recvBytes || 0) + u.length;
             window.__recvHead = Array.prototype.slice.call(u.slice(0, 8))
               .map(function (b) { return b.toString(16).padStart(2, '0'); }).join(' ');
+            if (u.length >= 3) {
+              var id = u[1] | (u[2] << 8);
+              window.__recvHist = window.__recvHist || {};
+              window.__recvHist[id] = (window.__recvHist[id] || 0) + 1;
+              (window.__recvIds = window.__recvIds || []).push(id);
+              if (window.__recvIds.length > 400) window.__recvIds.shift();
+            }
           } catch (e) { window.__recvErr = String(e); }
           return fn.apply(this, arguments);
         };
