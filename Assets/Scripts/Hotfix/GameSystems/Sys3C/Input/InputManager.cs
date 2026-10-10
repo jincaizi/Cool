@@ -40,6 +40,12 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _adapter = new KeyboardInputAdapter();
         }
 
+        /// <summary>按平台注入适配器 —— 移动端由 MobileInputBinder 调用；不调用则维持键鼠。</summary>
+        public void SetAdapter(IInputAdapter adapter)
+        {
+            if (adapter != null) _adapter = adapter;
+        }
+
         /// <summary>
         /// 每帧更新 — 重置即时事件状态
         /// </summary>
@@ -54,7 +60,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _lastReleaseDuration = -1f;
             _attackJustPressed = false;
 
-            bool mouseDown = UnityInput.GetMouseButton(0);
+            bool mouseDown = UnityInput.GetMouseButton(0) || _attackHeldFromUI;
             if (mouseDown && !_attackHeld)
             {
                 _attackHeld = true;
@@ -124,7 +130,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsJumpPressed()
         {
-            bool pressed = UnityInput.GetButtonDown("Jump");
+            bool pressed = UnityInput.GetButtonDown("Jump") || _jumpPressedFromUI;
             if (pressed && !_jumpConsumed)
             {
                 _jumpConsumed = true;
@@ -182,6 +188,24 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public void SetDefendHeld(bool held)
         {
             _defendHeldFromUI = held;
+        }
+
+        // UI 按钮设置的攻击按住状态（手游平台使用）—— 与鼠标在 Update 里合并成同一条边沿
+        private bool _attackHeldFromUI;
+
+        /// <summary>由 UI 按钮调用，设置攻击按住状态（与 SetDefendHeld 同形）。</summary>
+        public void SetAttackHeld(bool held)
+        {
+            _attackHeldFromUI = held;
+        }
+
+        // UI 按钮设置的跳跃按下锁存（手游平台使用）—— 消费掉一次性按下是 UI 侧的责任
+        private bool _jumpPressedFromUI;
+
+        /// <summary>由 UI 按钮调用，置位跳跃的一次性按下（手游平台使用）。</summary>
+        public void SetJumpPressed(bool pressed)
+        {
+            _jumpPressedFromUI = pressed;
         }
 
         /// <summary>

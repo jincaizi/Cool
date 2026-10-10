@@ -1,71 +1,49 @@
+using System;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Input
 {
     /// <summary>
-    /// 虚拟摇杆输入适配器（用于移动端）
+    /// 移动端输入适配器 —— 从 UI 摇杆与触屏观察区取输入。
+    /// **重写原因**（见 Task 6 说明）：原实现读三个不存在的 legacy Input 轴
+    /// （GetAxisRaw 对未定义轴会抛异常），且 normalized 丢弃模拟量。
+    ///
+    /// 本类实现既有的 IInputAdapter 契约，成员签名未变 ——
+    /// InputManager 与 KeyboardInputAdapter 都不受影响。
+    /// 输入源用委托注入，因此本类可在 EditMode 单测（不需要真实 UI）。
     /// </summary>
     public class JoystickInputAdapter : IInputAdapter
     {
-        private const float DEAD_ZONE = 0.05f;
+        private const float DeadZone = 0.05f;
+
+        private readonly Func<Vector2> _moveSource;
+        private readonly Func<Vector2> _lookSource;
 
         public string AdapterName => "Joystick";
 
+        public JoystickInputAdapter(Func<Vector2> moveSource, Func<Vector2> lookSource)
+        {
+            _moveSource = moveSource;
+            _lookSource = lookSource;
+        }
+
         /// <summary>
-        /// 获取标准化移动输入（从虚拟摇杆）
+        /// 摇杆输入 → 世界方向。
+        /// **不 normalize**：保留模拟量，推一半走一半（P6 审查记录的坑）。
+        /// 死区以下的抖动视为无输入。
         /// </summary>
         public Vector3 GetMoveInput()
         {
-            float horizontal = UnityEngine.Input.GetAxisRaw("Horizontal_Joystick");
-            float vertical = UnityEngine.Input.GetAxisRaw("Vertical_Joystick");
-
-            Vector3 input = new Vector3(horizontal, 0f, vertical);
-
-            if (input.magnitude < DEAD_ZONE)
-                return Vector3.zero;
-
-            return input.normalized;
+            Vector2 v = _moveSource();
+            if (v.sqrMagnitude < DeadZone * DeadZone) return Vector3.zero;
+            return new Vector3(v.x, 0f, v.y);   // 注意是 v.y → z（俯视平面）
         }
 
-        /// <summary>
-        /// 获取相机旋转输入（从第二个摇杆或触摸拖拽）
-        /// </summary>
-        public Vector2 GetCameraRotationInput()
-        {
-            float rotX = UnityEngine.Input.GetAxisRaw("Mouse X_Joystick");
-            float rotY = UnityEngine.Input.GetAxisRaw("Mouse Y_Joystick");
+        /// <summary>触屏拖拽量原样透传（灵敏度由相机侧既有参数负责，不在此再缩放）</summary>
+        public Vector2 GetCameraRotationInput() => _lookSource();
 
-            // 如果没有摇杆输入，尝试触摸拖拽
-            if (Mathf.Abs(rotX) < DEAD_ZONE && Mathf.Abs(rotY) < DEAD_ZONE)
-            {
-                if (UnityEngine.Input.touchCount > 0)
-                {
-                    Touch touch = UnityEngine.Input.GetTouch(0);
-                    if (touch.phase == TouchPhase.Moved)
-                    {
-                        return touch.deltaPosition / 100f;
-                    }
-                }
-            }
+        public bool HasMoveInput() => GetMoveInput().sqrMagnitude > 0f;
 
-            return new Vector2(rotX, rotY);
-        }
-
-        /// <summary>
-        /// 是否有移动输入
-        /// </summary>
-        public bool HasMoveInput()
-        {
-            return GetMoveInput().sqrMagnitude > 0f;
-        }
-
-        /// <summary>
-        /// 是否有相机旋转输入
-        /// </summary>
-        public bool HasCameraRotationInput()
-        {
-            Vector2 rot = GetCameraRotationInput();
-            return rot.sqrMagnitude > 0f;
-        }
+        public bool HasCameraRotationInput() => GetCameraRotationInput().sqrMagnitude > 0f;
     }
 }
