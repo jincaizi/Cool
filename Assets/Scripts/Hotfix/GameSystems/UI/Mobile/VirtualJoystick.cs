@@ -32,5 +32,15 @@ namespace Hotfix.GameSystems.UI
             _value = Vector2.zero;
             _handle.anchoredPosition = Vector2.zero;
         }
+
+        /// <summary>
+        /// 停用/失焦时清空 —— 浏览器抢焦点会让抬指事件丢失，
+        /// 此时 OnPointerUp 不会来，Value 会锁存 ⇒ 角色一直跑。
+        /// </summary>
+        private void OnDisable()
+        {
+            _value = Vector2.zero;
+            _handle.anchoredPosition = Vector2.zero;
+        }
     }
 }

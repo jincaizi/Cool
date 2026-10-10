@@ -24,6 +24,16 @@ namespace Hotfix.GameSystems.UI
         }
 
         /// <summary>
+        /// 停用/失焦时清空 —— 浏览器抢焦点会让抬指事件丢失，
+        /// 此时 OnPointerUp 不会来，Delta 会锁存 ⇒ 视角一直转。
+        /// </summary>
+        private void OnDisable()
+        {
+            _pending = Vector2.zero;
+            _delta = Vector2.zero;
+        }
+
+        /// <summary>
         /// 帧末发布本帧累积的拖拽量并清空。手指停住时 OnDrag 不再触发，
         /// 若无此步 Delta 会一直保持上一次的值，而 Sys3CEntry 每帧都读它 → 视角会持续旋转不停。
         /// 放在 LateUpdate（所有 Update 之后）而非 Update，是为了与 EventSystem 的处理顺序无关：

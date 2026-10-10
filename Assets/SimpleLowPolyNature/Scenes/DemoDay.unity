@@ -5320,6 +5320,7 @@ MonoBehaviour:
   _lookArea: {fileID: 312999714}
   _buttons: {fileID: 1948128673}
   _mobileUiRoot: {fileID: 1948128672}
+  TouchOverride: 0
 --- !u!4 &672723895
 Transform:
   m_ObjectHideFlags: 0

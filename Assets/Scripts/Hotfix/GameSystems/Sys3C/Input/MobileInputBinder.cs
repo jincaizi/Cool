@@ -6,11 +6,11 @@ using Hotfix.GameSystems.UI;
 namespace Hotfix.GameSystems.Sys3C.Input
 {
     /// <summary>
-    /// 移动端输入接线 —— 只在触屏平台生效（WebGL 跑在手机上即为触屏）。
-    /// 用 Application.isMobilePlatform 判定：PC 浏览器仍走键鼠，不影响既有验收。
+    /// 移动端输入接线 —— 只在触屏形态生效（WebGL 跑在手机上即为触屏）。
+    /// PC 浏览器与编辑器维持键鼠，不影响既有验收。
     ///
     /// 本组件必须挂在**常驻激活**的对象上：`_mobileUiRoot` 默认不激活，
-    /// 若挂在它自身之下，Start 永不执行，手机上 UI 永远不会出现。
+    /// 若挂在它自身之下，`Update` 永不执行，手机上 UI 永远不会出现。
     /// </summary>
     public class MobileInputBinder : MonoBehaviour
     {
@@ -19,35 +19,46 @@ namespace Hotfix.GameSystems.Sys3C.Input
         [SerializeField] private MobileActionButtons _buttons;
         [SerializeField] private GameObject _mobileUiRoot;
 
-        private InputManager _inputManager;
-        private bool _bound;
+        /// <summary>
+        /// 触屏判定的人工档位。`Auto` 走自动判定；`ForceTouch` / `ForceNoTouch` 直接压过自动判定
+        /// （URL `?touch=1` / `?touch=0` 的优先级更高，见 TouchInputAvailability）。
+        ///
+        /// **这是面试现场的救命绳**：自动判据（`Application.isMobilePlatform` 在 iPad 桌面视图等
+        /// 场景会失效）判错时，在 Inspector 里拨一下即可，不必重新出包。
+        ///
+        /// 本字段**每帧重新读取**，因此它同时是 PlayMode 测试进入移动端分支的接缝
+        /// （否则 `Application.isMobilePlatform` 在编辑器恒 false，那条分支按构造测不到）。
+        /// </summary>
+        public TouchOverride TouchOverride = TouchOverride.Auto;
 
-        private void Start()
-        {
-            bool mobile = Application.isMobilePlatform;
-            if (_mobileUiRoot != null) _mobileUiRoot.SetActive(mobile);
-        }
+        private InputManager _inputManager;
 
         /// <summary>
-        /// 玩家的 Sys3CEntry 是 PlayerSpawner 在运行期生成的，其 InputManager 又是在
-        /// Sys3CEntry.Start 里 AddComponent 的（两个 Start 的顺序未定义），因此引用只能重试获取：
-        /// 一次性在 Start 里取会随执行顺序静默拿到 null，触屏输入全失效。
+        /// 每帧重新裁决 + 重新发现玩家。**不能一次性 latch**：玩家会被 PlayerSpawner
+        /// 销毁重建（每次 `CharacterSelectedEvent`，包括"确认角色"那一下），新玩家带的是全新的
+        /// `InputManager`（其 `Awake` 里装的又是 KeyboardInputAdapter）。旧引用被销毁后
+        /// `== null` 会重新成立，于是这里会重新发现、重新装适配器 —— 否则手机上确认角色之后
+        /// 摇杆与三个按钮会**只画不发**（静默失效，无日志无异常）。
         /// </summary>
         private void Update()
         {
-            if (_bound || !Application.isMobilePlatform) return;
+            bool touch = TouchInputAvailability.Resolve(TouchOverride);
+            if (_mobileUiRoot != null && _mobileUiRoot.activeSelf != touch)
+                _mobileUiRoot.SetActive(touch);
+            if (!touch) return;
+
+            if (_inputManager != null) return;   // 已绑定且仍存活（Unity 的 == 对已销毁对象为 true）
 
             var entry = FindObjectOfType<Sys3CEntry>();
             if (entry == null) return;
 
             var inputManager = entry.GetComponent<InputManager>();
-            if (inputManager == null) return;   // Sys3CEntry.Start 尚未执行
+            if (inputManager == null) return;    // Sys3CEntry.Start 尚未执行
 
             inputManager.SetAdapter(new JoystickInputAdapter(
                 () => _joystick != null ? _joystick.Value : Vector2.zero,
                 () => _lookArea != null ? _lookArea.Delta : Vector2.zero));
             _inputManager = inputManager;
-            _bound = true;
         }
 
         /// <summary>
@@ -56,7 +67,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         private void LateUpdate()
         {
-            if (!_bound || _buttons == null || _inputManager == null) return;
+            if (_inputManager == null || _buttons == null) return;
 
             _inputManager.SetAttackHeld(_buttons.AttackHeld);
             _inputManager.SetDefendHeld(_buttons.DefendHeld);
