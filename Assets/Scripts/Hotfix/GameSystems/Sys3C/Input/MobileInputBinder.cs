@@ -23,15 +23,19 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// 触屏判定的人工档位。`Auto` 走自动判定；`ForceTouch` / `ForceNoTouch` 直接压过自动判定
         /// （URL `?touch=1` / `?touch=0` 的优先级更高，见 TouchInputAvailability）。
         ///
-        /// **这是面试现场的救命绳**：自动判据（`Application.isMobilePlatform` 在 iPad 桌面视图等
-        /// 场景会失效）判错时，在 Inspector 里拨一下即可，不必重新出包。
+        /// **人工覆盖分两种场合**：编辑器与开发构建里可以拨本字段；
+        /// **出包后的 WebGL 产物没有 Inspector —— 那边唯一的入口是 URL `?touch=1` / `?touch=0`**
+        /// （面试现场若自动判据失效，靠的就是那个参数）。
         ///
-        /// 本字段**每帧重新读取**，因此它同时是 PlayMode 测试进入移动端分支的接缝
+        /// 本字段在运行时被读取（变化即重算），因此它同时是 PlayMode 测试进入移动端分支的接缝
         /// （否则 `Application.isMobilePlatform` 在编辑器恒 false，那条分支按构造测不到）。
         /// </summary>
         public TouchOverride TouchOverride = TouchOverride.Auto;
 
         private InputManager _inputManager;
+        private TouchOverride _resolvedOverride;
+        private bool _touch;
+        private bool _resolved;
 
         /// <summary>
         /// 每帧重新裁决 + 重新发现玩家。**不能一次性 latch**：玩家会被 PlayerSpawner
@@ -42,10 +46,29 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         private void Update()
         {
-            bool touch = TouchInputAvailability.Resolve(TouchOverride);
-            if (_mobileUiRoot != null && _mobileUiRoot.activeSelf != touch)
-                _mobileUiRoot.SetActive(touch);
-            if (!touch) return;
+            // 判定不必每帧重算：WebGL 下它要读绝对 URL（每帧一次托管字符串分配）并打一次
+            // jslib interop，而这个答案在一次会话内不会自己变 —— 只在人工档位被改时重算。
+            if (!_resolved || _resolvedOverride != TouchOverride)
+            {
+                _touch = TouchInputAvailability.Resolve(TouchOverride);
+                _resolvedOverride = TouchOverride;
+                _resolved = true;
+            }
+
+            if (_mobileUiRoot != null && _mobileUiRoot.activeSelf != _touch)
+                _mobileUiRoot.SetActive(_touch);
+
+            if (!_touch)
+            {
+                // 回退：切到"无触控"必须把适配器还原成键鼠 —— 否则只是把 UI 藏了，
+                // Joystick 适配器还挂在玩家身上，而 LateUpdate 也还在喂它。
+                if (_inputManager != null)
+                {
+                    _inputManager.SetAdapter(new KeyboardInputAdapter());
+                    _inputManager = null;
+                }
+                return;
+            }
 
             if (_inputManager != null) return;   // 已绑定且仍存活（Unity 的 == 对已销毁对象为 true）
 

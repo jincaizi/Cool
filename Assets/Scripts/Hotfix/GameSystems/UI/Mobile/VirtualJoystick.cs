@@ -40,7 +40,8 @@ namespace Hotfix.GameSystems.UI
         private void OnDisable()
         {
             _value = Vector2.zero;
-            _handle.anchoredPosition = Vector2.zero;
+            // 场景卸载/teardown 时子 RectTransform 可能先被销毁（本条路径可达，故判空）
+            if (_handle != null) _handle.anchoredPosition = Vector2.zero;
         }
     }
 }

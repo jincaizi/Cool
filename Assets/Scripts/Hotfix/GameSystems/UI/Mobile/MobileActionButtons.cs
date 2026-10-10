@@ -21,5 +21,17 @@ namespace Hotfix.GameSystems.UI
 
         /// <summary>由 MobileInputBinder 在每帧末调用，消费掉一次性按下</summary>
         public void ConsumeJump() => JumpPressed = false;
+
+        /// <summary>
+        /// 停用/失焦时清空 —— 与摇杆/观察区同一类缺陷：抬指事件因浏览器抢焦点丢失时
+        /// `AttackHeld` 会锁存为 true，而 binder 每帧把它汇入 `SetAttackHeld(true)`
+        /// ⇒ **自动连续攻击**（手机上才会现形）。
+        /// </summary>
+        private void OnDisable()
+        {
+            AttackHeld = false;
+            DefendHeld = false;
+            JumpPressed = false;
+        }
     }
 }
