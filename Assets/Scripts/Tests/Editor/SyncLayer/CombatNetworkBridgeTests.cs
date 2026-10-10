@@ -102,13 +102,14 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         public void OnDamageResult_LocalTarget_Invokes_Damage_Sink()
         {
             var registry = new RemoteEntityRegistry(_root.transform);
-            long sinkTarget = 0; float sinkDamage = 0; bool sinkCrit = false;
+            long sinkTarget = 0; float sinkDamage = 0; bool sinkCrit = false; float sinkRemainingHp = -1f;
             var bridge = new CombatNetworkBridge(_client, () => 7, registry,
-                (targetId, damage, isCritical, dir) =>
+                (targetId, damage, isCritical, dir, remainingHp) =>
                 {
                     sinkTarget = targetId;
                     sinkDamage = damage;
                     sinkCrit = isCritical;
+                    sinkRemainingHp = remainingHp;
                 });
 
             bridge.OnMessage(MessageId.DamageResult, new DamageResult
@@ -121,6 +122,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(7L, sinkTarget);
             Assert.AreEqual(120f, sinkDamage, 0.001f);
             Assert.False(sinkCrit);
+            // T12 甲-2：服务端权威余血必须原样带到本地注入点（宿主用它对齐本地 HP）
+            Assert.AreEqual(20f, sinkRemainingHp, 0.001f,
+                "TargetRemainingHp 未随回调下传——本地 HP 会退回自算，与服务端永远对不上");
         }
 
         [Test]
@@ -198,9 +202,13 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             // → onDamageToLocalPlayer 回调（宿主接 ApplyServerDamage——HitFSM 入口）。
             // 桥按 TargetPlayerId 匹配本地玩家——来源种类无关（既有逻辑，锁定回归）。
             var registry = new RemoteEntityRegistry(_root.transform);
-            float sinkDamage = 0;
+            float sinkDamage = 0; float sinkRemainingHp = -1f;
             var bridge = new CombatNetworkBridge(_client, () => 7, registry,
-                (targetId, damage, isCritical, dir) => sinkDamage = damage);
+                (targetId, damage, isCritical, dir, remainingHp) =>
+                {
+                    sinkDamage = damage;
+                    sinkRemainingHp = remainingHp;
+                });
 
             bridge.OnMessage(MessageId.DamageResult, new DamageResult
             {
@@ -210,6 +218,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             bridge.Update();
 
             Assert.AreEqual(10f, sinkDamage, 0.001f);
+            Assert.AreEqual(90f, sinkRemainingHp, 0.001f, "怪物打玩家这条链同样要带权威余血");
         }
 
         [Test]

@@ -36,15 +36,24 @@
 //   mup:<left|right|middle>     松开
 //   moverel:<dx>,<dy>      指针相对移动（累加式，page 坐标；用来产生 movementX/Y）
 //   mark:<label>           在日志里打一条带**相对脚本启动的毫秒时间戳**的标记（用于计时判据）
-// KeyName 映射见 KEYMAP（W/A/S/D/Q/R/1/2/3/Space/Shift/Esc）。
+// T12 追加（纯新增）：
+//   type:<text>            逐字符输入（KEYMAP 覆盖的字符）——用来往选人面板的地址/端口输入框打字
+//   KEYMAP 补全数字 0/5/6/7/8/9 与 Backspace（原来只有 1-4）
+//   CDP 会话开头 Network.setCacheDisabled —— 防止"换了新包、浏览器却喂旧包"的假失败
+// KeyName 映射见 KEYMAP（W/A/S/D/Q/R/0-9/Space/Shift/Esc/Backspace）。
 // 注意：按住类步骤只发一次 keydown（Unity 轮询按键状态，不需要重复发；重复发只用于规避
 // 个别实现把 keydown 当一次性事件的情况，本装置实测一次即可）。
 const KEYMAP = {
   W: { code: 'KeyW', key: 'w', vk: 87 }, A: { code: 'KeyA', key: 'a', vk: 65 },
   S: { code: 'KeyS', key: 's', vk: 83 }, D: { code: 'KeyD', key: 'd', vk: 68 },
   Q: { code: 'KeyQ', key: 'q', vk: 81 }, R: { code: 'KeyR', key: 'r', vk: 82 },
+  '0': { code: 'Digit0', key: '0', vk: 48 },
   '1': { code: 'Digit1', key: '1', vk: 49 }, '2': { code: 'Digit2', key: '2', vk: 50 },
   '3': { code: 'Digit3', key: '3', vk: 51 }, '4': { code: 'Digit4', key: '4', vk: 52 },
+  '5': { code: 'Digit5', key: '5', vk: 53 }, '6': { code: 'Digit6', key: '6', vk: 54 },
+  '7': { code: 'Digit7', key: '7', vk: 55 }, '8': { code: 'Digit8', key: '8', vk: 56 },
+  '9': { code: 'Digit9', key: '9', vk: 57 },
+  Backspace: { code: 'Backspace', key: 'Backspace', vk: 8 },
   Space: { code: 'Space', key: ' ', vk: 32 }, Shift: { code: 'ShiftLeft', key: 'Shift', vk: 16 },
   Esc: { code: 'Escape', key: 'Escape', vk: 27 },
 };
@@ -118,6 +127,11 @@ async function main() {
   await send('Runtime.enable');
   await send('Log.enable');
   await send('Page.enable');
+  // T12：**禁掉 HTTP 缓存**。WebGL 的 Build/WebGL.data|.wasm 与页面 URL 无关（页面的 query 串
+  // 不影响子资源 URL），所以换了新包但沿用同一个浏览器 profile 时，Chrome 会把**上一次的包**
+  // 喂给你——"验证旧包"这类假失败 T7/T8 各踩过一次。每个 CDP 会话各自生效，无需重开浏览器。
+  await send('Network.enable');
+  await send('Network.setCacheDisabled', { cacheDisabled: true });
   await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
   if (URL !== '-') {
@@ -214,6 +228,20 @@ async function main() {
       console.log('+' + elapsed() + ' MOVEREL ' + arg + ' -> @' + Math.round(mouseX) + ',' + Math.round(mouseY));
     } else if (kind === 'mark') {
       console.log('+' + elapsed() + ' === MARK ' + arg + ' ===');
+    } else if (kind === 'type') {
+      // T12：逐字符输入文本（KEYMAP 里有的字符才行）——用来往选人面板的服务器地址/端口输入框里打字
+      // （换端口起服 = 不动别人正在跑的服务器就能验断线路径）。
+      // 必须发 **keyDown + text**（不是 rawKeyDown）：TMP_InputField 的插入读的是字符事件，
+      // rawKeyDown 只带 keyCode，实测光标会聚焦但一个字符都进不去（T12 踩过）。
+      let unmapped = '';
+      for (const ch of arg) {
+        if (!KEYMAP[ch]) { unmapped += ch; continue; }
+        await keyEvent('keyDown', ch, { text: ch, unmodifiedText: ch });
+        await sleep(60);
+        await keyEvent('keyUp', ch);
+        await sleep(60);
+      }
+      console.log('+' + elapsed() + ' TYPE ' + arg + (unmapped ? ' (unmapped: ' + unmapped + ')' : ''));
     } else if (kind === 'addscriptfile') {
       const src = require('fs').readFileSync(arg, 'utf8');
       await send('Page.addScriptToEvaluateOnNewDocument', { source: src });

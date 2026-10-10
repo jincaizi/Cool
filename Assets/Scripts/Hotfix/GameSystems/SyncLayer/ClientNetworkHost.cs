@@ -1,6 +1,8 @@
 using System;
 using Cool.Protocol;
 using Cool.SyncCore;
+using Cysharp.Threading.Tasks;
+using Hotfix.GameSystems.UI;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C;
@@ -147,6 +149,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _pendingReturnToMenu = false;
                 Disconnect();                                   // 清理 adapter / 战斗桥 / 装配
                 SceneManager.LoadScene(MainMenuSceneName);
+                ReopenCharacterSelectPanel();
                 return;
             }
 
@@ -237,6 +240,33 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             _statusMessage = message;
             _statusMessageUntil = Time.unscaledTime + 3f;
+        }
+
+        /// <summary>
+        /// T12 乙-3：服务端判定本地玩家阵亡（权威余血归零）。服务端没有复活
+        /// （P8 范围，D-P4-8）——所以给一个明确提示 + 出口：回选人界面重新登录，
+        /// 重登会重建服务端 PlayerState（满血），等于复活。
+        /// </summary>
+        private void HandleLocalPlayerDeath()
+        {
+            if (_pendingReturnToMenu) return;             // 已在返回途中
+            Debug.LogWarning("[NetHost] 本地玩家阵亡（服务端权威 HP 归零）——返回选人界面重登即复活");
+            _pendingReturnToMenu = true;
+            // 提示语带 ASCII 锚点：WebGL 出包里 IMGUI 的中文字形会被整段丢掉（T11/T8 已记录），
+            // 纯中文提示在浏览器里等于看不见——`dead: HP 0` / `relogin = respawn` 保证可读。
+            ShowStatus("你已阵亡（dead: HP 0）——3 秒后返回选人界面，重登即满血复活（relogin = respawn）");
+        }
+
+        /// <summary>
+        /// T12 Step 4（T8 §6.2）：回菜单后重新打开选人面板。面板在"确认"时被 CloseAsync 关掉，
+        /// 而 UIManager 是 DontDestroyOnLoad 的——重进 CharacterSelect 场景不会重建它、
+        /// LoadBuiltInPanels 也不再跑 ⇒ 此前回到的是**没有 UI 的选人场景**（只能刷新页面）。
+        /// </summary>
+        private static void ReopenCharacterSelectPanel()
+        {
+            var ui = UIManager.Instance;
+            if (ui == null) return;
+            ui.OpenAsync("CharacterSelectPanel").Forget();
         }
 
         public void Disconnect()
@@ -338,9 +368,11 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链
             _combatBridge = new CombatNetworkBridge(_adapter!, () => _manager!.LocalPlayerId, _remoteEntities!,
-                (targetId, dmg, crit, dir) => _localEntry.ApplyServerDamage(dmg, dir));
+                (targetId, dmg, crit, dir, remainingHp) => _localEntry.ApplyServerDamage(dmg, dir, remainingHp));
             _adapter!.MessageReceived += _combatBridge.OnMessage;
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
+            // T12 乙-3：服务端判死 → 提示 + 回选人（重登即复活）
+            _localEntry.OnServerDeath += HandleLocalPlayerDeath;
             _combatBridge.OnCastBroadcast += b =>
                 Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
 
@@ -371,6 +403,11 @@ namespace Hotfix.GameSystems.SyncLayer
         /// </summary>
         private void DetachCombatBridge()
         {
+            // T12 乙-3：死亡回调也不能漏摘（它挂在本地角色上，宿主可能比角色活得久）——
+            // 放在早退守卫**之前**，没有战斗桥时同样要解开
+            if (_localEntry != null)
+                _localEntry.OnServerDeath -= HandleLocalPlayerDeath;
+
             if (_combatBridge == null || _adapter == null) return;
             _adapter.MessageReceived -= _combatBridge.OnMessage;
             if (_localEntry != null)

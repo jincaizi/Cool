@@ -23,7 +23,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly INetworkClient _client;
         private readonly Func<long> _localPlayerId;
         private readonly RemoteEntityRegistry _registry;
-        private readonly Action<long, float, bool, Vector3>? _onDamageToLocalPlayer;
+        /// <summary>本地受击注入点：targetId / damage / isCritical / 方向 / 服务端权威余血（T12 甲-2）</summary>
+        private readonly Action<long, float, bool, Vector3, float>? _onDamageToLocalPlayer;
         private readonly ConcurrentQueue<IMessage> _incoming = new ConcurrentQueue<IMessage>();
 
         /// <summary>收到其他玩家施法（表现接线点；P4 宿主仅日志占位——远程实体为胶囊）</summary>
@@ -33,7 +34,7 @@ namespace Hotfix.GameSystems.SyncLayer
         public event Action<DamageResult>? OnDamageResult;
 
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
-            RemoteEntityRegistry registry, Action<long, float, bool, Vector3>? onDamageToLocalPlayer = null)
+            RemoteEntityRegistry registry, Action<long, float, bool, Vector3, float>? onDamageToLocalPlayer = null)
         {
             _client = client;
             _localPlayerId = localPlayerId;
@@ -86,7 +87,10 @@ namespace Hotfix.GameSystems.SyncLayer
                 // P4：协议无方向字段——飘字/受击不依赖朝向（方向字段留待命中细节阶段，偏差记录）
                 if (hit.TargetPlayerId == localId)
                 {
-                    _onDamageToLocalPlayer?.Invoke(hit.TargetPlayerId, hit.Damage, hit.IsCritical, Vector3.zero);
+                    // T12 甲-2：权威余血随包下传（协议早已有 TargetRemainingHp，此前零消费方）——
+                    // 宿主用它对齐本地 HP，不再只看本地减法
+                    _onDamageToLocalPlayer?.Invoke(hit.TargetPlayerId, hit.Damage, hit.IsCritical,
+                        Vector3.zero, hit.TargetRemainingHp);
                     continue;
                 }
                 var view = _registry.GetView(hit.TargetPlayerId);

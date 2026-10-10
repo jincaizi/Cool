@@ -13,6 +13,11 @@
 //   WorldSnapshot=110, PositionSyncResponse=101, LoginResponse=2）。
 // 另：jslib 自己会挂 window.__wsnet（$WebSocketNetState 的 __postset），
 //   它给出 sockets[handle].state / queue.length / dropped，是"C# 有没有在轮询"的直接判据。
+// T12 追加（纯新增，不动上面的记账）：
+//   __rawFrames —— 把 **LoginResponse(2)** 与 **DamageResult(302)** 的原始字节 + 到达时刻留存，
+//     供离线解码（玩家 id / 每击的 TargetPlayerId / TargetRemainingHp）。分桶计数只能证明
+//     "某类帧到过"，证明不了"这一帧是不是打在本机玩家身上"——B4 那轮的悬案正需要这个。
+//     上限 300 帧（大包 ~300 hex 字符，内存可忽略）。
 (function () {
   window.__t4hook = 'installed';
 
@@ -58,6 +63,16 @@
               window.__recvHist[id] = (window.__recvHist[id] || 0) + 1;
               (window.__recvIds = window.__recvIds || []).push(id);
               if (window.__recvIds.length > 400) window.__recvIds.shift();
+              // T12：留原字节（登录响应 2 / 伤害结果 302）——离线解码用
+              if (id === 2 || id === 302) {
+                window.__rawFrames = window.__rawFrames || [];
+                window.__rawFrames.push({
+                  id: id,
+                  t: Date.now(),
+                  hex: Array.prototype.slice.call(u).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('')
+                });
+                if (window.__rawFrames.length > 300) window.__rawFrames.shift();
+              }
             }
           } catch (e) { window.__recvErr = String(e); }
           return fn.apply(this, arguments);

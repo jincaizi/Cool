@@ -57,6 +57,11 @@ namespace Hotfix.GameSystems.UI
         internal override void OnShow()
         {
             base.OnShow();
+            // T12 Step 4（浏览器实测）：面板是 DontDestroyOnLoad 的 UIManager 持有的**同一个实例**，
+            // `_closing` 只在 Confirm 里置位、从不复位 ⇒ 第一次"确认"之后面板永远失效。
+            // 断线/阵亡回选人界面后玩家点确认毫无反应（T8 §6.2 的"卡死只能刷新"就是这个），
+            // 而"回得来"（亡→回选人→重登）正是乙-3 的出口。重开面板即解除重入锁。
+            _closing = false;
             _selected = CharacterSelectionService.Load();
             _mode = NetworkModeService.Load();
             if (_hostInput != null) _hostInput.text = NetworkModeService.LoadHost();

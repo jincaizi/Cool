@@ -5,7 +5,8 @@
         "KcpNet",
         "Cool.Protocol",
         "GameSys",
-        "SyncCore"
+        "SyncCore",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

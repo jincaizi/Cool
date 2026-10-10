@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.FSM;
@@ -34,10 +35,23 @@ namespace Hotfix.GameSystems.Sys3C
         private float _respawnTimer;
         private bool _isDead;
 
+        private Sys3CEntryStatsProvider _statsProvider;
+        private float _hudHp = float.NaN;
+
+        /// <summary>
+        /// T12 乙-3：服务端判定本地玩家阵亡（联网态权威余血归零）。宿主（ClientNetworkHost）
+        /// 据此弹出阵亡提示并返回选人界面——重登会重建服务端 PlayerState，即满血复活。
+        /// </summary>
+        public event System.Action OnServerDeath;
+
         public float MaxHp => _maxHP;
         public float CurrentHp => _currentHP;
         public FSMManager Controller => _fsmManager;
         public bool IsDead => _isDead;
+
+        /// <summary>HUD 数据源（甲-3）：Start 建立并绑到 PlayerHudPanel；测试与宿主只读</summary>
+        public Sys3CEntryStatsProvider StatsProvider => _statsProvider;
+
         public Vector3 SpawnPoint { get => _spawnPoint; set => _spawnPoint = value; }
 
         bool IDamageable.IsAlive => _currentHP > 0;
@@ -157,6 +171,23 @@ namespace Hotfix.GameSystems.Sys3C
                 _camera.SnapToTarget();
             }
 
+            // T12 甲-3：HUD 绑定（PlayerHudPanel.Bind 此前全项目零调用者 ⇒ 血条是死的）。
+            // 与相机同为 Start 期的表现层装配——PlayerSpawner 的注释把"相机/HUD 绑定"都记在这里。
+            // 用显式判空而不是 ?.：UnityEngine.Object 的伪 null 不认 null 传播
+            //（UIManager 是 DontDestroyOnLoad 的，跨场景时可能已被销毁）。
+            _statsProvider = new Sys3CEntryStatsProvider(this);
+            var uiManager = Hotfix.GameSystems.UI.UIManager.Instance;
+            if (uiManager != null)
+            {
+                var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>("PlayerHudPanel");
+                if (hud != null)
+                {
+                    hud.Bind(_statsProvider);
+                    uiManager.ShowAlwaysAsync("PlayerHudPanel").Forget();   // 回选人时被收起过，进世界要再显示
+                }
+            }
+            _hudHp = _currentHP;
+
             _attackHandler = GetComponent<CharacterAttackHandler>();
             if (_attackHandler == null)
                 _attackHandler = gameObject.AddComponent<CharacterAttackHandler>();
@@ -169,6 +200,14 @@ namespace Hotfix.GameSystems.Sys3C
         private void Update()
         {
             TickRespawn(Time.deltaTime);
+
+            // T12 甲-3：HP 脏检查（全项目唯一读数点）——服务端伤害/怪物伤害/复活回满
+            // 都是写 _currentHP，这里统一推动 HUD 血条，不必在每个扣血点插桩。
+            if (_statsProvider != null && !Mathf.Approximately(_hudHp, _currentHP))
+            {
+                _hudHp = _currentHP;
+                _statsProvider.RaiseHpChanged();
+            }
 
             _inputManager.Update();
             // P6 ③：相机旋转接线——HandleRotationInput 此前全项目零调用者，相机角度永远停在初始值。
@@ -433,11 +472,27 @@ namespace Hotfix.GameSystems.Sys3C
         /// P4 网络伤害入口（服务端权威——DamageResult 驱动）：绕过防御修正器直扣
         /// （PvP 格挡减伤服务端化是 P4 backlog，D-P4-8），受击表现/HitFSM/浮字事件复用
         /// 现有链路。怪物战斗（本地权威）不受影响。
+        ///
+        /// T12 甲-2：<paramref name="serverRemainingHp"/> 是协议里已有的权威余血
+        /// （<c>HitEntry.TargetRemainingHp</c>）。传了就**以它为真相**、不在本地做减法——这消灭两个真实缺陷：
+        /// ①本地 HP 归零后永久早退（服务端也不会再打死者 ⇒ 此后永远静默）；
+        /// ②本地减法与服务端不一致时飘字/HUD 对不上（尤其致死那一击）。
+        /// 不传（单机测试路径 / 无该字段的旧服务端）退回本地减法。
         /// </summary>
-        public void ApplyServerDamage(float damage, Vector3 hitDirection)
+        public void ApplyServerDamage(float damage, Vector3 hitDirection, float? serverRemainingHp = null)
         {
-            if (_currentHP <= 0) return;
-            _currentHP = Mathf.Max(0f, _currentHP - damage);
+            if (serverRemainingHp.HasValue)
+            {
+                // 已死且服务端仍判死 → 没有新表现可做；否则以权威余血纠正本地血量
+                //（服务端复活/重登后回血时，本地的毒化 0 血必须被纠回来，不能永久早退）。
+                if (_currentHP <= 0f && serverRemainingHp.Value <= 0f) return;
+                _currentHP = Mathf.Max(0f, serverRemainingHp.Value);
+            }
+            else
+            {
+                if (_currentHP <= 0) return;
+                _currentHP = Mathf.Max(0f, _currentHP - damage);
+            }
 
             _fsmManager.HandleDamage(sourceId: -1, damage: damage, hitDirection: hitDirection,
                 knockbackForce: 0f);
@@ -572,14 +627,27 @@ namespace Hotfix.GameSystems.Sys3C
         }
 
         /// <summary>
-        /// P6 ⑦：单机本地死亡判定。仅单机模式生效——联网模式下玩家 HP 由服务端
-        /// PlayerState 权威持有，客户端自作判断会与服务端打架（D-P6-18）。
+        /// 死亡判定。单机走本地判死 + 3 秒本地复活；联网只**镜像**服务端权威结论
+        /// （HP 来自 HitEntry.TargetRemainingHp——甲-2），复活交给"回选人重登"（乙-3）。
+        ///
+        /// D-P6-18/D-P6-15 的边界没有被越过：联网下仍然不做本地 HP 自算、不自行判死，
+        /// 只有服务端说"余血 0"才进这个分支；本地 TickRespawn 在联网态被短路，
+        /// 免得出现"客户端站起来了、服务端还当他死了"（施法被 caster-dead 全拒）的分叉。
         /// </summary>
         private void EvaluateLocalDeath()
         {
-            if (IsOnlineMode()) return;      // 联网：交给服务端，见 D-P6-18
             if (_isDead) return;
             if (_currentHP > 0f) return;
+
+            if (IsOnlineMode())
+            {
+                _isDead = true;
+                _fsmManager.RequestDeath();
+                _fsmManager.HitFSM.EnterDeath();
+                UnityEngine.Debug.LogWarning("[Sys3CEntry] 服务端判定本地玩家阵亡（权威余血归零）");
+                OnServerDeath?.Invoke();
+                return;
+            }
 
             _isDead = true;
             _respawnTimer = _respawnDelay;
@@ -598,6 +666,9 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void TickRespawn(float deltaTime)
         {
+            // T12 乙-3：联网态的复活不归客户端（D-P6-15）——否则客户端会满血站起来，
+            // 而服务端仍判死（施法全被 caster-dead 拒绝）。复活走"回选人重登"。
+            if (IsOnlineMode()) return;
             if (!_isDead) return;
 
             _respawnTimer -= deltaTime;
@@ -622,6 +693,18 @@ namespace Hotfix.GameSystems.Sys3C
         private void OnDestroy()
         {
             PhysicsRegistry.Instance.Unregister(this);
+
+            // T12 甲-3：本地角色没了（阵亡/断线回选人/换角色）→ 收起 HUD 并解绑，
+            // 否则选人界面顶着一根死人的血条（HUD 在进世界时由 Start 重新绑定并显示）。
+            if (_statsProvider == null) return;
+            var uiManager = Hotfix.GameSystems.UI.UIManager.Instance;
+            if (uiManager == null) return;
+            var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>("PlayerHudPanel");
+            if (hud != null)
+            {
+                hud.Unbind();
+                uiManager.HideAlwaysAsync("PlayerHudPanel").Forget();
+            }
         }
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
