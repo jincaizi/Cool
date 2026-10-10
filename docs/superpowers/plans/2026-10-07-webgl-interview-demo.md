@@ -2781,6 +2781,39 @@ dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --monster
 
 ---
 
+### Task 12: 让联网演示"看得见血、死得起、回得来"（**插队任务：依赖 T8 的诊断，阻塞 T9 的部署**）
+
+> **为什么插队**：T8 的验收发现"联网演示约 20 秒后必死且零提示"。一支专项诊断把结论钉死了（**完整报告：`.superpowers/sdd/2026-10-07-webgl-interview-demo/p4-death-diagnosis.md`**，含可复算命令与归档图），其中**两条 T8 的结论被推翻**：
+> - **"P4 未通过"是验收装置的假阴性**——诊断在**现有 WebGL 包**上复现出了灰色 `-15` 飘字 + 受击火花（页面钩子 `302:7`）。T8 漏检有两个原因：怪物 15 伤 ×7 击即致死，整段伤害在登录后约 10–20 秒内跑完，而 T8 首张截图在登录后 20–25 秒；且**飘字 ROI 是按单机取景校准的**，同一张含 `-15` 的帧用它只数到 3 像素、ROI 上移 90px 数到 135 像素。
+> - **"玩家死不了"也是假阴性**——诊断在编辑器里逐周期复现了死亡 + 3 秒复活；而且 A8 的 29 条飘字在数学上要求 ≥2 次复活（每条 ≥9 伤 ⇒ ≥261 > 100 HP）。T8 看不到传送尖峰是因为玩家一直站在出生点、击退仅 0.2–0.3 米，复活传送是亚米级的。
+>
+> **真正的缺陷是**：服务端**从未实现复活**（自述 D-P4-8；P6 设计文档把服务端死亡/复活划给 **P8**），客户端联网下**有意**不做本地判死（D-P6-15/18），加上**零死亡提示**（`PlayerHudPanel.Bind` 全项目零调用者 ⇒ HP 条是死的；无死亡 UI）⇒ 玩家死了但什么都不知道，攻击被静默拒绝。这是"从未实现"，不是回归。
+
+**Files:**
+- 修改：`production/verify/t4-webgl-cdp.js`、`t4-webgl-inject.js`（甲-1：验收装置本身的缺陷）
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`（甲-2：`ApplyServerDamage`）
+- 创建/修改：HUD 绑定（甲-3：给 `PlayerHudPanel` 写一个基于 `Sys3CEntry` 的 `IPlayerStatsProvider` 并接上）
+- 修改：断线回退路径（选人面板不回来）
+- 修改：死亡提示与"重连当复活"（乙-3）
+
+- [ ] **Step 1（甲-1）：先修验收装置** —— 首帧提前到"确认"后 6s；飘字 ROI 改用 `520,240,800,420`。约 10 分钟、零风险。**不做这一步，后面的复验还会说谎。**
+
+- [ ] **Step 2（甲-2）：`ApplyServerDamage` 用权威余血** —— 现在 `Sys3CEntry.cs` 的 `ApplyServerDamage` 首行是 `if (_currentHP <= 0) return;`（死后**永久早退**），且完全不用协议里已有的 `HitEntry.TargetRemainingHp`（`Combat.cs:61`，全项目零生产消费方）。改用服务端权威余血。约 10 行。
+
+- [ ] **Step 3（甲-3）：把 HUD 接上** —— `PlayerHudPanel.Bind(IPlayerStatsProvider)` 有定义、**零调用者**，所以 HP 条从来没显示过任何东西。写一个基于 `Sys3CEntry` 的 provider 并接上。约 50 行。**这是面试官唯一能看见"我在掉血"的地方。**
+
+- [ ] **Step 4：修断线回退** —— T8 §6.2：杀掉服务器后场景切回选人，**但选人面板不回来**（60 秒观察无 UI，等于卡死只能刷新）。乙-3 依赖它。
+
+- [ ] **Step 5（乙-3）：死亡提示 + 重连当复活** —— 死亡时给一个明确提示并回到选人；重登会重建 `PlayerState` 即满血。约 30–60 行。
+
+- [ ] **Step 6：用修好的装置复跑四条声称面** —— 判据与 T8 相同（`docs/superpowers/guides/p6-human-acceptance.md` 的 A/C/D 组），但**这次装置是对的**。**P4 那条必须拍到"服务端伤害在浏览器里产生可见反应"**；A5/A6 必须拍到死亡与复活。
+
+- [ ] **Step 7：Commit**
+
+> **诊断里未钉死的一条（留给本任务留意）**：B4 那轮（`server-console-5`）三次施法被接受（服务端玩家还活着）却 41 帧 65 秒全无飘字，"窗口论"解释不了。若 Step 6 再遇到，导出 302 帧原始字节解码看 `TargetPlayerId` 与到达时刻。
+
+---
+
 ### Task 9: `WebGLBuildScript` + 部署
 
 **Files:**
