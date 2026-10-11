@@ -42,6 +42,8 @@ namespace KcpServer
                 float x = (float)(_random.NextDouble() * 2 - 1) * WorldHalfExtent * 0.8f;
                 float z = (float)(_random.NextDouble() * 2 - 1) * WorldHalfExtent * 0.8f;
                 var player = _store.AddPlayer(id, $"Bot_{id}");
+                // 与真人走同一条伤害/复活路径，只在**渲染**上分叉（D-N8 / D-P5-7）
+                player.Kind = (byte)EntityKind.PlayerBot;
                 player.UpdatePosition(new Vector3(x, 0, z), 0f, 0f, 1L, 0U);
                 // MarkDirty 保留（P2 测试语义）；AOI 可见性靠 grid 首帧 + scheduler 首槽，不依赖脏标记
                 var bot = new Bot { PlayerId = id };

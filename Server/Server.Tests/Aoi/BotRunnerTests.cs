@@ -57,4 +57,33 @@ public class BotRunnerTests
 
         Assert.Equal(0, store.Count);
     }
+
+    [Fact]
+    public void Bot_Is_Registered_As_PlayerBot()
+    {
+        var store = new EntityStore();
+        long next = 1;
+        var bot = new BotRunner(store, () => next++);
+        bot.Spawn(3);
+        Assert.Equal(3, store.Count); // 防空集空转通过
+        foreach (var p in store.All)
+            Assert.Equal((byte)EntityKind.PlayerBot, p.Kind);
+    }
+
+    [Fact]
+    public void Bot_Can_Be_Damaged_And_Respawns()
+    {
+        var store = new EntityStore();
+        long next = 1;
+        var bot = new BotRunner(store, () => next++);
+        bot.Spawn(1);
+        var target = store.All.First();
+
+        target.ApplyDamage(9999f);
+        Assert.False(target.IsAlive);
+
+        target.MarkDead(1000);
+        Assert.True(target.TryRespawn(1000 + 122, 66)); // 122 tick × 66ms = 8052ms ≥ 8s
+        Assert.True(target.IsAlive);
+    }
 }
