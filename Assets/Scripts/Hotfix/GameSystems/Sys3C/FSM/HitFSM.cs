@@ -59,14 +59,19 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         private HitData _hitData;
         private Vector3 _knockbackVelocity;
 
+        /// <summary>
+        /// 死亡后的倒地是否在等**服务端**复活（D-5）。为真时倒地没有本地出口：
+        /// 既不走状态计时器，也不认倒地剪辑的结束回调——客户端不自判活，
+        /// 自行起身的人会被服务端后续每一次施法以 caster-dead 拒绝。
+        /// </summary>
+        private bool _downHeldForRespawn;
+
         public HitState CurrentState => _currentState;
         public float StateTimer => _stateTimer;
         public HitData CurrentHitData => _hitData;
 
-        /// <summary>
-        /// 是否处于霸体状态（死亡状态免疫所有伤害）
-        /// </summary>
-        public bool HasSuperArmor => _currentState == HitState.Death;
+        /// <summary>死亡与倒地期间不可被后续命中打断——否则倒地被反复打断，永远起不来</summary>
+        public bool HasSuperArmor => _currentState == HitState.Death || _currentState == HitState.Down;
 
         /// <summary>
         /// 是否正在播放受击动画
@@ -124,8 +129,9 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     break;
 
                 case "Down":
-                    // 倒地动画结束，进入起身
-                    if (_currentState == HitState.Down)
+                    // 倒地动画结束，进入起身——除非这次倒地是**死亡**以后的躺卧：
+                    // 那次由服务端复活驱动（D-5），客户端不自行起身
+                    if (_currentState == HitState.Down && !_downHeldForRespawn)
                         TransitionTo(HitState.GetUp);
                     break;
 
@@ -135,8 +141,16 @@ namespace Hotfix.GameSystems.Sys3C.FSM
                     break;
 
                 case "Death":
-                    // 死亡动画结束，触发死亡完成事件
-                    OnDeathComplete?.Invoke();
+                    if (_currentState == HitState.Death)
+                    {
+                        // 死亡不是终点：打完死亡动画进"躺卧"，再由复活驱动起身（D-2 的 8 秒由服务端计时）
+                        _downHeldForRespawn = true;
+                        TransitionTo(HitState.Down);
+                        // 躺卧期间没有本地出口：StateTimer 到点那种起身（OnStateTimerEnd 的 Down 分支）
+                        // 在联网下会把"服务端还当他死了"的客户端先站起来
+                        _stateTimer = float.MaxValue;
+                        OnDeathComplete?.Invoke();
+                    }
                     break;
 
                 case "DefendHit":
@@ -286,6 +300,19 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         }
 
         /// <summary>
+        /// 复活驱动：从 Down（或 Death）转 GetUp，动画结束后回 None。
+        /// **只有服务端说复活了才调用**（D-5/F10：客户端不自行判活）。
+        /// 单机 3 秒计时复活走同一条路（Sys3CEntry.TickRespawn）——死亡剪辑播完后
+        /// 状态是 Down 而不是 Death，只认 Death 的旧路径会静默不生效。
+        /// </summary>
+        public void EnterRespawn()
+        {
+            if (_currentState != HitState.Down && _currentState != HitState.Death) return;
+            _downHeldForRespawn = false;
+            TransitionTo(HitState.GetUp);
+        }
+
+        /// <summary>
         /// 复活
         /// </summary>
         public void Resurrect()
@@ -302,9 +329,32 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         /// </summary>
         public void Reset()
         {
+            _downHeldForRespawn = false;
             TransitionTo(HitState.None);
             _stateTimer = 0;
             _knockbackVelocity = Vector3.zero;
+        }
+
+        /// <summary>
+        /// 测试接缝（internal，**不是**公开 API）：把死亡链推进一格。
+        /// 生产里这条链由两个来源驱动——剪辑结束回调（Death / GetUp）与**服务端复活**（Down；
+        /// 联网下倒地没有本地出口，见 <see cref="_downHeldForRespawn"/>）。
+        /// 没有它，这条链就只能靠真机 PlayMode 才验得了。
+        /// </summary>
+        internal void ForceAdvanceForTest()
+        {
+            switch (_currentState)
+            {
+                case HitState.Death:
+                    OnAnimationEnd("Death");
+                    break;
+                case HitState.Down:
+                    EnterRespawn();
+                    break;
+                case HitState.GetUp:
+                    OnAnimationEnd("GetUp");
+                    break;
+            }
         }
 
         /// <summary>
@@ -344,6 +394,13 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             var previous = _currentState;
             _currentState = target;
             _stateTimer = GetStateDuration(target);
+
+            // 无 Animator 的纯逻辑使用（状态机契约测试）：只推进状态与计时，不驱动画
+            if (_animator == null)
+            {
+                OnStateChanged?.Invoke(target);
+                return;
+            }
 
             // 驱动动画
             switch (target)

@@ -664,10 +664,26 @@ namespace Hotfix.GameSystems.Sys3C
             _fsmManager.HitFSM.EnterDeath();
         }
 
+        /// <summary>
+        /// 服务端说复活了（D-N4/D-5）。客户端**不自行判活**——只有收到这条才起身。
+        /// 位置由客户端自己摆：服务端不拥有玩家位置（D-N5）。
+        /// </summary>
+        public void ApplyServerRespawn(float hp)
+        {
+            _currentHP = hp;
+            _isDead = false;
+            _fsmManager.HitFSM.EnterRespawn();
+            // 死亡锁（StateCoordinator.HandleDeath 的 LockState + LockLayer(Base)）必须一起解除，
+            // 否则人虽然站起来了却动不了——单机 TickRespawn 一直是这么配对的。
+            _fsmManager.RequestResurrect();
+            TeleportToSpawnPoint();
+        }
+
         private void TickRespawn(float deltaTime)
         {
             // T12 乙-3：联网态的复活不归客户端（D-P6-15）——否则客户端会满血站起来，
-            // 而服务端仍判死（施法全被 caster-dead 拒绝）。复活走"回选人重登"。
+            // 而服务端仍判死（施法全被 caster-dead 拒绝）。复活走服务端的 RespawnNotice
+            //（ApplyServerRespawn）。
             if (IsOnlineMode()) return;
             if (!_isDead) return;
 
@@ -676,12 +692,22 @@ namespace Hotfix.GameSystems.Sys3C
 
             _isDead = false;
             _currentHP = _maxHP;
-            _fsmManager.HitFSM.Resurrect();
+            // N4：死亡剪辑播完后 HitFSM 停在 **Down**（躺卧）而不是 Death；
+            // 旧路径用的 Resurrect() 只认 Death，在这里会静默不生效 ⇒ 复活者永远躺着，
+            // 且 Down 的霸体让之后每一次命中都被优先级拒掉。EnterRespawn 覆盖 Down 与 Death。
+            _fsmManager.HitFSM.EnterRespawn();
             _fsmManager.RequestResurrect();
+            TeleportToSpawnPoint();
+        }
 
-            // 传送须先禁用 CharacterController：直接写 transform.position 会被它的内部位置
-            // 在下一帧 Move() 时吃掉（实测：写 (5,0,5) 下一帧回到 (0,-0.05,0)，复活点丢失）。
-            // 禁/启后再写是 Unity 的标准传送做法，实测生效。
+        /// <summary>
+        /// 传送回出生点。单机 3 秒复活与服务端复活**共用这一处**落位逻辑。
+        /// 传送须先禁用 CharacterController：直接写 transform.position 会被它的内部位置
+        /// 在下一帧 Move() 时吃掉（实测：写 (5,0,5) 下一帧回到 (0,-0.05,0)，复活点丢失）。
+        /// 禁/启后再写是 Unity 的标准传送做法，实测生效。
+        /// </summary>
+        private void TeleportToSpawnPoint()
+        {
             CharacterController.enabled = false;
             transform.position = _spawnPoint;
             CharacterController.enabled = true;

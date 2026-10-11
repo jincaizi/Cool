@@ -71,10 +71,13 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         private static bool IsHitState(int hash)
         {
+            // N4：Death 也要报——HitFSM.OnAnimationEnd 有 case "Death"（打完死亡动画进躺卧），
+            // 而 StateMachineBehaviour 上一次漏了它 ⇒ 那条分支在生产里永远收不到回调。
+            // OnStateEnter 早已把 HASH_Death 算进受击态（同一份清单只缺这一处），层里也挂着本行为。
             return hash == HASH_Hit || hash == HASH_Knockback ||
                    hash == HASH_Launched || hash == HASH_Dizzy ||
                    hash == HASH_Down || hash == HASH_GetUp ||
-                   hash == HASH_DefendHit;
+                   hash == HASH_Death || hash == HASH_DefendHit;
         }
 
         private static string GetStateName(int hash)

@@ -30,13 +30,11 @@ namespace GameSys.EditorTests
         /// P6 明确不承诺表现层的受击态（I1 backlog）。这些状态在 Hit 层既无对应状态、
         /// 也无入边转移——登记在此是为了让"没做"是显式决定，而不是无人发现的空白：
         /// 若某个已被覆盖的状态出现在这里（或反之），下面的覆盖登记测试会红。
+        /// N4 之后只剩 Launched：Death/Down/GetUp 拿到入边转移后已移入覆盖表。
         /// </summary>
         private static readonly HitState[] KnownBacklogStates =
         {
             HitState.Launched, // Hit 层无 Launched 状态（无任何调用方设置 LaunchForce，P6 内不可达）
-            HitState.Down,     // Hit 层有 Down 状态但零入边转移
-            HitState.GetUp,    // Hit 层有 GetUp 状态但零入边转移
-            HitState.Death,    // 同上，且 AnimHashes.Death / IsDead 两个参数在 controller 里根本不存在（见 PENDING-HUMAN A5）
         };
 
         /// <summary>
@@ -56,6 +54,12 @@ namespace GameSys.EditorTests
                     { Damage = 10f, HitDirection = Vector3.back, StunDuration = 1.5f }) },
                 { HitState.DefendHit, fsm => fsm.EnterDefendHit(new HitData
                     { Damage = 10f, HitDirection = Vector3.back }) },
+                // N4：死亡链。三个状态此前登记的正是"零入边转移"——入边补齐后它们必须
+                // 真的播得出剪辑（控制器里按 HitState 值分派的 AnyState 转移）。
+                // Down 的入手是躺卧（没有本地出口），GetUp 的入手是"服务端复活"。
+                { HitState.Death, fsm => fsm.EnterDeath() },
+                { HitState.Down, fsm => fsm.EnterDown() },
+                { HitState.GetUp, fsm => { fsm.EnterDeath(); fsm.EnterRespawn(); } },
             };
 
         private RuntimeAnimatorController _controller;
@@ -154,6 +158,53 @@ namespace GameSys.EditorTests
                 {
                     UnityEngine.Object.DestroyImmediate(go);
                 }
+            }
+        }
+
+        /// <summary>
+        /// N4：死亡链在**真实 Animator** 上真的会推进——死亡剪辑播完 → HitFSM 进 Down。
+        /// 这条断言钉住三处接线，缺任何一处它都不会绿：
+        /// ① 控制器里 `AnyState --(HitState==7)--> Death` 的入边（没有它层停在 Empty，剪辑不播）；
+        /// ② `HitStateBehaviour.IsHitState` 认不认 Death（漏了它回调永不触发，FSM 停在 Death）；
+        /// ③ `AnyState --(HitState==5)--> Down` 的入边（没有它 FSM 进了 Down 但层还是没表现）。
+        /// </summary>
+        [Test]
+        public void test_death_clip_completion_walks_the_fsm_into_down_and_holds()
+        {
+            // Arrange（与 FSMManager 同款接线：状态机行为 → HitFSM.OnAnimationEnd）
+            var (go, animator, fsm) = CreateRig();
+            HitStateBehaviour.SetCallback(fsm.OnAnimationEnd);
+            const float step = 1f / 60f;
+
+            try
+            {
+                // Act：进入死亡，推进 Animator 直到死亡剪辑播完
+                fsm.EnterDeath();
+                Assert.AreEqual(HitState.Death, fsm.CurrentState, "前置失败：应先进入 Death");
+
+                for (float t = 0f; t < 3f && fsm.CurrentState == HitState.Death; t += step)
+                {
+                    animator.Update(step);
+                    fsm.Update(step);
+                }
+
+                // Assert：进 Down（躺卧）
+                Assert.AreEqual(HitState.Down, fsm.CurrentState,
+                    "死亡剪辑播完必须推进到 Down（躺卧）——停在 Death 的话，服务端复活时无状态可起身");
+
+                // Assert：躺卧没有本地出口（2 秒的 Down 计时器已被停用，起身只能由复活驱动）
+                for (float t = 0f; t < 3f; t += step)
+                {
+                    animator.Update(step);
+                    fsm.Update(step);
+                }
+                Assert.AreEqual(HitState.Down, fsm.CurrentState,
+                    "死亡后的躺卧不得自行起身——客户端不自判活（D-5），起身由服务端复活驱动");
+            }
+            finally
+            {
+                HitStateBehaviour.SetCallback(null);
+                UnityEngine.Object.DestroyImmediate(go);
             }
         }
 
