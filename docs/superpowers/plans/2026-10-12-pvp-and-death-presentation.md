@@ -712,7 +712,15 @@ caster-dead."
 **Files:**
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityRegistry.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`（**N4 现场发现的跨批次冲突，原计划漏了**）
+- 修改（**资产**）：`Assets/RpgDuo/Animator/Character3C.controller`（对调 Death/Down 的剪辑）
 - 测试：`Assets/Scripts/Tests/PlayMode/`（追加）
+
+> **N4 现场发现的冲突（本任务必须一并解决，否则整套白做）**：`ClientNetworkHost` 在**死后 3 秒**把玩家送回选人界面（`:254-262` → `Update:147-154`），而服务端**8 秒**才复活 ⇒ **`RespawnNotice` 到达前客户端已离开世界**。
+> 3 秒那条是**上一个批次**（T12 的"重连当复活"）做的——那时服务端确实没有复活，回选人是唯一出路。现在服务端有了，**它变成了障碍**。
+> **要求**：死亡后**不要**再自动回选人；改为等待 `RespawnNotice`（N2 的 8 秒）。若你判断"服务器不可达时需要一个兜底"，**兜底必须长于 8 秒**（例如 15 秒），并在报告里说明理由。
+
+> **同任务内的动作状态提醒**：快照的 `Dead` 是**状态**不是边沿事件——已在视野内的观察者最多等 4 tick（≈264ms）的静止保活窗口才看到翻位。**读状态，不要读变化。**
 
 - [ ] **Step 1: 写失败的测试**
 
@@ -826,6 +834,17 @@ namespace GameSys.SyncLayer
 ```
 
 并在 `ApplySnapshot` 里：`view.Animator?.Apply(snapshot.ActionState);`
+
+- [ ] **Step 4b: 接上复活的调用链（`RespawnNotice` → `ApplyServerRespawn`）**
+
+`ClientNetworkManager` 订阅 `RespawnNotice`，收到时调用 `Sys3CEntry.ApplyServerRespawn(notice.Hp)`。
+**不加这一步，"躺下就永远起不来"**——N4 的 `ApplyServerRespawn` 目前零调用方。
+
+- [ ] **Step 4c: 解除"死后 3 秒回选人"**（见上方的冲突说明）
+
+- [ ] **Step 4d: 对调 `Death` / `Down` 的剪辑**
+
+控制器里 `Death` 挂的是 `Die01_Stay`（0.667s 循环）、`Down` 挂的是 `Die01`（0.5s）——**两个是反的**。按名字，`Death` 该播倒下、`Down` 该播躺卧。**必须走 N4 Step 4 那条已验证的资产落盘路径**（外部写入 + 导入管线 + 刷新后对 md5）——`script-execute` + 脚本保存那条路被 R6 打回过两次。
 
 - [ ] **Step 5: 运行测试验证通过**
 
