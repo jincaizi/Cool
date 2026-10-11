@@ -71,7 +71,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _hasServerRespawn;
         private float _serverRespawnHp;
 
-        // N5 阵亡等待：Notification 是网络线程置位，计时与提示留主线程 Update
+        // N5 阵亡等待：回调线程只置位，计时与提示留主线程 Update
         private bool _awaitingServerRespawn;
         private float _respawnWaitElapsed = -1f;   // <0 = 提示还没上屏（要读 Time，只能在主线程）
 
@@ -162,7 +162,9 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             // —— 服务端复活（N5）——放在"回选人"判定**之前**：通知到了就不该再走返回路径。
             // 封送点：RespawnNotice 在回调线程到达，而 ApplyServerRespawn 要动 Animator/Transform。
-            if (_hasServerRespawn)
+            // 角色还没装配就**留着通知**、下帧再试：此刻消费掉它、又清掉等待/兜底，
+            // 会留下"躺在死亡画面且再无出口"的死局（该会话不会再有第二次 OnServerDeath）。
+            if (_hasServerRespawn && _localEntry != null)
             {
                 _hasServerRespawn = false;
                 ApplyServerRespawn(_serverRespawnHp);
@@ -173,8 +175,8 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 if (_respawnWaitElapsed < 0f)
                 {
-                    // 提示只能在这里上屏：ShowStatus 读 Time，而置位它的死亡回调在网络线程上
-                    //（DotNetWebSocketChannel 的注释：宿主在该线程读 Time.unscaledTime 会抛）。
+                    // 提示在这里上屏（不在死亡回调里）：ShowStatus 读 Time，而那条回调的线程
+                    // 取决于传输实现（见 HandleServerRespawn 的实测记录），不赌。
                     // 提示语带 ASCII 锚点：WebGL 出包里 IMGUI 的中文字形会被整段丢掉（T11/T8 已记录），
                     // 纯中文提示在浏览器里等于看不见——`dead: HP 0` / `server respawn` 保证可读。
                     ShowStatus("你已阵亡（dead: HP 0）——等待服务端复活（server respawn）",
@@ -190,7 +192,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     _awaitingServerRespawn = false;
                     _pendingReturnToMenu = true;
                     Debug.LogWarning("[NetHost] " + (int)ServerRespawnFallbackSeconds
-                        + " 秒内未收到服务端复活通知——返回选人界面重登");
+                        + " 秒内未能应用服务端复活——返回选人界面重登");
                     ShowStatus("服务器未在 " + (int)ServerRespawnFallbackSeconds
                         + " 秒内复活你（no respawn notice）——返回选人界面重登（relogin = respawn）");
                     return;
@@ -316,8 +318,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 服务端复活永远看不见。现在改为等通知，兜底 15 秒见 Update
         /// （连接断了仍是断线那条路：`HandleDisconnected` 立刻给出口）。
         ///
-        /// **本回调在网络驱动线程上**（CombatNetworkBridge 的 DamageResult 消费链），
-        /// 所以这里只置位——Time/Unity API 一概留到 Update（提示的延迟上屏见那里）。
+        /// **本回调的线程取决于传输**（CombatNetworkBridge 的 DamageResult 消费链走
+        /// `INetworkClient.MessageReceived`：WS 实测在主线程，KCP 在驱动线程——见 HandleServerRespawn），
+        /// 所以这里只置位、不赌实现——Time/Unity API 一概留到 Update（提示的延迟上屏见那里）。
         /// </summary>
         private void HandleLocalPlayerDeath()
         {
@@ -328,8 +331,14 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// 服务端复活通知——**在网络回调线程上**，只记账。
-        /// 真正动 Unity API（Animator/Transform 的 `ApplyServerRespawn`）的是 Update 里的封送分支。
+        /// 服务端复活通知——只记账，真正动 Unity API（Animator/Transform 的 `ApplyServerRespawn`）
+        /// 的是 Update 里的封送分支。
+        ///
+        /// 为什么要封送：`INetworkClient.MessageReceived` 的契约是"回调线程"，**不保证主线程**——
+        /// 实测（2026-10-12，编辑器 + 本地服务器，`DotNetWebSocketChannel` 走 WebSocket）：
+        /// `MessageReceived` 回调在主线程（thread=1）；但 KCP 实现
+        /// （`KcpNetClientAdapter` + `DirectMessageExecutor`，PlayMode 测试用的那条）是驱动线程。
+        /// 所以这里不赌传输实现，一律记账、由 Update 应用。
         /// </summary>
         private void HandleServerRespawn(float hp)
         {
@@ -338,7 +347,8 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// 应用服务端复活（**只在主线程**调用——Update 的封送分支）。
+        /// 应用服务端复活（**只在主线程**调用——Update 的封送分支；调用方已保证 `_localEntry` 非空：
+        /// 装不上就压根不进来，见 Update 的 `_hasServerRespawn &amp;&amp; _localEntry != null`）。
         /// 血量直接采信服务端的（D-N4/D-5：客户端不自行判活）。
         /// </summary>
         private void ApplyServerRespawn(float hp)
@@ -349,12 +359,6 @@ namespace Hotfix.GameSystems.SyncLayer
             _pendingReturnToMenu = false;
             _statusMessage = null;
             Debug.Log("[NetHost] 服务端复活：HP=" + hp);
-
-            if (_localEntry == null)
-            {
-                Debug.LogWarning("[NetHost] 收到复活通知，但本地角色尚未装配——无从应用");
-                return;
-            }
             _localEntry.ApplyServerRespawn(hp);
         }
 

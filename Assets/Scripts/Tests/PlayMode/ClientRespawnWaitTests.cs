@@ -24,6 +24,14 @@ namespace KcpNet.PlayModeTests
         /// <summary>致死伤害（T12/PlayerDeathRespawnTests 同值：> 100 且远小于 9999 的秒杀旁路）。</summary>
         private const float LethalDamage = 150f;
 
+        /// <summary>场景根对象查找（与 MobileTouchInputTests 同款）。</summary>
+        private static GameObject FindRoot(string name)
+        {
+            foreach (var go in SceneManager.GetActiveScene().GetRootGameObjects())
+                if (go.name == name) return go;
+            return null;
+        }
+
         [UnityTest]
         public IEnumerator Death_Does_Not_Send_The_Player_Home_Before_The_Server_Revives()
         {
@@ -35,7 +43,6 @@ namespace KcpNet.PlayModeTests
             bool previousIgnore = LogAssert.ignoreFailingMessages;
             LogAssert.ignoreFailingMessages = true;   // 场景自身的网络/表现日志不参与判定
 
-            GameObject hostGo = null;
             ClientNetworkHost host = null;
             try
             {
@@ -55,9 +62,13 @@ namespace KcpNet.PlayModeTests
                 }
                 Assert.IsNotNull(player, "DemoDay 应在场景加载时生成玩家（PlayerSpawner）");
 
-                // 宿主：场景里没有常驻实例，按 MobileTouchInputTests 的 DemoDay 用法挂一个
-                hostGo = new GameObject("N5ClientNetworkHost");
-                host = hostGo.AddComponent<ClientNetworkHost>();
+                // 宿主：用**场景里本来就有的那个**（根对象 `Net`，随场景加载/销毁），
+                // 不另起一个——另起会变成双宿主/双会话，行为无法归因到任一个，
+                // 而线上跑的正是这一份场景接线。
+                var hostRoot = FindRoot("Net");
+                Assert.IsNotNull(hostRoot, "DemoDay 应有一个常驻网络宿主 `Net`（场景根对象）");
+                host = hostRoot.GetComponent<ClientNetworkHost>();
+                Assert.IsNotNull(host, "`Net` 上应挂着 ClientNetworkHost");
 
                 // 进世界 + 装配本地角色。Reporter 是"装配完成"的公开信号：
                 // 死亡回调与它同一个装配块（ClientNetworkHost.TryAttachLocalCharacter），
@@ -90,16 +101,16 @@ namespace KcpNet.PlayModeTests
 
                 // 收尾：本用例与 MobileTouchInputTests 是 Tests/ 下仅有的两个 LoadScene 用例，
                 // 不卸载就会把共享 play 会话留在 DemoDay 上，给其后所有用例制造顺序依赖。
+                // 宿主是场景里的对象——断开即可，随卸载一起销毁。
                 host.Disconnect();
-                Object.Destroy(hostGo);
                 SceneManager.SetActiveScene(SceneManager.CreateScene("N5CleanupScene"));
                 var unload = SceneManager.UnloadSceneAsync("DemoDay");
                 while (unload != null && !unload.isDone) yield return null;
             }
             finally
             {
-                // 断言失败提前退出时的兜底（成功路径已在上面清干净；Unity 的 == null 认已销毁对象）
-                if (hostGo != null) Object.Destroy(hostGo);
+                // 断言失败提前退出时的兜底：断开会话（幂等），场景留给下一个用例自己处理
+                if (host != null) host.Disconnect();
                 NetworkModeService.Save(previousMode);
                 NetworkModeService.SaveConnection(previousHost, previousPort.ToString(), previousUser);
                 LogAssert.ignoreFailingMessages = previousIgnore;
