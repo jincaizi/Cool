@@ -2951,6 +2951,8 @@ HttpListener needs before it will bind a non-localhost prefix."
 
 ### Task 10: 录屏 + 已知边界话术卡
 
+> **人类裁定（2026-10-11）：不做录屏。** 话术卡已完成并落盘：`docs/superpowers/guides/webgl-demo-boundaries.md`（含"主动亮出来的三件事"、10 条边界应答、演示操作建议、一句话总结）。原计划的录屏步骤**作废**——若将来又想要，用 T4/T8 的 CDP 装置驱动录制即可，不必真人操作。
+
 **Files:**
 - 创建：`docs/superpowers/guides/webgl-demo-script.md`
 - 仓库外：一段录屏
