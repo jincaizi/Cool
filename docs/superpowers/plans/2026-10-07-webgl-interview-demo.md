@@ -2766,6 +2766,8 @@ dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --monster
 
 - [ ] **Step 3: 手机浏览器复现同一批（触屏变量）**
 
+> **本步的操作清单已独立成文并已落盘：`docs/superpowers/guides/webgl-mobile-acceptance.md`**（含前置、启动命令、逐条判据与失败含义）。**人工待办，等待人类执行。**
+
 在**真实手机**上打开同一 URL，重复 Step 2 的关键项，并**记录帧率**（R4）：
 
 - 用浏览器开发者工具或屏幕上的 FPS 计数（若既有无则目测：是否明显卡顿）
