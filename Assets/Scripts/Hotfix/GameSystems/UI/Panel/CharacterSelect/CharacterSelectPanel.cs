@@ -64,10 +64,12 @@ namespace Hotfix.GameSystems.UI
             _closing = false;
             _selected = CharacterSelectionService.Load();
             _mode = NetworkModeService.Load();
-            // Task 13：预填**生效地址**（URL 参数 ?host= > 存档 > 默认）——投递链接带什么这里就显示什么，
-            // 面试官选「联网」+「确认」即可，不用手打公网 IP；框里显示的与实际连接的永远一致。
-            if (_hostInput != null) _hostInput.text = NetworkModeService.ResolveHost();
-            if (_portInput != null) _portInput.text = NetworkModeService.ResolvePort().ToString();
+            // Task 13：预填（URL 参数 ?host= > 存档 > 默认）——投递链接带什么这里就显示什么，
+            // 面试官选「联网」+「确认」即可，不用手打公网 IP。
+            // 注意 URL 的作用**止于这一行**：连接读的是下面 Confirm 写进去的框里的值，
+            // 所以操作者把框改掉之后，改的就是会连的那个（见 Confirm）。
+            if (_hostInput != null) _hostInput.text = NetworkModeService.PrefillHost();
+            if (_portInput != null) _portInput.text = NetworkModeService.PrefillPort().ToString();
             if (_usernameInput != null) _usernameInput.text = NetworkModeService.LoadUsername();
             RefreshHighlight();
             RefreshServerSettingsVisibility();
@@ -113,6 +115,9 @@ namespace Hotfix.GameSystems.UI
             if (_closing) return;
             _closing = true;
             CharacterSelectionService.Save(_selected);
+            // Task 13：**确认 = 把框里的值显式交给连接**（这里是唯一的交接点；客户端只读它，
+            // 连接那一刻不再回头看 URL 参数）。于是"框里显示的就是会连的"对任意输入都成立：
+            // 链接带地址 → 框里是链接给的 → 确认后连它；操作者改成别的 → 确认后连他改的。
             // 输入框绑定丢失时**跳过写入**，不能回落写默认值——那会把玩家存过的服务器地址
             // 静默重置回 127.0.0.1，下次连接打到本机且没有任何提示。
             if (_hostInput != null && _portInput != null && _usernameInput != null)

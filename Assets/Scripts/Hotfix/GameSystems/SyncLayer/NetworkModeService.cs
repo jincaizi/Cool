@@ -38,27 +38,43 @@ namespace Hotfix.GameSystems.SyncLayer
         public const int DefaultPort = 8000;
         public const string DefaultUsername = "Player";
 
-        /// <summary>服务器地址（无存档 → 默认值）</summary>
+        /// <summary>
+        /// 服务器地址（无存档 → 默认值）。**连接的端点就是这里**：选人面板「确认」时把**框里的值**
+        /// `SaveConnection` 进来，`ClientNetworkHost.Connect` 再读出去。
+        ///
+        /// Task 13 修复轮：URL 参数（`?host=`）**只影响预填**（见 `PrefillHost`），**不参与连接决议**——
+        /// 否则操作者把框改成别的地址后，链接里的值会在连接那一刻把它静默压掉，
+        /// "框里显示的就是会连的"就成了假话。
+        /// </summary>
         public static string LoadHost()
             => PlayerPrefs.HasKey(HostKey) ? PlayerPrefs.GetString(HostKey) : DefaultHost;
 
+        /// <summary>服务器端口（无存档 → 默认值）。与 `LoadHost` 同一条规则：连接的端点只来自存档</summary>
         public static int LoadPort()
             => PlayerPrefs.HasKey(PortKey) ? PlayerPrefs.GetInt(PortKey) : DefaultPort;
 
         /// <summary>
-        /// Task 13：**生效的**服务器地址 —— URL 参数 `?host=` &gt; 存档 &gt; 默认值。
-        /// 面试链接里带上地址，对方就不用在那块输入框里手填公网 IP。
+        /// Task 13：**预填**用的地址 —— URL 参数 `?host=` &gt; 存档 &gt; 默认值。
+        /// 面试链接里带上地址，对方就不用在那块输入框里手填公网 IP（链接的值先落进框，
+        /// 「确认」再把框里的值交给连接）。
         ///
-        /// 无 `?host=` 参数时与 `LoadHost` **逐字等价**：`TryFromUrlQuery` 在编辑器/PC 上恒 false，
-        /// 在 WebGL 上也要 URL 真带了该参数才为 true。因此这里只覆盖"有参数"那一种输入，
-        /// 其余路径（含存档、默认 `127.0.0.1`）一个字没动。
+        /// **只用于预填**（`CharacterSelectPanel.OnShow`）。无 `?host=` 参数时与 `LoadHost` 逐字等价：
+        /// `CurrentPageUrl` 在编辑器/PC 上恒空串，WebGL 上也要 URL 真带了该参数才为 true。
         /// </summary>
-        public static string ResolveHost()
-            => ServerAddressQuery.TryFromUrlQuery(DefaultPort, out string host, out _) ? host : LoadHost();
+        public static string PrefillHost()
+            => PrefillHost(ServerAddressQuery.CurrentPageUrl(), LoadHost());
 
-        /// <summary>生效的端口：URL 带端口就用它、只带地址则用默认 8000（链接自洽），都没带则回落到存档</summary>
-        public static int ResolvePort()
-            => ServerAddressQuery.TryFromUrlQuery(DefaultPort, out _, out int port) ? port : LoadPort();
+        /// <summary>预填用的端口：URL 带端口就用它、只带地址则用默认 8000（链接自洽），都没带则回落到存档</summary>
+        public static int PrefillPort()
+            => PrefillPort(ServerAddressQuery.CurrentPageUrl(), LoadPort());
+
+        /// <summary>预填（纯函数，可单测）：页面 URL 给得出就用它，否则用传入的兜底（存档值）</summary>
+        public static string PrefillHost(string? pageUrl, string savedHost)
+            => ServerAddressQuery.TryParse(pageUrl, DefaultPort, out string host, out _) ? host : savedHost;
+
+        /// <inheritdoc cref="PrefillHost(string,string)"/>
+        public static int PrefillPort(string? pageUrl, int savedPort)
+            => ServerAddressQuery.TryParse(pageUrl, DefaultPort, out _, out int port) ? port : savedPort;
 
         public static string LoadUsername()
             => PlayerPrefs.HasKey(UserKey) ? PlayerPrefs.GetString(UserKey) : DefaultUsername;

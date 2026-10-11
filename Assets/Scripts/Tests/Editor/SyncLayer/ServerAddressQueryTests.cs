@@ -1,10 +1,11 @@
 using Hotfix.GameSystems.SyncLayer;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace GameSys.EditorTests
 {
     /// <summary>
-    /// Task 13：`?host=&lt;IP&gt;` 的解析层。纯字符串逻辑，本地可测——不需要真连接，
+    /// Task 13：`?host=&lt;IP&gt;` 的解析层与它的**作用范围**。纯字符串逻辑，本地可测——不需要真连接，
     /// 也不需要出包（出包后的页面 URL 是浏览器边界，见 `production/verify/t13/` 的实测）。
     ///
     /// **规则（每种输入都必须有确定行为，畸形一律忽略、绝不抛）**：
@@ -13,10 +14,17 @@ namespace GameSys.EditorTests
     /// | `?host=1.2.3.4` | `1.2.3.4` | 传入的默认端口（演示里是 8000） |
     /// | `?host=1.2.3.4:9000` | `1.2.3.4` | `9000` |
     /// | 无该参数 / 畸形 | 不覆盖（`TryParse` 返回 false，调用方保持既有行为） | — |
+    ///
+    /// **作用范围**：这个参数只喂**预填**（`NetworkModeService.PrefillHost/PrefillPort` 填进选人面板的
+    /// 地址框）；连接的端点由框里的值决定（`test_confirm_entry_uses_the_box_value_not_the_url` 钉住的就是它）。
     /// </summary>
     public class ServerAddressQueryTests
     {
         private const int DefaultPort = 8000;
+
+        private const string HostKey = "net.host";
+        private const string PortKey = "net.port";
+        private const string UserKey = "net.username";
 
         [Test]
         public void test_server_address_query_parses_bare_host_with_default_port()
@@ -142,6 +150,56 @@ namespace GameSys.EditorTests
             Assert.IsTrue(ok);
             Assert.AreEqual("1.2.3.4", host);
             Assert.AreEqual(DefaultPort, port);
+        }
+
+        /// <summary>
+        /// 修复轮：**手打的（框里的）值压过 URL 参数**。
+        ///
+        /// 这条语义在修复前不成立：链接带 `?host=` → 面板预填 → 操作者改成别的地址 → 确认
+        /// （手打值落进存档）→ 而 `Connect` 又解析了一次 URL，于是**拨的是链接里的地址，
+        /// 框里（和他记忆里）却是另一个**，只有失败浮层说真话。正是本任务要消灭的"端点悄悄不对"。
+        ///
+        /// 现在：URL 的作用止于预填，连接只读确认时写进去的存档值。
+        /// 编辑器里页面 URL 恒空串（浏览器边界），所以这里把 URL **当参数注入**来钉住这条规则。
+        /// </summary>
+        [Test]
+        public void test_confirm_entry_uses_the_box_value_not_the_url()
+        {
+            const string url = "http://192.168.1.4:8080/index.html?host=1.2.3.4";
+            const int boxPort = 8019;
+
+            try
+            {
+                NetworkModeService.SaveConnection("10.0.0.9", "9000", "Player");  // 上一次留下的存档
+
+                // ① 预填：链接的值压过存档（面试官打开链接，框里就是链接给的地址）
+                Assert.AreEqual("1.2.3.4", NetworkModeService.PrefillHost(url, NetworkModeService.LoadHost()),
+                    "预填吃 URL");
+                Assert.AreEqual(8000, NetworkModeService.PrefillPort(url, NetworkModeService.LoadPort()),
+                    "只给地址不给端口 → 预填默认 8000");
+
+                // ② 操作者把框改成手打值并点「确认」（= 面板把框里的值写进存档）。
+                //    对照 ① 的 1.2.3.4：如果连接再解析一次 URL，下面这两行就会是 1.2.3.4 / 8000。
+                NetworkModeService.SaveConnection("127.0.0.1", boxPort.ToString(), "Player");
+
+                // ③ 连接入口（= `ClientNetworkHost.Connect` 读的那两个）拿到的就是**框里的值**
+                Assert.AreEqual("127.0.0.1", NetworkModeService.LoadHost(), "手打 host 压过 URL");
+                Assert.AreEqual(boxPort, NetworkModeService.LoadPort(), "手打 port 压过 URL");
+
+                // ④ 而**无参数时**预填与连接完全一致（改动前的老行为）
+                Assert.AreEqual(NetworkModeService.LoadHost(),
+                    NetworkModeService.PrefillHost("http://192.168.1.4:8080/index.html", NetworkModeService.LoadHost()),
+                    "没有 ?host= 时预填落回存档");
+                Assert.IsFalse(ServerAddressQuery.TryParse("http://192.168.1.4:8080/index.html", DefaultPort,
+                    out _, out _), "无参数不解析出任何覆盖");
+            }
+            finally
+            {
+                // PlayerPrefs 是编辑器级全局状态（与 CharacterSelectionServiceTests 同款收尾）
+                PlayerPrefs.DeleteKey(HostKey);
+                PlayerPrefs.DeleteKey(PortKey);
+                PlayerPrefs.DeleteKey(UserKey);
+            }
         }
     }
 }

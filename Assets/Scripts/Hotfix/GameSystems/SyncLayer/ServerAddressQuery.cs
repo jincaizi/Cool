@@ -3,10 +3,14 @@ using UnityEngine;
 namespace Hotfix.GameSystems.SyncLayer
 {
     /// <summary>
-    /// 服务器地址的 URL 覆盖（`?host=&lt;IP&gt;`）——把地址写进投递链接，面试官打开后**不用手填**。
+    /// 服务器地址的 URL 参数（`?host=&lt;IP&gt;`）——把地址写进投递链接，面试官打开后**不用手填**。
     ///
     /// 与 `?touch=1` 同源：解析走 `UrlQuery.TryGetValue`（同一个实现），URL 读的是
     /// `Application.absoluteURL`（WebGL 的页面 URL），**不需要新的 jslib**。
+    ///
+    /// **作用范围：只用于预填**（`NetworkModeService.PrefillHost/PrefillPort` 把值填进选人面板的地址框）。
+    /// 连接的端点在那一刻由框里的值决定，不再回头看这个参数 —— 见 `ServerAddressQueryTests` 的
+    /// "手打值压过 URL"用例与 `NetworkModeService.LoadHost` 的注释。
     ///
     /// 规则（每种输入都有确定行为；畸形一律**忽略**、绝不抛 —— 现场多打一个字符的代价
     /// 不能是"打不开游戏"）。逐条有单测：`ServerAddressQueryTests`。
@@ -57,17 +61,16 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// WebGL 运行时的 URL 覆盖；编辑器与其它平台恒 false（与 `TouchInputAvailability.FromUrlQuery`
-        /// 同一条路径）。编辑器恒 false 也是单测能确定的原因：解析层纯字符串，页面 URL 只在出包后存在。
+        /// 当前页面 URL —— 浏览器里是 `Application.absoluteURL`，**编辑器与其它平台恒空串**
+        /// （与 `TouchInputAvailability.FromUrlQuery` 同一条路径，没有新 jslib）。
+        /// 这是整条链上唯一的浏览器边界：解析层是纯字符串，所以本地可测、出包才验得到真实 URL。
         /// </summary>
-        public static bool TryFromUrlQuery(int defaultPort, out string host, out int port)
+        public static string CurrentPageUrl()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-            return TryParse(Application.absoluteURL, defaultPort, out host, out port);
+            return Application.absoluteURL ?? string.Empty;
 #else
-            host = string.Empty;
-            port = 0;
-            return false;
+            return string.Empty;
 #endif
         }
 
