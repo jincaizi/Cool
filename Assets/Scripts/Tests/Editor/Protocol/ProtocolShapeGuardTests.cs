@@ -115,6 +115,19 @@ namespace Cool.Protocol.Tests
         }
 
         [Test]
+        public void EntityFieldMask_Bits_Are_Unchanged()
+        {
+            // 增量快照靠这些位判断"这一栏可不可信"（EntityFieldMask 的文档："字段值仅在对应位被置位时有效"）。
+            // 任何一个既有位的值变了，客户端会把"没带这个字段"读成"带了"（或反过来）——静默的。
+            Assert.AreEqual(1 << 0, (ushort)Cool.Protocol.EntityFieldMask.Position);
+            Assert.AreEqual(1 << 1, (ushort)Cool.Protocol.EntityFieldMask.Rotation);
+            Assert.AreEqual(1 << 2, (ushort)Cool.Protocol.EntityFieldMask.Speed);
+            Assert.AreEqual(1 << 3, (ushort)Cool.Protocol.EntityFieldMask.ActionState);
+            Assert.AreEqual(1 << 4, (ushort)Cool.Protocol.EntityFieldMask.Kind);
+            Assert.AreEqual(1 << 5, (ushort)Cool.Protocol.EntityFieldMask.TemplateId);
+        }
+
+        [Test]
         public void RespawnNotice_Roundtrips()
         {
             var sent = new Cool.Protocol.RespawnNotice { Hp = 100f, Tick = 4242u };
