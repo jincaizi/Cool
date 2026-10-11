@@ -45,6 +45,21 @@ namespace Hotfix.GameSystems.SyncLayer
         public static int LoadPort()
             => PlayerPrefs.HasKey(PortKey) ? PlayerPrefs.GetInt(PortKey) : DefaultPort;
 
+        /// <summary>
+        /// Task 13：**生效的**服务器地址 —— URL 参数 `?host=` &gt; 存档 &gt; 默认值。
+        /// 面试链接里带上地址，对方就不用在那块输入框里手填公网 IP。
+        ///
+        /// 无 `?host=` 参数时与 `LoadHost` **逐字等价**：`TryFromUrlQuery` 在编辑器/PC 上恒 false，
+        /// 在 WebGL 上也要 URL 真带了该参数才为 true。因此这里只覆盖"有参数"那一种输入，
+        /// 其余路径（含存档、默认 `127.0.0.1`）一个字没动。
+        /// </summary>
+        public static string ResolveHost()
+            => ServerAddressQuery.TryFromUrlQuery(DefaultPort, out string host, out _) ? host : LoadHost();
+
+        /// <summary>生效的端口：URL 带端口就用它、只带地址则用默认 8000（链接自洽），都没带则回落到存档</summary>
+        public static int ResolvePort()
+            => ServerAddressQuery.TryFromUrlQuery(DefaultPort, out _, out int port) ? port : LoadPort();
+
         public static string LoadUsername()
             => PlayerPrefs.HasKey(UserKey) ? PlayerPrefs.GetString(UserKey) : DefaultUsername;
 

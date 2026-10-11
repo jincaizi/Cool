@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Input
@@ -47,16 +46,14 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// <summary>
         /// 从 URL 解析 `?touch=1` / `?touch=0`（无该参数返回 null）。抽成纯函数以便单测 ——
         /// 出包后的 URL 是浏览器边界，本地测不到。
+        /// 取值走 `UrlQuery.TryGetValue`（与 `?host=` 共用同一条解析路径）；**只看值首字符**是既有语义
+        /// （`?touch=10` 判开），抽取共享实现不得改变它 —— 见 `TouchInputAvailabilityTests` 的锁定用例。
         /// </summary>
         public static bool? ParseTouchQuery(string url)
         {
-            if (string.IsNullOrEmpty(url)) return null;
-            int at = url.IndexOf("touch=", StringComparison.OrdinalIgnoreCase);
-            if (at < 0) return null;
-            int value = at + "touch=".Length;
-            if (value >= url.Length) return null;
-            if (url[value] == '1') return true;
-            if (url[value] == '0') return false;
+            if (!UrlQuery.TryGetValue(url, "touch", out string value) || value.Length == 0) return null;
+            if (value[0] == '1') return true;
+            if (value[0] == '0') return false;
             return null;
         }
 

@@ -26,6 +26,21 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_url_query_touch_flag_semantics_locked()
+        {
+            // Task 13：`?host=` 与 `?touch=` 走**同一条解析路径**（`UrlQuery.TryGetValue`），
+            // 所以这条路径的既有语义要钉在这里 —— 抽取共享实现不得改变任何一条裁决。
+            Assert.IsTrue(TouchInputAvailability.ParseTouchQuery("https://host/index.html?touch=10"),
+                "既有语义是「只看首字符」：?touch=10 仍判开");
+            Assert.IsNull(TouchInputAvailability.ParseTouchQuery("https://host/index.html?touch=&x=1"),
+                "空值（后面跟别的参数）不裁决");
+            Assert.IsNull(TouchInputAvailability.ParseTouchQuery("https://host/index.html?touch=abc"),
+                "非 0/1 不裁决");
+            Assert.IsTrue(TouchInputAvailability.ParseTouchQuery("https://host/index.html?touch=1#frag"),
+                "值在锚点处结束，?touch=1 仍判开");
+        }
+
+        [Test]
         public void test_manual_override_beats_auto_detection()
         {
             // 人工档位必须能压过自动判定 —— 自动判据失效时这是唯一可靠的入口

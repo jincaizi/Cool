@@ -86,7 +86,7 @@ namespace Hotfix.GameSystems.SyncLayer
             // 模式由选人面板选择并持久化（NetworkModeService）：联网 → 进世界自动连接；单机 → 完全不触网
             if (NetworkModeService.Load() == NetworkMode.Online)
             {
-                Debug.Log($"[NetHost] 联网模式——连接 {NetworkModeService.LoadHost()}:{NetworkModeService.LoadPort()}");
+                Debug.Log($"[NetHost] 联网模式——连接 {NetworkModeService.ResolveHost()}:{NetworkModeService.ResolvePort()}");
                 Connect();
             }
         }
@@ -122,7 +122,7 @@ namespace Hotfix.GameSystems.SyncLayer
             // 玩家（重）生成即确认动作的副作用，此处补连接（正常流程 Start 已连，_connectRequested 守卫）
             if (!_connectRequested && NetworkModeService.Load() == NetworkMode.Online)
             {
-                Debug.Log($"[NetHost] 联网模式（选人确认）——连接 {NetworkModeService.LoadHost()}:{NetworkModeService.LoadPort()}");
+                Debug.Log($"[NetHost] 联网模式（选人确认）——连接 {NetworkModeService.ResolveHost()}:{NetworkModeService.ResolvePort()}");
                 Connect();
             }
         }
@@ -170,14 +170,16 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 不能只在 Start() 固化：直接跑 DemoDay 时选人确认发生在 Start() 之后
         /// （见 OnPlayerSpawned 的补连接逻辑），固化会读到旧地址（D-P6-17）。
         /// 显式传入的参数优先，供测试与代码路径覆盖。
+        /// Task 13：默认走 `ResolveHost/ResolvePort`（URL 参数 `?host=` &gt; 存档 &gt; 默认值）——
+        /// 链接能把地址带过来，无参数时与原先完全一致。
         /// </summary>
         public void Connect(string? username = null, string? host = null, int? port = null)
         {
             if (_connectRequested || _remoteEntities == null) return;
             _connectRequested = true;
 
-            string resolvedHost = host ?? NetworkModeService.LoadHost();
-            int resolvedPort = port ?? NetworkModeService.LoadPort();
+            string resolvedHost = host ?? NetworkModeService.ResolveHost();
+            int resolvedPort = port ?? NetworkModeService.ResolvePort();
             string resolvedUser = username ?? NetworkModeService.LoadUsername();
 
             _resolvedHost = resolvedHost;

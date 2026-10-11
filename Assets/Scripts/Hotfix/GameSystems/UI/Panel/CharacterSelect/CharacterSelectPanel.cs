@@ -64,8 +64,10 @@ namespace Hotfix.GameSystems.UI
             _closing = false;
             _selected = CharacterSelectionService.Load();
             _mode = NetworkModeService.Load();
-            if (_hostInput != null) _hostInput.text = NetworkModeService.LoadHost();
-            if (_portInput != null) _portInput.text = NetworkModeService.LoadPort().ToString();
+            // Task 13：预填**生效地址**（URL 参数 ?host= > 存档 > 默认）——投递链接带什么这里就显示什么，
+            // 面试官选「联网」+「确认」即可，不用手打公网 IP；框里显示的与实际连接的永远一致。
+            if (_hostInput != null) _hostInput.text = NetworkModeService.ResolveHost();
+            if (_portInput != null) _portInput.text = NetworkModeService.ResolvePort().ToString();
             if (_usernameInput != null) _usernameInput.text = NetworkModeService.LoadUsername();
             RefreshHighlight();
             RefreshServerSettingsVisibility();
