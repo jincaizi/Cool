@@ -68,6 +68,22 @@ namespace Hotfix.GameSystems.SyncLayer
         public static int PrefillPort()
             => PrefillPort(ServerAddressQuery.CurrentPageUrl(), LoadPort());
 
+        /// <summary>
+        /// **连接端点的决议**（纯静态，`ClientNetworkHost.Connect` 唯一调用方，单测直接断言它）。
+        /// 规则：显式入参 &gt; 存档（= 面板「确认」时写进去的**框里的值**）。
+        ///
+        /// `prefillUrl` 是**故意不参与决议**的输入：它只说明"链接会把框预填成什么"
+        /// （`PrefillHost` 那条路）。把它摆成形参，是因为本任务修复的正是"URL 在连接那一刻
+        /// 又压过框里的值"——有了这个形参，谁再把它接进决议，`test_connect_endpoint_...`
+        /// 就会红（那条断言只在两套语义下给出不同答案时才叫回归测试）。
+        /// </summary>
+        public static (string Host, int Port) ResolveConnectEndpoint(
+            string prefillUrl, string? hostOverride, int? portOverride)
+        {
+            _ = prefillUrl;   // 不参与 —— 理由见上：连接由框（存档）说了算，URL 只喂预填
+            return (hostOverride ?? LoadHost(), portOverride ?? LoadPort());
+        }
+
         /// <summary>预填（纯函数，可单测）：页面 URL 给得出就用它，否则用传入的兜底（存档值）</summary>
         public static string PrefillHost(string? pageUrl, string savedHost)
             => ServerAddressQuery.TryParse(pageUrl, DefaultPort, out string host, out _) ? host : savedHost;

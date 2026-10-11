@@ -201,5 +201,52 @@ namespace GameSys.EditorTests
                 PlayerPrefs.DeleteKey(UserKey);
             }
         }
+
+        /// <summary>
+        /// **修复的回归测试**：连接的端点决议（`NetworkModeService.ResolveConnectEndpoint`，
+        /// `ClientNetworkHost.Connect` 的唯一调用方）里**没有 URL**。
+        ///
+        /// 为什么要有它（上一版那条测试不够）：上一版的用例只断言了 `LoadHost/LoadPort` 与
+        /// `Prefill*`，而旧缺陷在 `Connect` —— 有人把"URL 优先"加回决议时，那条测试**照样全绿**
+        /// （`test-standards.md`：修 bug 必须配一条"抓得住原缺陷"的回归测试）。
+        /// 这里把**链接**一起喂给决议函数：旧语义（URL 优先）下它会返回 `1.2.3.4:8000`，
+        /// 于是这几条断言必红 —— 判据是**两套语义给出不同答案**，不是"跑得过"。
+        /// </summary>
+        [Test]
+        public void test_connect_endpoint_ignores_url_and_keeps_the_box_value()
+        {
+            const string url = "http://192.168.1.4:8080/index.html?host=1.2.3.4:8000";
+
+            try
+            {
+                // Arrange：存档里是操作者在框里确认过的值（他手改过，端口 8019）
+                NetworkModeService.SaveConnection("127.0.0.1", "8019", "Player");
+
+                // Act：把**链接**也一起喂进去（旧语义会在这里返回 1.2.3.4 / 8000）
+                var (host, port) = NetworkModeService.ResolveConnectEndpoint(url, null, null);
+
+                // Assert：连的是框里的值
+                Assert.AreEqual("127.0.0.1", host, "连接端点来自框（存档），不是链接");
+                Assert.AreEqual(8019, port, "端口同理：链接里的 8000 不得压过框里的 8019");
+
+                // 显式入参仍然最优先（测试与代码路径覆盖用），URL 再大也压不过它
+                var (overridden, overriddenPort) = NetworkModeService.ResolveConnectEndpoint(url, "10.0.0.5", 9001);
+                Assert.AreEqual("10.0.0.5", overridden, "显式入参 > 一切");
+                Assert.AreEqual(9001, overriddenPort);
+
+                // 无参数、无存档时仍是那对老默认值（改动前逐字等价）
+                PlayerPrefs.DeleteKey(HostKey);
+                PlayerPrefs.DeleteKey(PortKey);
+                var (fresh, freshPort) = NetworkModeService.ResolveConnectEndpoint(url, null, null);
+                Assert.AreEqual(NetworkModeService.DefaultHost, fresh, "无链接无覆盖 → 默认 127.0.0.1");
+                Assert.AreEqual(NetworkModeService.DefaultPort, freshPort, "无链接无覆盖 → 默认 8000");
+            }
+            finally
+            {
+                PlayerPrefs.DeleteKey(HostKey);
+                PlayerPrefs.DeleteKey(PortKey);
+                PlayerPrefs.DeleteKey(UserKey);
+            }
+        }
     }
 }

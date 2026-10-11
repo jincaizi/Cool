@@ -170,18 +170,18 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 不能只在 Start() 固化：直接跑 DemoDay 时选人确认发生在 Start() 之后
         /// （见 OnPlayerSpawned 的补连接逻辑），固化会读到旧地址（D-P6-17）。
         /// 显式传入的参数优先，供测试与代码路径覆盖。
-        /// Task 13：端点**只来自存档**（= 选人面板「确认」时写进去的**框里的值**），
-        /// URL 参数 `?host=` **不在这里解析** —— 它的作用止于预填把地址填进那个框。
-        /// 别在这里加"URL 优先"：那会让操作者手改的地址被链接里的值静默压掉，
-        /// 而屏幕上（以及他记忆里）显示的是另一个（见 NetworkModeService.PrefillHost 的注释）。
+        /// Task 13：端点决议在 `NetworkModeService.ResolveConnectEndpoint`（纯静态、有单测）——
+        /// **URL 参数 `?host=` 不参与**：它的作用止于预填把地址填进选人面板的那个框，
+        /// 连接拨的是框里的值。别在这里加"URL 优先"：那会让操作者手改的地址被链接里的值静默压掉，
+        /// 而屏幕上（以及他记忆里）显示的是另一个。
         /// </summary>
         public void Connect(string? username = null, string? host = null, int? port = null)
         {
             if (_connectRequested || _remoteEntities == null) return;
             _connectRequested = true;
 
-            string resolvedHost = host ?? NetworkModeService.LoadHost();
-            int resolvedPort = port ?? NetworkModeService.LoadPort();
+            var (resolvedHost, resolvedPort) = NetworkModeService.ResolveConnectEndpoint(
+                ServerAddressQuery.CurrentPageUrl(), host, port);
             string resolvedUser = username ?? NetworkModeService.LoadUsername();
 
             _resolvedHost = resolvedHost;
