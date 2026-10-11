@@ -707,7 +707,120 @@ caster-dead."
 
 ---
 
-### Task N5: 远程渲染分支 + 动作状态同步
+### Task N5: 让服务端复活在客户端看得见
+
+> **为什么单列**：N4 做完死亡序列后**现场发现三件没人负责的事**——它们合起来会让整套特性在真机**完全不可见**：
+> ① `ClientNetworkHost` 在**死后 3 秒**把玩家送回选人界面（`:254-262` → `Update:147-154`），而服务端 **8 秒**才复活 ⇒ **`RespawnNotice` 到达前客户端已离开世界**
+> ② `Sys3CEntry.ApplyServerRespawn`（N4 做的）**零调用方**
+> ③ 控制器里 `Death` 挂 `Die01_Stay`（0.667s 循环）、`Down` 挂 `Die01`（0.5s）——**两个剪辑是反的**
+>
+> ①的那 3 秒是**上一个批次**（T12 的"重连当复活"）做的——那时服务端确实没有复活，回选人是唯一出路。现在服务端有了，**它变成了障碍**。
+> **这三件是同一件事**：把客户端接到服务端已经在做的复活上。
+
+**Files:**
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs`（订阅 `RespawnNotice`）
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`（解除 3 秒回选人）
+- 修改（**资产**）：`Assets/RpgDuo/Animator/Character3C.controller`（对调 `Death`/`Down` 的剪辑）
+- 测试：`Assets/Scripts/Tests/EditMode/` + `Assets/Scripts/Tests/PlayMode/`
+
+- [ ] **Step 1: 写失败的测试**
+
+三条，各自锁一件：
+
+```csharp
+    [Test]
+    public void Respawn_Notice_Is_Forwarded_With_The_Servers_Hp()
+    {
+        // 服务端权威：客户端不自行判活，只采信这条通知里的血量（D-N4/D-5）
+        var fake = new RecordingClient();
+        var mgr = new ClientNetworkManager(fake);
+        float seen = -1f;
+        mgr.ServerRespawned += hp => seen = hp;
+
+        fake.Emit(MessageId.RespawnNotice, new RespawnNotice { Hp = 100f, Tick = 7u });
+
+        Assert.AreEqual(100f, seen, "RespawnNotice 必须被转出去——否则躺下就起不来");
+    }
+```
+
+```csharp
+    [Test]
+    public void Death_Plays_The_Fall_And_Down_Plays_Lying_Still()
+    {
+        // 两个剪辑挂反了：Death 播的是躺卧循环、Down 播的是倒下。
+        // 按名字，Death 该播倒下（Die01）、Down 该播躺卧（Die01_Stay）。
+        var controller = AssetDatabase.LoadAssetAtPath<UnityEditor.Animations.AnimatorController>(
+            "Assets/RpgDuo/Animator/Character3C.controller");
+        var layer = controller.layers.First(l => l.name == "Hit");
+        Assert.AreEqual("Die01_SwordAndShield", ClipNameOf(layer, "Death"));
+        Assert.AreEqual("Die01_Stay_SwordAndShield", ClipNameOf(layer, "Down"));
+    }
+```
+
+```csharp
+    [UnityTest]
+    public IEnumerator Death_Does_Not_Send_The_Player_Home_Before_The_Server_Revives()
+    {
+        // 3 秒回选人 vs 服务端 8 秒复活 ⇒ 不解除的话复活永远看不见。
+        // 判据：死后 5 秒仍在世界里（既没回菜单、也没自行站起来）。
+        // …（起服务器、进世界、把玩家打死、等 5 秒、断言场景仍是 DemoDay 且玩家仍 !IsAlive）
+    }
+```
+
+> 第三条的**具体驱动方式**以项目既有的 PlayMode 服务器用例为准（`PlayerDeathRespawnTests` 那一族已有起服/进世界的脚手架，**复用它**）。若脚手架不适用，**停下来说清**，不要写一个假的。
+
+- [ ] **Step 2: 运行测试验证失败**
+
+```bash
+unity-mcp-cli run-tool tests-run --input '{"testMode":"EditMode","testClass":"<你的新类名>"}' --timeout 300000
+```
+预期前两条：**FAIL**（`ServerRespawned` 不存在 / 两个剪辑名不符）。
+
+- [ ] **Step 3: 接上复活的调用链**
+
+`ClientNetworkManager` 订阅 `RespawnNotice`，把服务端的血量转出去（**上一条测试锁的就是这个出口**）。`ClientNetworkHost` 收到后调用 `Sys3CEntry.ApplyServerRespawn(hp)`。
+
+**不加这一步，`ApplyServerRespawn` 永远是零调用方——躺下就永远起不来。**
+
+- [ ] **Step 4: 解除"死后 3 秒回选人"**
+
+`ClientNetworkHost` 的 `:254-262`（`_pendingReturnToMenu` 那条）在死亡时**不再**自动回选人；改为等 `RespawnNotice`。
+
+> **若你判断"服务器不可达时需要一个兜底"，兜底必须长于 8 秒**（建议 15 秒），并在报告里说明理由。**不要**把兜底留在 3 秒——那等于没改。
+
+- [ ] **Step 5: 对调 `Death` / `Down` 的剪辑**
+
+**必须走 N4 Step 4 那条已验证的资产落盘路径**（外部写入 + 正常导入管线 + **跑一次 `assets-refresh` 后复核 md5**）——`script-execute` + 脚本保存那条路**被 R6 打回过两次**。
+
+- [ ] **Step 6: 运行测试验证通过**
+
+EditMode 与相关 PlayMode 类全绿；**PlayMode 每个用例至少在一次配置里通过**。
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add Assets
+git commit -m "fix(demo): the client waits for the server's respawn instead of leaving the world
+
+ClientNetworkHost returned the player to the character-select screen three
+seconds after death, while the server revives them after eight. The notice
+therefore arrived after the client had already left the world, which made the
+server-side respawn unobservable - the whole point of building it.
+
+That timer was right when it was written: the previous batch had no server
+respawn, so leaving the world was the only way back. Now that respawn exists it
+is the obstacle.
+
+Nothing called ApplyServerRespawn either, so this also wires the notice through
+to it. And the controller had the two death clips swapped - Death played the
+lying-still loop while Down played the fall - which only became visible once
+task 4 gave those states inbound transitions."
+```
+
+---
+
+
+### Task N5b: 远程渲染分支 + 动作状态同步
 
 **Files:**
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityRegistry.cs`
@@ -716,11 +829,7 @@ caster-dead."
 - 修改（**资产**）：`Assets/RpgDuo/Animator/Character3C.controller`（对调 Death/Down 的剪辑）
 - 测试：`Assets/Scripts/Tests/PlayMode/`（追加）
 
-> **N4 现场发现的冲突（本任务必须一并解决，否则整套白做）**：`ClientNetworkHost` 在**死后 3 秒**把玩家送回选人界面（`:254-262` → `Update:147-154`），而服务端**8 秒**才复活 ⇒ **`RespawnNotice` 到达前客户端已离开世界**。
-> 3 秒那条是**上一个批次**（T12 的"重连当复活"）做的——那时服务端确实没有复活，回选人是唯一出路。现在服务端有了，**它变成了障碍**。
-> **要求**：死亡后**不要**再自动回选人；改为等待 `RespawnNotice`（N2 的 8 秒）。若你判断"服务器不可达时需要一个兜底"，**兜底必须长于 8 秒**（例如 15 秒），并在报告里说明理由。
 
-> **同任务内的动作状态提醒**：快照的 `Dead` 是**状态**不是边沿事件——已在视野内的观察者最多等 4 tick（≈264ms）的静止保活窗口才看到翻位。**读状态，不要读变化。**
 
 - [ ] **Step 1: 写失败的测试**
 
@@ -834,17 +943,6 @@ namespace GameSys.SyncLayer
 ```
 
 并在 `ApplySnapshot` 里：`view.Animator?.Apply(snapshot.ActionState);`
-
-- [ ] **Step 4b: 接上复活的调用链（`RespawnNotice` → `ApplyServerRespawn`）**
-
-`ClientNetworkManager` 订阅 `RespawnNotice`，收到时调用 `Sys3CEntry.ApplyServerRespawn(notice.Hp)`。
-**不加这一步，"躺下就永远起不来"**——N4 的 `ApplyServerRespawn` 目前零调用方。
-
-- [ ] **Step 4c: 解除"死后 3 秒回选人"**（见上方的冲突说明）
-
-- [ ] **Step 4d: 对调 `Death` / `Down` 的剪辑**
-
-控制器里 `Death` 挂的是 `Die01_Stay`（0.667s 循环）、`Down` 挂的是 `Die01`（0.5s）——**两个是反的**。按名字，`Death` 该播倒下、`Down` 该播躺卧。**必须走 N4 Step 4 那条已验证的资产落盘路径**（外部写入 + 导入管线 + 刷新后对 md5）——`script-execute` + 脚本保存那条路被 R6 打回过两次。
 
 - [ ] **Step 5: 运行测试验证通过**
 
