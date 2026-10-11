@@ -16,15 +16,46 @@ namespace KcpServer
         public long LastUpdateTimestamp { get; internal set; }
         public uint LastReceivedSequence { get; internal set; }
 
-        /// <summary>P4 战斗状态（服务器权威；登录重建 PlayerState 即满血——无复活，见 D-P4-8）</summary>
+        /// <summary>P4 战斗状态（服务器权威；登录重建 PlayerState 即满血——复活另见 D-2 的 8 秒计时）</summary>
         public float Hp { get; internal set; } = 100f;
         public float MaxHp { get; internal set; } = 100f;
         public bool IsAlive => Hp > 0f;
         private readonly System.Collections.Generic.Dictionary<int, uint> _lastCastTicks =
             new System.Collections.Generic.Dictionary<int, uint>();
 
-        /// <summary>服务器权威扣血（命中裁决调用；可到负值——死亡判定唯一依据 IsAlive，无复活 D-P4-8）</summary>
+        /// <summary>服务器权威扣血（命中裁决调用；可到负值——死亡判定唯一依据 IsAlive，复活见 D-2）</summary>
         public void ApplyDamage(float damage) => Hp -= damage;
+
+        /// <summary>死亡发生的 tick（0 = 活着）。复活计时从它起算（D-2：8 秒）</summary>
+        public long DeadTick { get; private set; }
+
+        /// <summary>标记死亡。**由主循环在判定 `!IsAlive` 后调用一次**（幂等）</summary>
+        public void MarkDead(long tick)
+        {
+            if (DeadTick != 0) return;
+            DeadTick = tick;
+        }
+
+        /// <summary>
+        /// 到点则复活：满血 + 清死亡标记，返回 true。
+        /// 调用方（主循环 tick）负责在返回 true 时给本人发 `RespawnNotice`。
+        /// **位置不在这里改**——玩家位置由客户端上报（D-N5），服务端摆位置会被下一次上报覆盖。
+        /// </summary>
+        public bool TryRespawn(long nowTick, uint tickMs)
+        {
+            if (DeadTick == 0) return false;                 // 从未死过 / 已复活
+            if (IsAlive) { DeadTick = 0; return false; }     // 兜底：状态不一致时不复活
+
+            long elapsedMs = (nowTick - DeadTick) * tickMs;
+            if (elapsedMs < RespawnDelayMs) return false;
+
+            Hp = MaxHp;
+            DeadTick = 0;
+            return true;
+        }
+
+        /// <summary>复活延迟（人类裁定 8 秒；D-2）。**一个常量，演示时可调**</summary>
+        public const long RespawnDelayMs = 8_000;
 
         /// <summary>记录技能最后施放 tick（冷却判定；主循环独占访问）</summary>
         public void RecordCast(int skillId, uint tick) => _lastCastTicks[skillId] = tick;

@@ -34,6 +34,12 @@ namespace KcpServer
         private readonly object _registerLock = new object();
         private readonly HashSet<long> _registeredSessions = new HashSet<long>();
 
+        /// <summary>
+        /// 主循环 tick 间隔（~15Hz）。**GameLoop 构造与复活计时（D-2）共用同一个值**——
+        /// 两处各写一个 66 是复活时长随主循环调速静默漂移的隐患
+        /// </summary>
+        private const int TickIntervalMs = 66;
+
         // R2：唯一消费者线程独占世界状态；IO 线程只 Enqueue，不触碰状态
         private readonly GameLoop<(EndPoint endpoint, byte[] data)> _gameLoop;
 
@@ -93,7 +99,7 @@ namespace KcpServer
 
             // R2：唯一消费者线程独占世界状态；handler 同步链内完成解码/分发/发送
             _gameLoop = new GameLoop<(EndPoint, byte[])>(
-                TimeSpan.FromMilliseconds(66),   // ~15Hz
+                TimeSpan.FromMilliseconds(TickIntervalMs),   // ~15Hz
                 packet => HandlePacket(packet.Item1, packet.Item2),
                 logger,
                 tick =>
@@ -113,6 +119,11 @@ namespace KcpServer
                         foreach (var npcId in _monsterModule.DrainRemovedNpcs())
                             _aoi.RemoveEntity(npcId);
                     }
+
+                    // P8：死亡计时与复活（D-2，8 秒）。客户端不自判死（F10），
+                    // 所以这里是联网下唯一的复活路径。放在怪物 tick 之后——本 tick 由怪物
+                    // 打死的实体即时打上死亡标记，不必等下一 tick
+                    TickRespawns((uint)tick);
 
                     // 每 5s（75 tick）带宽统计日志——T7 验收口径（记录非断言）
                     if (tick % 75 == 0)
@@ -278,6 +289,31 @@ namespace KcpServer
                 session.DataReceived += OnSessionDataReceivedEnqueued;
                 session.Disconnected += OnSessionDisconnected;
                 session.Error += OnSessionError;
+            }
+        }
+
+        /// <summary>
+        /// 每 tick 扫一遍实体：新死的打标记，到点的复活并**给本人**发通知。
+        /// 复杂度 O(实体数)/tick——与既有的 AOI 广播同量级（本 tick 的第二遍遍历，无新增数据结构）。
+        /// **只改存活与血量，不摆位置**：玩家位置由客户端上报（D-N5），服务端写会被下一次上报覆盖。
+        /// </summary>
+        private void TickRespawns(uint tick)
+        {
+            foreach (var p in _entityStore.All)
+            {
+                if (!p.IsAlive)
+                {
+                    p.MarkDead(tick);
+                    continue;
+                }
+                if (!p.TryRespawn(tick, TickIntervalMs)) continue;
+
+                // 只发给**有会话**的实体（bot 没有 session，没人可通知）
+                if (!p.IsLoggedIn) continue;
+                var session = GetSession(p.PlayerId);
+                if (session == null) continue;
+                _ = SendToSessionAsync(session, MessageId.RespawnNotice,
+                    new RespawnNotice { Hp = p.Hp, Tick = tick });
             }
         }
 

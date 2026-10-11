@@ -91,8 +91,10 @@ public class AoiBroadcasterTests
         Assert.Equal(4f, captured.Speed, 4);
         Assert.Equal(1U, captured.Tick);
         // P5：掩码高位追加 ActionState/Kind/TemplateId（只加不删——旧客户端忽略未知位）
+        // D-N2：本任务再追加 Dead（存活是状态不是事件，每次快照都置位）
         Assert.Equal((ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed
-            | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId), captured.FieldMask);
+            | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId
+            | EntityFieldMask.Dead), captured.FieldMask);
     }
 
     [Fact]
