@@ -83,3 +83,10 @@ Server/Server.Tests/bin/
 !Server/Server3C.csproj
 # Server.Tests.csproj is hand-authored (not Unity-generated)
 !Server/Server.Tests/Server.Tests.csproj
+
+# T9 部署套件的发布产物（145 MB：站点副本 + 自包含服务端）——由 publish-server.sh 生成，不入库
+production/deploy/webgl-demo/dist/
+# StaticServer 的构建中间产物（obj/ 由上面的 [Oo]bj/ 覆盖，bin/ 不在通用规则里）
+production/deploy/webgl-demo/StaticServer/bin/
+# StaticServer 是手写工程，不是 Unity 生成的
+!production/deploy/webgl-demo/StaticServer/StaticServer.csproj
