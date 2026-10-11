@@ -29,6 +29,14 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>断线返回的目标场景——必须与 BuildScript.Scenes[0] 一致</summary>
         private const string MainMenuSceneName = "CharacterSelect";
 
+        /// <summary>
+        /// 阵亡后等待服务端复活的兜底（N5）。**必须长于服务端的 8 秒复活延迟**
+        /// （`PlayerState.RespawnDelayMs`）——留出"通知在路上"的余量，否则兜底会又变成
+        /// 抢在服务端前面把玩家送回选人界面。等满 15 秒仍未收到通知 = 服务器那边出了问题
+        /// （连接还活着但没人复活你），这时才复用 T12 的出口：提示 3 秒 → 回选人界面重登。
+        /// </summary>
+        private const float ServerRespawnFallbackSeconds = 15f;
+
         [Header("服务器")]
         // 以下三个字段**不再是连接来源**（D-P6-17）：Connect 每次调用时从 NetworkModeService
         // （PlayerPrefs "net.host"/"net.port"/"net.username"）解析。仅作 Inspector 兜底与默认值参考保留。
@@ -58,6 +66,14 @@ namespace Hotfix.GameSystems.SyncLayer
         private string? _statusMessage;        // 屏幕浮层上的错误/断线文本
         private float _statusMessageUntil;     // 显示截止时刻（Time.unscaledTime）
         private bool _pendingReturnToMenu;
+
+        // N5 服务端复活：通知在回调线程到达，Unity API 只能在主线程应用（见 HandleServerRespawn）
+        private bool _hasServerRespawn;
+        private float _serverRespawnHp;
+
+        // N5 阵亡等待：Notification 是网络线程置位，计时与提示留主线程 Update
+        private bool _awaitingServerRespawn;
+        private float _respawnWaitElapsed = -1f;   // <0 = 提示还没上屏（要读 Time，只能在主线程）
 
         // 本次 Connect 实际解析出的端点——连接失败时上屏（收件人看不到 Console；
         // 读这里而非 PlayerPrefs：Connect 的参数可被显式覆盖，只有这里才是真正尝试的地址）
@@ -144,6 +160,43 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void Update()
         {
+            // —— 服务端复活（N5）——放在"回选人"判定**之前**：通知到了就不该再走返回路径。
+            // 封送点：RespawnNotice 在回调线程到达，而 ApplyServerRespawn 要动 Animator/Transform。
+            if (_hasServerRespawn)
+            {
+                _hasServerRespawn = false;
+                ApplyServerRespawn(_serverRespawnHp);
+            }
+
+            // —— 阵亡后的等待与兜底（N5，主线程计时）——
+            if (_awaitingServerRespawn)
+            {
+                if (_respawnWaitElapsed < 0f)
+                {
+                    // 提示只能在这里上屏：ShowStatus 读 Time，而置位它的死亡回调在网络线程上
+                    //（DotNetWebSocketChannel 的注释：宿主在该线程读 Time.unscaledTime 会抛）。
+                    // 提示语带 ASCII 锚点：WebGL 出包里 IMGUI 的中文字形会被整段丢掉（T11/T8 已记录），
+                    // 纯中文提示在浏览器里等于看不见——`dead: HP 0` / `server respawn` 保证可读。
+                    ShowStatus("你已阵亡（dead: HP 0）——等待服务端复活（server respawn）",
+                        ServerRespawnFallbackSeconds);
+                    _respawnWaitElapsed = 0f;
+                }
+
+                _respawnWaitElapsed += Time.unscaledDeltaTime;
+                if (_respawnWaitElapsed >= ServerRespawnFallbackSeconds)
+                {
+                    // 服务端 8 秒复活 + 7 秒余量都等不到通知 ⇒ 服务器出了别的问题
+                    //（连接还在，但没人复活你）。复用 T12 的出口：提示 3 秒后回选人界面重登。
+                    _awaitingServerRespawn = false;
+                    _pendingReturnToMenu = true;
+                    Debug.LogWarning("[NetHost] " + (int)ServerRespawnFallbackSeconds
+                        + " 秒内未收到服务端复活通知——返回选人界面重登");
+                    ShowStatus("服务器未在 " + (int)ServerRespawnFallbackSeconds
+                        + " 秒内复活你（no respawn notice）——返回选人界面重登（relogin = respawn）");
+                    return;
+                }
+            }
+
             if (_pendingReturnToMenu && Time.unscaledTime >= _statusMessageUntil)
             {
                 _pendingReturnToMenu = false;
@@ -204,6 +257,8 @@ namespace Hotfix.GameSystems.SyncLayer
             _manager.OnDisconnected += HandleDisconnected;
             // 连接失败/登录被拒必须留日志——否则"无异常"会被误读为"已连上"（验收假阳性）
             _manager.OnError += HandleError;
+            // N5：服务端复活——被复活者本人唯一的"你活了"信号（本地玩家不在自己的 AOI 快照里）
+            _manager.OnServerRespawn += HandleServerRespawn;
             _manager.ConnectAndLogin(resolvedHost, resolvedPort);
         }
 
@@ -239,26 +294,68 @@ namespace Hotfix.GameSystems.SyncLayer
             _pendingReturnToMenu = true;
         }
 
-        /// <summary>连接失败 / 登录被拒——同样必须有屏幕出口</summary>
-        private void ShowStatus(string message)
+        /// <summary>连接失败 / 登录被拒——同样必须有屏幕出口（提示窗 3 秒）</summary>
+        private void ShowStatus(string message) => ShowStatus(message, 3f);
+
+        /// <summary>
+        /// 带时长的提示窗。阵亡等待要给到兜底那一刻（N5）——3 秒的窗口会在等待期间熄灭，
+        /// 屏幕上就没有任何"为什么动不了"的解释了。
+        /// </summary>
+        private void ShowStatus(string message, float durationSeconds)
         {
             _statusMessage = message;
-            _statusMessageUntil = Time.unscaledTime + 3f;
+            _statusMessageUntil = Time.unscaledTime + durationSeconds;
         }
 
         /// <summary>
-        /// T12 乙-3：服务端判定本地玩家阵亡（权威余血归零）。服务端没有复活
-        /// （P8 范围，D-P4-8）——所以给一个明确提示 + 出口：回选人界面重新登录，
-        /// 重登会重建服务端 PlayerState（满血），等于复活。
+        /// N5：服务端判定本地玩家阵亡（权威余血归零）——**等待服务端复活，不再自己回选人界面**。
+        ///
+        /// T12 乙-3 在这里 3 秒后把人送回选人界面：那时服务端没有复活（P8 范围，D-P4-8），
+        /// 重登（重建 PlayerState = 满血）是唯一的出路。N2 之后服务端 8 秒自己复活并给**本人**
+        /// 发 `RespawnNotice`——那 3 秒反过来成了障碍：通知到达前客户端已经离开世界，
+        /// 服务端复活永远看不见。现在改为等通知，兜底 15 秒见 Update
+        /// （连接断了仍是断线那条路：`HandleDisconnected` 立刻给出口）。
+        ///
+        /// **本回调在网络驱动线程上**（CombatNetworkBridge 的 DamageResult 消费链），
+        /// 所以这里只置位——Time/Unity API 一概留到 Update（提示的延迟上屏见那里）。
         /// </summary>
         private void HandleLocalPlayerDeath()
         {
             if (_pendingReturnToMenu) return;             // 已在返回途中
-            Debug.LogWarning("[NetHost] 本地玩家阵亡（服务端权威 HP 归零）——返回选人界面重登即复活");
-            _pendingReturnToMenu = true;
-            // 提示语带 ASCII 锚点：WebGL 出包里 IMGUI 的中文字形会被整段丢掉（T11/T8 已记录），
-            // 纯中文提示在浏览器里等于看不见——`dead: HP 0` / `relogin = respawn` 保证可读。
-            ShowStatus("你已阵亡（dead: HP 0）——3 秒后返回选人界面，重登即满血复活（relogin = respawn）");
+            _awaitingServerRespawn = true;
+            _respawnWaitElapsed = -1f;                    // <0：提示尚未上屏
+            Debug.LogWarning("[NetHost] 本地玩家阵亡（服务端权威 HP 归零）——等待服务端复活（RespawnNotice）");
+        }
+
+        /// <summary>
+        /// 服务端复活通知——**在网络回调线程上**，只记账。
+        /// 真正动 Unity API（Animator/Transform 的 `ApplyServerRespawn`）的是 Update 里的封送分支。
+        /// </summary>
+        private void HandleServerRespawn(float hp)
+        {
+            _serverRespawnHp = hp;
+            _hasServerRespawn = true;
+        }
+
+        /// <summary>
+        /// 应用服务端复活（**只在主线程**调用——Update 的封送分支）。
+        /// 血量直接采信服务端的（D-N4/D-5：客户端不自行判活）。
+        /// </summary>
+        private void ApplyServerRespawn(float hp)
+        {
+            _awaitingServerRespawn = false;
+            // 通知到了 ⇒ 兜底撤回、死亡提示收走。这里敢直接清 _pendingReturnToMenu：
+            // 连接失败/登录被拒/断线那三个入口之后都收不到任何消息，它只可能是死亡兜底设的。
+            _pendingReturnToMenu = false;
+            _statusMessage = null;
+            Debug.Log("[NetHost] 服务端复活：HP=" + hp);
+
+            if (_localEntry == null)
+            {
+                Debug.LogWarning("[NetHost] 收到复活通知，但本地角色尚未装配——无从应用");
+                return;
+            }
+            _localEntry.ApplyServerRespawn(hp);
         }
 
         /// <summary>
@@ -282,6 +379,10 @@ namespace Hotfix.GameSystems.SyncLayer
             _connectRequested = false;
             _inWorld = false;
             _entryLookedUp = false;
+            // 离开世界：阵亡等待随之作废（否则兜底计时会跨会话继续跑，15 秒后凭空把
+            // 新会话的玩家送回选人界面）
+            _awaitingServerRespawn = false;
+            _hasServerRespawn = false;
         }
 
         private void OnGUI()
@@ -424,6 +525,7 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_manager != null)
             {
                 _manager.OnEnterWorld -= HandleEnterWorld;
+                _manager.OnServerRespawn -= HandleServerRespawn;
                 _manager.Dispose();
                 _manager = null;
             }

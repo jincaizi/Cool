@@ -47,6 +47,16 @@ namespace Hotfix.GameSystems.SyncLayer
         public event Action<string>? OnError;
         public event Action<Vector3, Quaternion>? OnCorrectionNeeded;
 
+        /// <summary>
+        /// 服务端复活（血量 = **服务端权威**，客户端直接采信、不自行判活——D-N4/D-5）。
+        /// 被复活者本人唯一的"你活了"信号：本地玩家不在自己的 AOI 快照里
+        /// （Update 应用快照时 `entity.PlayerId == LocalPlayerId` 直接跳过）。
+        /// **在回调线程触发**（与 OnError/OnDisconnected、以及 Sys3CEntry.OnServerDeath 同——
+        /// 见 INetworkClient.MessageReceived 的注释）：负载只有一个 float，没有 Unity 对象要等，
+        /// 封送交给消费者（`ClientNetworkHost.HandleServerRespawn` 只记账，Update 里才动 Unity API）。
+        /// </summary>
+        public event Action<float>? OnServerRespawn;
+
         public ClientNetworkManager(INetworkClient client, RemoteEntityRegistry remoteEntities, string username)
         {
             _client = client;
@@ -60,6 +70,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _dispatcher.Subscribe(MessageId.ClockSyncResponse, OnClockSyncResponse);
             _dispatcher.Subscribe(MessageId.WorldSnapshot, OnWorldSnapshot);
             _dispatcher.Subscribe(MessageId.PlayerLeaveRoom, OnPlayerLeave);
+            _dispatcher.Subscribe(MessageId.RespawnNotice, OnRespawnNotice);
 
             _client.MessageReceived += _dispatcher.Dispatch;
             _client.Disconnected += OnSocketDisconnected;
@@ -233,6 +244,15 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             // 回调线程（网络驱动）只入队；Unity API 消费留主线程 Update
             _pendingLeaves.Enqueue(((PlayerLeaveRoom)message).PlayerId);
+        }
+
+        /// <summary>
+        /// 服务端复活（N5）。就地转出去，**不入队的理由见 OnServerRespawn 的事件注释**——
+        /// 交付形态与 `Sys3CEntry.OnServerDeath` 一致（同样在回调线程上触发、由宿主自行封送）。
+        /// </summary>
+        private void OnRespawnNotice(IMessage message)
+        {
+            OnServerRespawn?.Invoke(((RespawnNotice)message).Hp);
         }
 
         private void OnSocketDisconnected(string reason)
