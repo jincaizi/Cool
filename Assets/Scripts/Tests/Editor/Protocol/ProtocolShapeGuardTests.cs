@@ -74,10 +74,44 @@ namespace Cool.Protocol.Tests
             var prop = typeof(Cool.Protocol.EntitySnapshot).GetProperty("Dead");
             Assert.IsNotNull(prop, "EntitySnapshot 必须有 Dead");
             Assert.AreEqual(typeof(bool), prop!.PropertyType);
+            Assert.AreEqual(12, GetProtoMemberTag(prop!),
+                "Dead 必须真的挂在线上（[ProtoMember(12)]）——缺 attribute 会静默不序列化；"
+                + "号写错 protobuf-net 也不报错（它只报重号），观察者会恒读到\"活着\"");
             // 值必须是枚举的底层类型（ushort）——Mono 的 Enum.IsDefined 对 int 会抛
             // ArgumentException（"Enum underlying type and the object must be same type"）
             Assert.IsTrue(System.Enum.IsDefined(typeof(Cool.Protocol.EntityFieldMask), (ushort)(1 << 6)),
                 "EntityFieldMask 必须新增 1 << 6（只加不删：新字段追加高位）");
+        }
+
+        [Test]
+        public void EntityKind_Existing_Values_Are_Pinned()
+        {
+            // 只加不删的机器化防线：0/1 是已发布的 wire 契约，挪一位老客户端就把种类解反
+            Assert.AreEqual(0, (byte)Cool.Protocol.EntityKind.Player);
+            Assert.AreEqual(1, (byte)Cool.Protocol.EntityKind.Npc);
+        }
+
+        [Test]
+        public void NpcAnimationState_Existing_Values_Are_Pinned()
+        {
+            // 只加不删的机器化防线：0..6 是已发布的 wire 契约（玩家与 NPC 共用这一栏）
+            Assert.AreEqual(0, (byte)Cool.Protocol.NpcAnimationState.Idle);
+            Assert.AreEqual(1, (byte)Cool.Protocol.NpcAnimationState.Walk);
+            Assert.AreEqual(2, (byte)Cool.Protocol.NpcAnimationState.Run);
+            Assert.AreEqual(3, (byte)Cool.Protocol.NpcAnimationState.Attack);
+            Assert.AreEqual(4, (byte)Cool.Protocol.NpcAnimationState.Skill);
+            Assert.AreEqual(5, (byte)Cool.Protocol.NpcAnimationState.Hit);
+            Assert.AreEqual(6, (byte)Cool.Protocol.NpcAnimationState.Death);
+        }
+
+        [Test]
+        public void EntitySnapshot_Existing_Tags_Are_Pinned()
+        {
+            // 只加不删的机器化防线：既有 ProtoMember 号一旦被挪（哪怕挪成另一个唯一号），
+            // protobuf-net 不报错、老客户端静默解到别的字段上
+            Assert.AreEqual(9, GetProtoMemberTag(typeof(Cool.Protocol.EntitySnapshot).GetProperty("Tick")!));
+            Assert.AreEqual(10, GetProtoMemberTag(typeof(Cool.Protocol.EntitySnapshot).GetProperty("Kind")!));
+            Assert.AreEqual(11, GetProtoMemberTag(typeof(Cool.Protocol.EntitySnapshot).GetProperty("TemplateId")!));
         }
 
         [Test]
@@ -111,6 +145,26 @@ namespace Cool.Protocol.Tests
                 if (attribute.GetType().FullName == "ProtoBuf.ProtoMemberAttribute") return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// 取 [ProtoMember] 的 Tag（线上字段号）。没有 attribute 时返回 -1——调用方断言具体号，-1 即失败。
+        /// attribute 同样按名字认（本程序集引用不到 protobuf-net）。
+        /// </summary>
+        private static int GetProtoMemberTag(PropertyInfo property)
+        {
+            foreach (var attribute in property.GetCustomAttributes(false))
+            {
+                if (attribute.GetType().FullName != "ProtoBuf.ProtoMemberAttribute") continue;
+
+                var tag = attribute.GetType().GetProperty("Tag");
+                if (tag == null)
+                    throw new InvalidOperationException(
+                        "ProtoMemberAttribute 上没有 Tag 属性——本门禁的反射目标失效，取号方式需更新");
+
+                return (int)tag.GetValue(attribute);
+            }
+            return -1;
         }
     }
 }
