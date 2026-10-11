@@ -248,6 +248,59 @@ namespace GameSys.EditorTests
             }
         }
 
+        /// <summary>
+        /// N4 修复轮：GetUp 状态的计时器同样是**超时兜底、不是截断器**——但 GetUp/Down 两个状态
+        /// **都没挂 StateMachineBehaviour**，"剪辑播完 → Recover"那条边在生产里到不了，
+        /// 起身的唯一出口就是这个计时器。0.5s 会把 0.8334s 的起身剪辑截掉 40%（实测）。
+        /// 与 Hit/Knockback 那条同款：不硬编码资产名与时长，从真实 Animator 上量。
+        /// </summary>
+        [Test]
+        public void test_get_up_duration_is_at_least_the_get_up_clip_length()
+        {
+            // Arrange：把 FSM 推到 GetUp（Death → 服务端复活），实测那条剪辑
+            var (go, animator, fsm) = CreateRig();
+            const float step = 1f / 60f;
+            try
+            {
+                fsm.EnterDeath();
+                fsm.EnterRespawn();
+                Assert.AreEqual(HitState.GetUp, fsm.CurrentState, "前置失败：应停在 GetUp");
+
+                // Death → GetUp 带 0.25s 混合；不等到过渡结束就会读到上一条剪辑（Death）的长度。
+                // 循环兼等服务两件事：转移真的启动（首帧 IsInTransition 还是 false）与混合走完。
+                for (float t = 0f; t < 1.5f; t += step)
+                {
+                    animator.Update(step);
+                    if (!animator.IsInTransition(AnimHashes.HitLayerIndex)
+                        && HasClip(HitLayerClips(animator)))
+                        break;
+                }
+
+                var clips = HitLayerClips(animator);
+                Assert.IsTrue(HasClip(clips), "前提：Hit 层应正在播起身剪辑");
+
+                AnimationClip getUpClip = null;
+                foreach (var info in clips)
+                {
+                    if (info.clip != null) { getUpClip = info.clip; break; }
+                }
+                float clipLength = getUpClip.length;
+                Assert.Greater(clipLength, 0f, "剪辑时长应为正数");
+
+                // Act
+                var config = FSMConfig.Default;
+
+                // Assert
+                Assert.GreaterOrEqual(config.GetUpDuration, clipLength,
+                    "GetUpDuration(" + config.GetUpDuration + "s) 必须 ≥ GetUp 剪辑时长(" + clipLength
+                    + "s)——起身没有别的出口，低于它就是把起身动画拦腰截断");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
         [Test]
         public void test_every_hit_state_is_covered_or_declared_backlog()
         {

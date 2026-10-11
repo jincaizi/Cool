@@ -32,9 +32,12 @@ namespace Hotfix.GameSystems.Sys3C.Character
         // Down state duration
         [Tooltip("倒地状态时长")]
         public float DownDuration = 2.0f;
-        // Get up animation duration
-        [Tooltip("起身动画时长")]
-        public float GetUpDuration = 0.5f;
+        // Get up animation duration（0.9s = 实测 GetUp 剪辑 0.8334s 之上留 ~2 帧余量）。
+        // N4：与上两条同理——计时器是超时兜底、不是截断器。GetUp 状态**没有**挂
+        // StateMachineBehaviour（Down 也没有），所以"剪辑播完 → Recover"这条边在生产里
+        // 到不了，起身的唯一出口就是这个计时器；原值 0.5s 会把 0.8334s 的起身动画截掉 40%。
+        [Tooltip("起身动画时长（须 ≥ GetUp 剪辑时长）")]
+        public float GetUpDuration = 0.9f;
 
         [Header("防御受击")]
         [Tooltip("防御受击动画时长")]

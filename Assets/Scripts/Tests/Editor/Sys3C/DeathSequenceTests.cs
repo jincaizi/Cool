@@ -33,7 +33,14 @@ namespace GameSys.EditorTests
             // Arrange
             var fsm = new HitFSM(animator: null);
             fsm.EnterDeath();
+            Assert.IsTrue(fsm.HasSuperArmor, "死亡期间必须是霸体（既有条款）");
+
             fsm.ForceAdvanceForTest();                       // → Down
+
+            // 霸体条款本身。必须单独断言：下面那条"不被断出"证不了它——
+            // EnterHit 的优先级闸门（命中优先级 40 ≤ Down 的 90）先就把命中拒了，
+            // 撤掉 HasSuperArmor 里的 Down 也照样绿。
+            Assert.IsTrue(fsm.HasSuperArmor, "倒地（死亡后躺卧）期间必须保持霸体");
 
             // Act
             fsm.EnterHit(new HitData { Damage = 50f });

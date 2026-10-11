@@ -313,7 +313,9 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         }
 
         /// <summary>
-        /// 复活
+        /// 复活。**已被 <see cref="EnterRespawn"/> 取代，勿新增调用**（保留仅为既有公开面，当前零调用方）：
+        /// 链改之后死亡停在 Down 而不是 Death，这里只认 Death ⇒ 新调用方会**静默失效**
+        /// （人站不起来，且 Down 的霸体把之后每一次命中都拒掉）。
         /// </summary>
         public void Resurrect()
         {

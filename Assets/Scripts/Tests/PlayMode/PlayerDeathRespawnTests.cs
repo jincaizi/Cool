@@ -176,9 +176,9 @@ namespace GameSys.PlayModeTests
             yield return null;
 
             // Act（等待复活倒计时 3s + 起身缓冲）
-            // N4：复活多了"起身"这一段（Death → Down → GetUp → None），GetUp 的时长 0.5s 刚好
-            // 吃掉原来那 0.5s 缓冲——等 4s 才是真的有余量，断言本身未变。
-            yield return new WaitForSeconds(4f);
+            // N4：复活多了"起身"这一段（Death → Down → GetUp → None）：3s 计时 + 0.9s 起身 = 3.9s，
+            // 原来那 0.5s 缓冲不够。等 4.5s 才真的有余量，断言本身未变。
+            yield return new WaitForSeconds(4.5f);
 
             // Assert
             Assert.AreEqual(maxHp, _entry.CurrentHp, 0.01f, "复活应回满 HP");
