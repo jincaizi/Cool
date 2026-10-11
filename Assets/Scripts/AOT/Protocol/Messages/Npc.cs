@@ -2,7 +2,11 @@ using ProtoBuf;
 
 namespace Cool.Protocol
 {
-    /// <summary>NPC 动画状态</summary>
+    /// <summary>
+    /// 实体的动作/战斗状态（EntitySnapshot.ActionState）。
+    /// **玩家与 NPC 共用**（D-N3）——线上只有 `ActionState` 一栏，若按 Kind 分两种解释
+    /// 客户端就得按 Kind 分支解码，更糟。名字保留 "Npc" 是为了不动已发布的源码符号。
+    /// </summary>
     public enum NpcAnimationState : byte
     {
         Idle = 0,
@@ -11,7 +15,11 @@ namespace Cool.Protocol
         Attack = 3,
         Skill = 4,
         Hit = 5,
-        Death = 6
+        Death = 6,
+        /// <summary>倒地（死亡后躺卧）</summary>
+        Down = 7,
+        /// <summary>起身</summary>
+        GetUp = 8
     }
 
     /// <summary>NPC 生成通知</summary>

@@ -209,6 +209,7 @@ namespace Cool.Protocol
             RegisterMessageType(MessageId.CastRequest, typeof(CastRequest));
             RegisterMessageType(MessageId.CastBroadcast, typeof(CastBroadcast));
             RegisterMessageType(MessageId.DamageResult, typeof(DamageResult));
+            RegisterMessageType(MessageId.RespawnNotice, typeof(RespawnNotice));
             RegisterMessageType(MessageId.ChatMessage, typeof(ChatMessage));
             RegisterMessageType(MessageId.BroadcastMessage, typeof(BroadcastMessage));
             RegisterMessageType(MessageId.RemotePlayerSync, typeof(RemotePlayerSync));

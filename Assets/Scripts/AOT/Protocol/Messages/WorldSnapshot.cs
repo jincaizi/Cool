@@ -19,17 +19,25 @@ namespace Cool.Protocol
         /// <summary>实体种类（EntityKind：0=Player/1=Npc）——P5 怪物入实体快照</summary>
         Kind = 1 << 4,
         /// <summary>Npc 模板 ID（Kind=Npc 时有效；玩家恒 0）——P5 客户端怪物渲染区分</summary>
-        TemplateId = 1 << 5
+        TemplateId = 1 << 5,
+        /// <summary>
+        /// 实体是否已死（D-N1：用 Dead 而非 Alive——protobuf 零默认让"活着"不占字节）。
+        /// 每次快照都置位（D-N2）：存活是**状态**不是事件，新观察者首帧就要知道。
+        /// </summary>
+        Dead = 1 << 6
     }
 
     /// <summary>
     /// 实体种类（EntitySnapshot.Kind）——P5 怪物服务端化。
-    /// 0=Player（protobuf 默认，旧客户端兼容），1=Npc 怪物。
+    /// 0=Player（protobuf 默认，旧客户端兼容），1=Npc 怪物，
+    /// 2=PlayerBot 压测 bot（走玩家的伤害路径，客户端渲染成占位——D-P5-7）。
+    /// **0/1 是已发布的 wire 契约，只加不删。**
     /// </summary>
     public enum EntityKind : byte
     {
         Player = 0,
-        Npc = 1
+        Npc = 1,
+        PlayerBot = 2
     }
 
     /// <summary>实体快照（内嵌于 WorldSnapshot，不单独注册消息 ID；内嵌类型非线上消息，实现标记接口仅为协议层惯例）</summary>
@@ -73,6 +81,10 @@ namespace Cool.Protocol
         /// <summary>本快照对应的服务器 tick</summary>
         [ProtoMember(9)]
         public uint Tick { get; set; }
+
+        /// <summary>实体是否已死（服务器权威；仅在 FieldMask 的 Dead 位被置位时有效）</summary>
+        [ProtoMember(12)]
+        public bool Dead { get; set; }
     }
 
     /// <summary>

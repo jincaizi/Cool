@@ -42,6 +42,9 @@ namespace Cool.Protocol
         /// <summary>伤害结果（P4 追加；服务器 → caster + 受击者）</summary>
         DamageResult = 302,
 
+        /// <summary>复活通知（服务器 → **被复活者本人**；D-N4）</summary>
+        RespawnNotice = 303,
+
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,
         BroadcastMessage = 201,
