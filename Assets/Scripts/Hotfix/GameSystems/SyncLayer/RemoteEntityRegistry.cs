@@ -213,6 +213,9 @@ namespace Hotfix.GameSystems.SyncLayer
                     // 驱动在 Awake 里用 GetComponentInChildren 找到模型自带的 Animator。本类是普通类，
                     // 项目规则禁止在非 MonoBehaviour 上下文 GetComponent，所以驱动只能这样加（预制体本身保持纯美术）。
                     var driver = model.AddComponent<NpcEntityAnimator>();
+                    // 纯客户端身体碰撞体（2026-10-13）：让本地玩家撞不过去（Boss 不再能穿过）。
+                    // 只挡本地玩家——层矩阵/查询排查见 NpcBodyCollider 的类注释与验收报告。
+                    model.AddComponent<NpcBodyCollider>();
                     return new RemoteEntityView(model, snapshot.Kind, snapshot.TemplateId, npcAnimator: driver);
                 }
 
