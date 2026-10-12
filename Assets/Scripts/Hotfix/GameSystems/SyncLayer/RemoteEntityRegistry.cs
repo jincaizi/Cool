@@ -5,8 +5,9 @@ using UnityEngine;
 namespace Hotfix.GameSystems.SyncLayer
 {
     /// <summary>
-    /// 远程实体注册表 —— 管理远程玩家渲染对象（胶囊体占位 + P2 快照插值渲染：
-    /// RemoteInterpolator 缓冲 2-tick 延迟插值，不再直接定位）。生成/销毁由快照流驱动。
+    /// 远程实体注册表 —— 管理远程实体渲染对象（N5b 起按 `EntityKind` 分三支：
+    /// 真人 = 角色预制体 + Animator，bot = 胶囊占位，怪物 = 球体占位；
+    /// P2 快照插值渲染：RemoteInterpolator 缓冲 2-tick 延迟插值，不再直接定位）。生成/销毁由快照流驱动。
     /// </summary>
     public sealed class RemoteEntityRegistry
     {
@@ -17,15 +18,23 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Dictionary<long, float> _lastKnownYaw = new Dictionary<long, float>();
         private readonly Dictionary<long, long> _lastSampleTicks = new Dictionary<long, long>();
         private readonly Transform _root;
+        /// <summary>远程真人角色预制体（N5b）——null 时真人退化为胶囊占位，见 CreateView</summary>
+        private readonly GameObject? _playerAvatarPrefab;
+        private bool _warnedMissingAvatar;
 
         public int Count => _views.Count;
 
         /// <summary>当前视图实体 ID 集合（T7 AOI 验收统计用）</summary>
         public IEnumerable<long> PlayerIds => _views.Keys;
 
-        public RemoteEntityRegistry(Transform root)
+        /// <param name="playerAvatarPrefab">
+        /// 远程真人角色的预制体（N5b）。省略 = 占位渲染（测试宿主与未接线的场景走这条），
+        /// **不会** `Instantiate(null)`。
+        /// </param>
+        public RemoteEntityRegistry(Transform root, GameObject? playerAvatarPrefab = null)
         {
             _root = root;
+            _playerAvatarPrefab = playerAvatarPrefab;
         }
 
         /// <summary>
@@ -44,6 +53,12 @@ namespace Hotfix.GameSystems.SyncLayer
             // 无条件覆盖安全前提：服务端唯一快照生产者（AoiBroadcaster.BuildForObserver）恒发全掩码；
             // 若未来出现部分位快照，此处须改为按 FieldMask 位守卫（与 _lastKnownYaw 范式对齐）
             view.ActionState = snapshot.ActionState;
+
+            // N5b：存活是**状态**不是边沿事件（D-N1/D-N2——Dead 位每次快照都置位）。
+            // 已在视野内的观察者最多要等 4 tick（≈264ms）的静止保活窗口才看到它翻位，
+            // 所以这里每次都推给动画驱动，由驱动自行幂等去重（"读状态"而不是"读变化"）。
+            view.Dead = snapshot.Dead;
+            view.Animator?.Apply(snapshot.ActionState, snapshot.Dead);
 
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Position) != 0)
             {
@@ -142,14 +157,42 @@ namespace Hotfix.GameSystems.SyncLayer
                 return new RemoteEntityView(go, snapshot.Kind, snapshot.TemplateId);
             }
 
-            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            capsule.name = $"RemotePlayer_{playerId}";
-            capsule.transform.SetParent(_root, false);
-            return new RemoteEntityView(capsule);
+            // 压测 bot：胶囊占位。**绝不能上角色模型**——`--bots 100` 是 P3（AOI）演示的前提，
+            // 100 个蒙皮网格 + Animator 会在手机浏览器上直接压垮帧率（D-P5-7 / R2）
+            if (snapshot.Kind == (byte)EntityKind.PlayerBot)
+            {
+                var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                capsule.name = $"Bot_{playerId}";
+                capsule.transform.SetParent(_root, false);
+                return new RemoteEntityView(capsule, snapshot.Kind);
+            }
+
+            // 真人玩家：角色预制体 + Animator（D-P5-7）——你和面试官互相看到的应该是真角色
+            if (_playerAvatarPrefab == null)
+            {
+                // 未接线（测试宿主 / 没配场景的宿主）：退化为占位。**不 `Instantiate(null)`**
+                // ——那会抛异常并把整条快照消费链带崩（远程玩家直接不渲染）。
+                if (!_warnedMissingAvatar)
+                {
+                    _warnedMissingAvatar = true;
+                    Debug.LogWarning("[Sync] remote player avatar prefab not wired; " +
+                                     "real players fall back to capsule placeholders");
+                }
+                var fallback = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                fallback.name = $"RemotePlayer_{playerId}";
+                fallback.transform.SetParent(_root, false);
+                return new RemoteEntityView(fallback, snapshot.Kind);
+            }
+
+            var avatar = Object.Instantiate(_playerAvatarPrefab, _root, false);
+            avatar.name = $"RemotePlayer_{playerId}";
+            // AddComponent 同步跑 Awake：3C 装备在同一个 Start/Update 之前就被停掉（见该类注释）
+            var animator = avatar.AddComponent<RemoteEntityAnimator>();
+            return new RemoteEntityView(avatar, snapshot.Kind, animator: animator);
         }
     }
 
-    /// <summary>远程实体渲染视图（P1 占位；P5 加 Npc 元数据）</summary>
+    /// <summary>远程实体渲染视图（P1 占位；P5 加 Npc 元数据；N5b 加真人角色与动画驱动）</summary>
     public sealed class RemoteEntityView
     {
         public GameObject GameObject { get; }
@@ -159,6 +202,10 @@ namespace Hotfix.GameSystems.SyncLayer
         public int TemplateId { get; }
         /// <summary>动作/战斗状态（Npc=NpcAnimationState；玩家恒 0）</summary>
         public byte ActionState { get; set; }
+        /// <summary>服务端权威存活状态（D-N1：命名 Dead——protobuf 零默认让"活着"不占字节）</summary>
+        public bool Dead { get; set; }
+        /// <summary>远程动画驱动（只有真人角色有；占位为 null）</summary>
+        public RemoteEntityAnimator? Animator { get; }
 
         public Vector3 Position
         {
@@ -171,11 +218,13 @@ namespace Hotfix.GameSystems.SyncLayer
             set => GameObject.transform.rotation = value;
         }
 
-        public RemoteEntityView(GameObject go, byte kind = 0, int templateId = 0)
+        public RemoteEntityView(GameObject go, byte kind = 0, int templateId = 0,
+            RemoteEntityAnimator? animator = null)
         {
             GameObject = go;
             Kind = kind;
             TemplateId = templateId;
+            Animator = animator;
         }
     }
 }

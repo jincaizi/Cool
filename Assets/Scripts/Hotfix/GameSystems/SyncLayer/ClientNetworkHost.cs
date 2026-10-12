@@ -19,7 +19,8 @@ namespace Hotfix.GameSystems.SyncLayer
     /// 创建 adapter/manager/远程实体渲染根并每帧驱动；联网模式（NetworkModeService）下
     /// Start 自动 Connect()，登录进世界后自动装配本地角色（Sys3CEntry）：
     /// MovementReporter 上报（节流 + 预测帧）、NetMovementPolicy 接管移动与平滑纠偏。
-    /// 远程玩家以胶囊占位、怪物以球体占位渲染（RemoteEntityRegistry）。
+    /// 远程实体的渲染由 `RemoteEntityRegistry` 按 `EntityKind` 分三支（N5b）：真人 = 角色预制体
+    /// （`_playerAvatarPrefab`，未接线则退化占位）、bot = 胶囊占位、怪物 = 球体占位。
     /// 本地角色被销毁重建（DemoDay 直跑时选人确认触发 PlayerSpawner 重建）经 PlayerSpawnedEvent 重装配。
     /// 接线步骤与边界见 docs/superpowers/guides/p2-client-network-host.md 与 network-playtest.md。
     /// 单机模式零影响：选单机或只挂不 Connect 即可纯本地游玩。
@@ -46,6 +47,11 @@ namespace Hotfix.GameSystems.SyncLayer
 
         [Header("本地角色（可选：留空则运行时查找场景内首个 Sys3CEntry）")]
         [SerializeField] private Sys3CEntry _localEntry;
+
+        [Header("远程真人角色（N5b）")]
+        [Tooltip("远程真人的角色预制体（与 PlayerSpawner 用的是同一个）。留空则远程真人退化为胶囊占位" +
+                 "——测试宿主就是这种情况；bot 与怪物无论如何都是占位（D-P5-7）")]
+        [SerializeField] private GameObject _playerAvatarPrefab;
 
         [Header("调试")]
         [Tooltip("屏幕左下角连接状态浮层（模式/状态/玩家 id/远程实体数）")]
@@ -94,7 +100,7 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             var root = new GameObject("RemotePlayers");
             root.transform.SetParent(transform, false);
-            _remoteEntities = new RemoteEntityRegistry(root.transform);
+            _remoteEntities = new RemoteEntityRegistry(root.transform, _playerAvatarPrefab);
         }
 
         private void Start()

@@ -7431,6 +7431,7 @@ MonoBehaviour:
   _serverPort: 8000
   _username: Player
   _localEntry: {fileID: 0}
+  _playerAvatarPrefab: {fileID: 8189980434977739222, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
   _showDebugOverlay: 1
 --- !u!4 &940694965
 Transform:
