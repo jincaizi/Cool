@@ -78,5 +78,24 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(1, due.Count);
             Assert.AreEqual(8, due[0].EntityId);
         }
+
+        [Test]
+        public void Drain_Leaves_The_Callers_Existing_Items_Untouched()
+        {
+            var schedule = new NpcAttackSchedule();
+            schedule.Schedule(7, 1_000L);
+
+            // 调用方列表里预置一项：时间戳极大 ⇒ 一旦整表排序，它会被挪到末尾
+            var into = new List<NpcAttackSchedule.DueAttack>
+            {
+                new NpcAttackSchedule.DueAttack(99, 0, long.MaxValue)
+            };
+
+            schedule.Drain(renderAt: 1_000L, into);
+
+            Assert.AreEqual(2, into.Count);
+            Assert.AreEqual(99, into[0].EntityId, "Drain 只追加：不得重排（也不得清空）调用方列表的既有项");
+            Assert.AreEqual(7, into[1].EntityId);
+        }
     }
 }

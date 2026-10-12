@@ -30,22 +30,31 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private readonly List<(long EntityId, long ServerTicks)> _pending = new List<(long, long)>();
 
+        private static readonly Comparer<DueAttack> ByServerTicks =
+            Comparer<DueAttack>.Create((a, b) => a.ServerTicks.CompareTo(b.ServerTicks));
+
         /// <summary>服务器裁定的第几段攻击（0 → Attack01，1 → Attack02）</summary>
         public static int VariantOf(long serverTicks) => (int)((serverTicks / VariantBucketTicks) % 2);
 
         public void Schedule(long entityId, long serverTicks) => _pending.Add((entityId, serverTicks));
 
-        /// <summary>取出所有到点的项（timestamp &lt;= renderAt）并出队。迟到的立即触发，不丢弃。</summary>
+        /// <summary>
+        /// 取出所有到点的项（timestamp &lt;= renderAt）并出队。迟到的立即触发，不丢弃。
+        /// 对本列表**只追加**：不清空、也不重排调用方既有元素（本方法在每帧热路径上，
+        /// 调用方可能复用长寿命列表）。
+        /// </summary>
         public void Drain(long renderAt, List<DueAttack> into)
         {
+            int start = into.Count;   // 只对本次追加的区间排序 —— 调用方既有元素不该被我们动
             for (int i = _pending.Count - 1; i >= 0; i--)
             {
                 if (_pending[i].ServerTicks > renderAt) continue;
                 into.Add(new DueAttack(_pending[i].EntityId, VariantOf(_pending[i].ServerTicks), _pending[i].ServerTicks));
                 _pending.RemoveAt(i);
             }
-            // 同帧多项时按时间戳升序，保证变体顺序稳定
-            into.Sort((a, b) => a.ServerTicks.CompareTo(b.ServerTicks));
+            // 同帧多项时按时间戳升序，保证变体顺序稳定（只排本次追加的区间）
+            if (into.Count - start > 1)
+                into.Sort(start, into.Count - start, ByServerTicks);
         }
 
         /// <summary>视图销毁时清掉它的待播项（避免播给已不存在的实体）</summary>
