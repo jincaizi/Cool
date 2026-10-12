@@ -21,6 +21,28 @@
       "attackRange": 2.0,
       "patrolRadius": 10,
       "skills": ["Attack"]
+    },
+    {
+      "templateId": 3,
+      "name": "DogKnight",
+      "hp": 300,
+      "moveSpeed": 2.8,
+      "detectionRadius": 18,
+      "visionAngle": 120,
+      "attackRange": 2.2,
+      "patrolRadius": 6,
+      "skills": ["Attack"]
+    },
+    {
+      "templateId": 4,
+      "name": "SpiderBoss",
+      "hp": 1500,
+      "moveSpeed": 3.2,
+      "detectionRadius": 25,
+      "visionAngle": 140,
+      "attackRange": 2.5,
+      "patrolRadius": 12,
+      "skills": ["Attack"]
     }
   ]
 }

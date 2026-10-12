@@ -80,6 +80,30 @@ namespace KcpServer.Config
                         attackRange = 2.0f,
                         patrolRadius = 10,
                         skills = new List<string> { "Attack" }
+                    },
+                    new MonsterData
+                    {
+                        templateId = 3,
+                        name = "DogKnight",
+                        hp = 300,
+                        moveSpeed = 2.8f,
+                        detectionRadius = 18,
+                        visionAngle = 120,
+                        attackRange = 2.2f,
+                        patrolRadius = 6,
+                        skills = new List<string> { "Attack" }
+                    },
+                    new MonsterData
+                    {
+                        templateId = 4,
+                        name = "SpiderBoss",
+                        hp = 1500,
+                        moveSpeed = 3.2f,
+                        detectionRadius = 25,
+                        visionAngle = 140,
+                        attackRange = 2.5f,
+                        patrolRadius = 12,
+                        skills = new List<string> { "Attack" }
                     }
                 }
             };

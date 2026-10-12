@@ -35,11 +35,14 @@ namespace KcpServer.Monster
         /// <summary>活跃怪物数（测试/统计口径）</summary>
         public int Count => _monsters.Count;
 
-        /// <summary>攻击技能 id 模板映射（D-P5-2；配置模板 1/2 与 monster_config.json 对齐）</summary>
-        private static int SkillIdOf(int templateId) => templateId switch
+        /// <summary>模板 → 战斗技能 id。**public 自 2026-10-12**：测试要断言
+        /// 「配置 attackRange ≤ 表上限」（防静默冻结），需要拿到映射。</summary>
+        public static int SkillIdOf(int templateId) => templateId switch
         {
             1 => 50001,
             2 => 50002,
+            3 => 50003,   // DogKnight 精英
+            4 => 50004,   // SpiderBoss
             _ => throw new ArgumentException($"No combat skill mapped for monster template {templateId}")
         };
 
@@ -60,6 +63,8 @@ namespace KcpServer.Monster
         ///   [1] Slime(t1) (40,0,0)  巡逻可视（观察者视野 80m）、不感知（检测 8m）
         ///   [2] Slime(t1) (-40,0,0) 同 [1]
         ///   [3] Wolf(t2)  (0,0,40)  面向原点（观察者视野 80m 内，不感知——距离 40m > 15m）
+        ///   [4] DogKnight(t3) (0,0,-20)    精英：检测 18m < 20m ⇒ 开局不仇恨
+        ///   [5] SpiderBoss(t4) (-30,0,-30) Boss：距原点 42m、检测 25m ⇒ 要玩家找上门
         /// count 超过布局长度时循环复用；朝向一律面向原点（感知确定性）。
         /// </summary>
         public void SpawnDefaultLayout(int count)
@@ -70,6 +75,8 @@ namespace KcpServer.Monster
                 (1, new Vector3(40f, 0f, 0f)),
                 (1, new Vector3(-40f, 0f, 0f)),
                 (2, new Vector3(0f, 0f, 40f)),
+                (3, new Vector3(0f, 0f, -20f)),
+                (4, new Vector3(-30f, 0f, -30f)),
             };
             for (int i = 0; i < count; i++)
             {

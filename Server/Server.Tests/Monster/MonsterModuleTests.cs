@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using Cool.Protocol;
+using Cool.SyncCore;
+using KcpServer.Config;
 using KcpServer.Monster;
 using Xunit;
 
@@ -188,5 +191,54 @@ public class MonsterModuleTests
         Assert.Equal(1, respawned.TemplateId);              // 同模板重生
         Assert.Equal(respawned.MaxHp, respawned.Hp);        // 满血（HP 权威重置）
         Assert.Equal(100f, respawned.Hp);                   // Slime config hp=100
+    }
+
+    [Fact]
+    public void DefaultLayout_Carries_Six_Templates_In_Order()
+    {
+        var (store, _) = Create(6);
+
+        var templates = store.All
+            .Where(e => e.Kind == (byte)EntityKind.Npc)
+            .OrderBy(e => e.PlayerId)
+            .Select(e => e.TemplateId)
+            .ToArray();
+
+        Assert.Equal(new[] { 2, 1, 1, 2, 3, 4 }, templates);
+    }
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void New_Templates_Can_Spawn(int templateId)
+    {
+        var store = new EntityStore();
+        long seed = MonsterModule.NpcIdSeed;
+        var module = new MonsterModule(store, () => ++seed);
+
+        var npcId = module.SpawnMonster(templateId, new Vector3(5f, 0f, 5f), new Vector3(5f, 0f, 5f));
+
+        Assert.True(npcId > 0);
+        var npc = store.GetPlayer(npcId);
+        Assert.NotNull(npc);
+        Assert.Equal(templateId, npc!.TemplateId);
+    }
+
+    /// <summary>防「静默冻结」：怪物施法形状范围取 Config.attackRange（MonsterBtActions），
+    /// 超过表上限会被 CombatRules.ValidateShape 拒收，而拒收只写审计日志——怪物在攻击距离上零表现。</summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void Template_AttackRange_Fits_Its_Combat_Rule(int templateId)
+    {
+        var path = System.IO.Path.Combine(System.AppContext.BaseDirectory, "Config", "monster_config.json");
+        var config = ConfigLoader.LoadMonsterTemplates(path)[templateId];
+        var skillId = MonsterModule.SkillIdOf(templateId);
+
+        Assert.True(CombatRules.TryGet(skillId, out var rule), $"template {templateId} 缺 {skillId} 表项");
+        Assert.True(config.attackRange <= rule!.MaxRange + 0.01f,
+            $"template {templateId} attackRange={config.attackRange} > skill {skillId} maxRange={rule.MaxRange}");
     }
 }
