@@ -477,7 +477,10 @@ git commit -m "fix(server): send a snapshot the moment an entity changes action 
         interp.AddSample(1, 1_100L, new Vec3(10f, 0f, 0f), 0f, actionState: 2, dead: false);
 
         // 渲染时刻落在两样本之间 → 状态取**较早**那个样本（阶梯，不插值）
-        Assert.IsTrue(interp.TryGetRenderState(1, 1_105L, 100L,
+        // 算式：nowServerTicks 1_150 − renderDelayTicks 100 = renderAt **1_050**，落在样本 1_000/1_100 之间，
+        // 插值系数 0.5 ⇒ 位置 5f；状态取较早样本 ⇒ 0。
+        // （初稿这里写的是 1_105，renderAt=1_005 ⇒ 位置 0.5，与断言 5f 对不上——是笔误。）
+        Assert.IsTrue(interp.TryGetRenderState(1, 1_150L, 100L,
             out var pos, out _, out var actionState, out var dead));
         Assert.AreEqual(0, actionState, "状态是阶梯函数——取时间戳 ≤ renderAt 的最后一个样本");
         Assert.IsFalse(dead);
