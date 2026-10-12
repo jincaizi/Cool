@@ -1811,34 +1811,51 @@ bash production/deploy/webgl-demo/publish-server.sh
 
 - [ ] **步骤 3：服务端全量回归**
 
-运行：`STEST ""`（即不带过滤跑全部）—— 预期全绿。
+运行：`dotnet test Server/Server.Tests/Server.Tests.csproj --nologo -v q`（不带 `--filter` 即跑全部）—— 预期全绿。
 运行：`dotnet build Server/Server3C.csproj --nologo -v q` —— 预期 0 error。
 
 - [ ] **步骤 4：Unity 全量回归**
 
-运行：`MCP tests-run '{"testMode":"EditMode"}'` —— 预期全绿。
-运行：`UPLAY MonsterWorldTests`（需先按既有惯例起 `--monsters 4` 服务器，`timeout` 给 600000）—— 预期 PASS，且日志里的模板序列仍是 `2,1,1,2`。
+运行：`MCP tests-run '{"testMode":"EditMode"}'` —— 预期全绿（当前基线 293）。
+
+PlayMode e2e 需要**先起一个 `--monsters 4` 的服务器**（`MonsterWorldTests` 依赖固定布局的前四点位）：
+
+```bash
+dotnet build Server/Server3C.csproj --nologo -v q
+dotnet run --no-build --project Server/Server3C.csproj -- 8000 --monsters 4 > /tmp/srv-monsters4.log 2>&1 &
+```
+
+然后跑 `MCP tests-run '{"testMode":"PlayMode","testClass":"MonsterWorldTests","timeout":600000}'`。
+预期 PASS，且日志里的模板序列仍是 `2,1,1,2`（前四点位未被改动）。
+**跑完必须停服**：`netstat -ano | grep ":8000" | grep LISTENING` 取 PID，`taskkill //F //PID <pid>`。
 
 - [ ] **步骤 5：起 6 只怪的服务器，人工截图**
 
-按项目既有做法起服（`dotnet run --no-build --project Server/Server3C.csproj -- 8000 --monsters 6`），进 PlayMode，走到 `(0,0,-20)` 与 `(-30,0,-30)` 附近：
+```bash
+dotnet run --no-build --project Server/Server3C.csproj -- 8000 --monsters 6 > /tmp/srv-monsters6.log 2>&1 &
+```
+
+进 PlayMode（`MCP editor-application-set-state '{"IsPlaying":true}'`），等客户端连上（连接状态浮层 `_showDebugOverlay` 会写模式/状态/实体数；也可用 `console-get-logs` 看 `[NetHost]` 行）。
+
+两只怪在距原点 **20m** 与 **42m** 处，而观察者视野 80m —— 所以在出生点就能看见，**不必走过去**。若默认机位没框住它们，用 `script-execute` **调整相机朝向**（不要伪造结果、不要直接摆怪），再：
 
 ```
 MCP screenshot-game-view '{}'
 ```
 
-预期看到：骑士（约 1.1m 高，剑盾）与蜘蛛 Boss（约 3.3m 宽）是**真模型**而非球体；两者都在播动画；Boss 体型明显大于骑士。
-
-把截图存到 `production/verify/`（既有惯例），并在本计划末尾的验收记录里写一行结论。
+预期：骑士（约 1.1m 高、剑盾）与蜘蛛 Boss（约 3.3m 宽）是**真模型而非球体**；两者都在播动画（连续截两张可对比姿态变化）；Boss 体型明显大于骑士。
+把截图存到 `production/verify/`（既有惯例，命名带 `t8` 前缀，例如 `production/verify/t8_monsters.png`），并在本计划末尾的验收记录里写一行结论。**跑完同样要停服。**
 
 - [ ] **步骤 6：Commit**
 
 ```bash
 git add production/deploy/webgl-demo/start-game-server.cmd \
         production/deploy/webgl-demo/dist/server/Config/monster_config.json \
-        production/verify/
+        production/verify/t8_monsters.png
 git commit -m "chore(demo): the deployed demo spawns six monsters, config copy refreshed"
 ```
+
+> `production/verify/` 下已有大量历史产物 —— 只 add **本次新产生**的截图，不要 `git add` 整个目录。
 
 ---
 
