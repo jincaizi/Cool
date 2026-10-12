@@ -186,12 +186,47 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 }, serverTicks: 1_000_000L);
 
                 var view = registry.GetView(2_000_003);
-                Assert.IsTrue(view!.GameObject.name.Contains("Monster_"), "未命中目录要保持球体降级");
+                // StartsWith：降级名是 `Monster_{id}_T{t}`，而真预制体的名字带目录前缀
+                //（`DogKnightMonster_…` / `SpiderMonster_…`）——`Contains("Monster_")` 两者都命中，判不出来
+                Assert.IsTrue(view!.GameObject.name.StartsWith("Monster_"),
+                    $"未命中目录要保持球体降级，实际 {view.GameObject.name}");
             }
             finally
             {
                 registry.Clear();
                 Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void Npc_View_Falls_Back_To_The_Sphere_When_The_Catalog_Lacks_The_Template()
+        {
+            // 目录**非空**但缺该 templateId（球体降级的另一条真分支——传 null 目录覆盖不到）
+            var prefab = new GameObject("FakeMonsterPrefab");
+            prefab.AddComponent<Animator>();
+            var root = new GameObject("MissingTemplateRoot");
+            var registry = new RemoteEntityRegistry(root.transform, null,
+                new Dictionary<int, GameObject> { { 3, prefab } });   // 只配了 t3
+            try
+            {
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2_000_005,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind | EntityFieldMask.TemplateId),
+                    X = 1f, Z = 1f, Kind = (byte)EntityKind.Npc, TemplateId = 4, Tick = 1
+                }, serverTicks: 1_000_000L);
+
+                var view = registry.GetView(2_000_005);
+                Assert.IsNotNull(view);
+                Assert.IsTrue(view!.GameObject.name.StartsWith("Monster_"),
+                    $"目录缺该 templateId 时应退化为球体，实际 {view.GameObject.name}");
+                Assert.IsNull(view.NpcAnimator, "球体降级没有可驱动的东西（排程对它也只能空转）");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
             }
         }
 

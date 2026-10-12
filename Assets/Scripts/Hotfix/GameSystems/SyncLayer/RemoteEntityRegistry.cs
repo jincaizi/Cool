@@ -107,9 +107,10 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             long renderAt = nowServerTicks - renderDelayTicks;
 
-            // 攻击排程**先于**状态写入：PlayAttack 的契约是先写 MonsterState=3 再打 Trigger，
-            // 排程项到点必须在自己这一帧抢先落地；反过来的话同一帧的样本会排在挥砍之后写参数
-            // （受击/死亡样本会被这一刀盖回去，locomotion 样本也会把刚起手的挥砍往回拉）。
+            // 攻击排程**先于**状态写入。两种顺序的同帧**终值**其实一样（PlayAttack 当场置忙位并写
+            // MonsterState=3，反过来的话状态样本先写、随后仍被 PlayAttack 的写入收尾）——真正分叉的
+            // 只有**同一帧又采到 Hit/Death** 这一种：排程在前时那条样本排在后、当场把挥砍的 3 盖回去
+            // （并释放忙位），受击/死亡当帧可见；反过来的话这一帧会被挥砍盖住，受击表现晚一帧。
             _dueAttacks.Clear();
             _attacks.Drain(renderAt, _dueAttacks);
             foreach (var due in _dueAttacks)
@@ -128,7 +129,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 }
 
                 if (kv.Value.NpcAnimator != null
-                    && _interpolator.TryGetSampleState(kv.Key, renderAt, out var sampled, out var sampledDead))
+                    && TrySampleNpcState(kv.Key, renderAt, out var sampled, out var sampledDead))
                     kv.Value.NpcAnimator.ApplyState(sampled, sampledDead);
             }
         }

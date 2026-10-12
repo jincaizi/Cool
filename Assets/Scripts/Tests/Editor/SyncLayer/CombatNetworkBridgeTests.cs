@@ -260,5 +260,175 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 EventBus.Unsubscribe(handler);
             }
         }
+
+        // ------------------------------------------------------------------------------------
+        // 怪物挥砍的端到端链（spec §8 第 4 条）：CastBroadcast → ScheduleAttack → Drain →
+        // PlayAttack → Animator。宿主接线是 ClientNetworkHost 里那一行
+        // `_combatBridge.OnCastBroadcast += b => _remoteEntities.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp);`
+        // —— 下面两个用例把这条链整条穿起来（此前无任何自动化用例，失效完全静默）。
+        // ------------------------------------------------------------------------------------
+
+        /// <summary>目录里的**真预制体** + 真控制器：球体降级没有可驱动的东西，测不出这条链。
+        /// 与 DemoDay 场景的 `_npcPrefabs` 接线同款（templateId 3 → DogKnight、4 → SpiderBoss）。</summary>
+        private static readonly (string PrefabPath, int TemplateId)[] RealMonsterPrefabs =
+        {
+            ("Assets/Monstor/DogKnight/Prefab/DogKnightMonster.prefab", 3),
+            ("Assets/Monstor/fantasySpider/SpiderMonster.prefab", 4),
+        };
+
+        [Test]
+        public void A_Scheduled_Swing_Plays_The_Variant_Derived_From_The_Timestamp()
+        {
+            // 两个模型 × 两个变体槽（相邻桶 → 两段攻击各覆盖一次；哪段是 Attack01 由常量决定，
+            // 所以预期名一律从 NpcAttackSchedule.VariantOf 推，不写死）
+            foreach (var (prefabPath, templateId) in RealMonsterPrefabs)
+                for (int slot = 0; slot < 2; slot++)
+                    Assert_Scheduled_Swing_Plays(prefabPath, templateId, slot);
+        }
+
+        private static void Assert_Scheduled_Swing_Plays(string prefabPath, int templateId, int slot)
+        {
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            Assert.IsNotNull(prefab, prefabPath);
+            var root = new GameObject("CastChainRoot");
+            var registry = new RemoteEntityRegistry(root.transform, null,
+                new Dictionary<int, GameObject> { { templateId, prefab } });
+            try
+            {
+                long npcId = 2_000_000L + templateId;
+                // ServerClock.NowTicks 同量级（DateTime.UtcNow.Ticks——快照与广播同基准）
+                long sampleTicks = 638_000_000_000_000_000L;
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = npcId,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind
+                        | EntityFieldMask.TemplateId | EntityFieldMask.ActionState),
+                    X = 1f, Y = 0f, Z = 2f,
+                    Kind = (byte)EntityKind.Npc, TemplateId = templateId,
+                    ActionState = (byte)NpcAnimationState.Idle, Tick = 1
+                }, serverTicks: sampleTicks);
+
+                var view = registry.GetView(npcId);
+                Assert.IsNotNull(view, "Npc 视图未创建");
+                Assert.IsTrue(view!.GameObject.name.StartsWith(prefab!.name),
+                    $"目录命中就该用真预制体，实际是 {view.GameObject.name}");
+                Assert.IsNotNull(view.NpcAnimator, "真预制体上应补上怪物驱动（球体降级没有可驱动的东西）");
+                view.NpcAnimator!.ResolveAnimator();   // EditMode：AddComponent 不触发生命周期
+                var animator = view.GameObject.GetComponentInChildren<Animator>();
+                Assert.IsNotNull(animator, prefabPath + " 应带 Animator");
+
+                long castTicks = sampleTicks + slot * NpcAttackSchedule.VariantBucketTicks;
+                int variant = NpcAttackSchedule.VariantOf(castTicks);
+                string expected = variant == 0 ? "Attack01" : "Attack02";
+
+                registry.ScheduleAttack(npcId, castTicks);
+
+                // 时间闸门：渲染时钟还没越过时间戳 → 不许播（排程不是"立即播"）
+                registry.UpdateRender(nowServerTicks: castTicks - 1L, renderDelayTicks: 0L);
+                Settle(animator!);
+                Assert.IsFalse(animator!.GetCurrentAnimatorStateInfo(0).IsName("Attack01"),
+                    prefabPath + "：时间戳未到就播了");
+                Assert.IsFalse(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack02"),
+                    prefabPath + "：时间戳未到就播了");
+
+                // 越过时间戳 → 播时间戳对应的那一段
+                registry.UpdateRender(nowServerTicks: castTicks + 1L, renderDelayTicks: 0L);
+                Settle(animator);
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName(expected),
+                    $"{prefabPath}：变体 {variant} 应播 {expected}，实际 " +
+                    $"{animator.GetCurrentAnimatorStateInfo(0).shortNameHash}");
+            }
+            finally
+            {
+                registry.Clear();   // 连同实例化出的视图（含 Animator 驱动）一起销毁
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void CastBroadcast_From_An_Npc_Schedules_A_Swing_And_From_A_Player_Does_Not()
+        {
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Monstor/fantasySpider/SpiderMonster.prefab");
+            Assert.IsNotNull(prefab, "真预制体未找到");
+            var root = new GameObject("CastRoutingRoot");
+            var registry = new RemoteEntityRegistry(root.transform, null,
+                new Dictionary<int, GameObject> { { 4, prefab } });
+            try
+            {
+                long npcId = 2_000_006L, playerId = 7L;
+                long baseTicks = 638_000_000_000_000_000L;
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = npcId,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind
+                        | EntityFieldMask.TemplateId | EntityFieldMask.ActionState),
+                    X = 1f, Y = 0f, Z = 2f,
+                    Kind = (byte)EntityKind.Npc, TemplateId = 4,
+                    ActionState = (byte)NpcAnimationState.Idle, Tick = 1
+                }, serverTicks: baseTicks);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = playerId,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                    X = 3f, Y = 0f, Z = 3f, Kind = (byte)EntityKind.Player, Tick = 1
+                }, serverTicks: baseTicks);
+
+                var view = registry.GetView(npcId);
+                Assert.IsNotNull(view?.NpcAnimator, "怪物视图应带驱动");
+                view!.NpcAnimator!.ResolveAnimator();
+                var animator = view.GameObject.GetComponentInChildren<Animator>();
+                Assert.IsNotNull(animator);
+                Assert.IsNull(registry.GetView(playerId)!.NpcAnimator, "玩家视图不该有怪物驱动");
+
+                var bridge = new CombatNetworkBridge(_client, () => playerId, registry);
+                bridge.OnCastBroadcast += b => registry.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp);
+
+                // ① caster 是 npc → 排程 → 越过时间戳 → 真动画播起来
+                long npcCastTicks = baseTicks + 2L * NpcAttackSchedule.VariantBucketTicks;
+                int npcVariant = NpcAttackSchedule.VariantOf(npcCastTicks);
+                string played = npcVariant == 0 ? "Attack01" : "Attack02";
+                bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
+                {
+                    SkillId = 50004, CasterPlayerId = npcId, ServerTimestamp = npcCastTicks
+                });
+                bridge.Update();
+                registry.UpdateRender(nowServerTicks: npcCastTicks + 1L, renderDelayTicks: 0L);
+                Settle(animator!);
+                Assert.IsTrue(animator!.GetCurrentAnimatorStateInfo(0).IsName(played),
+                    $"npc 的 CastBroadcast 没排到真动画上（期望 {played}）");
+
+                // ② caster 是玩家 → 不排程：同一只怪不得因它再播一刀。
+                //    玩家那条广播取**相邻桶**（推另一段），所以"错排到怪物身上"会让状态换成另一段——可判。
+                long playerCastTicks = baseTicks + 3L * NpcAttackSchedule.VariantBucketTicks;
+                Assert.AreNotEqual(npcVariant, NpcAttackSchedule.VariantOf(playerCastTicks),
+                    "本用例的前提：两条广播推出不同变体（否则错排看不出来）");
+                bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
+                {
+                    SkillId = 20001, CasterPlayerId = playerId, ServerTimestamp = playerCastTicks
+                });
+                bridge.Update();
+                registry.UpdateRender(nowServerTicks: playerCastTicks + 1L, renderDelayTicks: 0L);
+                Settle(animator);
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName(played),
+                    "玩家的 CastBroadcast 被排到了怪物身上——同一只怪因它又起了一刀");
+            }
+            finally
+            {
+                registry.Clear();
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        /// <summary>推帧直到过渡落定（与 NpcAnimatorAssetTests.Settle 同款）：AnyState 过渡在参数写入后的
+        /// 第一次 Update 才开始计时，落定前 <c>GetCurrentAnimatorStateInfo</c> 报的仍是源状态。上限 20 帧防呆。</summary>
+        private static void Settle(Animator animator)
+        {
+            int guard = 0;
+            do
+            {
+                animator.Update(0.05f);
+            } while (++guard < 20 && animator.IsInTransition(0));
+        }
     }
 }
