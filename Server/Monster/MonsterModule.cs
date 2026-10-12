@@ -162,6 +162,17 @@ namespace KcpServer.Monster
                     m.Moving = false; // 本 tick 死亡/受击硬直：跳过行为树（ActionState 保持 Death/Hit 不被 BT 覆盖）
                 }
 
+                // 硬直窗口**刚过期那一 tick**的状态写回（终审 I1）：本 tick BT 已恢复，但 Chase 在攻击距离内
+                // `return Success` 不写状态、Attack 在冷却门未过时 `return Running` 也不写——近战互殴（目标
+                // 一直留在攻击距离内）时 ActionState 会从受击那刻停在 Hit，直到下一次真正施法或目标离开。
+                // 客户端持续采到 Hit → 动画停在受击态（DogKnight 的 GetHit 循环播；蜘蛛 hit1 定格末帧）。
+                // 只在"上一 tick 还在窗口内、这一 tick 刚出窗口"这一次补（每 tick 写会提前释放客户端忙位、
+                // 当场打断挥砍）；且只在 BT 没写（仍是 Hit）时补——否则会盖掉同 tick 的 Attack 置位。
+                bool hitWindowJustExpired = m.HitStartTick.HasValue
+                    && tick - m.HitStartTick.Value == HitDisplayTicks;
+                if (hitWindowJustExpired && entity.ActionState == (byte)NpcAnimationState.Hit)
+                    entity.ActionState = (byte)(m.Moving ? NpcAnimationState.Run : NpcAnimationState.Idle);
+
                 // 位置/朝向/速度 flush（AOI 节拍由调度器按坐标判定——每 tick 写与 BotRunner 同惯例）
                 entity.UpdatePosition(m.Position, YawOf(m.Rotation), m.Moving ? m.Config.moveSpeed : 0f,
                     tick * 10_000L + 1L, tick);

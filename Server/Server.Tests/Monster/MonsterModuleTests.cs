@@ -168,6 +168,63 @@ public class MonsterModuleTests
             "monster should resume moving after the hit window elapses");
     }
 
+    /// <summary>
+    /// 硬直窗口到期那一 tick，ActionState 必须离开 Hit（终审 I1，产品缺陷）。
+    /// 机制：窗口内跳过行为树；窗口一过期 BT 立刻恢复，**但 Chase 在攻击距离内 `return Success`
+    /// 不写状态（MonsterBtActions:42）、Attack 在冷却门未过时 `return Running` 也不写（:68）**——
+    /// 近战互殴（目标全程留在攻击距离内）时 ActionState 会从受击那刻一直停在 Hit，直到下一次
+    /// 真正施法（该怪冷却 1.5s / 2.0s）或目标离开攻击距离。客户端持续采到 Hit → 驱动只写一次 →
+    /// Animator 停在 Hit 态：DogKnight 的 GetHit 是循环片段（循环播）、蜘蛛的 hit1 非循环（定格末帧）。
+    /// 走**真实裁决链**（drain + CombatResolver）让冷却记录生效——否则怪物每 tick 都能施法，
+    /// 到期那一 tick 恰好会被 Attack 写成 Attack，缺陷测不出来（假绿）。
+    /// </summary>
+    [Fact]
+    public void Hit_Window_Expiry_Restores_Locomotion_While_Target_Stays_In_Attack_Range()
+    {
+        var store = new EntityStore();
+        long seed = MonsterModule.NpcIdSeed;
+        var module = new MonsterModule(store, () => ++seed);
+        // Wolf：攻击距离 2.0m，冷却 15 tick（1s）。生成在 1.5m 处且面朝原点（SpawnMonster 的朝向
+        // 恒面向原点）——玩家原地不动，全程留在攻击距离内（正是缺陷的触发条件）
+        long wolfId = module.SpawnMonster(2, new Vector3(0f, 0f, 1.5f), new Vector3(0f, 0f, 1.5f));
+        var wolf = store.GetPlayer(wolfId)!;
+        LoginPlayer(store, 1, new Vector3(0f, 0f, 0f));
+
+        var resolver = new CombatResolver(store, new System.Random(42));
+
+        // 前置：让怪物真施放一次（冷却记录由裁决链写入——BT 的冷却门读的正是它）
+        uint castTick = 0;
+        bool casted = false;
+        for (uint t = 0; t < 10 && !casted; t++)
+        {
+            module.Tick(t);
+            foreach (var (id, request) in module.DrainPendingCasts())
+            {
+                resolver.ResolveCast(id, request, t);
+                castTick = t;
+                casted = true;
+            }
+        }
+        Assert.True(casted, "前置：怪物应在攻击距离内施放一次（入队 + 裁决链）");
+        Assert.Equal((byte)NpcAnimationState.Attack, wolf.ActionState);
+
+        // 玩家命中怪物 → 下一 tick 进受击硬直
+        uint hitTick = castTick + 1;
+        wolf.ApplyDamage(10f);
+        module.Tick(hitTick);
+        Assert.Equal((byte)NpcAnimationState.Hit, wolf.ActionState);
+
+        // 推进越过窗口（hitTick + HitDisplayTicks = 刚出窗口的那一 tick，再往后两 tick）
+        for (uint t = hitTick + 1; t <= hitTick + MonsterModule.HitDisplayTicks + 2; t++)
+        {
+            module.Tick(t);
+            // 前置：冷却门全程关着（没有新施法来"顺手"把状态写离 Hit）——缺陷场景成立
+            Assert.Empty(module.DrainPendingCasts());
+        }
+
+        Assert.NotEqual((byte)NpcAnimationState.Hit, wolf.ActionState);
+    }
+
     [Fact]
     public void Respawn_Uses_New_Id_And_Full_Hp()
     {

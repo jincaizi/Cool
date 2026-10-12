@@ -123,8 +123,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         {
             // 循环态绑了非循环片段 = 播一遍就定格在末帧（Boss 站桩时会僵住）。
             // 只钉"循环态必须循环"这一半：**不**断言一次性态必须不循环 —— DogKnight 的
-            // GetHit.anim 本就是循环的，而它的风险已被证明不可达（受击窗口 0.33s 短于
-            // 片段 0.833s，时间轴先带走状态）。
+            // GetHit.anim 本就是循环的，而"受击态会不会滞留"由**服务端**兜底（硬直窗口刚过期
+            // 那一 tick 写回状态，见 MonsterModule.Tick 与 NpcAnimator_DogKnight.controller.md；
+            // 早先"窗口 0.33s < 片段 0.833s ⇒ 风险不可达"的说法已被终审 I1 推翻）。
             foreach (var path in Controllers)
             {
                 var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(path)!;

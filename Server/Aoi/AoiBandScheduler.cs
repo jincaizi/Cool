@@ -63,10 +63,15 @@ namespace KcpServer
             // 状态翻转 → 立即发（跨客户端动画一致性依赖此语义：静止怪物的状态翻转若等保活，
             // 不同观察者的保活相位不同，同一翻转会落在不同 tick，客户端最多差 4 tick ≈267ms）。
             // 注意**不重置 LastSentTick** —— 重置会把位置更新推迟最多一个带间隔（近带 1 / 远带 4 tick）。
+            // 坐标锚点一并写回：本 tick 若同时有位移，锚点不跟上的话下一 tick 会因 moved 再补发一帧
+            // （同一次的翻转 + 位移被拆成两帧——近带里就是重复帧）。
             if (slot.ActionState != actionState || slot.Dead != dead)
             {
                 slot.ActionState = actionState;
                 slot.Dead = dead;
+                slot.X = x;
+                slot.Z = z;
+                slot.RotY = rotY;
                 entities[entityId] = slot;
                 return true;
             }

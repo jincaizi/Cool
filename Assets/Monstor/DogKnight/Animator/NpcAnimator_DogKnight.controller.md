@@ -26,15 +26,27 @@
 
 ## 为什么 `Hit` 没有出边也不怕片段循环（`GetHit.anim` 是 `m_LoopTime: 1`）
 
-`Hit` 状态刻意不放出边（见上）。`GetHit.anim` 自身是循环片段，看上去"没有出边 = 循环不会自己停"，但**这条风险不可达**：
+`Hit` 状态刻意不放出边（见上）。`GetHit.anim` 自身是循环片段，看上去"没有出边 = 循环不会自己停"。
+
+**2026-10-12 终审 I1 修正——早先这里写的是"这条风险不可达"，那个结论是错的**：
 
 | 项 | 值 |
 |---|---|
 | `GetHit.anim` 长度（末关键帧，字节实测） | **0.833s** |
 | 服务端受击硬直窗口 `MonsterModule.HitDisplayTicks` | 5 tick × `TickDeltaSeconds` 0.066s = **0.33s** |
 
-服务端在 0.33s 后就把 `MonsterState` 带离 4，时间轴在片段走到循环点（0.833s）之前就已经离开 `Hit` 态。余量 ≈ 2.5 倍。
-（即：**别为了"怕循环"给 Hit 加出边** —— 那才会让 `MonsterState==4` 持续为真时逐帧重播受击。）
+旧推理只算了窗口与片段（0.33s < 0.833s ⇒ "时间轴先带走状态"），**漏了"窗口结束后谁负责写状态"**：
+窗口内 BT 被跳过，窗口一过期 BT 立刻恢复，但 `MonsterBtActions.Chase` 在攻击距离内 `return Success`
+**不写 ActionState**、`Attack` 在冷却门未过时 `return Running` **也不写**。近战互殴（目标一直留在
+攻击距离内）时状态会从受击那刻**一直停在 `Hit`**，直到下一次真正施法（DogKnight 1.5s）或目标离开
+攻击距离——循环片段确实会一直循环（蜘蛛的 `hit1` 非循环，表现是定格末帧）。
+
+修复在服务端：`MonsterModule.Tick` 在硬直窗口**刚到期的那一 tick**、且 BT 没写状态（仍是 `Hit`）时
+补写一次 `m.Moving ? Run : Idle`（`MonsterModuleTests.Hit_Window_Expiry_Restores_Locomotion_
+While_Target_Stays_In_Attack_Range` 守着——它用真实裁决链让冷却记录生效，否则会假绿）。
+所以这条风险**现在是靠服务端状态写回兜底，不是"不可达"**；改服务端受击/行为树逻辑时要一并想清楚。
+
+（即：**别为了"怕循环"给 Hit 加出边** —— 那才会让 `MonsterState==4` 持续为真时逐帧重播受击。这条仍然对。）
 
 ## 改完怎么验（本资产的写回不可靠）
 

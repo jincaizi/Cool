@@ -125,6 +125,17 @@ public class AoiBandSchedulerTests
     }
 
     [Fact]
+    public void State_Change_With_A_Move_Does_Not_Cause_A_Second_Send_Next_Tick()
+    {
+        // 翻转分支若只更新 actionState/dead、不写回锚点坐标：同一 tick 又带位移的话，
+        // 下一 tick 会因 moved=（坐标 ≠ 旧锚点）再补发一帧（近带里就是同坐标的重复帧）。
+        var s = new AoiBandScheduler();
+        Assert.True(Send(s, 1, 2, 10f, 100, x: 0f, actionState: 0, dead: false));   // 首帧（锚点 x=0）
+        Assert.True(Send(s, 1, 2, 10f, 101, x: 1f, actionState: 4, dead: false));   // 翻转 + 位移：立即发
+        Assert.False(Send(s, 1, 2, 10f, 102, x: 1f, actionState: 4, dead: false));  // 坐标未变：不得再补一帧
+    }
+
+    [Fact]
     public void Same_Flip_Is_Sent_To_Two_Observers_On_The_Same_Tick()
     {
         var s = new AoiBandScheduler();
