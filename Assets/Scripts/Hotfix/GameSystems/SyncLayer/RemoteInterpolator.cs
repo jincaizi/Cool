@@ -40,7 +40,11 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>计算渲染状态：nowServerTicks 为换算后的服务器时钟，renderDelayTicks 为渲染延迟。
-        /// 位置/朝向插值；actionState/dead 是**阶梯函数**——取时间戳 ≤ renderAt 的最后一个样本。</summary>
+        /// 位置/朝向插值；actionState/dead 是**阶梯**（不随 t 混合）且是**渲染用**的状态——
+        /// 与插值位置配对的是所在区间**起始样本**的状态（区间内视为状态未变）。
+        /// 权威状态查询走 <see cref="TryGetSampleState"/>：两者只在 renderAt 恰等于某样本时间戳时
+        /// 差一个样本（本路径取区间左端=较早那个，它取"时间戳 ≤ renderAt 的最后一个"=该样本自身）——
+        /// 亚 tick，且实际不可达：样本时间戳是发送时刻的墙钟。</summary>
         public bool TryGetRenderState(long playerId, long nowServerTicks, long renderDelayTicks,
             out Vector3 position, out Quaternion rotation, out byte actionState, out bool dead)
         {
@@ -91,7 +95,10 @@ namespace Hotfix.GameSystems.SyncLayer
             return true;
         }
 
-        /// <summary>只取状态（阶梯语义，与 TryGetRenderState 同一规则）——供渲染循环按 renderAt 采样。</summary>
+        /// <summary>只取状态：**权威的状态查询**（阶梯——时间戳 ≤ renderAt 的最后一个样本；
+        /// 全部晚于 renderAt 时用最旧），供渲染循环按 renderAt 采样。
+        /// 与 <see cref="TryGetRenderState"/> 的状态 out 只差一个边界：renderAt 恰等于某样本时间戳时
+        /// 取该样本自身（对方取所在区间的左端）——差异与不可达性见其 summary。</summary>
         public bool TryGetSampleState(long playerId, long renderAt, out byte actionState, out bool dead)
         {
             actionState = 0;
