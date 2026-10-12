@@ -1399,6 +1399,8 @@ git add Assets/Monstor/DogKnight/Animator/NpcAnimator_DogKnight.controller* \
 git commit -m "feat(monster): two code-driven animator controllers with exit-time returns"
 ```
 
+> **已知状态（2026-10-12 实测）**：`Assets/Monstor/DogKnight/` **整棵树尚未入库** —— 那是用户在途的一次资源搬迁（`Assets/3rd/DogKnight/**` 72 个删除 + 新位置未跟踪；`DogPBR.prefab`/`Attack01.anim`/`DogControl.controller` 都不在 HEAD）。所以本提交的控制器会引用**尚未提交的** `.anim` 文件。**不要顺手把那次搬迁一起提交**（那是用户自己的在途工作，且牵涉仓库级策略）；只在报告里点名"本提交引用了未跟踪的片段"。
+
 ---
 
 ## 任务 6：怪物预制体与 spider 资源导入
@@ -1502,12 +1504,18 @@ MCP script-execute '{"isMethodBody":true,"className":"SpiderPrefab","methodName"
 - [ ] **步骤 6：Commit**
 
 ```bash
-git add Assets/Monstor/fantasySpider/ Assets/Monstor/DogKnight/Prefab/DogKnightMonster.prefab* \
+git add Assets/Monstor/fantasySpider/SpiderMonster.prefab* \
+        Assets/Monstor/DogKnight/Prefab/DogKnightMonster.prefab* \
         Assets/Scripts/Tests/Editor/SyncLayer/NpcAnimatorAssetTests.cs
-git commit -m "feat(monster): prefabs for the knight and the boss, spider rig switched to Generic"
+git commit -m "feat(monster): prefabs for the knight and the boss"
 ```
 
-> FBX 复制件走 Git LFS（项目既有约定），提交前确认 `.gitattributes` 已覆盖 `.FBX`。
+> **三处现实纠正（2026-10-12 实测；初稿在这几处写错了）**：
+> 1. **本仓库并没有启用 Git LFS** —— 无 `.gitattributes`、`git check-attr filter` 返回 `unspecified`、`git lfs ls-files` 为 0。项目 `CLAUDE.md` 里"Files are tracked with Git LFS"这句**与事实不符**。所以**不要**去加 `*.FBX filter=lfs`：那会回溯作用于全部既存 FBX，需要 `git lfs migrate` 重写历史，属仓库级策略变更，**不在本计划范围**。沿用仓库现状（裸存）提交。
+> 2. FBX 复制件 `spider_myOldOne_Mecanim.FBX` 已在**前置步骤**单独提交过 —— 本步骤不要再 `git add` 整个 `fantasySpider/` 目录（会把无关的未跟踪文件卷进来）。
+> 3. `Assets/Monstor/DogKnight/` 整棵树**未入库** —— 本步骤的 Variant 会引用未提交的基预制体 `DogPBR.prefab`。**不要顺手提交那次搬迁**，只在报告里点名。
+>
+> 另：`LoadAllAssetsAtPath` 会连 Unity 内部的 `__preview__Take 001` 一起返回（源 FBX 同样如此）——若写"恰好 N 段片段"的断言，必须排除 `__preview__` 前缀。
 
 ---
 
