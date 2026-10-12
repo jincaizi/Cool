@@ -93,7 +93,7 @@ namespace KcpServer
                 CasterZ = caster.Position.Z,
                 CasterRotation = caster.Rotation,
                 Shape = request.Shape,
-                ServerTimestamp = DateTime.UtcNow.Ticks
+                ServerTimestamp = ServerClock.NowTicks()
             };
             return resolution;
         }
@@ -173,7 +173,7 @@ namespace KcpServer
                 {
                     SourcePlayerId = playerId.Value,
                     SkillId = request.SkillId,
-                    ServerTimestamp = DateTime.UtcNow.Ticks,
+                    ServerTimestamp = ServerClock.NowTicks(),
                     Hits = resolution.Hits
                 };
                 var damageRecipients = new HashSet<long> { playerId.Value };
@@ -216,7 +216,7 @@ namespace KcpServer
                 {
                     SourcePlayerId = npcId,
                     SkillId = resolution.Broadcast.SkillId,
-                    ServerTimestamp = DateTime.UtcNow.Ticks,
+                    ServerTimestamp = ServerClock.NowTicks(),
                     Hits = resolution.Hits
                 };
                 foreach (var hit in resolution.Hits)

@@ -22,7 +22,7 @@ namespace KcpServer
             var response = new Cool.Protocol.ClockSyncResponse
             {
                 ClientTimestamp = request.ClientTimestamp,
-                ServerTimestamp = DateTime.UtcNow.Ticks
+                ServerTimestamp = ServerClock.NowTicks()
             };
             _logger.LogInformation($"ClockSync for session {session.SessionId}");
             return _server.SendToSessionAsync(session, MessageId.ClockSyncResponse, response);

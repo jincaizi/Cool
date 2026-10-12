@@ -4,12 +4,13 @@ namespace KcpServer.Tests;
 
 public class AoiBandSchedulerTests
 {
-    // 统一签名：ShouldSend(observerId, entityId, distance, tick, x, z, rotY)
+    // 统一签名：ShouldSend(observerId, entityId, distance, tick, x, z, rotY, actionState, dead)
     // 语义（终审 I5 修正）：移动实体（坐标自上次发送变化）按带频；
     // 静止实体（坐标未变）统一 4 tick 保活——近带静止 15Hz 全字段是带宽回归。
+    // 状态翻转（actionState/dead）立即发、不重置位置节拍——跨客户端动画一致性（2026-10-12）。
     private static bool Send(AoiBandScheduler s, long o, long e, float dist, uint tick,
-        float x = 0f, float z = 0f, float rot = 0f)
-        => s.ShouldSend(o, e, dist, tick, x, z, rot);
+        float x = 0f, float z = 0f, float rot = 0f, byte actionState = 0, bool dead = false)
+        => s.ShouldSend(o, e, dist, tick, x, z, rot, actionState, dead);
 
     [Fact]
     public void Near_Band_Moving_Entity_Updates_Every_Tick()
@@ -97,5 +98,42 @@ public class AoiBandSchedulerTests
         Assert.True(Send(scheduler, 1, 2, 10f, 1));
         Assert.False(Send(scheduler, 1, 2, 10f, 2));          // 静止
         Assert.True(Send(scheduler, 1, 2, 10f, 3, rot: 90f)); // 原地转身 → 发
+    }
+
+    [Fact]
+    public void State_Change_Sends_Immediately_For_A_Stationary_Entity()
+    {
+        var s = new AoiBandScheduler();
+        Assert.True(s.ShouldSend(1, 2, 10f, 100, 0f, 0f, 0f, actionState: 0, dead: false));
+
+        // 静止 + 状态未变：保活窗口（4 tick）未到，不发
+        Assert.False(s.ShouldSend(1, 2, 10f, 101, 0f, 0f, 0f, actionState: 0, dead: false));
+
+        // 状态翻转：立即发，不受保活间隔约束
+        Assert.True(s.ShouldSend(1, 2, 10f, 102, 0f, 0f, 0f, actionState: 3, dead: false));
+    }
+
+    [Fact]
+    public void State_Change_Does_Not_Push_Back_The_Position_Cadence()
+    {
+        var s = new AoiBandScheduler();
+        const float mid = 45f;   // 中带 ⇒ IntervalOf = 2 tick
+
+        Assert.True(s.ShouldSend(1, 2, mid, 100, 0f, 0f, 0f, 0, false));    // 首帧
+        Assert.True(s.ShouldSend(1, 2, mid, 101, 0f, 0f, 0f, 0, true));     // 状态翻转（dead）——立即发，但**不**重置位置节拍
+        Assert.True(s.ShouldSend(1, 2, mid, 102, 0.6f, 0f, 0f, 0, true));   // 距上次位置发送（tick 100）已 2 tick ⇒ 发
+    }
+
+    [Fact]
+    public void Same_Flip_Is_Sent_To_Two_Observers_On_The_Same_Tick()
+    {
+        var s = new AoiBandScheduler();
+        const long entity = 9;
+        Assert.True(s.ShouldSend(1, entity, 10f, 100, 0f, 0f, 0f, 0, false));   // 近带观察者
+        Assert.True(s.ShouldSend(2, entity, 70f, 100, 0f, 0f, 0f, 0, false));   // 远带观察者
+
+        // tick 102：两边保活都未到（100 + 4 = 104），若只看坐标/朝向则都不发
+        Assert.True(s.ShouldSend(1, entity, 10f, 102, 0f, 0f, 0f, 4, false));
+        Assert.True(s.ShouldSend(2, entity, 70f, 102, 0f, 0f, 0f, 4, false));
     }
 }

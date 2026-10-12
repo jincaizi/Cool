@@ -332,7 +332,7 @@ namespace KcpServer
                 var observerSnapshot = new WorldSnapshot
                 {
                     Tick = tick,
-                    ServerTimestamp = System.DateTime.UtcNow.Ticks,
+                    ServerTimestamp = ServerClock.NowTicks(),
                     Entities = entities
                 };
                 session.Send(MessageId.WorldSnapshot, observerSnapshot);

@@ -54,7 +54,8 @@ namespace KcpServer
                 float distance = (float)System.Math.Sqrt(dx * dx + dz * dz);
 
                 if (_scheduler.ShouldSend(observer.PlayerId, entity.PlayerId, distance, tick,
-                    entity.Position.X, entity.Position.Z, entity.Rotation))
+                    entity.Position.X, entity.Position.Z, entity.Rotation,
+                    entity.ActionState, !entity.IsAlive))
                 {
                     var snap = new EntitySnapshot
                     {
