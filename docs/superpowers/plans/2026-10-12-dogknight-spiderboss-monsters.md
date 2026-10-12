@@ -1810,7 +1810,7 @@ git commit -m "feat(sync): npc views resolve real monster prefabs and route cast
 
 `production/deploy/webgl-demo/start-game-server.cmd`：`--monsters 2` → `--monsters 6`，并把那条注释改成反映现状。
 
-> 注释内容**必须按实测写**，不能照抄旧推导。已知事实：DemoDay 出生点 **(10, 0, -15.5)**；两个新点位须满足"到出生点距离 > 感知 + 巡逻"（DogKnight ≥ 28m、SpiderBoss ≥ 41m）。初稿写的"距原点 20m/42m、开局不仇恨"是错的 —— 那是按原点推的，而原点只是 e2e 测试观察者的位置。
+> 注释内容**必须按实测写**，不能照抄旧推导。当时的出生点是 **(10, 0, -15.5)**（**2026-10-13 已搬到 `(10, 0.21, -40)`**）；两个新点位须满足"到出生点距离 > 感知 + 巡逻"（DogKnight ≥ 28m、SpiderBoss ≥ 41m）。初稿写的"距原点 20m/42m、开局不仇恨"是错的 —— 那是按原点推的，而原点只是 e2e 测试观察者的位置。
 
 - [ ] **步骤 2：同步部署副本**
 
@@ -1848,7 +1848,7 @@ dotnet run --no-build --project Server/Server3C.csproj -- 8000 --monsters 6 > /t
 
 进 PlayMode（`MCP editor-application-set-state '{"IsPlaying":true}'`），等客户端连上（连接状态浮层 `_showDebugOverlay` 会写模式/状态/实体数；也可用 `console-get-logs` 看 `[NetHost]` 行）。
 
-两只怪距出生点约 **46m** 与 **51m**，而观察者视野 80m —— 所以在出生点就能看见，**不必走过去**（但比初稿预期的更远，画面里会偏小；要看细节可走过去）。若默认机位没框住它们，用 `script-execute` **调整相机朝向**（不要伪造结果、不要直接摆怪），再：
+两只怪距出生点约 **46m** 与 **51m**（**2026-10-13 出生点搬到 `(10, 0.21, -40)` 后为约 67m 与 52m**），观察者视野 80m —— 出生点能看见，**不必走过去**（画面里偏小；要看细节可走过去）。⚠️ 实测结论：默认机位**框不住**它们（在左后方 45°/87°），必须转相机。若默认机位没框住，用 `script-execute` **调整相机朝向**（不要伪造结果、不要直接摆怪），再：
 
 ```
 MCP screenshot-game-view '{}'
@@ -1885,9 +1885,9 @@ git commit -m "chore(demo): the deployed demo spawns six monsters, config copy r
 | 8 | 完成（含最终收口） | 部署收尾 + 全量回归 + 截图；**"开局不仇恨"被实测推翻**（真凶是既有 [0] Wolf，见下）；最终审查后重拍了最终点位的截图 |
 | 最终审查 | 3 Important + 5 Minor → 一次收口修复 | 见 `progress.md`：I1 受击态残留（骑士受击动画循环）、I2 挥砍链无用例（spec §8#4 被丢）、I3 截图早于点位冻结 |
 
-> **已知限制（合并门禁请照读）**：① `Assets/Monstor/DogKnight/` 整棵树**未入库**（用户在途搬迁）⇒ **干净 clone 上 `NpcAnimatorAssetTests` 的若干用例必然红**，本分支的绿是"在用户工作区状态下"取得的；② `[0] Wolf` 在出生点 5.9m 处（感知 15m）⇒ **任何 `--monsters ≥ 1` 下挂机都会被它打死**（既有设计 + e2e 确定性依赖，本次未动）；③ 玩家可穿过 Boss（服务端无碰撞）；④ 本仓库未启用 Git LFS，`dist/` 被 gitignore。
+> **已知限制（合并门禁请照读；2026-10-13 更新）**：① ~~`Assets/Monstor/DogKnight/` 整棵树未入库~~ → **已入库**（72 个 R100 重命名，GUID 与引用原样保留），干净 clone 上资产断言恢复正常；② ~~挂机必死~~ → **已解决**：出生点搬到 `(10, 0.21, -40)`，六槽位全部脱离「感知 + 巡逻」范围，活体验证 4 分 22 秒零伤害（**离开出生点后仍会被追**）；③ ~~玩家可穿过 Boss~~ → **已加碰撞体，但只做客户端**（服务端不模拟玩家移动也不校验重叠 ⇒ **改客户端仍可穿模**）；④ 玩家与怪"互相走进身体"仍可能（静态碰撞体挡不住怪走进你，且服务端纠偏直接写 transform 绕过物理）；⑤ 本仓库未启用 Git LFS（`CLAUDE.md` 那句 "Files are tracked with Git LFS" 与事实不符，待改）；`dist/` 被 gitignore。
 >
-> **2026-10-13 更正**：② 已不成立——出生点搬到 (10,0,-40) 后六槽位全部脱离「感知 + 巡逻」范围，挂机不再会被 [0] Wolf 打到（活体验证 3 分钟 0 伤害）；③ 客户端侧已加怪物视图碰撞体（服务端仍不模拟玩家移动 ⇒ 改客户端仍可穿模）。见 `2026-10-13-spawn-and-collision-report.md`。
+> （2026-10-13 的后续改动见上面的已知限制块，报告：`2026-10-13-spawn-and-collision-report.md`。）
 
 ## 与 spec 的两处有意偏离
 
