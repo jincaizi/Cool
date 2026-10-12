@@ -97,19 +97,14 @@ namespace KcpServer
                 float x = player.Position.X + step.X;
                 float z = player.Position.Z + step.Z;
 
-                // 边界反弹：**按意图方向判**（不是按"新位置越界"判）。解出的位移可能被避让改向/改小，
-                // 用解出的位置判界会让贴着墙、被邻居往外推的 bot 把方向翻反（甚至翻来覆去卡在界外）。
-                // 无避让时两者等价：step 恒沿 Dir，越界 ⟺ 意图朝界外（旧行为逐字保留）。
-                if ((bot.DirX > 0f && x > WorldHalfExtent) || (bot.DirX < 0f && x < -WorldHalfExtent))
-                {
-                    bot.DirX = -bot.DirX;
-                    x = Clamp(x);
-                }
-                if ((bot.DirZ > 0f && z > WorldHalfExtent) || (bot.DirZ < 0f && z < -WorldHalfExtent))
-                {
-                    bot.DirZ = -bot.DirZ;
-                    z = Clamp(z);
-                }
+                // 边界反弹：**翻向看意图方向**（ShouldBounce），**位置永远夹回世界内**。两者旧写法同条件
+                // （步长恒沿 Dir ⇒ 越界 ⟺ 意图朝外），接线后必须拆开：一个被邻居往外推、意图朝界内的 bot
+                // 要能被夹回界内接着走；而 dir==0 的那条轴（被推出去时）若只在翻向分支里夹，
+                // 会永久留在界外（这条轴上它自己永远不动回来）。无邻居时两步都与旧写法逐位一致。
+                if (ShouldBounce(bot.DirX, x, WorldHalfExtent)) bot.DirX = -bot.DirX;
+                x = Clamp(x);
+                if (ShouldBounce(bot.DirZ, z, WorldHalfExtent)) bot.DirZ = -bot.DirZ;
+                z = Clamp(z);
 
                 // 速度上报（快照 Speed，m/s）：取**精确**的每 tick 步长换算值而不是四舍五入的 8f——
                 // 快照是 ORCA 邻居速度的唯一来源（AvoidanceSystem.EnsureSnapshot 按 Speed × 朝向 还原位移）。
@@ -120,6 +115,20 @@ namespace KcpServer
         }
 
         private static float Clamp(float v) => Math.Clamp(v, -WorldHalfExtent, WorldHalfExtent);
+
+        /// <summary>
+        /// 该不该在边界翻向：**看意图方向，不看新位置是否越界**。
+        ///
+        /// 接线前这两者在数学上等价（步长恒 = Dir×0.53 ⇒ 越界 ⟺ 意图朝界外），所以旧写法
+        /// `next &gt; half || next &lt; -half` 就够。接上避让后不再等价：解出的位移可能被邻居改向/改小，
+        /// 一个贴着墙、被邻居往外推的 bot 会出现"位置在界外、但意图朝界内"——按新位置判就会把方向
+        /// 翻反，下一 tick 继续往外走，再也回不来（来回翻则卡在界外）。
+        ///
+        /// 抽成纯函数是为了**能被单测直接钉住**（新旧判据的差异只有真空里的这几种输入组合，
+        /// 走整条 Tick 是构造不出来的）：见 `AvoidanceSystemTests.Bounce_Judgement_...`。
+        /// </summary>
+        internal static bool ShouldBounce(float dir, float nextCoord, float halfExtent)
+            => (dir > 0f && nextCoord > halfExtent) || (dir < 0f && nextCoord < -halfExtent);
 
         private static float YawOf(float dx, float dz) => (float)(System.Math.Atan2(dx, dz) * 180.0 / System.Math.PI);
 

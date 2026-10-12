@@ -22,8 +22,9 @@ namespace KcpServer.Movement
     ///    <see cref="_secondsPerTick"/> 换算进来（只影响"邻居被当成多快"，不影响自己的积分）。
     ///
     /// 3. **责任权重 α**：怪物/机器人互相 0.5（两边都在服务端跑同一套解算，各让一半）；
-    ///    真人玩家 1.0（服务端改不了客户端权威的速度 ⇒ 智能体全责绕开）。
-    ///    玩家的速度用其上报的 <c>PlayerState.Speed</c> + 朝向推——玩家是**会动的障碍**，不是静态柱子。
+    ///    真人玩家 1.0（服务端改不了客户端权威的速度 ⇒ 智能体全责绕开），且玩家**按零速度障碍**处理
+    ///    （不用上报速度推——理由见 <see cref="EnsureSnapshot"/> 里的注释：朝向≠移动方向，且不可信输入
+    ///    不该决定安全保证）。
     ///
     /// 已知取舍：邻居筛是**一次线性扫**（n² / 2 次距离比较，6 怪 + ~100 bot + 玩家 ≈ 一万次 @15Hz，
     /// 可忽略），不引空间哈希（明确不做）。筛程 = r_i + r_j + <see cref="NeighborMargin"/>。
@@ -52,8 +53,12 @@ namespace KcpServer.Movement
         /// </summary>
         public const float NeighborMargin = 1.5f;
 
-        /// <summary>邻居缓冲上限：筛程内同屏邻居是个位数，64 足够；真溢出则丢弃多出来的（不抛）</summary>
-        private const int MaxNeighbors = 64;
+        /// <summary>
+        /// 邻居缓冲上限。取 128 ≥ 全场理论上限（--bots 100 + 6 怪 + 玩家，且自己不在其中）⇒ 任何配置下
+        /// 都不会溢出。真溢出时**只跳过写不下的那些、继续扫完**（不 break——break 会把还没扫到的
+        /// 邻居**全部**丢掉，100 bot 挤到一处时那正是最需要保护的几对；审查把这条点名为"人群挤压的悬崖"）。
+        /// </summary>
+        private const int MaxNeighbors = 128;
 
         /// <summary>退化 tie-break 的偏移量（米）：只用来把数值上完全对称的几何掰开，
         /// 比任何真实半径小 3 个数量级（0.1mm），也远大于浮点噪声（~1e-7 相对值）。</summary>
@@ -117,16 +122,30 @@ namespace KcpServer.Movement
                 // 压测 bot **不算**登录态（D-P5-3），所以上面那条只筛真人 —— 这里按 kind 判参与者
                 bool participates = kind != (byte)EntityKind.Player;
 
-                float yawRad = e.Rotation * (float)(Math.PI / 180.0);
-                float speedPerTick = e.Speed * _secondsPerTick;
+                // 速度：**真人玩家一律按零速度障碍**（规格要求），怪物/机器人取上一 tick flush 的
+                // Speed × 朝向。为什么玩家不用上报速度（2026-10-13 审查裁定，曾在接线时用上报值推过）：
+                //   1. `PlayerState.Rotation` 是**角色朝向**，不是移动方向——侧移/后退/转身时两者不同，
+                //      按朝向推速度会把玩家当成"沿面朝方向飞出去"的障碍，约束算错方向；
+                //   2. 上报速度是**客户端可控输入**：报一个大速度朝反方向，就能让智能体"认为 τ 内
+                //      不会相遇"而根本不产约束（直接穿过去）。安全保证不能建立在不可信输入上。
+                // 代价落在保守侧：玩家真在跑时智能体按"他没动"来让——躲得笨一点，不会穿模
+                //（何况客户端那条 NpcBodyCollider 本来就挡着本地玩家）。
+                float vx = 0f, vz = 0f, speedPerTick = 0f;
+                if (participates)   // 怪物 / 压测机器人：服务端自己写的 Speed + 朝向（朝向 = 移动方向）
+                {
+                    float yawRad = e.Rotation * (float)(Math.PI / 180.0);
+                    speedPerTick = e.Speed * _secondsPerTick;
+                    vx = (float)Math.Sin(yawRad) * speedPerTick;
+                    vz = (float)Math.Cos(yawRad) * speedPerTick;
+                }
                 _agents.Add(new SnapshotAgent
                 {
                     Id = e.PlayerId,
                     X = e.Position.X,
                     Z = e.Position.Z,
-                    VX = (float)Math.Sin(yawRad) * speedPerTick,
-                    VZ = (float)Math.Cos(yawRad) * speedPerTick,
-                    Speed = speedPerTick,
+                    VX = vx,
+                    VZ = vz,
+                    Speed = speedPerTick,   // 玩家恒 0 ⇒ 邻居侧筛程随之变小（保守 ✓）
                     Radius = BodyRadiusOf(e),
                     Participates = participates,
                 });
@@ -183,6 +202,9 @@ namespace KcpServer.Movement
                 float dz = nz - position.Z;
                 // 筛程 = 半径和 + 近场余量 + τ 内双方的**最大**接近距离（|v_i|+|v_j| 是相对速度的
                 // 上界，不用 sqrt 也算得出来——宁可多收几个非冲突邻居，不能漏掉 τ 内会撞上的）
+                // 注：邻居的 a.Speed 是**上一 tick flush** 的值，刚起步的邻居会被低估一格（自己没有这个问题，
+                // 上面 selfSpeed 取了 max(当前, 期望)）；下一 tick 自愈，且低估只会让筛程偏小、
+                // 不会让人凭空绕路——不为此加兜底逻辑（审查裁定）。
                 float reach = radius + a.Radius + NeighborMargin + (selfSpeed + a.Speed) * horizon;
                 if (dx * dx + dz * dz > reach * reach) continue;
 
@@ -207,7 +229,7 @@ namespace KcpServer.Movement
                     nx -= -dz * invLen * TieBreakOffset;
                     nz -= dx * invLen * TieBreakOffset;
                 }
-                if (count == MaxNeighbors) break;   // 缓冲满（筛程内邻居是个位数）——丢弃多出来的邻居
+                if (count == MaxNeighbors) continue;   // 缓冲满：只丢写不下的这一个，继续扫（见 MaxNeighbors 注释）
                 _neighborBuffer[count++] = new OrcaNeighbor(nx, nz, a.VX, a.VZ, a.Radius,
                     a.Participates ? OrcaSolver.ReciprocalResponsibility : OrcaSolver.FullResponsibility);
             }

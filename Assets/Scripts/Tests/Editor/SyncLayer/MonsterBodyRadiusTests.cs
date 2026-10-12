@@ -26,8 +26,10 @@ namespace GameSys.EditorTests
     /// </summary>
     public class MonsterBodyRadiusTests
     {
-        /// <summary>容差：两侧手工录入的漂移警戒线（不是精度上限——实测两侧差值 ≤ 0.004）</summary>
-        private const float Tolerance = 0.1f;
+        /// <summary>容差：两侧手工录入的漂移警戒线（不是精度上限——实测两侧差值 ≤ 0.004）。
+        /// **0.05 是刻意的**：X 跨度与 XZ 取大者之间的差是 0.08m，容差放宽到 0.1 就分不出
+        /// "服务端抄的是哪条约定"了（实测：0.1 时按 X-only 量也能过）。</summary>
+        private const float Tolerance = 0.05f;
 
         /// <summary>球体占位的半径（RemoteEntityRegistry 用 CreatePrimitive(Sphere)：单位球 → 0.5，缩放 1）</summary>
         private const float PlaceholderRadius = 0.5f;
@@ -69,10 +71,12 @@ namespace GameSys.EditorTests
 
         /// <summary>
         /// 模型推出来的 XZ 半宽（**世界米**——服务端的位置/半径都在世界坐标系里）：
-        /// 合并 SkinnedMeshRenderer 的**世界** bounds 取 X 跨度的一半。根上的缩放（Boss 2×）
-        /// 已经折在世界 bounds 里，**不再除回 lossyScale**——NpcBodyCollider 除回是为了拿
-        /// 本地尺寸建 BoxCollider，它的世界跨度仍然是 3.32m，与本用例同一把尺子。
-        /// （上一轮审查实测 SpiderBoss = 3.3m/2 ≈ 1.66，本用例沿用同一约定。）
+        /// 合并 SkinnedMeshRenderer 的**世界** bounds，取 X/Z 两个跨度里**大的那个**的一半。
+        /// 取 max 而不是只取 X：客户端那条身体碰撞体（NpcBodyCollider）建的是 **X/Z 方盒包络**
+        /// （`box.size = (X 跨度, Y 跨度, Z 跨度)`）——只按 X 算会让服务端圆比客户端身体每侧小一截
+        /// （实测 SpiderBoss 半宽：X 1.6619 < Z 1.7419，差 0.08m），表现是贴着怪走仍被服务端轻微推。
+        /// 根上的缩放（Boss 2×）已经折在世界 bounds 里，**不再除回 lossyScale**——NpcBodyCollider
+        /// 除回是为了拿本地尺寸建 BoxCollider，它的世界跨度仍然是 3.48m，与本用例同一把尺子。
         /// </summary>
         private static float ModelHalfWidth(GameObject root)
         {
@@ -82,7 +86,7 @@ namespace GameSys.EditorTests
             var world = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) world.Encapsulate(renderers[i].bounds);
 
-            return world.size.x * 0.5f;
+            return Mathf.Max(world.size.x, world.size.z) * 0.5f;
         }
 
         [Test]

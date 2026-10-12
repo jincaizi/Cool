@@ -102,7 +102,7 @@ namespace KcpServer.Config
                         name = "SpiderBoss",
                         hp = 1500,
                         moveSpeed = 3.2f,
-                        bodyRadius = 1.66f,
+                        bodyRadius = 1.74f,
                         detectionRadius = 25,
                         visionAngle = 140,
                         attackRange = 2.5f,

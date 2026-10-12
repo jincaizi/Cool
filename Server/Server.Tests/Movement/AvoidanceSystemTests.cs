@@ -45,13 +45,19 @@ public class AvoidanceSystemTests
         var (store, module) = CreateModule();
         long id = module.SpawnMonster(3, new Vector3(-20f, 0f, 20f), new Vector3(-20f, 0f, 20f));
         var state = module.GetState(id)!;
-        var mover = new SimpleMoveSystem(CreateAvoidance(store, module));
-
+        var avoidance = CreateAvoidance(store, module);
+        var mover = new SimpleMoveSystem(avoidance);
         var target = new Vector3(120f, 0f, -60f);   // 直线走，全程离任何别人都很远（世界里也没有别人）
         var reference = state.Position;             // 接线前的积分（逐字抄旧 SimpleMoveSystem.MoveTo 的算式）
 
         for (int tick = 0; tick < 300; tick++)
         {
+            // 生产同款调用顺序（不能让快照恒空——否则"逐位不变"只是"筛子里没人"，
+            // 自过滤 / IsAlive / IsLoggedIn / Kind 这几道筛子在这条最关键的用例里就是零覆盖，审查指出）
+            avoidance.EnsureSnapshot((uint)tick);
+            if (tick == 0)
+                Assert.Equal(1, avoidance.AgentCount);   // 怪自己在快照里（self 过滤后 count==0 ⇒ 恒等成立）
+
             Vector3 dir = target - reference;
             dir.Y = 0;
             dir = dir.Normalize();
@@ -92,6 +98,44 @@ public class AvoidanceSystemTests
             Assert.Equal(a.Position.X, b.Position.X);
             Assert.Equal(a.Position.Z, b.Position.Z);
         }
+    }
+
+    /// <summary>
+    /// 边界反弹判据的**纯函数**表（审查 H）：两套 runner 的对照只证明"接避让且无邻居 ≡ 不接避让"，
+    /// 用的是同一份新判据 ⇒ 证明不了"新判据 ≡ 旧判据"。这里把旧判据
+    /// （`next &gt; half || next &lt; -half`，接线前那两行）抄进测试当参照，逐格比对：
+    /// 旧实现能走到的状态上两者必须一致；旧实现**走不到**的那一格（位置在界外但意图朝界内，
+    /// 只有被邻居推才会出现）新判据必须**不翻向**——翻向就等于把 bot 放出去再也回不来。
+    /// </summary>
+    [Theory]
+    // 旧实现可达的状态：步长恒 = Dir×0.53（⇒ 越界必与意图同向）；两侧都得到同样的结论
+    [InlineData(1f, 499f, false)]    // 界内，朝外走
+    [InlineData(1f, 500.4f, true)]   // 越界 + 意图朝外 ⇒ 翻
+    [InlineData(-1f, -499f, false)]  // 界内，朝内走
+    [InlineData(-1f, -500.4f, true)] // 越界 + 意图朝内 ⇒ 翻
+    [InlineData(0f, 500.4f, false)]  // DirX==0：旧判据在这也不可能出现（step 的 X 恒 0），两个判据都说不翻
+    // 旧实现不可达、避让后才可达的一格：位置在界外，但**意图朝界内** ⇒ 绝不能翻
+    [InlineData(-1f, 500.4f, false)]
+    [InlineData(1f, -500.4f, false)]
+    public void Bounce_Judgement_Matches_The_Old_One_And_Never_Flips_An_Inward_Intent(float dir, float next, bool expected)
+    {
+        float half = BotRunner.WorldHalfExtent;
+        bool oldJudgement = next > half || next < -half;
+        bool newJudgement = BotRunner.ShouldBounce(dir, next, half);
+
+        bool outwardIntent = (dir > 0f && next > half) || (dir < 0f && next < -half);
+        if (outwardIntent || !oldJudgement)
+        {
+            Assert.Equal(oldJudgement, newJudgement);   // 旧实现能走到的状态上，新旧必须逐格一致
+        }
+        else
+        {
+            // 位置在界外、意图却不是朝外（朝界内，或 dir==0 这条轴上根本没意图）——
+            // 旧判据一律会翻（dir==0 时翻成 −0，等于白翻），新判据必须不翻
+            Assert.True(oldJudgement, "（参照）旧判据在这种情况下会翻——差异是刻意的");
+            Assert.False(newJudgement, "意图朝界内（或该轴无意图）时不许翻向——被邻居推到界外也要能自己走回来");
+        }
+        Assert.Equal(expected, newJudgement);
     }
 
     // ------------------------------------------------------------------
@@ -291,6 +335,102 @@ public class AvoidanceSystemTests
             $"追击被自己的目标拖慢了：最慢一步 {slowestChaseStep:F4} < 满速 {fullStep:F4}（目标没被排除）");
     }
 
+    /// <summary>
+    /// 2026-10-13 审查 Important B：玩家必须按**零速度障碍**处理——**上报速度是客户端可控输入**，
+    /// 报个大速度朝反方向就能让智能体"认为 τ 内不会相遇"而根本不产约束（径直穿过去）。
+    /// 这条用例就是那个作弊场景：玩家**实际站着不动**，却上报 8m/s 朝 +X（背离来者）。
+    /// </summary>
+    [Fact]
+    public void Player_That_Reports_A_Fast_Velocity_Is_Still_Treated_As_A_Zero_Velocity_Obstacle()
+    {
+        var store = new EntityStore();
+        var avoidance = CreateAvoidance(store);
+        const float step = BotSpeed;
+
+        var player = store.AddPlayer(1, "P1");
+        player.IsLoggedIn = true;
+        // 位置不动，但上报 8m/s 朝 +X（Rotation=90° ⇒ sin/cos = (1,0)）——不可信的输入
+        player.UpdatePosition(new Vector3(0f, 0f, 0f), 90f, 8f, 1L, 0U);
+        var playerStart = player.Position;
+
+        var bot = store.AddPlayer(2, "Bot");
+        bot.Kind = (byte)EntityKind.PlayerBot;
+        var botPos = new Vector3(0f, 0f, -8f);
+        bot.UpdatePosition(botPos, 0f, step / Dt, 1L, 0U);
+        var botVelocity = new Vector3(0f, 0f, 0f);
+
+        float worstHorizon = float.MaxValue;
+        float minDistance = float.MaxValue;
+        for (uint tick = 0; tick < 60; tick++)
+        {
+            avoidance.EnsureSnapshot(tick);
+            Vector3 solveFrom = botPos;
+            Vector3 solved = avoidance.Solve(2, null, botPos, botVelocity,
+                new Vector3(0f, 0f, step), BotRadius, step);
+            botVelocity = solved;
+            botPos = botPos + solved;
+            bot.UpdatePosition(botPos, YawOf(solved), step / Dt, tick + 2, 0U);
+
+            minDistance = Math.Min(minDistance, Distance(botPos, player.Position));
+            worstHorizon = Math.Min(worstHorizon,
+                RayDiscMinDistance(solveFrom, solved, player.Position, avoidance.TimeHorizonTicks));
+        }
+
+        Assert.Equal(playerStart.X, player.Position.X);   // 服务端不改玩家位置
+        Assert.True(worstHorizon >= 1f - 0.01f,
+            $"被玩家上报的假速度骗了：解出的速度在 τ 内会撞上玩家（视界间距 {worstHorizon:F4}）");
+        Assert.True(minDistance >= 1f - 0.02f, $"机器人从站着不动的玩家身上穿过去了：{minDistance:F4}");
+    }
+
+    /// <summary>
+    /// 审查 B 的第二条：玩家**真的**以 8m/s 沿 +X 移动（位置逐 tick 更新、上报值也与实际一致），
+    /// 断言解出的位移在 τ 内不与玩家的**实际轨迹**相交。零速度是保守侧：玩家横向离开时，
+    /// 智能体仍按"他停在原地"让开，实际余量只会更大。
+    /// </summary>
+    [Fact]
+    public void Player_Moving_Along_X_Is_Never_Intersected_Within_The_Horizon()
+    {
+        var store = new EntityStore();
+        var avoidance = CreateAvoidance(store);
+        const float step = BotSpeed;                 // 玩家与机器人同速（8m/s）
+
+        var player = store.AddPlayer(1, "P1");
+        player.IsLoggedIn = true;
+        var playerPos = new Vector3(0f, 0f, 0f);
+        player.UpdatePosition(playerPos, 90f, step / Dt, 1L, 0U);   // 朝向 +X（Rotation=90°）
+
+        var bot = store.AddPlayer(2, "Bot");
+        bot.Kind = (byte)EntityKind.PlayerBot;
+        var botPos = new Vector3(0f, 0f, -8f);
+        bot.UpdatePosition(botPos, 0f, step / Dt, 1L, 0U);
+        var botVelocity = new Vector3(0f, 0f, 0f);
+        var playerVelocity = new Vector3(step, 0f, 0f);            // 玩家的真实每 tick 位移（+X）
+
+        float worstHorizon = float.MaxValue;
+        for (uint tick = 0; tick < 60; tick++)
+        {
+            avoidance.EnsureSnapshot(tick);
+            Vector3 solveFrom = botPos;
+            Vector3 targetFrom = playerPos;
+            Vector3 solved = avoidance.Solve(2, null, botPos, botVelocity,
+                new Vector3(0f, 0f, step), BotRadius, step);
+            botVelocity = solved;
+            botPos = botPos + solved;
+            bot.UpdatePosition(botPos, YawOf(solved), step / Dt, tick + 2, 0U);
+
+            // 玩家按自己的实际轨迹走（位置与上报值一致——诚实的客户端）
+            playerPos = playerPos + playerVelocity;
+            player.UpdatePosition(playerPos, 90f, step / Dt, tick + 2, 0U);
+
+            // 解出的位移（τ 内匀速）与玩家实际轨迹（τ 内匀速）的最小间距
+            worstHorizon = Math.Min(worstHorizon,
+                ClosingMinDistance(solveFrom, solved, targetFrom, playerVelocity, avoidance.TimeHorizonTicks));
+        }
+
+        Assert.True(worstHorizon >= 1f - 0.01f,
+            $"解出的速度在 τ 内与玩家的实际轨迹相交：最小间距 {worstHorizon:F4} < 1.0");
+    }
+
     // ------------------------------------------------------------------
     // 5. --no-avoid 负对照
     // ------------------------------------------------------------------
@@ -372,9 +512,15 @@ public class AvoidanceSystemTests
     /// 就是"解出的速度在时间视界内会不会撞上不动的邻居"的可证伪度量。
     /// </summary>
     private static float RayDiscMinDistance(Vector3 from, Vector3 velocity, Vector3 disc, float horizonTicks)
+        => ClosingMinDistance(from, velocity, disc, new Vector3(0f, 0f, 0f), horizonTicks);
+
+    /// <summary>同上，但目标也在动（τ 内匀速）：相对运动退化成一条射线 ⇒ 同一个最近点公式。
+    /// 用于"解出的位移 vs 邻居的**实际轨迹**"这种断言（双方各走各的）。</summary>
+    private static float ClosingMinDistance(Vector3 from, Vector3 velocity, Vector3 target,
+        Vector3 targetVelocity, float horizonTicks)
     {
-        float px = disc.X - from.X, pz = disc.Z - from.Z;
-        float vx = velocity.X, vz = velocity.Z;
+        float px = target.X - from.X, pz = target.Z - from.Z;
+        float vx = velocity.X - targetVelocity.X, vz = velocity.Z - targetVelocity.Z;
         float vv = vx * vx + vz * vz;
         float t = vv > 1e-12f ? (px * vx + pz * vz) / vv : 0f;   // 最近点参数
         if (t < 0f) t = 0f;

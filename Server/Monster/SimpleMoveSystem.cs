@@ -21,7 +21,13 @@ namespace KcpServer.Monster
             Vector3 direction = targetPosition - m.Position;
             direction.Y = 0;
 
-            if (direction.X * direction.X + direction.Z * direction.Z < 0.001f) return;
+            if (direction.X * direction.X + direction.Z * direction.Z < 0.001f)
+            {
+                // 到点了（本 tick 不动）：把"当前速度"清零，否则停住再起步那一 tick，ORCA 的半平面
+                // 锚点会用上"上一段行程的位移"——一个已经不存在的速度（审查指出）。
+                m.CurrentVelocity = default;
+                return;
+            }
 
             direction = direction.Normalize();
 

@@ -127,6 +127,12 @@ namespace KcpServer.Monster
             var entity = _store.AddNpc(npcId, $"{config.name}#{npcId}", templateId, config.hp, position);
             entity.Rotation = YawTowardOrigin(position);
 
+            // 半径**就地归一**：`RadiusOfTemplate` 的兜底（表里没有 / 值非法 → 0.5）必须落到配置对象上，
+            // 否则自身半径走 `config.bodyRadius`（漏填就是 0）、邻居眼里走 `RadiusOfTemplate`（0.5）——
+            // 合并半径减半，避让形同虚设。模板对象在表里唯一，归一一次全模板生效（本表是每模块
+            // 反序列化出来的私有副本，不会串到别的模块）。改的是同一个引用，两条路径从此同值。
+            config.bodyRadius = RadiusOfTemplate(templateId);
+
             var state = new MonsterState(npcId, templateId, config, attackSkillId)
             {
                 Position = position,

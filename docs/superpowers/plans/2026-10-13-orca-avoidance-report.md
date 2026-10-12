@@ -143,8 +143,9 @@ Avoidance", ISRR 2011）自己实现，**没有 vendor/移植 RVO2 源码**：�
 改动 `MonsterConfig.cs` / `monster_config.json` / `ConfigLoader.cs` / `SimpleMoveSystem.cs` /
 `MonsterState.cs` / `MonsterModule.cs` / `BotRunner.cs` / `Server3C.cs` / `Program.cs` /
 `OrcaSolver.cs`（仅类注释加一节"不要加沿 v_pref 拉满"的告诫）
-测试：`dotnet test Server/Server.Tests/Server.Tests.csproj` → **179 → 187 全绿**；
+测试：`dotnet test Server/Server.Tests/Server.Tests.csproj` → **179 → 187 →（审查后 210）全绿**；
 Unity EditMode（`unity-mcp-cli run-tool tests-run`）→ **303 → 305 全绿**（零回归）
+（追加：接线审查的 8 项修改见文末 §7）
 
 ## 1. 半径数据源（Part 0）
 
@@ -155,12 +156,12 @@ Unity EditMode（`unity-mcp-cli run-tool tests-run`）→ **303 → 305 全绿**
 |---|---|---|
 | 1 Slime | 0.5 | 客户端目录未接线 ⇒ 退化为 `CreatePrimitive(Sphere)` 单位球（半径 0.5，用例另钉住这条） |
 | 2 Wolf | 0.5 | 同上 |
-| 3 DogKnight | **0.88** | 本次实测：`DogKnightMonster.prefab` 合并 SkinnedMeshRenderer **世界** bounds 的 X 跨度 1.7535 ÷ 2 = 0.8768 |
-| 4 SpiderBoss | 1.66 | 同法：世界 X 跨度 3.3236 ÷ 2 = 1.6618（根上 2× 缩放已折进世界尺寸），与上一轮审查的 3.3/2 对齐 |
+| 3 DogKnight | **0.88** | 本次实测：`DogKnightMonster.prefab` 合并 SkinnedMeshRenderer **世界** bounds 的 XZ 大跨度 1.7535 ÷ 2 = 0.8768（X=Z 取大者后同值） |
+| 4 SpiderBoss | **1.74** | 同法，取 X/Z 跨度里**大的那个**（Z 3.4837 ÷ 2 = 1.7419；X 3.3236 略窄）。**2026-10-13 审查后从 1.66 改到 1.74**：客户端身体是 X/Z 方盒包络，只按 X 算每侧小 0.08m |
 
 DogKnight 的实测方法（与 `NpcBodyCollider.BuildCollider` **同一把尺子**）：Unity MCP
 `script-execute` 里 `PrefabUtility.InstantiatePrefab` → 合并子物体 SMR 的 `Renderer.bounds` →
-取世界 X 跨度的一半。机器人半径 `BotRunner.BotRadius = 0.5`（对应客户端 `CreatePrimitive(Capsule)`
+取世界 XZ 跨度里大的一半（审查后）。机器人半径 `BotRunner.BotRadius = 0.5`（对应客户端 `CreatePrimitive(Capsule)`
 占位体，代码注释里写明了来源）；玩家半径 `AvoidanceSystem.PlayerRadius = 0.5`（两份玩家预制体
 `CharacterController.m_Radius` 实测值）。
 
@@ -169,6 +170,8 @@ DogKnight 的实测方法（与 `NpcBodyCollider.BuildCollider` **同一把尺�
 RED→GREEN 都有实测：先写用例（json 无字段 ⇒ `bodyRadius=0` ⇒ 红），再补 json ⇒ 绿。
 **过程中它抓到了我自己的一个错误**：半宽一开始除回了 `lossyScale`（那是本地尺寸，服务端要的是世界米），
 SpiderBoss 量出 0.83 vs 服务端 1.66 ⇒ 红，改回世界 X 跨度后绿——这条断言确实在干活。
+（审查后又把它从"只取 X"改成"取 X/Z 大者"，并把容差从 0.1 收到 **0.05**：0.08m 的约定差
+在 0.1 容差下是分不出来的——实测按 X-only 量也能过，那这条断言就钉不住"服务端抄的是哪条约定"。）
 
 ## 2. 接线（Part 1）
 
@@ -179,7 +182,8 @@ SpiderBoss 量出 0.83 vs 服务端 1.66 ⇒ 红，改回世界 X 跨度后绿�
   Tick 顶部再叫一次（同 tick no-op）。
 - **速度单位 = 每 tick 位移**（米/tick），τ 同单位。这样"期望速度"就是各移动系统原本要走的位移，
   **没有邻居时逐字返回**，积分算式与接线前逐位相同。
-- **责任权重**：怪物/机器人 0.5，真人玩家 1.0（玩家速度用其上报的 `Speed` + 朝向推，是"会动的障碍"）。
+- **责任权重**：怪物/机器人 0.5，真人玩家 1.0。玩家按**零速度障碍**处理（审查后从"用上报的
+  `Speed`+朝向推"改回规格：朝向≠移动方向，且上报速度是客户端可控输入——见 §6 与代码注释）。
 - **两个系统**：`SimpleMoveSystem.MoveTo`（期望位移 → 解算 → 积分；邻居提供者由 MonsterModule 注入）
   与 `BotRunner.Tick`（同样接；**边界反弹改按意图方向判**——用解出的位移判界会让贴着墙、被邻居
   往外推的 bot 把方向翻反）。攻击目标 `MonsterState.TargetId` 在解算里排除。
@@ -269,3 +273,93 @@ t=31.61s 的第二次相遇 0.437 → 1.409。其余采样点两组**完全相�
    一字未改）。
 6. 解算器**未改**（除类注释加了"不要加沿 v_pref 拉满到 maxSpeed"的告诫）。所有不变量与容差
    口径与上一轮报告一致。
+
+---
+
+# 附录：接线审查（8 项）的修改记录
+
+日期：2026-10-13（同一任务，审查回执后）
+测试：服务端 **187 → 210 全绿**；Unity EditMode **305 全绿**（新增 14 条服务端用例 + 2 条客户端侧改动）
+提交：见 §7.6
+
+## 7.1 Important A：半径链条的钉子与"单一真值源"
+
+**问题**：`bodyRadius` 全靠 `ConfigLoader.IncludeFields = true` 才反序列化得到，而 `RadiusOfTemplate`
+在"表里没有/值非法"时**静默**回落 0.5——`IncludeFields` 被关掉、json 键改名或新模板漏填时，
+SpiderBoss 的半径会从 1.74 无声变成 0.5（客户端身体还是 3.48m 宽），而当时全部测试仍然全绿；
+更糟的是自身半径走 `m.Config.bodyRadius`（漏填即 0）、邻居眼里走 `RadiusOfTemplate`（0.5），
+合并半径减半，避让形同虚设。
+
+**改动**：
+- 新增 `Server/Server.Tests/Monster/MonsterBodyRadiusTests.cs`：从**构建输出目录**的 json 逐层断言
+  （四模板 0.5/0.5/0.88/1.74 + `bodyRadius > 0` 的"防静默落 0"守卫）→ 模块查表同值 → 生成出来的怪
+  身上读到的半径 == 邻居侧查表值；另有一条**坏 json**（缺 bodyRadius）用例把"自身 0 / 邻居 0.5"
+  的不对称逼出来。
+- `MonsterModule.SpawnMonster` 里**就地归一**：`config.bodyRadius = RadiusOfTemplate(templateId)`
+  —— 兜底落到配置对象上，两条路径从此同值（模板对象在表里唯一，归一一次全模板生效）。
+
+**变异**：`RadiusOfTemplate` 恒返回 0.5 ⇒ `Module_Resolves_The_Same_Radius_It_Shipped` 对 t3/t4 红；
+去掉装配归一 ⇒ `Invalid_Config_Is_Normalised_...` 红。
+
+## 7.2 Important B：玩家改回**零速度障碍**（原实现是偏离规格的）
+
+**问题**：原实现用上报的 `Speed` + `Rotation` 推玩家速度。两个毛病：① `Rotation` 是**角色朝向**，
+侧移/后退/转身时不是移动方向 ⇒ 约束算错方向；② 这是**客户端可控输入** ⇒ 报个大速度朝反方向
+就能让智能体"认为 τ 内不会相遇"而根本不产约束（穿过去）。规格原文就是"玩家是零速度障碍"。
+
+**改动**：`EnsureSnapshot` 里玩家恒 `VX = VZ = Speed = 0`（理由写进注释），`reach` 里那一项随之
+变小（更保守）。§2 的偏离清单相应删掉这一条。
+
+**新用例**：
+- `Player_That_Reports_A_Fast_Velocity_Is_Still_Treated_As_A_Zero_Velocity_Obstacle`（作弊场景：
+  玩家站着不动但上报 8m/s 朝 +X）。
+- `Player_Moving_Along_X_Is_Never_Intersected_Within_The_Horizon`（审查指定的场景：玩家真的以 8m/s
+  沿 +X 走，断言解出的位移在 τ 内不与**实际轨迹**相交）。
+- **变异**：玩家改回用上报速度 ⇒ 第一条红（视界间距 **0.0000**：径直穿过站着不动的玩家）。
+  诚实标注：第二条用例**抓不住**这个变异——该几何下玩家横向离开，按不按上报速度都撞不上；
+  真正有判别力的是那条作弊用例。
+
+## 7.3 六条次要
+
+| # | 问题 | 改动 | 钉子 |
+|---|---|---|---|
+| C | 怪物恒等用例全程没调 `EnsureSnapshot`（`_agents` 恒空 ⇒ 那条最关键的"逐位不变"是"筛子里没人"） | 循环里补 `EnsureSnapshot(tick)` | `Assert.Equal(1, AgentCount)`（自过滤后 count==0，但筛子真的跑了） |
+| D | 半宽只取 X 跨度，而客户端身体是 X/Z 方盒 ⇒ SpiderBoss 每侧小 0.08m | 取 `max(x,z)`；配置 1.66 → **1.74**；容差 0.1 → **0.05**（0.08 的约定差在 0.1 下分不出来，实测按 X-only 量也能过） | 客户端 `MonsterBodyRadiusTests` |
+| E | 提前 return（到点了）时 `CurrentVelocity` 留着上一段行程的旧值 ⇒ 停住再起步那 tick 的 ORCA 锚点用了一个不存在的速度 | 早退分支清零 | 既有恒等用例不受影响（早退不改位置） |
+| F | 邻居速度取上一 tick flush 的值，刚起步的邻居被低估一格（自己那侧有 `max(当前,期望)`，邻居侧没有对等物） | **只加注释**（下一 tick 自愈，低估只会让筛程偏小、不会凭空绕路）——按审查裁定不做兜底逻辑 | — |
+| G | `MaxNeighbors = 64` 用的是 `break`：缓冲一满就把**还没扫到的邻居全丢**（100 bot 挤一处时正是最需要保护的几对） | 缓冲 128（≥ 全场理论上限）+ **`continue` 只跳过写不下的**（不 break） | 注释即契约；人群挤压场景 |
+| H | 两套 runner 用的是同一份新反弹判据 ⇒ 只证明"接避让且无邻居 ≡ 不接避让"，证明不了"新判据 ≡ 旧判据" | 判据抽成纯函数 `BotRunner.ShouldBounce`（附注释解释为什么必须与"位置越界"解耦） | `Bounce_Judgement_Matches_The_Old_One_And_Never_Flips_An_Inward_Intent`：旧判据抄进测试逐格比对 + 钉住"意图朝界内（或该轴无意图）时绝不翻向" |
+| H+ | （H 过程中发现的真实边界）只被推到界外、而其方向为 0 的那条轴**再也不会自己走回来** | 位置**无条件**夹回世界内（旧代码两者同条件；无邻居时逐位一致） | 同上的注释 + 既有 bot 恒等用例 |
+
+## 7.4 活体对照**重跑**（因为 B 改了玩家的处理方式）
+
+`--bots 100`、同种子、前 30s（各 151 采样）。重跑数字与上一轮**逐项相同**——该场景里没有真人玩家
+（100 个都是 `PlayerBot`），B 的改动对它无影响；这本身就是"改动只落在玩家那条分支"的旁证。
+
+| 指标（前 30s） | 开避让（旧/新） | `--no-avoid`（旧/新） |
+|---|---|---|
+| 最小两两间距（采样最小值） | 1.047 m / **1.047 m** | 0.262 m / **0.262 m** |
+| 最小两两间距（中位数） | 7.527 m / **7.527 m** | 7.527 m / **7.527 m** |
+| 出现穿模对的采样点数 | 0 / **0** | 1 / **1** |
+| 距离 < 5m 的贴近对数（累计） | 40 / **40** | 40 / **40** |
+
+日志（已覆盖为最新一轮）：`production/verify/orca-avoid.log` / `orca-noavoid.log`；两组跑完都确认停服。
+
+## 7.5 复现命令
+
+```
+dotnet test Server/Server.Tests/Server.Tests.csproj                      # 210
+unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"EditMode"}'   # 305
+dotnet run --no-build --project Server/Server3C.csproj -- 8000 --bots 100 --probe                # 开避让
+dotnet run --no-build --project Server/Server3C.csproj -- 8000 --bots 100 --probe --no-avoid     # 负对照
+```
+
+## 7.6 疑虑（追加）
+
+1. 零速度玩家是**保守侧**：玩家真在跑动时智能体按"他没动"来让——躲得笨一点。**玩家迎着怪跑**时
+   这个保守会变成"来不及让"（小半径怪仍可能被玩家顶到），兜底是客户端那条 `NpcBodyCollider`
+   （它本来就挡着本地玩家）。审查已按此裁定，记录在案。
+2. `MaxNeighbors = 128` 在当前规模（100 bot + 6 怪）下不会溢出；真溢出时丢的是**按 id 排在后面**的
+   邻居（不是按距离），这点写在常量注释里。
+3. 反弹判据抽了纯函数是为了可测；行为与旧写法在**旧实现可达的状态**上逐格一致，
+   差异只在"被邻居推到界外"这一格（且是刻意的）。

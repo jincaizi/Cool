@@ -41,7 +41,7 @@
       "name": "SpiderBoss",
       "hp": 1500,
       "moveSpeed": 3.2,
-      "bodyRadius": 1.66,
+      "bodyRadius": 1.74,
       "detectionRadius": 25,
       "visionAngle": 140,
       "attackRange": 2.5,

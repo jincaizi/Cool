@@ -2,9 +2,9 @@ Starting Server3C on port 8000...
 Bot mode: 100 bots registered
 Avoidance: disabled (--no-avoid; 智能体按愿望位移直行)
 Probe: min pairwise distance every 200ms
-[04:42:56] INFO: Receive loop started
-[04:42:56] INFO: Server3C started on port 8000 with KCP protocol
-[04:42:56] INFO: WebSocket listener started on http://127.0.0.1:8000/
+[05:00:23] INFO: Receive loop started
+[05:00:23] INFO: Server3C started on port 8000 with KCP protocol
+[05:00:23] INFO: WebSocket listener started on http://127.0.0.1:8000/
 Server3C is running on port 8000
 Press Ctrl+C to stop...
 [Probe] t=0.13s min=9.000 win=8.970 close=0 ovl=0
@@ -32,7 +32,7 @@ Press Ctrl+C to stop...
 [Probe] t=4.49s min=11.864 win=11.864 close=0 ovl=0
 [Probe] t=4.69s min=11.864 win=11.864 close=0 ovl=0
 [Probe] t=4.88s min=11.864 win=11.864 close=0 ovl=0
-[04:43:01] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
+[05:00:28] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
 [Probe] t=5.08s min=11.864 win=11.864 close=0 ovl=0
 [Probe] t=5.28s min=11.005 win=11.005 close=0 ovl=0
 [Probe] t=5.48s min=10.700 win=10.698 close=0 ovl=0
@@ -58,7 +58,7 @@ Press Ctrl+C to stop...
 [Probe] t=9.44s min=9.908 win=8.657 close=0 ovl=0
 [Probe] t=9.64s min=9.585 win=9.585 close=0 ovl=0
 [Probe] t=9.83s min=8.208 win=8.208 close=0 ovl=0
-[04:43:06] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
+[05:00:33] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
 [Probe] t=10.03s min=7.279 win=7.279 close=0 ovl=0
 [Probe] t=10.23s min=6.980 win=6.980 close=0 ovl=0
 [Probe] t=10.43s min=7.387 win=7.039 close=0 ovl=0
@@ -84,7 +84,7 @@ Press Ctrl+C to stop...
 [Probe] t=14.39s min=4.676 win=2.754 close=1 ovl=0
 [Probe] t=14.59s min=7.755 win=5.690 close=0 ovl=0
 [Probe] t=14.78s min=10.892 win=8.797 close=0 ovl=0
-[04:43:10] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
+[05:00:38] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
 [Probe] t=14.98s min=11.864 win=11.864 close=0 ovl=0
 [Probe] t=15.18s min=11.756 win=11.756 close=0 ovl=0
 [Probe] t=15.38s min=9.594 win=9.594 close=0 ovl=0
@@ -110,7 +110,7 @@ Press Ctrl+C to stop...
 [Probe] t=19.34s min=4.237 win=4.237 close=1 ovl=0
 [Probe] t=19.54s min=2.694 win=2.694 close=1 ovl=0
 [Probe] t=19.73s min=2.584 win=2.397 close=1 ovl=0
-[04:43:15] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
+[05:00:43] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
 [Probe] t=19.93s min=4.026 win=2.955 close=1 ovl=0
 [Probe] t=20.13s min=5.988 win=4.651 close=0 ovl=0
 [Probe] t=20.33s min=8.100 win=6.682 close=0 ovl=0
@@ -136,7 +136,7 @@ Press Ctrl+C to stop...
 [Probe] t=24.29s min=11.283 win=11.283 close=0 ovl=0
 [Probe] t=24.49s min=8.943 win=8.943 close=0 ovl=0
 [Probe] t=24.68s min=7.271 win=7.271 close=0 ovl=0
-[04:43:20] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
+[05:00:48] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
 [Probe] t=24.88s min=6.781 win=6.781 close=0 ovl=0
 [Probe] t=25.08s min=7.702 win=6.941 close=0 ovl=0
 [Probe] t=25.28s min=6.104 win=6.104 close=0 ovl=0
@@ -162,7 +162,7 @@ Press Ctrl+C to stop...
 [Probe] t=29.24s min=4.091 win=2.362 close=1 ovl=0
 [Probe] t=29.44s min=7.094 win=5.068 close=0 ovl=0
 [Probe] t=29.63s min=10.205 win=8.125 close=0 ovl=0
-[04:43:25] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
+[05:00:53] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
 [Probe] t=29.83s min=11.864 win=11.250 close=0 ovl=0
 [Probe] t=30.03s min=11.310 win=11.310 close=0 ovl=0
 [Probe] t=30.23s min=9.547 win=9.547 close=0 ovl=0
@@ -188,7 +188,7 @@ Press Ctrl+C to stop...
 [Probe] t=34.19s min=6.802 win=6.802 close=0 ovl=0
 [Probe] t=34.39s min=3.821 win=3.821 close=1 ovl=0
 [Probe] t=34.58s min=1.777 win=1.777 close=1 ovl=0
-[04:43:30] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
+[05:00:57] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
 [Probe] t=34.78s min=3.455 win=1.958 close=1 ovl=0
 [Probe] t=34.98s min=6.398 win=4.400 close=0 ovl=0
 [Probe] t=35.18s min=6.455 win=6.455 close=0 ovl=0
@@ -208,14 +208,3 @@ Press Ctrl+C to stop...
 [Probe] t=37.95s min=3.246 win=3.246 close=2 ovl=0
 [Probe] t=38.15s min=1.397 win=1.397 close=1 ovl=0
 [Probe] t=38.35s min=1.864 win=1.155 close=1 ovl=0
-[Probe] t=38.54s min=3.887 win=2.496 close=1 ovl=0
-[Probe] t=38.74s min=6.071 win=4.608 close=0 ovl=0
-[Probe] t=38.94s min=8.290 win=6.808 close=0 ovl=0
-[Probe] t=39.14s min=10.521 win=9.032 close=0 ovl=0
-[Probe] t=39.34s min=11.864 win=11.266 close=0 ovl=0
-[Probe] t=39.53s min=11.864 win=11.864 close=0 ovl=0
-[04:43:35] INFO: [Aoi] 5s stat: sends/s=0, est_bytes/s=0, snapshotMsgs/s=0
-[Probe] t=39.73s min=11.864 win=11.864 close=0 ovl=0
-[Probe] t=39.93s min=11.864 win=11.864 close=0 ovl=0
-[Probe] t=40.13s min=11.864 win=11.864 close=0 ovl=0
-[Probe] t=40.33s min=11.864 win=11.864 close=0 ovl=0
