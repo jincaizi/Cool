@@ -1316,7 +1316,9 @@ foreach (var path in new[] {
 UnityEditor.AssetDatabase.SaveAssets();
 ```
 
-然后 `MCP assets-refresh '{}'`，再跑步骤 1 的断言测试**回读验证**（这是防"写回不可靠"的唯一手段）。
+然后 `MCP assets-refresh '{}'`，再跑步骤 1 的断言测试**回读验证**。
+
+> ⚠️ **光跑测试不足以验收（2026-10-12 实锤）**：任务 5 首轮就把 `Attack` 参数丢在了磁盘上 —— 磁盘与 HEAD 都只有 2 个参数，可 Unity 内存里是 3 个，于是 8 个断言全绿、提交的字节却是坏的。**必须同时给出字节级证据**：`grep -c 'm_Name: Attack$' <controller>` 等于 1（每个参数各一次），外加一段把两个控制器的参数名+类型打印出来的 `LoadAssetAtPath` 输出，证明内存视图与磁盘一致。变异验证之后同理 —— 回读**磁盘字节**确认变异已还原。
 
 - [ ] **步骤 5：运行测试验证通过**
 
