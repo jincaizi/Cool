@@ -681,7 +681,7 @@ git commit -m "fix(server): send a snapshot the moment an entity changes action 
         }
 ```
 
-`ApplySnapshot` 里把初始样本带上状态（`AddSample(...)` 的两处调用点补 `snapshot.ActionState`, `snapshot.Dead`），`UpdateRender` 暂时不接驱动（任务 4 落地后再接）。
+`ApplySnapshot` 里把初始样本带上状态（`AddSample(...)` 的**唯一**调用点在 `RemoteEntityRegistry.cs:71`，补上 `snapshot.ActionState` 与 `snapshot.Dead` 两个实参），`UpdateRender` 暂时不接驱动（任务 4 落地后再接）。
 
 - [ ] **步骤 5：运行测试验证通过**
 
@@ -726,9 +726,14 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         [Test]
         public void Variant_Is_A_Pure_Function_Of_The_Timestamp()
         {
+            // 钉住实际取值（只断言 f(t) == f(t) 是恒真式，挡不住"改成按客户端计数"这种回归）
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(0L));
+            Assert.AreEqual(1, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks));
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks * 2));
+
+            // 纯函数：同一时间戳任意次调用结果一致（所有客户端各算各的也必须同结论）
             long t = 638_000_000_000_000_000L;
-            Assert.AreEqual(NpcAttackSchedule.VariantOf(t), NpcAttackSchedule.VariantOf(t),
-                "同一时间戳必须得出同一变体");
+            Assert.AreEqual(NpcAttackSchedule.VariantOf(t), NpcAttackSchedule.VariantOf(t));
         }
 
         [Test]
@@ -1282,7 +1287,36 @@ UnityEditor.AssetDatabase.SaveAssets();
 运行：`UTEST NpcAnimatorAssetTests`
 预期：4 个用例全绿。
 
-再补一条**控制器与驱动的端到端**用例（同文件追加）：用真实控制器实例化 Animator，喂 `ApplyState(Run)` / `PlayAttack(0)` / 忙位期间喂 `Run`，断言 `GetCurrentAnimatorStateInfo(0).IsName(...)` —— 这是"参数名错=动画静默不动"的唯一防线。
+再补一条**控制器与驱动的端到端**用例（同文件追加）—— 这是"参数名错 = 动画静默不动"的唯一防线（`SetInteger` 写进不存在的参数**不报错**）：
+
+```csharp
+        [Test]
+        public void Driver_And_Real_Controller_Agree_On_Parameter_Names()
+        {
+            var go = new GameObject("DriverOnRealController");
+            try
+            {
+                var animator = go.AddComponent<Animator>();
+                animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
+                    "Assets/Monstor/DogKnight/Animator/NpcAnimator_DogKnight.controller");
+                var driver = go.AddComponent<NpcEntityAnimator>();   // 必须在设好控制器之后加：Awake 会缓存 Animator
+
+                driver.ApplyState((byte)NpcAnimationState.Run, false);
+                animator.Update(0.2f);   // 跨过 0.15s 过渡再断言：过渡期间 GetCurrentAnimatorStateInfo 报哪个状态是实现细节
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Run"),
+                    "写 MonsterState=2 之后必须真的进 Run —— 参数名对不上就会停在上一个状态");
+
+                driver.PlayAttack(variant: 0);
+                animator.Update(0.2f);   // 跨过 0.1s 过渡
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack01"),
+                    "Trigger 名对不上就永远不播攻击");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+```
 
 - [ ] **步骤 6：Commit**
 
@@ -1346,9 +1380,13 @@ MCP assets-prefab-close '{"save":true}'
 
 - [ ] **步骤 3：Spider 怪物预制体**
 
-从 FBX 里的模型 GameObject 建预制体，然后：根节点 `localScale = (2,2,2)`（spec D6：3.3m 宽）、`Animator` 指向 `NpcAnimator_Spider` + 该 FBX 的 Avatar、`Apply Root Motion = 0`、加 `NpcEntityAnimator`。
+一次性用脚本建好并保存（`PrefabUtility.SaveAsPrefabAsset` 是预制体的规范 API；**写完必须靠步骤 4 的断言回读验证** —— 本项目在 script-execute 写资产上有过不可靠的前科）：
 
-> Legacy 导入器产生的那个 `Animation` 组件在改 Generic 后会随重新导入自然消失；若仍在，用 `gameobject-component-destroy` 删掉（`gameobject-component-get` 先确认）。
+```
+MCP script-execute '{"isMethodBody":true,"className":"SpiderPrefab","methodName":"Run","csharpCode":"var fbx = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(\"Assets/Monstor/fantasySpider/spider_myOldOne_Mecanim.FBX\");\nvar root = new GameObject(\"SpiderMonster\");\nvar inst = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(fbx);\ninst.transform.SetParent(root.transform, false);\nroot.transform.localScale = new Vector3(2f, 2f, 2f);\nvar animator = inst.GetComponentInChildren<Animator>();\nvar legacy = inst.GetComponentInChildren<Animation>();\nif (legacy != null) Object.DestroyImmediate(legacy);\nanimator.applyRootMotion = false;\nanimator.runtimeAnimatorController = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(\"Assets/Monstor/fantasySpider/NpcAnimator_Spider.controller\");\nanimator.gameObject.AddComponent<Hotfix.GameSystems.SyncLayer.NpcEntityAnimator>();\nUnityEditor.PrefabUtility.SaveAsPrefabAsset(root, \"Assets/Monstor/fantasySpider/SpiderMonster.prefab\");\nObject.DestroyImmediate(root);\nUnityEditor.AssetDatabase.SaveAssets();\nUnityEditor.AssetDatabase.Refresh();\nDebug.Log(\"[SPIDER-PREFAB] saved\");"}'
+```
+
+> **驱动组件必须加在 Animator 所在的 GameObject 上**（`NpcEntityAnimator.Awake` 用 `GetComponent<Animator>()` 取自己身上的 Animator）。上面这段已经把 `localScale = (2,2,2)`（spec D6：3.3m 宽）、关根运动、去 legacy `Animation`、指控制器一次做完。
 
 - [ ] **步骤 4：断言预制体结构（追加到 `NpcAnimatorAssetTests`）**
 
@@ -1366,10 +1404,14 @@ MCP assets-prefab-close '{"save":true}'
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 Assert.IsNotNull(prefab, path);
-                Assert.IsNotNull(prefab!.GetComponent<NpcEntityAnimator>(), $"{path} 缺 NpcEntityAnimator");
 
-                var animator = prefab.GetComponentInChildren<Animator>();
+                var driver = prefab!.GetComponentInChildren<NpcEntityAnimator>(true);
+                Assert.IsNotNull(driver, $"{path} 缺 NpcEntityAnimator");
+
+                var animator = prefab.GetComponentInChildren<Animator>(true);
                 Assert.IsNotNull(animator, $"{path} 缺 Animator");
+                Assert.AreSame(animator!.gameObject, driver!.gameObject,
+                    $"{path} 的驱动必须与 Animator 同物体（Awake 里 GetComponent<Animator>() 只找自己）");
                 Assert.IsNotNull(animator!.runtimeAnimatorController, $"{path} 的 Animator 没有控制器");
                 Assert.IsTrue(animator.runtimeAnimatorController!.name.Contains(controllerName), $"{path} 控制器不对");
                 Assert.IsFalse(animator.applyRootMotion, $"{path} 必须关根运动（位置由服务端权威）");
@@ -1469,7 +1511,7 @@ git commit -m "feat(monster): prefabs for the knight and the boss, spider rig sw
     }
 
     [Test]
-    public void Pending_Attack_Is_Dropped_When_The_View_Goes_Away()
+    public void A_Scheduled_Attack_For_A_Destroyed_View_Is_Harmless()
     {
         var root = new GameObject("DropRoot");
         var prefab = new GameObject("FakeMonsterPrefab");
@@ -1489,9 +1531,10 @@ git commit -m "feat(monster): prefabs for the knight and the boss, spider rig sw
             registry.ScheduleAttack(2_000_004, serverTimestamp: 1_000_000L + 500L * 10_000L);
             registry.Remove(2_000_004);
 
-            // 视图没了 → 到点也不该再产出（否则会播给已不存在的实体）
-            registry.UpdateRender(nowServerTicks: 1_000_000L + 1_000L * 10_000L, renderDelayTicks: 0L);
-            Assert.IsNull(registry.GetView(2_000_004));
+            // 排程项到点时视图已不在 —— 不得抛异常，也不得把视图复活
+            Assert.DoesNotThrow(() => registry.UpdateRender(
+                nowServerTicks: 1_000_000L + 1_000L * 10_000L, renderDelayTicks: 0L));
+            Assert.IsNull(registry.GetView(2_000_004), "排程项不得复活已销毁的视图");
         }
         finally
         {
@@ -1501,6 +1544,8 @@ git commit -m "feat(monster): prefabs for the knight and the boss, spider rig sw
         }
     }
 ```
+
+> **本条只保证"无害"**，不保证"排程项被清掉"—— 那个语义由任务 4 的 `NpcAttackScheduleTests.Clear_For_Entity_Drops_Its_Pending_Attacks` 覆盖，别在这条里断言它看不见的东西。
 
 
 - [ ] **步骤 2：运行测试验证失败**
