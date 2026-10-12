@@ -39,13 +39,23 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         [Test]
         public void Parameters_Match_What_The_Driver_Hashes()
         {
-            // 驱动的参数名（Animator.StringToHash 常量）与资产必须成对；对不上 = 参数永远写不进去
-            var expected = new[] { "MonsterState", "AttackVariant", "Attack" };
+            // 驱动的参数名（Animator.StringToHash 常量）与资产必须成对；对不上 = 参数永远写不进去。
+            // **类型也要对**：`Attack` 若被写成 Bool，`SetTrigger` 一样静默不动（名字对、类型错也是死的）。
+            var expected = new (string Name, AnimatorControllerParameterType Type)[]
+            {
+                ("MonsterState", AnimatorControllerParameterType.Int),
+                ("AttackVariant", AnimatorControllerParameterType.Int),
+                ("Attack", AnimatorControllerParameterType.Trigger),
+            };
+
             foreach (var path in Controllers)
             {
                 var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(path)!;
                 var actual = controller.parameters.Select(p => p.name).ToArray();
-                CollectionAssert.AreEquivalent(expected, actual, path);
+                CollectionAssert.AreEquivalent(expected.Select(e => e.Name).ToArray(), actual, path);
+
+                foreach (var (name, type) in expected)
+                    Assert.AreEqual(type, controller.parameters.First(p => p.name == name).type, $"{path}:{name} 类型");
             }
         }
 
@@ -115,6 +125,8 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             //   · 不许重入（条件持续为真时逐帧重播自己）
             //   · 状态值/变体阈值必须与驱动写的常量一致
             //   · 两条攻击必须挂 Trigger 条件——只有变体条件 = 永远不会播
+            // 外加时长/exit-time：0.15s（locomotion）/ 0.1s（Hit、Death、两条攻击）与 hasExitTime=false 是逐字给定的硬参数，
+            // 被改成 0.5 或打开 exit-time 会让"参数一写就切"变成"等源状态走完"，且全套断言照样绿——所以这里也守住。
             var locomotion = new (string Dest, float Threshold)[]
             {
                 ("Idle", 0f), ("Walk", 1f), ("Run", 2f), ("Hit", 4f), ("Death", 5f),
@@ -127,7 +139,14 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
                 Assert.AreEqual(7, anyState.Length, $"{path} AnyState 转移数");
                 foreach (var t in anyState)
+                {
                     Assert.IsFalse(t.canTransitionToSelf, $"{path}:ANY->{t.destinationState.name} 不许重入");
+                    Assert.IsFalse(t.hasExitTime, $"{path}:ANY->{t.destinationState.name} 不该吃 exit time");
+                    bool isLocomotion = t.destinationState.name == "Idle" || t.destinationState.name == "Walk"
+                        || t.destinationState.name == "Run";
+                    Assert.AreEqual(isLocomotion ? 0.15f : 0.1f, t.duration, 0.001f,
+                        $"{path}:ANY->{t.destinationState.name} 过渡时长");
+                }
 
                 foreach (var (dest, threshold) in locomotion)
                 {
@@ -196,32 +215,49 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         [Test]
         public void Two_Swings_In_A_Row_Both_Play()
         {
+            // 两只怪都要守：asset 注记（*.controller.md）里那条不变量对两边都成立
+            foreach (var path in Controllers) Two_Swings_On(path);
+        }
+
+        private static void Two_Swings_On(string controllerPath)
+        {
             var go = new GameObject("TwoSwings");
             try
             {
                 var animator = go.AddComponent<Animator>();
-                animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
-                    "Assets/Monstor/fantasySpider/NpcAnimator_Spider.controller");
+                animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(controllerPath);
                 var driver = go.AddComponent<NpcEntityAnimator>();
                 driver.ResolveAnimator();   // EditMode 下 AddComponent 不触发 Awake
 
+                // 推进量从**该控制器**攻击片段的实测长度推，不写死数字：
+                // exit-time 在 0.95 处起退、再加 0.1s 混合 —— 死数字在换片段时会假红（片段只要仍短于冷却，不变量就成立）。
+                float advance = AttackClipLength(controllerPath) + 0.3f;
+
                 driver.PlayAttack(variant: 0);
                 Settle(animator);
-                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack01"));
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack01"), controllerPath);
 
-                animator.Update(1.0f);      // 推过片段（0.667s）+ exit-time 回 Idle
+                animator.Update(advance);   // 推过片段 + exit-time 回 Idle
                 Settle(animator);
-                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"), "攻击态必须已退出");
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"), controllerPath + " 攻击态必须已退出");
 
                 driver.PlayAttack(variant: 1);
                 Settle(animator);
                 Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack02"),
-                    "第二刀必须能播 —— 攻击态若没在冷却内退出，canTransitionToSelf=false 会把它静默吞掉");
+                    controllerPath + " 第二刀必须能播 —— 攻击态若没在冷却内退出，canTransitionToSelf=false 会把它静默吞掉");
             }
             finally
             {
                 Object.DestroyImmediate(go);
             }
+        }
+
+        private static float AttackClipLength(string controllerPath)
+        {
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath)!;
+            var st = controller.layers[0].stateMachine.states.First(s => s.state.name == "Attack01").state;
+            Assert.IsNotNull(st.motion, $"{controllerPath}:Attack01 没挂片段");
+            return ((AnimationClip)st.motion!).length;
         }
     }
 }

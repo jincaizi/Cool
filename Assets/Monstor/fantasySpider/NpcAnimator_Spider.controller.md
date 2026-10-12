@@ -26,4 +26,15 @@
 | 该 Boss 攻击冷却 | **2.0s** |
 | 攻击态退出的最迟时刻 | exit-time 0.95 × 0.667s + 0.1s 过渡 ≈ 0.73s |
 
-约 2.7 倍余量。**调冷却或换片段时必须重验**：`NpcAnimatorAssetTests.Two_Swings_In_A_Row_Both_Play` 会替你发现越界（它推过片段 + exit-time 后断言攻击态已回 Idle，再打第二刀）。
+约 2.7 倍余量。**调冷却或换片段时必须重验**：`NpcAnimatorAssetTests.Two_Swings_In_A_Row_Both_Play` 会替你发现越界（它推过片段 + exit-time 后断言攻击态已回 Idle，再打第二刀，两只怪各跑一遍）。
+
+## 改完怎么验（本资产的写回不可靠）
+
+`animator-modify` / `script-execute` 写 `.controller` 后，Unity 会留着**陈旧实例**：磁盘字节可能没变、或变了但 Unity 视图仍是旧的（本次任务踩到过，含"变异回滚只落到内存、没落到磁盘"）。
+所以**只跑测试不足以证明**（测试读的是 Unity 视图）。改完必须三者一致：
+
+1. 磁盘字节：片段引用（`m_Motion: {fileID: 7400010, guid: 6850c6…, type: 3}` 之类，`7400000+2×take序`）与参数表逐条对着文件看
+2. Unity 视图：`LoadAssetAtPath<AnimatorController>` 打印参数名+类型
+3. 测试绿灯
+
+`ImportAsset(ForceUpdate)` 刷不掉陈旧实例；可靠解法是**把好字节在另一个路径导入（新 GUID）→ `AssetDatabase.MoveAsset` 挪到目标路径**。
