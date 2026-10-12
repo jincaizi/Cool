@@ -64,7 +64,7 @@
 | `NpcAnimator_DogKnight.controller` / `NpcAnimator_Spider.controller` | 新资产，内容见 §5 |
 | `DogKnightMonster.prefab` | 基于 `DogPBR.prefab` 的 **Prefab Variant**：换控制器 + 挂 `NpcEntityAnimator`。原预制体不动，Asset Store 自带 `Scene01` 不受影响 |
 | `SpiderMonster.prefab` | 从 FBX 新建：移除 legacy `Animation` 组件、根节点缩放 ×2、挂 Animator + `NpcEntityAnimator` |
-| `NpcPrefabCatalog.asset` | 新 ScriptableObject：templateId → prefab |
+| `ClientNetworkHost._npcPrefabs` | `[Serializable] NpcPrefabEntry[] { int TemplateId; GameObject Prefab; }`。**不用 ScriptableObject**：场景接线无论如何都要做一次，SO 只换来"以后加怪不开场景"这点便利，却要走 `script-execute` 创建资产 —— 那条路在本项目有反序列化不正确的前科（见项目记忆 `unity-mcp-script-execute-asset-trap`） |
 | `RemoteEntityRegistry.CreateView` | Npc 分支查目录，命中实例化真模型；**未命中退回球体**（保持今天的降级行为） |
 | `RemoteInterpolator` + `RemoteEntityRegistry.UpdateRender` | 快照缓冲增加 `actionState`/`dead`，按 `renderAt` 采样出状态并喂给驱动 —— 见 §6.1 |
 | `RemoteEntityView` | 现在只挂 `RemoteEntityAnimator?`（真人用，`RemoteEntityRegistry.cs:210`）。怪物走新组件，视图需要并行的字段（或抽一个小接口）供渲染时驱动 |
@@ -253,14 +253,14 @@ VariantBucketTicks = 666_667                                    // 常量，≈1
 3. `RemoteEntityRegistryTests`（追加）：目录命中 → 视图对象是真预制体（不再是球体）；未命中 → 仍球体；视图销毁清掉待播项
 4. `CombatNetworkBridgeTests`（追加）：`CastBroadcast`(casterId = npc) → registry 收到排程；casterId = 玩家 → 不排程
 5. **控制器资产断言**（新）：两只控制器存在；状态名集合与片段映射符合 §5.1；**参数集合恰为 `MonsterState` / `AttackVariant` / `Attack`**；**Hit/Death 无出边、Attack 有 exit-time 出边** —— 防止以后被改坏
-6. **时间基准断言**（新）：`WorldSnapshot.ServerTimestamp` 与 `CastBroadcast.ServerTimestamp` 必须同源同基准 —— §6 的基石，一旦被改成相对量要立刻红
+6. **时间基准结构化 + 断言**（新）：把服务端三处墙钟调用点收敛到唯一出口 `ServerClock.NowTicks()`（`Server3C.cs` / `Handler/CastHandler.cs` / `Handler/ClockSyncHandler.cs`），并加一条断言它落在 `DateTime.UtcNow` 的秒级邻域内 —— 把 §6 的基石从口头契约变成结构性事实，而不是只靠一条测试守
 
 **Server (xUnit)**
 
 7. t3/t4 在四处齐备：`monster_config.json`、`SkillIdOf`、`CombatRules`、`CreateDefaultConfig`；并断言 `attackRange ≤ maxRange`（防「静默冻结」陷阱回归）
 8. `SpawnDefaultLayout(6)` 生成 6 只、模板序列为 `2,1,1,2,3,4`
 9. `AoiBandSchedulerTests`（追加）：**状态变化立即发送**（不受带间隔与保活间隔约束）；状态未变时既有的带频率/保活语义不变（回归）
-10. `AoiBroadcasterTests`（追加）：同一状态翻转在全 AOI 观察者上落在**同一个 tick**
+10. ~~`AoiBroadcasterTests` 单写一条~~ → **并入第 9 条**：广播器只是把 `ActionState` 透传给 `ShouldSend`，加参数后**编译期即强制接线**；跨观察者一致性的覆盖由第 9 条的第三个用例承担（两个观察者 × 不同带 × 同一 tick）
 
 **PlayMode / 人工**
 
@@ -287,7 +287,7 @@ VariantBucketTicks = 666_667                                    // 常量，≈1
 |---|---|
 | 一致性依赖时钟收敛 | 收敛前（约 1.6s 突发期）动画与位置都会短暂退化——既有性质，非本设计引入 |
 | **服务端节拍改动会碰 P3 语义** | 往 `ShouldSend` 加「状态变化即发」会动到带宽/节拍回归面（`AoiBandSchedulerTests` 8 例 + `BandwidthBudgetTests`）；预算常量不需动，但必须用回归测试锁住带宽口径 |
-| **时间基准是隐式契约，无编译期保护** | 快照与广播的时间戳靠「两处都写 `DateTime.UtcNow.Ticks`」维持一致；谁改了一处不会编译报错，只会静默破坏一致性。第 6 条测试是唯一防线 |
+| ~~时间基准是隐式契约~~ | **已降级**：三处墙钟调用点收敛到 `ServerClock.NowTicks()`，并有断言测试守着基准（§8 第 6 条）。残余风险仅剩「新代码绕过该出口直接写 `DateTime.UtcNow.Ticks`」——靠评审拦，破坏方式从"静默"变成"一眼可见" |
 | 攻击竞态 | 广播与状态快照同 tick 发出、到达顺序不保证；靠 §5.2 规则 1「先写 3 再打 Trigger + 当场置忙位」堵住。实现时不要"简化"掉这一步 |
 | 蜘蛛改 Generic 需要重新导入 | 复制 FBX 的方案下不影响原资产，但多一份网格/片段资产 |
 | Walk 状态实际不可达 | 服务端 `MonsterBtActions` 只写 `Idle` 与 `Run`，从不写 `Walk`。控制器里的 Walk 是预留位，不要误以为它该动 |
