@@ -119,6 +119,29 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void Locomotion_States_Bind_Looping_Clips()
+        {
+            // 循环态绑了非循环片段 = 播一遍就定格在末帧（Boss 站桩时会僵住）。
+            // 只钉"循环态必须循环"这一半：**不**断言一次性态必须不循环 —— DogKnight 的
+            // GetHit.anim 本就是循环的，而它的风险已被证明不可达（受击窗口 0.33s 短于
+            // 片段 0.833s，时间轴先带走状态）。
+            foreach (var path in Controllers)
+            {
+                var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(path)!;
+                var states = controller.layers[0].stateMachine.states;
+
+                foreach (var name in new[] { "Idle", "Walk", "Run" })
+                {
+                    var st = states.First(s => s.state.name == name).state;
+                    Assert.IsNotNull(st.motion, $"{path}:{name} 没挂片段");
+                    var clip = (AnimationClip)st.motion!;
+                    Assert.IsTrue(clip.isLooping,
+                        $"{path}:{name} 绑的是 {clip.name}，必须开循环（否则播一遍就定格）");
+                }
+            }
+        }
+
+        [Test]
         public void AnyState_Transitions_Match_The_Driver_Contract()
         {
             // 三条硬约束（AnyState 每帧评估，写错就静默跑偏）：

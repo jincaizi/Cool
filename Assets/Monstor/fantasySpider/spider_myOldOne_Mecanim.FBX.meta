@@ -512,7 +512,7 @@ ModelImporter:
     - serializedVersion: 16
       name: refpose
       takeName: Take 001
-      internalID: 0
+      internalID: 7400000
       firstFrame: 0
       lastFrame: 1
       wrapMode: 2
@@ -521,7 +521,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 1
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -541,7 +541,7 @@ ModelImporter:
     - serializedVersion: 16
       name: walk
       takeName: Take 001
-      internalID: 0
+      internalID: 7400002
       firstFrame: 1
       lastFrame: 30
       wrapMode: 2
@@ -550,7 +550,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 1
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -570,7 +570,7 @@ ModelImporter:
     - serializedVersion: 16
       name: run
       takeName: Take 001
-      internalID: 0
+      internalID: 7400004
       firstFrame: 33
       lastFrame: 62
       wrapMode: 2
@@ -579,7 +579,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 1
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -599,7 +599,7 @@ ModelImporter:
     - serializedVersion: 16
       name: attack1
       takeName: Take 001
-      internalID: 0
+      internalID: 7400006
       firstFrame: 65
       lastFrame: 85
       wrapMode: 0
@@ -628,7 +628,7 @@ ModelImporter:
     - serializedVersion: 16
       name: attack2
       takeName: Take 001
-      internalID: 0
+      internalID: 7400008
       firstFrame: 87
       lastFrame: 107
       wrapMode: 0
@@ -657,7 +657,7 @@ ModelImporter:
     - serializedVersion: 16
       name: idle
       takeName: Take 001
-      internalID: 0
+      internalID: 7400010
       firstFrame: 108
       lastFrame: 137
       wrapMode: 2
@@ -666,7 +666,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 1
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -686,7 +686,7 @@ ModelImporter:
     - serializedVersion: 16
       name: taunt
       takeName: Take 001
-      internalID: 0
+      internalID: 7400014
       firstFrame: 141
       lastFrame: 170
       wrapMode: 0
@@ -715,7 +715,7 @@ ModelImporter:
     - serializedVersion: 16
       name: hit1
       takeName: Take 001
-      internalID: 0
+      internalID: 7400012
       firstFrame: 173
       lastFrame: 193
       wrapMode: 0
@@ -744,7 +744,7 @@ ModelImporter:
     - serializedVersion: 16
       name: hit2
       takeName: Take 001
-      internalID: 0
+      internalID: 7400016
       firstFrame: 195
       lastFrame: 215
       wrapMode: 0
@@ -773,7 +773,7 @@ ModelImporter:
     - serializedVersion: 16
       name: jump
       takeName: Take 001
-      internalID: 0
+      internalID: 7400018
       firstFrame: 217
       lastFrame: 257
       wrapMode: 0
@@ -802,7 +802,7 @@ ModelImporter:
     - serializedVersion: 16
       name: death1
       takeName: Take 001
-      internalID: 0
+      internalID: 7400020
       firstFrame: 260
       lastFrame: 299
       wrapMode: 8
@@ -831,7 +831,7 @@ ModelImporter:
     - serializedVersion: 16
       name: death2
       takeName: Take 001
-      internalID: 0
+      internalID: 7400022
       firstFrame: 302
       lastFrame: 342
       wrapMode: 8
@@ -860,7 +860,7 @@ ModelImporter:
     - serializedVersion: 16
       name: allanims
       takeName: Take 001
-      internalID: 0
+      internalID: 7400024
       firstFrame: 0
       lastFrame: 370
       wrapMode: 2
