@@ -40,11 +40,9 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>计算渲染状态：nowServerTicks 为换算后的服务器时钟，renderDelayTicks 为渲染延迟。
-        /// 位置/朝向插值；actionState/dead 是**阶梯**（不随 t 混合）且是**渲染用**的状态——
-        /// 与插值位置配对的是所在区间**起始样本**的状态（区间内视为状态未变）。
-        /// 权威状态查询走 <see cref="TryGetSampleState"/>：两者只在 renderAt 恰等于某样本时间戳时
-        /// 差一个样本（本路径取区间左端=较早那个，它取"时间戳 ≤ renderAt 的最后一个"=该样本自身）——
-        /// 亚 tick，且实际不可达：样本时间戳是发送时刻的墙钟。</summary>
+        /// 位置/朝向插值；actionState/dead 是**阶梯**（不随 t 混合，取时间戳 ≤ renderAt 的最后一个样本）。
+        /// 状态由 <see cref="PickState"/> 统一选样，与 <see cref="TryGetSampleState"/> 是**同一条规则**
+        /// —— 只取状态时用后者（免造 position/rotation 的 out）。</summary>
         public bool TryGetRenderState(long playerId, long nowServerTicks, long renderDelayTicks,
             out Vector3 position, out Quaternion rotation, out byte actionState, out bool dead)
         {
@@ -56,6 +54,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 return false;
 
             long renderAt = nowServerTicks - renderDelayTicks;
+            PickState(samples, renderAt, out actionState, out dead);
 
             // 最新样本仍早于渲染时刻 → 用最新（快照不足场景）
             if (renderAt >= samples[samples.Count - 1].ServerTicks)
@@ -63,8 +62,6 @@ namespace Hotfix.GameSystems.SyncLayer
                 var last = samples[samples.Count - 1];
                 position = ToUnity(last.Position);
                 rotation = Quaternion.Euler(0f, last.RotationY, 0f);
-                actionState = last.ActionState;
-                dead = last.Dead;
                 return true;
             }
 
@@ -79,9 +76,6 @@ namespace Hotfix.GameSystems.SyncLayer
                     float t = span <= 0 ? 0f : (float)(renderAt - a.ServerTicks) / span;
                     position = Vector3.LerpUnclamped(ToUnity(a.Position), ToUnity(b.Position), t);
                     rotation = Quaternion.Slerp(Quaternion.Euler(0f, a.RotationY, 0f), Quaternion.Euler(0f, b.RotationY, 0f), t);
-                    // 状态是阶梯：取较早样本（不随 t 混合）
-                    actionState = a.ActionState;
-                    dead = a.Dead;
                     return true;
                 }
             }
@@ -90,15 +84,11 @@ namespace Hotfix.GameSystems.SyncLayer
             var first = samples[0];
             position = ToUnity(first.Position);
             rotation = Quaternion.Euler(0f, first.RotationY, 0f);
-            actionState = first.ActionState;
-            dead = first.Dead;
             return true;
         }
 
-        /// <summary>只取状态：**权威的状态查询**（阶梯——时间戳 ≤ renderAt 的最后一个样本；
-        /// 全部晚于 renderAt 时用最旧），供渲染循环按 renderAt 采样。
-        /// 与 <see cref="TryGetRenderState"/> 的状态 out 只差一个边界：renderAt 恰等于某样本时间戳时
-        /// 取该样本自身（对方取所在区间的左端）——差异与不可达性见其 summary。</summary>
+        /// <summary>只取状态（阶梯——同 <see cref="PickState"/> 的规则），供渲染循环按 renderAt 采样；
+        /// 不想造 position/rotation 的 out 时用它。</summary>
         public bool TryGetSampleState(long playerId, long renderAt, out byte actionState, out bool dead)
         {
             actionState = 0;
@@ -106,7 +96,20 @@ namespace Hotfix.GameSystems.SyncLayer
             if (!_buffers.TryGetValue(playerId, out var samples) || samples.Count == 0)
                 return false;
 
-            // 时间戳 ≤ renderAt 的最后一个样本；全部晚于 renderAt 时用最旧（与位置路径的 fallback 一致）
+            PickState(samples, renderAt, out actionState, out dead);
+            return true;
+        }
+
+        public void Remove(long playerId) => _buffers.Remove(playerId);
+
+        public void Clear() => _buffers.Clear();
+
+        /// <summary>
+        /// 取 renderAt 时刻的状态（**阶梯**：时间戳 ≤ renderAt 的最后一个样本；全部晚于 renderAt 时用最旧）。
+        /// 两个查询入口共用这一处规则 —— 分头实现过一次，就在区间右端点差了一个样本。
+        /// </summary>
+        private static void PickState(List<Sample> samples, long renderAt, out byte actionState, out bool dead)
+        {
             Sample chosen = samples[0];
             for (int i = 0; i < samples.Count; i++)
             {
@@ -115,12 +118,7 @@ namespace Hotfix.GameSystems.SyncLayer
             }
             actionState = chosen.ActionState;
             dead = chosen.Dead;
-            return true;
         }
-
-        public void Remove(long playerId) => _buffers.Remove(playerId);
-
-        public void Clear() => _buffers.Clear();
 
         private static Vector3 ToUnity(Vec3 v) => new Vector3(v.X, v.Y, v.Z);
 

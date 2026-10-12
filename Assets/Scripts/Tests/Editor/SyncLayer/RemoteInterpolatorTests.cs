@@ -106,6 +106,13 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(0, actionState, "状态是阶梯函数——取时间戳 ≤ renderAt 的最后一个样本");
             Assert.IsFalse(dead);
             Assert.AreEqual(5f, pos.x, 0.001f, "位置仍然插值");
+
+            // 右端点：renderAt 恰等于区间右端样本的时间戳（且该样本**不是**最新样本，否则会走"贴最新"
+            // 那条路、绕开区间）→ 状态取该样本，与 TryGetSampleState 同一条规则——
+            // 两个入口不许在这里分叉（审查修复的守护点）
+            interp.AddSample(1, 1_200L, new Vec3(20f, 0f, 0f), 0f, actionState: 5, dead: false);
+            Assert.IsTrue(interp.TryGetRenderState(1, 1_200L, 100L, out _, out _, out var atRightEdge, out _));
+            Assert.AreEqual(2, atRightEdge, "renderAt == 区间右端样本时间戳 ⇒ 取该样本");
         }
 
         [Test]
@@ -121,6 +128,33 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
             Assert.IsTrue(interp.TryGetRenderState(7, 750L, 100L, out _, out _, out _, out dead));
             Assert.IsTrue(dead, "renderAt=650 时已越过第二样本");
+        }
+
+        [Test]
+        public void Sample_State_Steps_At_The_Sample_Boundary()
+        {
+            var interp = new RemoteInterpolator();
+            interp.AddSample(1, 1_000L, new Vec3(0f, 0f, 0f), 0f, actionState: 0, dead: false);
+            interp.AddSample(1, 1_100L, new Vec3(10f, 0f, 0f), 0f, actionState: 2, dead: true);
+
+            Assert.IsTrue(interp.TryGetSampleState(1, 1_050L, out var a, out var d));
+            Assert.AreEqual(0, a, "renderAt 落在两样本之间 ⇒ 取较早那个");
+            Assert.IsFalse(d);
+
+            Assert.IsTrue(interp.TryGetSampleState(1, 1_100L, out a, out d));
+            Assert.AreEqual(2, a, "renderAt 恰等于右端样本 ⇒ 取该样本（这是与 TryGetRenderState 曾经分叉的那个点）");
+            Assert.IsTrue(d);
+        }
+
+        [Test]
+        public void Sample_State_Falls_Back_To_The_Oldest_When_Everything_Is_Later()
+        {
+            var interp = new RemoteInterpolator();
+            interp.AddSample(1, 5_000L, new Vec3(0f, 0f, 0f), 0f, actionState: 4, dead: false);
+            interp.AddSample(1, 5_100L, new Vec3(0f, 0f, 0f), 0f, actionState: 2, dead: false);
+
+            Assert.IsTrue(interp.TryGetSampleState(1, 100L, out var a, out _));
+            Assert.AreEqual(4, a, "全部样本都晚于 renderAt ⇒ 用最旧");
         }
     }
 }
