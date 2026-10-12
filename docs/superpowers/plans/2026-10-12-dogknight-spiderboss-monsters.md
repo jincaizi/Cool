@@ -1349,7 +1349,43 @@ UnityEditor.AssetDatabase.SaveAssets();
                 Object.DestroyImmediate(go);
             }
         }
+
+        [Test]
+        public void Two_Swings_In_A_Row_Both_Play()
+        {
+            var go = new GameObject("TwoSwings");
+            try
+            {
+                var animator = go.AddComponent<Animator>();
+                animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
+                    "Assets/Monstor/fantasySpider/NpcAnimator_Spider.controller");
+                var driver = go.AddComponent<NpcEntityAnimator>();
+                driver.ResolveAnimator();   // EditMode 下 AddComponent 不触发 Awake
+
+                driver.PlayAttack(variant: 0);
+                animator.Update(0.2f);
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack01"));
+
+                animator.Update(1.0f);      // 推过片段（0.667s）+ exit-time 回 Idle
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"), "攻击态必须已退出");
+
+                driver.PlayAttack(variant: 1);
+                animator.Update(0.2f);
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack02"),
+                    "第二刀必须能播 —— 攻击态若没在冷却内退出，canTransitionToSelf=false 会把它静默吞掉");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
 ```
+
+**这条用例守的是一个隐式不变量，必须写进两个控制器的资产注释**：
+
+> 攻击片段时长必须**短于**该怪的冷却 —— 否则下一刀到达时攻击态还没退出，而 `canTransitionToSelf = false` 会让新 Trigger **被静默吞掉**（不报错、不播、不计数，只是丢刀）。
+
+实测余量：DogKnight `Attack01/Attack02` **0.833s** vs 冷却 1.5s；SpiderBoss `attack1/attack2` **0.667s** vs 冷却 2.0s —— 都约 2 倍余量，当前安全。将来谁调冷却或换片段，这条用例会替他发现。
 
 - [ ] **步骤 6：Commit**
 
