@@ -98,6 +98,11 @@ namespace KcpServer.Movement
     ///
     /// 无分配热路径：邻居经 ReadOnlySpan 传入，内部约束缓冲随实例复用，不用 LINQ。
     /// 邻居顺序 = 约束顺序（同一输入必得同一输出）。实例持有复用缓冲，非线程安全（服务端主循环单线程）。
+    ///
+    /// **不要加"沿 v_pref 拉满到 maxSpeed"那一步**（曾经出现在任务指令里、被审查驳回）：
+    /// 论文（§3 + 附录 A）没有该步骤，LP2 的起点就是"maxSpeed 圆上离 v_pref 最近的点"；
+    /// 加上它会打破本类的护栏 —— 无邻居时不再逐字返回 v_pref（会让接线后的位置序列与接线前不等），
+    /// 而且智能体在空旷处会一直全速跑（v_pref 慢下来时被重新拉满）。要限速就改调用方的 v_pref。
     /// </summary>
     public sealed class OrcaSolver
     {

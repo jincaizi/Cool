@@ -1,11 +1,20 @@
 using System;
+using KcpServer.Movement;
 
 namespace KcpServer.Monster
 {
-    /// <summary>简单平面移动（旧 Server/AI 移植——Quaternion 数学与 Server/Util 同源）</summary>
+    /// <summary>简单平面移动（旧 Server/AI 移植——Quaternion 数学与 Server/Util 同源）。
+    /// 2026-10-13：接上 ORCA 避让——期望位移 → 解算 → 积分。**没有邻居时解算器逐字返回期望位移**，
+    /// 于是本方法的积分结果与接线前逐位相同（顺序/结合都不能动，见 <see cref="MoveTo"/> 注释）。</summary>
     public sealed class SimpleMoveSystem
     {
         private const float RotationSpeed = 180f; // 度/秒
+
+        private readonly AvoidanceSystem? _avoidance;
+
+        /// <param name="avoidance">邻居提供者 + 解算器（MonsterModule 注入）。null = 不接避让
+        /// （等价于全局 --no-avoid；测试里用来跑"接线前"的对照组）</param>
+        public SimpleMoveSystem(AvoidanceSystem? avoidance = null) => _avoidance = avoidance;
 
         public void MoveTo(MonsterState m, Vector3 targetPosition, float deltaTime)
         {
@@ -19,7 +28,20 @@ namespace KcpServer.Monster
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             m.Rotation = RotateTowards(m.Rotation, targetRotation, RotationSpeed * deltaTime);
 
+            // 期望位移：**结合顺序与接线前逐字相同**（direction*moveSpeed 先算、再乘 deltaTime）——
+            // 换成 direction*(moveSpeed*deltaTime) 会差最后一位浮点，"无邻居逐位不变"的护栏就没了
             Vector3 movement = direction * m.Config.moveSpeed * deltaTime;
+
+            if (_avoidance != null)
+            {
+                float movementLength = (float)Math.Sqrt(movement.X * movement.X + movement.Z * movement.Z);
+                float configuredLength = m.Config.moveSpeed * deltaTime;
+                float maxStep = movementLength > configuredLength ? movementLength : configuredLength;
+                movement = _avoidance.Solve(m.NpcId, m.TargetId, m.Position, m.CurrentVelocity,
+                    movement, m.Config.bodyRadius, maxStep);
+            }
+
+            m.CurrentVelocity = movement;
             m.Position = m.Position + movement;
         }
 

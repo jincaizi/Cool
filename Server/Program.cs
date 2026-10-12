@@ -50,6 +50,20 @@ namespace KcpServer
                 if (args[i] == "--ws-echo") { wsEcho = true; break; }
             }
 
+            // 2026-10-13 ORCA 避让：--no-avoid 关掉（活体对照的负对照组——与接线前逐字一致）；
+            // --probe 打开最小两两间距探针（每 200ms 一行 [Probe] 日志，纯诊断）
+            bool noAvoid = false;
+            for (int i = 1; i < args.Length; i++)
+            {
+                if (args[i] == "--no-avoid") { noAvoid = true; break; }
+            }
+
+            bool probe = false;
+            for (int i = 1; i < args.Length; i++)
+            {
+                if (args[i] == "--probe") { probe = true; break; }
+            }
+
             // --ws-prefix：WS 监听前缀。默认本机开发地址——HttpListener 的 host 段是**字面匹配**
             // 请求 Host 头的，而客户端 WebSocketClientAdapter 拼的是 ws://<host>:<port>/、
             // 本项目所有客户端都拨 127.0.0.1：写成 localhost 会得到一个**静默不匹配**
@@ -80,6 +94,18 @@ namespace KcpServer
             {
                 _server.EnableMonsters(monsterCount);
                 Console.WriteLine($"Monster mode: {monsterCount} monsters spawned");
+            }
+
+            if (noAvoid)
+            {
+                _server.DisableAvoidance();
+                Console.WriteLine("Avoidance: disabled (--no-avoid; 智能体按愿望位移直行)");
+            }
+
+            if (probe)
+            {
+                _server.EnableDistanceProbe();
+                Console.WriteLine("Probe: min pairwise distance every 200ms");
             }
 
             try

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using KcpServer.Monster; // P5：怪物模块（EnableMonsters/tick 接线）
+using KcpServer.Movement; // 2026-10-13：ORCA 避让（AvoidanceSystem / AvoidanceProbe）
 
 namespace KcpServer
 {
@@ -56,6 +57,11 @@ namespace KcpServer
 
         private BotRunner? _botRunner;
 
+        // 2026-10-13：ORCA 避让（怪物 + 机器人共用一份世界快照；玩家只当障碍）。
+        // 一份实例就够——主循环单线程，解算器**非线程安全**（持有复用缓冲）。
+        private readonly AvoidanceSystem _avoidance;
+        private AvoidanceProbe? _avoidanceProbe;
+
         /// <summary>诊断计数：5s 窗口内真实发送的 WorldSnapshot 消息数（与实体发送数区分——集成定位用）</summary>
         private long _snapshotMessagesSent;
 
@@ -64,16 +70,26 @@ namespace KcpServer
         public void EnableBots(int count)
         {
             long botIdSeed = 1_000_000;
-            _botRunner = new BotRunner(_entityStore, () => System.Threading.Interlocked.Increment(ref botIdSeed));
+            _botRunner = new BotRunner(_entityStore, () => System.Threading.Interlocked.Increment(ref botIdSeed),
+                avoidance: _avoidance);
             _botRunner.Spawn(count);
         }
 
         /// <summary>怪物模式：注册 N 个怪物（固定布局——T5 e2e 依赖）。必须在 StartAsync 之前调用</summary>
         public void EnableMonsters(int count)
         {
-            _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed));
+            _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed),
+                avoidance: _avoidance);
             _monsterModule.SpawnDefaultLayout(count);
         }
+
+        /// <summary>ORCA 避让负对照（CLI <c>--no-avoid</c>）：关掉后智能体按愿望位移直行。
+        /// 必须在 StartAsync 之前调用（主循环独占世界状态——R2）。</summary>
+        public void DisableAvoidance() => _avoidance.Enabled = false;
+
+        /// <summary>活体对照探针（CLI <c>--probe</c>）：每 tick 统计全体实体的最小两两间距并定期打日志。
+        /// 纯诊断（O(n²) 距离比较，只在显式打开时跑），必须在 StartAsync 之前调用。</summary>
+        public void EnableDistanceProbe() => _avoidanceProbe = new AvoidanceProbe(_entityStore, _avoidance);
 
         // 超时配置
         private readonly TimeSpan _sessionTimeout = TimeSpan.FromSeconds(300);
@@ -97,6 +113,12 @@ namespace KcpServer
             _clockSyncHandler = new ClockSyncHandler(this, _logger);
             _castHandler = new CastHandler(this, _logger, new CombatResolver(_entityStore));
 
+            // 避让系统在 EnableMonsters 之前就可能建（--bots 单独跑）；模板表由模块在启用时补上，
+            // 所以半径解析走**延迟查**（闭包读字段，调用时模块已就位）；未启用怪物时也走不到 Npc 分支
+            _avoidance = new AvoidanceSystem(_entityStore,
+                templateId => _monsterModule?.RadiusOfTemplate(templateId) ?? AvoidanceSystem.DefaultMonsterRadius,
+                secondsPerTick: TickIntervalMs / 1000f);
+
             // R2：唯一消费者线程独占世界状态；handler 同步链内完成解码/分发/发送
             _gameLoop = new GameLoop<(EndPoint, byte[])>(
                 TimeSpan.FromMilliseconds(TickIntervalMs),   // ~15Hz
@@ -105,6 +127,13 @@ namespace KcpServer
                 tick =>
                 {
                     CurrentTick = (uint)tick;
+
+                    // ORCA（2026-10-13）：**tick 起始处**拍一份位置+速度快照（Jacobi）——
+                    // 机器人 tick 与怪物 tick 都对着同一份解算，先解谁后解谁不影响结果。
+                    // 智能体各自就地积分：它们读的是快照，所以顺序不改变别人的输入。
+                    _avoidance.EnsureSnapshot((uint)tick);
+                    _avoidanceProbe?.Sample((uint)tick);
+
                     _botRunner?.Tick((uint)tick); // P3 压测：bot 群每 tick 游走
 
                     // P5：怪物 AI tick → 攻击裁决 drain（同 tick 冷却记录即时生效）→ 死亡移除清 AOI

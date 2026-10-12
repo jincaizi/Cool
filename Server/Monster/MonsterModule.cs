@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cool.Protocol;
 using Cool.SyncCore;
 using KcpServer.Config;
+using KcpServer.Movement;
 
 namespace KcpServer.Monster
 {
@@ -27,7 +28,8 @@ namespace KcpServer.Monster
         private readonly Func<long> _nextNpcId;
         private readonly Dictionary<int, MonsterData> _templates = new();
         private readonly Dictionary<long, MonsterState> _monsters = new();
-        private readonly SimpleMoveSystem _mover = new();
+        private readonly SimpleMoveSystem _mover;
+        private readonly AvoidanceSystem _avoidance;
         private readonly List<(long NpcId, CastRequest Request)> _pendingCasts = new();
         private readonly List<long> _removedNpcs = new();
         private readonly List<(int TemplateId, Vector3 Center, uint DueTick)> _respawns = new();
@@ -46,7 +48,10 @@ namespace KcpServer.Monster
             _ => throw new ArgumentException($"No combat skill mapped for monster template {templateId}")
         };
 
-        public MonsterModule(EntityStore store, Func<long> nextNpcId, string? configPath = null)
+        /// <param name="avoidance">ORCA 避让系统（Server3C 注入以与 BotRunner 共用一份世界快照）。
+        /// null = 本模块自建一个只看得见自己的（单测/独立宿主就是这条路径）。</param>
+        public MonsterModule(EntityStore store, Func<long> nextNpcId, string? configPath = null,
+            AvoidanceSystem? avoidance = null)
         {
             _store = store;
             _nextNpcId = nextNpcId;
@@ -55,7 +60,18 @@ namespace KcpServer.Monster
             var path = configPath ?? System.IO.Path.Combine(AppContext.BaseDirectory, "Config", "monster_config.json");
             var templates = ConfigLoader.LoadMonsterTemplates(path);
             foreach (var kvp in templates) _templates[kvp.Key] = kvp.Value;
+
+            _avoidance = avoidance ?? new AvoidanceSystem(store, RadiusOfTemplate, TickDeltaSeconds);
+            _mover = new SimpleMoveSystem(_avoidance);
         }
+
+        /// <summary>模板 id → 身体半径（米；ORCA 用）。表里没有/值非法则兜底 <see cref="AvoidanceSystem.DefaultMonsterRadius"/>——
+        /// 不抛：新模板漏填 bodyRadius 时 System.Text.Json 会静默落 0（本仓库踩过同款坑，见 ConfigLoader 的
+        /// IncludeFields 注释），半径 0 会让避让对这个怪失效但没有别的可观察症状。</summary>
+        public float RadiusOfTemplate(int templateId)
+            => _templates.TryGetValue(templateId, out var config) && config.bodyRadius > 0f
+                ? config.bodyRadius
+                : AvoidanceSystem.DefaultMonsterRadius;
 
         /// <summary>
         /// 固定布局生成（e2e 确定性依赖——T5 注释同步此表）：
@@ -131,6 +147,10 @@ namespace KcpServer.Monster
         /// <summary>推进一 tick（服务器主循环每 tick 调用——先于施法裁决 drain 与快照广播）</summary>
         public void Tick(uint tick)
         {
+            // ORCA 快照（Jacobi）：Server3C 在主循环 tick 起始处已调过一次（同一 tick 是 no-op）——
+            // 这里再叫一次是为了"没有 Server3C 的宿主"（单测/独立运行）也能有快照
+            _avoidance.EnsureSnapshot(tick);
+
             var done = new List<long>();
             foreach (var m in _monsters.Values)
             {

@@ -28,6 +28,11 @@ namespace KcpServer.Monster
         public Quaternion Rotation;
         public bool Moving; // 本 tick 是否在移动（快照 Speed 取值）
 
+        /// <summary>上一 tick 的实际位移（米/tick）——ORCA 当"当前速度"用（半平面的锚点）。
+        /// 单位是**每 tick 位移**不是 m/s：解算器与各移动系统统一在这个单位里工作，
+        /// 好处是无邻居时解出的期望位移可以原样积分（逐位不变）。</summary>
+        public Vector3 CurrentVelocity;
+
         // 攻击技能 id（模板映射：1→50001，2→50002；D-P5-2）
         public int AttackSkillId { get; }
 
