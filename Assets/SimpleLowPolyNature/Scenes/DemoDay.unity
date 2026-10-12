@@ -7432,6 +7432,11 @@ MonoBehaviour:
   _username: Player
   _localEntry: {fileID: 0}
   _playerAvatarPrefab: {fileID: 8189980434977739222, guid: 2dfbb63c9cdf7504faf4ff26b0581598, type: 3}
+  _npcPrefabs:
+  - TemplateId: 3
+    Prefab: {fileID: 4727220250917052466, guid: 936e4733a3f998a45aa48dd140fa34b6, type: 3}
+  - TemplateId: 4
+    Prefab: {fileID: 3451747886464063661, guid: 2dd741c8c27cf9c45a0cbca64ae3c229, type: 3}
   _showDebugOverlay: 1
 --- !u!4 &940694965
 Transform:

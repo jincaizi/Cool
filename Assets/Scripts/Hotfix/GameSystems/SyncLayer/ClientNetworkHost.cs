@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Cool.Protocol;
 using Cool.SyncCore;
 using Cysharp.Threading.Tasks;
@@ -20,7 +21,8 @@ namespace Hotfix.GameSystems.SyncLayer
     /// Start 自动 Connect()，登录进世界后自动装配本地角色（Sys3CEntry）：
     /// MovementReporter 上报（节流 + 预测帧）、NetMovementPolicy 接管移动与平滑纠偏。
     /// 远程实体的渲染由 `RemoteEntityRegistry` 按 `EntityKind` 分三支（N5b）：真人 = 角色预制体
-    /// （`_playerAvatarPrefab`，未接线则退化占位）、bot = 胶囊占位、怪物 = 球体占位。
+    /// （`_playerAvatarPrefab`，未接线则退化占位）、bot = 胶囊占位、怪物 = `_npcPrefabs` 目录里
+    /// 按 templateId 取到的真模型（目录未命中/未接线则退化球体占位）。
     /// 本地角色被销毁重建（DemoDay 直跑时选人确认触发 PlayerSpawner 重建）经 PlayerSpawnedEvent 重装配。
     /// 接线步骤与边界见 docs/superpowers/guides/p2-client-network-host.md 与 network-playtest.md。
     /// 单机模式零影响：选单机或只挂不 Connect 即可纯本地游玩。
@@ -50,8 +52,22 @@ namespace Hotfix.GameSystems.SyncLayer
 
         [Header("远程真人角色（N5b）")]
         [Tooltip("远程真人的角色预制体（与 PlayerSpawner 用的是同一个）。留空则远程真人退化为胶囊占位" +
-                 "——测试宿主就是这种情况；bot 与怪物无论如何都是占位（D-P5-7）")]
+                 "——测试宿主就是这种情况；bot 无论如何都是占位（D-P5-7），怪物走 _npcPrefabs 目录")]
         [SerializeField] private GameObject _playerAvatarPrefab;
+
+        /// <summary>
+        /// 怪物模型目录的一条（Inspector 可编辑）。**不能换成 `Dictionary`**：
+        /// Unity 不序列化字典，场景里配的值会静默丢光（Awake 再建表）。
+        /// </summary>
+        [Serializable]
+        public class NpcPrefabEntry
+        {
+            public int TemplateId;
+            public GameObject Prefab;
+        }
+
+        [Header("怪物模型（templateId → prefab；留空则该 template 退化为球体占位）")]
+        [SerializeField] private NpcPrefabEntry[] _npcPrefabs = Array.Empty<NpcPrefabEntry>();
 
         [Header("调试")]
         [Tooltip("屏幕左下角连接状态浮层（模式/状态/玩家 id/远程实体数）")]
@@ -100,7 +116,15 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             var root = new GameObject("RemotePlayers");
             root.transform.SetParent(transform, false);
-            _remoteEntities = new RemoteEntityRegistry(root.transform, _playerAvatarPrefab);
+
+            // Inspector 的数组 → 查询表（registry 只吃表；空目录传 null = 球体降级，与未接线同一条路）
+            var catalog = new Dictionary<int, GameObject>();
+            foreach (var entry in _npcPrefabs)
+                if (entry != null && entry.Prefab != null)
+                    catalog[entry.TemplateId] = entry.Prefab;
+
+            _remoteEntities = new RemoteEntityRegistry(root.transform, _playerAvatarPrefab,
+                catalog.Count > 0 ? catalog : null);
         }
 
         private void Start()
@@ -488,8 +512,14 @@ namespace Hotfix.GameSystems.SyncLayer
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
             // T12 乙-3：服务端判死 → 提示 + 回选人（重登即复活）
             _localEntry.OnServerDeath += HandleLocalPlayerDeath;
+            // 施法广播除日志外还要**路由**到怪物排程：广播本身不含"这是哪只怪的哪一刀"之外的
+            // 表现信息，registry 用发布者时间戳排成 renderAt 处的挥砍（本回调已在主线程——
+            // CombatNetworkBridge.Update 消费，见该类线程模型）。
             _combatBridge.OnCastBroadcast += b =>
+            {
                 Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
+                _remoteEntities!.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp);
+            };
 
             // P5：联网模式下怪物由服务器驱动——禁用场景内全部本地 MonsterSpawner
             //（DemoDay 有 SlimeSpawner + TurtleShellSpawner 两个——单数 FindObjectOfType 会漏）

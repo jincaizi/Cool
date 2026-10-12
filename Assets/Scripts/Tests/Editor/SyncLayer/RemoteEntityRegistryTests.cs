@@ -141,6 +141,94 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void Npc_View_Uses_The_Catalog_Prefab_When_Present()
+        {
+            var prefab = new GameObject("FakeMonsterPrefab");
+            prefab.AddComponent<Animator>();
+            var root = new GameObject("CatalogRoot");
+            var registry = new RemoteEntityRegistry(root.transform, null,
+                new Dictionary<int, GameObject> { { 3, prefab } });
+            try
+            {
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2_000_002,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind | EntityFieldMask.TemplateId),
+                    X = 1f, Z = 1f, Kind = (byte)EntityKind.Npc, TemplateId = 3, Tick = 1
+                }, serverTicks: 1_000_000L);
+
+                var view = registry.GetView(2_000_002);
+                Assert.IsNotNull(view);
+                Assert.IsTrue(view!.GameObject.name.StartsWith("FakeMonsterPrefab"),
+                    $"命中目录应实例化真预制体，实际是 {view.GameObject.name}");
+                Assert.IsNotNull(view.NpcAnimator, "registry 应在实例化出的怪物根上补上驱动组件");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void Npc_View_Falls_Back_To_The_Sphere_When_The_Template_Is_Missing()
+        {
+            var root = new GameObject("FallbackRoot");
+            var registry = new RemoteEntityRegistry(root.transform, null, null);
+            try
+            {
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2_000_003,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind | EntityFieldMask.TemplateId),
+                    X = 1f, Z = 1f, Kind = (byte)EntityKind.Npc, TemplateId = 99, Tick = 1
+                }, serverTicks: 1_000_000L);
+
+                var view = registry.GetView(2_000_003);
+                Assert.IsTrue(view!.GameObject.name.Contains("Monster_"), "未命中目录要保持球体降级");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void A_Scheduled_Attack_For_A_Destroyed_View_Is_Harmless()
+        {
+            var root = new GameObject("DropRoot");
+            var prefab = new GameObject("FakeMonsterPrefab");
+            prefab.AddComponent<Animator>();
+            var registry = new RemoteEntityRegistry(root.transform, null,
+                new Dictionary<int, GameObject> { { 3, prefab } });
+            try
+            {
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2_000_004,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind | EntityFieldMask.TemplateId),
+                    X = 0f, Z = 0f, Kind = (byte)EntityKind.Npc, TemplateId = 3, Tick = 1
+                }, serverTicks: 1_000_000L);
+
+                registry.ScheduleAttack(2_000_004, serverTimestamp: 1_000_000L + 500L * 10_000L);
+                registry.Remove(2_000_004);
+
+                // 排程项到点时视图已不在 —— 不得抛异常，也不得把视图复活
+                Assert.DoesNotThrow(() => registry.UpdateRender(
+                    nowServerTicks: 1_000_000L + 1_000L * 10_000L, renderDelayTicks: 0L));
+                Assert.IsNull(registry.GetView(2_000_004), "排程项不得复活已销毁的视图");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
         public void Npc_View_Keeps_Sampled_State_Instead_Of_Arrival_State()
         {
             // 采样路径：视图的 ActionState 由 UpdateRender 在 renderAt 处采出
