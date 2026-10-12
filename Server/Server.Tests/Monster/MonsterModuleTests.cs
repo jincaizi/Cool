@@ -272,4 +272,26 @@ public class MonsterModuleTests
         Assert.True(dist > reach,
             $"槽位 [{slot}] 模板 {npc.TemplateId} 距出生点 {dist:F1}m ≤ 感知+巡逻 {reach}m——挂机玩家会被它开局追杀");
     }
+
+    /// <summary>上面那条几何断言的行为侧（活体实测的廉价替身，2026-10-12）：玩家长时间挂着不动，
+    /// 两只新怪一次施法都不该发起——从感知、行为树到入队整条链上验一遍，不只看距离。
+    /// 只盯 50003/50004：槽位 [0] Wolf 本来就会来（见上条注释），不在本测试的守备范围。
+    /// 伤害裁决不在本模块（Server3C drain 后才掷骰），故这里玩家不掉血、施法队列是本模块唯一出口。</summary>
+    [Fact]
+    public void Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_The_New_Monsters()
+    {
+        var (store, module) = Create(6);
+        LoginPlayer(store, 1, DemoSpawnPosition); // 站着不动 40s（600 tick，够 Wolf 走完大半个巡逻圈）
+
+        var castSkills = new List<int>();
+        for (uint t = 0; t < 600; t++)
+        {
+            module.Tick(t);
+            foreach (var (_, request) in module.DrainPendingCasts()) castSkills.Add(request.SkillId);
+        }
+
+        Assert.Equal(6, module.Count); // 六只都在场——防"没生成所以没施法"的假绿
+        Assert.DoesNotContain(50003, castSkills);
+        Assert.DoesNotContain(50004, castSkills);
+    }
 }
