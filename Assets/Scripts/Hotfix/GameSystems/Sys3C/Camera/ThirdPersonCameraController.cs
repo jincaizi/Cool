@@ -1,3 +1,4 @@
+using Hotfix.GameSystems.SyncLayer;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Camera
@@ -26,10 +27,25 @@ namespace Hotfix.GameSystems.Sys3C.Camera
 
         private const float CameraCollisionRadius = 0.25f;
         private const float MinCameraDistance = 0.8f;
+
         /// <summary>相机碰撞层——触发器由 QueryTriggerInteraction.Ignore 排除；
-        /// 跟随目标自身的碰撞体在代码里按层级剔除（掩码无法区分玩家子物体与场景几何），
-        /// 故默认 ~0（Everything）即可，无需在 Inspector 排除玩家</summary>
-        [SerializeField] private LayerMask CameraCollisionMask = ~0;
+        /// 跟随目标自身的碰撞体在代码里按层级剔除（掩码无法区分玩家子物体与场景几何）。
+        /// **必须排除怪物身体层**（客户端运行时加的 `NpcBodyCollider`，层索引见其 `BodyLayer`）：
+        /// 层矩阵只约束接触对、对 SphereCast/Overlap 这类查询无效，所以只能由掩码自己排——
+        /// 动态角色不该把相机拽过去（2026-10-13 实测：贴着 Boss 时相机被拉到最近，画面只剩后脑）。
+        /// 场景里可能还序列化着旧版的 ~0，由 <see cref="ApplyLayerExclusions"/> 在 Awake 兜底剔除。</summary>
+        [SerializeField] internal LayerMask CameraCollisionMask = DefaultCollisionMask;
+
+        /// <summary>新实例/新场景的默认掩码（Everything 去掉怪物身体层）。守卫用例见
+        /// NpcBodyColliderTests.Camera_Collision_Mask_Excludes_The_Body_Layer。</summary>
+        internal static readonly LayerMask DefaultCollisionMask = ~(1 << NpcBodyCollider.BodyLayer);
+
+        /// <summary>把"不该挡相机"的层从掩码里剔掉（幂等）。独立成方法：EditMode 下 AddComponent
+        /// 不触发生命周期，测试要直接调它；场景资产里若还存着旧值，启动这一下也兜得住。</summary>
+        internal void ApplyLayerExclusions()
+            => CameraCollisionMask &= ~(1 << NpcBodyCollider.BodyLayer);
+
+        private void Awake() => ApplyLayerExclusions();
 
         // 当前旋转角度
         private float _horizontalAngle;

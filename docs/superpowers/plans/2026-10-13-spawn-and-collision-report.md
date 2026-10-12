@@ -241,3 +241,67 @@ y 保持 0.27（没有再爬上头顶）。截图 `production/verify/t13_boss_bl
 - 服务端纠偏路径（`CharacterController.ApplyServerPosition` / `NetMovementPolicy` 的平滑拉回）**直接写 transform、绕过物理**；
   如果服务端位置与本地不同步，它可以把玩家"拉"过碰撞体（本次实测的第一次胶囊尝试里出现过一次中心距 0 且 y 不变的可疑样本，
   之后用静止靶 + 逐步探针复现并确认了真实原因是**穹顶可攀爬**，与纠偏无关；此处把机制记下来供后续排查）。
+
+---
+
+## 复查修复（2026-10-13 审查 I1）：相机查询未隔离 —— 已修
+
+审查判定：层矩阵只管**接触对**、对 `SphereCastAll/Overlap` 这类**查询无效**（本次实测亦然），
+而相机 `ThirdPersonCameraController.CameraCollisionMask = ~0` 会把 `NpcBody` 当遮挡物 ——
+贴合 Boss 时相机被拉到最近距离（`t13_boss_blocked.png`：画面只剩后脑）。裁定：**改掩码排除层 10**。
+
+### 改动（层索引用常量，不用层名）
+
+1. `ThirdPersonCameraController.cs`：
+   - `[SerializeField] internal LayerMask CameraCollisionMask = DefaultCollisionMask;`
+     其中 `internal static readonly LayerMask DefaultCollisionMask = ~(1 << NpcBodyCollider.BodyLayer);`（新场景/新实例即正确）。
+   - `internal void ApplyLayerExclusions() => CameraCollisionMask &= ~(1 << NpcBodyCollider.BodyLayer);`，`Awake` 调一次——
+     **场景资产里可能还序列化着旧版 ~0，光改 C# 默认值救不了已序列化的实例**，这一下兜底（幂等）。
+2. DemoDay 场景里的相机组件（MCP `gameobject-component-modify`，pathPatch `CameraCollisionMask/value`）：
+   `-1 → -1025`，保存。
+   - **字节级**：`git diff DemoDay.unity` 只有一行 `m_Bits: 4294967295 → 4294966271`（= `0xFFFFFBFF`，即去掉 bit 10、保留 bit 0）。
+   - **视图级**：保存后经 Unity 读回 `CameraCollisionMask.value = -1025`，与字节一致（另：`(4294966271 & 1) != 0`、`& (1<<10) == 0` 已核）。
+
+### 守卫用例（能失败）
+
+`NpcBodyColliderTests.Camera_Collision_Mask_Excludes_The_Body_Layer`：
+断言（a）`DefaultCollisionMask` 不含层 10、保留 Default 层；（b）把掩码置成 `~0` 再调 `ApplyLayerExclusions()` 后不含层 10、且不误删其它层。
+**RED 演示**：把 `ApplyLayerExclusions` 临时改成空实现 → 红：
+
+```
+[FAIL] Camera_Collision_Mask_Excludes_The_Body_Layer
+   兜底剔除后掩码不许含 NpcBody 层   Expected: 0  But was: 1024   ← bit 10 还在
+```
+恢复实现后绿。
+
+### 活体验证：改前 vs 改后（同为"贴着 Boss 被挡住"状态）
+
+| | 改前 `t13_boss_blocked.png` | 改后 `t13_boss_blocked_camfix.png` |
+|---|---|---|
+| 画面 | **只剩玩家后脑**（相机被拽到 MinCameraDistance=0.8m，Boss 完全出画） | 正常第三人称：玩家站在蜘蛛 Boss 侧面、两者全身可见、距离感正常 |
+| 原因 | `SphereCastAll` 起始球（半径 0.25）与 Boss 身体盒在玩家头旁 **起始重叠 → distance≈0** → 相机拉到最近 | 掩码排除层 10 ⇒ 该投射看不见怪体，只有地形/静态遮挡能拽相机 |
+
+**探针（同一次运行，碰撞体开，推 6 秒）**：
+
+```
+[T13B3] phase1 start dist=7.00 bossRadiusWorld=1.66 bossCol=on matrix(10,9 ignore)=False hp=100
+[T13B3] ON t=1.0 player=(-37.45, 0.23, -14.62) boss=(-39.95, 0.00, -13.05) dist=2.96 cpDist=0.65 hp=100
+[T13B3] ON t=3.0 player=(-38.30, 0.20, -15.01) boss=(-40.07, 0.00, -12.93) dist=2.73 cpDist=0.64 hp=100
+[T13B3] ON t=5.0 player=(-38.34, 0.19, -15.11) boss=(-39.97, 0.00, -13.03) dist=2.64 cpDist=0.56 hp=100
+[T13B3] PHASE1 END(碰撞体开) minCenterDist=2.51 hp=100
+```
+
+——**挡住的行为没变**（连续 4 秒推不动、cpDist 0.56~0.65 = 贴在身体盒表面；这次 Boss 没挥砍所以 HP 全程 100）。
+负对照复测（碰撞体关）：`minCenterDist=0.00`，玩家进到 Boss 体内（`t13_boss_passthrough_camfix.png`，同样正常相机距离）⇒ 测量仍可失败。
+
+### 顺带两条文档修正（审查次要项）
+
+- `network-playtest.md`：AOI 计数改成**波动**口径（`--monsters 4` → 3↔4、`6` → 5↔6；[3] Wolf 巡逻（半径 10m）在 80m 视距边缘进出；实测 t=10.3s 读到 6），并注明"别把波动当 bug"。
+- `p5-monster-server.md`：碰撞体尺寸描述从"半径 = XZ 跨度较大者的一半、高度 = Y 跨度"改为与实现一致的**"竖直棱柱（BoxCollider，XZ 跨度 + Y 跨度；不是胶囊）"**，并带上"穹顶会被 CC 爬"的理由。
+
+### 复查后回归
+
+```
+Unity EditMode：303/303（302 + 相机守卫 1 条）
+服务端 xunit：166/166
+```

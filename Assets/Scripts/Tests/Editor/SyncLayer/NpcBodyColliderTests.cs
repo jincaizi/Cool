@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Cool.Protocol;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.SyncLayer;
+using Hotfix.GameSystems.Sys3C.Camera;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using NUnit.Framework;
 using UnityEditor;
@@ -219,6 +220,35 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     path + " 预制体不该带碰撞体（运行时才加）");
                 Assert.IsNull(prefab.GetComponentInChildren<NpcBodyCollider>(true),
                     path + " 预制体不该挂 NpcBodyCollider（由 registry 实例化后添加）");
+            }
+        }
+
+        [Test]
+        public void Camera_Collision_Mask_Excludes_The_Body_Layer()
+        {
+            // 相机防穿墙是 SphereCastAll(~0)：层矩阵管不到查询（实测），只能靠掩码自己排除怪物身体层。
+            // 否则贴着 Boss 时相机会被拽到最近距离（2026-10-13 实测：画面只剩后脑）。
+            var def = ThirdPersonCameraController.DefaultCollisionMask;
+            Assert.AreEqual(0, def.value & (1 << NpcBodyCollider.BodyLayer),
+                "默认掩码必须排除 NpcBody 层（改回 ~0 本用例就红）");
+            Assert.AreNotEqual(0, def.value & 1, "默认层（地形/静态遮挡）必须留在掩码里");
+
+            // 场景资产里可能还序列化着旧版的 ~0 —— Awake 的兜底剔除要把层 10 拿掉（去掉这段逻辑本用例红）
+            var go = new GameObject("CameraMaskProbe");
+            try
+            {
+                var cam = go.AddComponent<ThirdPersonCameraController>();
+                cam.CameraCollisionMask = ~0;   // 模拟"场景里存的是旧值"
+                cam.ApplyLayerExclusions();     // EditMode：AddComponent 不触发 Awake
+
+                int bits = cam.CameraCollisionMask.value;
+                Assert.AreEqual(0, bits & (1 << NpcBodyCollider.BodyLayer),
+                    "兜底剔除后掩码不许含 NpcBody 层");
+                Assert.AreNotEqual(0, bits & 1, "兜底剔除不该误删其它层");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
             }
         }
 

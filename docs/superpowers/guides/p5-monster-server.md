@@ -54,8 +54,9 @@ dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
 
 - 联网装配成功后 `ClientNetworkHost` 自动禁用场景内全部本地 `MonsterSpawner`（DemoDay 场景有两个）
 - Npc 视图 = 真模型 + 动画驱动（`NpcEntityAnimator`；目录未命中/未接线时退化为球体占位），名称带预制体名前缀
-- **怪物视图带运行时碰撞体**（`NpcBodyCollider`，2026-10-13）：尺寸按模型包围盒推（半径 = XZ 跨度较大者的一半，
-  高度 = Y 跨度），层 `NpcBody`，层矩阵只与本地玩家层碰撞 ⇒ 撞不过去。**纯客户端判定**——服务端不模拟
+- **怪物视图带运行时碰撞体**（`NpcBodyCollider`，2026-10-13）：尺寸按模型包围盒推——竖直棱柱
+  （`BoxCollider`，XZ 跨度 + Y 跨度；不是胶囊：穹顶会被 CharacterController 爬上去），层 `NpcBody`，
+  层矩阵只与本地玩家层碰撞 ⇒ 撞不过去。**纯客户端判定**——服务端不模拟
   玩家移动也不校验重叠，改客户端仍可穿模（见 `webgl-demo-boundaries.md` 第 ⑪ 条）
 
 ## 扩展点：加一种新怪物

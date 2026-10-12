@@ -1066,7 +1066,7 @@ MonoBehaviour:
   MouseSensitivityY: 2
   CameraCollisionMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294966271
 --- !u!1001 &122206172
 PrefabInstance:
   m_ObjectHideFlags: 0

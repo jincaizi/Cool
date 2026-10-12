@@ -51,7 +51,7 @@ dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --bots 10
 ```
 
 - `状态`：`未连接` → `Connecting` → `LoggingIn` → **`InWorld`**（成功）
-- `远程实体`：服务器 AOI 视野内的实体数（视距 80m，按 XZ 距离判）。出生点 2026-10-13 搬到 (10,0,-40) 后：`--monsters 4` 时看到 **3**——槽位 [3] 的 Wolf 在 (0,0,40)，距新出生点 80.6m，恰好落在 80m 视距外 0.6m（走近一点就进视野）；`--monsters 6` 时看到 **5**（多出的 DogKnight/SpiderBoss 都在视野内）
+- `远程实体`：服务器 AOI 视野内的实体数（视距 80m，按 XZ 距离判）。出生点 2026-10-13 搬到 (10,0,-40) 后：`--monsters 4` 看到 **3↔4、`--monsters 6` 看到 5↔6 波动**——槽位 [3] 的 Wolf 在 (0,0,40)，距新出生点 80.6m，恰在 80m 视距边缘外 0.6m，它巡逻（半径 10m）时会来回进出视野（实测：t=10.3s 探针读到的就是 6）。**别把波动当成 bug**
 - 控制台应出现（关键日志）：
   - `[NetHost] 联网模式——连接 127.0.0.1:8000`
   - `[NetHost] 本地 MonsterSpawner 已禁用：SlimeSpawner` / `TurtleShellSpawner`
