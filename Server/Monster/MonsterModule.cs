@@ -64,13 +64,16 @@ namespace KcpServer.Monster
         ///   [1] Slime(t1) (40,0,0)  巡逻可视（观察者视野 80m）、不感知（检测 8m）
         ///   [2] Slime(t1) (-40,0,0) 同 [1]
         ///   [3] Wolf(t2)  (0,0,40)  面向原点（观察者视野 80m 内，不感知——距离 40m > 15m）
-        /// 后两点位按 **DemoDay 玩家出生点 (10,0,-15.52)**（DemoDay.unity 的 PlayerSpawner._spawnPoint 实测）
-        /// 避让——原点只是 e2e 观察者的位置，按原点推算会漏判：槽位距出生点须 > 感知半径 + 巡逻半径，
-        /// 否则怪物走完巡逻圈就能感知到原地不动的玩家。
-        ///（实测教训：DogKnight 初版 (0,0,-20) 距出生点仅 11.0m < 感知 18m → 12 分钟内 8/8 次进世界
-        ///  打死挂机玩家；MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn 守这条。）
-        ///   [4] DogKnight(t3) (-20,0,20)    距出生点 46.5m（> 18+6）——对原点观察者 28.3m（> 18）亦不仇恨
-        ///   [5] SpiderBoss(t4) (-40,0,-25)  距出生点 50.9m（> 25+12）——对原点观察者 47.2m（> 25）亦不仇恨
+        /// 全部六槽位按 **DemoDay 玩家出生点 (10,0,-40)**（DemoDay.unity 的 PlayerSpawner._spawnPoint 实测，
+        /// 2026-10-13 从 (10,0,-15.52) 搬到湖东岸台地）避让——原点只是 e2e 观察者的位置，按原点推算会漏判：
+        /// 槽位距出生点须 > 感知半径 + 巡逻半径，否则怪物走完巡逻圈就能感知到原地不动的玩家。
+        ///（实测教训：DogKnight 初版 (0,0,-20) 距旧出生点仅 11.0m < 感知 18m → 12 分钟内 8/8 次进世界
+        ///  打死挂机玩家；旧出生点下 [0] Wolf 是唯一按设计违反本规则的槽位（巡逻圈最近切到 5.9m），
+        ///  新出生点下它也达标——MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn
+        ///  现覆盖全部六槽位，行为侧由 Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster 守。）
+        ///   [0] Wolf(t2) (12,0,0) 距出生点 40.1m（> 15+10）——对原点观察者开局即感知（12m ≤ 15m，e2e 夹具）
+        ///   [4] DogKnight(t3) (-20,0,20)    距出生点 67.1m（> 18+6）——对原点观察者 28.3m（> 18）亦不仇恨
+        ///   [5] SpiderBoss(t4) (-40,0,-25)  距出生点 52.2m（> 25+12）——对原点观察者 47.2m（> 25）亦不仇恨
         /// count 超过布局长度时循环复用；朝向一律面向原点（感知确定性）。
         /// </summary>
         public void SpawnDefaultLayout(int count)

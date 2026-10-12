@@ -13,17 +13,16 @@ REM --ws-prefix http://+:8000/ 是**对外必须**的：默认的 127.0.0.1 前�
 REM   面试官的浏览器拨 <公网IP>:8000 会连不上（T8 实测：连 TCP 都建不起来）。
 REM   `+` 这个强通配前缀需要 setup-once.cmd 里的 URL ACL。
 REM --bots 100 是 P3(AOI) 那条声称面要的规模（浮层"远程实体"会从 0 跳到 8-9）。
-REM --monsters 6：布局尾部的 DogKnight / SpiderBoss 距**玩家出生点** (10,0,-15.52) 46.5m / 50.9m，
-REM   都在各自「感知半径 + 巡逻半径」（18+6 / 25+12）之外 —— 开局不仇恨，它们不会主动扑向你。
-REM   （T8 修正：初版 DogKnight 距出生点只有 11m < 感知 18m，实测 12 分钟 8/8 次进世界打死挂机玩家。）
-REM   但**别原地挂机**：[0] Wolf 的巡逻圈最近离出生点约 5.9m < 检测 15m，站着不动会被它追上打死、
-REM   被送回选人界面重登 —— 这在任何 --monsters ≥ 1 下都成立（槽位 [0] 总是 Wolf，**调小数量躲不开**，
-REM   数量只决定场上有几只、看得到哪些）。阵亡时间**别当精确读数**：旧的"约 7 秒"出自修复前
-REM   4~6 只怪一起围在脸上的实测，现在按"十几秒起、最坏接近半分钟"理解
-REM   （口径见 docs/superpowers/guides/webgl-demo-boundaries.md）。
-REM   两只新怪仍在 80m AOI 视野内（AoiGrid.SightRadius）——实体与模型都在场，但**不在开屏机位里**：
-REM   出生朝向 +Z，实测两只在左后方 45° / 87° 方位（距相机 49m / 57m，画面上只有几十像素高），
-REM   要**把相机转过去**才看得见（最终点位下的实拍见 production/verify/t8_monsters.png）。
-REM   别拿初版的截图当证据（那张是按旧点位 20m/42m 拍的，且骑士当时正在追击玩家）。
+REM 出生点 2026-10-13 搬到湖东岸 (10,0.21,-40)（旧点 (10,0.16,-15.52)）：新点到六只怪的
+REM   「感知半径 + 巡逻半径」之和**全部有余量**（最近的是 [0] Wolf：40.1m > 15+10）——
+REM   开局站在原地不动**不会被任何怪发现**（活体验证：--monsters 6 挂机 3 分钟 0 伤害、未阵亡；
+REM   守备见 Server.Tests 的 New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn（全六槽位）与
+REM   Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster）。
+REM   但这只保住**出生点**：离开它朝原点方向走约 15m 就会踏进 [0] Wolf 的感知圈
+REM   （40.1m − 巡逻半径 10m − 感知 15m ≈ 15m），之后照样会被追上打死、被送回选人界面重登。
 REM   演示时留意走位（想活着就得动起来或打回去）。
+REM 开屏取景：出生朝向 +Z（正对原点方向）。六只怪都在 80m AOI 视野内（AoiGrid.SightRadius），
+REM   但 [0] Wolf 在正前方 40m、两只新怪偏左（DogKnight 左前 27°/67m，SpiderBoss 左侧 73°/52m）——
+REM   要**把相机转过去**才看得全新怪。production/verify/t8_monsters.png 拍于旧出生点，方位参考
+REM   仍近，但取景不再等同"开屏所见"（新取景见 t13_spawn_*.png）。
 dist\server\Server3C.exe 8000 --monsters 6 --bots 100 --ws-prefix http://+:8000/

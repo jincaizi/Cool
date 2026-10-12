@@ -1886,6 +1886,8 @@ git commit -m "chore(demo): the deployed demo spawns six monsters, config copy r
 | 最终审查 | 3 Important + 5 Minor → 一次收口修复 | 见 `progress.md`：I1 受击态残留（骑士受击动画循环）、I2 挥砍链无用例（spec §8#4 被丢）、I3 截图早于点位冻结 |
 
 > **已知限制（合并门禁请照读）**：① `Assets/Monstor/DogKnight/` 整棵树**未入库**（用户在途搬迁）⇒ **干净 clone 上 `NpcAnimatorAssetTests` 的若干用例必然红**，本分支的绿是"在用户工作区状态下"取得的；② `[0] Wolf` 在出生点 5.9m 处（感知 15m）⇒ **任何 `--monsters ≥ 1` 下挂机都会被它打死**（既有设计 + e2e 确定性依赖，本次未动）；③ 玩家可穿过 Boss（服务端无碰撞）；④ 本仓库未启用 Git LFS，`dist/` 被 gitignore。
+>
+> **2026-10-13 更正**：② 已不成立——出生点搬到 (10,0,-40) 后六槽位全部脱离「感知 + 巡逻」范围，挂机不再会被 [0] Wolf 打到（活体验证 3 分钟 0 伤害）；③ 客户端侧已加怪物视图碰撞体（服务端仍不模拟玩家移动 ⇒ 改客户端仍可穿模）。见 `2026-10-13-spawn-and-collision-report.md`。
 
 ## 与 spec 的两处有意偏离
 

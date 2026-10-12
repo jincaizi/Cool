@@ -20,18 +20,19 @@ dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
 
 | index | 模板 | 位置 | 朝向 | 行为 |
 |---|---|---|---|---|
-| [0] | Wolf(2) | (12,0,0) | 面向原点 | 开局感知原点观察者（检测 15m ≥ 12m）→ 追击攻击 |
+| [0] | Wolf(2) | (12,0,0) | 面向原点 | 开局感知原点观察者（检测 15m ≥ 12m）→ 追击攻击；距玩家出生点 40.1m > 15+10 |
 | [1] | Slime(1) | (40,0,0) | 面向原点 | 巡逻可视（观察者视野 80m）、不感知（检测 8m） |
 | [2] | Slime(1) | (-40,0,0) | 面向原点 | 同上 |
 | [3] | Wolf(2) | (0,0,40) | 面向原点 | 可视不感知（观察者视野 80m 内，距离 40m > 15m） |
-| [4] | DogKnight(3) | (-20,0,20) | 面向原点 | 可视（距原点 28.3m < 80m）且对原点观察者不感知（28.3m > 检测 18m）；**按玩家出生点避让**：距出生点 46.5m > 感知 18m + 巡逻 6m |
-| [5] | SpiderBoss(4) | (-40,0,-25) | 面向原点 | 可视（距原点 47.2m < 80m）且对原点观察者不感知（47.2m > 检测 25m）；距出生点 50.9m > 感知 25m + 巡逻 12m |
+| [4] | DogKnight(3) | (-20,0,20) | 面向原点 | 可视（距原点 28.3m < 80m）且对原点观察者不感知（28.3m > 检测 18m）；**按玩家出生点避让**：距出生点 67.1m > 感知 18m + 巡逻 6m |
+| [5] | SpiderBoss(4) | (-40,0,-25) | 面向原点 | 可视（距原点 47.2m < 80m）且对原点观察者不感知（47.2m > 检测 25m）；距出生点 52.2m > 感知 25m + 巡逻 12m |
 
-> [4]/[5] 的避让约束是**到玩家出生点 (10,0,-15.52)** 的距离 > 感知半径 + 巡逻半径（DemoDay 的
-> `PlayerSpawner._spawnPoint` 实测；原点只是 e2e 观察者的位置，按原点推会漏判）。守备测试
-> `MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn` 与
-> `Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_The_New_Monsters`。前四点位不受该约束——
-> [0] Wolf 的巡逻圈最近切到出生点约 5.9m（< 检测 15m），挂机玩家是被它打死的。
+> 避让约束是**到玩家出生点 (10,0,-40)** 的距离 > 感知半径 + 巡逻半径（DemoDay 的
+> `PlayerSpawner._spawnPoint` 实测；原点只是 e2e 观察者的位置，按原点推会漏判）。
+> 2026-10-13 出生点从 (10,0,-15.52) 搬到湖东岸 (10,0,-40)，**六个槽位全部满足该约束**
+>（旧点下 [0] Wolf 是唯一按设计违反规则的槽位：巡逻圈最近切到 5.9m < 检测 15m，挂机玩家是被它打死的）。
+> 守备测试：`MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn`（全六槽位，几何）与
+> `Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster`（3 分钟挂机零施法，行为）。
 
 ## 怪物生命周期
 
@@ -52,7 +53,10 @@ dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
 ## 客户端
 
 - 联网装配成功后 `ClientNetworkHost` 自动禁用场景内全部本地 `MonsterSpawner`（DemoDay 场景有两个）
-- Npc 视图 = 球体占位（玩家是胶囊），名称 `Monster_{id}_T{template}`；真实模型/动画表现留 backlog
+- Npc 视图 = 真模型 + 动画驱动（`NpcEntityAnimator`；目录未命中/未接线时退化为球体占位），名称带预制体名前缀
+- **怪物视图带运行时碰撞体**（`NpcBodyCollider`，2026-10-13）：尺寸按模型包围盒推（半径 = XZ 跨度较大者的一半，
+  高度 = Y 跨度），层 `NpcBody`，层矩阵只与本地玩家层碰撞 ⇒ 撞不过去。**纯客户端判定**——服务端不模拟
+  玩家移动也不校验重叠，改客户端仍可穿模（见 `webgl-demo-boundaries.md` 第 ⑪ 条）
 
 ## 扩展点：加一种新怪物
 
