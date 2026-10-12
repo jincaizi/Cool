@@ -138,14 +138,17 @@
 
 攻击的退出用 exit-time 交给 Animator 自己算，**因此不需要片段长度表**。
 
-**驱动侧三条规则**（按此优先级执行）：
+**驱动侧四条规则**（按此优先级执行）：
 
-1. **排程的攻击到点**：置忙位 → 写 `MonsterState = 3` → 打 `Attack` Trigger。
-   先写值是为了堵竞态：施法广播与状态快照在同一 tick 发出，客户端不保证谁先到；若 Trigger 先到而参数还停在 2(Run)，`AnyState → Run` 会立刻把挥砍打断。忙位必须**当场由驱动置位**，不能等 `StateMachineBehaviour` 回调 —— 回调发生在同一帧更晚的 Animator 更新阶段，那一帧规则 2 还拦不住。
-2. **忙位为真时**：不写 `MonsterState`（保持 3）。
-3. **其余时间**：把时间轴采出的状态写进 `MonsterState`。
+1. **排程的攻击到点**：写 `MonsterState = 3` → 置忙位与「待确认」→ 打 `Attack` Trigger。
+   先写值是为了堵竞态：施法广播与状态快照在同一 tick 发出，客户端不保证谁先到；若 Trigger 先到而参数还停在 2(Run)，`AnyState → Run` 会立刻把挥砍打断。
+2. **时间轴采出状态后**：若处于「待确认」且采到 `3 / Hit / Death` 任一值 → 清「待确认」（服务端确实进了攻击窗口；后两者是打断场景）。
+3. **忙位为真且「待确认」已清**：不写 `MonsterState`（保持 3）。
+4. **其余时间**：把采出的状态写进 `MonsterState`。
 
-忙位由攻击状态上的 `StateMachineBehaviour` 的 `OnStateExit` 清除（`OnStateEnter` 只做幂等确认）—— 与本项目 `Sys3C/Animation/StateBehaviours/` 既有惯例一致，且比 `GetCurrentAnimatorStateInfo().normalizedTime >= 1` 可靠（过渡期间该 API 返回源态还是目标态本身是个坑）。
+**为什么忙位不靠 `StateMachineBehaviour`**：草稿曾用攻击状态上的 `OnStateExit` 清忙位。它可行，但需要在建好的控制器资产上额外挂组件 —— MCP 的 `animator-modify` 不支持挂 SMB，只能走 `script-execute` 手改资产，而那条路在本项目有"资产写回后反序列化不正确"的前科。改用「时间轴确认」后：状态机逻辑**全部落在纯 C# 里、可无 Animator 单测**，控制器资产保持纯数据。
+
+代价是驱动依赖一个前提：**服务端在排队施法的同一次 BT 动作里就置了 `ActionState = Attack`**（`MonsterBtActions.Attack` 确实如此，"待确认"必然在 ≤1 tick 内被确认）。若哪天服务端改成"先施法、稍后置状态"，这里会卡在忙位 —— 因为它是隐式契约，规则 2 里的 Hit/Death 分支是唯一的兜底。
 
 **一致性并不依赖「驱动 CrossFade 还是控制器转移」** —— 两者都在同一个 `renderAt` 触发（§6.1）。既然不依赖，就该选可检查、能在 Animator 窗口里看见的标准画法。本节早先版本提出的「控制器不放转移图」是为了解决一致性问题，而那个理由不成立，故废弃。
 
