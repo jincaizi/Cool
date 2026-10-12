@@ -1028,7 +1028,10 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void Awake()
         {
-            _animator = GetComponent<Animator>();
+            // 用 GetComponentInChildren：本组件由 registry 在实例化后 AddComponent 到**预制体根**，
+            // 而模型自带的 Animator 可能在子节点上（美术资源的常见结构）。这里在 MonoBehaviour
+            // 内部取组件是合规的——registry 是普通类，项目规则禁止它在非 MonoBehaviour 上下文里 GetComponent。
+            _animator = GetComponentInChildren<Animator>();
             if (_animator != null && _animator.runtimeAnimatorController == null)
                 _animator = null;   // 没有控制器的 Animator 写参数只会刷错误日志
         }
@@ -1364,12 +1367,9 @@ MCP script-execute '{"isMethodBody":true,"className":"SpiderRigCheck","methodNam
 MCP assets-prefab-create '{"sourcePrefabAssetPath":"Assets/Monstor/DogKnight/Prefab/DogPBR.prefab","prefabAssetPath":"Assets/Monstor/DogKnight/Prefab/DogKnightMonster.prefab"}'
 ```
 
-进编辑态改两处：Animator 的 `m_Controller` → `NpcAnimator_DogKnight.controller`；`Apply Root Motion` 保持 0；加 `NpcEntityAnimator` 组件：
+进编辑态改一处：Animator 的 `m_Controller` → `NpcAnimator_DogKnight.controller`，`Apply Root Motion` 保持 0。
 
-```
-MCP assets-prefab-open '{"gameObjectRef":{"instanceID":0,"assetPath":"Assets/Monstor/DogKnight/Prefab/DogKnightMonster.prefab"}}'
-MCP gameobject-component-add '{"gameObjectRef":{"instanceID":0,"assetPath":"Assets/Monstor/DogKnight/Prefab/DogKnightMonster.prefab"},"componentNames":["Hotfix.GameSystems.SyncLayer.NpcEntityAnimator"]}'
-```
+> **预制体上不放 `NpcEntityAnimator`** —— 驱动由 registry 在实例化后动态 `AddComponent` 添加（与真人角色的既有做法一致：`RemoteEntityRegistry.cs:190` 对玩家预制体也是 `AddComponent<RemoteEntityAnimator>()`）。原因：registry 是普通类，项目规则禁止它在非 MonoBehaviour 上下文里 `GetComponent`；让预制体保持纯美术，职责也更干净。
 
 > 根节点的 Animator 组件用 `gameobject-find` + `gameobject-component-modify` 把 `m_Controller` 指到新控制器（`object-modify` 亦可）。
 
@@ -1386,7 +1386,7 @@ MCP assets-prefab-close '{"save":true}'
 MCP script-execute '{"isMethodBody":true,"className":"SpiderPrefab","methodName":"Run","csharpCode":"var fbx = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(\"Assets/Monstor/fantasySpider/spider_myOldOne_Mecanim.FBX\");\nvar root = new GameObject(\"SpiderMonster\");\nvar inst = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(fbx);\ninst.transform.SetParent(root.transform, false);\nroot.transform.localScale = new Vector3(2f, 2f, 2f);\nvar animator = inst.GetComponentInChildren<Animator>();\nvar legacy = inst.GetComponentInChildren<Animation>();\nif (legacy != null) Object.DestroyImmediate(legacy);\nanimator.applyRootMotion = false;\nanimator.runtimeAnimatorController = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(\"Assets/Monstor/fantasySpider/NpcAnimator_Spider.controller\");\nanimator.gameObject.AddComponent<Hotfix.GameSystems.SyncLayer.NpcEntityAnimator>();\nUnityEditor.PrefabUtility.SaveAsPrefabAsset(root, \"Assets/Monstor/fantasySpider/SpiderMonster.prefab\");\nObject.DestroyImmediate(root);\nUnityEditor.AssetDatabase.SaveAssets();\nUnityEditor.AssetDatabase.Refresh();\nDebug.Log(\"[SPIDER-PREFAB] saved\");"}'
 ```
 
-> **驱动组件必须加在 Animator 所在的 GameObject 上**（`NpcEntityAnimator.Awake` 用 `GetComponent<Animator>()` 取自己身上的 Animator）。上面这段已经把 `localScale = (2,2,2)`（spec D6：3.3m 宽）、关根运动、去 legacy `Animation`、指控制器一次做完。
+> **预制体上不放驱动组件** —— 由 registry 在实例化后 `AddComponent` 添加（见步骤 2 的说明）。上面这段只做：`localScale = (2,2,2)`（spec D6：3.3m 宽）、关根运动、去 legacy `Animation`、指控制器。
 
 - [ ] **步骤 4：断言预制体结构（追加到 `NpcAnimatorAssetTests`）**
 
@@ -1405,13 +1405,12 @@ MCP script-execute '{"isMethodBody":true,"className":"SpiderPrefab","methodName"
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 Assert.IsNotNull(prefab, path);
 
-                var driver = prefab!.GetComponentInChildren<NpcEntityAnimator>(true);
-                Assert.IsNotNull(driver, $"{path} 缺 NpcEntityAnimator");
+                // 预制体保持纯美术：驱动由 registry 实例化后 AddComponent（普通类不能用 GetComponent）
+                Assert.IsNull(prefab!.GetComponentInChildren<NpcEntityAnimator>(true),
+                    $"{path} 不该挂驱动组件——它在实例化后由 registry 添加");
 
                 var animator = prefab.GetComponentInChildren<Animator>(true);
                 Assert.IsNotNull(animator, $"{path} 缺 Animator");
-                Assert.AreSame(animator!.gameObject, driver!.gameObject,
-                    $"{path} 的驱动必须与 Animator 同物体（Awake 里 GetComponent<Animator>() 只找自己）");
                 Assert.IsNotNull(animator!.runtimeAnimatorController, $"{path} 的 Animator 没有控制器");
                 Assert.IsTrue(animator.runtimeAnimatorController!.name.Contains(controllerName), $"{path} 控制器不对");
                 Assert.IsFalse(animator.applyRootMotion, $"{path} 必须关根运动（位置由服务端权威）");
@@ -1477,6 +1476,7 @@ git commit -m "feat(monster): prefabs for the knight and the boss, spider rig sw
             Assert.IsNotNull(view);
             Assert.IsTrue(view!.GameObject.name.StartsWith("FakeMonsterPrefab"),
                 $"命中目录应实例化真预制体，实际是 {view.GameObject.name}");
+            Assert.IsNotNull(view.NpcAnimator, "registry 应在实例化出的怪物根上补上驱动组件");
         }
         finally
         {
@@ -1516,7 +1516,6 @@ git commit -m "feat(monster): prefabs for the knight and the boss, spider rig sw
         var root = new GameObject("DropRoot");
         var prefab = new GameObject("FakeMonsterPrefab");
         prefab.AddComponent<Animator>();
-        prefab.AddComponent<NpcEntityAnimator>();
         var registry = new RemoteEntityRegistry(root.transform, null,
             new Dictionary<int, GameObject> { { 3, prefab } });
         try
@@ -1580,8 +1579,11 @@ git commit -m "feat(monster): prefabs for the knight and the boss, spider rig sw
                 {
                     var model = Object.Instantiate(prefab, _root, false);
                     model.name = $"Monster_{playerId}_T{snapshot.TemplateId}";
-                    return new RemoteEntityView(model, snapshot.Kind, snapshot.TemplateId,
-                        npcAnimator: model.GetComponent<NpcEntityAnimator>());
+                    // AddComponent 同步跑 Awake（与真人路径同惯例，见本文件 :190 对玩家预制体的处理）——
+                    // 驱动在 Awake 里用 GetComponentInChildren 找到模型自带的 Animator。
+                    // 本类是普通类，项目规则禁止 GetComponent，所以驱动只能这样加。
+                    var driver = model.AddComponent<NpcEntityAnimator>();
+                    return new RemoteEntityView(model, snapshot.Kind, snapshot.TemplateId, npcAnimator: driver);
                 }
 
                 var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);   // 降级占位（目录未命中/未接线）

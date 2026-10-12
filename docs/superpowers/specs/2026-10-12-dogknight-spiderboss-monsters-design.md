@@ -62,8 +62,9 @@
 | 位置 | 改动 |
 |---|---|
 | `NpcAnimator_DogKnight.controller` / `NpcAnimator_Spider.controller` | 新资产，内容见 §5 |
-| `DogKnightMonster.prefab` | 基于 `DogPBR.prefab` 的 **Prefab Variant**：换控制器 + 挂 `NpcEntityAnimator`。原预制体不动，Asset Store 自带 `Scene01` 不受影响 |
-| `SpiderMonster.prefab` | 从 FBX 新建：移除 legacy `Animation` 组件、根节点缩放 ×2、挂 Animator + `NpcEntityAnimator` |
+| `DogKnightMonster.prefab` | 基于 `DogPBR.prefab` 的 **Prefab Variant**：只换控制器。原预制体不动，Asset Store 自带 `Scene01` 不受影响 |
+| `SpiderMonster.prefab` | 从 FBX 新建：移除 legacy `Animation` 组件、根节点缩放 ×2、挂 Animator |
+| （预制体**不挂** `NpcEntityAnimator`） | 驱动由 `RemoteEntityRegistry` 在实例化后 `AddComponent` 添加 —— 与真人路径同惯例（`RemoteEntityRegistry.cs:190` 对玩家预制体也是 `AddComponent<RemoteEntityAnimator>()`）。原因是 registry 是**普通类**，项目规则禁止它在非 MonoBehaviour 上下文里 `GetComponent`；预制体保持纯美术，职责也更干净。为此驱动在 `Awake` 里用 `GetComponentInChildren<Animator>()`（模型自带的 Animator 可能在子节点上） |
 | `ClientNetworkHost._npcPrefabs` | `[Serializable] NpcPrefabEntry[] { int TemplateId; GameObject Prefab; }`。**不用 ScriptableObject**：场景接线无论如何都要做一次，SO 只换来"以后加怪不开场景"这点便利，却要走 `script-execute` 创建资产 —— 那条路在本项目有反序列化不正确的前科（见项目记忆 `unity-mcp-script-execute-asset-trap`） |
 | `RemoteEntityRegistry.CreateView` | Npc 分支查目录，命中实例化真模型；**未命中退回球体**（保持今天的降级行为） |
 | `RemoteInterpolator` + `RemoteEntityRegistry.UpdateRender` | 快照缓冲增加 `actionState`/`dead`，按 `renderAt` 采样出状态并喂给驱动 —— 见 §6.1 |
