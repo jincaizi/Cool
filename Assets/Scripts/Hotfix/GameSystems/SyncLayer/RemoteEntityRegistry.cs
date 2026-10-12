@@ -69,7 +69,8 @@ namespace Hotfix.GameSystems.SyncLayer
 
                 float yaw = _lastKnownYaw.TryGetValue(snapshot.PlayerId, out var last) ? last : 0f;
                 _interpolator.AddSample(snapshot.PlayerId, serverTicks,
-                    new Cool.SyncCore.Vec3(snapshot.X, snapshot.Y, snapshot.Z), yaw);
+                    new Cool.SyncCore.Vec3(snapshot.X, snapshot.Y, snapshot.Z), yaw,
+                    snapshot.ActionState, snapshot.Dead);
                 _lastSampleTicks[snapshot.PlayerId] = serverTicks; // 只在真收到样本时刷新
             }
         }
@@ -95,13 +96,22 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             foreach (var kv in _views)
             {
+                // 本循环只写位置/朝向；状态（actionState/dead）走 TrySampleNpcState 的阶梯采样路径
                 if (_interpolator.TryGetRenderState(kv.Key, nowServerTicks, renderDelayTicks,
-                    out var pos, out var rot))
+                    out var pos, out var rot, out _, out _))
                 {
                     kv.Value.Position = pos;
                     kv.Value.Rotation = rot;
                 }
             }
+        }
+
+        /// <summary>采出某视图在 renderAt 处的状态（阶梯）。供 UpdateRender 与测试使用。</summary>
+        public bool TrySampleNpcState(long entityId, long renderAt, out byte actionState, out bool dead)
+        {
+            actionState = 0;
+            dead = false;
+            return _interpolator.TryGetSampleState(entityId, renderAt, out actionState, out dead);
         }
 
         public bool Remove(long playerId)
@@ -206,6 +216,8 @@ namespace Hotfix.GameSystems.SyncLayer
         public bool Dead { get; set; }
         /// <summary>远程动画驱动（只有真人角色有；占位为 null）</summary>
         public RemoteEntityAnimator? Animator { get; }
+        /// <summary>怪物动画驱动（Kind=Npc 且预制体带组件时非空；球体占位为 null）</summary>
+        public NpcEntityAnimator? NpcAnimator { get; }
 
         public Vector3 Position
         {
@@ -219,12 +231,13 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         public RemoteEntityView(GameObject go, byte kind = 0, int templateId = 0,
-            RemoteEntityAnimator? animator = null)
+            RemoteEntityAnimator? animator = null, NpcEntityAnimator? npcAnimator = null)
         {
             GameObject = go;
             Kind = kind;
             TemplateId = templateId;
             Animator = animator;
+            NpcAnimator = npcAnimator;
         }
     }
 }

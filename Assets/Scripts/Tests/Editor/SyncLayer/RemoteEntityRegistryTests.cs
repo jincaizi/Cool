@@ -139,5 +139,25 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 Object.DestroyImmediate(root);
             }
         }
+
+        [Test]
+        public void Npc_View_Keeps_Sampled_State_Instead_Of_Arrival_State()
+        {
+            // 采样路径：视图的 ActionState 由 UpdateRender 在 renderAt 处采出
+            //（ApplySnapshot 仍写 view.ActionState 作为"最后已知值"，供测试与观察用）
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 2_000_001,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind
+                    | EntityFieldMask.ActionState | EntityFieldMask.TemplateId),
+                X = 0f, Z = 0f, Kind = (byte)EntityKind.Npc, TemplateId = 2,
+                ActionState = (byte)NpcAnimationState.Run, Tick = 1
+            }, serverTicks: 1_000_000L);
+
+            Assert.IsTrue(_registry.TrySampleNpcState(2_000_001, renderAt: 1_000_000L,
+                out var state, out var dead));
+            Assert.AreEqual((byte)NpcAnimationState.Run, state);
+            Assert.IsFalse(dead);
+        }
     }
 }
