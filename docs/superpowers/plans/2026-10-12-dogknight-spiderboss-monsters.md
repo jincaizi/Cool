@@ -737,12 +737,17 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
-        public void Adjacent_Swings_Alternate_Variant()
+        public void A_Swing_Sequence_Shows_Both_Variants()
         {
-            // 相邻两刀间隔 ≥ 冷却 1.5s ≫ VariantBucketTicks(≈1/15s) ⇒ 必然落在不同桶
-            long t1 = 638_000_000_000_000_000L;
-            long t2 = t1 + 1_500 * 10_000L;   // +1.5s（10_000 ticks = 1ms）
-            Assert.AreNotEqual(NpcAttackSchedule.VariantOf(t1), NpcAttackSchedule.VariantOf(t2));
+            // 变体是时间戳的纯函数（跨客户端一致，这是硬要求）；"交替"只是 cadence 的副产物——
+            // 1.5s 冷却 = 22.5 个桶，桶序号每次 +22 或 +23，奇偶每两刀翻一次。
+            // 这里断言**真正成立**的性质：一段连续挥砍里两段攻击都出现过（否则玩家永远只看同一段）。
+            long t0 = 638_000_000_000_000_000L;
+            var seen = new HashSet<int>();
+            for (int k = 0; k < 10; k++)
+                seen.Add(NpcAttackSchedule.VariantOf(t0 + k * 1_500L * 10_000L));
+
+            Assert.AreEqual(2, seen.Count, "连续 10 刀里两段攻击都应出现过");
         }
 
         [Test]
@@ -838,9 +843,10 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
     public void SetUp()
     {
         var controller = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath(TempControllerPath);
-        controller.AddParameter("MonsterState", UnityEditor.Animations.AnimatorControllerParameterType.Int);
-        controller.AddParameter("AttackVariant", UnityEditor.Animations.AnimatorControllerParameterType.Int);
-        controller.AddParameter("Attack", UnityEditor.Animations.AnimatorControllerParameterType.Trigger);
+        // 枚举在 UnityEngine 下，不在 UnityEditor.Animations 里
+        controller.AddParameter("MonsterState", UnityEngine.AnimatorControllerParameterType.Int);
+        controller.AddParameter("AttackVariant", UnityEngine.AnimatorControllerParameterType.Int);
+        controller.AddParameter("Attack", UnityEngine.AnimatorControllerParameterType.Trigger);
 
         var sm = controller.layers[0].stateMachine;
         var idle = sm.AddState("Idle");
@@ -850,10 +856,12 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
         var toRun = sm.AddAnyStateTransition(run);
         toRun.canTransitionToSelf = false;
+        toRun.duration = 0.1f;          // 显式给混合时长：默认 0.25s 会让断言落在过渡中途
         toRun.AddCondition(UnityEditor.Animations.AnimatorConditionMode.Equals, 2f, "MonsterState");
 
         var toAttack = sm.AddAnyStateTransition(attack);
         toAttack.canTransitionToSelf = false;
+        toAttack.duration = 0.1f;
         toAttack.AddCondition(UnityEditor.Animations.AnimatorConditionMode.If, 0f, "Attack");
 
         var backToIdle = attack.AddTransition(idle);      // exit-time 回 Idle
@@ -865,6 +873,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         _animator = _go.AddComponent<Animator>();
         _animator.runtimeAnimatorController = controller;
         _driver = _go.AddComponent<NpcEntityAnimator>();
+        _driver.ResolveAnimator();   // EditMode 下 AddComponent 不触发 Awake —— 必须显式解析一次
     }
 
     [TearDown]
@@ -876,7 +885,10 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
     private string CurrentState()
     {
-        _animator.Update(0.05f);
+        // 必须推进足够跨越混合时长（fixture 里设的是 0.1s）再断言：
+        // 过渡期间 GetCurrentAnimatorStateInfo 报的是**源态**，只推 50ms 会读到上一个状态，
+        // 断言就会在"过渡还没完成"这件事上假红/假绿。
+        _animator.Update(0.3f);
         var info = _animator.GetCurrentAnimatorStateInfo(0);
         if (info.IsName("Run")) return "Run";
         if (info.IsName("Attack01")) return "Attack01";
@@ -892,16 +904,16 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
     }
 
     [Test]
-    public void A_Scheduled_Swing_Plays_And_Is_Not_Interrupted_By_Locomotion()
+    public void A_Stale_Locomotion_Sample_Does_Not_Interrupt_The_Swing()
     {
         _driver.ApplyState((byte)NpcAnimationState.Run, false);
         _driver.PlayAttack(variant: 0);
         Assert.AreEqual("Attack01", CurrentState());
 
-        // 忙位 + 待确认期间，时间轴即使还说 Run 也不得写参数（否则 AnyState→Run 当场打断挥砍）
-        _driver.ApplyState((byte)NpcAnimationState.Attack, false);   // 服务端确认进入攻击窗口
-        _driver.ApplyState((byte)NpcAnimationState.Run, false);      // 陈旧样本
-        Assert.AreEqual("Attack01", CurrentState(), "挥砍期间不得被 locomotion 打断");
+        // 竞态：施法广播与状态快照同 tick 发出，到达顺序不保证——
+        // 广播先到时会先起手，紧接着来的还是**上一 tick 的** Run 样本
+        _driver.ApplyState((byte)NpcAnimationState.Run, false);
+        Assert.AreEqual("Attack01", CurrentState(), "确认前不得被陈旧的 locomotion 样本打断");
     }
 
     [Test]
@@ -1026,11 +1038,19 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _busy;              // 攻击片段在播 / 等待时间轴确认
         private bool _awaitingConfirm;   // 已触发挥砍，等时间轴证实服务端进了攻击窗口
 
-        private void Awake()
+        private void Awake() => ResolveAnimator();
+
+        /// <summary>
+        /// 解析 Animator。**internal 是为了测试**：EditMode 下 `AddComponent` **不会触发 `Awake`**
+        /// （只在 play mode 生效），测试必须自己能调一次；用反射硬调 Awake 会踩 Unity 的
+        /// `ShouldRunBehaviour` 断言，所以留这个命名的方法。
+        ///
+        /// 用 GetComponentInChildren：本组件由 registry 在实例化后 AddComponent 到**预制体根**，
+        /// 而模型自带的 Animator 可能在子节点上（美术资源的常见结构）。在 MonoBehaviour 内部
+        /// 取组件是合规的——registry 是普通类，项目规则禁止它在非 MonoBehaviour 上下文里 GetComponent。
+        /// </summary>
+        internal void ResolveAnimator()
         {
-            // 用 GetComponentInChildren：本组件由 registry 在实例化后 AddComponent 到**预制体根**，
-            // 而模型自带的 Animator 可能在子节点上（美术资源的常见结构）。这里在 MonoBehaviour
-            // 内部取组件是合规的——registry 是普通类，项目规则禁止它在非 MonoBehaviour 上下文里 GetComponent。
             _animator = GetComponentInChildren<Animator>();
             if (_animator != null && _animator.runtimeAnimatorController == null)
                 _animator = null;   // 没有控制器的 Animator 写参数只会刷错误日志
@@ -1042,10 +1062,20 @@ namespace Hotfix.GameSystems.SyncLayer
             int state = MapState(actionState, dead);
             if (state < 0) return;                       // Skill/Down/GetUp：忽略
 
-            if (_awaitingConfirm && (state == StateAttacking || state == StateHit || state == StateDeath))
-                _awaitingConfirm = false;                // 服务端确实进了攻击窗口（或被打断）
+            if (_awaitingConfirm)
+            {
+                if (state == StateAttacking || state == StateHit || state == StateDeath)
+                    _awaitingConfirm = false;            // 服务端确认进了攻击窗口（或被打断）
+                else
+                    return;                              // 确认前一律不写：广播可能先于快照到达
+            }
 
-            if (_busy && !_awaitingConfirm) return;      // 挥砍期间不写 locomotion
+            if (_busy)
+            {
+                if (state == StateAttacking) return;     // 攻击窗口内保持 3，别让 locomotion 转移打断挥砍
+                _busy = false;                           // 服务端离开攻击窗口 → **释放**（漏了这句就是永久锁存：
+                                                         // 怪物挥完第一刀后再也不写时间轴，既不播受击也不播死亡）
+            }
 
             Write(state);
         }
