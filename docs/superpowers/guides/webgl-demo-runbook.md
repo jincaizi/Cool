@@ -127,7 +127,7 @@ webgl-demo/
 双击 `start-demo.cmd`。它会开两个窗口：
 
 * `静态站点 8080` → `StaticServer.exe --root dist\site --port 8080 --prefix http://+:8080/`
-* `游戏服务端 8000` → `Server3C.exe 8000 --monsters 2 --bots 100 --ws-prefix http://+:8000/`
+* `游戏服务端 8000` → `Server3C.exe 8000 --monsters 6 --bots 100 --ws-prefix http://+:8000/`
 
 看到这两行才算起来了：
 
@@ -136,8 +136,11 @@ StaticServer listening on http://+:8080/
 Server3C is running on port 8000
 ```
 
-`--bots 100` 是 AOI 那条声称面要的规模；`--monsters 2` 而不是 4，是因为 4 只怪会围住出生点、
-大约 7 秒就把你打死（见 `webgl-demo-boundaries.md` 的"演示操作建议"）。
+`--bots 100` 是 AOI 那条声称面要的规模。`--monsters 6` 是为了让两只新怪（DogKnight / SpiderBoss）出现在演示里——
+**它只管场上有几只、看得到哪些，不管安全**：任何 `--monsters ≥ 1` 都含槽位 [0] 的 Wolf，它的巡逻圈最近切到出生点
+约 5.9m（不足它 15m 检测的一半），所以**站在出生点不动会被它追上打死，调小数量躲不开**。想活着就**动起来或打回去**
+（这是设计意图）；真要"挂机安全"须挪 [0] 的点位，并同步改两个既有 e2e 测试的前提——不在本计划范围，
+登记为已知限制（详见 `webgl-demo-boundaries.md` 的"演示操作建议"）。
 
 ### 4.2 给面试官的话
 

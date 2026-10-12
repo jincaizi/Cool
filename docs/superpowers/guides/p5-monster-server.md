@@ -24,10 +24,18 @@ dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
 | [1] | Slime(1) | (40,0,0) | 面向原点 | 巡逻可视（观察者视野 80m）、不感知（检测 8m） |
 | [2] | Slime(1) | (-40,0,0) | 面向原点 | 同上 |
 | [3] | Wolf(2) | (0,0,40) | 面向原点 | 可视不感知（观察者视野 80m 内，距离 40m > 15m） |
+| [4] | DogKnight(3) | (-20,0,20) | 面向原点 | 可视（距原点 28.3m < 80m）且对原点观察者不感知（28.3m > 检测 18m）；**按玩家出生点避让**：距出生点 46.5m > 感知 18m + 巡逻 6m |
+| [5] | SpiderBoss(4) | (-40,0,-25) | 面向原点 | 可视（距原点 47.2m < 80m）且对原点观察者不感知（47.2m > 检测 25m）；距出生点 50.9m > 感知 25m + 巡逻 12m |
+
+> [4]/[5] 的避让约束是**到玩家出生点 (10,0,-15.52)** 的距离 > 感知半径 + 巡逻半径（DemoDay 的
+> `PlayerSpawner._spawnPoint` 实测；原点只是 e2e 观察者的位置，按原点推会漏判）。守备测试
+> `MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn` 与
+> `Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_The_New_Monsters`。前四点位不受该约束——
+> [0] Wolf 的巡逻圈最近切到出生点约 5.9m（< 检测 15m），挂机玩家是被它打死的。
 
 ## 怪物生命周期
 
-生成（`NpcIdSeed` 2_000_000 起，BotRunner 占 1_000_000+）→ 巡逻（围绕巡逻中心 4 点，半径随模板）/ 感知（视野锥内**最近**存活已登录玩家；目标丢失才切换）→ 追击 → 攻击（CombatRules 技能 50001 Slime / 50002 Wolf，冷却 1s）→ 受击硬直 5 tick（跳过行为树）→ 死亡展示 30 tick（快照持续广播死亡态）→ 移除实体（Server3C 清 AOI）→ 450 tick（30s）后以**新 id 满血**重生在巡逻中心。
+生成（`NpcIdSeed` 2_000_000 起，BotRunner 占 1_000_000+）→ 巡逻（围绕巡逻中心 4 点，半径随模板）/ 感知（视野锥内**最近**存活已登录玩家；目标丢失才切换）→ 追击 → 攻击（CombatRules 技能 50001 Slime cd 1s / 50002 Wolf cd 1s / 50003 DogKnight cd 1.5s / 50004 SpiderBoss cd 2s）→ 受击硬直 5 tick（跳过行为树）→ 死亡展示 30 tick（快照持续广播死亡态）→ 移除实体（Server3C 清 AOI）→ 450 tick（30s）后以**新 id 满血**重生在巡逻中心。
 
 死亡/重生全在服务器；断线不中断——状态全在 EntityStore + MonsterModule，零 per-session 依赖（e2e 重连断言同 id 怪物仍在）。
 
