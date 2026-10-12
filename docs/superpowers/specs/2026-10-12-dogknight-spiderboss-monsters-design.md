@@ -48,7 +48,9 @@
 | attackRange | 2.2 | 2.5 |
 | patrolRadius | 6 | 12 |
 | 技能表项 | 50003：maxRange 2.2 / cd 1.5s / dmg 30 / crit 0 | 50004：maxRange 2.5 / cd 2.0s / dmg 20 / crit 0 |
-| 布局点位 | `[4] (0, 0, -20)` | `[5] (-30, 0, -30)` |
+| 布局点位 | `[4]` 距**出生点** ≥ 28m | `[5]` 距**出生点** ≥ 41m |
+
+> **点位约束的更正（2026-10-12 实测）**：初稿按"到**原点**的距离"推导点位，并据此声称"开局不仇恨" —— 这是错的。DemoDay 的出生点是 **(10, 0, -15.5)**，原点只是 e2e 测试观察者的位置。按原点推出来的 DogKnight `(0,0,-20)` 距真实出生点只有 11m < 感知 18m，实测 12 分钟内 **8/8 次把挂机玩家打死**。正确约束是「到**出生点**的距离 > 感知半径 + 巡逻半径」。
 
 **两条硬约束**：
 
@@ -281,8 +283,8 @@ VariantBucketTicks = 666_667                                    // 常量，≈1
 
 ## 10. 部署收尾（易漏）
 
-- `production/deploy/webgl-demo/start-game-server.cmd` 的 `--monsters 2` → 6，并改掉那条「4 只怪会围住出生点」的注释（这是把新怪放进演示的唯一开关；6 只里新增的两只在距原点 20m 与 42m 处，开局不仇恨）
-- 部署产物里有一份**独立副本** `production/deploy/webgl-demo/dist/server/Config/monster_config.json`（当前与源一致）—— 需跑 `publish-server.sh` 重生成或同步，否则部署出去的演示服务器没有新怪
+- `production/deploy/webgl-demo/start-game-server.cmd` 的 `--monsters 2` → 6，并把那条注释按**实测**改写（新点位须满足"到出生点距离 > 感知 + 巡逻"，否则挂机玩家会被打死）
+- 部署产物里有一份**独立副本** `production/deploy/webgl-demo/dist/server/Config/monster_config.json` —— 该目录**被 `.gitignore` 忽略**，所以同步是工作区操作（跑 `publish-server.sh` 或直接同步），不入库；部署件在发布时重生成
 
 ## 11. 风险
 

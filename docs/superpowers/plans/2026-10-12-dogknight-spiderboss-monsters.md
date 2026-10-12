@@ -156,8 +156,11 @@ Unity EditMode 全量基线在任务 1 开工前用 `MCP tests-run '{"testMode":
         ///   [1] Slime(t1) (40,0,0)  巡逻可视（观察者视野 80m）、不感知（检测 8m）
         ///   [2] Slime(t1) (-40,0,0) 同 [1]
         ///   [3] Wolf(t2)  (0,0,40)  面向原点（观察者视野 80m 内，不感知——距离 40m > 15m）
-        ///   [4] DogKnight(t3) (0,0,-20)    精英：检测 18m < 20m ⇒ 开局不仇恨
-        ///   [5] SpiderBoss(t4) (-30,0,-30) Boss：距原点 42m、检测 25m ⇒ 要玩家找上门
+        ///   [4] DogKnight(t3) 与 [5] SpiderBoss(t4)：**开局不得仇恨** —— 约束是"到出生点的距离
+        ///       > 感知半径 + 巡逻半径"（DogKnight ≥ 28m、SpiderBoss ≥ 41m）
+        ///       ⚠️ 初稿把这两个点位按"到**原点**的距离"推导（(0,0,-20) / (-30,0,-30)）是错的：
+        ///       DemoDay 的出生点是 (10, 0, -15.5)，DogKnight 距它只有 11m < 感知 18m，
+        ///       实测 12 分钟内 8/8 次把挂机玩家打死。**原点只是 e2e 测试观察者的位置。**
         /// count 超过布局长度时循环复用；朝向一律面向原点（感知确定性）。
         /// </summary>
         public void SpawnDefaultLayout(int count)
@@ -1802,7 +1805,9 @@ git commit -m "feat(sync): npc views resolve real monster prefabs and route cast
 
 - [ ] **步骤 1：演示启动脚本**
 
-`production/deploy/webgl-demo/start-game-server.cmd`：`--monsters 2` → `--monsters 6`，并把那条注释改成反映现状（新增的两只在距原点 20m 与 42m 处、感知 18/25m，**开局不仇恨**，所以不会再出现"4 只怪围住出生点"的问题——那条注释描述的旧配置已不适用）。
+`production/deploy/webgl-demo/start-game-server.cmd`：`--monsters 2` → `--monsters 6`，并把那条注释改成反映现状。
+
+> 注释内容**必须按实测写**，不能照抄旧推导。已知事实：DemoDay 出生点 **(10, 0, -15.5)**；两个新点位须满足"到出生点距离 > 感知 + 巡逻"（DogKnight ≥ 28m、SpiderBoss ≥ 41m）。初稿写的"距原点 20m/42m、开局不仇恨"是错的 —— 那是按原点推的，而原点只是 e2e 测试观察者的位置。
 
 - [ ] **步骤 2：同步部署副本**
 
@@ -1840,7 +1845,7 @@ dotnet run --no-build --project Server/Server3C.csproj -- 8000 --monsters 6 > /t
 
 进 PlayMode（`MCP editor-application-set-state '{"IsPlaying":true}'`），等客户端连上（连接状态浮层 `_showDebugOverlay` 会写模式/状态/实体数；也可用 `console-get-logs` 看 `[NetHost]` 行）。
 
-两只怪在距原点 **20m** 与 **42m** 处，而观察者视野 80m —— 所以在出生点就能看见，**不必走过去**。若默认机位没框住它们，用 `script-execute` **调整相机朝向**（不要伪造结果、不要直接摆怪），再：
+两只怪距出生点约 **46m** 与 **51m**，而观察者视野 80m —— 所以在出生点就能看见，**不必走过去**（但比初稿预期的更远，画面里会偏小；要看细节可走过去）。若默认机位没框住它们，用 `script-execute` **调整相机朝向**（不要伪造结果、不要直接摆怪），再：
 
 ```
 MCP screenshot-game-view '{}'
@@ -1853,12 +1858,13 @@ MCP screenshot-game-view '{}'
 
 ```bash
 git add production/deploy/webgl-demo/start-game-server.cmd \
-        production/deploy/webgl-demo/dist/server/Config/monster_config.json \
         production/verify/t8_monsters.png
 git commit -m "chore(demo): the deployed demo spawns six monsters, config copy refreshed"
 ```
 
 > `production/verify/` 下已有大量历史产物 —— 只 add **本次新产生**的截图，不要 `git add` 整个目录。
+>
+> ⚠️ **`production/deploy/webgl-demo/dist/` 被 `.gitignore:88` 忽略**（2026-10-12 实测）—— 初稿把 `dist/server/Config/monster_config.json` 列进 `git add` 是**做不到的**（除非 `-f` 强加，而那会破坏该目录被忽略的设计）。所以"同步部署副本"是**工作区操作**（跑 `publish-server.sh` 或直接同步文件），不入库；真正的部署件由发布流程在部署时重生成。
 
 ---
 
