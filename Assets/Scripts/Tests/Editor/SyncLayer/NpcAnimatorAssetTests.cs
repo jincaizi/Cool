@@ -191,6 +191,39 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             }
         }
 
+        [Test]
+        public void Monster_Prefabs_Carry_The_Driver_And_The_Right_Controller()
+        {
+            var cases = new (string Path, string Controller)[]
+            {
+                ("Assets/Monstor/DogKnight/Prefab/DogKnightMonster.prefab", "NpcAnimator_DogKnight"),
+                ("Assets/Monstor/fantasySpider/SpiderMonster.prefab", "NpcAnimator_Spider"),
+            };
+
+            foreach (var (path, controllerName) in cases)
+            {
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                Assert.IsNotNull(prefab, path);
+
+                // 预制体保持纯美术：驱动由 registry 实例化后 AddComponent（普通类不能用 GetComponent）
+                Assert.IsNull(prefab!.GetComponentInChildren<NpcEntityAnimator>(true),
+                    $"{path} 不该挂驱动组件——它在实例化后由 registry 添加");
+
+                var animator = prefab.GetComponentInChildren<Animator>(true);
+                Assert.IsNotNull(animator, $"{path} 缺 Animator");
+                Assert.IsNotNull(animator!.runtimeAnimatorController, $"{path} 的 Animator 没有控制器");
+                Assert.IsTrue(animator.runtimeAnimatorController!.name.Contains(controllerName), $"{path} 控制器不对");
+                Assert.IsFalse(animator.applyRootMotion, $"{path} 必须关根运动（位置由服务端权威）");
+            }
+        }
+
+        [Test]
+        public void Spider_Boss_Is_Twice_Its_Imported_Size()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Monstor/fantasySpider/SpiderMonster.prefab")!;
+            Assert.AreEqual(2f, prefab.transform.localScale.x, 0.001f);
+        }
+
         /// <summary>
         /// 推帧直到过渡落定。实测：AnyState 过渡在参数写入后的**第一次** Update 里才开始计时，
         /// 且落定前 <c>GetCurrentAnimatorStateInfo</c> 报的仍是**源**状态（目标状态在
