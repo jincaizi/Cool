@@ -241,4 +241,35 @@ public class MonsterModuleTests
         Assert.True(config.attackRange <= rule!.MaxRange + 0.01f,
             $"template {templateId} attackRange={config.attackRange} > skill {skillId} maxRange={rule.MaxRange}");
     }
+
+    /// <summary>DemoDay 玩家出生点——客户端 `PlayerSpawner._spawnPoint` 实测
+    ///（DemoDay.unity 里该 Transform 无父节点，local 即 world (10, 0.16, -15.52)；
+    /// y 与感知判定无关——TargetDetector 只算 XZ——故常量 y 取 0，使 Vector3.Distance 即 XZ 距离）。
+    /// **不是原点**：原点只是 e2e 观察者的位置，按原点推点位会漏判（2026-10-12 实测教训）。</summary>
+    private static readonly Vector3 DemoSpawnPosition = new Vector3(10f, 0f, -15.52f);
+
+    /// <summary>挂机安全：新增槽位距出生点须 > 该模板「感知半径 + 巡逻半径」——否则怪物走完巡逻圈
+    /// 就能感知到站在原地不动的玩家。半径从构建输出目录的 monster_config.json 读，不在测试里抄数字。
+    /// 只守 [4]/[5]：前四点位是既有 e2e 夹具（[0] Wolf 面向原点即仇恨，设计如此），改点位会动到 e2e 假设；
+    /// 且 [0] 的巡逻圈最近点距出生点约 5.9m < 检测 15m——挂机挨打的是它，不是这两只新怪。
+    /// 实测教训：DogKnight 初版 (0,0,-20) 距出生点仅 11.0m < 感知 18m → 12 分钟内 8/8 次进世界打死挂机玩家。</summary>
+    [Theory]
+    [InlineData(4)] // DogKnight(t3)
+    [InlineData(5)] // SpiderBoss(t4)
+    public void New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn(int slot)
+    {
+        var (store, _) = Create(slot + 1);
+        var npc = store.All
+            .Where(e => e.Kind == (byte)EntityKind.Npc)
+            .OrderBy(e => e.PlayerId)
+            .ElementAt(slot);
+
+        var path = System.IO.Path.Combine(System.AppContext.BaseDirectory, "Config", "monster_config.json");
+        var config = ConfigLoader.LoadMonsterTemplates(path)[npc.TemplateId];
+
+        float dist = Vector3.Distance(DemoSpawnPosition, npc.Position);
+        float reach = config.detectionRadius + config.patrolRadius;
+        Assert.True(dist > reach,
+            $"槽位 [{slot}] 模板 {npc.TemplateId} 距出生点 {dist:F1}m ≤ 感知+巡逻 {reach}m——挂机玩家会被它开局追杀");
+    }
 }
