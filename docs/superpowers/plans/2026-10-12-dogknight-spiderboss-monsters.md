@@ -1891,3 +1891,55 @@ git commit -m "chore(demo): the deployed demo spawns six monsters, config copy r
 
 1. **预制作目录不用 ScriptableObject**（spec §4 写的是 `NpcPrefabCatalog.asset`）。改用 `ClientNetworkHost` 上的 `SerializedArray (templateId, prefab)`。原因：场景接线无论如何都要做一次，SO 换来的只是"以后加怪不开场景"这点便利，却要引入 `script-execute` 创建资产的路径 —— 那条路在本项目有"资产反序列化不正确"的前科（见项目记忆 `unity-mcp-script-execute-asset-trap`）。
 2. **spec §8 第 10 条（`AoiBroadcasterTests`）由任务 2 的第三个调度器用例覆盖**。广播器只是把 `ActionState` 透传给 `ShouldSend`，加参数后**编译期即强制接线**；再写一个需要构造 AOI 世界的集成用例，成本高于它挡住的回归面。
+
+## Backlog（执行账本删除前的逐字摘录）
+
+> 账本本身不入库，删工作区前把这条清单捞进来。**以下为逐字摘录、未再分类**（保留原始措辞以免二次转述走样）。最终审查当年对它们的甄别结论是：
+>
+> - **必须先修**（影响行为 / 让验证失真 / 守关键不变量）：I1 受击态残留、I2 挥砍链无用例、I3 截图早于点位冻结、M1–M5 —— **全部已修**。
+> - **已被后续提交超期解决**（标 closed-superseded）：p5 布局表缺 [4]/[5]、boundaries/runbook 的"调小数量就安全"、"`AttackVariant` 写入无断言"、boundaries 的"演示用 1 或 2"。
+> - **其余归 backlog**：测试深度类与"未来护栏"类（当前不可达或有界）。
+> - **不修**（已知限制）：见上面的验收记录。
+>
+> ⚠️ 摘录里少数条目（例如"截图只在工作区未跟踪"、"cmd 的 7 秒口径"）**当时记为待办，其后已被修复**；下文保留原文只为留痕。
+
+ - Task 1: minor (deferred): SkillIdOf 提 public 属计划强制（审查者已核实影响面为零：仅 MonsterModule.cs:97 与测试引用，Server/ 不被 Unity asmdef 引用）
+ - Task 1: minor (deferred): New_Templates_Can_Spawn 只断言 TemplateId/npcId，未断言 MaxHp —— 日后改错 t4 的 1500 无测试报警
+ - Task 1: minor (deferred): CreateDefaultConfig 与 monster_config.json 的同步无测试守护，只靠"照抄"
+ - Task 1: minor (deferred): attackRange 的 InlineData 硬编码 1..4，日后加模板 5 会静默不覆盖
+ - Task 1: minor (deferred): 测试命名/读盘依赖与 .claude/rules/test-standards.md 不一致（既有服务端测试惯例如此，非本次引入）
+ - Task 2: minor (deferred): 翻转分支保留旧位置锚点，同 tick 位移时下一 tick 可能多补一帧（有界，报告已披露）
+ - Task 2: minor (deferred): 用例 3 未复现"保活相位不同"的原场景（两位观察者同在 tick 100 首帧）；同 tick 位移无覆盖
+ - Task 2: minor (deferred): new Slot { } 字面量已 3 处，将来加字段易漏一处（沿用既有写法）
+ - Task 2: minor (deferred): 翻转判定完全绕过带间隔，若 ActionState 来源每 tick 抖动会让远带退化为每 tick 全字段（无护栏、无上限测试）
+ - Task 2: minor (deferred): scope-out 观察 —— NpcSpawn/NpcDespawn 带 ServerTimestamp 且已在 MessageCodec 注册，但服务端无发送点、客户端无消费者（未接线的协议面）
+ - Task 2: minor (deferred): Assets/Scripts/Examples/ServerExample.cs:145/197 仍直写墙钟（Unity 侧示例，不在 Server/ 工程内）
+ - Task 4: minor (deferred): AttackVariant 的写入无任何断言（变体写错参数不会被发现）
+ - Task 4: minor (deferred): 两条 Animator 用例的判读依赖未文档化的 AnyState 评估顺序（先注册者先赢）
+ - Task 4: minor (deferred): ResolveAnimator 只在 Awake 调，而 Write 在 _animator==null 时仍推进 _lastWritten → 事后补解析也补不回当前状态（当前预制体同步实例化，风险窄）
+ - Task 4: minor (deferred): Drain 同帧多项的"时间戳升序"分支无用例覆盖（现有用例每次最多追加 1 项，>1 短路）—— 恰是本次修复触碰的分支
+ - Task 4: minor (deferred): ClearAll() 无用例
+ - Task 4: minor (deferred): NpcEntityAnimator.cs:30 的 Animator? 触发 CS8632（项目未开 nullable 上下文，与 RemoteEntityAnimator 同款）
+ - Task 3: minor (deferred): RemoteEntityRegistry.TrySampleNpcState 的 summary 写"供 UpdateRender 与测试使用"，但 UpdateRender 并未调用它（任务 7 才接）—— 现在时会误导
+ - Task 3: minor (deferred): RemoteEntityRegistry.cs:52-54 的"无条件覆盖安全前提"注释只点名 view.ActionState/view.Dead，没点名本任务新增的第二个义务点（:71-73 采样实参），服务端全掩码现状已核实支持该前提
+ - Task 3: minor (deferred): 用例名 Npc_View_Keeps_Sampled_State_Instead_Of_Arrival_State 过度承诺（单样本下"采样"与"到达"恒等，它实际钉的是生产接线）
+ - Task 3: minor (deferred): 报告 §2.1/§4 的用例计数口径不一致（5 vs 6，实际 6）
+ - Task 3: minor (deferred, from re-review): 重复时间戳样本时位置取先入样、状态取后入样（亚 tick，需 renderAt 精确落在该 tick；类注释已声明有序性归外部保证）
+ - Task 3: minor (deferred, from re-review): "最旧 fallback"用例用了 2 样本而非裁定字面的 3 个（鉴别力不受实质影响）
+ - Task 5: minor (deferred, from re-review): m_HasFixedDuration 未纳入断言（关掉后数值仍留 0.15 但语义变成"源状态时长的 15%"，断言不会红）
+ - Task 5: minor (deferred, from re-review): AttackClipLength 的 (AnimationClip)st.motion 强制转换——将来挂 BlendTree 会抛异常而非干净的断言失败
+ - Task 6a: minor (deferred): 循环守护用例只报每个控制器的第一个违规态（诊断粒度粗）
+ - Task 6a: minor (deferred): internalID: 0 → 显式 74xxxxx 的副作用经复审确认无损（固化值 = 控制器早已引用的值；7 条引用逐名比对）
+ - Task 6: minor (deferred): 控制器名比对用 name.Contains（当前两名字互不为子串，够用；将来出现 NpcAnimator_Spider_Alt 之类会误绿）→ 宜改 AreEqual 或比 GUID
+ - Task 6: minor (deferred): 缩放只断言 localScale.x（只改 y/z 会漏）
+ - Task 6: minor (deferred): 无断言钉住 DogKnightMonster 是 Variant；无 legacy Animation 的显式断言
+ - Task 6: minor (deferred): Variant 含 10 条恒等 transform 覆盖（SaveAsPrefabAsset 的标准产物），会把根 transform 钉死
+ - Task 7: minor (deferred): 真模型命名 {prefab.name}_{id}_T{t} 与降级球体 Monster_... 形式不一致；降级用例的 Contains("Monster_") 判别力偏弱（简报逐字给定）
+ - Task 7: minor (deferred): 未命中目录的降级用例只覆盖 null 目录，未覆盖"目录非空但 templateId 缺失"（代码正确，属计划内测试范围偏窄）
+ - Task 7: minor (deferred): 广播早于首帧快照时第一刀被丢弃（计划强制：只对已存在视图排程）
+ - Task 1: minor (deferred): 几何守卫只覆盖 [4]/[5]（[0] 按设计违反该规则），InlineData 写死 4/5 → 将来加槽位不会自动覆盖
+ - Task 1: minor (deferred): p5-monster-server.md 的固定布局表缺 [4]/[5]（标注属 T5 同步范围）
+ - Task 8: minor (deferred): 最强的视觉证据（两张隔离渲染 + 两张 3× 裁切）只在工作区未跟踪 → 建议一并入库，否则工作区被清理后只剩报告里的探针文本
+ - Task 8: minor (deferred): boundaries.md:133 的"演示用 1 或 2"与脚本的 --monsters 6 未统一（已并入文档收口修复）
+ - Task 1: minor (deferred, 待最终审查一并甄别): production/deploy/webgl-demo/start-game-server.cmd:19 仍写"约 7 秒阵亡"、:23 仍写"或按需把数量调低" —— 与 a976be9 新立的口径相抵（该文件是演示者实际双击运行的那个）
+ - Task 1: minor (deferred): 实现者"残留只在 .superpowers"的自述被高估 —— production/verify/t9、t12 的历史脚本里也有"约 7 秒"文本（历史产物、非用户可见，对当时状态为真）
