@@ -1873,7 +1873,7 @@ git commit -m "chore(demo): the deployed demo spawns six monsters, config copy r
 | 5 | | |
 | 6 | | |
 | 7 | | |
-| 8 | | |
+| 8 | DONE_WITH_CONCERNS | 部署副本已同步（diff 空、md5 同、发布产物冒烟 6 只怪）；服务端 157/157、EditMode 293/293（前后各一次）、PlayMode 2/2；截图 `production/verify/t8_monsters.png` 同框拍到骑士（探针 px 488,257）+ 蜘蛛（px 795,180）、浮层"远程实体=6"、同帧另有 4 只球体占位作对照，隔离渲染 + 3× 原像素裁切证实两者是真模型、都在播动画。**简报"开局不仇恨"被实测推翻**：DemoDay 出生点 (10,0,-15.5) 距 DogKnight 仅 11m、巡逻又进 18m 检测圈，12 分钟内 8/8 次进世界都把挂机玩家打死（含 26 次 skill 50003 施法广播）→ 脚本注释按实测改写 |
 
 ## 与 spec 的两处有意偏离
 
