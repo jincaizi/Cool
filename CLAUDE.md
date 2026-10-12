@@ -25,7 +25,8 @@ Unity 2022 LTS MMO client with server integration planned. Code assisted by Clau
 
 ### Git
 - Commit changes: Use `git add <files>` then `git commit -m "<message>"`
-- LFS tracking: Files are tracked with Git LFS
+- LFS: **未启用** —— 仓库里没有 `.gitattributes`，`git check-attr filter` 返回 `unspecified`，`git lfs ls-files` 为空；二进制（FBX/贴图等）按**裸存**提交。
+  （本节曾写作"Files are tracked with Git LFS"，与事实不符，2026-10-13 实测后更正。若要启用需 `git lfs migrate` 重写历史，属仓库级决策。）
 
 ---
 
@@ -247,7 +248,7 @@ Animator三层Layer架构：
 - EventBus用于层间通信
 - StateCoordinator通过反射调用各FSM方法
 - 资源: Addressable异步加载，对象池管理高频对象
-- 版本: Git + Git LFS
+- 版本: Git（**未启用 LFS**，二进制裸存）
 
 ---
 
