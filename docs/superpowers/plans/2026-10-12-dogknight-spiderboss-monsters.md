@@ -1679,8 +1679,11 @@ git commit -m "feat(monster): prefabs for the knight and the boss"
         {
             long renderAt = nowServerTicks - renderDelayTicks;
 
-            // 攻击排程先于状态写入：排程到点要**先**把 MonsterState 写成攻击中，
-            // 再打 Trigger（否则 locomotion 转移会把刚起手的挥砍打断）。
+            // 攻击排程先于状态写入。**别把理由写成"否则 locomotion 会打断挥砍"**（2026-10-12 复审纠正）：
+            // 驱动的忙位在 PlayAttack 里当场置位，同帧内两种顺序的终值相同，locomotion 情形不分叉。
+            // 真正分叉的只有**同帧采到 Hit/Death**：先排程则命中/死亡那笔最后落盘（并顺手释放忙位），
+            // 顺序反了则挥砍值最后落盘、命中/死亡要等下一帧才夺回 —— 差 1 帧。之所以选先排程，
+            // 是因为驱动注释里"Hit/Death 分支是唯一兜底"想要的正是前者。
             _dueAttacks.Clear();
             _attacks.Drain(renderAt, _dueAttacks);
             foreach (var due in _dueAttacks)
