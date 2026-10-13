@@ -10,7 +10,7 @@ namespace Hotfix.GameSystems.UI
     {
         public static UIManager Instance { get; private set; }
 
-        private readonly Canvas[] _layers = new Canvas[5];
+        private readonly Canvas[] _layers = new Canvas[UIConst.Layers.Length];
         private readonly Dictionary<string, UIPanel> _registry = new Dictionary<string, UIPanel>();
         private readonly Stack<UIPanel> _stack = new Stack<UIPanel>();
         private readonly HashSet<UIPanel> _activeOverlays = new HashSet<UIPanel>();
@@ -74,14 +74,16 @@ namespace Hotfix.GameSystems.UI
 
         private void CreateCanvasLayers()
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < UIConst.Layers.Length; i++)
             {
-                var go = new GameObject($"Canvas_Layer_{(LayerType)i}");
+                var (layer, sortOrder) = UIConst.Layers[i];
+
+                var go = new GameObject("Canvas_Layer_" + layer);
                 go.transform.SetParent(transform);
 
                 var canvas = go.AddComponent<Canvas>();
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-                canvas.sortingOrder = UIConst.SortOrders[i];
+                canvas.sortingOrder = sortOrder;
 
                 go.AddComponent<UnityEngine.UI.CanvasScaler>();
                 go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
