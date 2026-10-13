@@ -77,20 +77,28 @@ namespace Hotfix.GameSystems.UI
             for (int i = 0; i < UIConst.Layers.Length; i++)
             {
                 var (layer, sortOrder) = UIConst.Layers[i];
-
-                var go = new GameObject("Canvas_Layer_" + layer);
-                go.transform.SetParent(transform);
-
-                var canvas = go.AddComponent<Canvas>();
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-                canvas.sortingOrder = sortOrder;
-
-                go.AddComponent<UnityEngine.UI.CanvasScaler>();
-                go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-                go.AddComponent<ScreenAdapter>();
-
-                _layers[i] = canvas;
+                _layers[i] = BuildLayerCanvas(transform, layer, sortOrder);
             }
+        }
+
+        /// <summary>
+        /// 建一层 Canvas。抽成 static 是为了能在 EditMode 里直接断言层表契约 ——
+        /// 走 UIManager.Awake 会连带触发 Resources 加载与面板注册，测不动。
+        /// </summary>
+        internal static Canvas BuildLayerCanvas(Transform parent, LayerType layer, int sortOrder)
+        {
+            var go = new GameObject("Canvas_Layer_" + layer);
+            go.transform.SetParent(parent);
+
+            var canvas = go.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = sortOrder;
+
+            go.AddComponent<UnityEngine.UI.CanvasScaler>();
+            go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            go.AddComponent<ScreenAdapter>();
+
+            return canvas;
         }
 
         public void Register(UIPanel panel)
