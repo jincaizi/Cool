@@ -27,6 +27,23 @@ namespace Hotfix.GameSystems.Tests.Quality
         public void Url_Desktop_Forces_No_Change()
             => Assert.IsNull(MobileQualityBootstrap.ResolveLevel("?quality=desktop", isMobileDevice: true));
 
+        /// <summary>
+        /// `?quality=mobile` 是人工实测（计划任务 10 / webgl-mobile-acceptance）实际使用的 URL。
+        /// 别名必须在**自动判定为 false** 时也强制生效——判定失准的设备（iPad 桌面 UA：
+        /// `isMobilePlatform` 与 `deviceType` 两个判据都失效）否则会静默跑 Ultra 档，
+        /// 实测拿到的是别的瓶颈。本断言就是那条"实测数字有效性"的机器化防线。
+        /// </summary>
+        [Test]
+        public void Url_Mobile_Alias_Forces_The_Mobile_Level_Even_When_Detection_Says_Desktop()
+        {
+            Assert.AreEqual(MobileQualityBootstrap.MobileQualityLevel,
+                MobileQualityBootstrap.ResolveLevel("?quality=mobile", isMobileDevice: false),
+                "判定失准（false）时别名也必须切档——否则人工实测在 iPad 桌面 UA 上跑的是 Ultra");
+            Assert.AreEqual(MobileQualityBootstrap.MobileQualityLevel,
+                MobileQualityBootstrap.ResolveLevel("?quality=mobile", isMobileDevice: true),
+                "判定为真时同样切到移动档（与自动判定同值）");
+        }
+
         [Test]
         public void Malformed_Url_Falls_Back_To_Detection()
             => Assert.AreEqual(MobileQualityBootstrap.MobileQualityLevel,

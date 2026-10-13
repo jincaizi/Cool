@@ -37,6 +37,11 @@ namespace Hotfix.GameSystems.Sys3C.Quality
             {
                 string value = raw.Trim().ToLowerInvariant();
                 if (value == "desktop") return null;   // 人工兜底：手机上强制不切档（对比实测用）
+                // `mobile` 别名 = 强制切到移动档（人工实测用的就是 `?quality=mobile`，见
+                // webgl-mobile-acceptance / 计划任务 10）。**必须无条件生效**：它是自动判定失准时
+                // 唯一可靠的出口——iPad 桌面 UA 会让 isMobilePlatform 与 deviceType 两个判据都失效，
+                // 别名若落进"畸形 ⇒ 自动判定"，那种设备会静默跑 Ultra，实测数字全部无效。
+                if (value == "mobile") return MobileQualityLevel;
                 if (int.TryParse(value, out int level) && level >= 0 && level <= MaxQualityLevel)
                     return level;
                 // 畸形值落到自动判定——与 TouchInputAvailability 的"URL 优先但不阻塞"同源

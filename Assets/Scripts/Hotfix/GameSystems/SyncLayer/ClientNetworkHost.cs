@@ -456,19 +456,40 @@ namespace Hotfix.GameSystems.SyncLayer
                 GUI.Box(new Rect(0f, Screen.height * 0.35f, Screen.width, 64f), _statusMessage, style);
             }
 
-            // 屏幕左下角连接状态浮层（调试用——Inspector `_showDebugOverlay` 可关）
+            // 屏幕左下角连接状态浮层（调试用——Inspector `_showDebugOverlay` 可关）。
+            // **分两行**：竖屏手机约 390px 宽，旧的单行 620px 会把串尾（任务 10 的实测数据
+            // 全部从这一行读：Full/Proxy/预算/质量档/FPS）整段截在屏外——档位不上屏，
+            // 这次跑的是档 2 还是 Ultra 就无法自证。读数行全 ASCII 且短，保证永远可见
+            //（WebGL 出包里 IMGUI 的中文字形会被整段丢掉，读数不能依赖中文）。
             if (!_showDebugOverlay) return;
 
             var mode = NetworkModeService.Load() == NetworkMode.Online ? "联网" : "单机";
             var state = _manager != null ? _manager.CurrentState.ToString() : "未连接";
             long playerId = _manager != null ? _manager.LocalPlayerId : 0L;
             int remoteCount = _remoteEntities != null ? _remoteEntities.Count : 0;
-            string tiers = _remoteEntities != null
-                ? $"  Full={_remoteEntities.FullCount} Proxy={_remoteEntities.ProxyCount} 预算={_remoteEntities.TierPolicy.MaxFull}"
-                : string.Empty;
             float fps = Time.unscaledDeltaTime > 0f ? 1f / Time.unscaledDeltaTime : 0f;
-            GUI.Box(new Rect(10f, Screen.height - 34f, 620f, 26f),
-                $"[Net] 模式={mode}  状态={state}  玩家id={playerId}  远程实体={remoteCount}{tiers}  FPS={fps:F0}");
+            float overlayWidth = Mathf.Min(620f, Screen.width - 20f);
+            GUI.Box(new Rect(10f, Screen.height - 60f, overlayWidth, 26f),
+                $"[Net] 模式={mode}  状态={state}  玩家id={playerId}  远程实体={remoteCount}");
+            GUI.Box(new Rect(10f, Screen.height - 34f, overlayWidth, 26f),
+                FormatTierReadout(_remoteEntities, QualitySettings.GetQualityLevel(), fps));
+        }
+
+        /// <summary>
+        /// 调试浮层第二行：分档读数 + 质量档 + FPS。**独立成纯函数**供单测钉住——
+        /// 任务 10（手机实测）的全部数据都从这一行读，而竖屏手机约 390px 宽：读数缺一项、
+        /// 或长到被截掉，实测就无从自证（当初单行 620px 正是把这一整段截在屏外）。
+        /// `B` = 每帧 Full 预算（`TierPolicy.MaxFull`）、`Q` = 当前质量档
+        /// （`QualitySettings.GetQualityLevel()`——实测记录必须写明档位）。
+        /// 全 ASCII：WebGL 出包里 IMGUI 的中文字形会被整段丢掉（与阵亡提示同因）。
+        /// registry 为 null（未联网/未接线）时只出质量档与 FPS，不炸。
+        /// </summary>
+        internal static string FormatTierReadout(RemoteEntityRegistry? registry, int qualityLevel, float fps)
+        {
+            string tiers = registry != null
+                ? $"Full={registry.FullCount} Proxy={registry.ProxyCount} B={registry.TierPolicy.MaxFull}  "
+                : string.Empty;
+            return tiers + $"Q={qualityLevel}  FPS={fps:F0}";
         }
 
         private void HandleEnterWorld()
