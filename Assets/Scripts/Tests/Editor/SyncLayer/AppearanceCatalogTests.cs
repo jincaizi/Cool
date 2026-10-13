@@ -69,7 +69,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         [Test]
         public void Bot_Appearance_Spreads_Across_Entries()
         {
-            // 连续 id 必须打散：直接取模会得到 0,1,0,1…（一眼假），乘法哈希不会
+            // 连续 id 必须打散：直接取模会得到 0,1,0,1…（一眼假），乘法哈希不会。
+            // 但**分布断言不足以排除取模**：`playerId % 2` 同样满足 seen=2、sum=5。
+            // 真正钉死取模的是本用例末尾的黄金值 / 相邻同值两条断言。
             var seen = new HashSet<int>();
             for (long id = 1; id <= 20; id++) seen.Add(AppearanceResolver.BotIndex(id, 2));
             Assert.AreEqual(2, seen.Count, "连续 id 应覆盖全部条目");
@@ -77,6 +79,15 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             int firstHalf = 0;
             for (long id = 1; id <= 10; id++) firstHalf += AppearanceResolver.BotIndex(id, 2);
             Assert.That(firstHalf, Is.InRange(3, 7), "前 10 个 id 不该全部落在同一条目");
+
+            // 反例排除：`playerId % 2` 在上面两条断言下同样通过（1,0,1,0… 也是 sum=5、seen=2），
+            // 所以必须再钉两条它必然违反的：黄金值 —— id=3 的乘法哈希落条目 0，而 `3 % 2` 会落条目 1。
+            Assert.AreEqual(0, AppearanceResolver.BotIndex(3, 2),
+                "黄金值：乘法哈希下 id=3 → 条目 0（`playerId % 2` 会给 1）——这条专门挡'取模交替'回归");
+
+            // 且相邻 id 必须能落在同一条目（严格交替永远没有相邻同值）：哈希下 id=4 与 id=5 同为条目 1。
+            Assert.AreEqual(AppearanceResolver.BotIndex(4, 2), AppearanceResolver.BotIndex(5, 2),
+                "相邻 id 必须能落在同一条目——严格交替（男女男女）永远做不到");
         }
 
         [Test]
