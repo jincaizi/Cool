@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Cool.Protocol;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Animation;
+using Hotfix.GameSystems.Sys3C.FSM;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -381,6 +382,53 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 Object.DestroyImmediate(root);
                 Object.DestroyImmediate(prefab);
                 UnityEditor.AssetDatabase.DeleteAsset(controllerPath);
+            }
+        }
+
+        /// <summary>
+        /// 升档必须**当场回放锁存的状态**（规格 §5："升档：失效 `_lastKey` 并强制重写一次"）。
+        /// 实现若只"失效"、不重写，重写就要等**下一条快照**——静止实体保活 4 tick（≈264ms），
+        /// 而角色预制体的 `m_KeepAnimatorStateOnDisable` 是 0（禁用即重置）⇒ 死亡/受击中的
+        /// 实体从 Proxy 升 Full 时会**先站直最多 264ms**。
+        /// 判据取在驱动的观测面 `LastHitState` 上（测试里的空 Animator 没有控制器，
+        /// 驱动不写参数但照样记映射结果——与 `RemoteRenderBranchTests` 同惯例）。
+        /// </summary>
+        [Test]
+        public void Promotion_Replays_The_Latched_Dead_State_Immediately()
+        {
+            var root = new GameObject("ReplayDeadRoot");
+            var prefab = new GameObject("ReplayDeadAvatar");
+            prefab.AddComponent<Animator>();
+            var registry = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = prefab } });
+            var observer = new Vector3(500f, 0f, 0f);   // 先让实体落在 Proxy 档
+            registry.ObserverPositionProvider = () => observer;
+            registry.TierPolicy.FullDistance = 60f;
+            try
+            {
+                var dead = SnapAt(10, new Vector3(5f, 0f, 0f));
+                dead.Dead = true;
+                registry.ApplySnapshot(dead, serverTicks: 1_000_000L);
+
+                var view = registry.GetView(10)!;
+                Assert.AreEqual(RemoteTier.Proxy, view.Tier,
+                    "前置：观察者远 ⇒ 视图先落 Proxy（权威状态只锁存，Proxy 档不驱动）");
+                Assert.IsNull(view.Animator, "Proxy 档没有驱动");
+
+                observer = Vector3.zero;   // 本地角色就位 ⇒ 升档
+                registry.UpdateRender(nowServerTicks: 1_000_000L, renderDelayTicks: 0L);
+
+                Assert.AreEqual(RemoteTier.Full, view.Tier, "5m 在进入阈值内 ⇒ 升档");
+                Assert.IsNotNull(view.Animator, "升档挂上驱动");
+                Assert.IsTrue(view.Dead, "视图锁存了权威存活状态");
+                Assert.AreEqual((int)HitState.Death, view.Animator!.LastHitState,
+                    "升档那一帧就必须回放锁存的死亡状态——只失效去重、不重写的话要等下一条快照（最多 264ms 站直）");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
             }
         }
 

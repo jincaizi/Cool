@@ -267,6 +267,11 @@ namespace Hotfix.GameSystems.SyncLayer
                 view.ProxyRoot?.SetActive(false);
                 view.Animator!.InvalidateDedup();
                 view.Animator!.ResetLayerWeights();
+                // 升档当场**回放锁存的状态**（规格 §5："升档：失效 _lastKey 并强制重写一次"）：
+                // 只"失效"的话重写要等下一条快照——静止实体保活 4 tick（≈264ms），而
+                // `m_KeepAnimatorStateOnDisable=0` 会把 Animator 重置 ⇒ 死亡/受击中的实体
+                // 从 Proxy 升 Full 时会先站直最多 264ms。游标刚被 InvalidateDedup 置 -1，必定写下去。
+                view.Animator.Apply(view.ActionState, view.Dead);
             }
             else
             {
