@@ -284,28 +284,52 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         /// <summary>
-        /// ORCA 半径真值源（design 任务 8）：服务端 `BotRunner.BotRadius` 的注释原写"对应
-        /// 客户端那条占位胶囊"（当时 = 0.5）——bot 换真模型后真值应是**模型半宽**。
+        /// ORCA 半径真值源（design 任务 8；2026-10-13 **人类裁定改锚**）：服务端 `BotRunner.BotRadius`
+        /// 必须等于**客户端角色预制体根上的 `CharacterController.radius`**——那是项目对"角色身体半径"
+        /// 的既有定义，服务端给**同款模型的真人**用的 `AvoidanceSystem.PlayerRadius` 也是这个口径
+        /// （bot 与真人同一个模型 ⇒ 半径必须一致）。
+        /// 曾按 SMR 包围盒量出 0.7469（绑定姿态、含张开的双臂）——**已被裁定否决，不采用**。
+        ///
+        /// 第二条守卫：场景必须**真的**把这个预制体当默认外观（`_playerAvatarPrefab` 的 guid 对得上
+        /// `.meta`），否则本用例钉住的是一个不再被 bot 使用的模型而不自知。
         ///
         /// 为什么读源码文本而不是引用常量：`Server/Server3C.csproj` 是 Assets/ 之外的 .NET 工程，
         /// Unity 测试程序集引用不到它。项目已有"断言文件文本"的先例（`NpcBodyColliderTests` 读
         /// TagManager 资产），这里同款处理。
         /// </summary>
         [Test]
-        public void Bot_Model_HalfWidth_Matches_The_Orca_Radius()
+        public void Bot_Radius_Matches_The_Character_Controller_Radius()
         {
             const string PrefabPath = "Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab";
             var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
             Assert.IsNotNull(prefab, PrefabPath);
 
-            var renderers = prefab.GetComponentsInChildren<SkinnedMeshRenderer>(true);
-            Assert.IsNotEmpty(renderers, "角色预制体应有蒙皮网格");
-            var local = renderers[0].localBounds;
-            for (int i = 1; i < renderers.Length; i++) local.Encapsulate(renderers[i].localBounds);
-
-            float halfWidth = Mathf.Max(local.size.x, local.size.z) * 0.5f;
+            var rootCollider = prefab.GetComponent<CharacterController>();
+            Assert.IsNotNull(rootCollider, PrefabPath + " 根上应有 CharacterController（真值源就是它的 radius）");
+            Assert.AreEqual(1, prefab.GetComponentsInChildren<CharacterController>(true).Length,
+                PrefabPath + " 上应只有根这一个 CharacterController——多个会让真值源有歧义，先裁定再改本用例");
+            float colliderRadius = rootCollider.radius;
 
             // 路径基座用 Application.dataPath（= Assets/）而不是 CWD：测试宿主不保证 CWD 落在项目根
+            string projectRoot = System.IO.Path.Combine(Application.dataPath, "..");
+
+            // 场景接线：默认外观必须就是上面这个预制体（读场景/`.meta` 的**文件文本**，同 NpcBodyColliderTests）
+            string scenePath = System.IO.Path.Combine(projectRoot,
+                "Assets/SimpleLowPolyNature/Scenes/DemoDay.unity");
+            Assert.IsTrue(System.IO.File.Exists(scenePath), "宿主场景应存在：" + scenePath);
+            var wiring = System.Text.RegularExpressions.Regex.Match(
+                System.IO.File.ReadAllText(scenePath),
+                @"_playerAvatarPrefab:\s*\{[^}]*guid:\s*([0-9a-f]{32})");
+            Assert.IsTrue(wiring.Success,
+                "没在 DemoDay.unity 里解析到 _playerAvatarPrefab 的 guid——字段改名了？同步更新本用例");
+            var metaGuid = System.Text.RegularExpressions.Regex.Match(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(projectRoot, PrefabPath + ".meta")),
+                @"guid:\s*([0-9a-f]{32})");
+            Assert.IsTrue(metaGuid.Success, PrefabPath + ".meta 应解析到 guid");
+            Assert.AreEqual(metaGuid.Groups[1].Value, wiring.Groups[1].Value,
+                "场景的默认外观换了 ⇒ 来更新本守卫的模型路径与半径结论；" +
+                "若已引入多外观目录，把本守卫改为遍历目录条目");
+
             string sourcePath = System.IO.Path.Combine(Application.dataPath, "..",
                 "Server", "Aoi", "BotRunner.cs");
             Assert.IsTrue(System.IO.File.Exists(sourcePath), "服务端源码应存在：" + sourcePath);
@@ -316,9 +340,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             float orcaRadius = float.Parse(match.Groups[1].Value,
                 System.Globalization.CultureInfo.InvariantCulture);
 
-            Assert.That(halfWidth, Is.EqualTo(orcaRadius).Within(0.15f),
-                $"模型半宽 {halfWidth:F3}m 应与 ORCA 半径 {orcaRadius}m 一致（±0.15）——" +
-                "不一致就改 BotRunner.BotRadius 并同步注释，别让注释与真相脱节");
+            Assert.AreEqual(colliderRadius, orcaRadius,
+                $"ORCA 半径 {orcaRadius}m 必须 == 预制体 CharacterController.radius {colliderRadius}m——" +
+                "不一致 ⇒ bot 与真人的避让半径不同（同一个模型却是两个身体半径），间距观感错");
         }
     }
 }

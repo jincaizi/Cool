@@ -163,7 +163,7 @@ namespace KcpServer.Movement
         public float BodyRadiusOf(PlayerState e) => e.Kind switch
         {
             (byte)EntityKind.Npc => _npcRadiusOf(e.TemplateId),
-            (byte)EntityKind.PlayerBot => BotRunner.BotRadius,   // 常量定义处见 BotRunner（占位胶囊量级）
+            (byte)EntityKind.PlayerBot => BotRunner.BotRadius,   // 常量定义处见 BotRunner（真值源 = 客户端角色预制体的 CharacterController.radius）
             _ => PlayerRadius,
         };
 

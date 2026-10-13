@@ -16,13 +16,15 @@ namespace KcpServer
         public const float BotSpeedPerTick = 0.53f; // ~8m/s @ 66ms tick
 
         /// <summary>
-        /// 机器人身体半径（米，ORCA 避让用）——**真值源 = 客户端角色模型的半宽**
-        /// （`Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab` 的 SMR localBounds，见
-        /// `RemoteEntityRegistryTests.Bot_Model_HalfWidth_Matches_The_Orca_Radius`）。
-        /// 2026-10-13 换真模型后复核：实测半宽 0.7469（X 跨度 1.4939 / 2），与旧占位胶囊的 0.5 不符，
-        /// 故由占位胶囊的 0.5 改为实测 0.7469。
+        /// 机器人身体半径（米，ORCA 避让用）——**真值源 = 客户端角色预制体根上的
+        /// `CharacterController.radius`**（`Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab`：0.5）。
+        /// 那是项目对"角色身体半径"的既有定义，服务端给**同款模型的真人**用的
+        /// `AvoidanceSystem.PlayerRadius` 也是这个口径——bot 与真人同一个模型，半径必须一致
+        /// （见 `RemoteEntityRegistryTests.Bot_Radius_Matches_The_Character_Controller_Radius`）。
+        /// **不采用**按 SMR 绑定姿态包围盒量出的半宽 0.7469（X 跨度 1.4939 / 2）——那是含**张开的
+        /// 双臂**的算法，不是身体半径（2026-10-13 换真模型后实测复核，人类裁定否决，别再推一遍）。
         /// </summary>
-        public const float BotRadius = 0.7469f;
+        public const float BotRadius = 0.5f;
 
         /// <summary>主循环 tick 秒数（Server3C.TickIntervalMs = 66）——
         /// 只用于把 m/s 的上报速度换算成快照里的米/tick（ORCA 邻居速度）</summary>
