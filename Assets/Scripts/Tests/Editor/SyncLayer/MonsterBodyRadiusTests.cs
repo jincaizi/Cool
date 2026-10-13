@@ -12,11 +12,11 @@ namespace GameSys.EditorTests
     /// 背景：服务端原本没有"身体半径"这个概念（AOI/快照/移动都不需要它）。ORCA 避让接线后
     /// `monster_config.json` 的 `bodyRadius` 成了服务端唯一的半径来源，而客户端那条身体碰撞体
     /// （<c>NpcBodyCollider</c>）是**从模型 bounds 推**的——两边各记一份就会漂移，
-    /// 表现是"客户端挡在 1.66m、服务端认为 1.80m"：贴着怪走会被服务端轻微来回推。
+    /// 表现是"客户端挡在 1.74m、服务端认为 1.60m"：贴着怪走会被服务端轻微来回推。
     ///
     /// 本项目例钉住两边同值：
     ///   · 目录里有真模型的模板（3 DogKnight / 4 SpiderBoss）→ 预制体模型的 **XZ 半宽**
-    ///     （合并 SkinnedMeshRenderer 世界 bounds 的 X 跨度 / 2）≈ json 的 bodyRadius；
+    ///     （合并 SkinnedMeshRenderer 世界 bounds 的 **X/Z 跨度取大者** / 2）≈ json 的 bodyRadius；
     ///   · 目录里没有模型的模板（1 Slime / 2 Wolf）→ 客户端退化为球体占位
     ///     （半径 0.5，RemoteEntityRegistry.CreateView 的 PrimitiveType.Sphere）≈ json 的 bodyRadius。
     ///

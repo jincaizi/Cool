@@ -17,6 +17,18 @@ namespace KcpServer.Tests;
 /// </summary>
 public class MonsterBodyRadiusTests
 {
+    /// <summary>
+    /// 发布 json 的路径 + **文件必须真的在**。这一行不是形式主义：`ConfigLoader.LoadMonsterConfig`
+    /// 在文件缺失时**静默回落到默认表**，而默认表恰好同值 ⇒ 不加这条，"断言的是发布 json"
+    /// 这句话本身就不可验证（发不出 json 也全绿）。所有读 json 的用例都走这里。
+    /// </summary>
+    private static string ShippedConfigPath()
+    {
+        var path = System.IO.Path.Combine(System.AppContext.BaseDirectory, "Config", "monster_config.json");
+        Assert.True(System.IO.File.Exists(path), "构建输出里应有发布 json（csproj CopyToOutputDirectory）：" + path);
+        return path;
+    }
+
     /// <summary>四模板的实测半径：0.5/0.5 是客户端球体占位，0.88/1.74 是模型 XZ 跨度取大者的一半
     /// （量法见客户端 MonsterBodyRadiusTests 与 docs/superpowers/plans/2026-10-13-orca-avoidance-report.md）。</summary>
     [Theory]
@@ -26,12 +38,30 @@ public class MonsterBodyRadiusTests
     [InlineData(4, 1.74f)]
     public void Shipped_Json_Carries_The_Measured_Body_Radius(int templateId, float expected)
     {
-        var path = System.IO.Path.Combine(System.AppContext.BaseDirectory, "Config", "monster_config.json");
-        var config = ConfigLoader.LoadMonsterTemplates(path)[templateId];
+        var config = ConfigLoader.LoadMonsterTemplates(ShippedConfigPath())[templateId];
 
         Assert.True(config.bodyRadius > 0f,
             $"模板 {templateId} 的 bodyRadius 落 0 —— 多半是 IncludeFields 被关掉 / json 键改名（静默失效）");
         Assert.Equal(expected, config.bodyRadius, 0.001f);
+    }
+
+    /// <summary>
+    /// **将来新增模板**的守卫（复审指出：上面那条按模板号写死，只覆盖 1~4）。漏填 `bodyRadius`
+    /// 反序列化得到 0，这里遍历整表必然抓到——不钉模板号，所以新模板自动纳入。
+    /// 断言条数 ≥ 4：模板可以增、不该减（减了多半是 json 被截断/合并事故）。
+    /// </summary>
+    [Fact]
+    public void Every_Shipped_Template_Declares_A_Body_Radius()
+    {
+        var templates = ConfigLoader.LoadMonsterTemplates(ShippedConfigPath());
+
+        Assert.True(templates.Count >= 4, $"发布表只剩 {templates.Count} 个模板（应 ≥ 4）");
+        foreach (var kvp in templates)
+        {
+            Assert.True(kvp.Value.bodyRadius > 0f,
+                $"模板 {kvp.Key}（{kvp.Value.name}）漏填 bodyRadius ⇒ 半径会**静默**回落 " +
+                $"{AvoidanceSystem.DefaultMonsterRadius}（客户端身体不会跟着变），避让半径悄悄变小");
+        }
     }
 
     [Theory]
@@ -86,9 +116,10 @@ public class MonsterBodyRadiusTests
             var module = new MonsterModule(store, () => ++seed, configPath: path);
             long npcId = module.SpawnMonster(3, new Vector3(1f, 0f, 1f), new Vector3(1f, 0f, 1f));  // 3 有技能映射，能生成
 
-            // 坏表不污染别的模块（各自反序列化自己的副本，归一只写自己那份）
+            // 坏表不污染别的模块（各自反序列化自己的副本，归一只写自己那份）：同一个模板号，
+            // 坏模块因为漏填得到兜底 0.5，好模块仍是发布表里的 0.88 ⇒ 两者必须不同
             var goodModule = new MonsterModule(new EntityStore(), () => ++seed);
-            Assert.Equal(1.74f, goodModule.RadiusOfTemplate(4), 0.001f);
+            Assert.NotEqual(module.RadiusOfTemplate(3), goodModule.RadiusOfTemplate(3));
 
             var state = module.GetState(npcId)!;
             Assert.Equal(0.5f, module.RadiusOfTemplate(3), 0.0001f);   // 漏填 ⇒ 兜底

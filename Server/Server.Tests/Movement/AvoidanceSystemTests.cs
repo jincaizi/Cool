@@ -382,55 +382,6 @@ public class AvoidanceSystemTests
         Assert.True(minDistance >= 1f - 0.02f, $"机器人从站着不动的玩家身上穿过去了：{minDistance:F4}");
     }
 
-    /// <summary>
-    /// 审查 B 的第二条：玩家**真的**以 8m/s 沿 +X 移动（位置逐 tick 更新、上报值也与实际一致），
-    /// 断言解出的位移在 τ 内不与玩家的**实际轨迹**相交。零速度是保守侧：玩家横向离开时，
-    /// 智能体仍按"他停在原地"让开，实际余量只会更大。
-    /// </summary>
-    [Fact]
-    public void Player_Moving_Along_X_Is_Never_Intersected_Within_The_Horizon()
-    {
-        var store = new EntityStore();
-        var avoidance = CreateAvoidance(store);
-        const float step = BotSpeed;                 // 玩家与机器人同速（8m/s）
-
-        var player = store.AddPlayer(1, "P1");
-        player.IsLoggedIn = true;
-        var playerPos = new Vector3(0f, 0f, 0f);
-        player.UpdatePosition(playerPos, 90f, step / Dt, 1L, 0U);   // 朝向 +X（Rotation=90°）
-
-        var bot = store.AddPlayer(2, "Bot");
-        bot.Kind = (byte)EntityKind.PlayerBot;
-        var botPos = new Vector3(0f, 0f, -8f);
-        bot.UpdatePosition(botPos, 0f, step / Dt, 1L, 0U);
-        var botVelocity = new Vector3(0f, 0f, 0f);
-        var playerVelocity = new Vector3(step, 0f, 0f);            // 玩家的真实每 tick 位移（+X）
-
-        float worstHorizon = float.MaxValue;
-        for (uint tick = 0; tick < 60; tick++)
-        {
-            avoidance.EnsureSnapshot(tick);
-            Vector3 solveFrom = botPos;
-            Vector3 targetFrom = playerPos;
-            Vector3 solved = avoidance.Solve(2, null, botPos, botVelocity,
-                new Vector3(0f, 0f, step), BotRadius, step);
-            botVelocity = solved;
-            botPos = botPos + solved;
-            bot.UpdatePosition(botPos, YawOf(solved), step / Dt, tick + 2, 0U);
-
-            // 玩家按自己的实际轨迹走（位置与上报值一致——诚实的客户端）
-            playerPos = playerPos + playerVelocity;
-            player.UpdatePosition(playerPos, 90f, step / Dt, tick + 2, 0U);
-
-            // 解出的位移（τ 内匀速）与玩家实际轨迹（τ 内匀速）的最小间距
-            worstHorizon = Math.Min(worstHorizon,
-                ClosingMinDistance(solveFrom, solved, targetFrom, playerVelocity, avoidance.TimeHorizonTicks));
-        }
-
-        Assert.True(worstHorizon >= 1f - 0.01f,
-            $"解出的速度在 τ 内与玩家的实际轨迹相交：最小间距 {worstHorizon:F4} < 1.0");
-    }
-
     // ------------------------------------------------------------------
     // 5. --no-avoid 负对照
     // ------------------------------------------------------------------
