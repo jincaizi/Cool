@@ -30,6 +30,19 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly List<NpcAttackSchedule.DueAttack> _dueAttacks = new List<NpcAttackSchedule.DueAttack>();
         private bool _warnedMissingAvatar;
 
+        /// <summary>分档策略（宿主可覆盖预算/阈值；URL 旋钮见 TierQuery）</summary>
+        public RemoteTierPolicy TierPolicy { get; } = new RemoteTierPolicy();
+
+        /// <summary>
+        /// 观察者位置提供者（本地玩家位置，与 AOI 同心）。**未注入、或本帧返回 null = 不分档
+        /// （保持全 Full）**——测试宿主与既有行为不受影响（延续"缺配置即降级"的惯例）。
+        /// 返回 null 的场景：本地角色还没装配（`_localEntry` 为空）——此时拿不到有意义的距离。
+        /// </summary>
+        public System.Func<Vector3?>? ObserverPositionProvider { get; set; }
+
+        private readonly List<TierCandidate> _tierCandidates = new List<TierCandidate>();
+        private readonly List<RemoteTier> _tierResults = new List<RemoteTier>();
+
         public int Count => _views.Count;
 
         /// <summary>当前视图实体 ID 集合（T7 AOI 验收统计用）</summary>
@@ -73,7 +86,9 @@ namespace Hotfix.GameSystems.SyncLayer
             // 已在视野内的观察者最多要等 4 tick（≈264ms）的静止保活窗口才看到它翻位，
             // 所以这里每次都推给动画驱动，由驱动自行幂等去重（"读状态"而不是"读变化"）。
             view.Dead = snapshot.Dead;
-            view.Animator?.Apply(snapshot.ActionState, snapshot.Dead);
+            // 只在 Full 档驱动：降档后写参数是白费（且 Animator 已随 FullRoot 禁用）
+            if (view.Tier == RemoteTier.Full)
+                view.Animator?.Apply(snapshot.ActionState, snapshot.Dead);
 
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Position) != 0)
             {
@@ -138,6 +153,94 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (kv.Value.NpcAnimator != null
                     && TrySampleNpcState(kv.Key, renderAt, out var sampled, out var sampledDead))
                     kv.Value.NpcAnimator.ApplyState(sampled, sampledDead);
+            }
+
+            // 分档（design §4）：插值写完位置之后、驱动写入之前——本帧的档位就是这个位置算出来的。
+            // 未注入观察者、或本帧拿不到位置（本地角色还没装配）= 不分档（保持全 Full）。
+            if (ObserverPositionProvider?.Invoke() is Vector3 observer)
+                ApplyTiers(observer);
+
+            // 行走驱动写入（此时位置与速度都已就位）。同样只在 Full 档写：降档后是白费
+            //（Animator 已随 FullRoot 禁用）。
+            foreach (var kv in _views)
+                if (kv.Value.Tier == RemoteTier.Full)
+                    kv.Value.Animator?.ApplyLocomotion(kv.Value.Speed);
+        }
+
+        /// <summary>每帧分档：距离（迟滞）+ 预算（最近优先）→ 目标档 → 换档。</summary>
+        private void ApplyTiers(Vector3 observer)
+        {
+            _tierCandidates.Clear();
+            foreach (var kv in _views)
+            {
+                // 怪物不参与分档（design D15）：它们是玩法实体（碰撞体/受击/攻击排程耦合），
+                // 且决策点共用——将来要扩，加一个字段即可。
+                if (kv.Value.Kind == (byte)EntityKind.Npc) continue;
+                if (kv.Value.FullRoot == null && kv.Value.ProxyRoot == null) continue;  // 纯降级占位视图
+
+                float dx = kv.Value.Position.x - observer.x;
+                float dz = kv.Value.Position.z - observer.z;
+                _tierCandidates.Add(new TierCandidate
+                {
+                    PlayerId = kv.Key,
+                    DistanceSqr = dx * dx + dz * dz,
+                    CurrentlyFull = kv.Value.Tier == RemoteTier.Full
+                });
+            }
+
+            TierPolicy.Decide(_tierCandidates, _tierResults);
+
+            for (int i = 0; i < _tierCandidates.Count; i++)
+                if (_views.TryGetValue(_tierCandidates[i].PlayerId, out var view))
+                    SetTier(view, _tierResults[i]);
+        }
+
+        /// <summary>
+        /// 换档（惰性建表现）。降档 = `FullRoot.SetActive(false)`——**整棵禁用**：Animator、
+        /// 蒙皮、渲染器全停，这正是表示分级相对于网格 LOD 的价值（LOD 省不到这几项）。
+        /// **不销毁**（会再升回来）；升级时强制重写一次驱动参数（Animator 禁用即重置状态），
+        /// 并重新归零 Attack/Hit/Defend 层权重（禁用重置含层权重——见 ResetLayerWeights）。
+        /// </summary>
+        private void SetTier(RemoteEntityView view, RemoteTier tier)
+        {
+            if (view.Tier == tier && (tier == RemoteTier.Full ? view.FullRoot != null : view.ProxyRoot != null))
+                return;
+
+            view.Tier = tier;
+
+            if (tier == RemoteTier.Full)
+            {
+                if (view.FullRoot == null && view.FullPrefab != null)
+                {
+                    var avatar = Object.Instantiate(view.FullPrefab, view.GameObject.transform, false);
+                    avatar.name = "Full";
+                    view.FullRoot = avatar;
+                    // AddComponent 同步跑 Awake：归零层权重、停掉 3C 装备，赶在同一个 Start/Update 之前
+                    view.Animator = avatar.AddComponent<RemoteEntityAnimator>();
+                }
+                if (view.FullRoot == null)
+                {
+                    // 没有 Full 资产（该条目只配了代理）：档位如实落回 Proxy，别让 Tier 与眼前所见脱节
+                    view.Tier = RemoteTier.Proxy;
+                    return;
+                }
+                view.FullRoot.SetActive(true);
+                view.ProxyRoot?.SetActive(false);
+                view.Animator!.InvalidateDedup();
+                view.Animator!.ResetLayerWeights();
+            }
+            else
+            {
+                if (view.ProxyRoot == null)
+                {
+                    var proxy = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                    StripCollider(proxy);   // D19
+                    proxy.name = "Proxy";
+                    proxy.transform.SetParent(view.GameObject.transform, false);
+                    view.ProxyRoot = proxy;
+                }
+                view.ProxyRoot.SetActive(true);
+                view.FullRoot?.SetActive(false);
             }
         }
 
@@ -232,7 +335,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 return new RemoteEntityView(go, snapshot.Kind, snapshot.TemplateId);
             }
 
-            // 玩家类（真人 + bot）：**同一条路径**（design D1/D6）——外观目录查表 → 实例化 → 挂驱动。
+            // 玩家类（真人 + bot）：**同一条路径**（design D1/D6）——外观目录查表 → 包装根 +
+            // 惰性建表现（Full 档才实例化/挂驱动，见 SetTier）。
             // 旧的两支（真人 = 预制体 / bot = 胶囊）已合并：AOI 之后同屏实体数由局部密度决定，
             // 实测 `--bots 100` 的同屏峰值只有 5~6 个，'100 个蒙皮网格' 从来没发生过。
             var entry = snapshot.Kind == (byte)EntityKind.PlayerBot
@@ -256,15 +360,14 @@ namespace Hotfix.GameSystems.SyncLayer
                 return new RemoteEntityView(fallback, snapshot.Kind);
             }
 
-            // 包装根：位置/朝向写它，两个表现子物体挂它下面（分档在任务 6 接线）
+            // 包装根：位置/朝向写它，两个表现子物体挂它下面（分档换表现——见 SetTier）
             var viewRoot = new GameObject(KindName(playerId, snapshot.Kind));
             viewRoot.transform.SetParent(_root, false);
-            var avatar = Object.Instantiate(fullPrefab, viewRoot.transform, false);
-            avatar.name = "Full";
-            // AddComponent 同步跑 Awake：3C 装备在同一个 Start/Update 之前就被停掉（见类注释）
-            var animator = avatar.AddComponent<RemoteEntityAnimator>();
-            var view = new RemoteEntityView(viewRoot, snapshot.Kind, animator: animator);
-            view.FullRoot = avatar;
+            var view = new RemoteEntityView(viewRoot, snapshot.Kind);
+            view.FullPrefab = fullPrefab;
+            // 无观察者（测试宿主/未接线）= 不分档，直接建 Full——既有测试在 ApplySnapshot 之后
+            // 立刻断言 Animator，不能等 UpdateRender。
+            SetTier(view, ObserverPositionProvider == null ? RemoteTier.Full : RemoteTier.Proxy);
             return view;
         }
 
@@ -294,8 +397,13 @@ namespace Hotfix.GameSystems.SyncLayer
         public byte ActionState { get; set; }
         /// <summary>服务端权威存活状态（D-N1：命名 Dead——protobuf 零默认让"活着"不占字节）</summary>
         public bool Dead { get; set; }
-        /// <summary>远程动画驱动（只有真人角色有；占位为 null）</summary>
-        public RemoteEntityAnimator? Animator { get; }
+        /// <summary>当前档位（null = 表现尚未建立：无 Full 资产的纯降级占位视图）</summary>
+        public RemoteTier? Tier { get; internal set; }
+        /// <summary>近档预制体（分档升档时惰性实例化用；null = 无 Full 资产）</summary>
+        public GameObject? FullPrefab { get; internal set; }
+        /// <summary>近档的动画驱动（玩家类视图专用；升档时才存在，纯降级占位为 null。
+        /// **bot 在接线态同样有驱动**——不是只有真人有）</summary>
+        public RemoteEntityAnimator? Animator { get; internal set; }
         /// <summary>近档表现（模型实例）。null = 尚未建/无 Full 资产</summary>
         public GameObject? FullRoot { get; internal set; }
         /// <summary>远档表现（代理）。null = 尚未建</summary>

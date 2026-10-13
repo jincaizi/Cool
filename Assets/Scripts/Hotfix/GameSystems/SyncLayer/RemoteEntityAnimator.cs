@@ -63,11 +63,24 @@ namespace Hotfix.GameSystems.SyncLayer
             foreach (var c in GetComponentsInChildren<Collider>(true))
                 c.enabled = false;
 
+            // 归零 Attack / Hit / Defend 层权重（原因见 ResetLayerWeights 的注释）
+            ResetLayerWeights();
+        }
+
+        /// <summary>
+        /// `Attack` / `Hit` / `Defend` 三层权重归零。控制器资产里这三层的 `m_DefaultWeight`
+        /// 是 **1**，本地玩家靠 `FSMManager` 构造时把它们归零；远程没有 FSMManager，不归零的话
+        /// Attack 层会一直以权重 1 压着 Base 层（远程角色看起来是"攻击待机"而不是站着）。
+        ///
+        /// **升档时也必须调**：角色预制体的 `m_KeepAnimatorStateOnDisable` 是 0 —— Animator 在
+        /// 禁用期间会重置回资产的默认状态（含层权重），所以 Proxy → Full **重新启用**既有
+        /// FullRoot 时光靠 <see cref="InvalidateDedup"/> 不够（它管的是参数写入去重，不管权重）。
+        /// 惰性实例化路径（新建 avatar）走 `Awake`，本来就归零。
+        /// </summary>
+        public void ResetLayerWeights()
+        {
             if (_animator == null) return;
 
-            // 控制器资产里 Attack / Hit 两层的 `m_DefaultWeight` 是 **1**，本地玩家靠
-            // `FSMManager` 构造时把它们归零；远程没有 FSMManager，不归零的话 Attack 层
-            // 会一直以权重 1 压着 Base 层（远程角色看起来是"攻击待机"而不是站着）。
             _animator.SetLayerWeight(AnimHashes.AttackLayerIndex, 0f);
             _animator.SetLayerWeight(AnimHashes.HitLayerIndex, 0f);
             _animator.SetLayerWeight(AnimHashes.DefendLayerIndex, 0f);
