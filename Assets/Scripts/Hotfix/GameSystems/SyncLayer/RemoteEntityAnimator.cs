@@ -1,5 +1,6 @@
 using Cool.Protocol;
 using Hotfix.GameSystems.Sys3C.Animation;
+using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.FSM;
 using UnityEngine;
 
@@ -15,20 +16,35 @@ namespace Hotfix.GameSystems.SyncLayer
     /// </summary>
     public sealed class RemoteEntityAnimator : MonoBehaviour
     {
+        /// <summary>标称走/跑速度（m/s）——**必须与本地 CharacterController.MoveSpeed/SprintSpeed 一致**，
+        /// 由 `RemoteEntityAnimatorLocomotionTests` 的守护用例钉住。</summary>
+        public const float NominalWalkSpeed = 5f;
+        public const float NominalSprintSpeed = 8f;
+        /// <summary>走/跑档的分界（两个标称速度的中点）</summary>
+        public const float WalkRunSplitSpeed = 6.5f;
+        /// <summary>低于这个速度算静止（避免浮点噪声把 Idle 抖成走）</summary>
+        public const float IdleSpeedThreshold = 0.1f;
+        /// <summary>步频下限——速度趋 0 时比例为 0 会把动画冻成静止帧</summary>
+        public const float MinLocomotionSpeed = 0.3f;
+        /// <summary>步频上限（防御：反推速度已被钳过，这里只做兜底）</summary>
+        public const float MaxLocomotionSpeed = 1.5f;
+
         /// <summary>最近一次快照映射出的控制器 `HitState` 值（观察面——测试与调试读数用）</summary>
         public int LastHitState { get; private set; } = (int)HitState.None;
+
+        /// <summary>最近一次写出的混合值（观察面——测试与调试读数用，与 LastHitState 同惯例）</summary>
+        public float LastBlend { get; private set; }
+        /// <summary>最近一次写出的步频倍率（观察面）</summary>
+        public float LastLocomotionSpeed { get; private set; } = 1f;
+        /// <summary>最近一次写出的 Base 层状态（观察面）</summary>
+        public int LastBaseState { get; private set; }
 
         private Animator? _animator;
         private int _lastKey = -1;   // -1 不在取值域内 ⇒ 首个快照必定应用一次
 
         private void Awake()
         {
-            _animator = GetComponent<Animator>();
-
-            // 没有控制器的 Animator 既没有层也没有参数——对它写权重/参数只会刷
-            // `Animator is not playing an AnimatorController` **错误**日志。视作"无可驱动"。
-            if (_animator != null && _animator.runtimeAnimatorController == null)
-                _animator = null;
+            ResolveAnimator();
 
             // 远程实体是"别人权威状态的视图"——本地行为一条都不许跑。
             // 不停的话，角色预制体上那些**本地玩家的**装备会照着别人的角色跑一遍：
@@ -58,6 +74,21 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
+        /// 解析被驱动的 Animator。为什么独立成 <c>internal</c> 方法而不是塞进 <c>Awake</c>：
+        /// EditMode 下 <c>AddComponent</c> **不会**触发生命周期（除非组件挂 <c>[ExecuteAlways]</c>），
+        /// 测试要直接调它才能拿到驱动（与 `NpcEntityAnimator.ResolveAnimator` 同惯例）。
+        /// </summary>
+        internal void ResolveAnimator()
+        {
+            _animator = GetComponent<Animator>();
+
+            // 没有控制器的 Animator 既没有层也没有参数——对它写权重/参数只会刷
+            // `Animator is not playing an AnimatorController` **错误**日志。视作"无可驱动"。
+            if (_animator != null && _animator.runtimeAnimatorController == null)
+                _animator = null;
+        }
+
+        /// <summary>
         /// 快照状态 → Animator。**每次快照都调**（状态不是边沿事件）：服务端对已在视野内的
         /// 观察者最多 4 tick（≈264ms）才保活重发一次，只在"翻位"时切动画会漏掉那一段——
         /// 这里靠 `_lastKey` 去重，仍是"读状态"而不是"读变化"。
@@ -78,6 +109,57 @@ namespace Hotfix.GameSystems.SyncLayer
             // 0 表示"没有受击/死亡状态"——把 Hit 层权重收回，交还给 Base 层
             _animator.SetLayerWeight(AnimHashes.HitLayerIndex, active ? 1f : 0f);
             if (active) _animator.SetInteger(AnimHashes.HitState, hitState);
+        }
+
+        private int _lastLocomotionKey = int.MinValue;   // 去重：参数没变不重写
+
+        /// <summary>
+        /// 行走动画（design §4 行走动画映射；速度由 registry 从渲染位移反推后传入）。
+        ///
+        /// 三个参数的分工照抄本地契约（`FSMManager.UpdateBlendParameter` / `CharacterController`）：
+        ///   · `Blend` = Idle/Walk/Sprint 混合值（0 / 0.5 / 1）；
+        ///   · `LocomotionSpeed` = **步频倍率** = 速度 ÷ 该档标称速度 —— 不按比例调就是脚步溜冰；
+        ///   · `BaseState` = 0(Idle) / 7(Locomotion)。
+        /// </summary>
+        public void ApplyLocomotion(float speed)
+        {
+            float blend = speed < IdleSpeedThreshold ? 0f
+                : speed < WalkRunSplitSpeed ? 0.5f
+                : 1f;
+
+            float nominal = blend >= 1f ? NominalSprintSpeed : NominalWalkSpeed;
+            float rate = blend <= 0f
+                ? 1f                                                   // 静止：写 1（写 0 会冻住 idle）
+                : Mathf.Clamp(speed / nominal, MinLocomotionSpeed, MaxLocomotionSpeed);
+
+            int baseState = blend <= 0f
+                ? (int)BaseState.Idle
+                : (int)BaseState.Locomotion;
+
+            LastBlend = blend;
+            LastLocomotionSpeed = rate;
+            LastBaseState = baseState;
+
+            int key = Mathf.RoundToInt(blend * 1000f) * 100_000 + Mathf.RoundToInt(rate * 1000f) * 10 + baseState;
+            if (key == _lastLocomotionKey) return;
+            _lastLocomotionKey = key;
+
+            if (_animator == null) return;   // 无控制器：只记观察值（与 Apply 同款守卫）
+
+            _animator.SetFloat(AnimHashes.Blend, blend);
+            _animator.SetFloat(AnimHashes.LocomotionSpeed, rate);
+            _animator.SetInteger(AnimHashes.BaseState, baseState);
+        }
+
+        /// <summary>
+        /// 让去重游标失效：下一次写入必定落到 Animator。
+        /// **升档时必须调用**——角色预制体的 `m_KeepAnimatorStateOnDisable` 是 0（禁用即重置状态），
+        /// 从 Proxy 档升回 Full 档时 Animator 已回到默认状态，去重游标会把"该重写"误判成"没变"。
+        /// </summary>
+        public void InvalidateDedup()
+        {
+            _lastKey = -1;                 // 受击层去重游标（Apply 用）
+            _lastLocomotionKey = int.MinValue;
         }
 
         /// <summary>
