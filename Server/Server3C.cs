@@ -66,12 +66,14 @@ namespace KcpServer
         private long _snapshotMessagesSent;
 
         /// <summary>压测模式：注册 N 个 bot（无 session 假玩家）并在主循环 tick 推进。
-        /// 必须在 StartAsync 之前调用（bot 注册写 EntityStore——R2 主循环独占）</summary>
-        public void EnableBots(int count)
+        /// 必须在 StartAsync 之前调用（bot 注册写 EntityStore——R2 主循环独占）。
+        /// denseRadius = 密集压测半径（`--bots-radius R`，撒点与反弹边界都收到 ±R）；
+        /// null = 保持现状（撒点 ±0.8×500、边界 ±500）</summary>
+        public void EnableBots(int count, float? denseRadius = null)
         {
             long botIdSeed = 1_000_000;
             _botRunner = new BotRunner(_entityStore, () => System.Threading.Interlocked.Increment(ref botIdSeed),
-                avoidance: _avoidance);
+                avoidance: _avoidance, denseRadius: denseRadius);
             _botRunner.Spawn(count);
         }
 

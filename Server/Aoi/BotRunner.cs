@@ -37,6 +37,12 @@ namespace KcpServer
         private readonly List<Bot> _bots = new List<Bot>();
         private long _tickCounter;
 
+        /// <summary>
+        /// 密集压测模式的半径（米）：`--bots-radius R` 时，bot 的**撒点与反弹边界**都收到 ±R，
+        /// 测试者站原点即可拿到满屏实体（实测渲染预算用）。null = 保持现状（撒点 ±0.8×500、边界 ±500）。
+        /// </summary>
+        private readonly float? _denseRadius;
+
         private sealed class Bot
         {
             public long PlayerId;
@@ -46,13 +52,28 @@ namespace KcpServer
         }
 
         /// <param name="avoidance">与怪物模块共用的避让系统（Server3C 注入）。null = 不接避让</param>
+        /// <param name="denseRadius">密集压测半径（米，`--bots-radius R`）。null = 默认离散分布</param>
         public BotRunner(EntityStore store, Func<long> nextPlayerId, int seed = 12345,
-            AvoidanceSystem? avoidance = null)
+            AvoidanceSystem? avoidance = null, float? denseRadius = null)
         {
             _store = store;
             _nextPlayerId = nextPlayerId;
             _random = new Random(seed);
             _avoidance = avoidance;
+            _denseRadius = denseRadius;
+        }
+
+        private float BounceExtent => _denseRadius ?? WorldHalfExtent;
+
+        /// <summary>
+        /// 撒点坐标（单轴）。密集模式收到 ±R；**默认分支必须与本类改造前逐位一致**——乘法结合序
+        /// 不能重排：`(t×500)×0.8` 与 `t×(500×0.8)` 在 30% 的 t 上差 1 ULP（500 万采样实测
+        /// 1,521,132 处不等），而"不带参数时默认路径逐位不变"是硬约束。
+        /// </summary>
+        private float RandomSpawnCoordinate()
+        {
+            float t = (float)(_random.NextDouble() * 2 - 1);
+            return _denseRadius.HasValue ? t * _denseRadius.Value : t * WorldHalfExtent * 0.8f;
         }
 
         /// <summary>生成 count 个 bot（随机位置 + 随机方向）</summary>
@@ -61,8 +82,8 @@ namespace KcpServer
             for (int i = 0; i < count; i++)
             {
                 long id = _nextPlayerId();
-                float x = (float)(_random.NextDouble() * 2 - 1) * WorldHalfExtent * 0.8f;
-                float z = (float)(_random.NextDouble() * 2 - 1) * WorldHalfExtent * 0.8f;
+                float x = RandomSpawnCoordinate();
+                float z = RandomSpawnCoordinate();
                 var player = _store.AddPlayer(id, $"Bot_{id}");
                 // 与真人走同一条伤害/复活路径；渲染**也不再分叉**——bot 与真人共用外观目录的
                 // 真模型路径（D-N8 / D-P5-7 的"bot 用占位胶囊"降级已随任务 5 合并消亡）
@@ -105,9 +126,9 @@ namespace KcpServer
                 // （步长恒沿 Dir ⇒ 越界 ⟺ 意图朝外），接线后必须拆开：一个被邻居往外推、意图朝界内的 bot
                 // 要能被夹回界内接着走；而 dir==0 的那条轴（被推出去时）若只在翻向分支里夹，
                 // 会永久留在界外（这条轴上它自己永远不动回来）。无邻居时两步都与旧写法逐位一致。
-                if (ShouldBounce(bot.DirX, x, WorldHalfExtent)) bot.DirX = -bot.DirX;
+                if (ShouldBounce(bot.DirX, x, BounceExtent)) bot.DirX = -bot.DirX;
                 x = Clamp(x);
-                if (ShouldBounce(bot.DirZ, z, WorldHalfExtent)) bot.DirZ = -bot.DirZ;
+                if (ShouldBounce(bot.DirZ, z, BounceExtent)) bot.DirZ = -bot.DirZ;
                 z = Clamp(z);
 
                 // 速度上报（快照 Speed，m/s）：取**精确**的每 tick 步长换算值而不是四舍五入的 8f——
@@ -118,7 +139,7 @@ namespace KcpServer
             }
         }
 
-        private static float Clamp(float v) => Math.Clamp(v, -WorldHalfExtent, WorldHalfExtent);
+        private float Clamp(float v) => Math.Clamp(v, -BounceExtent, BounceExtent);
 
         /// <summary>
         /// 该不该在边界翻向：**看意图方向，不看新位置是否越界**。

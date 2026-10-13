@@ -32,6 +32,18 @@ namespace KcpServer
                 }
             }
 
+            // 密集压测：--bots-radius R（把 bot 的撒点与反弹边界都收到 ±R，站原点即满屏实体）。
+            // 畸形/缺失/≤0 一律忽略 ⇒ 保持默认离散分布。独立解析（--bots 那个循环会 break）
+            float? botsRadius = null;
+            for (int i = 1; i < args.Length - 1; i++)
+            {
+                if (args[i] == "--bots-radius" && float.TryParse(args[i + 1], out var r) && r > 0f)
+                {
+                    botsRadius = r;
+                    break;
+                }
+            }
+
             // P5 怪物模式：--monsters N（固定布局怪物——供 MonsterWorldTests 验收）
             int monsterCount = 0;
             for (int i = 1; i < args.Length - 1; i++)
@@ -86,8 +98,10 @@ namespace KcpServer
             // bot 必须先于 StartAsync 注册（EntityStore 主循环独占——R2）
             if (botCount > 0)
             {
-                _server.EnableBots(botCount);
+                _server.EnableBots(botCount, botsRadius);
                 Console.WriteLine($"Bot mode: {botCount} bots registered");
+                if (botsRadius.HasValue)
+                    Console.WriteLine($"Dense bot mode: radius ±{botsRadius.Value}m");
             }
 
             if (monsterCount > 0)
