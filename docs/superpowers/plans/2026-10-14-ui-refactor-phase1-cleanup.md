@@ -65,7 +65,8 @@ Assets/Scripts/Hotfix/GameSystems/UI/Animation.meta                 (文件夹 m
 - ⚠️ **项目里有两个 `LayerType` 枚举**：`Hotfix.GameSystems.Sys3C.Core.LayerType`（Base/Attack/Hit）与 `Hotfix.GameSystems.UI.LayerType`（Base/Main/Popup/Top/Guide）。**两者都有 `Base`**。本计划动的是 UI 那个；任何同时 `using` 两个命名空间的文件都会产生歧义 —— 本阶段涉及的文件都只 `using Hotfix.GameSystems.UI`
 - `AssemblyInfo.cs` 已有 `[assembly: InternalsVisibleTo("GameSys.EditorTests")]` → EditMode 测试可直接访问 `internal` 成员，**无需新增程序集管道**
 - `GameSys.EditorTests.asmdef` 的 references 里**没有** `UnityEngine.UI`，但测试可以直接 `using UnityEngine.UI;` —— `Library/PackageCache/com.unity.ugui@1.0.0/Runtime/UnityEngine.UI.asmdef` 带了 `"autoReferenced": true`，自动引用对所有程序集生效（`GameSys.asmdef` 也没列它，却在用 `UnityEngine.UI.Image`，同理）。**不要为此改 asmdef。**
-- ⚠️ **`DOTween.Modules` 不是 autoReferenced**，而 `UIPanel.PlayShowAnimation()` / `PlayHideAnimation()` 的返回类型是 `DG.Tweening.Sequence`（定义在预编译 `DOTween.dll` 里）。asmdef 引用**不传递**，所以任务 3 的测试程序集必须**显式**加一行 `"DOTween.Modules"`，否则调用这两个钩子会报 `CS0012: The type 'Sequence' is defined in an assembly that is not referenced`。这是任务 3 步骤 2 的内容。（此前的检查只覆盖了 `UnityEngine.UI`，漏了这一条；任务 3 的实现者以 CS0012 实测发现。）
+- ⚠️ **`DOTween.dll` 被排除在 Editor 平台之外**（`Assets/Plugins/Demigiant/DOTween/DOTween.dll.meta`：`Any: enabled 1`、**`Editor: enabled 0`**），而 `UIPanel.PlayShowAnimation()` / `PlayHideAnimation()` 的返回类型是 `DG.Tweening.Sequence`（定义在该 DLL 里）。因此 `includePlatforms: ["Editor"]` 的测试程序集既拿不到自动引用、asmdef 引用也不传递（`"DOTween.Modules"` 带不来 `Sequence`），调用这两个钩子会报 `CS0012: The type 'Sequence' is defined in an assembly that is not referenced`。**唯一有效的修法是 `overrideReferences: true` + `precompiledReferences: ["DOTween.dll"]`** —— 见任务 3 步骤 2。
+  （此前的检查只覆盖了 `UnityEngine.UI`，漏了这一条；任务 3 的实现者以 CS0012 实测 + `CompilationPipeline` 定位根因发现。人类已裁定采纳该方案：它是 Unity 文档中"引用非自动引用的预编译 DLL"的标准做法，且保住了计划的意图——编译期绑定。代价是该测试程序集成为全项目唯一这样配置的；今后在 EditMode 测试里用别的预编译 DLL 需手动登记，会报 CS0012、可发现。）
 - `UIPanel.Layer` 是表达式体**属性**，不是序列化字段 → 改枚举不影响任何预制体
 
 ### 运行测试的方式
@@ -406,9 +407,9 @@ grep -rn "UIAnimation\|UIAnimPreset\|SequenceBuilder\|UITweenExtensions" Assets/
 
 > **为什么这条必须是第 1 步**：它是"动手前的状态核验"。若放在新建测试文件之后跑，测试文件里那句**注释**（枚举了这四个类型名）会自命中，闸门字面上永远无法通过 —— 这是本计划初版的缺陷，由实现者实测发现。注释里的类型名不是代码依赖，但与其在闸门里加例外，不如让闸门看到真实的初始状态。
 
-- [ ] **步骤 2：给测试程序集加 DOTween 引用**
+- [ ] **步骤 2：给测试程序集加 DOTween 预编译引用**
 
-`Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef` 的 `references` 数组里加一行 `"DOTween.Modules"`（放在 `"GameSys"` 之后即可）：
+`Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef` 需要加**两处**：
 
 ```json
     "references": [
@@ -420,9 +421,17 @@ grep -rn "UIAnimation\|UIAnimPreset\|SequenceBuilder\|UITweenExtensions" Assets/
         "SyncCore",
         "WebSocketNet"
     ],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "DOTween.dll"
+    ],
 ```
 
-**理由**：两个钩子返回 `DG.Tweening.Sequence`，asmdef 引用不传递，测试程序集不显式引用它就会报 `CS0012`。不加这一行，步骤 4 的表征测试编译不过。**这是本计划要求的唯一一处 asmdef 改动** —— 其他 asmdef 一律不动。
+**理由（实测得出，不是推断）**：两个钩子返回 `DG.Tweening.Sequence`。`DOTween.dll.meta` 里 `Editor: enabled: 0`，而本程序集是 `includePlatforms: ["Editor"]` 的 Editor-only 程序集 ⇒ 拿不到自动引用；asmdef 引用又不传递 ⇒ **只加 `"DOTween.Modules"` 仍然报 CS0012**（任务 3 的实现者照抄初版简报后实测复现两次，非缓存）。必须用 `overrideReferences: true` 把该程序集切成"只引用我列出的预编译 DLL"模式，再在 `precompiledReferences` 里点名 `DOTween.dll`。
+
+**副作用（已实测可接受）**：`overrideReferences: true` 后该程序集不再自动引用任何预编译 DLL。`nunit.framework.dll` 不受影响（测试程序集经由 `optionalUnityReferences: ["TestAssemblies"]` 获得，与 `overrideReferences` 无关），实测全量套件 365/365 通过。**代价**：今后在 EditMode 测试里使用其他预编译 DLL 需要手动登记，会以 CS0012 报出、可发现。
+
+**这是本计划要求的唯一一处 asmdef 改动** —— 其他 asmdef 一律不动。
 
 - [ ] **步骤 3：编写表征测试**
 
