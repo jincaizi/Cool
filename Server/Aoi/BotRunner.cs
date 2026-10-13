@@ -16,12 +16,13 @@ namespace KcpServer
         public const float BotSpeedPerTick = 0.53f; // ~8m/s @ 66ms tick
 
         /// <summary>
-        /// 机器人身体半径（米，ORCA 避让用）——对应客户端那条**占位胶囊**
-        /// （RemoteEntityRegistry 给 Kind=PlayerBot 建的 `CreatePrimitive(Capsule)`：单位胶囊
-        /// 半径 0.5、根缩放 1，见 p5-monster-server / D-P5-7 的降级路径），所以取 0.5。
-        /// 机器人不是真角色模型（100 个蒙皮网格会压垮手机浏览器），半径也就跟着占位体走。
+        /// 机器人身体半径（米，ORCA 避让用）——**真值源 = 客户端角色模型的半宽**
+        /// （`Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab` 的 SMR localBounds，见
+        /// `RemoteEntityRegistryTests.Bot_Model_HalfWidth_Matches_The_Orca_Radius`）。
+        /// 2026-10-13 换真模型后复核：实测半宽 0.7469（X 跨度 1.4939 / 2），与旧占位胶囊的 0.5 不符，
+        /// 故由占位胶囊的 0.5 改为实测 0.7469。
         /// </summary>
-        public const float BotRadius = 0.5f;
+        public const float BotRadius = 0.7469f;
 
         /// <summary>主循环 tick 秒数（Server3C.TickIntervalMs = 66）——
         /// 只用于把 m/s 的上报速度换算成快照里的米/tick（ORCA 邻居速度）</summary>
@@ -61,7 +62,8 @@ namespace KcpServer
                 float x = (float)(_random.NextDouble() * 2 - 1) * WorldHalfExtent * 0.8f;
                 float z = (float)(_random.NextDouble() * 2 - 1) * WorldHalfExtent * 0.8f;
                 var player = _store.AddPlayer(id, $"Bot_{id}");
-                // 与真人走同一条伤害/复活路径，只在**渲染**上分叉（D-N8 / D-P5-7）
+                // 与真人走同一条伤害/复活路径；渲染**也不再分叉**——bot 与真人共用外观目录的
+                // 真模型路径（D-N8 / D-P5-7 的"bot 用占位胶囊"降级已随任务 5 合并消亡）
                 player.Kind = (byte)EntityKind.PlayerBot;
                 player.UpdatePosition(new Vector3(x, 0, z), 0f, 0f, 1L, 0U);
                 // MarkDirty 保留（P2 测试语义）；AOI 可见性靠 grid 首帧 + scheduler 首槽，不依赖脏标记

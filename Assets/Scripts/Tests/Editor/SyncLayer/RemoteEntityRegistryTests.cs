@@ -282,5 +282,43 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual((byte)NpcAnimationState.Run, state);
             Assert.IsFalse(dead);
         }
+
+        /// <summary>
+        /// ORCA 半径真值源（design 任务 8）：服务端 `BotRunner.BotRadius` 的注释原写"对应
+        /// 客户端那条占位胶囊"（当时 = 0.5）——bot 换真模型后真值应是**模型半宽**。
+        ///
+        /// 为什么读源码文本而不是引用常量：`Server/Server3C.csproj` 是 Assets/ 之外的 .NET 工程，
+        /// Unity 测试程序集引用不到它。项目已有"断言文件文本"的先例（`NpcBodyColliderTests` 读
+        /// TagManager 资产），这里同款处理。
+        /// </summary>
+        [Test]
+        public void Bot_Model_HalfWidth_Matches_The_Orca_Radius()
+        {
+            const string PrefabPath = "Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab";
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+            Assert.IsNotNull(prefab, PrefabPath);
+
+            var renderers = prefab.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            Assert.IsNotEmpty(renderers, "角色预制体应有蒙皮网格");
+            var local = renderers[0].localBounds;
+            for (int i = 1; i < renderers.Length; i++) local.Encapsulate(renderers[i].localBounds);
+
+            float halfWidth = Mathf.Max(local.size.x, local.size.z) * 0.5f;
+
+            // 路径基座用 Application.dataPath（= Assets/）而不是 CWD：测试宿主不保证 CWD 落在项目根
+            string sourcePath = System.IO.Path.Combine(Application.dataPath, "..",
+                "Server", "Aoi", "BotRunner.cs");
+            Assert.IsTrue(System.IO.File.Exists(sourcePath), "服务端源码应存在：" + sourcePath);
+            string source = System.IO.File.ReadAllText(sourcePath);
+            var match = System.Text.RegularExpressions.Regex.Match(source, @"BotRadius\s*=\s*([0-9.]+)f");
+            Assert.IsTrue(match.Success,
+                "没在 Server/Aoi/BotRunner.cs 里找到 BotRadius 常量——常量改名了？同步更新本用例");
+            float orcaRadius = float.Parse(match.Groups[1].Value,
+                System.Globalization.CultureInfo.InvariantCulture);
+
+            Assert.That(halfWidth, Is.EqualTo(orcaRadius).Within(0.15f),
+                $"模型半宽 {halfWidth:F3}m 应与 ORCA 半径 {orcaRadius}m 一致（±0.15）——" +
+                "不一致就改 BotRunner.BotRadius 并同步注释，别让注释与真相脱节");
+        }
     }
 }
