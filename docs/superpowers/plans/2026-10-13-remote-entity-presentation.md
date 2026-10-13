@@ -335,12 +335,16 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         [Test]
         public void Registry_Derives_Speed_From_Rendered_Motion()
         {
-            const long tickMs = 66L * 10_000L;   // 一 tick = 66ms = 660_000 时钟单位
+            // 两个样本把渲染时刻夹在中间（**必须插值**：两次渲染都落在最后一个样本之后的话，
+            // 位置会保持不动 ⇒ 反推速度为 0，这条用例就测不到东西了）。
+            // 样本 A=(1_000_000, x=0) 样本 B=(2_320_000, x=1.056) ⇒ 1.056m / 0.132s = 8 m/s。
+            // 渲染时刻取 1_660_000（t=0.5，x=0.528）与 1_990_000（t=0.75，x=0.792）：
+            // Δx=0.264m / Δt=0.033s = 8 m/s。
             _registry.ApplySnapshot(Snap(1, 0f, 0), serverTicks: 1_000_000L);
-            _registry.ApplySnapshot(Snap(1, 0.528f, 1), serverTicks: 1_000_000L + tickMs);
-            _registry.UpdateRender(nowServerTicks: 1_000_000L + tickMs, renderDelayTicks: 0L);
-            _registry.UpdateRender(nowServerTicks: 1_000_000L + tickMs * 2,
-                renderDelayTicks: 0L);   // 第二次推：位置从样本 A 移到 B（0.528m / 66ms = 8 m/s）
+            _registry.ApplySnapshot(Snap(1, 1.056f, 1), serverTicks: 2_320_000L);
+
+            _registry.UpdateRender(nowServerTicks: 1_660_000L, renderDelayTicks: 0L);
+            _registry.UpdateRender(nowServerTicks: 1_990_000L, renderDelayTicks: 0L);
 
             var view = _registry.GetView(1)!;
             Assert.That(view.Speed, Is.GreaterThan(1f), "渲染位移 8 m/s ⇒ 反推速度必须非零");
