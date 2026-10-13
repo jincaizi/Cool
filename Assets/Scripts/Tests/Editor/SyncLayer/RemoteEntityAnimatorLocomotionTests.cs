@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
 using Hotfix.GameSystems.SyncLayer;
 using NUnit.Framework;
 using UnityEngine;
@@ -89,6 +92,13 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var animator = _go.GetComponent<Animator>()!;
             Assert.AreEqual(1f, animator.GetFloat("Blend"), "Blend 必须真的写进控制器");
             Assert.AreEqual(7, animator.GetInteger("BaseState"), "移动态 = Locomotion(7)");
+
+            // 步频必须用"比例 ≠ 1"的场景钉在**真实 Animator** 上：8.03 ÷ 8.0 = 1.004，与"写死 1"
+            // 只差 0.004，断在这里放不出滑步；2.5 ÷ 5.0 = 0.5 才能让"没按比例调/压根没写"当场变红
+            // （只断言观测属性 `LastLocomotionSpeed` 是弱 oracle——它和写入是同一个方法算出来的）。
+            _driver.ApplyLocomotion(2.5f);
+            Assert.AreEqual(0.5f, animator.GetFloat("LocomotionSpeed"),
+                "LocomotionSpeed 必须真的落到 Animator 上（只写进观测属性 = 远端步频根本没接上）");
         }
 
         [Test]
@@ -100,6 +110,44 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             _driver.ApplyLocomotion(0f);
             Assert.AreEqual(0f, _go.GetComponent<Animator>()!.GetFloat("Blend"),
                 "升档后必须强制重写一次（Animator 禁用即重置状态，去重游标不能拦它）");
+        }
+
+        /// <summary>
+        /// 标称速度常量与**本地** `CharacterController` 的一致性守护——不一致时，远端按错的标称
+        /// 速度缩放步频/挑档位，表现是**脚步无声滑步**（循环按 A 速度走、位移是 B 速度）。
+        ///
+        /// 真值源是普通类（非 MonoBehaviour，且只有带参构造），实例化不了 ⇒ 读源码文本解析
+        /// （同 MonsterBodyRadiusTests 读 `monster_config.json` 的"文本即真值源"惯例）。
+        /// </summary>
+        [Test]
+        public void Nominal_Speeds_Match_The_Local_Character_Controller()
+        {
+            string path = Path.Combine(Application.dataPath,
+                "Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs");
+            Assert.IsTrue(File.Exists(path), "本地 CharacterController 源码应存在：" + path);
+            string source = File.ReadAllText(path);
+
+            float localWalk = ParseFloatDefault(source, "MoveSpeed");
+            float localSprint = ParseFloatDefault(source, "SprintSpeed");
+
+            Assert.AreEqual(localWalk, RemoteEntityAnimator.NominalWalkSpeed,
+                "NominalWalkSpeed 必须与本地 MoveSpeed(" + localWalk + ") 一致——"
+                + "不一致时远端走档步频按错的标称速度缩放，脚步无声滑步");
+            Assert.AreEqual(localSprint, RemoteEntityAnimator.NominalSprintSpeed,
+                "NominalSprintSpeed 必须与本地 SprintSpeed(" + localSprint + ") 一致——跑档同样会滑步");
+            Assert.AreEqual((localWalk + localSprint) * 0.5f, RemoteEntityAnimator.WalkRunSplitSpeed,
+                "走跑分界必须是两个标称速度的中点——偏了会让远端在某档用错标称速度（步频错、脚步滑步）");
+        }
+
+        /// <summary>从源码文本里抠出 `public float X { get; set; } = 1f;` 的默认值。</summary>
+        private static float ParseFloatDefault(string source, string propertyName)
+        {
+            var match = Regex.Match(source,
+                @"float\s+" + Regex.Escape(propertyName) + @"\s*\{[^}]*\}\s*=\s*(-?[0-9]*\.?[0-9]+)f");
+            Assert.IsTrue(match.Success,
+                "没在 CharacterController.cs 里解析到 " + propertyName + " 的默认值——"
+                + "属性写法变了就要同步改本守护用例的正则，别让它静默失效");
+            return float.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
         }
     }
 }
