@@ -91,6 +91,10 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _entryLookedUp;
         private CombatNetworkBridge? _combatBridge;
 
+        /// <summary>远程实体渲染根（Awake 建的 `RemotePlayers`）——本地角色查找要排除它整棵子树，
+        /// 见 <see cref="FindLocalEntry"/></summary>
+        private Transform? _remoteRoot;
+
         private string? _statusMessage;        // 屏幕浮层上的错误/断线文本
         private float _statusMessageUntil;     // 显示截止时刻（Time.unscaledTime）
         private bool _pendingReturnToMenu;
@@ -122,6 +126,7 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             var root = new GameObject("RemotePlayers");
             root.transform.SetParent(transform, false);
+            _remoteRoot = root.transform;   // 本地角色查找要排除这棵子树（见 FindLocalEntry）
 
             // Inspector 的数组 → 查询表（registry 只吃表；空目录传 null = 球体降级，与未接线同一条路）
             var catalog = new Dictionary<int, GameObject>();
@@ -140,7 +145,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _remoteEntities.ObserverPositionProvider = () =>
             {
                 if (_localEntry == null && !_entryLookedUp)
-                    _localEntry = FindObjectOfType<Sys3CEntry>();
+                    _localEntry = FindLocalEntry();
                 return _localEntry != null ? _localEntry.transform.position : (Vector3?)null;
             };
 
@@ -148,6 +153,21 @@ namespace Hotfix.GameSystems.SyncLayer
             string url = Application.absoluteURL;
             if (TierQuery.TryFull(url, out int budget)) _remoteEntities.TierPolicy.MaxFull = budget;
             if (TierQuery.TryFullDistance(url, out float distance)) _remoteEntities.TierPolicy.FullDistance = distance;
+        }
+
+        /// <summary>
+        /// 场景内首个本地 `Sys3CEntry`。**必须排除远程实体根之下的候选**：远程头像预制体上
+        /// 挂着同一个 `Sys3CEntry`（`RemoteEntityAnimator.Awake` 只把它 `enabled = false`），
+        /// 而 `FindObjectOfType` **会返回启用 GameObject 上的禁用组件**（2026-10-13 实测：
+        /// disabled 组件照样被找到）——在"远端视图已建、本地角色尚未装配"的窗口里，不排除的话
+        /// 观察者位置（分档中心）与移动上报会接到**别人身上**。
+        /// </summary>
+        private Sys3CEntry? FindLocalEntry()
+        {
+            foreach (var entry in FindObjectsOfType<Sys3CEntry>())
+                if (_remoteRoot == null || !entry.transform.IsChildOf(_remoteRoot))
+                    return entry;
+            return null;
         }
 
         private void Start()
@@ -512,7 +532,7 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 _entryLookedUp = true;
                 if (_localEntry == null)
-                    _localEntry = FindObjectOfType<Sys3CEntry>();
+                    _localEntry = FindLocalEntry();
                 if (_localEntry == null)
                 {
                     _attachFailed = true;

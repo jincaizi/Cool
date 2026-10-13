@@ -13,8 +13,12 @@ namespace Hotfix.GameSystems.SyncLayer
     {
         private const long ExpiryTicks = 12_000_000L; // 1.2s 无快照即视为出视野/离线（AOI 停流语义；≫ 静止保活 4 tick ≈ 267ms）
 
-        /// <summary>速度反推的钳位上限（1.5 × 本地冲刺速度 8.0 —— design §4 速度反推）</summary>
-        private const float SpeedClamp = 12f;
+        /// <summary>
+        /// 速度反推的钳位上限（= 步频上限 1.5 × 标称冲刺速度 8.0 —— design §4 速度反推）。
+        /// **由常量推导，别写死 12f**：写死会在标称跑速调整时静默漂移——守护用例只钉
+        /// `Nominal*` 与本地 `CharacterController` 的一致性，钉不到这个派生值。
+        /// </summary>
+        private const float SpeedClamp = RemoteEntityAnimator.MaxLocomotionSpeed * RemoteEntityAnimator.NominalSprintSpeed;
 
         private readonly Dictionary<long, RemoteEntityView> _views = new Dictionary<long, RemoteEntityView>();
         private readonly RemoteInterpolator _interpolator = new RemoteInterpolator();
@@ -452,7 +456,10 @@ namespace Hotfix.GameSystems.SyncLayer
         public byte ActionState { get; set; }
         /// <summary>服务端权威存活状态（D-N1：命名 Dead——protobuf 零默认让"活着"不占字节）</summary>
         public bool Dead { get; set; }
-        /// <summary>当前档位（null = 表现尚未建立：无 Full 资产的纯降级占位视图）</summary>
+        /// <summary>当前档位（null = 表现尚未建立：无 Full 资产的纯降级占位视图）。
+        /// **注意**：这种视图被 SetTier 碰过之后会落到 `Proxy`（没有 Full 资产时升档分支
+        /// 如实退回 Proxy，见 SetTier）——所以 `Tier == null` 只说明"从未参与过换档"，
+        /// 不代表读数口径上被排除（`RecountTiers` 把 `Tier != Full` 全记代理）。</summary>
         public RemoteTier? Tier { get; internal set; }
         /// <summary>近档预制体（分档升档时惰性实例化用；null = 无 Full 资产）</summary>
         public GameObject? FullPrefab { get; internal set; }
