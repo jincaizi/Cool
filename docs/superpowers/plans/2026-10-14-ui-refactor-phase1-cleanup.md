@@ -65,6 +65,7 @@ Assets/Scripts/Hotfix/GameSystems/UI/Animation.meta                 (文件夹 m
 - ⚠️ **项目里有两个 `LayerType` 枚举**：`Hotfix.GameSystems.Sys3C.Core.LayerType`（Base/Attack/Hit）与 `Hotfix.GameSystems.UI.LayerType`（Base/Main/Popup/Top/Guide）。**两者都有 `Base`**。本计划动的是 UI 那个；任何同时 `using` 两个命名空间的文件都会产生歧义 —— 本阶段涉及的文件都只 `using Hotfix.GameSystems.UI`
 - `AssemblyInfo.cs` 已有 `[assembly: InternalsVisibleTo("GameSys.EditorTests")]` → EditMode 测试可直接访问 `internal` 成员，**无需新增程序集管道**
 - `GameSys.EditorTests.asmdef` 的 references 里**没有** `UnityEngine.UI`，但测试可以直接 `using UnityEngine.UI;` —— `Library/PackageCache/com.unity.ugui@1.0.0/Runtime/UnityEngine.UI.asmdef` 带了 `"autoReferenced": true`，自动引用对所有程序集生效（`GameSys.asmdef` 也没列它，却在用 `UnityEngine.UI.Image`，同理）。**不要为此改 asmdef。**
+- ⚠️ **`DOTween.Modules` 不是 autoReferenced**，而 `UIPanel.PlayShowAnimation()` / `PlayHideAnimation()` 的返回类型是 `DG.Tweening.Sequence`（定义在预编译 `DOTween.dll` 里）。asmdef 引用**不传递**，所以任务 3 的测试程序集必须**显式**加一行 `"DOTween.Modules"`，否则调用这两个钩子会报 `CS0012: The type 'Sequence' is defined in an assembly that is not referenced`。这是任务 3 步骤 2 的内容。（此前的检查只覆盖了 `UnityEngine.UI`，漏了这一条；任务 3 的实现者以 CS0012 实测发现。）
 - `UIPanel.Layer` 是表达式体**属性**，不是序列化字段 → 改枚举不影响任何预制体
 
 ### 运行测试的方式
@@ -390,7 +391,40 @@ set before phase 3 renumbers the layers."
 
 > **为什么不是红→绿**：这是删除任务，没有"新行为"要测。这里写的是**表征测试** —— 先钉住"钩子存在且默认不播动画"，删除前后都必须通过。删除本身的判据是"零引用 + 编译通过 + 既有套件全绿"。
 
-- [ ] **步骤 1：编写表征测试**
+- [ ] **步骤 1：确认零引用 —— 删除的前置判据（硬闸门，必须先跑）**
+
+```bash
+# 1) 脚本 GUID 在任何 prefab / scene / asset 中零引用（预期：无输出）
+grep -rl "4ee6cd6feb7d3f6409aaf8884c73d1ca" Assets/ --include=*.prefab --include=*.unity --include=*.asset
+
+# 2) 类型名的引用只出现在 Animation 目录与 UIPanel 内（预期：只有 UIPanel.cs 一个文件）
+grep -rn "UIAnimation\|UIAnimPreset\|SequenceBuilder\|UITweenExtensions" Assets/Scripts/ --include=*.cs \
+  | grep -v "Assets/Scripts/Hotfix/GameSystems/UI/Animation/"
+```
+
+若第 2 条列出了 `UIPanel.cs` 以外的文件，**停下来**：本计划的删除范围需要扩大，先回报再动手。
+
+> **为什么这条必须是第 1 步**：它是"动手前的状态核验"。若放在新建测试文件之后跑，测试文件里那句**注释**（枚举了这四个类型名）会自命中，闸门字面上永远无法通过 —— 这是本计划初版的缺陷，由实现者实测发现。注释里的类型名不是代码依赖，但与其在闸门里加例外，不如让闸门看到真实的初始状态。
+
+- [ ] **步骤 2：给测试程序集加 DOTween 引用**
+
+`Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef` 的 `references` 数组里加一行 `"DOTween.Modules"`（放在 `"GameSys"` 之后即可）：
+
+```json
+    "references": [
+        "GameSys",
+        "DOTween.Modules",
+        "DataDefinition",
+        "Cool.Protocol",
+        "KcpNet",
+        "SyncCore",
+        "WebSocketNet"
+    ],
+```
+
+**理由**：两个钩子返回 `DG.Tweening.Sequence`，asmdef 引用不传递，测试程序集不显式引用它就会报 `CS0012`。不加这一行，步骤 4 的表征测试编译不过。**这是本计划要求的唯一一处 asmdef 改动** —— 其他 asmdef 一律不动。
+
+- [ ] **步骤 3：编写表征测试**
 
 创建 `Assets/Scripts/Tests/Editor/UIPanelLifecycleTests.cs`：
 
@@ -439,25 +473,12 @@ namespace GameSys.EditorTests
 }
 ```
 
-- [ ] **步骤 2：运行测试 —— 预期通过（表征测试）**
+- [ ] **步骤 4：运行测试 —— 预期通过（表征测试）**
 
 运行：`tests-run(testMode: "EditMode", testClass: "UIPanelLifecycleTests")`
 预期：**PASS**。此时 `UIPanel` 里仍是 `Animation != null ? Animation.PlayShow() : null`，而测试面板没挂 UIAnimation，所以返回 null。这一步的作用是把"默认不播动画"钉住，让接下来的删除有回归网。
 
-- [ ] **步骤 3：确认零引用（删除的前置判据）**
-
-```bash
-# 1) 脚本 GUID 在任何 prefab / scene / asset 中零引用（预期：无输出）
-grep -rl "4ee6cd6feb7d3f6409aaf8884c73d1ca" Assets/ --include=*.prefab --include=*.unity --include=*.asset
-
-# 2) 类型名的引用只出现在 Animation 目录与 UIPanel 内（预期：只有 UIPanel.cs）
-grep -rn "UIAnimation\|UIAnimPreset\|SequenceBuilder\|UITweenExtensions" Assets/Scripts/ --include=*.cs \
-  | grep -v "Assets/Scripts/Hotfix/GameSystems/UI/Animation/"
-```
-
-若第 2 条列出了 `UIPanel.cs` 以外的文件，**停下来**：本计划的删除范围需要扩大，先回报再动手。
-
-- [ ] **步骤 4：删除 4 个文件与文件夹 meta**
+- [ ] **步骤 5：删除 4 个文件与文件夹 meta**
 
 ```bash
 git rm Assets/Scripts/Hotfix/GameSystems/UI/Animation/UIAnimation.cs \
@@ -471,7 +492,7 @@ git rm Assets/Scripts/Hotfix/GameSystems/UI/Animation/UIAnimation.cs \
        Assets/Scripts/Hotfix/GameSystems/UI/Animation.meta
 ```
 
-- [ ] **步骤 5：解除 UIPanel 对 UIAnimation 的依赖**
+- [ ] **步骤 6：解除 UIPanel 对 UIAnimation 的依赖**
 
 修改 `Assets/Scripts/Hotfix/GameSystems/UI/Core/UIPanel.cs`：
 
@@ -502,15 +523,18 @@ git rm Assets/Scripts/Hotfix/GameSystems/UI/Animation/UIAnimation.cs \
 
 即：删掉 `public UIAnimation Animation { get; private set; }` 与 `Animation = GetComponent<UIAnimation>();`，两个钩子的函数体由 `Animation != null ? ... : null` 改为直接 `=> null`。**`using DG.Tweening;` 保留**（`Sequence` 返回类型仍需要它）。
 
-- [ ] **步骤 6：运行测试验证通过**
+- [ ] **步骤 7：运行测试验证通过**
 
 运行：`tests-run(testMode: "EditMode", testClass: "UIPanelLifecycleTests")`
 预期：**PASS**（表征测试，删除前后一致）。同时确认 Unity 控制台无编译错误。
 
-- [ ] **步骤 7：Commit**
+- [ ] **步骤 8：Commit**
 
 ```bash
-git add -A Assets/Scripts/Hotfix/GameSystems/UI/ Assets/Scripts/Tests/Editor/UIPanelLifecycleTests.cs
+git add -A Assets/Scripts/Hotfix/GameSystems/UI/ \
+       Assets/Scripts/Tests/Editor/UIPanelLifecycleTests.cs \
+       Assets/Scripts/Tests/Editor/UIPanelLifecycleTests.cs.meta \
+       Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef
 git commit -m "chore(ui): delete the unused UI animation subsystem
 
 UIAnimation was never attached to any prefab (its script GUID has zero
