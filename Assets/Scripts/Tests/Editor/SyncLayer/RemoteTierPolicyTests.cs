@@ -349,6 +349,84 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             }
         }
 
+        /// <summary>测试专用的代理标记组件：证明 Proxy 表现确实来自目录条目的 `Proxy` 预制体
+        /// （`CreatePrimitive` 的胶囊上不可能有这个组件）。</summary>
+        private sealed class ProxyMarker : MonoBehaviour { }
+
+        /// <summary>
+        /// `AppearanceEntry.Proxy` 是**可插拔接缝**（规格 §4）：美术产出 billboard/impostor 后
+        /// 填进条目的 `Proxy`，代理表现就换成它——"换档机制一行都不用改"。本用例把这条接缝
+        /// 钉成可执行事实（此前它是一句谎：全仓无任何代码读这个字段）。
+        /// </summary>
+        [Test]
+        public void Proxy_Tier_Uses_The_Catalog_Proxy_Prefab_When_Configured()
+        {
+            var root = new GameObject("ProxyPrefabRoot");
+            var full = new GameObject("ProxyPrefabFull");
+            full.AddComponent<Animator>();
+            var proxyPrefab = new GameObject("ProxyPrefabDouble");
+            proxyPrefab.AddComponent<ProxyMarker>();
+            proxyPrefab.AddComponent<BoxCollider>();                  // 预制体自带的碰撞体（根上）
+            var child = new GameObject("Deco");
+            child.transform.SetParent(proxyPrefab.transform, false);
+            child.AddComponent<CapsuleCollider>();                    // 子物体上的也要处理
+
+            var registry = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = full, Proxy = proxyPrefab } });
+            registry.ObserverPositionProvider = () => Vector3.zero;
+            registry.TierPolicy.FullDistance = 1f;   // 50m 处 ⇒ Proxy 档
+            try
+            {
+                registry.ApplySnapshot(SnapAt(10, new Vector3(50f, 0f, 0f)), serverTicks: 1_000_000L);
+                var proxy = registry.GetView(10)!.ProxyRoot;
+                Assert.IsNotNull(proxy, "Proxy 档必须有代理表现");
+                Assert.AreEqual("Proxy", proxy!.name, "代理仍叫 Proxy（验收/诊断靠名字）");
+                Assert.IsNotNull(proxy.GetComponent<ProxyMarker>(),
+                    "ProxyRoot 必须来自目录条目的 Proxy 预制体（胶囊上没有这个标记组件）");
+                Assert.IsNotNull(proxy.GetComponentInChildren<ProxyMarker>(true),
+                    "标记（连同整棵预制体子树）都该在");
+                AssertHasNoEnabledCollider(proxy, "Proxy 预制体（含子物体）");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(full);
+                Object.DestroyImmediate(proxyPrefab);
+            }
+        }
+
+        /// <summary>对照：条目**未配** `Proxy` ⇒ 仍是运行时胶囊（今天的路径不变）。</summary>
+        [Test]
+        public void Proxy_Tier_Still_Uses_The_Capsule_When_No_Proxy_Prefab_Is_Configured()
+        {
+            var root = new GameObject("CapsuleProxyRoot");
+            var full = new GameObject("CapsuleProxyFull");
+            full.AddComponent<Animator>();
+            var registry = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = full } });   // Proxy 留空
+            registry.ObserverPositionProvider = () => Vector3.zero;
+            registry.TierPolicy.FullDistance = 1f;
+            var reference = GameObject.CreatePrimitive(PrimitiveType.Capsule);   // 对照组（同一内建 mesh）
+            try
+            {
+                registry.ApplySnapshot(SnapAt(10, new Vector3(50f, 0f, 0f)), serverTicks: 1_000_000L);
+                var proxy = registry.GetView(10)!.ProxyRoot!;
+                Assert.IsNull(proxy.GetComponent<ProxyMarker>(), "没配 Proxy 就不该有预制体标记");
+                Assert.AreSame(reference.GetComponent<MeshFilter>()!.sharedMesh,
+                    proxy.GetComponent<MeshFilter>()!.sharedMesh,
+                    "未配 Proxy ⇒ 仍是胶囊（与对照组同一个内建 mesh）");
+                AssertHasNoEnabledCollider(proxy, "运行时胶囊");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(full);
+                Object.DestroyImmediate(reference);
+            }
+        }
+
         /// <summary>
         /// EditMode 走 `DestroyImmediate` ⇒ 组件直接没了（与 null 相等）；运行时 `Destroy`
         /// 帧末生效 ⇒ 创建帧内组件还在、但必须已禁用 —— 两条都算过（设计只要求"无**启用的** Collider"）。

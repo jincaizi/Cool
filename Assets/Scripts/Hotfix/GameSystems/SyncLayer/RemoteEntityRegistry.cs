@@ -233,8 +233,12 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 if (view.ProxyRoot == null)
                 {
-                    var proxy = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                    StripCollider(proxy);   // D19
+                    // 代理：目录条目配了 `Proxy` 预制体就用它（美术产出 billboard/impostor 的可插拔
+                    // 接缝——换档机制一行不改），留空 = 运行时胶囊
+                    var proxy = view.ProxyPrefab != null
+                        ? Object.Instantiate(view.ProxyPrefab)
+                        : GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                    StripCollider(proxy);   // D19：整棵代理层级都不许有启用的 Collider
                     proxy.name = "Proxy";
                     proxy.transform.SetParent(view.GameObject.transform, false);
                     view.ProxyRoot = proxy;
@@ -365,6 +369,7 @@ namespace Hotfix.GameSystems.SyncLayer
             viewRoot.transform.SetParent(_root, false);
             var view = new RemoteEntityView(viewRoot, snapshot.Kind);
             view.FullPrefab = fullPrefab;
+            view.ProxyPrefab = entry?.Proxy;   // 留空 ⇒ Proxy 档运行时生成胶囊（见 SetTier）
             // 无观察者（测试宿主/未接线）= 不分档，直接建 Full——既有测试在 ApplySnapshot 之后
             // 立刻断言 Animator，不能等 UpdateRender。
             SetTier(view, ObserverPositionProvider == null ? RemoteTier.Full : RemoteTier.Proxy);
@@ -375,13 +380,19 @@ namespace Hotfix.GameSystems.SyncLayer
         private static string KindName(long playerId, byte kind)
             => kind == (byte)EntityKind.PlayerBot ? $"Bot_{playerId}" : $"RemotePlayer_{playerId}";
 
-        /// <summary>去掉 `CreatePrimitive` 自带的碰撞体（D19：远端实体是视图不是物理体）</summary>
+        /// <summary>
+        /// 去掉**整棵层级**上的碰撞体（D19：远端实体是视图不是物理体）。代理可能来自美术预制体
+        /// ——碰撞体可能挂在根上，也可能在子物体上，都要处理。**先禁用再销毁**：运行时 `Destroy`
+        /// 帧末才生效，只销毁的话"创建帧内"仍有一个启用碰撞体（层矩阵挡不住 OverlapSphere 这类查询）。
+        /// </summary>
         private static void StripCollider(GameObject go)
         {
-            var collider = go.GetComponent<Collider>();
-            if (collider == null) return;
-            if (Application.isPlaying) Object.Destroy(collider);
-            else Object.DestroyImmediate(collider);
+            foreach (var collider in go.GetComponentsInChildren<Collider>(true))
+            {
+                collider.enabled = false;
+                if (Application.isPlaying) Object.Destroy(collider);
+                else Object.DestroyImmediate(collider);
+            }
         }
     }
 
@@ -401,6 +412,9 @@ namespace Hotfix.GameSystems.SyncLayer
         public RemoteTier? Tier { get; internal set; }
         /// <summary>近档预制体（分档升档时惰性实例化用；null = 无 Full 资产）</summary>
         public GameObject? FullPrefab { get; internal set; }
+        /// <summary>远档代理预制体（**可插拔接缝**：美术产出 billboard/impostor 时填进
+        /// `AppearanceEntry.Proxy` 即可换掉运行时胶囊；null = 运行时生成胶囊）</summary>
+        public GameObject? ProxyPrefab { get; internal set; }
         /// <summary>近档的动画驱动（玩家类视图专用；升档时才存在，纯降级占位为 null。
         /// **bot 在接线态同样有驱动**——不是只有真人有）</summary>
         public RemoteEntityAnimator? Animator { get; internal set; }
