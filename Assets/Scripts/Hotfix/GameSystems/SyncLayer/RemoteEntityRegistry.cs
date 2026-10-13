@@ -13,6 +13,9 @@ namespace Hotfix.GameSystems.SyncLayer
     {
         private const long ExpiryTicks = 12_000_000L; // 1.2s 无快照即视为出视野/离线（AOI 停流语义；≫ 静止保活 4 tick ≈ 267ms）
 
+        /// <summary>速度反推的钳位上限（1.5 × 本地冲刺速度 8.0 —— design §4 速度反推）</summary>
+        private const float SpeedClamp = 12f;
+
         private readonly Dictionary<long, RemoteEntityView> _views = new Dictionary<long, RemoteEntityView>();
         private readonly RemoteInterpolator _interpolator = new RemoteInterpolator();
         private readonly Dictionary<long, float> _lastKnownYaw = new Dictionary<long, float>();
@@ -126,6 +129,9 @@ namespace Hotfix.GameSystems.SyncLayer
                 {
                     kv.Value.Position = pos;
                     kv.Value.Rotation = rot;
+                    // D17：速度由**渲染位移**反推（动画要匹配屏幕上的移动，且免动协议/插值器）。
+                    // 钳位上限 = 1.5 × 冲刺速度：重生/服务器校正的瞬移不该让 Blend 跳到跑档。
+                    kv.Value.TrackSpeed(pos, renderAt, SpeedClamp);
                 }
 
                 if (kv.Value.NpcAnimator != null
@@ -286,6 +292,26 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             get => GameObject.transform.rotation;
             set => GameObject.transform.rotation = value;
+        }
+
+        /// <summary>平滑后的渲染速度（m/s）——由相邻两次插值位置反推（design D17）</summary>
+        public float Speed { get; private set; }
+
+        /// <summary>上一次渲染写下的位置（速度反推用）</summary>
+        private Vector3 _lastRenderPosition;
+
+        /// <summary>上一次渲染的服务器时刻（&lt; 0 = 尚无，首帧保持上一速度）</summary>
+        private long _lastRenderTicks = -1L;
+
+        /// <summary>速度反推 + 记账（registry 的渲染循环每帧调用一次）</summary>
+        internal void TrackSpeed(Vector3 position, long renderAt, float maxSpeed)
+        {
+            float dt = _lastRenderTicks < 0
+                ? 0f
+                : (renderAt - _lastRenderTicks) / RenderSpeedEstimator.TicksPerSecond;
+            Speed = RenderSpeedEstimator.Step(Speed, _lastRenderPosition, position, dt, maxSpeed);
+            _lastRenderPosition = position;
+            _lastRenderTicks = renderAt;
         }
 
         public RemoteEntityView(GameObject go, byte kind = 0, int templateId = 0,
