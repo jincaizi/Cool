@@ -5,8 +5,8 @@ using UnityEngine;
 namespace Hotfix.GameSystems.SyncLayer
 {
     /// <summary>
-    /// 远程实体注册表 —— 管理远程实体渲染对象（N5b 起按 `EntityKind` 分三支：
-    /// 真人 = 角色预制体 + Animator，bot = 胶囊占位，怪物 = 球体占位；
+    /// 远程实体注册表 —— 管理远程实体渲染对象（N5b 起按 `EntityKind` 分两支：
+    /// 玩家类（真人 + bot）= 外观目录 → 角色预制体 + Animator，怪物 = 模型目录 / 球体占位；
     /// P2 快照插值渲染：RemoteInterpolator 缓冲 2-tick 延迟插值，不再直接定位）。生成/销毁由快照流驱动。
     /// </summary>
     public sealed class RemoteEntityRegistry
@@ -21,8 +21,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Dictionary<long, float> _lastKnownYaw = new Dictionary<long, float>();
         private readonly Dictionary<long, long> _lastSampleTicks = new Dictionary<long, long>();
         private readonly Transform _root;
-        /// <summary>远程真人角色预制体（N5b）——null 时真人退化为胶囊占位，见 CreateView</summary>
-        private readonly GameObject? _playerAvatarPrefab;
+        /// <summary>玩家类实体（真人 + bot）的外观目录——null 时退化为胶囊占位，见 CreateView</summary>
+        private readonly IReadOnlyList<AppearanceEntry>? _appearances;
         /// <summary>怪物模型目录（templateId → prefab，宿主接线）——null 或未命中时怪物退化为球体占位，见 CreateView</summary>
         private readonly IReadOnlyDictionary<int, GameObject>? _npcPrefabs;
         private readonly NpcAttackSchedule _attacks = new NpcAttackSchedule();
@@ -35,19 +35,20 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>当前视图实体 ID 集合（T7 AOI 验收统计用）</summary>
         public IEnumerable<long> PlayerIds => _views.Keys;
 
-        /// <param name="playerAvatarPrefab">
-        /// 远程真人角色的预制体（N5b）。省略 = 占位渲染（测试宿主与未接线的场景走这条），
-        /// **不会** `Instantiate(null)`。
+        /// <param name="appearances">
+        /// 玩家类实体（真人与 bot）的外观目录。**省略 = 全部退化为胶囊占位**
+        /// （未接线的测试宿主与场景走这条，与怪物分支同款"缺配置即降级"）。
         /// </param>
         /// <param name="npcPrefabs">
         /// 怪物模型目录：templateId → 预制体（宿主从 `ClientNetworkHost._npcPrefabs` 建表传入）。
-        /// 省略/未命中 = 球体占位（未接线的测试宿主与场景走这条）——与真人分支同款"缺配置即降级"。
+        /// 省略/未命中 = 球体占位（未接线的测试宿主与场景走这条）——与玩家类分支同款"缺配置即降级"。
         /// </param>
-        public RemoteEntityRegistry(Transform root, GameObject? playerAvatarPrefab = null,
+        public RemoteEntityRegistry(Transform root,
+            IReadOnlyList<AppearanceEntry>? appearances = null,
             IReadOnlyDictionary<int, GameObject>? npcPrefabs = null)
         {
             _root = root;
-            _playerAvatarPrefab = playerAvatarPrefab;
+            _appearances = appearances;
             _npcPrefabs = npcPrefabs;
         }
 
@@ -231,38 +232,53 @@ namespace Hotfix.GameSystems.SyncLayer
                 return new RemoteEntityView(go, snapshot.Kind, snapshot.TemplateId);
             }
 
-            // 压测 bot：胶囊占位。**绝不能上角色模型**——`--bots 100` 是 P3（AOI）演示的前提，
-            // 100 个蒙皮网格 + Animator 会在手机浏览器上直接压垮帧率（D-P5-7 / R2）
-            if (snapshot.Kind == (byte)EntityKind.PlayerBot)
+            // 玩家类（真人 + bot）：**同一条路径**（design D1/D6）——外观目录查表 → 实例化 → 挂驱动。
+            // 旧的两支（真人 = 预制体 / bot = 胶囊）已合并：AOI 之后同屏实体数由局部密度决定，
+            // 实测 `--bots 100` 的同屏峰值只有 5~6 个，'100 个蒙皮网格' 从来没发生过。
+            var entry = snapshot.Kind == (byte)EntityKind.PlayerBot
+                ? AppearanceResolver.EntryAt(_appearances, AppearanceResolver.BotIndex(playerId, _appearances?.Count ?? 0))
+                : AppearanceResolver.FindId(_appearances, AppearanceResolver.DefaultId);
+            var fullPrefab = entry?.Full;
+            if (fullPrefab == null)
             {
-                var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                capsule.name = $"Bot_{playerId}";
-                capsule.transform.SetParent(_root, false);
-                return new RemoteEntityView(capsule, snapshot.Kind);
-            }
-
-            // 真人玩家：角色预制体 + Animator（D-P5-7）——你和面试官互相看到的应该是真角色
-            if (_playerAvatarPrefab == null)
-            {
-                // 未接线（测试宿主 / 没配场景的宿主）：退化为占位。**不 `Instantiate(null)`**
-                // ——那会抛异常并把整条快照消费链带崩（远程玩家直接不渲染）。
+                // 未接线 / 未命中：占位降级（**不 `Instantiate(null)`**——那会抛异常并把整条
+                // 快照消费链带崩，远程玩家直接不渲染）
                 if (!_warnedMissingAvatar)
                 {
                     _warnedMissingAvatar = true;
-                    Debug.LogWarning("[Sync] remote player avatar prefab not wired; " +
-                                     "real players fall back to capsule placeholders");
+                    Debug.LogWarning("[Sync] no appearance configured; remote players/bots " +
+                                     "fall back to capsule placeholders");
                 }
                 var fallback = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                fallback.name = $"RemotePlayer_{playerId}";
+                StripCollider(fallback);   // D19：CreatePrimitive 自带 Collider，远端实体不该挡人
+                fallback.name = KindName(playerId, snapshot.Kind);
                 fallback.transform.SetParent(_root, false);
                 return new RemoteEntityView(fallback, snapshot.Kind);
             }
 
-            var avatar = Object.Instantiate(_playerAvatarPrefab, _root, false);
-            avatar.name = $"RemotePlayer_{playerId}";
-            // AddComponent 同步跑 Awake：3C 装备在同一个 Start/Update 之前就被停掉（见该类注释）
+            // 包装根：位置/朝向写它，两个表现子物体挂它下面（分档在任务 6 接线）
+            var viewRoot = new GameObject(KindName(playerId, snapshot.Kind));
+            viewRoot.transform.SetParent(_root, false);
+            var avatar = Object.Instantiate(fullPrefab, viewRoot.transform, false);
+            avatar.name = "Full";
+            // AddComponent 同步跑 Awake：3C 装备在同一个 Start/Update 之前就被停掉（见类注释）
             var animator = avatar.AddComponent<RemoteEntityAnimator>();
-            return new RemoteEntityView(avatar, snapshot.Kind, animator: animator);
+            var view = new RemoteEntityView(viewRoot, snapshot.Kind, animator: animator);
+            view.FullRoot = avatar;
+            return view;
+        }
+
+        /// <summary>视图名：验收/诊断靠它认实体身份（保留既有命名）</summary>
+        private static string KindName(long playerId, byte kind)
+            => kind == (byte)EntityKind.PlayerBot ? $"Bot_{playerId}" : $"RemotePlayer_{playerId}";
+
+        /// <summary>去掉 `CreatePrimitive` 自带的碰撞体（D19：远端实体是视图不是物理体）</summary>
+        private static void StripCollider(GameObject go)
+        {
+            var collider = go.GetComponent<Collider>();
+            if (collider == null) return;
+            if (Application.isPlaying) Object.Destroy(collider);
+            else Object.DestroyImmediate(collider);
         }
     }
 
@@ -280,6 +296,10 @@ namespace Hotfix.GameSystems.SyncLayer
         public bool Dead { get; set; }
         /// <summary>远程动画驱动（只有真人角色有；占位为 null）</summary>
         public RemoteEntityAnimator? Animator { get; }
+        /// <summary>近档表现（模型实例）。null = 尚未建/无 Full 资产</summary>
+        public GameObject? FullRoot { get; internal set; }
+        /// <summary>远档表现（代理）。null = 尚未建</summary>
+        public GameObject? ProxyRoot { get; internal set; }
         /// <summary>怪物动画驱动（Kind=Npc 且预制体带组件时非空；球体占位为 null）</summary>
         public NpcEntityAnimator? NpcAnimator { get; }
 

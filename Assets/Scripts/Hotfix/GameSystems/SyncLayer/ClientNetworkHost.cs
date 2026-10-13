@@ -20,8 +20,9 @@ namespace Hotfix.GameSystems.SyncLayer
     /// 创建 adapter/manager/远程实体渲染根并每帧驱动；联网模式（NetworkModeService）下
     /// Start 自动 Connect()，登录进世界后自动装配本地角色（Sys3CEntry）：
     /// MovementReporter 上报（节流 + 预测帧）、NetMovementPolicy 接管移动与平滑纠偏。
-    /// 远程实体的渲染由 `RemoteEntityRegistry` 按 `EntityKind` 分三支（N5b）：真人 = 角色预制体
-    /// （`_playerAvatarPrefab`，未接线则退化占位）、bot = 胶囊占位、怪物 = `_npcPrefabs` 目录里
+    /// 远程实体的渲染由 `RemoteEntityRegistry` 按 `EntityKind` 分两支（N5b → 2026-10-13 合并）：
+    /// 玩家类（真人 + bot）= 外观目录里的角色预制体（当前目录先由 `_playerAvatarPrefab` 包成
+    /// 一条默认条目，未接线则退化占位）、怪物 = `_npcPrefabs` 目录里
     /// 按 templateId 取到的真模型（目录未命中/未接线则退化球体占位）。
     /// 本地角色被销毁重建（DemoDay 直跑时选人确认触发 PlayerSpawner 重建）经 PlayerSpawnedEvent 重装配。
     /// 接线步骤与边界见 docs/superpowers/guides/p2-client-network-host.md 与 network-playtest.md。
@@ -51,8 +52,8 @@ namespace Hotfix.GameSystems.SyncLayer
         [SerializeField] private Sys3CEntry _localEntry;
 
         [Header("远程真人角色（N5b）")]
-        [Tooltip("远程真人的角色预制体（与 PlayerSpawner 用的是同一个）。留空则远程真人退化为胶囊占位" +
-                 "——测试宿主就是这种情况；bot 无论如何都是占位（D-P5-7），怪物走 _npcPrefabs 目录")]
+        [Tooltip("远程玩家类（真人 + bot）的角色预制体（与 PlayerSpawner 用的是同一个）。留空则退化为" +
+                 "胶囊占位——测试宿主就是这种情况；怪物走 _npcPrefabs 目录")]
         [SerializeField] private GameObject _playerAvatarPrefab;
 
         /// <summary>
@@ -123,7 +124,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (entry != null && entry.Prefab != null)
                     catalog[entry.TemplateId] = entry.Prefab;
 
-            _remoteEntities = new RemoteEntityRegistry(root.transform, _playerAvatarPrefab,
+            _remoteEntities = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = _playerAvatarPrefab } },
                 catalog.Count > 0 ? catalog : null);
         }
 

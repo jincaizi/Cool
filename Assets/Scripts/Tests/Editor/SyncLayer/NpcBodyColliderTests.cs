@@ -184,7 +184,8 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         {
             // 回归：碰撞体只加给怪物分支。真人视图（含 bot 那条）一条碰撞体都不许多出来
             var avatarPrefab = new GameObject("FakeAvatarPrefab");
-            var registry = new RemoteEntityRegistry(_root.transform, avatarPrefab);
+            var registry = new RemoteEntityRegistry(_root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = avatarPrefab } });
             try
             {
                 registry.ApplySnapshot(new EntitySnapshot

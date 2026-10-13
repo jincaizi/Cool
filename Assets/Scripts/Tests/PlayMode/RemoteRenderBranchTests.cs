@@ -9,16 +9,17 @@ using UnityEngine.TestTools;
 namespace KcpNet.PlayModeTests
 {
     /// <summary>
-    /// N5b：远程实体按 `EntityKind` 分三支渲染（D-P5-7）。
+    /// 远端实体按 `EntityKind` 分支机构（N5b → 2026-10-13 统一）。
     ///
-    /// 这条分叉只有一个理由：**100 个 bot 是 AOI（P3）演示的前提**，而 100 个蒙皮网格 +
-    /// Animator 会在手机浏览器上直接压垮帧率。所以 bot 与怪物必须是 `CreatePrimitive` 占位，
-    /// 只有真人才上角色预制体。
+    /// **反转记录**：这里原先钉的是"bot 必须是胶囊占位"（D-P5-7），理由是"100 个蒙皮网格会
+    /// 压垮手机浏览器"。该前提已被实测推翻——AOI（80m 视野）之后客户端的同屏实体数由
+    /// **局部密度**决定，`--bots 100` 撒在 ±400m 时的实测峰值只有 5~6 个
+    /// （production/verify/t12、t13 的 AoiWorldTests 输出），客户端从来没有同时渲染过 100 个。
+    /// 所以 bot 与真人合并到同一条真模型路径（design D1/D6），数量由分档骨架的**每帧预算**兜底。
     ///
     /// 用例自带一个"角色预制体"（运行时 GameObject + Animator）而不是去磁盘上取真预制体：
     /// PlayMode 测试程序集在非 Editor 平台也要能跑，不能引用 `UnityEditor.AssetDatabase`。
-    /// 这里要钉的是**分支契约**——`Kind` 决定拿到的是不是"带 Animator 的实例"，
-    /// 而不是某个具体预制体的身份。
+    /// 这里要钉的是**路径契约**——两种 Kind 拿到的是同一种东西，而不是某个具体预制体的身份。
     /// </summary>
     public class RemoteRenderBranchTests
     {
@@ -39,7 +40,8 @@ namespace KcpNet.PlayModeTests
             _avatarPrefab.AddComponent<BoxCollider>();
             _avatarPrefab.AddComponent<DecoyBehaviour>();
 
-            _registry = new RemoteEntityRegistry(_root.transform, _avatarPrefab);
+            _registry = new RemoteEntityRegistry(_root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = _avatarPrefab } });
         }
 
         [TearDown]
@@ -63,7 +65,7 @@ namespace KcpNet.PlayModeTests
         }
 
         [UnityTest]
-        public IEnumerator Real_Player_Gets_A_Character_Bot_Gets_A_Placeholder()
+        public IEnumerator Real_Player_And_Bot_Take_The_Same_Model_Path()
         {
             // 两个快照走同一条 ApplySnapshot：只有 Kind 不同
             var real = Snap(playerId: 1, kind: (byte)EntityKind.Player);
@@ -73,10 +75,17 @@ namespace KcpNet.PlayModeTests
             _registry.ApplySnapshot(bot, 0);
             yield return null;
 
-            Assert.IsNotNull(_registry.GetView(1)!.GameObject.GetComponentInChildren<Animator>(),
+            var realView = _registry.GetView(1)!;
+            var botView = _registry.GetView(2)!;
+
+            Assert.IsNotNull(realView.GameObject.GetComponentInChildren<Animator>(true),
                 "真人必须拿到带 Animator 的角色");
-            Assert.IsNull(_registry.GetView(2)!.GameObject.GetComponentInChildren<Animator>(),
-                "bot 必须是占位——100 个蒙皮网格会压垮手机（D-P5-7）");
+            Assert.IsNotNull(botView.GameObject.GetComponentInChildren<Animator>(true),
+                "bot 走的是同一条真模型路径（D1/D6——旧断言\"D-P5-7: bot 必须是占位\"已被实测推翻）");
+            Assert.IsNotNull(botView.Animator, "bot 也必须挂上行走动画驱动");
+            Assert.IsNotNull(realView.Animator, "真人挂驱动");
+            Assert.IsNull(botView.GameObject.GetComponentInChildren<NpcBodyCollider>(true),
+                "bot 不挡路（D5：远端实体是视图不是物理体）");
         }
 
         /// <summary>
