@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.UI;
@@ -72,7 +74,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
 
             if (_inputManager != null) return;   // 已绑定且仍存活（Unity 的 == 对已销毁对象为 true）
 
-            var entry = FindObjectOfType<Sys3CEntry>();
+            var entry = PickLocalEntry(FindObjectsOfType<Sys3CEntry>());
             if (entry == null) return;
 
             var inputManager = entry.GetComponent<InputManager>();
@@ -82,6 +84,35 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 () => _joystick != null ? _joystick.Value : Vector2.zero,
                 () => _lookArea != null ? _lookArea.Delta : Vector2.zero));
             _inputManager = inputManager;
+        }
+
+        /// <summary>
+        /// 从候选里挑出**本地**的 `Sys3CEntry`；全是远端视图（或没有候选）时返回 null。
+        ///
+        /// 为什么不能直接用 `FindObjectOfType<Sys3CEntry>()` 的单个返回值：它**会返回启用
+        /// GameObject 上的禁用组件**（2026-10-13 实测，与 `ClientNetworkHost.FindLocalEntry`
+        /// 同一类洞），而远端头像上正是"预制体自带的 `Sys3CEntry` 被
+        /// `RemoteEntityAnimator.Awake` 置 enabled=false"（不是移除）。若在"远端视图已建、
+        /// 本地角色尚未装配"的重发现窗口（玩家被 PlayerSpawner 销毁重建）里选中它，
+        /// 摇杆适配器会装到**别人身上**——手机上摇杆与三个动作按钮完全没反应，且无任何日志。
+        ///
+        /// 判据基于**组件**而非名字（`RemotePlayers` 根可改名）：候选自身或父链上存在
+        /// `RemoteEntityAnimator`（`RemoteEntityRegistry` 给每个玩家类远程视图挂的驱动）
+        /// 即判为远端。查父链要 `includeInactive`：Proxy 档会把视图整棵 `SetActive(false)`。
+        /// 独立成 internal static 纯函数供 EditMode 测试直接调
+        /// （与 `NpcBodyCollider.BuildCollider` / `NpcEntityAnimator.ResolveAnimator` 同惯例）。
+        /// </summary>
+        internal static Sys3CEntry PickLocalEntry(IReadOnlyList<Sys3CEntry> candidates)
+        {
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                var candidate = candidates[i];
+                if (candidate == null) continue;
+                // 远端候选：排除（含驱动与 entry 挂在同一个 GameObject 上的真机布局）
+                if (candidate.GetComponentInParent<RemoteEntityAnimator>(true) != null) continue;
+                return candidate;
+            }
+            return null;
         }
 
         /// <summary>
