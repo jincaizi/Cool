@@ -198,30 +198,24 @@ namespace GameSys.EditorTests
             for (int i = 0; i < UIConst.Layers.Length; i++)
             {
                 var (layer, sortOrder) = UIConst.Layers[i];
-                _layers[i] = BuildLayerCanvas(transform, layer, sortOrder);
+
+                var go = new GameObject("Canvas_Layer_" + layer);
+                go.transform.SetParent(transform);
+
+                var canvas = go.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.sortingOrder = sortOrder;
+
+                go.AddComponent<UnityEngine.UI.CanvasScaler>();
+                go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+                go.AddComponent<ScreenAdapter>();
+
+                _layers[i] = canvas;
             }
         }
-
-        /// <summary>
-        /// 建一层 Canvas。抽成 static 是为了能在 EditMode 里直接断言层表契约 ——
-        /// 走 UIManager.Awake 会连带触发 Resources 加载与面板注册，测不动。
-        /// </summary>
-        internal static Canvas BuildLayerCanvas(Transform parent, LayerType layer, int sortOrder)
-        {
-            var go = new GameObject("Canvas_Layer_" + layer);
-            go.transform.SetParent(parent);
-
-            var canvas = go.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = sortOrder;
-
-            go.AddComponent<UnityEngine.UI.CanvasScaler>();
-            go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-            go.AddComponent<ScreenAdapter>();
-
-            return canvas;
-        }
 ```
+
+> **本任务刻意不抽取工厂方法** —— 抽取与它的测试属于任务 2，那里先写测试（红：方法不存在）再抽取（绿）。任务 1 只负责"层的定义收敛成一处"。
 
 > **零行为变化的核对点**：原代码的游戏对象名是 `$"Canvas_Layer_{(LayerType)i}"`，即 "Canvas_Layer_Base"。新代码是 `"Canvas_Layer_" + layer`，枚举字符串拼接结果**逐字相同**。
 
@@ -251,10 +245,10 @@ Sort orders are deliberately unchanged; renumbering is phase 3."
 ## 任务 2：抽出 Canvas 工厂并测住层表契约
 
 **文件：**
-- 修改：`Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs`（工厂已在任务 1 建好，本任务只补测试）
+- 修改：`Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs`（把 Canvas 创建从 `CreateCanvasLayers` 的循环里抽出来）
 - 测试：`Assets/Scripts/Tests/Editor/UIManagerLayerCanvasTests.cs`（创建）
 
-> **说明**：`BuildLayerCanvas` 在任务 1 已随调用点抽出。本任务把它**测住** —— 一个没被断言过的抽取等于没抽。若你按顺序执行任务 1，本任务就是"给已存在的接缝补测试"；若单独执行本任务，请先确认该方法存在。
+> **为什么这里才抽**：任务 1 把 Canvas 创建留在循环里内联，就是为了让本任务能走完整的红→绿 —— 先写测试（编译失败：方法不存在），再抽取让它通过。抽取与断言它的测试必须同批，否则"抽了但没测"和"测了但没东西可测"各占一个任务。
 
 - [ ] **步骤 1：编写失败的测试**
 
@@ -332,11 +326,42 @@ namespace GameSys.EditorTests
 - [ ] **步骤 2：运行测试验证失败**
 
 运行：`tests-run(testMode: "EditMode", testClass: "UIManagerLayerCanvasTests")`
-预期：若 `BuildLayerCanvas` 尚不存在 → 编译错误；若已存在（任务 1 已执行）→ 直接 PASS 也可接受，此时**降级为表征测试**：它的职责是钉住当前契约，删除前后都必须通过。请如实记录你看到的是哪一种。
+预期：**编译失败** —— `UIManager` 不含 `BuildLayerCanvas` 的定义（该方法由本任务步骤 3 引入）。这是本步骤期望的红。
 
-- [ ] **步骤 3：确认实现满足断言**
+- [ ] **步骤 3：抽取工厂方法让测试通过**
 
-若步骤 2 出现失败（而非编译错误），检查 `BuildLayerCanvas` 是否漏加了 `CanvasScaler` / `GraphicRaycaster` / `ScreenAdapter` 三者之一，或排序号没有用传入的 `sortOrder`。
+修改 `Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs`，把 `CreateCanvasLayers()` 换成下面两个成员（行为逐字不变，只是把创建动作搬进一个可被直接调用的方法）：
+
+```csharp
+        private void CreateCanvasLayers()
+        {
+            for (int i = 0; i < UIConst.Layers.Length; i++)
+            {
+                var (layer, sortOrder) = UIConst.Layers[i];
+                _layers[i] = BuildLayerCanvas(transform, layer, sortOrder);
+            }
+        }
+
+        /// <summary>
+        /// 建一层 Canvas。抽成 static 是为了能在 EditMode 里直接断言层表契约 ——
+        /// 走 UIManager.Awake 会连带触发 Resources 加载与面板注册，测不动。
+        /// </summary>
+        internal static Canvas BuildLayerCanvas(Transform parent, LayerType layer, int sortOrder)
+        {
+            var go = new GameObject("Canvas_Layer_" + layer);
+            go.transform.SetParent(parent);
+
+            var canvas = go.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = sortOrder;
+
+            go.AddComponent<UnityEngine.UI.CanvasScaler>();
+            go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            go.AddComponent<ScreenAdapter>();
+
+            return canvas;
+        }
+```
 
 - [ ] **步骤 4：运行测试验证通过**
 
@@ -632,6 +657,6 @@ Open/Close and ShowAlways/HideAlways keep working unchanged."
 
 **2. 占位符扫描**：无"待定/TODO/后续实现"；每个测试与实现步骤都带可直接粘贴的代码块；运行命令与预期结果逐条写明。
 
-**3. 类型一致性**：`UIConst.Layers`（`(LayerType layer, int sortOrder)[]`）在任务 1 定义，任务 2、任务 3 的测试与实现均按此签名使用；`BuildLayerCanvas(Transform, LayerType, int)` 在任务 1 定义、任务 2 断言，签名一致；`UIPanel.PlayShowAnimation()` / `PlayHideAnimation()` 返回 `DG.Tweening.Sequence`，在任务 3 的测试与实现中一致。
+**3. 类型一致性**：`UIConst.Layers`（`(LayerType layer, int sortOrder)[]`）在任务 1 定义，任务 2、任务 3 的测试与实现均按此签名使用；`BuildLayerCanvas(Transform, LayerType, int)` 在任务 2 定义并由同任务的测试断言；`UIPanel.PlayShowAnimation()` / `PlayHideAnimation()` 返回 `DG.Tweening.Sequence`，在任务 3 的测试与实现中一致。
 
 **4. 一处已知的规格偏差（有意为之）**：规格 §2.1 把层表放在新文件 `UI/Const/UILayers.cs` 并改名为 `UILayerId`；本阶段把它放在既有 `UIConst.cs` 里并保留 `LayerType` 名字 —— 因为改名与重排属于阶段 3，阶段 1 只收敛魔数、不动名字与数值。阶段 3 再搬文件与改名。
