@@ -45,6 +45,11 @@ namespace Hotfix.GameSystems.SyncLayer
 
         public int Count => _views.Count;
 
+        /// <summary>当前 Full 档视图数（诊断读数用）</summary>
+        public int FullCount { get; private set; }
+        /// <summary>当前 Proxy 档视图数（诊断读数用）</summary>
+        public int ProxyCount { get; private set; }
+
         /// <summary>当前视图实体 ID 集合（T7 AOI 验收统计用）</summary>
         public IEnumerable<long> PlayerIds => _views.Keys;
 
@@ -158,7 +163,18 @@ namespace Hotfix.GameSystems.SyncLayer
             // 分档（design §4）：插值写完位置之后、驱动写入之前——本帧的档位就是这个位置算出来的。
             // 未注入观察者、或本帧拿不到位置（本地角色还没装配）= 不分档（保持全 Full）。
             if (ObserverPositionProvider?.Invoke() is Vector3 observer)
+            {
                 ApplyTiers(observer);
+            }
+            else
+            {
+                // 未分档 = 全 Full：读数与视觉一致（Npc 与分档同样的排除口径）
+                FullCount = 0;
+                ProxyCount = 0;
+                foreach (var kv in _views)
+                    if (kv.Value.Kind != (byte)EntityKind.Npc)
+                        FullCount++;
+            }
 
             // 行走驱动写入（此时位置与速度都已就位）。同样只在 Full 档写：降档后是白费
             //（Animator 已随 FullRoot 禁用）。
@@ -193,6 +209,15 @@ namespace Hotfix.GameSystems.SyncLayer
             for (int i = 0; i < _tierCandidates.Count; i++)
                 if (_views.TryGetValue(_tierCandidates[i].PlayerId, out var view))
                     SetTier(view, _tierResults[i]);
+
+            FullCount = 0;
+            ProxyCount = 0;
+            foreach (var kv in _views)
+            {
+                if (kv.Value.Kind == (byte)EntityKind.Npc) continue;   // 与分档同样的排除口径
+                if (kv.Value.Tier == RemoteTier.Full) FullCount++;
+                else ProxyCount++;   // Tier 为 null（纯降级占位视图）也算代理口径——读数与所见一致
+            }
         }
 
         /// <summary>

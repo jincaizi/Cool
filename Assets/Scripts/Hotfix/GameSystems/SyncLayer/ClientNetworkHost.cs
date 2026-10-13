@@ -21,8 +21,8 @@ namespace Hotfix.GameSystems.SyncLayer
     /// Start 自动 Connect()，登录进世界后自动装配本地角色（Sys3CEntry）：
     /// MovementReporter 上报（节流 + 预测帧）、NetMovementPolicy 接管移动与平滑纠偏。
     /// 远程实体的渲染由 `RemoteEntityRegistry` 按 `EntityKind` 分两支（N5b → 2026-10-13 合并）：
-    /// 玩家类（真人 + bot）= 外观目录里的角色预制体（当前目录先由 `_playerAvatarPrefab` 包成
-    /// 一条默认条目，未接线则退化占位）、怪物 = `_npcPrefabs` 目录里
+    /// 玩家类（真人 + bot）= `_appearances` 外观目录里的角色预制体（目录留空则退回
+    /// `_playerAvatarPrefab` 单条默认外观，再留空则退化占位）、怪物 = `_npcPrefabs` 目录里
     /// 按 templateId 取到的真模型（目录未命中/未接线则退化球体占位）。
     /// 本地角色被销毁重建（DemoDay 直跑时选人确认触发 PlayerSpawner 重建）经 PlayerSpawnedEvent 重装配。
     /// 接线步骤与边界见 docs/superpowers/guides/p2-client-network-host.md 与 network-playtest.md。
@@ -55,6 +55,9 @@ namespace Hotfix.GameSystems.SyncLayer
         [Tooltip("远程玩家类（真人 + bot）的角色预制体（与 PlayerSpawner 用的是同一个）。留空则退化为" +
                  "胶囊占位——测试宿主就是这种情况；怪物走 _npcPrefabs 目录")]
         [SerializeField] private GameObject _playerAvatarPrefab;
+
+        [Header("远程玩家外观目录（Id 0 = 默认外观；bot 按 id 哈希选条目）")]
+        [SerializeField] private AppearanceEntry[] _appearances = System.Array.Empty<AppearanceEntry>();
 
         /// <summary>
         /// 怪物模型目录的一条（Inspector 可编辑）。**不能换成 `Dictionary`**：
@@ -125,8 +128,24 @@ namespace Hotfix.GameSystems.SyncLayer
                     catalog[entry.TemplateId] = entry.Prefab;
 
             _remoteEntities = new RemoteEntityRegistry(root.transform,
-                new[] { new AppearanceEntry { Id = 0, Full = _playerAvatarPrefab } },
+                _appearances.Length > 0
+                    ? _appearances
+                    : new[] { new AppearanceEntry { Id = 0, Full = _playerAvatarPrefab } },
                 catalog.Count > 0 ? catalog : null);
+
+            // 观察者位置 = 本地玩家（与 AOI 同心）。取不到（角色还没装配）⇒ 本帧返回 null，
+            // registry 那一帧不分档——**不能返回 Vector3.zero**：那会让分档以原点为中心，距离全错。
+            _remoteEntities.ObserverPositionProvider = () =>
+            {
+                if (_localEntry == null && !_entryLookedUp)
+                    _localEntry = FindObjectOfType<Sys3CEntry>();
+                return _localEntry != null ? _localEntry.transform.position : (Vector3?)null;
+            };
+
+            // 分档旋钮（URL 覆盖——手机上扫参数不用重新打包）
+            string url = Application.absoluteURL;
+            if (TierQuery.TryFull(url, out int budget)) _remoteEntities.TierPolicy.MaxFull = budget;
+            if (TierQuery.TryFullDistance(url, out float distance)) _remoteEntities.TierPolicy.FullDistance = distance;
         }
 
         private void Start()
@@ -444,8 +463,12 @@ namespace Hotfix.GameSystems.SyncLayer
             var state = _manager != null ? _manager.CurrentState.ToString() : "未连接";
             long playerId = _manager != null ? _manager.LocalPlayerId : 0L;
             int remoteCount = _remoteEntities != null ? _remoteEntities.Count : 0;
-            GUI.Box(new Rect(10f, Screen.height - 34f, 470f, 26f),
-                $"[Net] 模式={mode}  状态={state}  玩家id={playerId}  远程实体={remoteCount}");
+            string tiers = _remoteEntities != null
+                ? $"  Full={_remoteEntities.FullCount} Proxy={_remoteEntities.ProxyCount} 预算={_remoteEntities.TierPolicy.MaxFull}"
+                : string.Empty;
+            float fps = Time.unscaledDeltaTime > 0f ? 1f / Time.unscaledDeltaTime : 0f;
+            GUI.Box(new Rect(10f, Screen.height - 34f, 620f, 26f),
+                $"[Net] 模式={mode}  状态={state}  玩家id={playerId}  远程实体={remoteCount}{tiers}  FPS={fps:F0}");
         }
 
         private void HandleEnterWorld()
