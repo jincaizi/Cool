@@ -12,8 +12,6 @@ namespace Hotfix.GameSystems.UI
 
         private readonly Canvas[] _layers = new Canvas[UIConst.Layers.Length];
         private readonly Dictionary<string, UIPanel> _registry = new Dictionary<string, UIPanel>();
-        private readonly Stack<UIPanel> _stack = new Stack<UIPanel>();
-        private readonly HashSet<UIPanel> _activeOverlays = new HashSet<UIPanel>();
 
         private async void Awake()
         {
@@ -127,53 +125,6 @@ namespace Hotfix.GameSystems.UI
             panel.ApplyVisibilityOff();
         }
 
-        // ===== Stack (Main / Popup) =====
-
-        public async UniTask PushAsync(string panelId)
-        {
-            if (!_registry.TryGetValue(panelId, out var panel))
-            {
-                Debug.LogError($"UIManager: Panel '{panelId}' not registered");
-                return;
-            }
-
-            // Pause current top panel
-            if (_stack.Count > 0)
-            {
-                var current = _stack.Peek();
-                current.OnHide();
-            }
-
-            // Show new panel
-            await ShowPanelAsync(panel);
-            _stack.Push(panel);
-        }
-
-        public async UniTask PopAsync()
-        {
-            if (_stack.Count == 0) return;
-
-            var panel = _stack.Peek();
-            await HidePanelAsync(panel);
-            _stack.Pop();
-
-            // Resume underlying panel
-            if (_stack.Count > 0)
-            {
-                var newTop = _stack.Peek();
-                newTop.ApplyVisibilityOn();
-                newTop.OnShow();
-            }
-        }
-
-        public async UniTask PopTo(string panelId)
-        {
-            while (_stack.Count > 0 && _stack.Peek().PanelId != panelId)
-            {
-                await PopAsync();
-            }
-        }
-
         // ===== Overlay (Top / Guide) =====
 
         public async UniTask OpenAsync(string panelId)
@@ -185,7 +136,6 @@ namespace Hotfix.GameSystems.UI
             }
 
             await ShowPanelAsync(panel);
-            _activeOverlays.Add(panel);
         }
 
         public async UniTask CloseAsync(string panelId)
@@ -194,7 +144,6 @@ namespace Hotfix.GameSystems.UI
                 return;
 
             await HidePanelAsync(panel);
-            _activeOverlays.Remove(panel);
         }
 
         // ===== Always (Base) =====
