@@ -68,8 +68,9 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// `Attack` / `Hit` / `Defend` 三层权重归零。控制器资产里这三层的 `m_DefaultWeight`
-        /// 是 **1**，本地玩家靠 `FSMManager` 构造时把它们归零；远程没有 FSMManager，不归零的话
+        /// `Attack` / `Hit` / `Defend` 三层权重归零。控制器资产（`Character3C.controller`）里
+        /// 四层 `m_DefaultWeight` 依次是 Base=1 / Attack=1 / Hit=1 / **Defend=0**——本地玩家靠
+        /// `FSMManager` 构造时把 Attack/Hit/Defend 归零；远程没有 FSMManager，不归零的话
         /// Attack 层会一直以权重 1 压着 Base 层（远程角色看起来是"攻击待机"而不是站着）。
         ///
         /// **升档时也必须调**：角色预制体的 `m_KeepAnimatorStateOnDisable` 是 0 —— Animator 在

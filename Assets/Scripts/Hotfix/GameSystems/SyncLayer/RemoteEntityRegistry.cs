@@ -501,12 +501,11 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         public RemoteEntityView(GameObject go, byte kind = 0, int templateId = 0,
-            RemoteEntityAnimator? animator = null, NpcEntityAnimator? npcAnimator = null)
+            NpcEntityAnimator? npcAnimator = null)
         {
             GameObject = go;
             Kind = kind;
             TemplateId = templateId;
-            Animator = animator;
             NpcAnimator = npcAnimator;
         }
     }

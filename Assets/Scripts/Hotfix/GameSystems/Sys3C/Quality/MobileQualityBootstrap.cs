@@ -51,9 +51,13 @@ namespace Hotfix.GameSystems.Sys3C.Quality
         }
 
         /// <summary>
-        /// 平台判定。`Application.isMobilePlatform` 在 WebGL 下**可能不准**（项目已有实锤：
-        /// iPad 默认桌面视图会返回 false，见 TouchInputAvailability 的注释），叠加
-        /// `SystemInfo.deviceType` 兜底。出包产物没有 Inspector，唯一的现场开关是 `?quality=`。
+        /// 平台判定。`Application.isMobilePlatform` 在 WebGL 下**可能不准**（Unity 官方文档的
+        /// 隐私/匿名化条款），叠加 `SystemInfo.deviceType` 兜的是"`isMobilePlatform` 漏报、
+        /// 而 `deviceType` 仍为 Handheld"的设备。
+        /// **兜不住 iPad 默认桌面视图**：项目自己的实锤（TouchInputAvailability 的注释）是
+        /// 那个场景下 `isMobilePlatform == false` **且** `deviceType == Desktop` —— 两个判据
+        /// 一起失效，只能靠 `?quality=mobile`（别名，无条件生效）。
+        /// 出包产物没有 Inspector，现场开关就是 `?quality=`。
         /// </summary>
         public static bool IsMobileDevice()
             => Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;

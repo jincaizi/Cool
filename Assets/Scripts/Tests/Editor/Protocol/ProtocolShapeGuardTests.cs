@@ -63,7 +63,7 @@ namespace Cool.Protocol.Tests
         [Test]
         public void EntityKind_Carries_PlayerBot()
         {
-            // bot 与真人在伤害路径上同类，只在渲染上分叉（D-N8 / D-P5-7）
+            // bot 与真人同类：伤害路径与渲染路径都不分叉（D-N8；D-P5-7 的"渲染成占位"已被推翻）
             Assert.AreEqual(2, (byte)Cool.Protocol.EntityKind.PlayerBot,
                 "PlayerBot 必须是 2——0/1 是已发布的 wire 契约，不能改");
         }

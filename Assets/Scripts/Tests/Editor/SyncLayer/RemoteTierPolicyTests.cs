@@ -185,7 +185,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         /// 注入的提供者**本帧返回 null**（本地角色还没装配 —— 正常启动态）= 本帧不分档：
         /// 视图落到全 Full，等拿到位置后再按距离定档。（任务 7 审查修正：此前"不分档"被实现成
         /// "视图保持原样"——而注入态下 `CreateView` 先建的是 Proxy ⇒ 观察者模式/装配窗口里
-        /// 远程玩家会永久停在胶囊、无动画；第一段断言随之从 Proxy 改成 Full。）
+        /// 远程玩家会永久停在胶囊、无动画。被改的是**第二段断言**（"本帧拿不到位置 ⇒ Full"）；
+        /// 第一段断言（"注入但暂无位置" ⇒ 创建时先落 Proxy，惰性）不变。下面 500m 那条
+        /// `Provider_Returning_Null_Keeps_Every_View_Full` 的断言同属这次修改。）
         /// 若把 null 误当 `Vector3.zero` 处理，远处的实体会按原点距离被降档。
         /// </summary>
         [Test]

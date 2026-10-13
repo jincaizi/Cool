@@ -30,7 +30,7 @@ P2 全部验收（MovementSyncTests 等）都是测试代码自己 `new ClientNe
 5. 完成后自动发生：
    - 登录 → `OnEnterWorld` 触发
    - 本地角色就绪后自动装配：`MovementPolicy` 换成 `NetMovementPolicy`（本地物理照常 + 服务器纠偏平滑拉回）、每 `ServerTickRateMs` 上报位置/旋转/真实速度、预测帧对账
-   - 远程玩家以胶囊占位渲染（`RemoteEntityRegistry`），2-tick 延迟插值平滑位移
+   - 远程玩家（真人 + bot）经外观目录（`_appearances`，留空退回 `_playerAvatarPrefab` 单条默认外观）以**真模型**渲染，2-tick 延迟插值平滑位移；距离/预算分档——60m 外或超每帧预算降为代理（`?full=` / `?fulldist=` 可覆盖预算与阈值）
 
 ## 行为细节与边界
 
@@ -42,7 +42,7 @@ P2 全部验收（MovementSyncTests 等）都是测试代码自己 `new ClientNe
 | 上报速度源 | 读 `CharacterData.Velocity` 水平幅度（真实 m/s，来自 `_controller.velocity`）。**勿改用 `MovementSpeed`（0-1 动画参数）**——超速钳制链路依赖真实值 |
 | 位置起点 | 本地角色留在场景初始位即可：服务器接受距上次权威位 ≤50m 的首报，不会误伤瞬移判定 |
 | 断线/重连 | 断开触发 `OnDisconnected`；当前协议 = 重新 `Connect()`（全新 Login 全流程，P1 D4）。`Disconnect()` 可主动断开并复位 |
-| 远程渲染占位 | 胶囊体 + 名字，无外观——真实角色模型渲染留后续；视野 = 服务器 AOI 80m（进出驱动生成/销毁：进视野快照到达即生成；出视野停流 1.2s 后客户端缺席超时销毁） |
+| 远程渲染 | 玩家类（真人 + bot）走外观目录的真模型 + 行走动画驱动；**分档**：60m（退出 ×1.15=69m，距离迟滞）或超每帧 Full 预算（默认 `RemoteTierPolicy.MaxFull`）降为代理（未配 `Proxy` 预制体的条目 = 运行时胶囊）；怪物走 `_npcPrefabs` 模型目录，未命中才退球体占位。视野 = 服务器 AOI 80m（进出驱动生成/销毁：进视野快照到达即生成；出视野停流 1.2s 后客户端缺席超时销毁） |
 | 纠偏手感 | 服务器判瞬移/超速时 ack 带权威位，客户端 8/s blend 收敛（不瞬移）；无纠偏时本地手感与单机一致 |
 
 ## 事件（可选接线）

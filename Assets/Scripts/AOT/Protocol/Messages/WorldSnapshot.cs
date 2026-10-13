@@ -30,7 +30,8 @@ namespace Cool.Protocol
     /// <summary>
     /// 实体种类（EntitySnapshot.Kind）——P5 怪物服务端化。
     /// 0=Player（protobuf 默认，旧客户端兼容），1=Npc 怪物，
-    /// 2=PlayerBot 压测 bot（走玩家的伤害路径，客户端渲染成占位——D-P5-7）。
+    /// 2=PlayerBot 压测 bot（走玩家的伤害路径；客户端渲染**与真人同一条真模型路径**——
+    /// D-P5-7 的"渲染成占位"已被实测推翻：AOI 下的同屏数由局部密度决定，见 RemoteRenderBranchTests）。
     /// **0/1 是已发布的 wire 契约，只加不删。**
     /// </summary>
     public enum EntityKind : byte

@@ -14,7 +14,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>外观 id（0 = 默认外观：真人玩家在协议带上外观 id 之前走它）</summary>
         public int Id;
 
-        /// <summary>近档（Full）：完整模型预制体。留空 ⇒ 该条目退化为纯代理</summary>
+        /// <summary>近档（Full）：完整模型预制体。留空 ⇒ 该条目退化为**占位胶囊**
+        /// （registry 在 `fullPrefab == null` 时早退到胶囊占位并直接返回——`Proxy` 预制体
+        /// 在这条早退路径上不生效；"纯代理条目该不该用 `Proxy`"是未决的语义问题，见 backlog）</summary>
         public GameObject? Full;
 
         /// <summary>远档（Proxy）代理预制体。**留空 = 运行时生成胶囊**——将来美术产出

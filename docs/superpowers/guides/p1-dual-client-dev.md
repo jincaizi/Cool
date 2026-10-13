@@ -28,8 +28,8 @@
 ## 验收清单（双开手测）
 
 1. 两个 Editor 各自登录进同 Zone（服务器日志出现两行 `Player N logged in`）
-2. A 场景中出现 B 的胶囊体占位（RemoteEntityRegistry 生成；P1 位置恒为出生点，
-   移动同步属 P2）
+2. A 场景中出现 B 的远端实体视图（RemoteEntityRegistry 生成；接线了外观目录/默认外观
+   时是真模型，未接线则退化为胶囊占位。P1 位置恒为出生点，移动同步属 P2）
 3. 关掉 B → 约 15s 后 A 端 B 实体消失（服务器 PeerSilence 检测窗口，T8 落地）；
    B 重开重连 → A 端 B 重新出现
 

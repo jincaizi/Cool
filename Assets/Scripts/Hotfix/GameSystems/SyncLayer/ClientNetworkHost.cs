@@ -51,9 +51,11 @@ namespace Hotfix.GameSystems.SyncLayer
         [Header("本地角色（可选：留空则运行时查找场景内首个 Sys3CEntry）")]
         [SerializeField] private Sys3CEntry _localEntry;
 
-        [Header("远程真人角色（N5b）")]
-        [Tooltip("远程玩家类（真人 + bot）的角色预制体（与 PlayerSpawner 用的是同一个）。留空则退化为" +
-                 "胶囊占位——测试宿主就是这种情况；怪物走 _npcPrefabs 目录")]
+        [Header("远程玩家默认外观（**仅当 _appearances 目录为空时生效**，与目录二选一）")]
+        [Tooltip("远程玩家类（真人 + bot）的默认角色预制体（与 PlayerSpawner 用的是同一个）。" +
+                 "只在 _appearances 目录为空时生效——目录非空时本字段被静默忽略（目录是主路径，" +
+                 "见 Awake 的接线）。两者都留空则退化为胶囊占位——测试宿主就是这种情况；" +
+                 "怪物走 _npcPrefabs 目录")]
         [SerializeField] private GameObject _playerAvatarPrefab;
 
         [Header("远程玩家外观目录（Id 0 = 默认外观；bot 按 id 哈希选条目）")]

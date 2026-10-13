@@ -218,6 +218,23 @@ Animator三层Layer架构：
 
 ---
 
+## Remote Entity Presentation (SyncLayer)
+
+`Assets/Scripts/Hotfix/GameSystems/SyncLayer/` 负责**远端实体的渲染**（本地角色走 3C 那条路，两者别混）：
+
+| 实体 | 走哪条 | 退化路径 |
+|---|---|---|
+| 玩家 + bot（`EntityKind.Player` / `PlayerBot`） | **同一条**：外观目录 `_appearances`（留空则退回 `_playerAvatarPrefab` 单条默认外观）→ 真模型 + `RemoteEntityAnimator`（走/跑动画由渲染位移反推的速度驱动） | 两者都空 ⇒ 胶囊占位 |
+| 怪物（`EntityKind.Npc`） | `_npcPrefabs`（templateId → 预制体）→ 真模型 + `NpcEntityAnimator` + `NpcBodyCollider` | 目录未命中 ⇒ 球体占位 |
+
+- **bot 不再是胶囊**（D-P5-7 的"渲染成占位"已被实测推翻）：bot 与真人同一条真模型路径——AOI（80m）下同屏数由**局部密度**决定（`--bots 100` 撒在 ±500m 时同屏峰值只有 5~6 个），成本由分档兜底
+- **表示分级**（`RemoteTierPolicy` + `RemoteEntityRegistry.SetTier`）：近距离 **Full** = 真模型（惰性实例化；降/升档 = 整棵 `SetActive`）；远距离 **Proxy** = 代理（条目配了 `Proxy` 就用它，否则运行时胶囊；整棵剥碰撞体）。规则 = 进入 60m / 退出 69m（迟滞）+ 每帧 Full 预算 `MaxFull`（最近优先）
+- 升档要**当场回放锁存状态**（`Apply(view.ActionState, view.Dead)`）：`m_KeepAnimatorStateOnDisable: 0` 会重置 Animator，只"失效去重"会让死亡/受击中的实体先站直最多 264ms
+- **URL 旋钮**（WebGL 出包没有 Inspector，手机实测靠它扫参）：`?full=<N>` 覆盖预算、`?fulldist=<米>` 覆盖进入距离、`?quality=mobile` 强制移动质量档（**别名无条件生效**——iPad 桌面 UA 下 `isMobilePlatform` 与 `deviceType` 两个自动判据都失效）
+- **调试浮层**（`_showDebugOverlay`）第二行是实测读数：`Full=12 Proxy=8 B=20  Q=2  FPS=42`（B=预算、Q=质量档）——**竖屏约 390px 也必须完整可见**（`FormatTierReadout` 有内容与长度守卫）
+
+---
+
 ## KCP Networking
 
 `Assets/Scripts/AOT/KcpNet/`:
@@ -299,3 +316,4 @@ Animator三层Layer架构：
 - [x] Nameplate System (Entity display)
 - [x] NPC Mirror system（P5 怪物服务端化：服务器 MonsterModule 行为树驱动 + 客户端 Npc 快照视图）
 - [x] Movement / Collision & Avoidance（服务端 ORCA 避让 + 客户端怪物碰撞体 + `NpcBody` 层 —— 见同名章节）
+- [x] Remote Entity Presentation（外观目录 + 真人/bot 统一真模型路径 + 行走动画 + 距离/预算分档骨架 + `?full=` / `?fulldist=` / `?quality=mobile` 旋钮 —— 见同名章节；bot 不再是胶囊）
