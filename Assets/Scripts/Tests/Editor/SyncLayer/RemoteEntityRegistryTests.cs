@@ -317,8 +317,15 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             string scenePath = System.IO.Path.Combine(projectRoot,
                 "Assets/SimpleLowPolyNature/Scenes/DemoDay.unity");
             Assert.IsTrue(System.IO.File.Exists(scenePath), "宿主场景应存在：" + scenePath);
-            var wiring = System.Text.RegularExpressions.Regex.Match(
-                System.IO.File.ReadAllText(scenePath),
+            string sceneText = System.IO.File.ReadAllText(scenePath);
+
+            // 守卫的守卫：本用例钉的模型只有在外观目录为空时才真的生效（ClientNetworkHost.Awake 二选一）。
+            // 目录一旦填充，bot 的实际模型改由目录条目决定 ⇒ 上面的接线断言会静默假绿。
+            // 到那时请把本用例改为遍历目录条目，而不是删掉这行。
+            Assert.IsFalse(System.Text.RegularExpressions.Regex.IsMatch(sceneText, @"_appearances:\s*\r?\n\s*-\s"),
+                "场景已配置外观目录 —— 本守卫钉住的不再是 bot 实际使用的模型，请改为遍历目录条目");
+
+            var wiring = System.Text.RegularExpressions.Regex.Match(sceneText,
                 @"_playerAvatarPrefab:\s*\{[^}]*guid:\s*([0-9a-f]{32})");
             Assert.IsTrue(wiring.Success,
                 "没在 DemoDay.unity 里解析到 _playerAvatarPrefab 的 guid——字段改名了？同步更新本用例");
