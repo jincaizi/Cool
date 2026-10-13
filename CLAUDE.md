@@ -193,6 +193,31 @@ Animator三层Layer架构：
 
 ---
 
+## Movement, Collision & Avoidance
+
+**碰撞的两半分开放，别只改一半**：
+
+| 关注点 | 落在哪 | 关键约束 |
+|---|---|---|
+| 怪物 / 机器人**彼此**避让 | **服务端** `Server/Movement/`：`OrcaSolver.cs`（2D ORCA 速度解算，纯算法，有论文对照注释）+ `AvoidanceSystem.cs`（tick 快照、邻居筛选、接线） | **无邻居时解算结果逐字等于期望速度** —— 这条护栏保证既有布局/e2e 断言不受影响；动它必须同步改那两条"逐位相同"的用例 |
+| **玩家 vs 怪物**阻挡 | **客户端** `SyncLayer/NpcBodyCollider.cs`：运行时按模型 bounds 生成，挂在**怪物视图**上 | 预制体本身**不挂**碰撞体（有资产断言）；`RemoteEntityAnimator` 对真人/bot 视图仍禁用碰撞体 —— 两者语义不同，别互相套用 |
+
+**ORCA 避让**（`Server/Movement/`）：
+- 参与者：**怪物 + 机器人**；**玩家不参与**（服务端改不了客户端权威的速度）⇒ 对智能体而言玩家是**零速度障碍**、责任权重 **1.0**（不信上报速度：朝向 ≠ 移动方向，且那是可控输入）；智能体彼此 **0.5**
+- **不避让当前攻击目标**（`MonsterState.TargetId`）—— 否则追击的怪会绕着玩家转、永远进不了 `attackRange`
+- 确定性：每 tick 开始按 id 排序拍快照（Jacobi）、逐个解算、统一应用 ⇒ 与遍历顺序无关
+- 半径真值源 = `monster_config.json` 的 `bodyRadius`（装配时归一），客户端有断言"从预制体量出的半宽 ≈ 配置值"
+- 调试开关：`--no-avoid`（负对照）、`--probe`（采样最小两两间距）
+- **明确没做**：空间哈希、静态障碍线（世界边界仍由 `BotRunner` 处理）、预测性避让
+
+**`NpcBody` 层（索引 10）**：怪物碰撞体专用；碰撞矩阵只放行本地玩家层（9）；**相机防穿墙掩码也必须排除它**（`ThirdPersonCameraController`，否则贴 Boss 时相机被拽到最近）。改层/矩阵时注意 Unity 2022.3 会按层名缓存回写 `TagManager.asset` —— **关掉 Unity 再改文件并复核**，代码一律用**层索引**不依赖层名。
+
+**出生点**：DemoDay 的 `PlayerSpawner._spawnPoint` = **`(10, 0.21, -40)`**（湖东岸台地）。约束是"到每个布局槽位的距离 > 该模板的感知半径 + 巡逻半径"⇒ 出生点挂机不会被任何怪发现；**离开出生点后照样会被追**。改点位或出生点时几何守卫会红 —— 那是设计，不是噪音。
+
+**已知限制（不是 bug，改前先读）**：① 碰撞**只在客户端** ⇒ 改客户端仍可穿模，服务端也不校验重叠；② "**怪走进你身体**"挡不住（静态碰撞体挡不住会移动的怪，`CharacterController` 不会被 kinematic 碰撞体推动），零速度玩家最坏交叠约 0.48m（已量化）；③ ORCA 是**纯局部**避让：不解决"被挤进死角"，对称多体挤压仍有约 5% 视觉交叠。
+
+---
+
 ## KCP Networking
 
 `Assets/Scripts/AOT/KcpNet/`:
@@ -273,3 +298,4 @@ Animator三层Layer架构：
 - [x] VFX System (Weapon + Skill effects)
 - [x] Nameplate System (Entity display)
 - [x] NPC Mirror system（P5 怪物服务端化：服务器 MonsterModule 行为树驱动 + 客户端 Npc 快照视图）
+- [x] Movement / Collision & Avoidance（服务端 ORCA 避让 + 客户端怪物碰撞体 + `NpcBody` 层 —— 见同名章节）
