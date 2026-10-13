@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "GameSys",
+        "DOTween.Modules",
         "DataDefinition",
         "Cool.Protocol",
         "KcpNet",
@@ -14,8 +15,10 @@
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "DOTween.dll"
+    ],
     "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],

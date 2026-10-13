@@ -11,27 +11,24 @@ namespace Hotfix.GameSystems.UI
 
         public Canvas Canvas { get; private set; }
         public CanvasGroup CanvasGroup { get; private set; }
-        public UIAnimation Animation { get; private set; }
         public bool IsVisible { get; private set; }
 
         protected virtual void Awake()
         {
             Canvas = GetComponent<Canvas>();
             CanvasGroup = GetComponent<CanvasGroup>();
-            Animation = GetComponent<UIAnimation>();
         }
 
         internal virtual void OnPreShow() { }
-        internal virtual Sequence PlayShowAnimation()
-        {
-            return Animation != null ? Animation.PlayShow() : null;
-        }
+
+        /// <summary>入场动画钩子。默认不播；阶段 5 在此接入实现。</summary>
+        internal virtual Sequence PlayShowAnimation() => null;
+
         internal virtual void OnShow() { }
         internal virtual void OnHide() { }
-        internal virtual Sequence PlayHideAnimation()
-        {
-            return Animation != null ? Animation.PlayHide() : null;
-        }
+
+        /// <summary>出场动画钩子。默认不播；阶段 5 在此接入实现。</summary>
+        internal virtual Sequence PlayHideAnimation() => null;
 
         internal void SetVisible(bool visible)
         {
