@@ -47,5 +47,14 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.IsFalse(TierQuery.TryFull("?full=999999", out _));
             Assert.IsFalse(TierQuery.TryFullDistance("?fulldist=99999", out _));
         }
+
+        [Test]
+        public void NonFinite_Distances_Are_Rejected()
+        {
+            // NaN 与 0/200 的比较恒为 false —— `value <= 0f` 这种守卫拦不住它：会被接受 ⇒
+            // ExitDistance = NaN ⇒ Decide 无候选合格 ⇒ 全场静默降 Proxy（量具被悄悄毁掉）
+            Assert.IsFalse(TierQuery.TryFullDistance("?fulldist=NaN", out _));
+            Assert.IsFalse(TierQuery.TryFullDistance("?fulldist=Infinity", out _));
+        }
     }
 }

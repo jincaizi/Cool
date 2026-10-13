@@ -182,8 +182,10 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
         /// <summary>
         /// 注入的提供者**本帧返回 null**（本地角色还没装配 —— 正常启动态）= 本帧不分档：
-        /// 视图保持原样，等拿到位置后再按距离定档。若把 null 误当 `Vector3.zero` 处理，
-        /// 5m 处的实体会被当场升档（这条断言就是防这个）。
+        /// 视图落到全 Full，等拿到位置后再按距离定档。（任务 7 审查修正：此前"不分档"被实现成
+        /// "视图保持原样"——而注入态下 `CreateView` 先建的是 Proxy ⇒ 观察者模式/装配窗口里
+        /// 远程玩家会永久停在胶囊、无动画；第一段断言随之从 Proxy 改成 Full。）
+        /// 若把 null 误当 `Vector3.zero` 处理，远处的实体会按原点距离被降档。
         /// </summary>
         [Test]
         public void A_Null_Observer_Position_Skips_Tiering_For_That_Frame()
@@ -203,12 +205,92 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 Assert.AreEqual(RemoteTier.Proxy, view.Tier, "注入但暂无位置：创建时先不建 Full（惰性）");
 
                 registry.UpdateRender(nowServerTicks: 1_000_000L, renderDelayTicks: 0L);
-                Assert.AreEqual(RemoteTier.Proxy, view.Tier,
-                    "本帧拿不到位置 ⇒ 不分档（视图保持原样；被误算成原点的话 5m 处会当场升档）");
+                Assert.AreEqual(RemoteTier.Full, view.Tier,
+                    "本帧拿不到位置 ⇒ 不分档 = 视图落到全 Full（\"保持全 Full\"说的是视图状态，不只是读数）");
 
                 observer = Vector3.zero;   // 本地角色装配好了
                 registry.UpdateRender(nowServerTicks: 1_000_000L, renderDelayTicks: 0L);
                 Assert.AreEqual(RemoteTier.Full, view.Tier, "拿到位置后按距离定档");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
+            }
+        }
+
+        /// <summary>
+        /// 任务 7 审查（Important）：provider **已注入但恒返回 null**（观察者模式：场景里没有
+        /// `Sys3CEntry`，宿主自身支持的降级）= 不分档 ⇒ 玩家类视图必须**落在 Full**，
+        /// 而不是停在 `CreateView` 的惰性 Proxy 胶囊上（那会让远程玩家永久无动画）。
+        /// 实体放 500m 外：若把 null 误当 `Vector3.zero`（按原点算距离）它会被降档——这条抓的就是它。
+        /// </summary>
+        [Test]
+        public void Provider_Returning_Null_Keeps_Every_View_Full()
+        {
+            var root = new GameObject("NullProviderRoot");
+            var prefab = new GameObject("NullProviderAvatar");
+            prefab.AddComponent<Animator>();
+            var registry = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = prefab } });
+            registry.ObserverPositionProvider = () => (Vector3?)null;
+            registry.TierPolicy.FullDistance = 60f;
+            try
+            {
+                registry.ApplySnapshot(SnapAt(1, new Vector3(500f, 0f, 0f)), serverTicks: 1_000_000L);
+                registry.UpdateRender(nowServerTicks: 1_000_000L, renderDelayTicks: 0L);
+
+                var view = registry.GetView(1)!;
+                Assert.AreEqual(RemoteTier.Full, view.Tier,
+                    "拿不到观察者位置 = 不分档 ⇒ 视图全 Full（不是停在惰性 Proxy 胶囊）");
+                Assert.AreEqual(1, registry.FullCount, "读数与所见一致：视图是 Full，读数也是");
+                Assert.AreEqual(0, registry.ProxyCount);
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
+            }
+        }
+
+        private static EntitySnapshot NpcSnapAt(long id, Vector3 pos)
+            => new EntitySnapshot
+            {
+                PlayerId = id,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind | EntityFieldMask.TemplateId),
+                X = pos.x, Y = pos.y, Z = pos.z, Kind = (byte)EntityKind.Npc, TemplateId = 7, Tick = 1
+            };
+
+        /// <summary>
+        /// 任务 7：计数口径必须与分档口径一致 —— Npc 不进任何计数（它是玩法实体，从不分档）；
+        /// 玩家类视图按**实际档位**记：真落在 Proxy 的进 `ProxyCount`，不是"非 Npc 一律记 Full"。
+        /// </summary>
+        [Test]
+        public void Tier_Counts_Follow_The_Actual_Tier_And_Exclude_Npcs()
+        {
+            var root = new GameObject("TierCountRoot");
+            var prefab = new GameObject("TierCountAvatar");
+            prefab.AddComponent<Animator>();
+            var registry = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = prefab } });
+            registry.ObserverPositionProvider = () => Vector3.zero;
+            registry.TierPolicy.FullDistance = 60f;
+            try
+            {
+                registry.ApplySnapshot(SnapAt(1, new Vector3(10f, 0f, 0f)), serverTicks: 1_000_000L);
+                registry.ApplySnapshot(SnapAt(2, new Vector3(500f, 0f, 0f)), serverTicks: 1_000_000L);
+                registry.ApplySnapshot(NpcSnapAt(3, new Vector3(5f, 0f, 0f)), serverTicks: 1_000_000L);
+
+                registry.UpdateRender(nowServerTicks: 1_000_000L, renderDelayTicks: 0L);
+
+                Assert.AreEqual(RemoteTier.Full, registry.GetView(1)!.Tier, "10m 在阈值内 ⇒ Full");
+                Assert.AreEqual(RemoteTier.Proxy, registry.GetView(2)!.Tier, "500m 出阈值 ⇒ Proxy");
+                Assert.AreEqual(1, registry.FullCount);
+                Assert.AreEqual(1, registry.ProxyCount, "真落在 Proxy 的玩家类视图进 ProxyCount");
+                Assert.AreEqual(3, registry.Count, "三个视图都在——Npc 只是不进任何计数");
+                Assert.AreEqual((byte)EntityKind.Npc, registry.GetView(3)!.Kind);
             }
             finally
             {

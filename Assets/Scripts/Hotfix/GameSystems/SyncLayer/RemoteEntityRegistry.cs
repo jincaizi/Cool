@@ -161,19 +161,23 @@ namespace Hotfix.GameSystems.SyncLayer
             }
 
             // 分档（design §4）：插值写完位置之后、驱动写入之前——本帧的档位就是这个位置算出来的。
-            // 未注入观察者、或本帧拿不到位置（本地角色还没装配）= 不分档（保持全 Full）。
-            if (ObserverPositionProvider?.Invoke() is Vector3 observer)
+            // 未注入观察者（测试宿主）= 建即 Full，什么都不用做；已注入但本帧拿不到位置
+            //（本地角色还没装配 / 观察者模式）= 不分档，**把玩家类视图显式保持/恢复为 Full**——
+            // "保持全 Full"说的是视图状态，不只是读数（注入态下 CreateView 先建的是 Proxy）。
+            if (ObserverPositionProvider == null)
+            {
+                RecountTiers();
+            }
+            else if (ObserverPositionProvider.Invoke() is Vector3 observer)
             {
                 ApplyTiers(observer);
             }
             else
             {
-                // 未分档 = 全 Full：读数与视觉一致（Npc 与分档同样的排除口径）
-                FullCount = 0;
-                ProxyCount = 0;
                 foreach (var kv in _views)
                     if (kv.Value.Kind != (byte)EntityKind.Npc)
-                        FullCount++;
+                        SetTier(kv.Value, RemoteTier.Full);   // 已 Full 的走早退
+                RecountTiers();
             }
 
             // 行走驱动写入（此时位置与速度都已就位）。同样只在 Full 档写：降档后是白费
@@ -210,13 +214,23 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (_views.TryGetValue(_tierCandidates[i].PlayerId, out var view))
                     SetTier(view, _tierResults[i]);
 
+            RecountTiers();
+        }
+
+        /// <summary>
+        /// 诊断读数（Full/Proxy 计数）。Npc 跳过（与分档同样的排除口径）；`Tier != Full`
+        /// （含 Tier 为 null 的纯降级占位视图）都记代理——读数与所见一致。
+        /// 单一实现：分档路径与未分档路径都调它（两处各写一份口径会悄悄分叉）。
+        /// </summary>
+        private void RecountTiers()
+        {
             FullCount = 0;
             ProxyCount = 0;
             foreach (var kv in _views)
             {
-                if (kv.Value.Kind == (byte)EntityKind.Npc) continue;   // 与分档同样的排除口径
+                if (kv.Value.Kind == (byte)EntityKind.Npc) continue;
                 if (kv.Value.Tier == RemoteTier.Full) FullCount++;
-                else ProxyCount++;   // Tier 为 null（纯降级占位视图）也算代理口径——读数与所见一致
+                else ProxyCount++;
             }
         }
 

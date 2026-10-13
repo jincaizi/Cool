@@ -30,7 +30,9 @@ namespace Hotfix.GameSystems.SyncLayer
             if (!UrlQuery.TryGetValue(url, "fulldist", out string raw)) return false;
             if (!float.TryParse(raw.Trim(), System.Globalization.NumberStyles.Float,
                     System.Globalization.CultureInfo.InvariantCulture, out float value)) return false;
-            if (value <= 0f || value > MaxDistance) return false;
+            // `!(value > 0f)` 而不是 `value <= 0f`：NaN 与两者比较都是 false，只有前一种写法拦得住它——
+            // 放进来会经 `ExitDistance = NaN` 传染，`Decide` 无候选合格 ⇒ 全场静默降 Proxy（现场无从解释）
+            if (!(value > 0f) || value > MaxDistance) return false;
             distance = value;
             return true;
         }
