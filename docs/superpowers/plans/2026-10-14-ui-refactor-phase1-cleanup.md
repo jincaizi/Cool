@@ -662,7 +662,12 @@ Open/Close and ShowAlways/HideAlways keep working unchanged."
 - [ ] **步骤 3：运行全量 PlayMode 测试**
 
 运行：`tests-run(testMode: "PlayMode")`
-预期：全绿 —— 这一步保护的是 `PlayerHudBindingTests` 与 `CharacterSelectPanelReopenTests`，它们是"选人→世界"链路的自动化代表。
+
+**预期不是"全绿"** —— 本仓库的 PlayMode 套件依赖一个运行在 `127.0.0.1:8000` 的服务端（测试源码自注：`dotnet run --project Server/Server3C.csproj -- 8000`）。没有服务端时，`KcpNet.PlayModeTests.*` 的网络用例会失败（实测：15/28 通过、13 失败，失败原因均为连不上 8000 端口）。
+
+**正确判据：与基线逐条相同，无新增失败。** 基线获取方式（任务 4 的实现者已实证有效）：`git stash` → 在未改动的 HEAD 上跑同一条命令 → 记录失败的测试名与消息 → `git stash pop`。
+
+**不要为了把套件跑绿而擅自启动服务端进程** —— 那属环境决策，不在本计划范围内。这一步保护的是 `PlayerHudBindingTests` 与 `CharacterSelectPanelReopenTests`（"选人→世界"链路的自动化代表），确认它们在**失败名单里没有新增**即可。
 
 - [ ] **步骤 4：链路验证 · 进世界**
 
