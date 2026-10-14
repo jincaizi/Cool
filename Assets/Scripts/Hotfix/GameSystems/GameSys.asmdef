@@ -7,7 +7,6 @@
         "DOTween.Modules",
         "Unity.Addressables",
         "Unity.ResourceManager",
-        "Unity.InputSystem",
         "Core",
         "DataDefinition",
         "KcpNet",
