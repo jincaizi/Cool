@@ -63,7 +63,11 @@ namespace Hotfix.GameSystems.UI
             try
             {
                 await LoadBuiltInPanels();
-                IsReady = true;
+                // 不能写 IsReady = true —— 主失败路径**不抛异常**：预制体缺失 / 无 UIPanel 组件 /
+                // 类型不匹配，RegisterFromPrefab 一律 LogError + return。写死 true 会让
+                // "HUD 预制体缺失、HUD 从未注册"这种情况下 IsReady 仍为 true，与它自己的文档契约
+                // （"全部面板加载成功"）相反。按实际注册数量判，代码才配得上那句注释。
+                IsReady = _panels.Count == PanelRegistry.Length;
             }
             catch (Exception e)
             {
