@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "GameSys",
+        "UniTask",
         "DOTween.Modules",
         "DataDefinition",
         "Cool.Protocol",

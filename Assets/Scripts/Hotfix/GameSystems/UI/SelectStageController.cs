@@ -19,13 +19,24 @@ namespace Hotfix.GameSystems.UI
 
         private async void Start()
         {
-            // UIManager.Awake 异步注册面板（await Resources.Load），轮询等待
-            while (UIManager.Instance == null)
-                await UniTask.Delay(50);
-            while (UIManager.Instance.GetPanel<CharacterSelectPanel>() == null)
-                await UniTask.Delay(50);
+            var ui = UIManager.Instance;
+            if (ui == null)
+            {
+                Debug.LogError("SelectStageController: 场景里没有 UIManager");
+                return;
+            }
 
-            _panel = UIManager.Instance.GetPanel<CharacterSelectPanel>();
+            // 阶段 2：等就绪信号，不再轮询。WhenReady 必然完成 ⇒ 不会挂死；
+            // 面板没起来时下面那条 null 检查会明确报出来（而不是原来的无限空转）。
+            await ui.WhenReady();
+
+            _panel = ui.GetPanel<CharacterSelectPanel>();
+            if (_panel == null)
+            {
+                Debug.LogError("SelectStageController: CharacterSelectPanel 未注册");
+                return;
+            }
+
             ApplyPreview(CharacterSelectionService.Load());
             _panel.OnSelectionChanged += ApplyPreview;
             _panel.OnClosed += LoadGameScene;

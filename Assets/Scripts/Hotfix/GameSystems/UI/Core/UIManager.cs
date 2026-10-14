@@ -28,7 +28,19 @@ namespace Hotfix.GameSystems.UI
 
         private readonly Dictionary<System.Type, UIPanel> _panels = new Dictionary<System.Type, UIPanel>();
 
-        private async void Awake()
+        private readonly ReadinessGate _ready = new ReadinessGate();
+
+        /// <summary>全部面板加载成功。失败时为 false —— 具体缺哪块用 GetPanel&lt;T&gt;() == null 判断。</summary>
+        public bool IsReady { get; private set; }
+
+        /// <summary>
+        /// 初始化完成的信号。**必然完成** —— InitializeAsync 的 finally 一定会放行，
+        /// 所以调用方永远不会永久挂起。这正是它取代轮询的地方：
+        /// `while (…) await UniTask.Delay(50)` 在加载失败时是无限空转，没有任何出口。
+        /// </summary>
+        public UniTask WhenReady() => _ready.WaitAsync();
+
+        private void Awake()
         {
             if (Instance != null)
             {
@@ -38,7 +50,29 @@ namespace Hotfix.GameSystems.UI
             Instance = this;
             DontDestroyOnLoad(gameObject);
             CreateCanvasLayers();
-            await LoadBuiltInPanels();
+            InitializeAsync().Forget();
+        }
+
+        /// <summary>
+        /// 显式初始化。不再是 `async void Awake` —— 那样异常无人接管，
+        /// 而且"Awake 什么时候算完"对外没有出口。
+        /// `finally` 里无条件放行，是"加载失败也不会挂死"的结构性保证。
+        /// </summary>
+        private async UniTask InitializeAsync()
+        {
+            try
+            {
+                await LoadBuiltInPanels();
+                IsReady = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("UIManager: 初始化中断 —— " + e.Message);
+            }
+            finally
+            {
+                _ready.Release();
+            }
         }
 
         private async UniTask LoadBuiltInPanels()

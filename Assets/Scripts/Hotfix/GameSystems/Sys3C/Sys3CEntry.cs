@@ -172,20 +172,12 @@ namespace Hotfix.GameSystems.Sys3C
             }
 
             // T12 甲-3：HUD 绑定（PlayerHudPanel.Bind 此前全项目零调用者 ⇒ 血条是死的）。
-            // 与相机同为 Start 期的表现层装配——PlayerSpawner 的注释把"相机/HUD 绑定"都记在这里。
-            // 用显式判空而不是 ?.：UnityEngine.Object 的伪 null 不认 null 传播
-            //（UIManager 是 DontDestroyOnLoad 的，跨场景时可能已被销毁）。
+            // 阶段 2：改成"等就绪信号"而不是"假设面板已注册"。今天面板是同步加载的，
+            // 这个 await 立刻返回；阶段 4 换成 Addressables 之后面板会真的异步加载 ——
+            // 那时若还假设 Start 时就绪，HUD 会静默绑不上（血条死在预制体烘焙值上，
+            // 即 T12 修掉的那个缺陷）。放在一个独立方法里是因为 Start 本身必须保持同步。
             _statsProvider = new Sys3CEntryStatsProvider(this);
-            var uiManager = Hotfix.GameSystems.UI.UIManager.Instance;
-            if (uiManager != null)
-            {
-                var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>();
-                if (hud != null)
-                {
-                    hud.Bind(_statsProvider);
-                    uiManager.ShowAlwaysAsync<Hotfix.GameSystems.UI.PlayerHudPanel>().Forget();   // 回选人时被收起过，进世界要再显示
-                }
-            }
+            BindHudWhenReady().Forget();
             _hudHp = _currentHP;
 
             _attackHandler = GetComponent<CharacterAttackHandler>();
@@ -715,6 +707,28 @@ namespace Hotfix.GameSystems.Sys3C
 
         private static bool IsOnlineMode()
             => NetworkModeService.Load() == NetworkMode.Online;
+
+        /// <summary>
+        /// 等 UI 就绪再绑 HUD。用显式判空而不是 ?.：UnityEngine.Object 的伪 null 不认 null 传播
+        ///（UIManager 是 DontDestroyOnLoad 的，跨场景时可能已被销毁）。
+        /// </summary>
+        private async Cysharp.Threading.Tasks.UniTask BindHudWhenReady()
+        {
+            var uiManager = Hotfix.GameSystems.UI.UIManager.Instance;
+            if (uiManager == null) return;
+
+            await uiManager.WhenReady();
+
+            var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>();
+            if (hud == null)
+            {
+                UnityEngine.Debug.LogError("Sys3CEntry: PlayerHudPanel 未注册，HUD 不会更新");
+                return;
+            }
+
+            hud.Bind(_statsProvider);
+            uiManager.ShowAlwaysAsync<Hotfix.GameSystems.UI.PlayerHudPanel>().Forget();   // 回选人时被收起过，进世界要再显示
+        }
 
         private void OnDestroy()
         {
