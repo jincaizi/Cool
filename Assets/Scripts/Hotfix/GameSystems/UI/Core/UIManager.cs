@@ -112,6 +112,22 @@ namespace Hotfix.GameSystems.UI
                 Debug.LogWarning($"UIManager: Panel '{panel.PanelId}' already registered, replacing.");
             }
 
+            var mismatch = UIPanel.DescribeModeMismatch(
+                panel.Mode,
+                hasCanvas: panel.GetComponent<Canvas>() != null,
+                hasCanvasGroup: panel.GetComponent<CanvasGroup>() != null);
+
+            if (mismatch != null)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                throw new System.InvalidOperationException(
+                    $"UIManager: 面板 '{panel.GetType().Name}' {mismatch}");
+#else
+                Debug.LogError($"UIManager: 面板 '{panel.GetType().Name}' {mismatch} —— 已跳过注册");
+                return;
+#endif
+            }
+
             _registry[panel.PanelId] = panel;
 
             // Reparent to correct layer canvas
@@ -120,6 +136,9 @@ namespace Hotfix.GameSystems.UI
             {
                 panel.transform.SetParent(_layers[layerIndex].transform, false);
             }
+
+            // 阶段 3 的事件层要用 CanvasGroup.interactable，这里先保证它存在
+            panel.EnsureCanvasGroup();
 
             // Start hidden
             panel.ApplyVisibilityOff();
