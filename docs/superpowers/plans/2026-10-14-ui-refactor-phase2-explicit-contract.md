@@ -84,6 +84,9 @@
 - `Packages/manifest.json` **有一处未提交改动**（`com.ivanmurzak.unity.mcp` 0.86.3 → 0.90.0），与本阶段无关。**改文件时不要碰那一行。**
 - `GameSys.asmdef` 第 10 行是 `"Unity.InputSystem",`。
 - 两个场景的 EventSystem 都用旧的 `StandaloneInputModule`（GUID `4f231c4f…`）。
+- ⚠️ **`GameSys.EditorTests.asmdef` 不引用 `UniTask`**（实测其 references 为 `GameSys, DOTween.Modules, DataDefinition, Cool.Protocol, KcpNet, SyncCore, WebSocketNet`），而 `GameSys.asmdef` 引用了 —— **asmdef 引用不传递**。任务 3 的测试要 `using Cysharp.Threading.Tasks;` 并用 `UniTaskStatus` 断言，所以**必须**给测试程序集显式加一行 `"UniTask"`，否则报 `CS0246: 'Cysharp' could not be found`。
+  **先例**：阶段 1 的提交 `0d769fb` 为同一原因往同一个 asmdef 加过 `"DOTween.Modules"`。
+  （此条由任务 3 的实现者实测发现。计划初版只对 `UnityEngine.UI` 与 `DOTween` 做了引用模型取证，漏了 UniTask —— 正是 §11.1 第 3 条教训自身的又一次重演。）
 
 ### 运行测试的方式
 
@@ -642,7 +645,28 @@ fails at test time instead of in a runtime Awake."
 
 **背景（修复规格 R1/§3.1/§3.3）**：`UIManager.Awake` 是 `async void`（异常无人接管）；`SelectStageController` 用两个**无超时**的 `while (…) await UniTask.Delay(50)` 轮询等面板 —— 面板加载失败就永久空转。今天 `Resources.Load` 是同步的所以轮询从未真正循环过，但阶段 4 换成 Addressables 后它会真的开始循环。
 
-- [ ] **步骤 1：编写失败的测试**
+- [ ] **步骤 1：给测试程序集加 UniTask 引用**
+
+`Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef` 的 `references` 数组里加一行 `"UniTask"`（放在 `"GameSys"` 之后即可）：
+
+```json
+    "references": [
+        "GameSys",
+        "UniTask",
+        "DOTween.Modules",
+        "DataDefinition",
+        "Cool.Protocol",
+        "KcpNet",
+        "SyncCore",
+        "WebSocketNet"
+    ],
+```
+
+**理由（实测定案）**：本任务的测试要 `using Cysharp.Threading.Tasks;` 并用 `UniTaskStatus` 断言（EditMode 测试跑不了协程，所以靠 `Status` 断言而不 await）。`GameSys.asmdef` 引用了 `UniTask`，但 **asmdef 引用不传递**，而拼写 `UniTaskStatus` 必须能解析到类型 ⇒ 测试程序集不显式引用就报 `CS0246: 'Cysharp' could not be found`。**先例**：阶段 1 的 `0d769fb` 为同一原因往同一个 asmdef 加过 `"DOTween.Modules"`。
+
+**这是本任务要求的唯一一处 asmdef 改动** —— 其他 asmdef 一律不动。
+
+- [ ] **步骤 2：编写失败的测试**
 
 创建 `Assets/Scripts/Tests/Editor/ReadinessGateTests.cs`：
 
@@ -705,12 +729,12 @@ namespace GameSys.EditorTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [ ] **步骤 3：运行测试验证失败**
 
 运行：`tests-run(testMode: "EditMode", testClass: "ReadinessGateTests")`
 预期：**编译失败** —— `ReadinessGate` 不存在。这是期望的红。
 
-- [ ] **步骤 3：实现 ReadinessGate**
+- [ ] **步骤 4：实现 ReadinessGate**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/UI/Core/ReadinessGate.cs`：
 
@@ -747,7 +771,7 @@ namespace Hotfix.GameSystems.UI
 }
 ```
 
-- [ ] **步骤 4：把 UIManager 的 Awake 改成显式初始化**
+- [ ] **步骤 5：把 UIManager 的 Awake 改成显式初始化**
 
 对 `Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs`：
 
@@ -808,7 +832,7 @@ namespace Hotfix.GameSystems.UI
 
 （`using System;` 已在第 1 行，`Exception` 可直接用。）
 
-- [ ] **步骤 5：SelectStageController 换成就绪信号**
+- [ ] **步骤 6：SelectStageController 换成就绪信号**
 
 `Assets/Scripts/Hotfix/GameSystems/UI/SelectStageController.cs` 的 `Start` 整个方法换成：
 
@@ -841,7 +865,7 @@ namespace Hotfix.GameSystems.UI
 
 （同时删掉文件顶部若因此变成多余的 `using Cysharp.Threading.Tasks;` —— `Async` 泛型仍需要它，**保留**。）
 
-- [ ] **步骤 6：Sys3CEntry 的 HUD 绑定改等就绪**
+- [ ] **步骤 7：Sys3CEntry 的 HUD 绑定改等就绪**
 
 `Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`：
 
@@ -915,7 +939,7 @@ namespace Hotfix.GameSystems.UI
 
 > **注**：`OnDestroy` 里仍假设面板已注册 —— 这是可以的：`OnDestroy` 只会在角色已被创建出来之后发生，而那时 HUD 绑定早已跑过。
 
-- [ ] **步骤 7：运行测试验证通过**
+- [ ] **步骤 8：运行测试验证通过**
 
 运行：`tests-run(testMode: "EditMode", testClass: "ReadinessGateTests")`
 预期：3 个测试 PASS。
@@ -923,10 +947,11 @@ namespace Hotfix.GameSystems.UI
 运行：`tests-run(testMode: "EditMode")`
 预期：374/374 全绿。
 
-- [ ] **步骤 8：Commit**
+- [ ] **步骤 9：Commit**
 
 ```bash
-git add Assets/Scripts/Hotfix/GameSystems/UI/Core/ReadinessGate.cs \
+git add Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef\
+        git add Assets/Scripts/Hotfix/GameSystems/UI/Core/ReadinessGate.cs \
         Assets/Scripts/Hotfix/GameSystems/UI/Core/ReadinessGate.cs.meta \
         Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs \
         Assets/Scripts/Hotfix/GameSystems/UI/SelectStageController.cs \
