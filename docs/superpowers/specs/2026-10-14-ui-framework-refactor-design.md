@@ -124,7 +124,7 @@ internal static class UILayers {
 ### 3.1 就绪信号
 
 ```csharp
-UniTask WhenReady();      // 一次性、可重复 await、带超时
+UniTask WhenReady();      // 一次性、可重复 await；**必然完成**（见下）
 bool IsReady { get; }
 ```
 
@@ -141,9 +141,11 @@ CanvasGroup = GetComponent<CanvasGroup>();
 // ApplyVisibilityOff 里：if (Canvas != null) { ... }  ← CanvasSwitch 静默变成"什么都不做"
 ```
 
-**改为**：注册时校验声明的 `Mode` 与实际组件是否匹配，不匹配**报错**（开发期抛出；发行期禁用该面板并打日志）。同类补齐：声明了 `Mode` 需要 `CanvasGroup` 而预制体没有 → 报错。
+**改为**：注册时校验声明的 `Mode` 与实际组件是否匹配，不匹配**报错**（开发期抛出；发行期 LogError + **跳过注册**）。
 
-**同时保证注册后面板根一定有一个 `CanvasGroup`**（预制体没有则 `AddComponent` 补齐）。这是 §4.1 事件层实现的前提 —— 模态遮挡统一用 `CanvasGroup.interactable`，不能依赖"恰好面板选了 CanvasGroup 模式"。
+**唯一会报错的是 `CanvasSwitch` 而没有 `Canvas`** —— 那种面板**关不掉**，是必须拦下的接线错误。缺 `CanvasGroup` **不算不匹配**：注册时会**自动补齐**（`UIPanel.EnsureCanvasGroup()` 每次重新 `GetComponent`，缺则 `AddComponent`）。
+
+**同时保证注册后面板根一定有一个 `CanvasGroup`**。这是 §4.1 事件层实现的前提 —— 模态遮挡统一用 `CanvasGroup.interactable`，不能依赖"恰好面板选了 CanvasGroup 模式"。
 
 ### 3.3 显式依赖（R1 的正面修法）
 
@@ -158,7 +160,7 @@ CanvasGroup = GetComponent<CanvasGroup>();
 |---|---|---|
 | `Sys3CEntry.Start` 绑 HUD | 假设面板已注册 | `await UIManager.WhenReady()` 后取 |
 | `CharacterAttackHandler` | 运行期取（相对安全） | `await OpenAsync<TargetPanel>()` |
-| `SelectStageController` | 无超时轮询 | `await WhenReady()` + 超时 |
+| `SelectStageController` | 无超时轮询 | `await WhenReady()` + 显式判空（面板缺了要**报错返回**，不是静默继续） |
 
 ### 3.4 状态机与幂等
 
@@ -258,7 +260,8 @@ public static class UIInputGate {
 
 - **删掉 `PanelId` 字符串**，改类型寻址：`GetPanel<T>()` / `OpenAsync<T>()`。消掉那 6 处 `GetPanel<T>("PlayerHudPanel")` 的静默失败（`as T` 返回 null）
 - 面板自声明**行为**（沿用现有风格）：`Layer` / `Mode` / `IsModal`
-- **编辑器校验器**：扫描所有 `UIPanel` 子类，不在注册表里的直接报错 —— 15+ 面板时最省事的一道闸
+- **漏注册的守卫**：扫描所有 `UIPanel` 子类，不在注册表里的直接报错 —— 15+ 面板时最省事的一道闸。
+  **实现形态是 EditMode 测试**（`UIPanelRegistryTests`），不是 `[InitializeOnLoad]` 校验器：测试是可独立验证的产物，不需要推理编辑器回调的生命周期，而且能在 CI 里跑。代价是它只在测试运行时报红，而不是"编辑器里持续红"。若将来需要后者，再加一个薄校验器调用同一份数据即可。
 
 ---
 
@@ -365,7 +368,56 @@ public static class UIInputGate {
 
 ---
 
-## 12. 关联文档
+## 12. 阶段 2 执行记录（2026-10-15 完成）
+
+分支即 **master**（人类伙伴明确同意，未另开分支）。14 个提交：8 个代码/配置 + 6 个计划文档修正。起点 `b35a305`，终点 `cff0cf3`。
+
+**最终审查结论：可以合并吗？——「修完再合」，0 关键、4 重要。** 人类伙伴裁定：**4 条重要发现记为阶段 3 的入口项，阶段 2 现在关档**（见 §12.1 —— 这是本阶段交给下一阶段的第一样东西）。
+
+**验收结果**：EditMode 374/374 绿；PlayMode 30/17/13，失败集合与基线**实质零变化**（唯一差异是基线记录里的一处下划线笔误）；负向验收通过 —— 改错预制体地址后两条具名日志都出现，且**帧号 20282→27124 证明没有挂死**，临时改动经 `git hash-object` 确认逐位还原。
+
+### 12.1 阶段 3 开工前必须补的四条（来自最终审查的 Important 发现）
+
+形态一致：**契约已经显式，但守卫它的测试与注释还差最后一格。**
+
+1. **`Register` 的校验没有接线测试**（`UIManager.cs`）。现在只覆盖了纯函数 `DescribeModeMismatch` —— **把那 10 行 `mismatch != null` 校验整段删掉，374 个测试照绿**。而**阶段 4 会重写 `Register`/`RegisterFromPrefab`**，不钉住就会被无声抹掉。补法：`Register` 改 `internal`（程序集已有 `InternalsVisibleTo("GameSys.EditorTests")`）→ EditMode + `AddComponent<UIManager>()`（Awake 不执行）+ `Mode => CanvasSwitch` 探针面板 + `Assert.Throws<InvalidOperationException>`，并断言抛在 `_panels` 写入之前。
+2. **`EnsureCanvasGroup` 只断言了返回值同一性**，没断言 `panel.CanvasGroup` 被刷新（1 行 `Assert.AreSame(first, panel.CanvasGroup)`）。可见性依赖的是**被缓存的属性**；只测返回值的话，`CanvasGroup = cg` 被删时"无 CanvasGroup 的面板起手可见"这个原缺陷会复活而无测试报红。
+3. **`UIBootstrapTests` 钉不住 R8 的原 bug**：两条用例都先调 `Ensure*` 再断言 ⇒ **删掉 `RuntimeInitializeOnLoadMethod` 属性、或 bootstrap 根本不跑，两条照样全绿**；场景塞回 UIManager 也测不出来（单例守卫把计数压回 1）。两处加固：(a) 第一次 `Ensure*` **之前**加 `Assert.IsNotNull(UIManager.Instance)`；(b) 加一条 **EditMode 场景文本守卫**，断言两个场景无 `m_Name: UIManager` / `m_Name: EventSystem`（先例：`RemoteEntityRegistryTests` 读场景文本）。**⏰ (b) 时效性很强** —— 阶段 3 明确要重开 `DemoDay.unity` 做层序号重排，那正是可能把对象带回来的动作。
+4. **`WhenReady()` 的注释强于代码实际保证**（`UIManager.cs`）。注释写"**必然完成**……调用方永远不会永久挂起"，但 `finally` 保证的是"**try 块退出时**一定放行"，不是"一定到达 finally"：链上的 `WaitForSequence` 是 `while (seq.IsPlaying()) await UniTask.Yield()` —— 某个 show 序列永不结束（时间缩放 0、被暂停的 tween）时到不了 finally。今天不活（钩子默认 `return null`，整条链同步完成），但注释该收紧为"异常/提前返回也放行；**'必然到达 finally' 取决于被 await 的链，阶段 4 的异步加载必须自带超时**"。
+
+**另有一条**：`Register` 的发行期"跳过注册"分支（`#else` 那半）**泄漏面板实例** —— 它 `return` 前既不 `Destroy` 也不隐藏，而同段另两条错误路径都 `Destroy(instance)` 了。窄可达（编辑器会先抛），但失败时留下的是一个**框架永不管理、也永远关不掉**的面板。1 行修复。
+
+### 12.2 阶段 3 的另外三条前置（来自最终审查的建议）
+
+1. **`ApplyVisibilityOn` 不碰 `CanvasGroup.interactable`。** 模态闸门若靠它复位，被闸门关过的面板会在重新打开后保持不可交互 —— `interactable` 必须当作**闸门自己的状态**显式管理。
+2. **重开 `DemoDay.unity` 时顺手退掉那条既有 missing-script**（guid `b2456740…`）—— 反正要动这个场景。
+3. **PlayMode 会话级的共享对象**：bootstrap 之后 `UIManager.Instance` 在每个 PlayMode 会话非空，`CharacterSelectPanelReopenTests` 的 `Confirm()` 现在会**真的关掉 bootstrap 注册的那个面板实例**（此前 `Instance == null` 整条跳过）。当前无失败，但**阶段 3 的模态闸门测试会直接操作这批共享对象**（`CanvasGroup.interactable` 是全局可见状态）—— 写测试时要么自带实例，要么加会话级复位钩子。
+
+**给阶段 4 的一条**：`Register`/`RegisterFromPrefab` 即将被重写 ⇒ 把 **"每条早退路径都要销毁自己 Instantiate 出来的实例"** 写成验收项，别靠记忆。
+
+### 12.3 本阶段暴露的两条通用教训
+
+1. **不可能失败的验收方法，比没有验收更糟。** 任务 6 报告里那段"程序化比对"把基线名单与本次名单**手打了两遍**（内容逐字相同）再"比对"它们 —— `added=[] removed=[]` 恒真，**任何一次运行都会输出"通过"，包括真的发生回归的那次**。它比"没验证"危险，因为它带着已经验证过的外观。**修法：判据本身也要能被判据检验** —— 一个恒真的脚本不会报出差异，而修正后的比对真的报出了 `same set: False`（基线记录的一处笔误），这才是它还活着的证据。
+2. **写下"没有 / 全部 / 无"之前，先枚举"所有可能藏着它的地方"。** 两个不同的实现者在同一类问题上被连着挑到：一位只扫了 `Assets/` + `Packages/` 就断言"全部 asmdef 无其他匹配"（漏了 `Library/PackageCache` 里 VisualScripting 的硬引用）；另一位只查了**顶层**会话 jsonl 就断言"原始返回没有落盘副本"（漏了 `subagents/` 子目录）。两次后果都是零，但形态一样：**全称判断的搜索范围比判断本身窄**。
+
+### 12.4 代码 ↔ 规格的三处漂移（已在本节落笔时改回现状）
+
+阶段 2 期间计划被修正 6 次，但**规格一个字节没改**，于是留下三处"规格说的与代码做的不一致"。已改：
+
+| 规格原话 | 实际实现 | 处置 |
+|---|---|---|
+| §3.1 `WhenReady()` "带超时" | 无超时，靠 `finally` 无条件放行（**更好**：结构性保证而非定时器） | 改成"必然完成"，超时责任归阶段 4 |
+| §3.3 `SelectStageController` "`await WhenReady()` + 超时" | 就绪信号 + **显式判空报错** | 同上 |
+| §3.2 "声明需要 `CanvasGroup` 而预制体没有 → **报错**" | **自动补齐**，不报错（只有 `CanvasSwitch` 无 `Canvas` 才报错） | 改回现状；原话与 §3.2 下一句"保证一定有一个 CanvasGroup"本就自相矛盾 |
+| §6 "**编辑器校验器**" | **EditMode 测试**（`UIPanelRegistryTests`） | 改回现状并写明取舍 |
+
+### 12.5 延后的 Minor（最终审查逐条甄别：**无一条必须在合并前修**）
+
+除上面 §12.1/§12.2 已记为入口项的四条外，其余裁定为"留到后续阶段"或"无需处理"：注册表测试的反射范围限于 Hotfix 程序集（阶段 5 扩）；失败路径（`catch → Release`）无测试（阶段 4 引入可注入加载步骤后补）；需手动登记预编译 DLL 的范围比阶段 1 记的更大（**阶段 3 预检清单应纳入**）；`RegisterFromPrefab` 的 CS1998（阶段 4 变真异步后自然消失）；`IsReady` 与 `WhenReady` 的语义分工已由 `IsReady = _panels.Count == PanelRegistry.Length` 钉住。
+
+---
+
+## 13. 关联文档
 
 - `docs/superpowers/specs/2026-10-14-ui-framework-refactor-design.md`（本文）
 - `docs/superpowers/specs/2026-05-08-ui-framework-design.md`（框架原始设计，§4.2 安全区原意、§13 YAGNI 边界）
