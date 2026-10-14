@@ -950,8 +950,8 @@ namespace Hotfix.GameSystems.UI
 - [ ] **步骤 9：Commit**
 
 ```bash
-git add Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef\
-        git add Assets/Scripts/Hotfix/GameSystems/UI/Core/ReadinessGate.cs \
+git add Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef \
+        Assets/Scripts/Hotfix/GameSystems/UI/Core/ReadinessGate.cs \
         Assets/Scripts/Hotfix/GameSystems/UI/Core/ReadinessGate.cs.meta \
         Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs \
         Assets/Scripts/Hotfix/GameSystems/UI/SelectStageController.cs \
