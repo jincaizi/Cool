@@ -132,17 +132,16 @@ bool IsReady { get; }
 
 ### 3.2 注册时校验，而非运行期判空
 
-现状是所有可选组件静默降级：
+**阶段 1 之前**，所有可选组件都静默降级：
 
 ```csharp
-// UIPanel.Awake —— 三个都可能为 null
+// UIPanel.Awake（阶段 1 之前）—— 可选组件都可能为 null
 Canvas = GetComponent<Canvas>();
 CanvasGroup = GetComponent<CanvasGroup>();
-Animation = GetComponent<UIAnimation>();
 // ApplyVisibilityOff 里：if (Canvas != null) { ... }  ← CanvasSwitch 静默变成"什么都不做"
 ```
 
-**改为**：注册时校验声明的 `Mode` 与实际组件是否匹配，不匹配**报错**（开发期抛出；发行期禁用该面板并打日志）。同类补齐：声明了 `Mode` 需要 `CanvasGroup` 而预制体没有 → 报错；`UIAnimation` 缺失 → 明确告知。
+**改为**：注册时校验声明的 `Mode` 与实际组件是否匹配，不匹配**报错**（开发期抛出；发行期禁用该面板并打日志）。同类补齐：声明了 `Mode` 需要 `CanvasGroup` 而预制体没有 → 报错。
 
 **同时保证注册后面板根一定有一个 `CanvasGroup`**（预制体没有则 `AddComponent` 补齐）。这是 §4.1 事件层实现的前提 —— 模态遮挡统一用 `CanvasGroup.interactable`，不能依赖"恰好面板选了 CanvasGroup 模式"。
 
