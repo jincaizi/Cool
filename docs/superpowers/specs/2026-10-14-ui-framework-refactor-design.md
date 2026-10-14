@@ -319,7 +319,53 @@ public static class UIInputGate {
 
 ---
 
-## 11. 关联文档
+## 11. 阶段 1 执行记录（2026-10-14 完成）
+
+分支 `ui-refactor-phase1`，起点 `9622ba0`。**最终整分支审查结论：可以合并。** 0 关键、2 重要（均为文档层，已修）、5 次要。
+
+**验收结果**：EditMode 365/365 绿；PlayMode 15/28，与基线逐条相同、零新增失败（13 个失败为既有环境依赖，见下）；两条链路（进世界 / 选人→确认→进世界）经截图与运行时探针验证通过。
+
+### 11.1 必须带进后续阶段的三条
+
+1. **"零引用"闸门要升级为编译级判据。** 阶段 1 用的字面 grep 有两个坑：新建文件自己的**注释**会自命中（计划的初版闸门因此字面上永远无法通过，被迫前移）；`Assets/Scripts/**/graphify-out/` 下的**既有生成缓存**仍含被删类型名。更硬的判据是 Unity 的真实编译产物 `Library/Bee/artifacts/*/<Assembly>.rsp` —— 它是"谁引用了什么"的权威快照，能直接看出某个 DLL/源文件是否还在编译输入里。**另外：闸门的 grep 模式必须显式纳入随文件一起消失的公开类型名**（阶段 1 漏了 `Direction`，靠人工补查才确认零消费者）。
+2. **`overrideReferences: true` 不是单向门。** 若某个 EditMode 测试只是想断言某个钩子返回 null，可以用反射（`MethodInfo.Invoke` 返回 `object`）绕开对 `Sequence` 的编译期依赖，从而不必再登记第二个 DLL。有这条退路，阶段 1 那次裁定（`GameSys.EditorTests` 加 `overrideReferences` + `precompiledReferences`）的代价更可控。
+3. **阶段 5 的消重工作要决定 `UITweenExtensions` 的去留。** 阶段 1 删掉的 `Punch` / `Shake` / `Flash` / `CountUp` 四个扩展方法与 §7 计划的 `StatBar` / `BuffBar` 动画需求有重叠 —— 阶段 5 落笔时明确写"从 git 历史取回或重写"，不要让它悄悄消失。
+
+### 11.2 阶段 1 暴露的三类计划缺陷（写后续阶段计划时的教训）
+
+三次修正全部由**执行侧实测**发现，没有一次是计划评审阶段想到的：
+
+| 缺陷 | 形态 | 教训 |
+|---|---|---|
+| 闸门自命中 | 核验步骤排在"新建文件"之后，被新文件自己的注释命中 | **核验步骤必须排在它要核验的状态之前** |
+| 引用不足 | 计划指定"加一行 `DOTween.Modules`"，实测无效 | 涉及程序集引用模型时，**先取证再落笔**（见 §11.3） |
+| 验收预期写错 | 任务 5 写"PlayMode 预期全绿"，而该套件依赖 `127.0.0.1:8000` 的服务端 | **验收预期要基于实测基线**，不能想当然 |
+
+另有两处 `git add` 配方不完整（其中任务 2 的那条漏了它自己刚改过的实现文件，照字面执行会产生**不可编译的提交点**）。**写后续阶段计划时，每个提交步骤的 `git add` 必须覆盖该步骤全部产出**（含 Unity 自动生成的 `.cs.meta`）。
+
+### 11.3 程序集引用：本仓库实测
+
+> 以下为 **Unity 2022.3.25f1 本仓库实测**（依据 `Library/Bee/artifacts/*/*.rsp` 的 `-r:` 行），不是引擎文档规则。
+
+- **带 `optionalUnityReferences: ["TestAssemblies"]` 的测试程序集拿不到 `Assets/Plugins/` 下预编译 DLL 的自动引用**（同批次对照：`GameSys`(39 个)、`Unity.TextMeshPro.Editor`(39)、`Unity.VSCode.Editor`(39) vs `KcpNet.PlayModeTests`(0)、`GameSys.EditorTests` 改前(0)；两个测试程序集一 Editor-only 一全平台 ⇒ **分界在"是不是测试程序集"，与平台无关**）。
+- 被 Editor 排除的只有 `DOTween.dll` 与 5 个 .NET facades（`System.Memory` / `System.Buffers` / `System.Numerics.Vectors` 等；它们因此缺席 `GameSys.rsp`）。`R3` / `System.Text.Json` / `Microsoft.Extensions.*` 等**不受影响**。
+- 新格式 meta（`serializedVersion: 2`）的 `Editor: enabled: 0` **生效**；`DOTween.dll.meta` 是旧格式（`serializedVersion: 1`），那行 `Editor: enabled: 0` **实测不产生排除** —— 这里曾连续两次被误读为根因，写后续计划时不要重蹈。
+
+### 11.4 延后的 Minor（审查者已逐条裁定：无一条需在合并前修）
+
+| 项 | 去向 |
+|---|---|
+| `UIConst.Layers` 元素运行期仍可写 | 阶段 3 迁表（`UILayers.cs`）时顺手收成 `IReadOnlyList` |
+| 新增测试钉住工厂但不覆盖 `CreateCanvasLayers` 的接线 | 阶段 2 重写初始化（`WhenReady()` / `InitializeAsync`）时把"表 → 数组"纳入可测面 |
+| 表征测试未钉住两个钩子仍是 `virtual` | 无需处理 —— 真被改成 non-virtual，阶段 5 的 `override` 会以 CS0506 当场报错 |
+| asmdef 里的 `"DOTween.Modules"` | 无需处理 —— 实测它是**活的**引用（`DOTween.Modules.ref.dll`），能带来扩展方法，阶段 5 会用上 |
+| graphify 生成物索引仍列被删符号 | 无需处理 —— 生成缓存，下次 graphify 运行即刷新 |
+| `production/verify/t6_sortorder.cs` 与两份旧 plan 文档仍写 `SortOrders` | 无需处理 —— 在 `Assets/` 之外不参与编译 |
+| 验收报告里的括注日期/时间精度 | 无需处理 —— prose，不在分支上 |
+
+---
+
+## 12. 关联文档
 
 - `docs/superpowers/specs/2026-10-14-ui-framework-refactor-design.md`（本文）
 - `docs/superpowers/specs/2026-05-08-ui-framework-design.md`（框架原始设计，§4.2 安全区原意、§13 YAGNI 边界）
