@@ -10,7 +10,6 @@ namespace Hotfix.GameSystems.UI
     {
         public override LayerType Layer => LayerType.Base;
         public override VisibilityMode Mode => VisibilityMode.CanvasGroup;
-        public override string PanelId => "TargetPanel";
 
         [SerializeField] private Image _portrait;
         [SerializeField] private TMP_Text _nameText;
@@ -119,7 +118,7 @@ namespace Hotfix.GameSystems.UI
         private void OnTargetDeath()
         {
             Clear();
-            UIManager.Instance?.HideAlwaysAsync(PanelId);
+            UIManager.Instance?.HideAlwaysAsync<TargetPanel>();
         }
 
         private new void OnDestroy()

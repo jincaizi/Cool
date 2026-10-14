@@ -22,10 +22,10 @@ namespace Hotfix.GameSystems.UI
             // UIManager.Awake 异步注册面板（await Resources.Load），轮询等待
             while (UIManager.Instance == null)
                 await UniTask.Delay(50);
-            while (UIManager.Instance.GetPanel<CharacterSelectPanel>("CharacterSelectPanel") == null)
+            while (UIManager.Instance.GetPanel<CharacterSelectPanel>() == null)
                 await UniTask.Delay(50);
 
-            _panel = UIManager.Instance.GetPanel<CharacterSelectPanel>("CharacterSelectPanel");
+            _panel = UIManager.Instance.GetPanel<CharacterSelectPanel>();
             ApplyPreview(CharacterSelectionService.Load());
             _panel.OnSelectionChanged += ApplyPreview;
             _panel.OnClosed += LoadGameScene;

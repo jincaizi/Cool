@@ -10,7 +10,6 @@ namespace Hotfix.GameSystems.UI
     {
         public override LayerType Layer => LayerType.Base;
         public override VisibilityMode Mode => VisibilityMode.CanvasGroup;
-        public override string PanelId => "PlayerHudPanel";
 
         [SerializeField] private Image _portrait;
         [SerializeField] private TMP_Text _nameText;

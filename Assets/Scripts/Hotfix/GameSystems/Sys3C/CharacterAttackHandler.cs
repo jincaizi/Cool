@@ -54,11 +54,11 @@ namespace Hotfix.GameSystems.Sys3C
             }
 
             // Target panel
-            var targetPanel = UIManager.Instance?.GetPanel<TargetPanel>("TargetPanel");
+            var targetPanel = UIManager.Instance?.GetPanel<TargetPanel>();
             if (targetPanel != null)
             {
                 targetPanel.Bind(_currentTarget);
-                UIManager.Instance.ShowAlwaysAsync("TargetPanel").Forget();
+                UIManager.Instance.ShowAlwaysAsync<TargetPanel>().Forget();
             }
 
             _onTargetDeath = () =>
@@ -80,11 +80,11 @@ namespace Hotfix.GameSystems.Sys3C
             if (_selectionRing != null)
                 _selectionRing.Detach();
 
-            var targetPanel = UIManager.Instance?.GetPanel<TargetPanel>("TargetPanel");
+            var targetPanel = UIManager.Instance?.GetPanel<TargetPanel>();
             if (targetPanel != null)
             {
                 targetPanel.Clear();
-                UIManager.Instance.HideAlwaysAsync("TargetPanel").Forget();
+                UIManager.Instance.HideAlwaysAsync<TargetPanel>().Forget();
             }
 
             _currentTarget = null;

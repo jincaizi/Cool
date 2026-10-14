@@ -179,11 +179,11 @@ namespace Hotfix.GameSystems.Sys3C
             var uiManager = Hotfix.GameSystems.UI.UIManager.Instance;
             if (uiManager != null)
             {
-                var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>("PlayerHudPanel");
+                var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>();
                 if (hud != null)
                 {
                     hud.Bind(_statsProvider);
-                    uiManager.ShowAlwaysAsync("PlayerHudPanel").Forget();   // 回选人时被收起过，进世界要再显示
+                    uiManager.ShowAlwaysAsync<Hotfix.GameSystems.UI.PlayerHudPanel>().Forget();   // 回选人时被收起过，进世界要再显示
                 }
             }
             _hudHp = _currentHP;
@@ -725,11 +725,11 @@ namespace Hotfix.GameSystems.Sys3C
             if (_statsProvider == null) return;
             var uiManager = Hotfix.GameSystems.UI.UIManager.Instance;
             if (uiManager == null) return;
-            var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>("PlayerHudPanel");
+            var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>();
             if (hud != null)
             {
                 hud.Unbind();
-                uiManager.HideAlwaysAsync("PlayerHudPanel").Forget();
+                uiManager.HideAlwaysAsync<Hotfix.GameSystems.UI.PlayerHudPanel>().Forget();
             }
         }
 

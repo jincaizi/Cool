@@ -17,7 +17,6 @@ namespace Hotfix.GameSystems.UI
     {
         public override LayerType Layer => LayerType.Popup;
         public override VisibilityMode Mode => VisibilityMode.CanvasGroup;
-        public override string PanelId => "CharacterSelectPanel";
 
         [SerializeField] private Button _maleButton;
         [SerializeField] private Button _femaleButton;
@@ -133,7 +132,7 @@ namespace Hotfix.GameSystems.UI
         private async void CloseSelf()
         {
             if (UIManager.Instance != null)
-                await UIManager.Instance.CloseAsync(PanelId);
+                await UIManager.Instance.CloseAsync<CharacterSelectPanel>();
             OnClosed?.Invoke();
         }
     }

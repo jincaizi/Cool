@@ -7,7 +7,6 @@ namespace Hotfix.GameSystems.UI
     {
         public abstract LayerType Layer { get; }
         public abstract VisibilityMode Mode { get; }
-        public abstract string PanelId { get; }
 
         public Canvas Canvas { get; private set; }
         public CanvasGroup CanvasGroup { get; private set; }

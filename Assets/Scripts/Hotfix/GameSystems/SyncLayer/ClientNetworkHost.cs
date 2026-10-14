@@ -444,7 +444,7 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             var ui = UIManager.Instance;
             if (ui == null) return;
-            ui.OpenAsync("CharacterSelectPanel").Forget();
+            ui.OpenAsync<CharacterSelectPanel>().Forget();
         }
 
         public void Disconnect()

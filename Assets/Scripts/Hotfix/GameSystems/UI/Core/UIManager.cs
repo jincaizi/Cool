@@ -11,7 +11,22 @@ namespace Hotfix.GameSystems.UI
         public static UIManager Instance { get; private set; }
 
         private readonly Canvas[] _layers = new Canvas[UIConst.Layers.Length];
-        private readonly Dictionary<string, UIPanel> _registry = new Dictionary<string, UIPanel>();
+
+        /// <summary>
+        /// 全项目唯一的面板清单。**加一个面板 = 这里加一行 + 加一个预制体。**
+        /// 漏注册由 UIPanelRegistryTests 在 EditMode 里当场报红（它反射全部 UIPanel 子类）。
+        ///
+        /// 路由用**类型**而不是字符串：改名、打错、复制粘贴都会变成编译错误，
+        /// 不再有 `GetPanel&lt;T&gt;() == null` 这种静默失败。
+        /// </summary>
+        internal static readonly (System.Type panelType, string prefabPath)[] PanelRegistry =
+        {
+            (typeof(PlayerHudPanel),       "Prefabs/UI/PlayerHudPanel"),
+            (typeof(TargetPanel),          "Prefabs/UI/TargetPanel"),
+            (typeof(CharacterSelectPanel), "Prefabs/UI/CharacterSelectPanel"),
+        };
+
+        private readonly Dictionary<System.Type, UIPanel> _panels = new Dictionary<System.Type, UIPanel>();
 
         private async void Awake()
         {
@@ -28,23 +43,21 @@ namespace Hotfix.GameSystems.UI
 
         private async UniTask LoadBuiltInPanels()
         {
-            await RegisterFromPrefab("Prefabs/UI/PlayerHudPanel", "PlayerHudPanel");
-            await RegisterFromPrefab("Prefabs/UI/TargetPanel", "TargetPanel");
-            await RegisterFromPrefab("Prefabs/UI/CharacterSelectPanel", "CharacterSelectPanel");
+            foreach (var (panelType, prefabPath) in PanelRegistry)
+            {
+                await RegisterFromPrefab(panelType, prefabPath);
+            }
 
-            if (_registry.TryGetValue("PlayerHudPanel", out var hud))
+            if (_panels.TryGetValue(typeof(PlayerHudPanel), out var hud))
             {
                 await ShowPanelAsync(hud);
             }
 
             // 启动流程：先选人，再进世界（选人面板全屏覆盖 HUD）
-            if (_registry.TryGetValue("CharacterSelectPanel", out var select))
-            {
-                await OpenAsync("CharacterSelectPanel");
-            }
+            await OpenAsync<CharacterSelectPanel>();
         }
 
-        private async UniTask RegisterFromPrefab(string resourcePath, string panelId)
+        private async UniTask RegisterFromPrefab(System.Type panelType, string resourcePath)
         {
             var prefab = Resources.Load<GameObject>(resourcePath);
             if (prefab == null)
@@ -62,12 +75,16 @@ namespace Hotfix.GameSystems.UI
                 return;
             }
 
-            if (panel.PanelId != panelId)
+            // 注册表说这个路径是 A，预制体上却是 B —— 这是接线错误，不是警告
+            if (!panelType.IsInstanceOfType(panel))
             {
-                Debug.LogWarning($"UIManager: PanelId mismatch, expected '{panelId}' got '{panel.PanelId}'");
+                Debug.LogError($"UIManager: 注册表把 {resourcePath} 标成 {panelType.Name}，" +
+                               $"但预制体上的组件是 {panel.GetType().Name}");
+                Destroy(instance);
+                return;
             }
 
-            Register(panel);
+            Register(panelType, panel);
         }
 
         private void CreateCanvasLayers()
@@ -99,17 +116,12 @@ namespace Hotfix.GameSystems.UI
             return canvas;
         }
 
-        public void Register(UIPanel panel)
+        private void Register(System.Type panelType, UIPanel panel)
         {
-            if (panel == null || string.IsNullOrEmpty(panel.PanelId))
+            if (panel == null || panelType == null)
             {
-                Debug.LogError("UIManager: Cannot register null panel or empty PanelId");
+                Debug.LogError("UIManager: Cannot register null panel");
                 return;
-            }
-
-            if (_registry.ContainsKey(panel.PanelId))
-            {
-                Debug.LogWarning($"UIManager: Panel '{panel.PanelId}' already registered, replacing.");
             }
 
             var mismatch = UIPanel.DescribeModeMismatch(
@@ -121,14 +133,19 @@ namespace Hotfix.GameSystems.UI
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 throw new System.InvalidOperationException(
-                    $"UIManager: 面板 '{panel.GetType().Name}' {mismatch}");
+                    $"UIManager: 面板 '{panelType.Name}' {mismatch}");
 #else
-                Debug.LogError($"UIManager: 面板 '{panel.GetType().Name}' {mismatch} —— 已跳过注册");
+                Debug.LogError($"UIManager: 面板 '{panelType.Name}' {mismatch} —— 已跳过注册");
                 return;
 #endif
             }
 
-            _registry[panel.PanelId] = panel;
+            if (_panels.ContainsKey(panelType))
+            {
+                Debug.LogWarning($"UIManager: Panel '{panelType.Name}' already registered, replacing.");
+            }
+
+            _panels[panelType] = panel;
 
             // Reparent to correct layer canvas
             var layerIndex = (int)panel.Layer;
@@ -144,22 +161,22 @@ namespace Hotfix.GameSystems.UI
             panel.ApplyVisibilityOff();
         }
 
-        // ===== Overlay (Top / Guide) =====
+        // ===== Open / Close =====
 
-        public async UniTask OpenAsync(string panelId)
+        public async UniTask OpenAsync<T>() where T : UIPanel
         {
-            if (!_registry.TryGetValue(panelId, out var panel))
+            if (!_panels.TryGetValue(typeof(T), out var panel))
             {
-                Debug.LogError($"UIManager: Panel '{panelId}' not registered");
+                Debug.LogError($"UIManager: Panel '{typeof(T).Name}' not registered");
                 return;
             }
 
             await ShowPanelAsync(panel);
         }
 
-        public async UniTask CloseAsync(string panelId)
+        public async UniTask CloseAsync<T>() where T : UIPanel
         {
-            if (!_registry.TryGetValue(panelId, out var panel))
+            if (!_panels.TryGetValue(typeof(T), out var panel))
                 return;
 
             await HidePanelAsync(panel);
@@ -167,20 +184,20 @@ namespace Hotfix.GameSystems.UI
 
         // ===== Always (Base) =====
 
-        public async UniTask ShowAlwaysAsync(string panelId)
+        public async UniTask ShowAlwaysAsync<T>() where T : UIPanel
         {
-            if (!_registry.TryGetValue(panelId, out var panel))
+            if (!_panels.TryGetValue(typeof(T), out var panel))
             {
-                Debug.LogError($"UIManager: Panel '{panelId}' not registered");
+                Debug.LogError($"UIManager: Panel '{typeof(T).Name}' not registered");
                 return;
             }
 
             await ShowPanelAsync(panel);
         }
 
-        public async UniTask HideAlwaysAsync(string panelId)
+        public async UniTask HideAlwaysAsync<T>() where T : UIPanel
         {
-            if (!_registry.TryGetValue(panelId, out var panel))
+            if (!_panels.TryGetValue(typeof(T), out var panel))
                 return;
 
             await HidePanelAsync(panel);
@@ -188,9 +205,9 @@ namespace Hotfix.GameSystems.UI
 
         // ===== Lookup =====
 
-        public T GetPanel<T>(string panelId) where T : UIPanel
+        public T GetPanel<T>() where T : UIPanel
         {
-            _registry.TryGetValue(panelId, out var panel);
+            _panels.TryGetValue(typeof(T), out var panel);
             return panel as T;
         }
 

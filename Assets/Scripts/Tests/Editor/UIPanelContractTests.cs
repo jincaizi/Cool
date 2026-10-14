@@ -18,7 +18,6 @@ namespace GameSys.EditorTests
         {
             public override LayerType Layer => LayerType.Base;
             public override VisibilityMode Mode => VisibilityMode.CanvasGroup;
-            public override string PanelId => "ProbePanel";
         }
 
         [Test]
