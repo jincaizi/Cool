@@ -614,7 +614,9 @@ git add Assets/Scripts/Hotfix/GameSystems/UI/ \
         Assets/Scripts/Hotfix/GameSystems/Sys3C/CharacterAttackHandler.cs \
         Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs \
         Assets/Scripts/Tests/Editor/UIPanelRegistryTests.cs \
-        Assets/Scripts/Tests/Editor/UIPanelRegistryTests.cs.meta
+        Assets/Scripts/Tests/Editor/UIPanelRegistryTests.cs.meta \
+        Assets/Scripts/Tests/Editor/UIPanelLifecycleTests.cs \
+        Assets/Scripts/Tests/Editor/UIPanelContractTests.cs
 git commit -m "refactor(ui): address panels by type instead of a magic string
 
 PanelId was a string that had to match a literal at every call site;
