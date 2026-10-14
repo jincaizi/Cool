@@ -1223,7 +1223,21 @@ grep -n "com.unity.inputsystem" Packages/packages-lock.json
 - [ ] **步骤 6：Commit（包与 asmdef 部分）**
 
 ```bash
-git add Packages/manifest.json Assets/Scripts/Hotfix/GameSystems/GameSys.asmdef
+# ⚠️ manifest 与 lock 都另有**与本任务无关**的未提交改动（com.ivanmurzak.unity.mcp 0.86.3 → 0.90.0），
+#    所以**不能整文件 `git add`** —— 那会把无关改动一起提交。
+#    用 hunk 级暂存：筛出只含目标改动的补丁，`--cached` 应用。
+git diff -- Packages/manifest.json > /tmp/m.patch
+#   把 /tmp/m.patch 裁成只含 "com.unity.inputsystem" 那一个 hunk 的文件 → /tmp/m_target.patch
+git apply --cached /tmp/m_target.patch
+
+# lock 同理：只取 com.unity.inputsystem 那个条目块的 hunk，
+# **不要**取 com.ivanmurzak.unity.mcp 的版本行。lock 必须一起提交 ——
+# 否则已提交的快照里 manifest 已经删了这个包、lock 却还声明着它，两者不一致。
+git diff -- Packages/packages-lock.json > /tmp/l.patch
+#   裁成只含 inputsystem 条目块的文件 → /tmp/l_target.patch
+git apply --cached /tmp/l_target.patch
+
+git add Assets/Scripts/Hotfix/GameSystems/GameSys.asmdef
 git commit -m "chore(ui): drop the unused Input System package
 
 Nothing in Assets/Scripts uses UnityEngine.InputSystem (0 hits), there
