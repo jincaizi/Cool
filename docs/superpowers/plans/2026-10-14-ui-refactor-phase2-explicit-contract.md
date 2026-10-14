@@ -956,6 +956,14 @@ HUD after the gate, so the T12 fix survives the phase 4 switch."
 
 **背景（修复规格 R8）**：两个场景各带一份 `UIManager` 与 `EventSystem`，靠"先加载的场景先 Awake"裁决单例 —— 隐式顺序依赖，且场景里漏放一份就没有 UI。
 
+> ⚠️ **本任务有一处必须盯住的风险：它会改变 PlayMode 套件的运行环境。**
+>
+> 此前测试场景里**从来没有** UIManager（`PlayerHudBindingTests.cs:19` 的注释明写"测试场景没有 UIManager"）。bootstrap 在 `AfterSceneLoad` 无条件创建之后，**每一个 PlayMode 用例都会凭空多出一套 UI**：加载 3 个面板、并把 `CharacterSelectPanel` 的 `OnShow` 跑一遍（它会读 `CharacterSelectionService` 与 `NetworkModeService`，而 `PlayerHudBindingTests` 恰好对 `NetworkModeService` 做了 Save/Restore —— 说明它知道这类副作用）。
+>
+> **不预先加"测试里跳过 bootstrap"的开关** —— 那种守卫要么靠探测测试程序集（在编辑器里恒真，等于把 bootstrap 整体关掉），要么靠猜场景名，都是投机。**先让证据说话**：任务 6 步骤 4 会把 PlayMode 结果与基线逐条比对，若有新增失败，bootstrap 的测试期创建就是第一嫌疑。
+>
+> **任务 6 步骤 4 因此额外要求**：明确确认这 4 个非联网用例仍在通过名单里 —— `PlayerHudBindingTests`、`CharacterSelectPanelReopenTests`、`MobileTouchInputTests`、`RemoteRenderBranchTests`。
+
 - [ ] **步骤 1：编写失败的测试**
 
 创建 `Assets/Scripts/Tests/PlayMode/UIBootstrapTests.cs`：
@@ -1253,6 +1261,17 @@ separate commit."
 
 运行：`tests-run(testMode: "PlayMode")`
 预期：与基线**逐条同名同消息**，零新增失败。基线为 28 个总数 / 15 通过 / 13 失败（全是 `KcpNet.PlayModeTests.*` 连不上 `127.0.0.1:8000` 的联网用例）。
+
+**另外必须逐名确认这 4 个非联网用例仍在通过名单里** —— 任务 4 的 bootstrap 会改变 PlayMode 的运行环境（每个用例凭空多出一套 UI），它们是第一承受面：
+
+| 用例 | 为什么盯它 |
+|---|---|
+| `PlayerHudBindingTests` | 它的注释写明"测试场景没有 UIManager"——这个前提没了 |
+| `CharacterSelectPanelReopenTests` | 它 `Confirm()` 会走 `UIManager.Instance.CloseAsync`，而此前那条路径因 `Instance == null` 被跳过 |
+| `MobileTouchInputTests` | 输入适配器接线 |
+| `RemoteRenderBranchTests` | 渲染分支 |
+
+若其中任何一个从通过变成失败，**先查 bootstrap 的测试期创建**，而不是怀疑被测代码。
 
 **不要为了把 PlayMode 跑绿而启动服务端进程** —— 那属环境决策，不在本计划范围内。
 
