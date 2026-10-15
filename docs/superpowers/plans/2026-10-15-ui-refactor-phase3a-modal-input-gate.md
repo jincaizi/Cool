@@ -1218,6 +1218,14 @@ namespace KcpNet.PlayModeTests
             Assert.IsNotNull(ui, "bootstrap 没有建 UIManager");
             yield return ui.WhenReady().ToCoroutine();
 
+            // ⚠️ 启动流程的最后一步**就是打开选人面板**（LoadBuiltInPanels → OpenAsync<CharacterSelectPanel>），
+            // 所以此刻闸门本来就是挡住的。必须先把它关掉，拿到一个"没有模态面板"的干净起点 ——
+            // 否则下面第一个断言（按住攻击必须读到 true）必红，而且红得让人以为是闸门的 bug。
+            yield return ui.CloseAsync<CharacterSelectPanel>().ToCoroutine();
+            yield return null;
+            Assert.IsFalse(UIInputGate.IsBlocked,
+                "前置：关掉选人面板后闸门必须是通的（不通说明 RefreshModalGate 没归零）");
+
             _probe = new GameObject("InputProbe");
             var input = _probe.AddComponent<InputManager>();
 
