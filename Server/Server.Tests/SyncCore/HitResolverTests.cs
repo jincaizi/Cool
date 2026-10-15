@@ -55,6 +55,33 @@ public class HitResolverTests
     }
 
     [Fact]
+    public void Single_Explicit_Target_Behind_Caster_Misses()
+    {
+        // D-6 绕背躲怪：显式目标同样要过锥（此前只查距离，锥角是死参数）
+        var candidates = new List<CombatCandidate> { C(2, 0f, -2f) };
+        var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates);
+        Assert.Empty(hits);
+    }
+
+    [Fact]
+    public void Single_Explicit_Target_At_Cone_Edge_Hits()
+    {
+        // 锥边界恰 60°：(0.8660254, 0.5) → dot == halfCos，含边界
+        var candidates = new List<CombatCandidate> { C(2, 0.8660254f, 0.5f) };
+        var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates);
+        Assert.Equal(new long[] { 2 }, hits);
+    }
+
+    [Fact]
+    public void Single_Explicit_Target_Zero_Distance_Hits()
+    {
+        // 与自动目标同一条零距离护栏
+        var candidates = new List<CombatCandidate> { C(2, 0f, 0f) };
+        var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates);
+        Assert.Equal(new long[] { 2 }, hits);
+    }
+
+    [Fact]
     public void Single_AutoTarget_Picks_Nearest_In_Cone()
     {
         var candidates = new List<CombatCandidate> { C(2, 0f, 3f), C(3, 0f, 1f) };

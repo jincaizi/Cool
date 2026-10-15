@@ -55,6 +55,30 @@ namespace Hotfix.GameSystems.Tests.SyncCore
         }
 
         [Test]
+        public void Single_Explicit_Target_Behind_Caster_Misses()
+        {
+            var candidates = new List<CombatCandidate> { C(2, 0f, -2f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates);
+            Assert.That(hits, Is.Empty);
+        }
+
+        [Test]
+        public void Single_Explicit_Target_At_Cone_Edge_Hits()
+        {
+            var candidates = new List<CombatCandidate> { C(2, 0.8660254f, 0.5f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates);
+            Assert.That(hits, Is.EqualTo(new long[] { 2 }));
+        }
+
+        [Test]
+        public void Single_Explicit_Target_Zero_Distance_Hits()
+        {
+            var candidates = new List<CombatCandidate> { C(2, 0f, 0f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates);
+            Assert.That(hits, Is.EqualTo(new long[] { 2 }));
+        }
+
+        [Test]
         public void Single_AutoTarget_Picks_Nearest_In_Cone()
         {
             var candidates = new List<CombatCandidate> { C(2, 0f, 3f), C(3, 0f, 1f) };
