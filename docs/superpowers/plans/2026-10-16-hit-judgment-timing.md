@@ -930,13 +930,16 @@ git commit -m "refactor(combat): split the cast decision from the hit resolution
                             _ = _castHandler.BroadcastSwingAsync(decision); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
                         }
 
-                        // 判定帧到期（F13：必须早于 TickRespawns——本 tick 打死的实体即时进死亡流程）
-                        foreach (var resolution in _castHandler.DrainResolved((uint)tick))
-                            _ = _castHandler.BroadcastDamageAsync(resolution);
-
                         foreach (var npcId in _monsterModule.DrainRemovedNpcs())
                             _aoi.RemoveEntity(npcId);
                     }
+
+                    // 判定帧到期（F13：必须早于 TickRespawns——本 tick 打死的实体即时进死亡流程）
+                    // **2026-10-16 实现期修正（人类裁定）**：本段原先写在上面的 if 块**内**，导致
+                    // 不带 --monsters 跑服务端时玩家施法判定永不结算、`_pending` 无界增长。
+                    // 它是 tick 级语句，与怪物无关——**不能放进上面的 if**。
+                    foreach (var resolution in _castHandler.DrainResolved((uint)tick))
+                        _ = _castHandler.BroadcastDamageAsync(resolution);
 ```
 
 - [ ] **步骤 6：跑全量服务端测试**
@@ -1176,11 +1179,15 @@ public class MonsterWindupTests
 
 `MonsterModule.cs` 两处：
 
-1) `Tick` 里在 BT 之前清理到期前摇（紧接 `DetectHitOrDeath(m, entity, tick);` 之后、`bool deadNow = ...` 之前）：
+1) `Tick` 里在**行为树块之后**清理到期前摇（紧接 BT 的 `else { m.Moving = false; }` 之后、`hitWindowJustExpired` 判定之前）：
+
+> **2026-10-16 实现期修正（人类裁定 A）**：本节原先写"紧接 `DetectHitOrDeath` 之后、BT 之前"，与本节步骤 1 的用例 3（`Windup_Expires_And_Unlocks_After_HitDelayTicks` 断言 `!HasValue`）以及规格 §3"前摇期**持续**以 90°/s 朝向目标"自相矛盾——因为测试只 `Tick` + `DrainPendingCasts`、不跑裁决链，冷却永不记录，清理若在 BT 之前，**同一 tick 行为树会立刻重新决策并重新武装** `AttackResolveTick`（t=0 决策 ART=6 → t=6 重武装 12），用例 3 必红。挪到 BT 之后即解：前摇 = 6 tick 整、转向覆盖到判定帧、与 `HitDelayTicks(50002)=6` 精确对齐。生产行为两种写法**不可区分**（怪物冷却 15 tick ≫ 前摇 6 tick，冷却门永远先关上）。
 
 ```csharp
                 // 前摇到期 → 解锁（D-10：到期即恢复行为树；本 tick 的判定由 Server3C 的
-                // DrainResolved 负责，二者互不依赖——解锁只影响"怪物下一步做什么"）
+                // DrainResolved 负责，二者互不依赖——解锁只影响"怪物下一步做什么"）。
+                // **必须在行为树块之后**：放在之前会让测试路径（只 Tick、不走裁决链 ⇒ 冷却永不记录）
+                // 在同一 tick 立刻重新决策并重新武装，前摇期变成 5 tick 而非 6。
                 if (m.AttackResolveTick.HasValue && tick >= m.AttackResolveTick.Value)
                     m.AttackResolveTick = null;
 ```
