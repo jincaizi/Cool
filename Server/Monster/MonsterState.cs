@@ -36,6 +36,10 @@ namespace KcpServer.Monster
         // 攻击技能 id（模板映射：1→50001，2→50002；D-P5-2）
         public int AttackSkillId { get; }
 
+        /// <summary>前摇到期 tick（决策 tick + CombatRules.HitDelayTicks）——HasValue 表示
+        /// **前摇中**：站定、朝目标转向、锁住行为树（D-10 前摇 = 承诺）。由模块在到期 tick 自清理。</summary>
+        public uint? AttackResolveTick { get; set; }
+
         // 受击硬直窗口（玩家命中 → Hit 态 HitDisplayTicks；窗口内跳过行为树）
         public uint? HitStartTick;
 

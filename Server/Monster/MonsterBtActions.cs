@@ -10,6 +10,10 @@ namespace KcpServer.Monster
     /// </summary>
     public static class MonsterBtActions
     {
+        /// <summary>前摇期转身速度（度/秒）——**比移动态 180 慢**（D-7 人类裁定）：
+        /// 把冲刺绕圈的半径门槛从 1.2m 放宽到 1.75m，绕背才是可执行的操作。</summary>
+        public const float WindupTurnSpeedDegPerSecond = 90f;
+
         public static BtStatus Patrol(MonsterTickContext ctx)
         {
             var m = ctx.State;
@@ -52,6 +56,16 @@ namespace KcpServer.Monster
             var m = ctx.State;
             var entity = ctx.Entity;
 
+            // 前摇 = 承诺（D-10）：站定 + 朝目标转向，不受距离/目标丢失影响；
+            // 只有死亡能取消（死亡后实体被移除/IsAlive=false，判定阶段自然丢弃这一刀）。
+            if (m.AttackResolveTick.HasValue)
+            {
+                m.Moving = false;
+                if (m.LastKnownTargetPosition.HasValue)
+                    ctx.Mover.TurnTowards(m, m.LastKnownTargetPosition.Value, ctx.DeltaTime, WindupTurnSpeedDegPerSecond);
+                return BtStatus.Running;
+            }
+
             // 目标丢失（死亡/离场）→ 失败回 Chase/Return
             if (!m.TargetId.HasValue) return BtStatus.Failure;
 
@@ -62,7 +76,7 @@ namespace KcpServer.Monster
 
             m.Moving = false;
 
-            // 冷却门（tick 基准——与 P4 玩家同机制；裁决在怪物 tick 后发生，记录即时生效）
+            // 冷却门（tick 基准——与 P4 玩家同机制；冷却在**决策**时记录，D-3）
             // 表缺失校验已前移 SpawnMonster（fail fast——避免在攻击距离静默冻结）；此处为防御分支，正常不可达
             if (!CombatRules.TryGet(m.AttackSkillId, out var entry)) return BtStatus.Failure;
             if (!entity.IsCastReady(m.AttackSkillId, ctx.Tick, CombatRules.CooldownTicks(entry)))
@@ -71,7 +85,7 @@ namespace KcpServer.Monster
             ctx.Module.QueueCast(m.NpcId, new CastRequest
             {
                 SkillId = m.AttackSkillId,
-                TargetPlayerId = m.TargetId.Value, // 显式仇恨目标（HitResolver 按 id + 距离裁决，D-P5-4）
+                TargetPlayerId = m.TargetId.Value, // 显式仇恨目标（HitResolver 按 id + 距离 + 锥角裁决，D-P5-4/D-6）
                 Shape = new HitShape
                 {
                     ShapeType = 0, // Single——范围 = 配置 attackRange（须 ≤ 表上限——ValidateShape 校验）
@@ -79,8 +93,9 @@ namespace KcpServer.Monster
                     Angle = 120f
                 }
             });
+            m.AttackResolveTick = ctx.Tick + CombatRules.HitDelayTicks(entry); // 前摇到期（判定帧）
             entity.ActionState = (byte)NpcAnimationState.Attack;
-            return BtStatus.Running; // 保持攻击态；下一 tick 冷却门再判
+            return BtStatus.Running; // 保持攻击态；下一 tick 前摇分支再判
         }
 
         public static BtStatus Return(MonsterTickContext ctx)

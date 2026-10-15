@@ -191,6 +191,11 @@ namespace KcpServer.Monster
                     m.Moving = false; // 本 tick 死亡/受击硬直：跳过行为树（ActionState 保持 Death/Hit 不被 BT 覆盖）
                 }
 
+                // 前摇到期 → 解锁（D-10：到期即恢复行为树；本 tick 的判定由 Server3C 的
+                // DrainResolved 负责，二者互不依赖——解锁只影响"怪物下一步做什么"）
+                if (m.AttackResolveTick.HasValue && tick >= m.AttackResolveTick.Value)
+                    m.AttackResolveTick = null;
+
                 // 硬直窗口**刚过期那一 tick**的状态写回（终审 I1）：本 tick BT 已恢复，但 Chase 在攻击距离内
                 // `return Success` 不写状态、Attack 在冷却门未过时 `return Running` 也不写——近战互殴（目标
                 // 一直留在攻击距离内）时 ActionState 会从受击那刻停在 Hit，直到下一次真正施法或目标离开。
@@ -299,7 +304,9 @@ namespace KcpServer.Monster
                     new BtAction(MonsterBtActions.Patrol)
                 ),
                 new BtSequence(
-                    new BtCondition(m => m.AlertLevel == AlertLevel.HOSTILE && m.TargetId.HasValue),
+                    // 前摇期允许目标丢失（F12）：否则"目标跑出感知半径"会让怪挥到一半改走回家
+                    new BtCondition(m => m.AlertLevel == AlertLevel.HOSTILE
+                                         && (m.TargetId.HasValue || m.AttackResolveTick.HasValue)),
                     new BtAction(MonsterBtActions.Chase),
                     new BtAction(MonsterBtActions.Attack)
                 ),

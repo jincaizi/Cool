@@ -58,6 +58,16 @@ namespace KcpServer.Monster
             return (dx * dx + dz * dz) < (threshold * threshold);
         }
 
+        /// <summary>前摇期原地转向：改朝向、不动位置。复用移动的转身数学（同一套 Slerp/角差）。</summary>
+        public void TurnTowards(MonsterState m, Vector3 targetPosition, float deltaTime, float degreesPerSecond)
+        {
+            Vector3 direction = targetPosition - m.Position;
+            direction.Y = 0;
+            if (direction.X * direction.X + direction.Z * direction.Z < 0.001f) return; // 零向量：保持当前朝向
+            direction = direction.Normalize();
+            m.Rotation = RotateTowards(m.Rotation, Quaternion.LookRotation(direction), degreesPerSecond * deltaTime);
+        }
+
         private static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDegrees)
         {
             float angle = Angle(from, to);
