@@ -68,6 +68,7 @@
 - `UIPanel.CanvasGroup` 是 `{ get; private set; }`，由 `Awake` 与 `EnsureCanvasGroup()` 赋值。
 - 测试程序集 `GameSys.EditorTests` 已有 `InternalsVisibleTo`，能访问 `internal` 成员。
 - `System.Array.Empty<AppearanceEntry>()` 之类的**无关既有改动**不在本计划范围内。
+- ⚠️ **测试文件同时 `using System;` 与 `using UnityEngine;` 时，`Object.DestroyImmediate` 会报 `CS0104` 歧义**（`System.Object` vs `UnityEngine.Object`）。本计划里只有 `UIManagerRegistrationTests.cs`（任务 1 建、任务 6 追加）同时有这两个 using，所以那两处的片段写的是全限定名 `UnityEngine.Object.DestroyImmediate`。**仓库既有模式就是这条**：全仓带 `using System;` 的测试文件都写全限定名，不带的才写裸 `Object.`。（此处由任务 1 的实现者实测发现 —— 简报初版只写裸 `Object.`，照抄到不了"4 个测试 PASS"。）
 
 ### 运行测试的方式
 
@@ -146,7 +147,7 @@ namespace GameSys.EditorTests
         [TearDown]
         public void TearDown()
         {
-            if (_go != null) Object.DestroyImmediate(_go);
+            if (_go != null) UnityEngine.Object.DestroyImmediate(_go);
         }
 
         [Test]
@@ -947,7 +948,7 @@ focus-loss path share one implementation."
         [TearDown]
         public void TearDown()
         {
-            if (_go != null) Object.DestroyImmediate(_go);
+            if (_go != null) UnityEngine.Object.DestroyImmediate(_go);
         }
 
         [Test]
