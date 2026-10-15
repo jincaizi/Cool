@@ -40,6 +40,12 @@ namespace KcpServer.Monster
         public static BtStatus Chase(MonsterTickContext ctx)
         {
             var m = ctx.State;
+
+            // 前摇 = 承诺（D-10/F12）：前摇期把本 tick 让给 Attack 的前摇分支——
+            // 不移动、不写 ActionState（写 Run 会当场截断挥砍），也不因距离变化抢先追击。
+            // 这一条和 Hostile 条件放宽（MonsterModule）是一对：前者管"进得了 Attack"，后者管"不中途改走"。
+            if (m.AttackResolveTick.HasValue) return BtStatus.Success;
+
             Vector3 target = m.LastKnownTargetPosition ?? m.Position;
 
             // 进入攻击距离即成功（P5 修正）——让序列前进到 Attack
