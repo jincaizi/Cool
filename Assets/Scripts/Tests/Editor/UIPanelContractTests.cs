@@ -62,6 +62,9 @@ namespace GameSys.EditorTests
                 // Assert
                 Assert.IsNotNull(first);
                 Assert.AreSame(first, second, "重复调用必须复用同一个，不能越加越多");
+                Assert.AreSame(first, panel.CanvasGroup,
+                    "EnsureCanvasGroup 必须把组件**缓存**到面板属性上 —— 可见性判断读的是这个属性，" +
+                    "只断言返回值的话，`CanvasGroup = cg` 被删时缺陷会复活而无测试报红");
                 Assert.AreEqual(1, go.GetComponents<CanvasGroup>().Length);
             }
             finally

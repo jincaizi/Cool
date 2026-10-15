@@ -154,7 +154,12 @@ namespace Hotfix.GameSystems.UI
             return canvas;
         }
 
-        private void Register(System.Type panelType, UIPanel panel)
+        /// <summary>
+        /// 注册一个面板。`internal` 而不是 `private`：注册期的校验是**契约的守门人**，
+        /// 它必须有接线测试（UIManagerRegistrationTests），而测试程序集靠 InternalsVisibleTo 访问。
+        /// 对外仍不可见 —— 唯一的生产调用点是 RegisterFromPrefab。
+        /// </summary>
+        internal void Register(System.Type panelType, UIPanel panel)
         {
             if (panel == null || panelType == null)
             {
