@@ -359,4 +359,29 @@ public class MonsterModuleTests
         Assert.Equal(6, module.Count); // 六只都在场——防"没生成所以没施法"的假绿
         Assert.Empty(castSkills);
     }
+
+    /// <summary>F19：客户端 `NpcEntityAnimator` 的忙位解除**依赖**"决策与置 ActionState=Attack
+    /// 发生在同一次 BT 动作内"（否则挥砍被锁定在 Attack 态不释放）。这条不变量此前只活在注释里——
+    /// 本用例把它钉成可证伪的断言。</summary>
+    [Fact]
+    public void Attack_Decision_And_Action_State_Happen_In_The_Same_Tick()
+    {
+        var (store, module) = Create();
+        LoginPlayer(store, 1, new Vector3(0f, 0f, 0f));
+        var wolf = store.GetPlayer(MonsterModule.NpcIdSeed + 1)!;
+
+        uint decideTick = 0;
+        for (uint t = 0; t < 200 && decideTick == 0; t++)
+        {
+            module.Tick(t);
+            if (module.DrainPendingCasts().Count > 0)
+            {
+                decideTick = t;
+                // 同一次 BT 动作的产物：入队的那一 tick 就必须已经是 Attack 态
+                Assert.Equal((byte)NpcAnimationState.Attack, wolf.ActionState);
+            }
+        }
+        Assert.NotEqual(0u, decideTick);
+        Assert.True(module.GetState(MonsterModule.NpcIdSeed + 1)!.AttackResolveTick.HasValue);
+    }
 }

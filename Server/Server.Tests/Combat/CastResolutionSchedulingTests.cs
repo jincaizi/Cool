@@ -117,6 +117,21 @@ public class CastResolutionSchedulingTests
         Assert.Single(one.Hits);
     }
 
+    [Fact]
+    public void Packet_Path_Decides_On_The_Tick_That_Is_About_To_Run()
+    {
+        // F17：包处理发生在 tick 处理之前，`CurrentTick` 此刻仍是上一 tick 的值——
+        // CastHandler.HandleCastAsync 因此传 CurrentTick + 1。本用例钉住这个换算口径本身：
+        // 决策 tick = T 时，判定发生在 T + HitDelayTicks（早一 tick 或晚一 tick 都是缺陷）。
+        var (store, resolver, caster, target) = World(1.5f);
+        const uint decideTick = 37;
+        resolver.Decide(caster, Swing(), decideTick);
+
+        Assert.Empty(resolver.DrainResolved(decideTick + CombatRules.HitDelayTicks(EntryOf(10001)) - 1));
+        var one = Assert.Single(resolver.DrainResolved(decideTick + CombatRules.HitDelayTicks(EntryOf(10001))));
+        Assert.Single(one.Hits);
+    }
+
     private static SkillEntry EntryOf(int skillId)
     {
         CombatRules.TryGet(skillId, out var entry);
