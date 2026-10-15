@@ -345,11 +345,21 @@ namespace GameSys.EditorTests
 
 - [ ] **步骤 3：验证这条守卫真的有牙齿**
 
-把 `Assets/SimpleLowPolyNature/Scenes/DemoDay.unity` 用 `grep` 找一处现有的 `m_Name:`，临时把它改成 `m_Name: UIManager`，重跑上面的命令。
+> ⚠️ **本步骤有一个必须先做的前置动作，否则会把 Unity 主线程堵死。**
+>
+> **改一个正在编辑器里打开着的场景文件，Unity 会弹 "modified externally" 模态框**，而模态框会阻塞 MCP 主线程 —— 此后**所有** MCP 工具调用一律挂死（本仓库记忆里记过这个现象，阶段 3a 的任务 2 第一次执行时正是这样卡住的）。
+> **解法：先把场景在编辑器里关掉。** 守卫读的是磁盘上的文本，场景开不开不影响它的结果。
 
-预期：**FAIL**，且报错里点名 `DemoDay.unity`。**确认之后把改动逐字还原**，并 `git diff -- Assets/SimpleLowPolyNature/Scenes/DemoDay.unity` 确认无输出。
+1. `scene-list-opened` 看一眼 —— 若 `DemoDay` 已打开，`scene-unload` 把它卸载（**不要** `scene-save`，那会把编辑器里的状态写回磁盘）
+2. **整文件备份**：`cp Assets/SimpleLowPolyNature/Scenes/DemoDay.unity /tmp/DemoDay.unity.bak`
+3. 用 `grep` 找一处现有的 `m_Name:`，改成 `m_Name: UIManager`
+4. 重跑上面的命令 —— 预期 **FAIL**，且报错里点名 `DemoDay.unity`
+5. **用备份整文件还原**：`cp /tmp/DemoDay.unity.bak Assets/SimpleLowPolyNature/Scenes/DemoDay.unity`
+6. 双重确认还原干净：`git diff -- Assets/SimpleLowPolyNature/Scenes/DemoDay.unity` 无输出，且 `sha256sum` 与备份一致
 
-> 这一步不能省：一条永远绿的守卫等于没有守卫（阶段 2 的任务 6 就是因为这个被审查判过一回）。
+> 这一步不能省：一条永远绿的守卫等于没有守卫（阶段 2 的任务 6 就是因为这个被审查判过一回 —— 那份"程序化比对"把两份**手打的、内容相同**的名单拿来比对，任何运行都会通过）。
+>
+> **如果它没有变红**，停下来修守卫，不要把一个永远绿的测试交上去。
 
 - [ ] **步骤 4：给 UIBootstrapTests 加前置断言**
 
