@@ -200,7 +200,8 @@ public class MonsterModuleTests
             module.Tick(t);
             foreach (var (id, request) in module.DrainPendingCasts())
             {
-                resolver.ResolveCast(id, request, t);
+                resolver.Decide(id, request, t);
+                resolver.DrainResolved(t);      // N2：同 tick 到期
                 castTick = t;
                 casted = true;
             }

@@ -28,6 +28,19 @@ public class CastHandlerTests
             Shape = new HitShape { ShapeType = shapeType, Range = range, Angle = 120f, InnerRadius = 0.8f, InnerAngle = 90f }
         };
 
+    /// <summary>N2 迁移助手：决策 → 推进到到期 → 取回该次施法的结果。
+    /// 断言一字未改，只是把"一步到位"拆成两步——N3 起延迟生效后本助手**无需修改**。</summary>
+    private static CombatResolver.CastResolution Resolve(CombatResolver resolver, long casterId,
+        CastRequest request, uint decideTick)
+    {
+        var decision = resolver.Decide(casterId, request, decideTick);
+        if (!decision.Accepted) return decision;
+        foreach (var r in resolver.DrainResolved(decideTick + 8))
+            if (r.Broadcast!.CasterPlayerId == casterId && r.Broadcast.SkillId == request.SkillId)
+                return r;
+        return decision;
+    }
+
     [Fact]
     public void Reject_Unknown_Skill()
     {
@@ -36,7 +49,7 @@ public class CastHandlerTests
         Spawn(store, 2, 0, 2);
         var request = new CastRequest { SkillId = 30001, Shape = Q().Shape };
 
-        var resolution = resolver.ResolveCast(caster.PlayerId, request, 10);
+        var resolution = Resolve(resolver, caster.PlayerId, request, 10);
 
         Assert.False(resolution.Accepted);
         Assert.Equal("unknown-skill", resolution.RejectReason);
@@ -50,7 +63,7 @@ public class CastHandlerTests
         Spawn(store, 2, 0, 2);
         caster.ApplyDamage(100f); // 击杀
 
-        var resolution = resolver.ResolveCast(1, Q(), 10);
+        var resolution = Resolve(resolver, 1, Q(), 10);
 
         Assert.False(resolution.Accepted);
         Assert.Equal("caster-dead", resolution.RejectReason);
@@ -63,10 +76,10 @@ public class CastHandlerTests
         var caster = Spawn(store, 1, 0, 0);
         Spawn(store, 2, 0, 2);
 
-        Assert.True(resolver.ResolveCast(1, Q(), 10).Accepted);
-        Assert.False(resolver.ResolveCast(1, Q(), 11).Accepted);      // 冷却 90 tick 内
-        Assert.Equal("cooldown", resolver.ResolveCast(1, Q(), 11).RejectReason);
-        Assert.True(resolver.ResolveCast(1, Q(), 10 + 90).Accepted);  // 冷却到
+        Assert.True(Resolve(resolver, 1, Q(), 10).Accepted);
+        Assert.False(Resolve(resolver, 1, Q(), 11).Accepted);      // 冷却 90 tick 内
+        Assert.Equal("cooldown", Resolve(resolver, 1, Q(), 11).RejectReason);
+        Assert.True(Resolve(resolver, 1, Q(), 10 + 90).Accepted);  // 冷却到
     }
 
     [Fact]
@@ -76,7 +89,7 @@ public class CastHandlerTests
         var caster = Spawn(store, 1, 0, 0);
         Spawn(store, 2, 0, 2);
 
-        var resolution = resolver.ResolveCast(1, Q(range: 999f), 10);
+        var resolution = Resolve(resolver, 1, Q(range: 999f), 10);
 
         Assert.False(resolution.Accepted);
         Assert.Equal("shape-tampered", resolution.RejectReason);
@@ -89,7 +102,7 @@ public class CastHandlerTests
         var caster = Spawn(store, 1, 0, 0);
         Spawn(store, 2, 0, 2);
 
-        var resolution = resolver.ResolveCast(1, Q(shapeType: 1), 10);
+        var resolution = Resolve(resolver, 1, Q(shapeType: 1), 10);
 
         Assert.False(resolution.Accepted);
         Assert.Equal("shape-tampered", resolution.RejectReason);
@@ -102,7 +115,7 @@ public class CastHandlerTests
         var caster = Spawn(store, 1, 0, 0);
         var target = Spawn(store, 2, 0, 2); // Q range 3.5 内
 
-        var resolution = resolver.ResolveCast(1, Q(), 10);
+        var resolution = Resolve(resolver, 1, Q(), 10);
 
         Assert.True(resolution.Accepted);
         var hit = Assert.Single(resolution.Hits);
@@ -133,7 +146,7 @@ public class CastHandlerTests
             SkillId = 20002,
             Shape = new HitShape { ShapeType = 1, AreaRadius = 2.5f, Angle = 120f }
         };
-        var resolution = resolver.ResolveCast(1, request, 10);
+        var resolution = Resolve(resolver, 1, request, 10);
 
         Assert.True(resolution.Accepted);
         Assert.Equal(new long[] { 2, 3 }, resolution.Hits.Select(h => h.TargetPlayerId).OrderBy(id => id).ToArray());
@@ -147,7 +160,7 @@ public class CastHandlerTests
         var caster = Spawn(store, 1, 0, 0);
         Spawn(store, 2, 10, 0); // range 外
 
-        var resolution = resolver.ResolveCast(1, Q(), 10);
+        var resolution = Resolve(resolver, 1, Q(), 10);
 
         Assert.True(resolution.Accepted);
         Assert.Empty(resolution.Hits);
@@ -160,8 +173,8 @@ public class CastHandlerTests
         var (store, resolver) = Setup();
         var caster = Spawn(store, 1, 0, 0);
 
-        Assert.True(resolver.ResolveCast(1, Q(), 10).Accepted);   // 空挥
-        Assert.False(resolver.ResolveCast(1, Q(), 11).Accepted);  // 立即再施 → 冷却拒绝（D-P4-5）
+        Assert.True(Resolve(resolver, 1, Q(), 10).Accepted);   // 空挥
+        Assert.False(Resolve(resolver, 1, Q(), 11).Accepted);  // 立即再施 → 冷却拒绝（D-P4-5）
     }
 
     [Fact]
@@ -171,7 +184,7 @@ public class CastHandlerTests
         var caster = Spawn(store, 1, 0, 0);
         Spawn(store, 2, 0, 0); // 同出生点（双端 e2e 场景）
 
-        var resolution = resolver.ResolveCast(1, Q(), 10);
+        var resolution = Resolve(resolver, 1, Q(), 10);
 
         Assert.True(resolution.Accepted);
         var hit = Assert.Single(resolution.Hits);
@@ -191,7 +204,7 @@ public class CastHandlerTests
             SkillId = 20002,
             Shape = new HitShape { ShapeType = 1, AreaRadius = 2.5f, Angle = 120f }
         };
-        var resolution = resolver.ResolveCast(1, request, 10);
+        var resolution = Resolve(resolver, 1, request, 10);
 
         Assert.True(resolution.Accepted); // 施法本身合法
         Assert.Empty(resolution.Hits);

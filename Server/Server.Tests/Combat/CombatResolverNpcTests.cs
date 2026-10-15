@@ -41,13 +41,24 @@ public class CombatResolverNpcTests
         Shape = new HitShape { ShapeType = 0, Range = range, Angle = 120f }
     };
 
+    private static CombatResolver.CastResolution Resolve(CombatResolver resolver, long casterId,
+        CastRequest request, uint decideTick)
+    {
+        var decision = resolver.Decide(casterId, request, decideTick);
+        if (!decision.Accepted) return decision;
+        foreach (var r in resolver.DrainResolved(decideTick + 8))
+            if (r.Broadcast!.CasterPlayerId == casterId && r.Broadcast.SkillId == request.SkillId)
+                return r;
+        return decision;
+    }
+
     [Fact]
     public void Player_Cast_Explicit_Npc_Target_Damages_Npc_Authoritatively()
     {
         var (store, resolver, player, npc) = World(1.5f); // 玩家前方 1.5m（10001 射程 2 内）
         var npcState = store.GetPlayer(npc)!;
 
-        var result = resolver.ResolveCast(player, PlayerSwing(npc), 10);
+        var result = Resolve(resolver, player, PlayerSwing(npc), 10);
 
         Assert.True(result.Accepted);
         var hit = Assert.Single(result.Hits);
@@ -65,7 +76,7 @@ public class CombatResolverNpcTests
         other.IsLoggedIn = true;
         other.UpdatePosition(new Vector3(0f, 0f, 3f), 0f, 0f, 1L, 0U); // 前方 3m——锥内但射程 2 外
 
-        var result = resolver.ResolveCast(player, PlayerSwing(0), 10); // 自动目标（P4 backlog 跨界判别落地）
+        var result = Resolve(resolver, player, PlayerSwing(0), 10); // 自动目标（P4 backlog 跨界判别落地）
 
         Assert.True(result.Accepted);
         var hit = Assert.Single(result.Hits);
@@ -78,7 +89,7 @@ public class CombatResolverNpcTests
     {
         var (store, resolver, player, npc) = World(1.5f);
 
-        var result = resolver.ResolveCast(npc, MonsterBite(player, 1.5f), 10);
+        var result = Resolve(resolver, npc, MonsterBite(player, 1.5f), 10);
 
         Assert.True(result.Accepted);
         var hit = Assert.Single(result.Hits);
@@ -88,7 +99,7 @@ public class CombatResolverNpcTests
         Assert.Equal(npc, result.Broadcast!.CasterPlayerId); // 客户端表现/浮字源 id
 
         // 冷却：同 tick 重施被拒（RecordCast 即时生效）
-        var second = resolver.ResolveCast(npc, MonsterBite(player, 1.5f), 10);
+        var second = Resolve(resolver, npc, MonsterBite(player, 1.5f), 10);
         Assert.False(second.Accepted);
         Assert.Equal("cooldown", second.RejectReason);
     }
@@ -99,7 +110,7 @@ public class CombatResolverNpcTests
         var (store, resolver, player, npc) = World(1.5f);
         store.AddNpc(npc + 1, "Wolf#2", 2, 150f, new Vector3(1.6f, 0f, 0f)); // 贴邻怪物
 
-        var result = resolver.ResolveCast(npc, MonsterBite(player, 1.5f), 10);
+        var result = Resolve(resolver, npc, MonsterBite(player, 1.5f), 10);
 
         var hit = Assert.Single(result.Hits); // 邻怪不被命中（D-P5-3 怪物互不打——回归锁定）
         Assert.Equal(player, hit.TargetPlayerId);
@@ -112,7 +123,7 @@ public class CombatResolverNpcTests
         var bot = store.AddPlayer(99, "Bot");
         bot.UpdatePosition(new Vector3(0f, 0f, 0.8f), 0f, 0f, 1L, 0U); // 未登录 bot 比玩家更近（锥内）
 
-        var result = resolver.ResolveCast(npc, MonsterBite(0, 1.5f), 10); // 自动目标
+        var result = Resolve(resolver, npc, MonsterBite(0, 1.5f), 10); // 自动目标
 
         Assert.True(result.Accepted);
         var hit = Assert.Single(result.Hits);
@@ -129,11 +140,11 @@ public class CombatResolverNpcTests
 
         Assert.False(npcState.IsAlive);
 
-        var cast = resolver.ResolveCast(npc, MonsterBite(player, 1.5f), 10);
+        var cast = Resolve(resolver, npc, MonsterBite(player, 1.5f), 10);
         Assert.False(cast.Accepted);
         Assert.Equal("caster-dead", cast.RejectReason);
 
-        var swing = resolver.ResolveCast(player, PlayerSwing(npc), 10);
+        var swing = Resolve(resolver, player, PlayerSwing(npc), 10);
         Assert.True(swing.Accepted);   // 施法合法（空挥冷却语义）
         Assert.Empty(swing.Hits);      // 死亡怪物不可被命中（Alive 过滤）
     }

@@ -22,20 +22,40 @@ namespace KcpServer
             _rng = rng ?? new Random();
         }
 
-        /// <summary>施放裁决结果（输出载体）</summary>
+        /// <summary>施放裁决结果（输出载体）——决策阶段只填 Accepted/RejectReason/Broadcast/IsNpcCaster，
+        /// 判定阶段（DrainResolved）才填 Hits</summary>
         public sealed class CastResolution
         {
             public bool Accepted;
             public string RejectReason = string.Empty;
             public CastBroadcast? Broadcast;
+            public bool IsNpcCaster;
             public readonly List<HitEntry> Hits = new List<HitEntry>();
         }
 
-        /// <summary>校验 + 裁决 + 状态变更（冷却记录/扣血）。广播发送由 CastHandler 负责。</summary>
-        public CastResolution ResolveCast(long playerId, CastRequest request, uint tick)
+        private readonly struct PendingCast
+        {
+            public readonly long CasterId;
+            public readonly CastRequest Request;
+            public readonly uint ResolveTick;
+            public readonly CastBroadcast Broadcast;
+            public readonly bool IsNpcCaster;
+
+            public PendingCast(long casterId, CastRequest request, uint resolveTick,
+                CastBroadcast broadcast, bool isNpcCaster)
+            {
+                CasterId = casterId; Request = request; ResolveTick = resolveTick;
+                Broadcast = broadcast; IsNpcCaster = isNpcCaster;
+            }
+        }
+
+        private readonly List<PendingCast> _pending = new List<PendingCast>();
+
+        /// <summary>决策：校验 + 冷却记录 + 生成广播 + 入队。判定（几何/掷骰/扣血）推迟到 ResolveTick。</summary>
+        public CastResolution Decide(long casterId, CastRequest request, uint tick)
         {
             var resolution = new CastResolution();
-            var caster = _store.GetPlayer(playerId);
+            var caster = _store.GetPlayer(casterId);
             if (caster == null) return Reject(resolution, "caster-not-found");
             if (!caster.IsAlive) return Reject(resolution, "caster-dead");
             if (!CombatRules.TryGet(request.SkillId, out var entry))
@@ -45,26 +65,71 @@ namespace KcpServer
             if (!caster.IsCastReady(request.SkillId, tick, CombatRules.CooldownTicks(entry)))
                 return Reject(resolution, "cooldown");
 
-            // 候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
-            //  玩家施法 → 玩家 + 怪物（PvE 挥击自动目标按锥内最近者自然命中怪物——
-            //    跨界误伤玩家 backlog 项落地；bot 压测实体同 P4 语义不排除）
-            //  怪物施法 → 仅已登录玩家（怪物互不打；bot 不可被怪物命中）
-            bool isNpcCaster = caster.Kind == (byte)EntityKind.Npc;
+            // D-3：冷却记录在决策（空挥也冷却，D-P4-5）
+            caster.RecordCast(request.SkillId, tick);
+
+            resolution.Accepted = true;
+            resolution.IsNpcCaster = caster.Kind == (byte)EntityKind.Npc;
+            resolution.Broadcast = new CastBroadcast
+            {
+                SkillId = request.SkillId,
+                CasterPlayerId = casterId,
+                TargetPlayerId = request.TargetPlayerId,
+                CasterX = caster.Position.X,
+                CasterY = caster.Position.Y,
+                CasterZ = caster.Position.Z,
+                CasterRotation = caster.Rotation,
+                Shape = request.Shape,
+                ServerTimestamp = ServerClock.NowTicks()
+            };
+            // N2：同 tick 到期（行为零变化）。N3 改为 tick + CombatRules.HitDelayTicks(entry)
+            _pending.Add(new PendingCast(casterId, request, tick, resolution.Broadcast, resolution.IsNpcCaster));
+            return resolution;
+        }
+
+        /// <summary>取出到期（含本 tick）的待判定施法并裁决。单遍压缩，出队顺序 = 入队顺序（确定性）。</summary>
+        public List<CastResolution> DrainResolved(uint tick)
+        {
+            List<CastResolution>? resolved = null;
+            int write = 0;
+            for (int read = 0; read < _pending.Count; read++)
+            {
+                var pending = _pending[read];
+                if (pending.ResolveTick > tick) { _pending[write++] = pending; continue; }
+                var resolution = ResolveHits(pending);
+                if (resolution == null) continue;          // 施法者已死/已移除：丢弃这一刀（D-4）
+                (resolved ??= new List<CastResolution>()).Add(resolution);
+            }
+            if (write < _pending.Count) _pending.RemoveRange(write, _pending.Count - write);
+            return resolved ?? new List<CastResolution>();
+        }
+
+        /// <summary>判定帧：复查施法者存活 → 几何 → 服务端掷骰 → 扣血。返回 null 表示丢弃。</summary>
+        private CastResolution? ResolveHits(PendingCast pending)
+        {
+            var caster = _store.GetPlayer(pending.CasterId);
+            if (caster == null || !caster.IsAlive) return null;
+            if (!CombatRules.TryGet(pending.Request.SkillId, out var entry)) return null; // 决策已校验，防御分支
+
             var candidates = new List<CombatCandidate>();
             foreach (var p in _store.All)
             {
-                if (p.PlayerId == playerId) continue;
-                if (isNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
+                if (p.PlayerId == pending.CasterId) continue;
+                if (pending.IsNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
                 candidates.Add(new CombatCandidate(p.PlayerId,
                     new Vec3(p.Position.X, p.Position.Y, p.Position.Z), p.IsAlive));
             }
+
             var hitIds = HitResolver.Resolve(
                 new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z),
-                caster.Rotation, request.TargetPlayerId, request.Shape, candidates);
+                caster.Rotation, pending.Request.TargetPlayerId, pending.Request.Shape, candidates);
 
-            // 冷却记录在裁决后（D-P4-5：空挥也冷却——与客户端激活即冷却一致）
-            caster.RecordCast(request.SkillId, tick);
-
+            var resolution = new CastResolution
+            {
+                Accepted = true,
+                IsNpcCaster = pending.IsNpcCaster,
+                Broadcast = pending.Broadcast
+            };
             foreach (var targetId in hitIds)
             {
                 var target = _store.GetPlayer(targetId);
@@ -81,21 +146,25 @@ namespace KcpServer
                     HitZ = target.Position.Z
                 });
             }
-
-            resolution.Accepted = true;
-            resolution.Broadcast = new CastBroadcast
-            {
-                SkillId = request.SkillId,
-                CasterPlayerId = playerId,
-                TargetPlayerId = request.TargetPlayerId,
-                CasterX = caster.Position.X,
-                CasterY = caster.Position.Y,
-                CasterZ = caster.Position.Z,
-                CasterRotation = caster.Rotation,
-                Shape = request.Shape,
-                ServerTimestamp = ServerClock.NowTicks()
-            };
             return resolution;
+        }
+
+        /// <summary>校验 + 裁决 + 状态变更（冷却记录/扣血）。广播发送由 CastHandler 负责。
+        /// （内部已拆为 `Decide` + `ResolveHits`）
+        /// N2 兼容包装：决策 + 立即结算**本次这一条**（行为与拆分前逐位相同；**N3 迁移完成后删除**）。
+        /// 只按引用取出本请求对应的那一项——同 tick 多次施法不会互相吞噬（其余项留给 DrainResolved）。</summary>
+        public CastResolution ResolveCast(long playerId, CastRequest request, uint tick)
+        {
+            var decision = Decide(playerId, request, tick);
+            if (!decision.Accepted) return decision;
+            for (int i = 0; i < _pending.Count; i++)
+            {
+                var pending = _pending[i];
+                if (pending.CasterId != playerId || !ReferenceEquals(pending.Request, request)) continue;
+                _pending.RemoveAt(i);                       // 兼容路径一次性使用：无 O(n²) 顾虑
+                return ResolveHits(pending) ?? decision;    // 施法者已死/已移除 → Accepted=true、Hits 空
+            }
+            return decision;
         }
 
         /// <summary>D4：战斗骰只有服务器掷——暴击 ×1.5；波动 0 与客户端 GameSettings.DamageFluctuation 默认对齐（D-P4-4）</summary>

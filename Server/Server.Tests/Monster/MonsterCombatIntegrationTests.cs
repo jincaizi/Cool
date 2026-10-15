@@ -28,13 +28,14 @@ public class MonsterCombatIntegrationTests
             module.Tick(t);
             foreach (var (npcId, request) in module.DrainPendingCasts())
             {
-                var resolution = resolver.ResolveCast(npcId, request, t);
-                if (!resolution.Accepted) continue; // BT 冷却门先行——正常不应发生（防御跳过）
+                var decision = resolver.Decide(npcId, request, t);
+                if (!decision.Accepted) continue; // BT 冷却门先行——正常不应发生（防御跳过）
                 castCount++;
                 if (castCount > 1)
                     Assert.True(t - lastCastTick >= 15, $"casts spaced only {t - lastCastTick} ticks (cooldown not enforced)");
                 lastCastTick = t;
             }
+            resolver.DrainResolved(t);   // N2：同 tick 到期，结果本用例不消费
         }
 
         // 120 tick：追击 ~45 tick 进入射程，此后每 15 tick 一次——期望 ≥3 次间隔施法
