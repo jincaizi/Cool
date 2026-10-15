@@ -138,15 +138,20 @@ namespace KcpServer
 
                     _botRunner?.Tick((uint)tick); // P3 压测：bot 群每 tick 游走
 
-                    // P5：怪物 AI tick → 攻击裁决 drain（同 tick 冷却记录即时生效）→ 死亡移除清 AOI
+                    // P5：怪物 AI tick → 攻击决策入队（校验 + 冷却 + 广播挥砍）
                     if (_monsterModule != null)
                     {
                         _monsterModule.Tick((uint)tick);
                         foreach (var (npcId, request) in _monsterModule.DrainPendingCasts())
                         {
-                            var resolution = _castHandler.Resolve(npcId, request, (uint)tick);
-                            _ = _castHandler.HandleNpcCastAsync(npcId, resolution); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
+                            var decision = _castHandler.Decide(npcId, request, (uint)tick);
+                            _ = _castHandler.BroadcastSwingAsync(decision); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
                         }
+
+                        // 判定帧到期（F13：必须早于 TickRespawns——本 tick 打死的实体即时进死亡流程）
+                        foreach (var resolution in _castHandler.DrainResolved((uint)tick))
+                            _ = _castHandler.BroadcastDamageAsync(resolution);
+
                         foreach (var npcId in _monsterModule.DrainRemovedNpcs())
                             _aoi.RemoveEntity(npcId);
                     }

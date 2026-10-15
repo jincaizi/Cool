@@ -5,8 +5,8 @@ using Xunit;
 
 namespace KcpServer.Tests;
 
-/// <summary>N2：决策 / 判定两段化——本任务内两段在同 tick 完成（行为零变化），
-/// N3 起 resolveTick = decideTick + HitDelayTicks。</summary>
+/// <summary>N3：决策 / 判定两段化 + 判定帧延迟（resolveTick = decideTick + HitDelayTicks）——
+/// 前摇窗口内目标移出射程 / 绕到身后 / 施法者死亡都会改变结局。</summary>
 public class CastResolutionSchedulingTests
 {
     private static (EntityStore Store, CombatResolver Resolver, long Caster, long Target) World(float targetZ)
@@ -43,17 +43,83 @@ public class CastResolutionSchedulingTests
     }
 
     [Fact]
-    public void DrainResolved_At_DecideTick_Yields_This_Casts_Hits()
+    public void DrainResolved_At_The_Deadline_Yields_This_Casts_Hits()
     {
         var (store, resolver, caster, target) = World(1.5f);
         resolver.Decide(caster, Swing(), 10);
 
-        var resolved = resolver.DrainResolved(10);          // N2：同 tick 到期
+        Assert.Empty(resolver.DrainResolved(10));   // N3：判定帧未到，决策 tick 不结算
+
+        var resolved = resolver.DrainResolved(10 + CombatRules.HitDelayTicks(EntryOf(10001)));
 
         var one = Assert.Single(resolved);
         Assert.Equal(caster, one.Broadcast!.CasterPlayerId);
         var hit = Assert.Single(one.Hits);
         Assert.Equal(target, hit.TargetPlayerId);
         Assert.Equal(100f - hit.Damage, store.GetPlayer(target)!.Hp, 4);
+    }
+
+    [Fact]
+    public void Target_Leaving_Range_During_The_Window_Misses()
+    {
+        var (store, resolver, caster, target) = World(1.5f);
+        resolver.Decide(caster, Swing(), 10);                       // 决策：目标在射程内
+        resolver.DrainResolved(10);                                 // 模拟 tick 循环：决策那一 tick 也会 drain
+        store.GetPlayer(target)!.UpdatePosition(new Vector3(0f, 0f, 5f), 0f, 0f, 1L, 0U);
+
+        var one = Assert.Single(resolver.DrainResolved(10 + CombatRules.HitDelayTicks(EntryOf(10001))));
+
+        Assert.Empty(one.Hits);                                     // 判定帧已出射程 → 空挥
+        Assert.Equal(100f, store.GetPlayer(target)!.Hp, 4);
+    }
+
+    [Fact]
+    public void Target_Circling_Behind_During_The_Window_Misses()
+    {
+        // 绕背躲怪：判定帧在身后（夹角 180° > 半锥 60°）
+        var (store, resolver, caster, target) = World(1.5f);
+        resolver.Decide(caster, Swing(), 10);
+        resolver.DrainResolved(10);                                 // 模拟 tick 循环
+        store.GetPlayer(target)!.UpdatePosition(new Vector3(0f, 0f, -1.5f), 0f, 0f, 1L, 0U);
+
+        var one = Assert.Single(resolver.DrainResolved(10 + CombatRules.HitDelayTicks(EntryOf(10001))));
+
+        Assert.Empty(one.Hits);
+    }
+
+    [Fact]
+    public void Caster_Dying_Before_The_Judgment_Drops_The_Swing()
+    {
+        var (store, resolver, caster, target) = World(1.5f);
+        resolver.Decide(caster, Swing(), 10);
+        resolver.DrainResolved(10);                                 // 模拟 tick 循环（此刻施法者还活着）
+        store.GetPlayer(caster)!.ApplyDamage(1000f);                // 打断抬手 = 免伤
+
+        var resolved = resolver.DrainResolved(10 + CombatRules.HitDelayTicks(EntryOf(10001)));
+
+        Assert.Empty(resolved);                                     // 整条结果被丢弃（不下发 DamageResult）
+        Assert.Equal(100f, store.GetPlayer(target)!.Hp, 4);
+    }
+
+    [Fact]
+    public void Zero_Delay_Skill_Resolves_In_The_Same_Tick()
+    {
+        var (store, resolver, caster, target) = World(1.5f);
+        var spin = new CastRequest
+        {
+            SkillId = 20002,                                        // HitDelay = 0（D-9 向后兼容）
+            Shape = new HitShape { ShapeType = 1, AreaRadius = 2.5f, Angle = 120f }
+        };
+        resolver.Decide(caster, spin, 10);
+
+        var one = Assert.Single(resolver.DrainResolved(10));
+
+        Assert.Single(one.Hits);
+    }
+
+    private static SkillEntry EntryOf(int skillId)
+    {
+        CombatRules.TryGet(skillId, out var entry);
+        return entry!;
     }
 }

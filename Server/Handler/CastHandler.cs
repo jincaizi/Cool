@@ -82,8 +82,9 @@ namespace KcpServer
                 Shape = request.Shape,
                 ServerTimestamp = ServerClock.NowTicks()
             };
-            // N2：同 tick 到期（行为零变化）。N3 改为 tick + CombatRules.HitDelayTicks(entry)
-            _pending.Add(new PendingCast(casterId, request, tick, resolution.Broadcast, resolution.IsNpcCaster));
+            // D-1/D-2：判定帧延迟由服务端表自持——判定发生在 tick + HitDelayTicks
+            _pending.Add(new PendingCast(casterId, request, tick + CombatRules.HitDelayTicks(entry),
+                resolution.Broadcast, resolution.IsNpcCaster));
             return resolution;
         }
 
@@ -149,24 +150,6 @@ namespace KcpServer
             return resolution;
         }
 
-        /// <summary>校验 + 裁决 + 状态变更（冷却记录/扣血）。广播发送由 CastHandler 负责。
-        /// （内部已拆为 `Decide` + `ResolveHits`）
-        /// N2 兼容包装：决策 + 立即结算**本次这一条**（行为与拆分前逐位相同；**N3 迁移完成后删除**）。
-        /// 只按引用取出本请求对应的那一项——同 tick 多次施法不会互相吞噬（其余项留给 DrainResolved）。</summary>
-        public CastResolution ResolveCast(long playerId, CastRequest request, uint tick)
-        {
-            var decision = Decide(playerId, request, tick);
-            if (!decision.Accepted) return decision;
-            for (int i = 0; i < _pending.Count; i++)
-            {
-                var pending = _pending[i];
-                if (pending.CasterId != playerId || !ReferenceEquals(pending.Request, request)) continue;
-                _pending.RemoveAt(i);                       // 兼容路径一次性使用：无 O(n²) 顾虑
-                return ResolveHits(pending) ?? decision;    // 施法者已死/已移除 → Accepted=true、Hits 空
-            }
-            return decision;
-        }
-
         /// <summary>D4：战斗骰只有服务器掷——暴击 ×1.5；波动 0 与客户端 GameSettings.DamageFluctuation 默认对齐（D-P4-4）</summary>
         private float RollDamage(SkillEntry entry, out bool isCritical)
         {
@@ -202,9 +185,72 @@ namespace KcpServer
             _resolver = resolver;
         }
 
-        /// <summary>裁决入口（P5 怪物施法复用——怪物无 session，Server3C tick 内直调）</summary>
-        public CombatResolver.CastResolution Resolve(long casterId, CastRequest request, uint tick)
-            => _resolver.ResolveCast(casterId, request, tick);
+        /// <summary>裁决入口（怪物：tick 内决策 → 校验 + 冷却 + 入队）</summary>
+        public CombatResolver.CastResolution Decide(long casterId, CastRequest request, uint tick)
+            => _resolver.Decide(casterId, request, tick);
+
+        /// <summary>到期取出（Server3C 每 tick 在 TickRespawns 之前调用）</summary>
+        public System.Collections.Generic.List<CombatResolver.CastResolution> DrainResolved(uint tick)
+            => _resolver.DrainResolved(tick);
+
+        /// <summary>决策阶段广播"挥砍开始"（F7：时间戳 = 剪辑起始时刻）。拒绝分支内部处理（日志 + 计数）。</summary>
+        public async Task BroadcastSwingAsync(CombatResolver.CastResolution decision)
+        {
+            if (!decision.Accepted || decision.Broadcast == null)
+            {
+                RejectedCasts++;
+                _logger.LogWarning($"[Combat] cast rejected: caster={decision.Broadcast?.CasterPlayerId} reason={decision.RejectReason}");
+                return;
+            }
+
+            var broadcast = decision.Broadcast;
+            if (decision.IsNpcCaster)
+            {
+                foreach (var recipientId in _server.GetObserversOf(broadcast.CasterPlayerId))
+                {
+                    var s = _server.GetSession(recipientId);
+                    if (s != null)
+                        await _server.SendToSessionAsync(s, MessageId.CastBroadcast, broadcast);
+                }
+                return;
+            }
+
+            var castRecipients = new HashSet<long> { broadcast.CasterPlayerId };
+            foreach (var p in _server.GetVisiblePlayers(broadcast.CasterPlayerId))
+                castRecipients.Add(p.PlayerId);
+            foreach (var recipientId in castRecipients)
+            {
+                var s = _server.GetSession(recipientId);
+                if (s != null)
+                    await _server.SendToSessionAsync(s, MessageId.CastBroadcast, broadcast);
+            }
+        }
+
+        /// <summary>判定阶段广播伤害（D-P4-6）。施法者收件人：仅玩家施法时包含（怪物无 session）。</summary>
+        public async Task BroadcastDamageAsync(CombatResolver.CastResolution resolution)
+        {
+            if (resolution.Hits.Count == 0 || resolution.Broadcast == null) return;
+
+            var result = new DamageResult
+            {
+                SourcePlayerId = resolution.Broadcast.CasterPlayerId,
+                SkillId = resolution.Broadcast.SkillId,
+                ServerTimestamp = ServerClock.NowTicks(),
+                Hits = resolution.Hits
+            };
+
+            var damageRecipients = new HashSet<long>();
+            if (!resolution.IsNpcCaster) damageRecipients.Add(resolution.Broadcast.CasterPlayerId);
+            foreach (var hit in resolution.Hits)
+                damageRecipients.Add(hit.TargetPlayerId);
+
+            foreach (var recipientId in damageRecipients)
+            {
+                var s = _server.GetSession(recipientId);
+                if (s != null)
+                    await _server.SendToSessionAsync(s, MessageId.DamageResult, result);
+            }
+        }
 
         public async Task HandleCastAsync(IServerSession session, CastRequest request)
         {
@@ -216,85 +262,10 @@ namespace KcpServer
                 return;
             }
 
-            var resolution = _resolver.ResolveCast(playerId.Value, request, _server.CurrentTick);
-            if (!resolution.Accepted)
-            {
-                RejectedCasts++;
-                _logger.LogWarning($"[Combat] cast rejected: player={playerId.Value} skill={request.SkillId} reason={resolution.RejectReason}");
-                return;
-            }
-
-            // CastBroadcast → caster + caster AOI 视野内观察者（第三方看到技能表现；AoiGrid 现成语义）
-            var castRecipients = new HashSet<long> { playerId.Value };
-            foreach (var p in _server.GetVisiblePlayers(playerId.Value))
-                castRecipients.Add(p.PlayerId);
-            foreach (var recipientId in castRecipients)
-            {
-                var s = _server.GetSession(recipientId);
-                if (s != null)
-                    await _server.SendToSessionAsync(s, MessageId.CastBroadcast, resolution.Broadcast!);
-            }
-
-            // DamageResult → caster + 每个在线受击者（双端伤害数字一致性载体；AOE 打包）
-            if (resolution.Hits.Count > 0)
-            {
-                var result = new DamageResult
-                {
-                    SourcePlayerId = playerId.Value,
-                    SkillId = request.SkillId,
-                    ServerTimestamp = ServerClock.NowTicks(),
-                    Hits = resolution.Hits
-                };
-                var damageRecipients = new HashSet<long> { playerId.Value };
-                foreach (var hit in resolution.Hits)
-                    damageRecipients.Add(hit.TargetPlayerId);
-                foreach (var recipientId in damageRecipients)
-                {
-                    var s = _server.GetSession(recipientId);
-                    if (s != null)
-                        await _server.SendToSessionAsync(s, MessageId.DamageResult, result);
-                }
-            }
-        }
-
-        /// <summary>
-        /// P5 怪物施放广播（D-P5-4）：CastBroadcast → 怪物 AOI 视野内在线观察者
-        /// （第三方看技能表现）；DamageResult → 每个受击玩家（怪物无 session，caster 收件人跳过）。
-        /// 拒绝不广播（怪物被拒 = 服务器内部逻辑错误——审计日志 + 计数）。
-        /// </summary>
-        public async Task HandleNpcCastAsync(long npcId, CombatResolver.CastResolution resolution)
-        {
-            if (!resolution.Accepted || resolution.Broadcast == null)
-            {
-                RejectedCasts++;
-                _logger.LogWarning($"[Combat] npc cast rejected: npc={npcId} reason={resolution.RejectReason}");
-                return;
-            }
-
-            var castRecipients = _server.GetObserversOf(npcId);
-            foreach (var recipientId in castRecipients)
-            {
-                var s = _server.GetSession(recipientId);
-                if (s != null)
-                    await _server.SendToSessionAsync(s, MessageId.CastBroadcast, resolution.Broadcast);
-            }
-
-            if (resolution.Hits.Count > 0)
-            {
-                var result = new DamageResult
-                {
-                    SourcePlayerId = npcId,
-                    SkillId = resolution.Broadcast.SkillId,
-                    ServerTimestamp = ServerClock.NowTicks(),
-                    Hits = resolution.Hits
-                };
-                foreach (var hit in resolution.Hits)
-                {
-                    var s = _server.GetSession(hit.TargetPlayerId);
-                    if (s != null)
-                        await _server.SendToSessionAsync(s, MessageId.DamageResult, result);
-                }
-            }
+            // F17：包在 tick 之间处理，此刻 CurrentTick 仍是上一 tick 的值——
+            // 本次决策归属"本轮即将运行的 tick"，+1 后与怪物路径（tick 内决策）口径一致。
+            var decision = _resolver.Decide(playerId.Value, request, _server.CurrentTick + 1);
+            await BroadcastSwingAsync(decision);
         }
     }
 }
