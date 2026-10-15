@@ -28,7 +28,7 @@
 | **F16** | `HitResolverTests.cs` 与 `CombatRulesTests.cs` 在客户端（NUnit）与服务端（xUnit）**各一份、内容同构**（diff 只差断言语法与命名空间） | 锥角与新表约束**两侧都要补**——项目既有惯例，不是新增负担 |
 | **F17** | 每轮循环顺序是**动作队列 → 数据包队列 → tick 处理**（`GameLoop.LoopAsync`），而 `Server3C.CurrentTick` 在 **tick 处理里**才更新 | 包处理阶段读到的 `CurrentTick` 是**上一 tick**的值，而这一轮循环会用 `CurrentTick + 1` ⇒ **包路径的 `decideTick` 必须显式 +1**，否则玩家技能延迟少一 tick（4 tick/267ms ≠ 表值 5 tick/333ms），且与怪物路径（tick 内决策）口径不一致 |
 | **F18** | `ProcessPacket` 经 `_gameLoop.EnqueueAction` 入主循环（注释明写"直接在 IO 线程上 `ProcessPacket` 会给世界状态开出第二条不受游戏循环管辖的并发入口"），`CastHandler` 文档亦标"主循环线程执行" | pending 队列**无锁前提成立**——本设计不新增并发面 |
-| **F19** | `NpcEntityAnimator` 类注释明写两条不变式：① 挥砍**只由排程的 `PlayAttack` 起手**，快照只驱动 Idle/Walk/Run/Hit/Death；② 忙位解除**依赖「服务端在同一次 BT 动作里置 `ActionState = Attack`」** | 本设计保住②（`AttackPending` 不改置位时机）⇒ 必须**登记为不变量 + 守护测试**，否则它只活在一段注释里（见 N5） |
+| **F19** | `NpcEntityAnimator` 类注释明写两条不变式：① 挥砍**只由排程的 `PlayAttack` 起手**，快照只驱动 Idle/Walk/Run/Hit/Death；② 忙位解除**依赖「服务端在同一次 BT 动作里置 `ActionState = Attack`」** | 本设计保住②（前摇机制不改置位时机）⇒ 必须**登记为不变量 + 守护测试**，否则它只活在一段注释里（见 N5） |
 | **F20** | 广播时间戳走 wall-clock（`ServerClock.NowTicks()`），判定走 tick 计数——**两套时钟**。另：NPC 攻击剪辑**没有动画事件**（DogKnight `Attack01/02.anim` 的 `m_Events` 是空数组；Slime 攻击是 FBX 片段、二进制无事件串），DogKnight `Attack01` 时长 **0.833s @30fps** | 对齐精度上限 = **≤1 tick 量化**（66ms）+ `ceil` 取整偏差（0.35s → 5 tick = 333ms）。怪物侧判定帧的真值只能"从剪辑时长 + 视觉判定帧"推——**这是 R3 的根因** |
 
 ---
@@ -58,8 +58,8 @@
 | 层 | 内容 |
 |---|---|
 | **纯核心** | `CombatRules` 表加 `HitDelaySeconds`；`HitResolver` 显式目标路径加锥角；`CombatResolver` 拆成 `Decide` / `DrainResolved` + 内部 pending 队列 |
-| **服务端接线** | `CastHandler` 拆成"决策广播挥砍"与"判定广播伤害"；`Server3C` 的 tick 顺序（`DrainResolved` 在 `TickRespawns` 之前）+ `NotifyCastResolved` 回调 |
-| **怪物** | `MonsterState.AttackPending`（前摇 = 承诺）；前摇期以 90°/s 朝目标转向；BT 的 Hostile 条件放宽 |
+| **服务端接线** | `CastHandler` 拆成"决策广播挥砍"与"判定广播伤害"；`Server3C` 的 tick 顺序（`DrainResolved` 在 `TickRespawns` 之前） |
+| **怪物** | `MonsterState.AttackResolveTick`（前摇 = 承诺，到期由模块自清理——见 D-15）；前摇期以 90°/s 朝目标转向；BT 的 Hostile 条件放宽 |
 | **客户端** | **行为零改动**（F15）：无逻辑改动，但 SyncCore 属双端同源编译 ⇒ 客户端程序集仍会重编译、WebGL 需重出包。协议字段与编码不变 ⇒ **部署序任意**（见 §3） |
 
 ### 明确不做
@@ -91,7 +91,7 @@
        castHandler.Decide(npcId, req, tick)               → 校验 + 冷却 + 广播挥砍
    foreach resolved in castHandler.DrainResolved(tick):
        castHandler.BroadcastDamage(resolved)              → DamageResult
-       monsterModule.NotifyCastResolved(casterId)         → 清 AttackPending
+       monsterModule.Tick 内自清理到期前摇（AttackResolveTick → null，无需跨模块回调）
    TickRespawns(tick)                                     ← **必须在 DrainResolved 之后**（F13）
             ↓
 [客户端] 行为零改动（F15 / D-14）：
@@ -149,10 +149,10 @@ F12：前摇期内目标一旦跑出射程，`Attack` 会返回 `Failure` → �
 | **C2** | `HitResolver` 显式目标加锥角 | `Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs` | 距离 + 锥角；沿用零距离退化护栏；**保持零 UnityEngine 依赖**（`System.Math`，不用 `Mathf`/`Vector3`——F15） | **两侧** `HitResolverTests`（NUnit + xUnit，F16） |
 | **C3** | `CombatResolver` 两段化 + pending 队列 | `Server/Handler/CastHandler.cs` | `Decide` / `DrainResolved`；队列是纯核心内部状态。**三条约束**：出队顺序 = 入队顺序（确定性，同一 tick 多项按插入序裁决）；单遍压缩，不用 `RemoveAt` 的 O(n²)；不跨 tick 累积（每项必在 `HitDelayTicks` 内出队） | Server.Tests 直调 |
 | **C4** | `CastHandler` 广播拆分 | 同上 | 决策广播挥砍（caster + 观察者）/ 判定广播伤害（caster + 受击者） | Server.Tests |
-| **C5** | `Server3C` tick 顺序 + 回调 | `Server/Server3C.cs` | `DrainResolved` 在 `TickRespawns` 前；清 `AttackPending` | Server.Tests 集成 |
-| **C6** | `MonsterState.AttackPending` | `Server/Monster/MonsterState.cs` | 前摇 = 承诺的载体 | Server.Tests |
+| **C5** | `Server3C` tick 顺序 | `Server/Server3C.cs` | `DrainResolved` 在 `TickRespawns` 前（无跨模块回调——见 D-15） | Server.Tests 集成 |
+| **C6** | `MonsterState.AttackResolveTick` | `Server/Monster/MonsterState.cs` | 前摇 = 承诺的载体；到期由 `MonsterModule.Tick` 自清理 | Server.Tests |
 | **C7** | `MonsterBtActions.Attack` 前摇锁 + 转身 | `Server/Monster/MonsterBtActions.cs` | 首行查在飞攻击 → `Running` 站定；以 90°/s 朝目标转向 | Server.Tests |
-| **C8** | BT Hostile 条件放宽 | `Server/Monster/MonsterModule.cs` | `TargetId.HasValue \|\| m.AttackPending`——前摇不中途改走 | Server.Tests |
+| **C8** | BT Hostile 条件放宽 | `Server/Monster/MonsterModule.cs` | `TargetId.HasValue \|\| m.AttackResolveTick.HasValue`——前摇不中途改走 | Server.Tests |
 | **C9** | 客户端 | —— | **行为零改动**（F15 / D-14）；只更新"时间戳语义"的注释口径 | —— |
 
 ---
@@ -163,7 +163,7 @@ F12：前摇期内目标一旦跑出射程，`Attack` 会返回 `Failure` → �
 |---|---|
 | 判定 tick 时施法者已死 / 已被移除（`NpcDespawn`） | 丢弃该刀，**不下发** `DamageResult`（F14 的复查点） |
 | 判定 tick 时目标已死 | `HitResolver` 只返回 `Alive` 候选 → 自然空挥，无需特判 |
-| 目标在前摇期跑出感知半径 | `AttackPending` 让 Hostile 分支条件仍成立 → **不中途改走**；这把刀仍按承诺裁决（多半空挥） |
+| 目标在前摇期跑出感知半径 | `AttackResolveTick.HasValue` 让 Hostile 分支条件仍成立 → **不中途改走**；这把刀仍按承诺裁决（多半空挥） |
 | 目标在前摇期跑出射程 | 前摇锁生效（不 Chase、不截断），裁决时按几何判空 |
 | 施法者在判定前被击晕 / 受击硬直 | **不取消**（明确不做，D-4）；受击窗口只跳过 BT |
 | 零延迟技能（spin，表值 0） | 包处理先于 tick 处理（F17）⇒ 无论玩家路径还是怪物路径，`resolveTick <= tick` 都**在同一轮循环内出队**，今天的"决策即裁决"语义原样保留 |
@@ -177,10 +177,10 @@ F12：前摇期内目标一旦跑出射程，`Attack` 会返回 `Failure` → �
 
 | # | 任务（**编号从 N 起，避免与项目阶段 P0–P8 冲突**） | 规模 | 验收 |
 |---|---|---|---|
-| **N1** | 纯核心：`CombatRules.HitDelaySeconds`（逐技能表值，**含怪物攻击剪辑判定帧实测**——F20）+ `HitResolver` 显式目标锥角（C1/C2） | 小 | **两侧**单测同步补（F16）：锥内命中 / 锥外空 / 零距离退化仍在；表约束用例（`HitDelay ≤ Cooldown`、`MaxRange ≥ attackRange`）；4 条怪物占位值已替换为实测值（或明确写下"仍为占位"交 N6 肉眼校准） |
+| **N1** | 纯核心：`CombatRules.HitDelaySeconds`（逐技能表值，**含怪物攻击剪辑判定帧实测**——F20）+ `HitResolver` 显式目标锥角（C1/C2） | 小 | **两侧**单测同步补（F16）：锥内命中 / 锥外空 / 零距离退化仍在；表约束用例（`MaxRange ≥ attackRange`，以及**仅怪物技能**满足的 `HitDelay ≤ Cooldown`——玩家普攻 10001 冷却为 0、判定帧 0.30s，天然不满足该不等式）；4 条怪物占位值已替换为实测值（或明确写下"仍为占位"交 N6 肉眼校准） |
 | **N2** | 纯核心：`CombatResolver` 拆 `Decide` / `DrainResolved` + pending 队列（C3） | 中 | Server.Tests：前摇内目标移出射程 → 空；施法者死亡 → 丢弃；决策即冷却；**零延迟同 tick 出队** |
-| **N3** | 服务端接线：`CastHandler` 广播拆分 + `Server3C` tick 顺序 + `NotifyCastResolved`（C4/C5） | 中 | Server.Tests 集成：挥砍广播在决策 tick、伤害广播在判定 tick；死亡标记不多等 tick |
-| **N4** | 怪物前摇：`AttackPending` + 90°/s 转身 + BT 条件放宽（C6/C7/C8） | 中 | Server.Tests：前摇期不重复入队、不 Chase、不中途改走；转身角速度可用 |
+| **N3** | 服务端接线：`CastHandler` 广播拆分 + `Server3C` tick 顺序（C4/C5） | 中 | Server.Tests：判定时机的用例 + 三行顺序的代码审查；挥砍/伤害两个广播时刻由 N6 手测确认（无 session 级测试装置，见 §7） |
+| **N4** | 怪物前摇：`AttackResolveTick` + 90°/s 转身 + BT 条件放宽（C6/C7/C8） | 中 | Server.Tests：前摇期不重复入队、不 Chase、不中途改走；转身是**渐进**转向而非瞬转 |
 | **N5** | 既有测试迁移 + 新增用例（§7）；**含 `NpcEntityAnimator` 忙位不变式的守护用例**（F19） | 中 | 四套件全绿；组合用例覆盖"绕背 → Miss"与"前摇锁"；忙位不变式有可证伪的用例（置位与入队同一次 BT 动作） |
 | **N6** | 跑起来看（WebGL + PC 双端） | 小 | §1 的四条成功判据**逐条肉眼确认**——这是唯一能证明"判定帧对齐"成立的验收 |
 
@@ -192,7 +192,7 @@ F12：前摇期内目标一旦跑出射程，`Attack` 会返回 `Failure` → �
 |---|---|
 | 纯核心（表 / 几何） | 双端 `HitResolverTests` + `CombatRulesTests`：锥角新规则、零距离退化护栏、表约束遍历 |
 | 纯核心（时机） | Server.Tests 直调 `Decide` / `DrainResolved`：前摇窗口内的四种结局（空 / 中 / 施法者死 / 目标死） |
-| 服务端接线 | `CastHandlerTests` + `MonsterCombatIntegrationTests`：广播的两个时刻、tick 顺序、`NotifyCastResolved` |
+| 服务端接线 | `CastHandlerTests` + `MonsterCombatIntegrationTests`（迁移后）覆盖**裁决时机**。**两个广播时刻与 `DrainResolved`/`TickRespawns` 的先后没有自动化**——`Server3C`/`CastHandler` 没有 session 级测试装置（`Server.Tests/Server/` 下只有 GameLoop/Session/AOI/时钟等单点用例）；由调用点代码审查 + N6 手测兜底。要补需先建设置装置，属独立工作 |
 | 怪物行为树 | `MonsterModuleTests`：前摇锁（不 Chase / 不重复入队 / 不中途改走）；**既有 `Hit_Window_Expiry…` 那条靠真实裁决链的用例必须继续用它** |
 | 客户端不变式（F19） | 服务端侧加可证伪的用例：置 `ActionState = Attack` 与 `QueueCast` 必须发生在**同一次 BT 动作**内（忙位靠它解除）；客户端侧的忙位释放仍由既有 PlayMode 用例覆盖，若缺则 N5 补一条 |
 | 时机口径（F17） | 断言"包路径的 `decideTick` = 本轮的 tick（`CurrentTick + 1`）、怪物路径 = 当前 tick"——**差一 tick 的回归护栏** |
@@ -231,7 +231,8 @@ F12：前摇期内目标一旦跑出射程，`Attack` 会返回 `Failure` → �
 | **D-7** | 前摇期转身速度 **90°/s**（人类裁定；移动态仍 180°/s） | 把冲刺绕圈的半径门槛从 1.2m 放宽到 1.75m，让"绕背"成为可执行的操作而不是理论值；代价是怪物看起来"盯着你但不跟得上" |
 | **D-8** | 怪物技能 `HitDelay = 0.35s` **占位**（人类裁定） | NPC 攻击剪辑判定帧未实测；先让链路跑通，实测后逐条替换（R3） |
 | **D-9** | **零延迟项保持同 tick 出队**（spin 表值填 0） | 让改动可以逐技能灰度，且 spin 的多段命中本就是未建模的现状——**不借本次机会改它** |
-| **D-10** | 前摇 = **承诺**：`AttackPending` 锁住行为树，只有死亡能取消 | F12：不锁就会"收刀了还挨打"（假命中）与"挥到一半改走回家"（表现断裂）两种缺陷 |
+| **D-10** | 前摇 = **承诺**：`AttackResolveTick` 锁住行为树，只有死亡能取消 | F12：不锁就会"收刀了还挨打"（假命中）与"挥到一半改走回家"（表现断裂）两种缺陷 |
+| **D-15** | 前摇状态用**单个 `AttackResolveTick`（`uint?`）** 表示、由 `MonsterModule.Tick` 在到期 tick 自清理；**不用** `AttackPending` 布尔 + `NotifyCastResolved` 回调 | 实现级简化（语义与 D-10 一致）：模块自己就知道决策 tick，而 `CombatRules.HitDelayTicks(entry)` 是延迟的唯一真值源——少一条跨模块接线、少一个会漂移的布尔。落点见计划 N4 |
 | **D-11** | 客户端**零改动** | F7：时间戳语义归位后，`ScheduleAttack` 的行为本来就是期望行为。改动面留在服务端，是为了让"判定在哪一侧"这件事对读者一眼可辨 |
 | **D-12** | **`decideTick` 口径写死**：怪物路径 = 当前 tick；**包路径 = `CurrentTick + 1`** | F17：包处理先于 tick 处理，包阶段的 `CurrentTick` 是上一 tick。不写死就会出现"两侧延迟不一致 + 表值名不副实"（R8）——这是实现时最容易顺手写错的一处 |
 | **D-13** | pending 队列**放进 `CombatResolver` 内部**，不新建调度器类；守三条约束：定序 / 单遍压缩 / 不跨 tick 累积 | F1/F18：它已是"纯核心、单测直用、主循环单线程"。再抽一层只会多一个要测的边界与一个可漂移的口径 |
