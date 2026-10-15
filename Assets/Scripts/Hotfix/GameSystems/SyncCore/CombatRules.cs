@@ -27,9 +27,14 @@ namespace Cool.SyncCore
         public float CooldownSeconds { get; }
         public float BaseDamage { get; }
         public float CriticalRate { get; }
+        /// <summary>判定帧延迟（秒，自技能激活起算）。来源 = 客户端动画资产的判定帧实测
+        /// （<c>ShapeBlock._hitboxTimings</c> + CastTime；表注释逐条标注来源）。
+        /// 服务端在 决策 tick + HitDelayTicks 处做几何判定。</summary>
+        public float HitDelaySeconds { get; }
 
         public SkillEntry(int skillId, int shapeType, float maxRange, float maxAreaRadius,
-            float maxAngle, float cooldownSeconds, float baseDamage, float criticalRate)
+            float maxAngle, float cooldownSeconds, float baseDamage, float criticalRate,
+            float hitDelaySeconds)
         {
             SkillId = skillId;
             ShapeType = shapeType;
@@ -39,6 +44,7 @@ namespace Cool.SyncCore
             CooldownSeconds = cooldownSeconds;
             BaseDamage = baseDamage;
             CriticalRate = criticalRate;
+            HitDelaySeconds = hitDelaySeconds;
         }
     }
 
@@ -49,21 +55,25 @@ namespace Cool.SyncCore
 
         private static readonly Dictionary<int, SkillEntry> Table = new Dictionary<int, SkillEntry>
         {
-            [10001] = new SkillEntry(skillId: 10001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0f, baseDamage: 50f, criticalRate: 0.15f),
-            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f),
-            [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f),
-            [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f),
+            // 玩家四条：hitDelay = 客户端动画资产的判定帧实测（ShapeBlock._hitboxTimings + CastTime）
+            [10001] = new SkillEntry(skillId: 10001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0f, baseDamage: 50f, criticalRate: 0.15f, hitDelaySeconds: 0.30f),
+            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f),
+            [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f, hitDelaySeconds: 0.30f),
+            [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f, hitDelaySeconds: 0f),
+            // 怪物四条：**占位 0.35s**（人类裁定 D-8）。NPC 攻击剪辑无动画事件、判定帧未实测
+            //（DogKnight Attack01 时长 0.833s@30fps ⇒ 0.35s ≈ 42% 处，合理但未验证）。
+            // 实测后逐条替换：见 docs/superpowers/specs/2026-10-16-hit-judgment-timing-design.md R3。
             // P5 怪物技能（表值 = Server/Config/monster_config.json 实测 2026-09-12：
             //   Slime atk range 1.5 / Wolf atk range 2.0；伤害 Slime 10 / Wolf 15——旧 AiComponent 硬编码 10
             //   从未生效（死代码+攻击缺陷），P5 首次生效即差异化（D-P5-2 平衡选择，偏差记录）；
             //   cd 1s 与旧 SkillSystem 同值；怪物无暴击）
-            [50001] = new SkillEntry(skillId: 50001, shapeType: 0, maxRange: 1.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 10f, criticalRate: 0f),
-            [50002] = new SkillEntry(skillId: 50002, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 15f, criticalRate: 0f),
+            [50001] = new SkillEntry(skillId: 50001, shapeType: 0, maxRange: 1.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 10f, criticalRate: 0f, hitDelaySeconds: 0.35f),
+            [50002] = new SkillEntry(skillId: 50002, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 15f, criticalRate: 0f, hitDelaySeconds: 0.35f),
             // 2026-10-12 新怪（spec §3）：t3 骑士精英 / t4 蜘蛛 Boss。
             // maxRange 必须 ≥ monster_config.json 的 attackRange——填小了怪物在攻击距离静默冻结
             //（MonsterModuleTests.Template_AttackRange_Fits_Its_Combat_Rule 守这条）。
-            [50003] = new SkillEntry(skillId: 50003, shapeType: 0, maxRange: 2.2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1.5f, baseDamage: 30f, criticalRate: 0f),
-            [50004] = new SkillEntry(skillId: 50004, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 2f, baseDamage: 20f, criticalRate: 0f),
+            [50003] = new SkillEntry(skillId: 50003, shapeType: 0, maxRange: 2.2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1.5f, baseDamage: 30f, criticalRate: 0f, hitDelaySeconds: 0.35f),
+            [50004] = new SkillEntry(skillId: 50004, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 2f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0.35f),
         };
 
         public static bool IsSynced(int skillId) => Table.ContainsKey(skillId);
@@ -94,5 +104,9 @@ namespace Cool.SyncCore
         /// <summary>冷却换算为 tick 数（15Hz 基准，向上取整）；表值静态且非负，uint 转换安全</summary>
         public static uint CooldownTicks(SkillEntry entry) =>
             (uint)Math.Ceiling(entry.CooldownSeconds * TickRateHz);
+
+        /// <summary>判定延迟换算为 tick 数（15Hz 基准，向上取整，与 CooldownTicks 同惯例）</summary>
+        public static uint HitDelayTicks(SkillEntry entry) =>
+            (uint)Math.Ceiling(entry.HitDelaySeconds * TickRateHz);
     }
 }

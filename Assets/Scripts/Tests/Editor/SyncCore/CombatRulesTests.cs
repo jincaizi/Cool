@@ -146,5 +146,32 @@ namespace Hotfix.GameSystems.Tests.SyncCore
 
             Assert.AreEqual(15u, CombatRules.CooldownTicks(wolf)); // 1s @15Hz
         }
+
+        [Test]
+        public void HitDelay_Ticks_Map_From_Asset_Hit_Frames_At_15Hz()
+        {
+            Assert.IsTrue(CombatRules.TryGet(10001, out var combo));
+            Assert.AreEqual(0.30f, combo.HitDelaySeconds, 0.0001f);
+            Assert.AreEqual(5U, CombatRules.HitDelayTicks(combo));
+
+            Assert.IsTrue(CombatRules.TryGet(10002, out var heavy));
+            Assert.AreEqual(0.35f, heavy.HitDelaySeconds, 0.0001f);
+            Assert.AreEqual(6U, CombatRules.HitDelayTicks(heavy));
+
+            Assert.IsTrue(CombatRules.TryGet(20002, out var spin));
+            Assert.AreEqual(0f, spin.HitDelaySeconds, 0.0001f);
+            Assert.AreEqual(0U, CombatRules.HitDelayTicks(spin));
+        }
+
+        [Test]
+        public void Monster_HitDelay_Never_Exceeds_Its_Cooldown()
+        {
+            foreach (var skillId in new[] { 50001, 50002, 50003, 50004 })
+            {
+                Assert.IsTrue(CombatRules.TryGet(skillId, out var entry), $"缺 {skillId} 表项");
+                Assert.LessOrEqual(entry.HitDelaySeconds, entry.CooldownSeconds + 0.0001f,
+                    $"skill {skillId} hitDelay > cooldown");
+            }
+        }
     }
 }

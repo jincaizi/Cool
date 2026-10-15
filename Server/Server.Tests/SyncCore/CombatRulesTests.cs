@@ -146,4 +146,34 @@ public class CombatRulesTests
 
         Assert.Equal(15u, CombatRules.CooldownTicks(wolf)); // 1s @15Hz
     }
+
+    [Fact]
+    public void HitDelay_Ticks_Map_From_Asset_Hit_Frames_At_15Hz()
+    {
+        // 表值来源：客户端动画资产的判定帧实测（ShapeBlock._hitboxTimings + CastTime）
+        Assert.True(CombatRules.TryGet(10001, out var combo));
+        Assert.Equal(0.30f, combo.HitDelaySeconds, 4);
+        Assert.Equal(5U, CombatRules.HitDelayTicks(combo));   // 0.30 × 15 = 4.5 → 5
+
+        Assert.True(CombatRules.TryGet(10002, out var heavy));
+        Assert.Equal(0.35f, heavy.HitDelaySeconds, 4);
+        Assert.Equal(6U, CombatRules.HitDelayTicks(heavy));   // 0.35 × 15 = 5.25 → 6
+
+        Assert.True(CombatRules.TryGet(20002, out var spin));
+        Assert.Equal(0f, spin.HitDelaySeconds, 4);            // 旋转无判定帧：多段命中未建模（D-9）
+        Assert.Equal(0U, CombatRules.HitDelayTicks(spin));
+    }
+
+    [Fact]
+    public void Monster_HitDelay_Never_Exceeds_Its_Cooldown()
+    {
+        // 约束只对怪物成立：前摇结束时若冷却已过，怪物会立刻挥第二刀（第一刀的剪辑被截断）。
+        // 玩家普攻 10001 冷却为 0 且判定帧 0.30s——玩家侧由动画/连击链把关，不适用本约束。
+        foreach (var skillId in new[] { 50001, 50002, 50003, 50004 })
+        {
+            Assert.True(CombatRules.TryGet(skillId, out var entry), $"缺 {skillId} 表项");
+            Assert.True(entry!.HitDelaySeconds <= entry.CooldownSeconds + 0.0001f,
+                $"skill {skillId} hitDelay={entry.HitDelaySeconds} > cooldown={entry.CooldownSeconds}");
+        }
+    }
 }
