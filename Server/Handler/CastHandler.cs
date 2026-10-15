@@ -193,13 +193,15 @@ namespace KcpServer
         public System.Collections.Generic.List<CombatResolver.CastResolution> DrainResolved(uint tick)
             => _resolver.DrainResolved(tick);
 
-        /// <summary>决策阶段广播"挥砍开始"（F7：时间戳 = 剪辑起始时刻）。拒绝分支内部处理（日志 + 计数）。</summary>
-        public async Task BroadcastSwingAsync(CombatResolver.CastResolution decision)
+        /// <summary>决策阶段广播"挥砍开始"（F7：时间戳 = 剪辑起始时刻）。拒绝分支内部处理（日志 + 计数）。
+        /// casterId/request 只有拒绝日志用得到——拒绝时 <c>decision.Broadcast</c> 恒为 null，
+        /// 不传进来日志就只剩空 id（审计口径须可证伪）。</summary>
+        public async Task BroadcastSwingAsync(long casterId, CastRequest request, CombatResolver.CastResolution decision)
         {
             if (!decision.Accepted || decision.Broadcast == null)
             {
                 RejectedCasts++;
-                _logger.LogWarning($"[Combat] cast rejected: caster={decision.Broadcast?.CasterPlayerId} reason={decision.RejectReason}");
+                _logger.LogWarning($"[Combat] cast rejected: caster={casterId} skill={request.SkillId} reason={decision.RejectReason}");
                 return;
             }
 
@@ -265,7 +267,7 @@ namespace KcpServer
             // F17：包在 tick 之间处理，此刻 CurrentTick 仍是上一 tick 的值——
             // 本次决策归属"本轮即将运行的 tick"，+1 后与怪物路径（tick 内决策）口径一致。
             var decision = _resolver.Decide(playerId.Value, request, _server.CurrentTick + 1);
-            await BroadcastSwingAsync(decision);
+            await BroadcastSwingAsync(playerId.Value, request, decision);
         }
     }
 }

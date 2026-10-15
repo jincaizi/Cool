@@ -145,16 +145,16 @@ namespace KcpServer
                         foreach (var (npcId, request) in _monsterModule.DrainPendingCasts())
                         {
                             var decision = _castHandler.Decide(npcId, request, (uint)tick);
-                            _ = _castHandler.BroadcastSwingAsync(decision); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
+                            _ = _castHandler.BroadcastSwingAsync(npcId, request, decision); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
                         }
-
-                        // 判定帧到期（F13：必须早于 TickRespawns——本 tick 打死的实体即时进死亡流程）
-                        foreach (var resolution in _castHandler.DrainResolved((uint)tick))
-                            _ = _castHandler.BroadcastDamageAsync(resolution);
-
                         foreach (var npcId in _monsterModule.DrainRemovedNpcs())
                             _aoi.RemoveEntity(npcId);
                     }
+
+                    // 判定帧到期的施法——**与怪物无关**（玩家施法也要在这里结算，**不能放进上面的 if**），
+                    // 且必须早于 TickRespawns（F13：本 tick 打死的实体即时进死亡流程）
+                    foreach (var resolution in _castHandler.DrainResolved((uint)tick))
+                        _ = _castHandler.BroadcastDamageAsync(resolution);
 
                     // P8：死亡计时与复活（D-2，8 秒）。客户端不自判死（F10），
                     // 所以这里是联网下唯一的复活路径。放在怪物 tick 之后——本 tick 由怪物
