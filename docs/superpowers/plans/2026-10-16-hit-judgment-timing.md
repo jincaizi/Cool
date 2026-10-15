@@ -23,14 +23,17 @@
 
 ## 任务与规格编号的对应
 
-| 本计划 | 规格 §6 | 差异与理由 |
+| 本计划的任务 | 规格 §6 编号 | 差异与理由 |
 |---|---|---|
-| N1 | N1 | 拆成两个提交（表 / 锥角），互不依赖 |
-| N2 | N2 | **重切**：N2 只做"两段化 API + 测试迁移"，**行为零变化**（临时保留 `ResolveCast` 包装，迁移完即删）——这是 R1 要求的"先纯迁移、再叠行为" |
-| N3 | N3 | **承接 N2 的行为变化**：延迟生效 + 广播拆分 + tick 顺序 + 新行为用例 |
-| N4 | N4 | 怪物前摇（含机制简化，见下） |
-| N5 | N5 | 收敛为"新增守护用例 + 全量回归"（各任务的既有测试迁移已就地完成，否则任务边界处不可能保持绿色） |
-| N6 | N6 | 手动端到端验收 |
+| **任务 1**（N1a） | N1（前半） | 拆成两个任务/提交（表 / 锥角），互不依赖 |
+| **任务 2**（N1b） | N1（后半） | 同上 |
+| **任务 3**（N2） | N2 | **重切**：只做"两段化 API + 测试迁移"，**行为零变化**（临时保留 `ResolveCast` 包装，迁移完即删）——这是 R1 要求的"先纯迁移、再叠行为" |
+| **任务 4**（N3） | N3 | **承接任务 3 的行为变化**：延迟生效 + 广播拆分 + tick 顺序 + 新行为用例 |
+| **任务 5**（N4） | N4 | 怪物前摇（含机制简化，见下） |
+| **任务 6**（N5） | N5 | 收敛为"新增守护用例 + 全量回归"（各任务的既有测试迁移已就地完成，否则任务边界处不可能保持绿色） |
+| **任务 7**（N6） | N6 | 手动端到端验收 |
+
+> 下文各节标题写作 `任务 <数字>（规格 <N 编号>）`：括号里的编号与规格 §6 一一对应，正文中引用步骤时用**规格编号**（如"任务 5 步骤 3"= 规格 N4 步骤 3）。
 
 **对规格的三处实现级修正**（规格意图不变，机制更简单）：
 
@@ -65,7 +68,7 @@
 
 ---
 
-## 任务 N1a：`CombatRules` 判定延迟字段与表值
+## 任务 1（规格 N1a）：`CombatRules` 判定延迟字段与表值
 
 **文件：**
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs`
@@ -226,7 +229,7 @@ git commit -m "feat(combat): give every synced skill a hit-frame delay"
 
 ---
 
-## 任务 N1b：`HitResolver` 显式目标补锥角（绕背躲怪的地基）
+## 任务 2（规格 N1b）：`HitResolver` 显式目标补锥角（绕背躲怪的地基）
 
 **文件：**
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs`
@@ -373,7 +376,7 @@ git commit -m "feat(combat): the cone applies to explicit targets too"
 
 ---
 
-## 任务 N2：`CombatResolver` 两段化（**行为零变化**）+ 测试迁移
+## 任务 3（规格 N2）：`CombatResolver` 两段化（**行为零变化**）+ 测试迁移
 
 > 本任务结束时，所有既有测试的**断言一字不改**，只是从"一步到位"变成"两步调用"。R1 要求的纯迁移就是它。
 
@@ -721,7 +724,7 @@ git commit -m "refactor(combat): split the cast decision from the hit resolution
 
 ---
 
-## 任务 N3：延迟生效 + 广播拆分 + tick 顺序
+## 任务 4（规格 N3）：延迟生效 + 广播拆分 + tick 顺序
 
 **文件：**
 - 修改：`Server/Handler/CastHandler.cs`、`Server/Server3C.cs`
@@ -950,7 +953,7 @@ git commit -m "feat(combat): the judgment happens on the hit frame, not on keypr
 
 ---
 
-## 任务 N4：怪物前摇（站定 + 转向 + 锁住行为树）
+## 任务 5（规格 N4）：怪物前摇（站定 + 转向 + 锁住行为树）
 
 **文件：**
 - 修改：`Server/Monster/MonsterState.cs`、`Server/Monster/SimpleMoveSystem.cs`、`Server/Monster/MonsterBtActions.cs`、`Server/Monster/MonsterModule.cs`
@@ -1213,7 +1216,7 @@ git commit -m "feat(combat): monsters telegraph their swings and can be circled"
 
 ---
 
-## 任务 N5：守护用例 + 全量回归
+## 任务 6（规格 N5）：守护用例 + 全量回归
 
 **文件：**
 - 测试：`Server/Server.Tests/Monster/MonsterModuleTests.cs`、`Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs`
@@ -1290,7 +1293,7 @@ git commit -m "test(combat): pin the busy-flag invariant and the decide-tick con
 
 ---
 
-## 任务 N6：手动端到端验收（唯一能证明"对齐"成立的验收）
+## 任务 7（规格 N6）：手动端到端验收（唯一能证明"对齐"成立的验收）
 
 **无文件改动**（只做验收，问题回填到对应任务）。
 
