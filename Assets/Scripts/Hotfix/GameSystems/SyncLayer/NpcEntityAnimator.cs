@@ -52,12 +52,43 @@ namespace Hotfix.GameSystems.SyncLayer
         /// **不会**触发生命周期（除非组件挂 <c>[ExecuteAlways]</c>），测试要直接调它才能拿到驱动；
         /// 任务 5 的端到端用例同样复用这一处。语义上 <c>internal</c> 就是"供程序集内使用"，
         /// 比反射稳。
+        ///
+        /// 前提：宿主预制体的 Animator 控制器需带 <c>MonsterState</c> / <c>AttackVariant</c> / <c>Attack</c>
+        /// 三个参数（由 <c>NpcAnimator_*</c> 系列控制器提供）。缺任一参数——含空壳控制器与美术包自带
+        /// 词表的控制器（如 <c>Slime</c> / <c>TurtleShell</c> 只有 AIState / Attack / AttackIndex / Hit /
+        /// Death / Speed…，没有 MonsterState）——都会被安全降级为"只渲染、不动画"。
         /// </summary>
         internal void ResolveAnimator()
         {
             _animator = GetComponentInChildren<Animator>();
-            if (_animator != null && _animator.runtimeAnimatorController == null)
-                _animator = null;   // 没有控制器的 Animator 写参数只会刷错误日志
+            if (_animator == null) return;
+
+            // 「不可驱动」统一在此降级为 null，Write / PlayAttack 只认 _animator == null（保护集中在
+            // 一处，多处判断会漂移）：
+            //   · 没有控制器的 Animator——写参数只会刷错误日志；
+            //   · 空壳控制器（layerCount == 0）——SetInteger 会抛 NullReferenceException；
+            //   · 控制器词表缺驱动要写的参数——`Parameter 'Hash …' does not exist` 每帧刷屏
+            //     （玩家实测：Slime/TurtleShell 接进来后 171 条 MonsterState 警告；此类美术预制体被
+            //     接进 NPC 视图属于预期情形——资源方还没配 NpcAnimator 词表）。
+            if (_animator.runtimeAnimatorController == null
+                || _animator.layerCount == 0
+                || !HasDriverParameters(_animator))
+                _animator = null;
+        }
+
+        /// <summary>控制器是否带驱动要写的三个参数（MonsterState / AttackVariant / Attack）。
+        /// 读的是控制器资产数据，与宿主 GameObject 的激活状态无关。</summary>
+        private static bool HasDriverParameters(Animator animator)
+        {
+            bool monsterState = false, attackVariant = false, attack = false;
+            foreach (var p in animator.parameters)
+            {
+                int hash = p.nameHash;
+                if (hash == MonsterStateParam) monsterState = true;
+                else if (hash == AttackVariantParam) attackVariant = true;
+                else if (hash == AttackTrigger) attack = true;
+            }
+            return monsterState && attackVariant && attack;
         }
 
         /// <summary>快照状态（由调用方在 renderAt 处采样后传入）。规则 2/3/4。</summary>

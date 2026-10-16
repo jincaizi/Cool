@@ -122,5 +122,39 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             _driver.ApplyState((byte)NpcAnimationState.Run, false);      // 服务端离开攻击窗口
             Assert.AreEqual("Run", CurrentState(), "离开攻击窗口后必须释放忙位并把时间轴状态写回去");
         }
+
+        [Test]
+        public void A_Controller_Missing_The_Driver_Params_Is_Not_Written_To()
+        {
+            // 回归：美术包自带的控制器（Slime/TurtleShell 的 AIState/Speed/Hit/… 词表）里没有
+            // MonsterState——驱动照写就每帧刷 `Parameter 'Hash 54231900' does not exist`（玩家实测日志）。
+            // 这里用"有层、参数只配了 1/3"的控制器复现同类缺参控制器：写入必须被整体拒绝（保持默认 0），
+            // 而不是写进去。修掉前：ResolveAnimator 只挡 null 控制器，MonsterState 会被写成 2。
+            const string path = "Assets/Tests_TempPartialNpc.controller";
+            var controller = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath(path);
+            controller.AddParameter("MonsterState", AnimatorControllerParameterType.Int);
+            var sm = controller.layers[0].stateMachine;
+            var idle = sm.AddState("Idle");
+            sm.defaultState = idle;
+
+            var go = new GameObject("PartialParamNpc");
+            try
+            {
+                var animator = go.AddComponent<Animator>();
+                animator.runtimeAnimatorController = controller;
+                var driver = go.AddComponent<NpcEntityAnimator>();
+                driver.ResolveAnimator();   // EditMode 下 AddComponent 不触发 Awake
+
+                driver.ApplyState((byte)NpcAnimationState.Run, false);
+
+                Assert.AreEqual(0, animator.GetInteger("MonsterState"),
+                    "缺参数的控制器必须整只降级为只渲染——写下去只会每帧刷警告");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+                UnityEditor.AssetDatabase.DeleteAsset(path);
+            }
+        }
     }
 }

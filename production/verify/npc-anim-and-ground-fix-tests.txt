@@ -1,0 +1,29 @@
+
+Run Tool
+  Tool: tests-run
+  URL: http://localhost:26909/api/tools/tests-run
+  Auth: from config
+──────────────────────────────────────────────────
+Calling tests-run...
+SUCCESS: tests-run completed
+SUCCESS: Response:
+{
+  "status": "success",
+  "structured": {
+    "result": {
+      "Summary": {
+        "Status": "Passed",
+        "TotalTests": 386,
+        "PassedTests": 386,
+        "FailedTests": 0,
+        "SkippedTests": 0,
+        "Duration": "00:00:05.9932376"
+      },
+      "Results": []
+    }
+  }
+}
+
+  Update available: 0.71.0 → 1.0.1
+  Run npm i -g unity-mcp-cli to update
+
