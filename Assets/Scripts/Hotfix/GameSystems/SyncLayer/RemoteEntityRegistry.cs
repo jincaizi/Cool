@@ -13,6 +13,22 @@ namespace Hotfix.GameSystems.SyncLayer
     {
         private const long ExpiryTicks = 12_000_000L; // 1.2s 无快照即视为出视野/离线（AOI 停流语义；≫ 静止保活 4 tick ≈ 267ms）
 
+        /// <summary>地形对象名（DemoDay 的地形 MeshCollider 所在对象）——落地采样的解析锚点</summary>
+        internal const string TerrainObjectName = "LowpolyTerrain";
+
+        /// <summary>
+        /// 落地采样复用半径（米）。**是量出来的，不是拍的**：按"网格 + 每格采一次"的做法，
+        /// 0.5m 网格在本场景斜坡上实测偏差到 0.0159m、0.1m 网格到 0.0311m（湖东岸堤坡实测坡度 ~49%
+        /// ——10cm 就落差 4.9cm），都超过 1cm 的验收线 ⇒ 改成**按实体游标**：挪动超过本半径就重采。
+        /// 残差 ≤ 坡度 × 半径×√2，49% 坡 ⇒ ≤ 7mm ✓；静止的怪（含位置抖动 < 1cm）零射线，
+        /// 成本 ∝ **走过的距离**（与帧率无关），不是每帧每实体一次。
+        /// </summary>
+        private const float GroundSampleRadius = 0.01f;
+
+        /// <summary>落地射线：高空向下、400m 长（Map 落差仅 ~0.7m，留足余量覆盖树/山）</summary>
+        private const float GroundRayStartY = 200f;
+        private const float GroundRayLength = 400f;
+
         /// <summary>
         /// 速度反推的钳位上限（= 步频上限 1.5 × 标称冲刺速度 8.0 —— design §4 速度反推）。
         /// **由常量推导，别写死 12f**：写死会在标称跑速调整时静默漂移——守护用例只钉
@@ -34,8 +50,30 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly List<NpcAttackSchedule.DueAttack> _dueAttacks = new List<NpcAttackSchedule.DueAttack>();
         private bool _warnedMissingAvatar;
 
+        /// <summary>落地采样游标（每实体一份）：上次采样的 XZ + 结果，见 <see cref="GroundY"/></summary>
+        private readonly Dictionary<long, GroundSample> _groundSamples = new Dictionary<long, GroundSample>();
+        /// <summary>采过的那具地形碰撞体（来自物理查询本身——本类是普通类，不许 GetComponent）</summary>
+        private Collider? _terrainCollider;
+        /// <summary>解析只做一次（场景里没有地形就一直是 null，不再重试）</summary>
+        private bool _terrainResolveAttempted;
+        private bool _warnedNoGround;
+
         /// <summary>分档策略（宿主可覆盖预算/阈值；URL 旋钮见 TierQuery）</summary>
         public RemoteTierPolicy TierPolicy { get; } = new RemoteTierPolicy();
+
+        /// <summary>
+        /// Npc 落地采样的层掩码（宿主可覆盖，默认 = Default 层——本项目的地形层：DemoDay 的
+        /// `LowpolyTerrain` 在 layer 0，与玩家 prefab 的 `GroundLayer`（m_Bits 1）同惯例）。
+        /// **掩码本身挡不住树/石头**：它们同在 Default（探针实测 Tree1/Tree2 带 CapsuleCollider、
+        /// 离地 3.1m / 6.0m）⇒ 采样还要校验命中体是地形（见 <see cref="TrySampleTerrain"/>）。
+        /// </summary>
+        public LayerMask GroundMask { get; set; } = 1;
+
+        /// <summary>
+        /// 地形根（落地采样锚点）。默认懒解析：按 <see cref="TerrainObjectName"/> 在场景里找；
+        /// 测试注入桩用（**不依赖当前打开的场景里有没有真地形**——EditMode 测试跑在打开的场景里）。
+        /// </summary>
+        internal Transform? TerrainRoot { get; set; }
 
         /// <summary>
         /// 观察者位置提供者（本地玩家位置，与 AOI 同心）。**未注入、或本帧返回 null = 不分档
@@ -157,6 +195,17 @@ namespace Hotfix.GameSystems.SyncLayer
                     // D17：速度由**渲染位移**反推（动画要匹配屏幕上的移动，且免动协议/插值器）。
                     // 钳位上限 = 1.5 × 冲刺速度：重生/服务器校正的瞬移不该让 Blend 跳到跑档。
                     kv.Value.TrackSpeed(pos, renderAt, SpeedClamp);
+
+                    // Npc 落地吸附：服务端布局是 2D 的（XZ 才有效，y 恒 0），而 DemoDay 的地面在
+                    // 这些点位是 -0.113 ~ +0.624m ⇒ 不吸附模型会埋进地里。只换 y，且写在 TrackSpeed
+                    // **之后**：速度反推照旧吃插值器的原始位置（插值/速度/分档逻辑一行不动）。
+                    // 真人/bot 视图不碰（客户端权威，y 由本地物理决定）。
+                    if (kv.Value.Kind == (byte)EntityKind.Npc)
+                    {
+                        var snapped = kv.Value.Position;
+                        snapped.y = GroundY(kv.Key, pos.x, pos.z, pos.y);
+                        kv.Value.Position = snapped;
+                    }
                 }
 
                 if (kv.Value.NpcAnimator != null
@@ -327,6 +376,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _attacks.Clear(playerId); // 待播挥砍同步清理（视图没了，没人可驱动）
                 _lastKnownYaw.Remove(playerId);
                 _lastSampleTicks.Remove(playerId); // 缺席追踪同步清理（UpdateExpiry 重扫不残留）
+                _groundSamples.Remove(playerId); // 落地采样游标同生共死（防重连同 ID 残留旧采样）
                 return true;
             }
             return false;
@@ -341,6 +391,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _attacks.ClearAll(); // 与视图同生共死：宿主销毁/退出世界后不得再播任何挥砍
             _lastKnownYaw.Clear();
             _lastSampleTicks.Clear();
+            _groundSamples.Clear(); // 与视图同生共死（换世界后地形可能不同）
         }
 
         /// <summary>读远程实体视图（T6 验收断言用；无视图返回 null）</summary>
@@ -357,6 +408,101 @@ namespace Hotfix.GameSystems.SyncLayer
                 Object.Destroy(go);
             else
                 Object.DestroyImmediate(go);
+        }
+
+        /// <summary>
+        /// Npc 视图的落地高度：对地形向下射线采样一次。**未命中 = 原样返回 fallbackY（服务端 y），
+        /// 不回退到 0**——没有地形的区域（测试宿主、地形范围外）回退 0 会把怪压到地下。
+        ///
+        /// 三条约束（都是实测得来的）：
+        ///  1. **必须只认地形**：裸射线会先打到树/石头（探针实测 (-25,-15) 命中 Tree2 离地 6m、
+        ///     (20,-20) 命中 Tree1 离地 3.1m）⇒ 命中体不是地形就会把怪吸到树冠上；
+        ///  2. **掩码分不开地形与树**：DemoDay 里地形与树/石头同在 Default 层，所以掩码只作粗筛，
+        ///     身份校验（<see cref="IsTerrainHit"/>）才是精筛；
+        ///  3. **复用按实体游标，不按粗网格**：地形静态 ⇒ 挪窝不超过 <see cref="GroundSampleRadius"/>
+        ///     就复用上次采样（静止的怪零射线、成本 ∝ 走过的距离）。粗网格（0.5m / 0.1m）曾被
+        ///     实测否掉：本场景堤坡 ~49%，格内漂移能到 1.6cm / 3.1cm，越过 1cm 验收线。
+        /// </summary>
+        /// <param name="entityId">采样游标的归属者（每实体一份）。</param>
+        internal float GroundY(long entityId, float x, float z, float fallbackY)
+        {
+            if (_groundSamples.TryGetValue(entityId, out var last)
+                && Mathf.Abs(x - last.X) <= GroundSampleRadius
+                && Mathf.Abs(z - last.Z) <= GroundSampleRadius)
+                return last.HasGround ? last.Y : fallbackY;
+
+            bool hit = TrySampleTerrain(x, z, out float groundY);
+            _groundSamples[entityId] = new GroundSample { X = x, Z = z, Y = groundY, HasGround = hit };
+            if (hit) return groundY;
+
+            if (!_warnedNoGround)
+            {
+                _warnedNoGround = true;   // 只打一次：没地面是环境属性（测试宿主/出图），不是每帧事件
+                Debug.LogWarning("[Sync] no ground under npc sample at (" + x + ", " + z +
+                                 "); npc views keep their server y");
+            }
+            return fallbackY;
+        }
+
+        /// <summary>采样游标：上次采样的位置与结果（<see cref="HasGround"/>=false 时 <see cref="Y"/> 无意义）</summary>
+        private struct GroundSample
+        {
+            public float X;
+            public float Z;
+            public float Y;
+            public bool HasGround;
+        }
+
+        /// <summary>一次地形采样。false = 该点没有地面（未解析出地形 / 射线没打中地形）。</summary>
+        private bool TrySampleTerrain(float x, float z, out float groundY)
+        {
+            groundY = 0f;
+            if (TerrainRoot == null && !_terrainResolveAttempted)
+            {
+                _terrainResolveAttempted = true;
+                var found = GameObject.Find(TerrainObjectName);
+                TerrainRoot = found != null ? found.transform : null;   // null = 场景里没有地形，不再重试
+            }
+            if (TerrainRoot == null) return false;
+
+            var ray = new Ray(new Vector3(x, GroundRayStartY, z), Vector3.down);
+
+            // 快路径：掩码命中且命中体就是地形（无遮挡时一条射线就够）
+            if (Physics.Raycast(ray, out var hit, GroundRayLength, GroundMask) && IsTerrainHit(hit.collider))
+            {
+                _terrainCollider = hit.collider;
+                groundY = hit.point.y;
+                return true;
+            }
+
+            // 兜底：被树冠/石头截胡（掩码分不开：它们与地形同在 Default）⇒ 在全部命中里按身份挑地形，
+            // 取最上面那层（地形网面可能被射线穿过一次以上，取最近的一条才是脚下这面）
+            var hits = Physics.RaycastAll(ray, GroundRayLength, GroundMask);
+            float best = float.MaxValue;
+            bool found2 = false;
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (!IsTerrainHit(hits[i].collider) || hits[i].distance >= best) continue;
+                best = hits[i].distance;
+                groundY = hits[i].point.y;
+                _terrainCollider = hits[i].collider;
+                found2 = true;
+            }
+            return found2;
+        }
+
+        /// <summary>
+        /// 命中体是不是地形：按解析出的地形根做**身份**判断（不是按名字，也不是按碰撞体类型——
+        /// 石头/树桩/大蘑菇同样是 MeshCollider）。碰撞体引用来自物理查询本身：本类是普通类，
+        /// 项目规则禁止在这里 GetComponent。
+        /// </summary>
+        private bool IsTerrainHit(Collider? collider)
+        {
+            if (collider == null) return false;
+            if (_terrainCollider != null && collider == _terrainCollider) return true;   // 认过的地形，直接命中
+            if (TerrainRoot == null) return false;
+            var t = collider.transform;
+            return t == TerrainRoot || t.IsChildOf(TerrainRoot);
         }
 
         private RemoteEntityView CreateView(long playerId, EntitySnapshot snapshot)

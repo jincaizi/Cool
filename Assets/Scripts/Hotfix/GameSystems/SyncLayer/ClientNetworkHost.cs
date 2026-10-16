@@ -75,6 +75,10 @@ namespace Hotfix.GameSystems.SyncLayer
         [Header("怪物模型（templateId → prefab；留空则该 template 退化为球体占位）")]
         [SerializeField] private NpcPrefabEntry[] _npcPrefabs = Array.Empty<NpcPrefabEntry>();
 
+        [Tooltip("Npc 落地采样的层掩码。默认 = Default 层（本项目地形层：LowpolyTerrain 在 layer 0）。" +
+                 "注意：树/石头也在 Default —— 掩码只作粗筛，命中体还要校验是地形，否则怪会吸到树冠上")]
+        [SerializeField] private LayerMask _npcGroundMask = 1;
+
         [Header("调试")]
         [Tooltip("屏幕左下角连接状态浮层（模式/状态/玩家 id/远程实体数）")]
         [SerializeField] private bool _showDebugOverlay = true;
@@ -139,6 +143,9 @@ namespace Hotfix.GameSystems.SyncLayer
                     ? _appearances
                     : new[] { new AppearanceEntry { Id = 0, Full = _playerAvatarPrefab } },
                 catalog.Count > 0 ? catalog : null);
+
+            // Npc 视图落地吸附的采样掩码（服务端布局 y≡0 ⇒ 客户端贴地形，见 RemoteEntityRegistry.GroundY）
+            _remoteEntities.GroundMask = _npcGroundMask;
 
             // 观察者位置 = 本地玩家（与 AOI 同心）。取不到（角色还没装配）⇒ 本帧返回 null，
             // registry 那一帧不分档——**不能返回 Vector3.zero**：那会让分档以原点为中心，距离全错。
