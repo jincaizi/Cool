@@ -106,7 +106,8 @@ unity-mcp-cli run-tool tests-run --input '{"testMode":"EditMode"}' --timeout 900
 Summary: Status=Passed, Total=386, Passed=386, Failed=0, Skipped=0 (00:00:05.8)
 ```
 
-仍 **386/386**；没有 EditMode/PlayMode 用例断言旧出生点坐标（PlayMode 里两处只是注释，已更新）。
+当时 **386/386**；没有 EditMode/PlayMode 用例断言旧出生点坐标（PlayMode 里两处只是注释，已更新）。
+（二轮复跑：并行任务落地后基线涨到 **397/397** 全绿——见 §7.4。）
 
 ---
 
@@ -129,28 +130,99 @@ Summary: Status=Passed, Total=386, Passed=386, Failed=0, Skipped=0 (00:00:05.8)
 
 ## 5. 疑虑 / 需要人工复核的点（均未自行"修"）
 
-1. **e2e 观察者（原点）夹具语义变了**——旧布局里 [0] Wolf 在 (12,0,0)「开局即感知原点观察者」是
-   `--monsters 4` 那条 PlayMode e2e（`MonsterWorldTests`）的支点；新布局 [0] 距原点 30m
-   （巡逻圈最近 20m > 检测 15m）**不再感知**，原点观察者挨打只能来自 [3] Wolf（距原点 18.0m，
-   巡逻圈有点到原点 11.2m——巡逻中可能进圈）。该用例又取"**最先看到的** Wolf 视图"当 `wolfId`、
-   断言伤害来源 == 该 id ⇒ 两只 Wolf 都在 AOI 内时**存在假红风险**（不是必然失败）。
-   **本次未跑 PlayMode**：本机已有一个 `Server3C.exe`（PID 48320）在跑**旧二进制**并监听 UDP 8000，
-   我未去杀用户进程。请用新构建重启服务端后再跑一次：
-   `unity-mcp-cli run-tool tests-run --input '{"testMode":"PlayMode","testClass":"MonsterWorldTests"}' --timeout 300000`
-   （`HitJudgmentAlignmentTests` 也依赖起服，本次同样未跑，其注释已更新。）
-   另：新布局下 [4] DogKnight（18.0m，检测 18m）与 [5] SpiderBoss（32.0m，检测 25m）的巡逻圈也会
-   压到各自检测半径内——**只影响 `--monsters 6` 的 e2e/demo 口径**，与出生点挂机安全不变量无关。
-2. **正在跑的演示服务端是旧布局**：要看到新布局必须重启 `dist/server/Server3C.exe`（见上）。
-3. **落地高度差（既有待议项，非本次引入）**：怪物根节点按 y=0 落位，探针地面高度
+1. **e2e 观察者（原点）夹具语义变了** → **已在二轮修掉并实跑**（详见 §7：断言改为按"实际发起伤害的那只"
+   归属、观察者站位改到 (5,-7.5)，无 bots 服务端 2/2 通过；40-bots 服务端失败的原因也查清了 = 人群挡怪）。
+2. **正在跑的演示服务端**：01:22 重新构建、01:23:59 起在跑的是**含新布局**的构建
+   （`Server/bin/Debug/net8.0/Server3C.exe`，`--monsters 4 --bots 40 --bots-radius 60`，PID 56268，我全程未动它）。
+3. **落地高度差**：怪物根节点按 y=0 落位，探针地面高度
    [0]=+0.624 / [1]=0.000 / [2]=−0.113 / [3]=+0.162 / [4]=+0.372 / [5]=+0.490（旧槽位是 0.07–0.28）——
-   [0] Wolf 处地面比根节点高 0.62m，实机上"脚埋进地面"可能更明显（`production/verify/npc-anim-and-ground-fix.md` 已记该现象，
-   当时也列为"布局/出生点待议项"）。本次按任务要求**不动**，仅提醒重启服务端后看一眼实机表现。
+   [0] Wolf 处地面比根节点高 0.62m，实机上"脚埋进地面"可能更明显。
+   （二轮状态：并行任务 e36a734「Npc 视图吸附到客户端地形面」已落地该方向；PlayMode 跑时仍见
+   `[Sync] no ground under npc sample at (-40.00…` 警告 = 吸附在无地形处回落，属该任务的范畴。）
 4. **AOI 读数**：六只怪全部落在出生点的 80m 视距内（最远 [5] 64.0m）⇒ 演示浮层"远程实体"不再有
-   80m 边缘进出波动（旧口径 3↔4 / 5↔6 波动消失）。文档已按此更新，但**未做实机复测**（需起服）。
+   80m 边缘进出波动（旧口径 3↔4 / 5↔6 波动消失）。文档已按此更新；**未做实机复测**（需起服）。
 
 ---
 
 ## 6. 提交
 
-见本次提交（`fix(demo): …`）——布局收紧 + 出生点第三次搬迁；不变量（全六槽位距出生点 > 感知+巡逻）
-用新坐标重算后仍成立，服务端 236/236、EditMode 386/386、探针 7/7 命中陆地。
+- 一轮：`fe60f94 fix(demo): 布局收紧 + 出生点第三次搬迁到 (-15,0.3,-30)；挂机安全不变量仍成立`
+  ——不变量（全六槽位距出生点 > 感知+巡逻）用新坐标重算后仍成立，服务端 236/236、EditMode 386/386、探针 7/7。
+- 二轮（本 §7）：`test(demo): …`——`MonsterWorldTests` 断言归属 + 观察者站位 + 三处活文档就地改写。
+
+---
+
+## 7. 二轮返修（2026-10-17，审查发现 1 + 文档卫生项）
+
+### 7.1 改了哪几行（`Assets/Scripts/Tests/PlayMode/MonsterWorldTests.cs`）
+
+1. **断言归属**（审查指出的"假红"点）：`if (first.SourcePlayerId != wolfId.Value) return (false, "damage source X != wolf id Y")`
+   → 取首个 `DamageResult` 的 `SourcePlayerId`，断言
+   - 该 id 的视图存在且 `Kind==Npc`、`TemplateId==2`（仍是 Wolf，不是"随便一只怪都算"）；
+   - 它出手时与观察者的 XZ 距离 ≤ 15m（`WolfDetectionRadius` = `Server/Config/monster_config.json` 模板 2
+     `detectionRadius`，与既有的 dmg 15 同款硬编码 + 注释），且**采样期内最小距离**也 ≤ 15m
+     （`wolfMinDist` 按视图 id 分别累积；原单值 `wolfMinDistToSpawn` 退役）。
+   失败消息新增 `closestWolf=` 诊断。
+2. **观察者站位（夹具）**：实测原点已不在任何怪的感知可达范围（§7.2 数据），只改断言归属仍会红。
+   观察者改为经**真实移动上报链**（`ctx.Manager.AttachMovementReporter`）站到
+   **`ObserverPosition = (5, 0, -7.5)`**：在 [3] Wolf (10,0,-15) 出生朝向（面向原点）的**正前方 9.0m**——
+   15m 检测 + 90° 视锥（半角 45°）内，且落在它的巡逻方阵里（任何巡逻相位 60s 内都会被发现）；
+   离两只 Slime 巡逻圈最近点 9.0m / 23m（> 8m 检测 ⇒ 不抢"伤害来源必须是 Wolf"）；
+   [0] Wolf 远在 26m 外。首报 9m 位移不会被 `MovementValidator` 纠偏（瞬移门槛 = 50m）。
+
+### 7.2 实跑结果（含"是否重启过服务端"）
+
+| 环境 | 用例 | 结果 |
+|---|---|---|
+| **用户活服 8000**（`--monsters 4 --bots 40 --bots-radius 60`；**未重启、未杀进程**） | `MonsterWorldTests`（原点观察者，仅修断言） | **失败**：60s `casts=0`、`closestWolf=14.01` |
+| 同上 | `MonsterWorldTests`（新站位 (5,-7.5)） | **失败**：60s `casts=0`、`closestWolf=8.56` |
+| **临时实例 8001**（`--monsters 4`，无 bots；自起自停） | `MonsterWorldTests` | **2/2 通过**（19.1s，连跑两轮） |
+| 用户活服 8000 | `HitJudgmentAlignmentTests` | **2/2 通过**（2.3s） |
+
+**失败原因（证据链）= 40 个 bot 的人群把狼挡在半路**——不是布局、也不是断言：
+
+- 离线探针（临时 xunit 用例、跑完即删；**真实 MonsterModule、无 bots**；先空跑 40s 让狼巡逻，再登录静止玩家，
+  观察 4 分钟）：
+
+  | 观察者位置 | 登录后首次施法 | 攻击者 | 狼最小距离 | Slime[1] 最小距离 |
+  |---|---|---|---|---|
+  | origin(0,0) | 18.5s | [3] Wolf | 1.84m | 15.03m |
+  | **(5,-7.5)** | **0.6s** | [3] Wolf | 1.82m | 9.03m |
+  | (10,-10) | 14.5s | [3] Wolf | 1.77m | 10.04m |
+  | (2,-7.5) | 1.4s | [3] Wolf | 1.97m | 1.47m（Slime 也进圈 ⇒ 弃用） |
+  | demoSpawn(-15,-30) | 无（60s） | — | 20.18m | 11.20m |
+
+- 同一观察者位置对比：无 bots ⇒ 0.6s 被打；40 bots ⇒ 60s 内狼最近只到 8.56m、零施法（ORCA 是**纯局部**避让，
+  进不了人群——与 CLAUDE.md 已登记的"被挤进死角不解决"一致）。
+- **结论**：这条 e2e 需要**不带 bots** 的服务端（`--monsters 4`）；`--bots 40/100` 的 AOI 演示配置下
+  "挂机玩家被怪追上打"不成立（玩家自己走过去仍会被打——被挡的是"怪走向人"那一段）。已写进
+  `webgl-demo-runbook.md` / `webgl-demo-boundaries.md` / `start-game-server.cmd`。
+- **进程处置**：没有重启、没有杀用户的 8000 服务端；只为对照临时起了一个 8001 无 bots 实例
+  （stdout 留档 `production/verify/layout-spawn-nobots-server.log`），跑完已停。指向 8001 时临时改过
+  3 处端口字面量（带 `// TEMP-PORT` 标记），**已全部还原为 8000**（`grep -n "8000\|8001"` 复核）。
+
+### 7.3 三处活文档的新正文（就地改写，旧坐标只留一句"历史"）
+
+1. `docs/superpowers/guides/webgl-demo-runbook.md`（§4.1 起服务后）：
+   "…出生点自 2026-10-17 第三次搬迁后是 **(-15, 0.3, -30)**（历史：08-27 原点系 → 10-13 湖东岸 (10,0.21,-40)
+   → 现在是这里，布局同批收紧收进陆地），对全部六只怪都安全……离出生点最近的怪是 (0,0,-35) 的 [2] Slime：
+   朝它走出约 3m 就进它的感知圈被追（[0] Wolf 现在距出生点 33.5m，巡逻圈够不着）……"（末尾附 §7.2 的 bot 实测一段）
+2. `docs/superpowers/guides/network-playtest.md`：
+   ① 远程实体读数 → "出生点 2026-10-17 第三次搬迁到 (-15,0.3,-30)（历史：10-13 湖东岸 (10,0,-40)）……
+   `--monsters 4` 稳定 4、`--monsters 6` 稳定 6，不再有 80m 边缘波动"（旧 3↔4 / 5↔6 波动降为"旧读数留档"）；
+   ② 开局无仇恨条 → "出生点 (-15,0,−30)（历史：10-13 湖东岸、更早 (10,0,−15.52)）……最近的 (0,0,-35) [2] Slime
+   15.8m > 8+5……朝它走约 3m 进感知圈被追"。
+3. `production/deploy/webgl-demo/start-game-server.cmd`（REM 块）：出生点/避让段与开屏取景段整体改写成当前事实
+   （新点、最近怪 = [2] Slime、AOI 稳定 6、t8/t13 截图拍于旧点 ⇒ 需重新取景），并加一段 bot 实测警告。
+
+（另外 `docs/superpowers/guides/webgl-demo-boundaries.md` 的两处话术/口径块也一并就地改写：面试话术改成
+"2026-10-17 又搬了一次 (-15,0.3,-30)……朝 (0,0,-35) 走约 3m 就进那只 Slime 的感知圈"；演示建议表新增
+"bot 人群会把怪挡在半路"一行。）
+
+### 7.4 当前基线复核（二轮时点）
+
+- 服务端：`dotnet test Server/Server.Tests` → **246/246**（基线 246 = 一轮时的 236 + 并行任务
+  `982196c feat(combat): 服务端格挡减伤` 的 10 条；本改动不增删用例——临时诊断用例已删除，`git diff` 无用例增删）
+- Unity EditMode：**397/397**（并行任务落地后的新基线；本改动不涉 EditMode 逻辑）
+- PlayMode：`MonsterWorldTests` 无 bots 服务端 2/2（活服 8000 因人群失败，见 §7.2）；
+  `HitJudgmentAlignmentTests` 活服 8000 2/2

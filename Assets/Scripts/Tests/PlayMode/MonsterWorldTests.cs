@@ -17,9 +17,10 @@ namespace KcpNet.PlayModeTests
     /// 服务器 --monsters 4 模式启动（固定布局：Wolf(-30,0,0) / Slime(0,0,-20) / Slime(0,0,-35) /
     /// Wolf(10,0,-15)，一律面向原点）。**2026-10-17 第三次搬迁后原点观察者的夹具语义已变**：
     /// 旧 [0] Wolf 在 (12,0,0) 开局即感知原点观察者；新 [0] 距原点 30m（> 检测 15m）不再感知，
-    /// 观察者挨打只能来自 [3] Wolf（距原点 18.0m，巡逻圈有点到原点 11.2m——巡逻中可能进圈）。
-    /// 本用例的 wolfId 取"**最先看到的** Wolf 视图"、又断言伤害来源 == 该 id ⇒ 两只 Wolf 都在
-    /// AOI 里时存在假红风险，起服实跑复核见 production/verify/layout-and-spawn-move.md。
+    /// 原点也不在 [3] Wolf 巡逻时的视锥可达范围内（实测活服 60s casts=0）⇒ 观察者站位改到
+    /// (5,-7.5)（见 ObserverPosition），"谁打的"断言按**实际发起伤害的那只**算
+    /// （Wolf 视图 + 出手时在自己的检测半径内），不再取"最先看到的 Wolf"（按视图枚举序取会在
+    /// 两只 Wolf 同屏时必然假红）。起服实跑记录见 production/verify/layout-and-spawn-move.md。
     /// 统计口径（非时序脆弱断言——同 AoiWorldTests 惯例）。
     /// 注：登录须显式 ConnectAndLogin（ClientNetworkManager.Update 非 InWorld 时早退，
     /// 不会自行建连）——计划文本漏写，按 AoiWorldTests/CombatSyncTests 惯例补上（偏差记录）。
@@ -30,6 +31,22 @@ namespace KcpNet.PlayModeTests
     /// </summary>
     public class MonsterWorldTests
     {
+        /// <summary>Wolf 的检测半径（`Server/Config/monster_config.json` 模板 2 detectionRadius=15）——
+        /// PlayMode 侧没有服务端配置表的读取通道，与 dmg 15 同款硬编码，改配置时同改。</summary>
+        private const float WolfDetectionRadius = 15f;
+
+        /// <summary>2026-10-17 布局收紧后的**观察者站位**（默认落点是原点——LoginHandler 不填 SpawnX/Y/Z）。
+        /// 原点在新布局下已不在任何怪的感知可达范围：感知是**距离 + 视锥**双条件（TargetDetector：按怪物
+        /// **当前朝向**判 ±45°），巡逻中的狼朝向沿移动方向——原点只在 [3] Wolf 的巡逻方阵边上擦锥，实测
+        /// （40 bots 活服 60s）casts=0、最近狼 14.01m；离线无 bots 探针里同一位置狼会绕到 1.84m 并在 18.5s 施法
+        /// ⇒ 差距是人群把狼推离巡逻线，原点不宜再当夹具。
+        /// 夹具改为把观察者经**真实移动上报链**（MovementReporter，同 CombatSyncTests/BlockMitigation
+        /// 惯例）站到 (5,-7.5)：在 [3] Wolf (10,-15) 的**出生朝向**（面向原点）正前方 9.0m —— 15m 检测 +
+        /// 90° 视锥（半角 45°）内，且落在巡逻方阵内（任何巡逻相位都会在 60s 内被发现）；
+        /// 离两只 Slime 的巡逻圈最近点分别 9.0m / 23m（&gt; 8m 检测）⇒ 不会抢伤害来源；[0] Wolf 远在 26m 外。
+        /// 10m 以内的"首报瞬移"不会被 MovementValidator 纠偏（瞬移门槛 = 50m）。</summary>
+        private static readonly Vector3 ObserverPosition = new Vector3(5f, 0f, -7.5f);
+
         private sealed class Ctx
         {
             public KcpNetClientAdapter Adapter = new KcpNetClientAdapter();
@@ -109,14 +126,20 @@ namespace KcpNet.PlayModeTests
             ctx.Manager.ConnectAndLogin("127.0.0.1", 8000);
             if (!await WaitInWorld(ctx.Manager)) return (false, "login failed");
 
+            // 观察者站位（见 ObserverPosition 注释）：位置/朝向/速度经真实上报链上行（进世界后装配）
+            ctx.Manager.AttachMovementReporter(
+                () => new Cool.SyncCore.Vec3(ObserverPosition.x, ObserverPosition.y, ObserverPosition.z),
+                () => 0f,
+                () => 0f);
+
             // —— 观察 60s（统计口径）——
             // ① Wolf 感知：追击 → 攻击 → 观察者收到 DamageResult（dmg 15 恒值，
             //    SourcePlayerId = 怪物 id）——"打玩家触发 HitFSM 同步"链路的协议侧证据
-            //（2026-10-17 布局收紧后靠 [3] Wolf (10,0,-15) 的巡逻进圈，不再是 [0] 开局即感知）
+            //（2026-10-17 布局收紧：观察者站在 [3] Wolf (10,0,-15) 的出生朝向正前方 9m 处，见 ObserverPosition）
             // ② Slime 巡逻：视图位置漂移 ≥ 1m（样本间隔采样）
             var monsterIds = new HashSet<long>();
             long? wolfId = null;
-            float wolfMinDistToSpawn = float.MaxValue;
+            var wolfMinDist = new Dictionary<long, float>();   // 每只 Wolf 视图 → 与观察者的最小距离（诊断 + 出手归属）
             // 漂移按视图 id 分开累积——两个 Slime（±40m）共用一个变量会把彼此 ~160m 间距
             // 当成漂移（T5 首轮假绿：8s 窗口报 6000m，而单个 Slime 8s 至多走 ~16m）
             var slimeLastPos = new Dictionary<long, Vector3>();
@@ -139,8 +162,9 @@ namespace KcpNet.PlayModeTests
                         if (v.TemplateId == 2)
                         {
                             if (!wolfId.HasValue) wolfId = view;
-                            float d = Vector3.Distance(ctx.Manager.SpawnPosition, v.Position);
-                            if (d < wolfMinDistToSpawn) wolfMinDistToSpawn = d;
+                            float d = Vector3.Distance(ObserverPosition, v.Position);
+                            wolfMinDist[view] = wolfMinDist.TryGetValue(view, out var prevWolfDist)
+                                ? System.Math.Min(prevWolfDist, d) : d;
                         }
                         if (v.TemplateId == 1)
                         {
@@ -167,23 +191,40 @@ namespace KcpNet.PlayModeTests
             if (slimeDrift.Count == 0) return (false, "no slime sampled twice in 60s (patrol check impossible)");
             if (maxSlimeDrift < 1f)
                 return (false, $"max slime patrol drift only {maxSlimeDrift:F2}m in 60s (patrol not running?)");
+            float closestWolfDist = float.MaxValue;
+            foreach (var kv in wolfMinDist)
+                if (kv.Value < closestWolfDist) closestWolfDist = kv.Value;
             if (ctx.Damages.Count == 0)
                 return (false, $"observer never took monster damage (aggro/attack not working? monsters={monsterIds.Count} " +
-                               $"wolfMinDist={wolfMinDistToSpawn:F2} casts={ctx.CastBroadcasts} spawn={ctx.Manager.SpawnPosition})");
+                               $"closestWolf={closestWolfDist:F2} casts={ctx.CastBroadcasts} observer={ObserverPosition})");
 
             var first = ctx.Damages[0];
             var hit = FindHit(first, ctx.Manager.LocalPlayerId);
             if (hit == null) return (false, $"damage result {first.SourcePlayerId} did not target local player {ctx.Manager.LocalPlayerId}");
             if (System.Math.Abs(hit.Damage - 15f) > 0.001f)
                 return (false, $"monster damage {hit.Damage} != server-rolled 15 (wolf dmg)");
-            if (first.SourcePlayerId != wolfId.Value)
-                return (false, $"damage source {first.SourcePlayerId} != wolf id {wolfId.Value}");
+            // 2026-10-17 布局收紧后"谁打的"不能再取"最先看到的 Wolf"：新 [0] Wolf @ (-30,0,0) 的巡逻圈
+            // 最近 20m > 检测 15m，永远打不到原点观察者；实际出手的是巡逻圈压进检测半径的那只
+            // （[3] Wolf @ (10,0,-15)）——按视图枚举序取 id 会必然假红（damage source 2000004 != wolf id 2000001）。
+            // 断言口径 = "发起伤害的那只必须确实是 Wolf(template 2) 的 Npc 视图，且出手时就在自己的检测半径内"——
+            // 仍钉死"感知 → 追击 → 攻击"整条链，只是归属按**实际发起伤害的那只**算，不按枚举顺序。
+            var attacker = ctx.Registry.GetView(first.SourcePlayerId);
+            if (attacker == null || attacker.Kind != (byte)EntityKind.Npc || attacker.TemplateId != 2)
+                return (false, $"damage source {first.SourcePlayerId} is not a Wolf(template 2) Npc view " +
+                               $"(kind={attacker?.Kind}, template={attacker?.TemplateId})");
+            if (!wolfMinDist.TryGetValue(first.SourcePlayerId, out float attackerMin))
+                return (false, $"attacker {first.SourcePlayerId} was never sampled as a wolf view (ids: " +
+                               string.Join(",", wolfMinDist.Keys) + ")");
+            float attackerDist = Vector3.Distance(ObserverPosition, attacker.Position);
+            if (attackerDist > WolfDetectionRadius + 0.5f || attackerMin > WolfDetectionRadius + 0.5f)
+                return (false, $"Wolf {first.SourcePlayerId} hit from {attackerDist:F2}m (min sampled {attackerMin:F2}m) — " +
+                               $"outside its {WolfDetectionRadius}m detection radius (aggro geometry broken?)");
             if (System.Math.Abs(hit.TargetRemainingHp - (100f - hit.Damage)) > 0.001f)
                 return (false, $"local remaining hp {hit.TargetRemainingHp} inconsistent");
 
             string summary = $"ok: {monsterIds.Count} monsters seen, max slime patrol drift {maxSlimeDrift:F2}m " +
-                             $"(over {slimeDrift.Count} slimes), wolf {wolfId} hit observer for {hit.Damage} " +
-                             $"(hp {hit.TargetRemainingHp})";
+                             $"(over {slimeDrift.Count} slimes), wolf {first.SourcePlayerId} hit observer for {hit.Damage} " +
+                             $"(hp {hit.TargetRemainingHp}, min sampled dist {attackerMin:F2}m, all wolves min {closestWolfDist:F2}m)";
             Debug.Log("[MonsterWorldTests] " + summary);
             return (true, summary);
         }
