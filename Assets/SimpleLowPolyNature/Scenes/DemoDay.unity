@@ -7438,6 +7438,10 @@ MonoBehaviour:
     Prefab: {fileID: 4727220250917052466, guid: 936e4733a3f998a45aa48dd140fa34b6, type: 3}
   - TemplateId: 4
     Prefab: {fileID: 3451747886464063661, guid: 2dd741c8c27cf9c45a0cbca64ae3c229, type: 3}
+  - TemplateId: 1
+    Prefab: {fileID: 1931298151966786, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}
+  - TemplateId: 2
+    Prefab: {fileID: 1524411113276028, guid: e2aafa8770d34a9591b41bedf4e318ba, type: 3}
   _showDebugOverlay: 1
 --- !u!4 &940694965
 Transform:
