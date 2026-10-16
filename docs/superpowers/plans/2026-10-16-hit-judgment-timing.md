@@ -1234,8 +1234,9 @@ git commit -m "feat(combat): monsters telegraph their swings and can be circled"
 
 ```csharp
     /// <summary>F19：客户端 `NpcEntityAnimator` 的忙位解除**依赖**"决策与置 ActionState=Attack
-    /// 发生在同一次 BT 动作内"（否则挥砍被锁定在 Attack 态不释放）。这条不变量此前只活在注释里——
-    /// 本用例把它钉成可证伪的断言。</summary>
+    /// 发生在同一次 BT 动作内"（否则挥砍被锁定在 Attack 态不释放）。既有
+    /// `Hit_Window_Expiry_Restores_Locomotion_While_Target_Stays_In_Attack_Range` 已**间接**覆盖它
+    /// （其 :210 在决策 tick 断言同一等式）；本用例是**最小脚手架的专用钉**——不需要裁决链与伤害铺垫。</summary>
     [Fact]
     public void Attack_Decision_And_Action_State_Happen_In_The_Same_Tick()
     {
@@ -1265,11 +1266,14 @@ git commit -m "feat(combat): monsters telegraph their swings and can be circled"
 
 ```csharp
     [Fact]
-    public void Packet_Path_Decides_On_The_Tick_That_Is_About_To_Run()
+    public void Judgment_Lands_Exactly_On_DecideTick_Plus_HitDelay_Ticks()
     {
-        // F17：包处理发生在 tick 处理之前，`CurrentTick` 此刻仍是上一 tick 的值——
-        // CastHandler.HandleCastAsync 因此传 CurrentTick + 1。本用例钉住这个换算口径本身：
-        // 决策 tick = T 时，判定发生在 T + HitDelayTicks（早一 tick 或晚一 tick 都是缺陷）。
+        // F17：本用例钉住"决策 tick → 判定 tick"的**差值关系**——判定恰在
+        // decideTick + HitDelayTicks 那一 tick 到期（早一 tick 或晚一 tick 都是缺陷）；
+        // 期望 tick 由表推导（CombatRules.HitDelayTicks）而非硬编码，故表值调整不会误伤它。
+        // **已知覆盖缺口**：包路径里 CastHandler.HandleCastAsync 的 `_server.CurrentTick + 1`
+        //（Server/Handler/CastHandler.cs）目前**没有**自动化守护——删掉那个 +1 本用例不会变红；
+        // 它需要假 Server3C/session 装置，属本计划明确排除的范围，只能靠代码审查与 N6 手测。
         var (store, resolver, caster, target) = World(1.5f);
         const uint decideTick = 37;
         resolver.Decide(caster, Swing(), decideTick);
