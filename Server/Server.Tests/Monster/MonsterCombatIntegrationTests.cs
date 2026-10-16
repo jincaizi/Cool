@@ -17,7 +17,8 @@ public class MonsterCombatIntegrationTests
         module.SpawnDefaultLayout(4);
         var player = store.AddPlayer(1, "P");
         player.IsLoggedIn = true;
-        player.UpdatePosition(new Vector3(0f, 0f, 0f), 0f, 0f, 1L, 0U);
+        // Wolf[0] (-30,0,0) 面向原点——玩家在其前方 10m（检测 15m）：唯一感知者，入队 id 稳定为 NpcIdSeed+1
+        player.UpdatePosition(new Vector3(-20f, 0f, 0f), 0f, 0f, 1L, 0U);
 
         var resolver = new CombatResolver(store, new Random(42));
         uint lastCastTick = 0;
@@ -38,7 +39,7 @@ public class MonsterCombatIntegrationTests
             resolver.DrainResolved(t);   // 推进队列（本用例不消费结果；判定延迟 >0 ⇒ 决策当 tick 取不到这一条）
         }
 
-        // 120 tick：追击 ~45 tick 进入射程，此后每 15 tick 一次——期望 ≥3 次间隔施法
+        // 120 tick：追击 ~35 tick 进入射程（10m → 射程 2m @3.5m/s），此后每 15 tick 一次——期望 ≥3 次间隔施法
         Assert.True(castCount >= 3, $"expected multiple cooldown-spaced casts, got {castCount}");
     }
 }

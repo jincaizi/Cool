@@ -51,13 +51,13 @@ public class MonsterModuleTests
     public void Tick_With_No_Players_Patrols_Monsters()
     {
         var (store, module) = Create();
-        var slime = store.GetPlayer(MonsterModule.NpcIdSeed + 2)!; // 布局 [1]：Slime (40,0,0)
+        var slime = store.GetPlayer(MonsterModule.NpcIdSeed + 2)!; // 布局 [1]：Slime (0,0,-20)
         var start = slime.Position;
 
         for (uint t = 0; t < 60; t++) module.Tick(t);
 
         Assert.NotEqual(start, slime.Position);                       // 巡逻移动
-        float dx = slime.Position.X - 40f, dz = slime.Position.Z - 0f;
+        float dx = slime.Position.X - 0f, dz = slime.Position.Z - (-20f);
         Assert.True(dx * dx + dz * dz <= 5f * 5f + 0.01f);           // 巡逻半径 5 内（D-P5-9 零玩家持续运转）
     }
 
@@ -65,12 +65,13 @@ public class MonsterModuleTests
     public void Detection_Aggro_And_Attack_Queue_Targets_Closest_Player()
     {
         var (store, module) = Create();
-        LoginPlayer(store, 1, new Vector3(0f, 0f, 0f)); // 原点——Wolf[0] (12,0,0) 面向原点，检测 15m ≥ 12m
+        // Wolf[0] (-30,0,0) 面向原点（+x 朝向）——玩家在其前方 10m（检测 15m ≥ 10m，90° 锥内）
+        LoginPlayer(store, 1, new Vector3(-20f, 0f, 0f));
         var wolf = store.GetPlayer(MonsterModule.NpcIdSeed + 1)!;
 
         for (uint t = 0; t < 200; t++) module.Tick(t); // 3.5m/s × 200×66ms ≈ 46m 行程——足够追到 2m 内
 
-        float dist = Vector3.Distance(wolf.Position, new Vector3(0f, 0f, 0f));
+        float dist = Vector3.Distance(wolf.Position, new Vector3(-20f, 0f, 0f));
         Assert.True(dist <= 2.5f, $"wolf should chase to attack range, dist={dist}");
 
         var casts = module.DrainPendingCasts();
@@ -114,13 +115,14 @@ public class MonsterModuleTests
     public void Target_Lost_Triggers_Return_To_Spawn_And_Peace_Reset()
     {
         var (store, module) = Create();
-        LoginPlayer(store, 1, new Vector3(0f, 0f, 0f)); // Wolf[0] (12,0,0) 面向原点——开局即仇恨
+        // Wolf[0] (-30,0,0) 面向原点——玩家在其前方 10m（检测 15m ≥ 10m）：开局即仇恨
+        LoginPlayer(store, 1, new Vector3(-20f, 0f, 0f));
         long wolfId = MonsterModule.NpcIdSeed + 1;
         var wolf = store.GetPlayer(wolfId)!;
 
         for (uint t = 0; t < 200; t++) module.Tick(t);
         Assert.Equal(AlertLevel.HOSTILE, module.GetState(wolfId)!.AlertLevel); // 前置：已获取仇恨
-        Assert.True(Vector3.Distance(wolf.Position, new Vector3(0f, 0f, 0f)) <= 2.5f,
+        Assert.True(Vector3.Distance(wolf.Position, new Vector3(-20f, 0f, 0f)) <= 2.5f,
             "前置：狼应已追至攻击距离");
 
         store.RemovePlayer(1); // 目标消失（离场/死亡移除——DetectTarget 目标丢失路径）
@@ -133,7 +135,7 @@ public class MonsterModuleTests
         }
 
         Assert.True(returnedToPeace, "wolf should walk back to spawn and reset to PEACE after target loss");
-        float distToSpawn = Vector3.Distance(wolf.Position, new Vector3(12f, 0f, 0f));
+        float distToSpawn = Vector3.Distance(wolf.Position, new Vector3(-30f, 0f, 0f));
         Assert.True(distToSpawn <= 0.5f, $"wolf should be back at spawn, dist={distToSpawn}");
     }
 
@@ -141,7 +143,7 @@ public class MonsterModuleTests
     public void Hit_Stuns_Monster_For_Display_Window_Then_Resumes_Patrol()
     {
         var (store, module) = Create();
-        long slimeId = MonsterModule.NpcIdSeed + 2; // Slime (40,0,0)
+        long slimeId = MonsterModule.NpcIdSeed + 2; // Slime (0,0,-20)
         var slime = store.GetPlayer(slimeId)!;
 
         const uint t0 = 10;
@@ -230,7 +232,7 @@ public class MonsterModuleTests
     public void Respawn_Uses_New_Id_And_Full_Hp()
     {
         var (store, module) = Create();
-        long slimeId = MonsterModule.NpcIdSeed + 2; // Slime (40,0,0)，config hp=100
+        long slimeId = MonsterModule.NpcIdSeed + 2; // Slime (0,0,-20)，config hp=100
         var initialIds = new HashSet<long>();
         foreach (var p in store.All) initialIds.Add(p.PlayerId);
         Assert.Contains(slimeId, initialIds);
@@ -301,18 +303,22 @@ public class MonsterModuleTests
     }
 
     /// <summary>DemoDay 玩家出生点——客户端 `PlayerSpawner._spawnPoint` 实测
-    ///（DemoDay.unity 里该 Transform 无父节点，local 即 world (10, 0.21, -40)；
+    ///（DemoDay.unity 里该 Transform 无父节点，local 即 world (-15, 0.3, -30)；
     /// y 与感知判定无关——TargetDetector 只算 XZ——故常量 y 取 0，使 Vector3.Distance 即 XZ 距离）。
     /// **不是原点**：原点只是 e2e 观察者的位置，按原点推点位会漏判（2026-10-12 实测教训）。
-    /// 2026-10-13 从 (10,0,-15.52) 搬到 (10,0,-40)（湖东岸台地，地面 y≈0.21 高于水面 -0.38）：
+    /// 2026-10-13 第二次搬迁：从 (10,0,-15.52) 搬到 (10,0,-40)（湖东岸台地，地面 y≈0.21 高于水面 -0.38）——
     /// 旧点距 [0] Wolf 的巡逻圈最近只有 5.9m（检测 15m），站着不动必被它打死。
-    /// 选点与验证过程见 docs/superpowers/plans/2026-10-13-spawn-and-collision-report.md。</summary>
-    private static readonly Vector3 DemoSpawnPosition = new Vector3(10f, 0f, -40f);
+    /// 2026-10-17 第三次搬迁：搬到 (-15,0.3,-30)（地面实测 y≈0.256，y 抬到 0.3 让胶囊落稳）——
+    /// 与布局收紧同批（湖底/贴边的槽位收回陆地并向出生点靠拢——玩家反馈"怪太散、有的出图"）。
+    /// 前两次选点与验证见 docs/superpowers/plans/2026-10-13-spawn-and-collision-report.md，
+    /// 第三次见 production/verify/layout-and-spawn-move.md。</summary>
+    private static readonly Vector3 DemoSpawnPosition = new Vector3(-15f, 0f, -30f);
 
     /// <summary>挂机安全：每个槽位距出生点须 > 该模板「感知半径 + 巡逻半径」——否则怪物走完巡逻圈
     /// 就能感知到站在原地不动的玩家。半径从构建输出目录的 monster_config.json 读，不在测试里抄数字。
-    /// **全六槽位**（2026-10-13）：出生点搬到湖东岸后 [0] Wolf 也满足该规则了——旧出生点下它的
+    /// **全六槽位**（2026-10-13 起）：出生点搬到湖东岸后 [0] Wolf 也满足该规则了——旧出生点下它的
     /// 巡逻圈最近点只有约 5.9m（&lt; 检测 15m），是按设计违反本规则的唯一槽位，当时只能排除它。
+    /// 2026-10-17 第三次搬迁（出生点 + 布局同批改）后仍全六槽位达标，最小余量 [2] Slime +2.8m。
     /// 实测教训：DogKnight 初版 (0,0,-20) 距出生点仅 11.0m < 感知 18m → 12 分钟内 8/8 次进世界打死挂机玩家。</summary>
     [Theory]
     [InlineData(0)] // Wolf(t2)
@@ -370,7 +376,8 @@ public class MonsterModuleTests
     public void Attack_Decision_And_Action_State_Happen_In_The_Same_Tick()
     {
         var (store, module) = Create();
-        LoginPlayer(store, 1, new Vector3(0f, 0f, 0f));
+        // Wolf[0] (-30,0,0) 面向原点——玩家在其前方 10m（检测 15m）：追进射程后出手
+        LoginPlayer(store, 1, new Vector3(-20f, 0f, 0f));
         var wolf = store.GetPlayer(MonsterModule.NpcIdSeed + 1)!;
 
         uint decideTick = 0;

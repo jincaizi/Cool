@@ -14,8 +14,12 @@ namespace KcpNet.PlayModeTests
     /// ① 服务端驱动巡逻 + 仇恨追击 + 攻击：观察者看到怪物（Kind=Npc 视图）、
     ///    巡逻怪物位置漂移、Wolf 追击至攻击距离、收到 DamageResult（dmg 15 恒值）；
     /// ② 玩家断线怪物世界持续运转：重连后同一怪物 id 仍在（HP 权威保留）、继续攻击。
-    /// 服务器 --monsters 4 模式启动（固定布局：Wolf(12,0,0) 面向原点——开局即感知观察者；
-    /// Slime(±40,0,0) 巡逻可视不感知；Wolf(0,0,40) 可视不感知）。
+    /// 服务器 --monsters 4 模式启动（固定布局：Wolf(-30,0,0) / Slime(0,0,-20) / Slime(0,0,-35) /
+    /// Wolf(10,0,-15)，一律面向原点）。**2026-10-17 第三次搬迁后原点观察者的夹具语义已变**：
+    /// 旧 [0] Wolf 在 (12,0,0) 开局即感知原点观察者；新 [0] 距原点 30m（> 检测 15m）不再感知，
+    /// 观察者挨打只能来自 [3] Wolf（距原点 18.0m，巡逻圈有点到原点 11.2m——巡逻中可能进圈）。
+    /// 本用例的 wolfId 取"**最先看到的** Wolf 视图"、又断言伤害来源 == 该 id ⇒ 两只 Wolf 都在
+    /// AOI 里时存在假红风险，起服实跑复核见 production/verify/layout-and-spawn-move.md。
     /// 统计口径（非时序脆弱断言——同 AoiWorldTests 惯例）。
     /// 注：登录须显式 ConnectAndLogin（ClientNetworkManager.Update 非 InWorld 时早退，
     /// 不会自行建连）——计划文本漏写，按 AoiWorldTests/CombatSyncTests 惯例补上（偏差记录）。
@@ -106,9 +110,10 @@ namespace KcpNet.PlayModeTests
             if (!await WaitInWorld(ctx.Manager)) return (false, "login failed");
 
             // —— 观察 60s（统计口径）——
-            // ① Wolf(12,0,0) 开局感知：追击 → 攻击 → 观察者收到 DamageResult（dmg 15 恒值，
+            // ① Wolf 感知：追击 → 攻击 → 观察者收到 DamageResult（dmg 15 恒值，
             //    SourcePlayerId = 怪物 id）——"打玩家触发 HitFSM 同步"链路的协议侧证据
-            // ② Slime(40,0,0) 巡逻：视图位置漂移 ≥ 1m（样本间隔采样）
+            //（2026-10-17 布局收紧后靠 [3] Wolf (10,0,-15) 的巡逻进圈，不再是 [0] 开局即感知）
+            // ② Slime 巡逻：视图位置漂移 ≥ 1m（样本间隔采样）
             var monsterIds = new HashSet<long>();
             long? wolfId = null;
             float wolfMinDistToSpawn = float.MaxValue;

@@ -393,7 +393,7 @@ namespace KcpNet.PlayModeTests
 
                 while (!SawMonsterDamage() && Time.realtimeSinceStartup < deadline)
                 {
-                    // 优先挑**没仇恨我们**的 Slime（开局离出生点 40m，检测 8m ⇒ 未仇恨）并从它背后打：
+                    // 优先挑**没仇恨我们**的 Slime（开局离出生点 15.8m/[2]、18.0m/[1]，检测 8m ⇒ 未仇恨）并从它背后打：
                     // 怪看不见我们就不还手，我们的挥砍不会被打断（本地判定帧才一定触发）。
                     var monster = NearestNpc(rig.Registry, entry.transform.position, templateId: 1)
                                   ?? NearestNpc(rig.Registry, entry.transform.position);
