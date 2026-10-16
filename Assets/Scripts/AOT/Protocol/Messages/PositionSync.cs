@@ -33,6 +33,15 @@ namespace Cool.Protocol
         /// <summary>序列号（单调递增，用于 ack 对账）</summary>
         [ProtoMember(7)]
         public uint Sequence { get; set; }
+
+        /// <summary>
+        /// 是否处于防御姿态（客户端上报；服务端只做几何 + 耐久校验，信任面登记见
+        /// CombatRules.IsBlocked——与"客户端权威位置 + 服务端部分校验"同一哲学，不是防作弊闸门）。
+        /// 累积式协议：只加不删——新字段一律追加高位 tag，既有字段号不改不挪；
+        /// 缺该字段的老客户端读到 false = 未防御（服务端按全额伤害裁决，安全方向）
+        /// </summary>
+        [ProtoMember(8)]
+        public bool IsDefending { get; set; }
     }
 
     /// <summary>位置同步响应（含权威纠偏数据）</summary>

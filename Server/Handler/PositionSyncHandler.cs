@@ -45,6 +45,10 @@ namespace KcpServer
                 request.Timestamp, request.Sequence);
             // UpdatePosition 置 IsDirty——保留（P2 测试语义）；AOI 广播按带节拍直接读当前位置，不依赖脏标记
 
+            // 防御姿态随同一次位置同步刷新（格挡减伤服务端化的输入侧）。**故意不进 MovementValidator**：
+            // 位置校验与防御无关；防御的信任面（客户端上报 + 服务端几何/耐久校验）登记见 CombatRules.IsBlocked
+            player.IsDefending = request.IsDefending;
+
             if (result.NeedsCorrection)
             {
                 if (result.ClampedSpeed != request.Speed)

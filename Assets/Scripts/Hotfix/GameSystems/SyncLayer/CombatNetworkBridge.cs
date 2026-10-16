@@ -14,7 +14,8 @@ namespace Hotfix.GameSystems.SyncLayer
     ///  - 出站：本地技能激活 → 表内技能发 CastRequest（形状随包上线，服务端校验上限）。
     ///    本地表现即时播放不变（预测反馈）；伤害数字等服务端结果（D-P4-8）。
     ///  - 入站：CastBroadcast → OnCastBroadcast 事件（P4 表现占位：宿主日志）；
-    ///    DamageResult → 本地玩家走 onDamageToLocalPlayer 注入（宿主接 Sys3CEntry.ApplyServerDamage），
+    ///    DamageResult → 本地玩家走 onDamageToLocalPlayer 注入（宿主接 Sys3CEntry.ApplyServerDamage，
+    ///    含格挡标志——宿主据此走格挡受击表现而不是普通受击），
     ///    远程实体直接 Emit PlayerTakeDamageEvent——现有 DisplayEventBridge/FloatText 链自动飘字。
     /// 线程模型：adapter 回调线程只入队，Update（主线程）消费——与 ClientNetworkManager 同纪律。
     /// </summary>
@@ -23,8 +24,9 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly INetworkClient _client;
         private readonly Func<long> _localPlayerId;
         private readonly RemoteEntityRegistry _registry;
-        /// <summary>本地受击注入点：targetId / damage / isCritical / 方向 / 服务端权威余血（T12 甲-2）</summary>
-        private readonly Action<long, float, bool, Vector3, float>? _onDamageToLocalPlayer;
+        /// <summary>本地受击注入点：targetId / damage / isCritical / 方向 / 服务端权威余血（T12 甲-2）/
+        /// 是否被格挡（服务端裁决——宿主据此走格挡受击表现）</summary>
+        private readonly Action<long, float, bool, Vector3, float, bool>? _onDamageToLocalPlayer;
         private readonly ConcurrentQueue<IMessage> _incoming = new ConcurrentQueue<IMessage>();
 
         /// <summary>收到其他玩家施法（表现接线点；P4 宿主仅日志占位——远程实体为胶囊）</summary>
@@ -34,7 +36,7 @@ namespace Hotfix.GameSystems.SyncLayer
         public event Action<DamageResult>? OnDamageResult;
 
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
-            RemoteEntityRegistry registry, Action<long, float, bool, Vector3, float>? onDamageToLocalPlayer = null)
+            RemoteEntityRegistry registry, Action<long, float, bool, Vector3, float, bool>? onDamageToLocalPlayer = null)
         {
             _client = client;
             _localPlayerId = localPlayerId;
@@ -88,11 +90,14 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (hit.TargetPlayerId == localId)
                 {
                     // T12 甲-2：权威余血随包下传（协议早已有 TargetRemainingHp，此前零消费方）——
-                    // 宿主用它对齐本地 HP，不再只看本地减法
+                    // 宿主用它对齐本地 HP，不再只看本地减法。
+                    // IsBlocked 随同一回调下传：宿主走格挡受击表现（受击层既有 DefendHit 态）
                     _onDamageToLocalPlayer?.Invoke(hit.TargetPlayerId, hit.Damage, hit.IsCritical,
-                        Vector3.zero, hit.TargetRemainingHp);
+                        Vector3.zero, hit.TargetRemainingHp, hit.IsBlocked);
                     continue;
                 }
+                // 远程实体：被格挡时沿用既有飘字链路（Damage 已是减免后的值）；远程格挡动画
+                // 无同步通道（表现层只做本地玩家，P4 backlog——见格挡减伤交付报告）
                 var view = _registry.GetView(hit.TargetPlayerId);
                 if (view == null) continue; // 视野外无视图（AOI 下不应发生——防御跳过）
                 EventBus.Emit(new PlayerTakeDamageEvent(

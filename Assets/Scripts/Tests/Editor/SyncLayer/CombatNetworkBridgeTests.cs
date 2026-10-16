@@ -104,7 +104,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var registry = new RemoteEntityRegistry(_root.transform);
             long sinkTarget = 0; float sinkDamage = 0; bool sinkCrit = false; float sinkRemainingHp = -1f;
             var bridge = new CombatNetworkBridge(_client, () => 7, registry,
-                (targetId, damage, isCritical, dir, remainingHp) =>
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked) =>
                 {
                     sinkTarget = targetId;
                     sinkDamage = damage;
@@ -125,6 +125,31 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             // T12 甲-2：服务端权威余血必须原样带到本地注入点（宿主用它对齐本地 HP）
             Assert.AreEqual(20f, sinkRemainingHp, 0.001f,
                 "TargetRemainingHp 未随回调下传——本地 HP 会退回自算，与服务端永远对不上");
+        }
+
+        [Test]
+        public void OnDamageResult_LocalTarget_Passes_Blocked_Flag()
+        {
+            // 格挡减伤服务端化的表现侧：IsBlocked 必须随本地受击回调到宿主——
+            // 宿主据此走格挡受击（DefendHit）而不是普通受击。Damage 已是减免后的值（3 = 10 × 0.3）
+            var registry = new RemoteEntityRegistry(_root.transform);
+            bool sinkBlocked = false; float sinkDamage = 0f;
+            var bridge = new CombatNetworkBridge(_client, () => 7, registry,
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked) =>
+                {
+                    sinkDamage = damage;
+                    sinkBlocked = isBlocked;
+                });
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 2_000_001, SkillId = 50001,
+                Hits = { new HitEntry { TargetPlayerId = 7, Damage = 3f, IsBlocked = true, TargetRemainingHp = 97f } }
+            });
+            bridge.Update();
+
+            Assert.IsTrue(sinkBlocked, "格挡标志未随本地受击回调下传——宿主无法区分格挡/普通受击表现");
+            Assert.AreEqual(3f, sinkDamage, 0.001f);
         }
 
         [Test]
@@ -204,7 +229,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var registry = new RemoteEntityRegistry(_root.transform);
             float sinkDamage = 0; float sinkRemainingHp = -1f;
             var bridge = new CombatNetworkBridge(_client, () => 7, registry,
-                (targetId, damage, isCritical, dir, remainingHp) =>
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked) =>
                 {
                     sinkDamage = damage;
                     sinkRemainingHp = remainingHp;

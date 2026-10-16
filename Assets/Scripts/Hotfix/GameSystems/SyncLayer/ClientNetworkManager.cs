@@ -91,10 +91,13 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>
         /// 装配移动上报（进世界后由宿主调用；传入本地角色数据源）。
         /// speedProvider 必须反映真实移动速度（超速钳制链路依赖它——固定值会使纠偏测不到）。
+        /// defendStateProvider 报"是否防御中"（格挡减伤服务端化 —— 宿主接本地 3C
+        /// `CharacterController.IsDefending`；不传则恒上报 false = 未防御）。
         /// 宿主接线：manager.OnCorrectionNeeded += (pos, rot) => policy.ApplyServerCorrection(pos, rot);
         /// </summary>
         public void AttachMovementReporter(Func<Cool.SyncCore.Vec3> positionProvider,
-            Func<float> rotationProvider, Func<float> speedProvider, int injectedSendDelayMs = 0)
+            Func<float> rotationProvider, Func<float> speedProvider, int injectedSendDelayMs = 0,
+            Func<bool>? defendStateProvider = null)
         {
             if (_reporter != null)
             {
@@ -103,7 +106,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 return;
             }
 
-            _reporter = new MovementReporter(_client, positionProvider, rotationProvider, speedProvider, injectedSendDelayMs);
+            _reporter = new MovementReporter(_client, positionProvider, rotationProvider, speedProvider,
+                injectedSendDelayMs, defendStateProvider);
             _dispatcher.Subscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
         }
 

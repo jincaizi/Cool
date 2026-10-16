@@ -88,7 +88,7 @@ namespace KcpNet.PlayModeTests
                 // 本地受伤注入点（生产接线 = Sys3CEntry.ApplyServerDamage）与 OnDamageResult 在
                 // 同一个 Bridge.Update() 里先后触发（微秒级）——时间读数统一取 OnDamageResult 那一笔。
                 Bridge = new CombatNetworkBridge(Adapter, () => Manager.LocalPlayerId, Registry,
-                    onDamageToLocalPlayer: (_, __, ___, ____, _____) => LocalDamageAppliedCount++);
+                    onDamageToLocalPlayer: (_, __, ___, ____, _____, ______) => LocalDamageAppliedCount++);
                 Adapter.MessageReceived += Bridge.OnMessage;
                 Bridge.OnDamageResult += result =>
                 {

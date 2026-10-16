@@ -58,6 +58,7 @@ public class CodecRoundtripTests
         {
             X = 1.5f, Y = 0.25f, Z = -3.75f,
             Rotation = 90f, Speed = 4.2f,
+            IsDefending = true,     // 格挡减伤服务端化的输入侧（tag 8）
             Timestamp = 555L, Sequence = 7U
         };
 
@@ -72,6 +73,7 @@ public class CodecRoundtripTests
         Assert.Equal(source.Rotation, sync.Rotation, 4);
         Assert.Equal(source.Speed, sync.Speed, 4);
         Assert.Equal(source.Timestamp, sync.Timestamp);
+        Assert.True(sync.IsDefending, "IsDefending 未上线——服务端永远看到 false，格挡减伤整条链静默失效");
     }
 
     [Fact]

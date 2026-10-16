@@ -62,6 +62,13 @@ namespace Cool.Protocol
 
         [ProtoMember(5)] public float HitX { get; set; }
         [ProtoMember(6)] public float HitZ { get; set; }
+
+        /// <summary>
+        /// 这一击被格挡了（服务端裁决；Damage 已按 CombatRules.BlockDamageScale 减免，
+        /// TargetRemainingHp 仍是扣后权威余血）。客户端据此走格挡受击表现（本地玩家）。
+        /// 累积式协议：只加不删——新字段追加高位 tag；缺该字段的老客户端读到 false = 普通受击
+        /// </summary>
+        [ProtoMember(7)] public bool IsBlocked { get; set; }
     }
 
     /// <summary>伤害结果（服务器 → caster + 每个受击者；双端伤害数字一致性载体）。AOE 多命中打包。</summary>

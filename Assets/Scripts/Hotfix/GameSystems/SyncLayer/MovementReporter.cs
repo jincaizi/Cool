@@ -11,6 +11,8 @@ namespace Hotfix.GameSystems.SyncLayer
     /// 驱动点：ClientNetworkManager.Update（宿主每帧调）——与测试宿主解耦，
     /// 不依赖真实 NetMovementPolicy。
     /// 注入参数 injectedSendDelayMs 仅测试用（PlayMode 延迟注入验收；生产恒 0）。
+    /// 防御状态由 defendStateProvider 注入（照 positionProvider 惯例；宿主接线本地 3C 的
+    /// `CharacterController.IsDefending`——**不在本类里 FindObjectOfType**），随位置请求上报。
     /// </summary>
     public sealed class MovementReporter
     {
@@ -19,6 +21,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Func<float> _rotationProvider;
         private readonly Func<float> _speedProvider;
         private readonly int _injectedSendDelayMs;
+        private readonly Func<bool>? _defendStateProvider;
         private readonly PredictionReconciler _reconciler = new PredictionReconciler();
         private float _timer;
         private uint _sequence;
@@ -28,13 +31,14 @@ namespace Hotfix.GameSystems.SyncLayer
 
         public MovementReporter(INetworkClient client,
             Func<Vec3> positionProvider, Func<float> rotationProvider, Func<float> speedProvider,
-            int injectedSendDelayMs = 0)
+            int injectedSendDelayMs = 0, Func<bool>? defendStateProvider = null)
         {
             _client = client;
             _positionProvider = positionProvider;
             _rotationProvider = rotationProvider;
             _speedProvider = speedProvider;
             _injectedSendDelayMs = injectedSendDelayMs;
+            _defendStateProvider = defendStateProvider;
         }
 
         /// <summary>每帧驱动；reportIntervalSeconds = ServerTickRateMs/1000（默认 66ms）</summary>
@@ -66,6 +70,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 X = pos.X, Y = pos.Y, Z = pos.Z,
                 Rotation = rot,
                 Speed = _speedProvider(),
+                IsDefending = _defendStateProvider?.Invoke() ?? false,
                 Timestamp = DateTime.UtcNow.Ticks,
                 Sequence = seq
             });

@@ -8,7 +8,7 @@ namespace KcpServer
 {
     /// <summary>
     /// P4 服务端权威战斗裁决核心（spec §5-P4）——校验（已知技能/存活/冷却/形状上限）
-    /// → HitResolver 几何命中 → D4 服务端掷骰 → 权威扣血 + 冷却记录。
+    /// → HitResolver 几何命中 → D4 服务端掷骰 → 格挡减伤（防御中的受击者）→ 权威扣血 + 冷却记录。
     /// 纯核心不依赖 Server3C/session（单测直用）；主循环独占线程（R2），无锁。
     /// </summary>
     public sealed class CombatResolver
@@ -139,14 +139,35 @@ namespace KcpServer
             {
                 var target = _store.GetPlayer(targetId);
                 if (target == null) continue;
+
+                // 掷骰顺序不变：暴击照常掷，格挡只在最后乘倍率（确定性可复现——固定种子的
+                // 期望值不因格挡分支错位；调换这里两句会让既有种子序列整体漂移）
                 float damage = RollDamage(entry, out bool isCritical);
+
+                // 格挡减伤（D-P4-8 服务端化）：防御中 + 攻击者落在受击者正面 BlockHalfAngleDeg 锥内
+                // + 盾未耗尽 ⇒ 伤害 × BlockDamageScale、扣耐久、命中条目标记 IsBlocked。
+                // **信任面（诚实登记）**：IsDefending 由客户端上报、yaw 来自客户端上报的位置同步——
+                // 服务端只做几何与耐久校验，与既有"客户端权威位置 + 服务端部分校验"同一哲学，
+                // 不是防作弊闸门（位置校验的边界就是本裁决的边界）。
+                bool blocked = target.IsDefending
+                    && target.ShieldDurability > 0f
+                    && CombatRules.IsBlocked(target.Rotation,
+                        caster.Position.X - target.Position.X,
+                        caster.Position.Z - target.Position.Z);
+                if (blocked)
+                {
+                    damage *= CombatRules.BlockDamageScale;
+                    target.ConsumeShieldDurability(CombatRules.ShieldDurabilityPerBlock);
+                }
+
                 target.ApplyDamage(damage);
                 resolution.Hits.Add(new HitEntry
                 {
                     TargetPlayerId = targetId,
                     Damage = damage,
                     IsCritical = isCritical,
-                    TargetRemainingHp = target.Hp,
+                    IsBlocked = blocked,
+                    TargetRemainingHp = target.Hp, // 扣后权威余血（T12 甲-2）——格挡分支同样成立
                     HitX = target.Position.X,
                     HitZ = target.Position.Z
                 });

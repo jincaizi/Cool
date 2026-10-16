@@ -53,6 +53,25 @@ namespace Cool.SyncCore
         public const float CritMultiplier = 1.5f;
         public const float TickRateHz = 15f;
 
+        // —— PvP 格挡减伤（2026-10-17；服务端裁决，客户端表现复用既有 DefendHit 链路）——
+        // 表值自持（与判定延迟同一作风）：防御中且攻击者落在正面 BlockHalfAngleDeg 锥内 ⇒
+        // 伤害 × BlockDamageScale；每格挡一次扣 ShieldDurabilityPerBlock 耐久，归零后不再减伤。
+
+        /// <summary>格挡后伤害倍率（格挡成功 ⇒ damage × 该值）</summary>
+        public const float BlockDamageScale = 0.3f;
+
+        /// <summary>格挡锥半角（度）：受击者朝向与"受击者→攻击者"方向夹角 ≤ 半角 ⇒ 格挡命中。
+        /// **半角**语义（锥全角 120°）——与 HitShape.Angle（全角）不同，勿混</summary>
+        public const float BlockHalfAngleDeg = 60f;
+
+        /// <summary>盾耐久上限（服务端权威 PlayerState.ShieldDurability 的初值；登录/复活回满）。
+        /// 与客户端本地盾（CharacterController._shieldDurability 上限 50）**不同值域**：本地盾服务于
+        /// 单机权威战斗，服务端盾服务联网裁决，两者不互抄</summary>
+        public const float ShieldMaxDurability = 100f;
+
+        /// <summary>每次格挡消耗的耐久（100 / 25 = 4 次格挡后耗尽）</summary>
+        public const float ShieldDurabilityPerBlock = 25f;
+
         private static readonly Dictionary<int, SkillEntry> Table = new Dictionary<int, SkillEntry>
         {
             // 玩家四条：hitDelay = 客户端动画资产的判定帧实测（ShapeBlock._hitboxTimings + CastTime）
@@ -108,5 +127,25 @@ namespace Cool.SyncCore
         /// <summary>判定延迟换算为 tick 数（15Hz 基准，向上取整，与 CooldownTicks 同惯例）</summary>
         public static uint HitDelayTicks(SkillEntry entry) =>
             (uint)Math.Ceiling(entry.HitDelaySeconds * TickRateHz);
+
+        /// <summary>
+        /// 格挡几何（纯 XZ 平面，零 UnityEngine 依赖）：受击者朝向（yaw 语义与 HitResolver 一致：
+        /// yaw=0 → +Z，sin/cos 展开天然 wrap 安全）与"受击者→攻击者"方向的夹角 ≤
+        /// BlockHalfAngleDeg 即格挡命中。<paramref name="dx"/>/<paramref name="dz"/> =
+        /// 攻击者相对受击者的偏移（caster − defender）。
+        /// 零距离退化视为格挡——沿用 HitResolver 的退化护栏惯例（D-P4-2a）：贴脸时方向向量趋零、
+        /// 归一化不可靠，不做此修正会让"贴着受击者打"永远无法格挡（命中侧是同一护栏的反面）。
+        /// **信任面**：IsDefending 由客户端上报、yaw 也来自客户端上报的位置同步——本方法只做几何
+        /// 判定，与既有"客户端权威位置 + 服务端部分校验"同一哲学，不是防作弊闸门。
+        /// </summary>
+        public static bool IsBlocked(float defenderYawDeg, float dx, float dz)
+        {
+            float dist = (float)Math.Sqrt(dx * dx + dz * dz);
+            if (dist < 0.0001f) return true; // 零距离退化（阈值与 HitResolver.InCone 同款）
+            float forwardX = (float)Math.Sin(defenderYawDeg * Math.PI / 180.0);
+            float forwardZ = (float)Math.Cos(defenderYawDeg * Math.PI / 180.0);
+            float halfCos = (float)Math.Cos(BlockHalfAngleDeg * Math.PI / 180.0);
+            return (forwardX * dx + forwardZ * dz) / dist >= halfCos;
+        }
     }
 }

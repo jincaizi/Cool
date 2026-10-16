@@ -1,3 +1,4 @@
+using System;
 using Cool.Protocol;
 using Cool.SyncCore;
 using Xunit;
@@ -187,5 +188,58 @@ public class CombatRulesTests
             Assert.True(entry!.HitDelaySeconds <= entry.CooldownSeconds + 0.0001f,
                 $"skill {skillId} hitDelay={entry.HitDelaySeconds} > cooldown={entry.CooldownSeconds}");
         }
+    }
+
+    // —— PvP 格挡减伤（D-P4-8 服务端化，2026-10-17）——
+
+    [Fact]
+    public void Block_Table_Values_Are_Pinned()
+    {
+        // 表值自持（与判定延迟同一作风）：改这些值 = 平衡改动，必须在这里显式改
+        Assert.Equal(0.3f, CombatRules.BlockDamageScale, 4);
+        Assert.Equal(60f, CombatRules.BlockHalfAngleDeg, 4);
+        Assert.Equal(100f, CombatRules.ShieldMaxDurability, 4);
+        Assert.Equal(25f, CombatRules.ShieldDurabilityPerBlock, 4);
+    }
+
+    [Fact]
+    public void IsBlocked_Inside_Cone_True_Outside_False()
+    {
+        // yaw=0 → +Z：攻击者在正前 ⇒ 0° ⇒ 格挡；正后 ⇒ 180° ⇒ 不格挡
+        Assert.True(CombatRules.IsBlocked(0f, 0f, 1f));
+        Assert.False(CombatRules.IsBlocked(0f, 0f, -1f));
+        // 斜前方 45°（半角 60 内）；斜后方（约 143°）出锥
+        Assert.True(CombatRules.IsBlocked(0f, 0.7f, 0.7f));
+        Assert.False(CombatRules.IsBlocked(0f, 0.8f, -0.6f));
+    }
+
+    [Fact]
+    public void IsBlocked_At_Half_Angle_Boundary_Is_Inclusive()
+    {
+        // 受击者 yaw=60、攻击者在正 +Z 1m ⇒ 夹角恰好 60°：含边界（与 HitResolver 锥「含边界」同语义）。
+        // dist 在此恰好为 1、forwardZ 恰为 float 0.5 ⇒ 断言位级可复现，不是近似运气。
+        Assert.True(CombatRules.IsBlocked(60f, 0f, 1f));
+        Assert.False(CombatRules.IsBlocked(60.0001f, 0f, 1f)); // 刚出界
+    }
+
+    [Fact]
+    public void IsBlocked_Zero_Distance_Is_Blocked()
+    {
+        // 贴脸退化（方向向量趋零、归一化不可靠）⇒ 视为格挡——防"贴脸永远无法格挡"。
+        // 与 HitResolver 的"零距离视为锥内"反向配套：攻击方贴脸能命中，防守方贴脸就该能挡。
+        Assert.True(CombatRules.IsBlocked(0f, 0f, 0f));
+        Assert.True(CombatRules.IsBlocked(180f, 0.00001f, -0.00001f)); // 亚阈值（dist < 0.0001）
+    }
+
+    [Fact]
+    public void IsBlocked_Yaw_Wraps_Across_Zero()
+    {
+        // yaw=350 与攻击方向 10° 的夹角 = 20°（跨 0）——sin/cos 展开天然 wrap 安全
+        //（朴素"角度相减 + 手工取模"的实现会在这里漏判）
+        Assert.True(CombatRules.IsBlocked(350f,
+            (float)Math.Sin(10f * Math.PI / 180.0), (float)Math.Cos(10f * Math.PI / 180.0)));
+        // 跨 0 的背向：350 与 190 夹角 180° ⇒ 不格挡
+        Assert.False(CombatRules.IsBlocked(350f,
+            (float)Math.Sin(190f * Math.PI / 180.0), (float)Math.Cos(190f * Math.PI / 180.0)));
     }
 }

@@ -565,7 +565,9 @@ namespace Hotfix.GameSystems.SyncLayer
             _localEntry.MovementPolicy = _netPolicy; // 接管本地物理 + 平滑拉回（Start 的 null 守卫兼容预置）
 
             // 上报数据源：位置/旋转读 CharacterData（每帧自 transform 同步）；
-            // 速度 = 水平真实速度（_controller.velocity——超速钳制链路依赖真实值，勿用 0-1 动画参数）
+            // 速度 = 水平真实速度（_controller.velocity——超速钳制链路依赖真实值，勿用 0-1 动画参数）；
+            // 防御状态 = 3C 的 `IsDefending` 真值源（服务端格挡减伤据此裁决——本地盾耐久不同步，
+            // 服务端 PlayerState.ShieldDurability 是权威）
             _manager!.AttachMovementReporter(
                 () =>
                 {
@@ -577,12 +579,15 @@ namespace Hotfix.GameSystems.SyncLayer
                 {
                     var v = controller.Data.Velocity;
                     return Mathf.Sqrt(v.x * v.x + v.z * v.z);
-                });
+                },
+                defendStateProvider: () => controller.IsDefending);
             _manager.OnCorrectionNeeded += _netPolicy.ApplyServerCorrection;
 
             // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链
+            // （blocked = 服务端格挡裁决 → 本地走格挡受击表现，见 Sys3CEntry.ApplyServerDamage）
             _combatBridge = new CombatNetworkBridge(_adapter!, () => _manager!.LocalPlayerId, _remoteEntities!,
-                (targetId, dmg, crit, dir, remainingHp) => _localEntry.ApplyServerDamage(dmg, dir, remainingHp));
+                (targetId, dmg, crit, dir, remainingHp, blocked) =>
+                    _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked));
             _adapter!.MessageReceived += _combatBridge.OnMessage;
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
             // T12 乙-3：服务端判死 → 提示 + 回选人（重登即复活）

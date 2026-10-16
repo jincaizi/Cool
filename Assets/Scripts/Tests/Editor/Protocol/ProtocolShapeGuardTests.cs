@@ -147,6 +147,29 @@ namespace Cool.Protocol.Tests
             Assert.AreEqual(8, (byte)Cool.Protocol.NpcAnimationState.GetUp);
         }
 
+        [Test]
+        public void PositionSyncRequest_Defending_Tag_Is_Pinned()
+        {
+            // 只加不删的机器化防线（1..7 已发布）：Defending 必须在 tag 8——挪号不报错，
+            // 老客户端的上报会静默落到别的字段上（服务端永远读到 false）
+            var prop = typeof(Cool.Protocol.PositionSyncRequest).GetProperty("IsDefending");
+            Assert.IsNotNull(prop, "PositionSyncRequest 必须有 IsDefending");
+            Assert.AreEqual(typeof(bool), prop!.PropertyType);
+            Assert.AreEqual(8, GetProtoMemberTag(prop),
+                "IsDefending 必须挂在 tag 8（既有 1..7 是已发布的 wire 契约）");
+        }
+
+        [Test]
+        public void HitEntry_Blocked_Tag_Is_Pinned()
+        {
+            // 只加不删的机器化防线：格挡标志追加 tag 7（1..6 已发布）
+            var prop = typeof(Cool.Protocol.HitEntry).GetProperty("IsBlocked");
+            Assert.IsNotNull(prop, "HitEntry 必须有 IsBlocked");
+            Assert.AreEqual(typeof(bool), prop!.PropertyType);
+            Assert.AreEqual(7, GetProtoMemberTag(prop),
+                "IsBlocked 必须挂在 tag 7（既有 1..6 是已发布的 wire 契约）");
+        }
+
         /// <summary>
         /// 按名字认 [ProtoMember]：本测试程序集引用不到 protobuf-net 插件（Unity 不给它自动引用
         /// 预编译 DLL，GameSys.EditorTests.csproj 里没有该 Reference），所以不能写 ProtoBuf.ProtoMemberAttribute。

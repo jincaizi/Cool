@@ -1,4 +1,5 @@
 using System;
+using Cool.SyncCore;
 
 namespace KcpServer
 {
@@ -26,6 +27,25 @@ namespace KcpServer
         /// <summary>服务器权威扣血（命中裁决调用；可到负值——死亡判定唯一依据 IsAlive，复活见 D-2）</summary>
         public void ApplyDamage(float damage) => Hp -= damage;
 
+        /// <summary>
+        /// 防御姿态（客户端经 PositionSyncRequest.IsDefending 上报，每次位置同步刷新——
+        /// PositionSyncHandler；**不进 MovementValidator**：位置校验与防御无关）。
+        /// 服务端只做几何 + 耐久校验，信任面登记见 CombatRules.IsBlocked
+        /// </summary>
+        public bool IsDefending { get; internal set; }
+
+        /// <summary>
+        /// 盾耐久（服务端权威）。格挡成功每击消耗 ShieldDurabilityPerBlock、下限 0；
+        /// **归零 ⇒ IsDefending 不再产生减伤**（判定在 CastHandler.ResolveHits 的格挡条件）。
+        /// 恢复口径（本实现的选择）：**不做战斗内恢复**；登录重建 PlayerState 与复活
+        /// （TryRespawn）时回满——与 Hp 同款"复活即满"语义，少一个 YAGNI 的回复计时器
+        /// </summary>
+        public float ShieldDurability { get; internal set; } = CombatRules.ShieldMaxDurability;
+
+        /// <summary>格挡成功后的耐久扣除（下限 0）</summary>
+        public void ConsumeShieldDurability(float amount) =>
+            ShieldDurability = Math.Max(0f, ShieldDurability - amount);
+
         /// <summary>死亡发生的 tick（0 = 活着）。复活计时从它起算（D-2：8 秒）</summary>
         public long DeadTick { get; private set; }
 
@@ -50,6 +70,7 @@ namespace KcpServer
             if (elapsedMs < RespawnDelayMs) return false;
 
             Hp = MaxHp;
+            ShieldDurability = CombatRules.ShieldMaxDurability; // 复活即满盾（与满血同款语义；战斗中不恢复）
             DeadTick = 0;
             return true;
         }

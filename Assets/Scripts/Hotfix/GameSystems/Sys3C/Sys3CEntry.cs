@@ -461,17 +461,25 @@ namespace Hotfix.GameSystems.Sys3C
         private int GetSkillChargeBlastId() => (int)SkillID.ChargeBlast;
 
         /// <summary>
-        /// P4 网络伤害入口（服务端权威——DamageResult 驱动）：绕过防御修正器直扣
-        /// （PvP 格挡减伤服务端化是 P4 backlog，D-P4-8），受击表现/HitFSM/浮字事件复用
-        /// 现有链路。怪物战斗（本地权威）不受影响。
+        /// P4 网络伤害入口（服务端权威——DamageResult 驱动）：服务端已裁决的伤害直扣
+        /// （格挡减伤 D-P4-8 已服务端化：<paramref name="isBlocked"/> 为 true 时服务端已把
+        /// 伤害乘过 <c>CombatRules.BlockDamageScale</c>，本地不再复算），受击表现/HitFSM/浮字事件
+        /// 复用现有链路。怪物战斗（本地权威）不受影响。
         ///
         /// T12 甲-2：<paramref name="serverRemainingHp"/> 是协议里已有的权威余血
         /// （<c>HitEntry.TargetRemainingHp</c>）。传了就**以它为真相**、不在本地做减法——这消灭两个真实缺陷：
         /// ①本地 HP 归零后永久早退（服务端也不会再打死者 ⇒ 此后永远静默）；
         /// ②本地减法与服务端不一致时飘字/HUD 对不上（尤其致死那一击）。
         /// 不传（单机测试路径 / 无该字段的旧服务端）退回本地减法。
+        ///
+        /// 格挡分支（<paramref name="isBlocked"/>）：走**格挡受击**表现——复用单机格挡路径
+        /// （<c>IDamageable.TakeDamage</c>）同款挂点 <c>HitFSM.EnterDefendHit</c> + Hit 层激活，
+        /// 不新增状态/动画参数；浮字不发（与单机格挡一致：格挡成功本就跳过
+        /// <c>PlayerTakeDamageEvent</c>）。本地盾耐久**不**在此扣——联网裁决的盾在服务端
+        /// （PlayerState.ShieldDurability），本地盾那套只服务单机权威战斗，两值域不互抄。
         /// </summary>
-        public void ApplyServerDamage(float damage, Vector3 hitDirection, float? serverRemainingHp = null)
+        public void ApplyServerDamage(float damage, Vector3 hitDirection, float? serverRemainingHp = null,
+            bool isBlocked = false)
         {
             if (serverRemainingHp.HasValue)
             {
@@ -484,6 +492,25 @@ namespace Hotfix.GameSystems.Sys3C
             {
                 if (_currentHP <= 0) return;
                 _currentHP = Mathf.Max(0f, _currentHP - damage);
+            }
+
+            if (isBlocked)
+            {
+                _fsmManager.HitFSM.EnterDefendHit(new HitData
+                {
+                    Damage = damage,
+                    HitDirection = hitDirection
+                });
+                _fsmManager.Coordinator.SetActiveLayer(LayerType.Hit);
+
+                if (_currentHP <= 0)
+                {
+                    _skillCoordinator.ClearInputBuffer();
+                    _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
+                }
+
+                EvaluateLocalDeath();
+                return;
             }
 
             _fsmManager.HandleDamage(sourceId: -1, damage: damage, hitDirection: hitDirection,

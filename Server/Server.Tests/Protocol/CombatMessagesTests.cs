@@ -45,7 +45,7 @@ public class CombatMessagesTests
                 new HitEntry
                 {
                     TargetPlayerId = 2, Damage = 120f, IsCritical = false,
-                    TargetRemainingHp = 0f, HitX = 1f, HitZ = 2f
+                    TargetRemainingHp = 0f, HitX = 1f, HitZ = 2f, IsBlocked = true
                 },
                 new HitEntry
                 {
@@ -64,10 +64,12 @@ public class CombatMessagesTests
         Assert.Equal(120f, damage.Hits[0].Damage, 4);
         Assert.False(damage.Hits[0].IsCritical);
         Assert.Equal(0f, damage.Hits[0].TargetRemainingHp, 4);
+        Assert.True(damage.Hits[0].IsBlocked, "IsBlocked 未上线——客户端格挡受击表现整条链静默失效");
         Assert.Equal(3L, damage.Hits[1].TargetPlayerId);
         Assert.Equal(180f, damage.Hits[1].Damage, 4);
         Assert.True(damage.Hits[1].IsCritical);
         Assert.Equal(42f, damage.Hits[1].TargetRemainingHp, 4);
+        Assert.False(damage.Hits[1].IsBlocked);
     }
 
     [Fact]
