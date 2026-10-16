@@ -316,5 +316,158 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.IsNotNull(st.motion, $"{controllerPath}:Attack01 没挂片段");
             return ((AnimationClip)st.motion!).length;
         }
+
+        /// <summary>
+        /// DuoPolyart 两只怪（服务端模板 1 Slime / 2 TurtleShell）。它们的控制器原先是美术包词表
+        /// （AIState/Speed/Hit/…）—— 缺 <c>MonsterState</c> 于是被 <c>NpcEntityAnimator.ResolveAnimator</c>
+        /// 整只降级成"只渲染、不动画"。本次给它们换上驱动词表：**参数名/层/状态语义必须与
+        /// NpcAnimator_DogKnight 逐条一致**（客户端逻辑已按那套语义写死），否则 <c>SetInteger</c>
+        /// 静默失败，动画不动且不报错。
+        /// 元组 =（控制器路径，宿主预制体路径，状态表顺序的片段名 —— 见 <see cref="ExpectedStates"/>）。
+        /// </summary>
+        private static readonly (string Controller, string Prefab, string[] Clips)[] NpcWordControllers =
+        {
+            ("Assets/Monstor/DuoPolyart/Animators/NpcAnimator_Slime.controller",
+             "Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/SlimePBR.prefab",
+             new[] { "IdleBattle", "WalkFWD", "RunFWD", "Attack01", "Attack02", "GetHit", "Die" }),
+            ("Assets/Monstor/DuoPolyart/Animators/NpcAnimator_TurtleShell.controller",
+             "Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab",
+             new[] { "IdleBattle", "WalkFWD", "RunFWD", "Attack01", "Attack02", "GetHit", "Die" }),
+        };
+
+        /// <summary>
+        /// 两只 DuoPolyart 怪：参数、层/状态名与转移语义照 DogKnight；预制体已改线；且**真驱动一遍**
+        /// （参数写进去必须真的落进对应状态 —— 光是资产长得对不算数）。
+        /// </summary>
+        [Test]
+        public void Slime_And_TurtleShell_Controllers_Speak_The_Driver_Vocabulary()
+        {
+            var driverParameters = new (string Name, AnimatorControllerParameterType Type)[]
+            {
+                ("MonsterState", AnimatorControllerParameterType.Int),
+                ("AttackVariant", AnimatorControllerParameterType.Int),
+                ("Attack", AnimatorControllerParameterType.Trigger),
+            };
+            var stateValues = new (string Dest, int Value)[]
+            {
+                ("Idle", 0), ("Walk", 1), ("Run", 2), ("Hit", 4), ("Death", 5),
+            };
+
+            foreach (var (path, prefabPath, clips) in NpcWordControllers)
+            {
+                var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+                Assert.IsNotNull(controller, path);
+
+                // 参数：名字与类型逐字（驱动用 Animator.StringToHash 常量写参数；改名不报错、只是动画不动）
+                Assert.AreEqual(3, controller!.parameters.Length, path + " 参数数");
+                foreach (var (name, type) in driverParameters)
+                {
+                    var p = controller.parameters.FirstOrDefault(x => x.name == name);
+                    Assert.IsNotNull(p, path + " 缺参数 " + name);
+                    Assert.AreEqual(type, p!.type, path + ":" + name + " 类型");
+                }
+
+                // 单层 Base Layer、默认 Idle、7 个状态名与 DogKnight 一致
+                Assert.AreEqual(1, controller.layers.Length, path + " 层数");
+                Assert.AreEqual("Base Layer", controller.layers[0].name, path);
+                var sm = controller.layers[0].stateMachine;
+                Assert.AreEqual("Idle", sm.defaultState.name, path + " 默认状态");
+                CollectionAssert.AreEquivalent(ExpectedStates, sm.states.Select(s => s.state.name).ToArray(), path);
+
+                // 状态 → 片段（每个 FBX 单片段）；locomotion 三个态必须绑循环片段
+                for (int i = 0; i < ExpectedStates.Length; i++)
+                {
+                    var st = sm.states.First(s => s.state.name == ExpectedStates[i]).state;
+                    Assert.IsNotNull(st.motion, path + ":" + ExpectedStates[i] + " 没挂片段");
+                    Assert.AreEqual(clips[i], st.motion!.name, path + ":" + ExpectedStates[i] + " 片段不对");
+                }
+                foreach (var name in new[] { "Idle", "Walk", "Run" })
+                {
+                    var clip = (AnimationClip)sm.states.First(s => s.state.name == name).state.motion!;
+                    Assert.IsTrue(clip.isLooping, path + ":" + name + " 必须循环（否则播一遍就定格）");
+                }
+
+                // AnyState 语义：MonsterState 0/1/2/4/5 → Idle/Walk/Run/Hit/Death；两条攻击 = Trigger + 变体
+                Assert.AreEqual(7, sm.anyStateTransitions.Length, path + " AnyState 转移数");
+                foreach (var t in sm.anyStateTransitions)
+                {
+                    string to = path + ":ANY->" + t.destinationState.name;
+                    Assert.IsFalse(t.canTransitionToSelf, to + " 不许重入");
+                    Assert.IsFalse(t.hasExitTime, to + " 不该吃 exit time");
+                    bool locomotion = t.destinationState.name == "Idle"
+                        || t.destinationState.name == "Walk" || t.destinationState.name == "Run";
+                    Assert.AreEqual(locomotion ? 0.15f : 0.1f, t.duration, 0.001f, to + " 过渡时长");
+                }
+                foreach (var (dest, value) in stateValues)
+                {
+                    var c = sm.anyStateTransitions.First(t => t.destinationState.name == dest)
+                        .conditions.First(x => x.parameter == "MonsterState");
+                    Assert.AreEqual(AnimatorConditionMode.Equals, c.mode, path + ":ANY->" + dest);
+                    Assert.AreEqual(value, c.threshold, 0.001f, path + ":ANY->" + dest);
+                }
+                foreach (var (dest, variant) in new[] { ("Attack01", 0), ("Attack02", 1) })
+                {
+                    var t = sm.anyStateTransitions.First(x => x.destinationState.name == dest);
+                    Assert.IsTrue(t.conditions.Any(x => x.parameter == "Attack" && x.mode == AnimatorConditionMode.If),
+                        path + ":ANY->" + dest + " 缺 Attack Trigger 条件（只有变体条件 = 永远不播）");
+                    var c = t.conditions.First(x => x.parameter == "AttackVariant");
+                    Assert.AreEqual(AnimatorConditionMode.Equals, c.mode, path + ":ANY->" + dest);
+                    Assert.AreEqual(variant, c.threshold, 0.001f, path + ":ANY->" + dest);
+                }
+
+                // 受击/死亡不放出边；两条攻击靠 exit-time 回 Idle（同 DogKnight 的两条硬约束）
+                foreach (var name in new[] { "Hit", "Death" })
+                {
+                    Assert.AreEqual(0, sm.states.First(s => s.state.name == name).state.transitions.Length,
+                        path + ":" + name + " 不该有出边");
+                }
+                foreach (var name in new[] { "Attack01", "Attack02" })
+                {
+                    var t = sm.states.First(s => s.state.name == name).state.transitions;
+                    Assert.AreEqual(1, t.Length, path + ":" + name + " 应有一条 exit-time 回 Idle 的出边");
+                    Assert.IsTrue(t[0].hasExitTime, path + ":" + name);
+                    Assert.AreEqual("Idle", t[0].destinationState.name, path + ":" + name);
+                }
+
+                // 预制体改线：Animator 在子物体上，registry 实例化后靠 GetComponentInChildren 找它
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                Assert.IsNotNull(prefab, prefabPath);
+                var prefabAnimator = prefab!.GetComponentInChildren<Animator>(true);
+                Assert.IsNotNull(prefabAnimator, prefabPath + " 缺 Animator");
+                Assert.IsNotNull(prefabAnimator!.runtimeAnimatorController, prefabPath + " 的 Animator 没有控制器");
+                Assert.AreEqual(controller.name, prefabAnimator.runtimeAnimatorController!.name, prefabPath + " 控制器不对");
+                Assert.IsFalse(prefabAnimator.applyRootMotion, prefabPath + " 必须关根运动（位置由服务端权威）");
+
+                // 真驱动一遍（Hit/Death 没有出边，各用一台干净 Rig）
+                DriveTo(path, "Walk", d => d.ApplyState((byte)NpcAnimationState.Walk, false));
+                DriveTo(path, "Run", d => d.ApplyState((byte)NpcAnimationState.Run, false));
+                DriveTo(path, "Attack01", d => d.PlayAttack(0));
+                DriveTo(path, "Attack02", d => d.PlayAttack(1));
+                DriveTo(path, "Hit", d => d.ApplyState((byte)NpcAnimationState.Hit, false));
+                DriveTo(path, "Death", d => d.ApplyState((byte)NpcAnimationState.Idle, true));   // Dead 位优先
+            }
+        }
+
+        /// <summary>一台干净 Rig 上驱动一次，断言真的落进目标状态。</summary>
+        private static void DriveTo(string controllerPath, string expectedState, System.Action<NpcEntityAnimator> drive)
+        {
+            var go = new GameObject("NpcWordDrive");
+            try
+            {
+                var animator = go.AddComponent<Animator>();
+                animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(controllerPath);
+                var driver = go.AddComponent<NpcEntityAnimator>();
+                driver.ResolveAnimator();   // EditMode 下 AddComponent 不触发 Awake
+
+                drive(driver);
+                Settle(animator);
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName(expectedState),
+                    controllerPath + " 驱动后应进 " + expectedState + "（参数名/类型对不上就会停在上一个状态）");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
     }
 }
