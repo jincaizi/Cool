@@ -118,11 +118,15 @@ public class CastResolutionSchedulingTests
     }
 
     [Fact]
-    public void Packet_Path_Decides_On_The_Tick_That_Is_About_To_Run()
+    public void Judgment_Lands_Exactly_On_DecideTick_Plus_HitDelay_Ticks()
     {
-        // F17：包处理发生在 tick 处理之前，`CurrentTick` 此刻仍是上一 tick 的值——
-        // CastHandler.HandleCastAsync 因此传 CurrentTick + 1。本用例钉住这个换算口径本身：
-        // 决策 tick = T 时，判定发生在 T + HitDelayTicks（早一 tick 或晚一 tick 都是缺陷）。
+        // 钉住"决策 tick → 判定 tick"的**差值关系**：`decideTick = T` ⇒ 判定恰在
+        // `T + CombatRules.HitDelayTicks(entry)` 那一 tick 到期——**早一 tick 也不行**
+        //（既有用例只抓得住"晚"）。期望 tick 由表推导（`HitDelayTicks(EntryOf(10001))`），不是硬编码常数。
+        // **已知覆盖缺口**：包路径里 `CastHandler.HandleCastAsync` 的 `_server.CurrentTick + 1`
+        //（Server/Handler/CastHandler.cs:269）**没有**自动化守护——删掉那个 `+ 1`（正是 F17 修掉的回归），
+        // 本用例与全量服务端套件仍全绿（实测 229/229）；包路径的守护需要假 Server3C/session 装置，
+        // 属计划的已知缺口，只能靠代码审查与端到端手测兜住。
         var (store, resolver, caster, target) = World(1.5f);
         const uint decideTick = 37;
         resolver.Decide(caster, Swing(), decideTick);

@@ -361,8 +361,11 @@ public class MonsterModuleTests
     }
 
     /// <summary>F19：客户端 `NpcEntityAnimator` 的忙位解除**依赖**"决策与置 ActionState=Attack
-    /// 发生在同一次 BT 动作内"（否则挥砍被锁定在 Attack 态不释放）。这条不变量此前只活在注释里——
-    /// 本用例把它钉成可证伪的断言。</summary>
+    /// 发生在同一次 BT 动作内"（否则挥砍被锁定在 Attack 态不释放）。该不变量此前已被
+    /// `Hit_Window_Expiry_Restores_Locomotion_While_Target_Stays_In_Attack_Range` **间接**覆盖
+    ///（它 :210 的前置断言在决策 tick 断言同一等式，破坏本不变量时它同样会红）；
+    /// 本用例把它钉成**最小脚手架的专用钉**——不需要裁决链/伤害铺垫，两处写入被拆到不同 tick 时
+    /// 直接在 :381 失败。</summary>
     [Fact]
     public void Attack_Decision_And_Action_State_Happen_In_The_Same_Tick()
     {
