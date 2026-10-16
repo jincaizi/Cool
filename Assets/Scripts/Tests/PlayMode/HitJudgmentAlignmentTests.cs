@@ -243,9 +243,15 @@ namespace KcpNet.PlayModeTests
                 target.rotation = Quaternion.LookRotation(toMonster.normalized);
         }
 
-        /// <summary>技能判定帧延迟（tick）——从共享表读，不在测试里抄数字。</summary>
+        /// <summary>技能判定帧延迟（tick）——从共享表读，不在测试里抄数字。
+        /// 表里没有该技能时**直接红**：静默返回 0 会让"实测 vs 期望"的期望值变成无意义的负数，
+        /// 对照失真却看不出来。</summary>
         private static uint HitDelayTicksOf(int skillId)
-            => CombatRules.TryGet(skillId, out var entry) ? CombatRules.HitDelayTicks(entry) : 0u;
+        {
+            if (!CombatRules.TryGet(skillId, out var entry))
+                Assert.Fail($"技能 {skillId} 不在 CombatRules 表内——期望值无从计算");
+            return CombatRules.HitDelayTicks(entry);
+        }
 
         // ---------------------------------------------------------------- B1
 
@@ -256,7 +262,9 @@ namespace KcpNet.PlayModeTests
         ///   · 判定帧 = 决策 tick + HitDelayTicks(怪物技能)——表里 50001..50004 全是 0.35s → 6 tick（400ms）；
         ///   · 渲染起手 = 发布者时间戳对应的渲染时刻 = 决策时刻 + renderDelayTicks（客户端 2 tick ≈ 132ms）；
         ///   · 所以"血掉下去 − 挥砍起手" ≈ (6 − 2) tick ≈ 264ms（上行/下行延迟本地各几毫秒，抵消大半）。
-        ///   上界取 600ms：6 tick 判定延迟 − 2 tick 渲染延迟 + 1 tick 排程帧量化 + 2 tick 网络/时钟余量。
+        ///   上界 **600ms（9 tick ≈ 594ms，向上取整）**逐项拆开：4 tick 期望（264ms）+ 1 tick 排程帧量化
+        ///   + 1 tick 客户端渲染时钟偏移 + 1 tick 服务端 tick/发送量化 + 2 tick 网络与宿主余量 = 9 tick。
+        ///   实测 5 次落在 268~380ms（≈ 4~5.8 tick），余量对得上。
         /// 装置：观察者贴到某只怪的正前方 1.2m（≤ 所有模板的 attackRange），位置经 MovementReporter 上报——
         /// 服务端瞬移校验是双门槛（`distance > MaxSpeed×dt×1.2 && distance > 50m`），贴脸小范围大位移不被纠偏。
         /// </summary>
@@ -304,8 +312,10 @@ namespace KcpNet.PlayModeTests
                     + $"（期望 ≈ {expected * 1000.0:F0}ms = ({hitDelayTicks} tick 判定延迟 − 2 tick 渲染) × "
                     + $"{tickSeconds * 1000.0:F0}ms；上界 {upperBound * 1000.0:F0}ms）；来源怪 {hit.Source} "
                     + "skill " + hit.SkillId + $"、伤害 {hit.Damage}；观测到的起手队列 {string.Join(",", rig.SwingTimes.Keys)}";
-                Assert.GreaterOrEqual(residual, 0.0,
-                    $"{numbers}——挥砍必须在血掉下去**之前**起手（负值 = 先掉血后看见挥砍）");
+                // 严格 >：等于 0 意味着"起手与掉血同帧"——那正是要防的回归（判定提前到了起手那一刻）。
+                // 唯一代价：单帧卡顿 ≥ 264ms 时两次观测会被压进同一帧而假红；真实残差是 264ms 量级、编辑器帧 <20ms，风险可接受。
+                Assert.Greater(residual, 0.0,
+                    $"{numbers}——挥砍必须在血掉下去**之前**起手（≤ 0 = 掉血不晚于看见挥砍）");
                 Assert.LessOrEqual(residual, upperBound,
                     $"{numbers}——残差超上界（上界依据见用例注释）");
                 Debug.Log("[HitJudgmentAlignmentTests] B1 " + numbers);
@@ -333,8 +343,10 @@ namespace KcpNet.PlayModeTests
         /// 期望的构造（数字来源）：
         ///   · 本地判定帧 = 技能激活 + CastTime + hitboxTimings[0]（BA_Combo1 资产：0.30s）；
         ///   · 服务端判定帧 = 决策 tick + HitDelayTicks(10001) = 决策 tick + 5 tick（≈333ms，同一张表）；
-        ///   · 所以残差 ≈ 333 − 300 + 网络（本地服务器：上行几毫秒 + 服务端 tick 量化 ≤1 tick）≈ 数十毫秒。
-        ///   上界取 400ms（1 tick 上行 + 1 tick 服务端 tick 量化 + 1 tick 下行 + 余量）；下界 > 0。
+        ///   · 所以残差 ≈ 333 − 300 + 网络 = 30ms 基准 + 上行/服务端 tick 量化/下行。
+        ///   上界 **400ms（6 tick ≈ 396ms，向上取整）**逐项拆开：0.5 tick 基准（30ms）+ 1 tick 上行
+        ///   + 1 tick 服务端 tick 量化 + 1 tick 下行 + 2 tick 网络与宿主余量 = 5.5 tick ≈ 363ms。
+        ///   实测 5 次落在 63~130ms（≈ 1~2 tick），余量对得上；下界**严格 > 0**（本地判定帧必须先发生）。
         /// 装置：`PlayerEntryForTest`（带 Sys3CEntry 的测试玩家）实例化到场景，摆到怪的正前方 1.2m，
         /// 走**本地输入路径** `SkillCoordinator.HandleLightAttack()`（= 技能 10001）。
         /// </summary>

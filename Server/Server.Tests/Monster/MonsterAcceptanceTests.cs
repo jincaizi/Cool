@@ -137,19 +137,23 @@ public class MonsterAcceptanceTests
         Assert.Equal(50002, request.SkillId);
 
         // 前摇期内（T+2，落在 T+1 .. ART-1 里）把怪打死——用玩家裁决口径的入口：
-        // 怪物的 IsAlive 由 PlayerState.ApplyDamage 决定，而不是模块自己算的
+        // 怪物的 IsAlive 由 PlayerState.ApplyDamage 决定，而不是模块自己算的。
+        // **时间轴必须连续**：T+1 .. ART-1 每个 tick 都跑（击杀只是在 killTick 那一格额外插一刀），
+        // 漏 tick 在前摇无位移的当前几何下无害，但换成需要转向/位移的用例就会咬人。
         uint killTick = decideTick + 2;
         Assert.True(killTick < resolveTick, $"前置：击杀要发生在前摇内（kill={killTick} resolve={resolveTick}）");
-        store.GetPlayer(wolfId)!.ApplyDamage(9999f);
-        module.Tick(killTick);
+        for (uint t = decideTick + 1; t < resolveTick; t++)
+        {
+            if (t == killTick) store.GetPlayer(wolfId)!.ApplyDamage(9999f);
+            module.Tick(t);
+        }
 
         var state = module.GetState(wolfId);
         Assert.NotNull(state);
         Assert.True(state!.DeathTick.HasValue, "前置：怪物已进入死亡窗口（死亡由 HP 变化在下一 tick 察觉）");
-
-        // 推进到判定帧，再走真实裁决链（与 Server3C 主循环同序：怪物 tick 之后 DrainResolved）
-        for (uint t = killTick + 1; t < resolveTick; t++) module.Tick(t);
         Assert.Equal(100f, player.Hp); // 判定前玩家一滴血没掉
+
+        // 判定帧这一 tick + 真实裁决链（与 Server3C 主循环同序：怪物 tick 之后 DrainResolved）
         module.Tick(resolveTick);
         var resolved = resolver.DrainResolved(resolveTick);
 
@@ -165,7 +169,7 @@ public class MonsterAcceptanceTests
     // ---------- A2：丢目标 ≠ 打不中（静态角度） ----------
 
     /// <summary>
-    /// 两个静态角度钉死"视野锥 ≠ 判定锥"这条带子（Wolf：visionAngle 120 → 视野半角 45°；
+    /// 两个静态角度钉死"视野锥 ≠ 判定锥"这条带子（Wolf：visionAngle **90** → 视野半角 45°；
     /// 挥击判定锥恒 120 → 判定半角 60°）：
     ///   · 偏轴 55°：出视野锥（目标丢失、TargetId 清空）但仍在判定锥内 ⇒ **这一刀照样落地**；
     ///   · 偏轴 65°：出判定锥 ⇒ 纯空挥。
@@ -223,8 +227,13 @@ public class MonsterAcceptanceTests
         // 距离落在射程内 ⇒ 空挥只可能来自锥角（排除"跑出射程"这个错误原因）
         Assert.True(finalDistance <= config.attackRange + 0.01f,
             $"{numbers}——距离必须在 attackRange 内，否则空挥的成因是射程而不是锥角");
-        Assert.Equal(expectHit ? 100f - 15f : 100f, player.Hp); // Wolf 50002 伤害 15、crit 0（确定性）
-        _output.WriteLine($"A2 {numbers} → {(hit != null ? $"命中 {hit.Damage}" : "空挥")}（期望 {(expectHit ? "命中" : "空挥")}）");
+        // 伤害期望值从**表里读**（不抄常量）：怪物 crit 0 ⇒ 期望伤害恒 = BaseDamage
+        Assert.True(CombatRules.TryGet(request.SkillId, out var skill), $"技能 {request.SkillId} 不在 CombatRules 表内");
+        Assert.Equal(0f, skill!.CriticalRate);
+        float expectedHp = expectHit ? 100f - skill!.BaseDamage : 100f;
+        Assert.Equal(expectedHp, player.Hp, 4);
+        _output.WriteLine($"A2 {numbers} → {(hit != null ? $"命中 {hit.Damage}" : "空挥")}（期望 {(expectHit ? "命中" : "空挥")}），"
+            + $"玩家 HP={player.Hp:F0}（期望 {expectedHp:F0}）");
     }
 
     // ---------- A3：贴脸绕圈 → 空挥；拉开一点绕圈 → 命中 ----------
@@ -293,8 +302,12 @@ public class MonsterAcceptanceTests
         // 关键反证：两次的判定帧距离都在射程内——空挥只可能来自锥角
         Assert.True(finalDistance <= config.attackRange + 0.01f,
             $"{numbers}——距离必须在 attackRange 内，否则空挥的成因是射程而不是锥角");
-        Assert.Equal(expectHit ? 100f - 30f : 100f, player.Hp); // DogKnight 50003 伤害 30、crit 0（确定性）
+        // 伤害期望值从**表里读**（不抄常量）：怪物 crit 0 ⇒ 期望伤害恒 = BaseDamage
+        Assert.True(CombatRules.TryGet(request.SkillId, out var skill), $"技能 {request.SkillId} 不在 CombatRules 表内");
+        Assert.Equal(0f, skill!.CriticalRate);
+        float expectedHp = expectHit ? 100f - skill!.BaseDamage : 100f;
+        Assert.Equal(expectedHp, player.Hp, 4);
         _output.WriteLine($"A3 {numbers} → {(hit != null ? $"命中 {hit.Damage}" : "空挥")}（期望 {(expectHit ? "命中" : "空挥")}），"
-            + $"玩家 HP={player.Hp:F0}");
+            + $"玩家 HP={player.Hp:F0}（期望 {expectedHp:F0}）");
     }
 }

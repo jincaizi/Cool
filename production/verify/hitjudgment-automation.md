@@ -165,3 +165,50 @@ DogKnight 在 (0,0,2.0) 面向原点，玩家从决策后每 tick 沿以怪为�
    它们不依赖"怪慢慢走过来"，只依赖"怪确实打我们"。
 
 两条 PlayMode 用例都**需要真实服务器**，因此不进入离线 CI；A 部分不需要任何外部进程。
+
+---
+
+## 5. 修复轮（第 1 轮审查，2026-10-16）
+
+审查判定"通过"，本轮收掉 1 条硬要求违规 + 5 条次要项。**只动测试，生产代码照旧零改动**。
+
+### 改了什么
+
+| # | 位置 | 改动 | 理由 |
+|---|---|---|---|
+| 1（重要） | `MonsterAcceptanceTests.cs` A2/A3 | 伤害期望值从字面常量 `100f - 15f` / `100f - 30f` 改为**从表读** `100f - skill.BaseDamage`（`CombatRules.TryGet(request.SkillId, out skill)` + 断言 `CriticalRate == 0`） | 派单硬要求"数字必须从配置/表读"。表本身是调参对象——抄常量会让日后改平衡打红验收，而最省事的"修法"恰是被禁止的调断言 |
+| 2 | `MonsterAcceptanceTests.cs` A2 注释 | "Wolf：visionAngle 120 → 视野半角 45°" → **90** → 45° | 原注释与代码（`config.visionAngle * 0.5f`）和配置（json 里 Wolf=90）都矛盾；这行恰是"45° 那条带子"的论据 |
+| 3 | `HitJudgmentAlignmentTests.cs` B1 | 下界 `>= 0` → 严格 `Assert.Greater(residual, 0.0)` + 注释写明权衡（单帧卡顿 ≥264ms 才可能假红） | 与 B2 一致，且堵住"起手与掉血同帧"这种回归（判定提前到起手的退化形态） |
+| 4 | 两处上界依据 | B1：4 tick 期望 + 1 排程量化 + 1 客户端时钟偏移 + 1 服务端 tick/发送量化 + 2 网络宿主余量 = **9 tick ≈ 594ms**（向上取 600ms）；B2：0.5 tick 基准 + 1 上行 + 1 服务端 tick 量化 + 1 下行 + 2 余量 = **5.5 tick ≈ 363ms**（向上取 400ms） | 原文"6−2+1+2 tick" 算不出 600ms；**上界数值一格未动**（只把依据写成算得出来的账） |
+| 5 | `HitDelayTicksOf` | 表未命中不再静默返回 0，改 `Assert.Fail`（带技能 id） | 静默 0 会让 expected 变成无意义负值，对照失真却看不出来 |
+| 6 | `MonsterAcceptanceTests.cs` A1 | 击杀并入主循环：`for t in T+1 .. ART-1 { if (t == killTick) ApplyDamage; Tick(t); }` | 原写法 `Tick(killTick)` 后从 `killTick+1` 续跑 ⇒ **T+1 从未被 tick**；当前几何无害，换需要转向/位移的用例会咬人 |
+
+**明确不做（审查已裁定延后）**：B1/B2 配对启发式的两个已知缺陷（同帧出入队会漏记、`Clear` 会记成假起手；B2 无因果键）——
+失败方向是**假红而非假绿**，重写需动 PlayMode 装置并重跑，收益不抵成本。
+
+### 命令与输出
+
+```
+dotnet test Server/Server.Tests/Server.Tests.csproj
+已通过! - 失败: 0，通过: 236，已跳过: 0，总计: 236，持续时间: 298 ms   ← 修复前也是 236/236
+```
+
+```
+unity-mcp-cli run-tool tests-run --input '{"testMode":"PlayMode","testClass":"HitJudgmentAlignmentTests"}' --timeout 900000
+"Status": "Passed", "PassedTests": 2, "FailedTests": 0
+[HitJudgmentAlignmentTests] B1 渲染起手 → 伤害到达 实测残差 267ms（期望 ≈ 264ms = (6 tick 判定延迟 − 2 tick 渲染) × 66ms；上界 600ms）；来源怪 2000005 skill 50002、伤害 15
+[HitJudgmentAlignmentTests] B2 本地判定帧 → 服务端伤害到达 实测残差 61ms（期望 ≈ 30ms = 服务端 5 tick 判定 330ms − 本地判定帧 300ms；上界 400ms）；伤害 75 落在怪 2000007（skill 10001，本地判定帧共 1 次）
+```
+
+A 部分修复后实测（数字与修复前逐项一致；A1 因补上 T+1 的 tick 后依然 DeathTick=2 / 命中数 0）：
+
+```
+A1 实测：决策 T=0，判定帧 ART=6（HitDelayTicks=6），击杀 tick=2；判定后玩家 HP=100（期望 100），怪物 DeathTick=2，判定帧命中数=0
+A2 偏轴 55°：实测夹角 55.00°、距离 1.500m、TargetId=空 → 命中 15，玩家 HP=85（期望 85，从表读 BaseDamage）
+A2 偏轴 65°：实测夹角 65.00°、距离 1.500m、TargetId=空 → 空挥，玩家 HP=100（期望 100）
+A3 半径 1.5m：绕过 121.0°、怪只转 35.6° → 夹角 85.37°（半角 60°）→ 空挥，HP=100（期望 100）
+A3 半径 2.1m：绕过 86.4°、怪只转 35.6° → 夹角 50.79°（半角 60°）→ 命中 30，HP=70（期望 70）
+```
+
+**实测数字有无变化：无。** 两套件数字不变（236/236 与 2/2），B1 267ms（此前 268~380ms 带内）、B2 61ms（此前 63~130ms 带内）；
+A 的夹角/距离逐项不变，只有 A2/A3 的期望 HP 改成从表读、A1 的时间轴补齐 T+1。
