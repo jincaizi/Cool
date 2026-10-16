@@ -176,7 +176,7 @@ Summary: Status=Passed, Total=386, Passed=386, Failed=0, Skipped=0 (00:00:05.8)
 |---|---|---|
 | **用户活服 8000**（`--monsters 4 --bots 40 --bots-radius 60`；**未重启、未杀进程**） | `MonsterWorldTests`（原点观察者，仅修断言） | **失败**：60s `casts=0`、`closestWolf=14.01` |
 | 同上 | `MonsterWorldTests`（新站位 (5,-7.5)） | **失败**：60s `casts=0`、`closestWolf=8.56` |
-| **临时实例 8001**（`--monsters 4`，无 bots；自起自停） | `MonsterWorldTests` | **2/2 通过**（19.1s，连跑两轮） |
+| **临时实例 8001**（`--monsters 4`，无 bots；自起自停） | `MonsterWorldTests` | **2/2 通过**（19.1s，连跑两轮）——⚠️ 当时的端口改动只覆盖 2 处字面量（第 127/235 行），reconnect 的 phase 3（`ctxB.…`，第 268 行）**仍连的是用户 8000**（8001 日志里没有 `Reconnect_B`）⇒ 那两轮只有 **test 1 直接可证在 8001 上跑**；干净取证见 **§8.2**（三条会话全落 8001，2/2 通过） |
 | 用户活服 8000 | `HitJudgmentAlignmentTests` | **2/2 通过**（2.3s） |
 
 **失败原因（证据链）= 40 个 bot 的人群把狼挡在半路**——不是布局、也不是断言：
@@ -224,5 +224,58 @@ Summary: Status=Passed, Total=386, Passed=386, Failed=0, Skipped=0 (00:00:05.8)
 - 服务端：`dotnet test Server/Server.Tests` → **246/246**（基线 246 = 一轮时的 236 + 并行任务
   `982196c feat(combat): 服务端格挡减伤` 的 10 条；本改动不增删用例——临时诊断用例已删除，`git diff` 无用例增删）
 - Unity EditMode：**397/397**（并行任务落地后的新基线；本改动不涉 EditMode 逻辑）
-- PlayMode：`MonsterWorldTests` 无 bots 服务端 2/2（活服 8000 因人群失败，见 §7.2）；
-  `HitJudgmentAlignmentTests` 活服 8000 2/2
+- PlayMode：`MonsterWorldTests` 无 bots 服务端 **2/2（干净取证见 §8.2：三条会话全落在 8001、用户 8000 无活动）**；
+  活服 8000（40 bots）因人群失败（见 §7.2）；`HitJudgmentAlignmentTests` 活服 8000 2/2
+
+---
+
+## 8. 三轮回修（2026-10-17，复审：取证补正 + 两处一行修正）
+
+### 8.1 复审指出的取证缺陷（承认 + 原因）
+
+上一轮把测试指向 8001 时，替换的字符串是 `ctx.Manager.ConnectAndLogin("127.0.0.1", 8000);`——
+它只命中第 127/235 行两处，**没命中 `ctxB.Manager.ConnectAndLogin(...)`（第 268 行，reconnect 的 phase 3）**。
+所以那两轮里 reconnect 用例的 phase 3 连的是**用户活服 8000**（8001 日志里确实没有 `Reconnect_B` 会话），
+"8001 上 2/2 通过"当时只有 **test 1** 直接可证。§7.2/§7.4 的表述已按此改正。
+
+### 8.2 干净取证（本轮，可审计）
+
+1. 起临时实例：`./Server/bin/Debug/net8.0/Server3C.exe 8001 --monsters 4`（**无 bots**；
+   stdout 留档 `production/verify/layout-spawn-nobots-server2.log`；**用户 8000 全程未动、未重启**）。
+2. 临时把**全部 3 处**端口字面量改成 8001（带 `// TEMP-PORT` 标记）：
+
+   | 行号 | 语句 | 覆盖 |
+   |---|---|---|
+   | 127 | `ctx.Manager.ConnectAndLogin("127.0.0.1", 8000);` | test 1 `Monsters_Patrol_Chase_And_Attack_Server_Authoritative` |
+   | 235 | `ctx.Manager.ConnectAndLogin("127.0.0.1", 8000);` | test 2 phase 1 `Reconnect_A` |
+   | 268 | `ctxB.Manager.ConnectAndLogin("127.0.0.1", 8000);` | test 2 phase 3 **`Reconnect_B`**（上一轮漏掉的那处） |
+
+3. `assets-refresh` → `tests-run {"testMode":"PlayMode","testClass":"MonsterWorldTests"}` →
+   **Passed：2 passed / 0 failed，11.8s**。
+4. 8001 服务端日志里的**全部会话名**（逐条）：
+   - `[02:07:46] Login attempt: Monster_Observer from session 2` → test 1
+   - `[02:07:54] Login attempt: Reconnect_A from session 3` → test 2 phase 1
+   - `[02:07:57] Login attempt: Reconnect_B from session 4` → test 2 phase 3（本次确在 8001）
+   对照组：用户 8000 的 stdout（`block-server.log`）在 02:05–02:09 窗口**没有任何 login/连接行**。
+5. 还原：3 处字面量全部改回 8000（`grep -n "ConnectAndLogin(\"127\|TEMP-PORT\|8001"` 复核：3 行全是 8000、
+   无 `8001`/`TEMP-PORT` 残留）；临时实例已停（8001 无监听；用户 8000 的 PID 56268 全程在跑）。
+
+**两条用例各自的结论**：
+- test 1 `Monsters_Patrol_Chase_And_Attack_Server_Authoritative`：**通过** ✓（无 bots、`--monsters 4`）
+- test 2 `Reconnect_Monster_World_Persists`：**通过** ✓，且三条会话全落在 8001（可审计，不再是"连到别处"）
+- 与**旧布局**的对照：**未对照**——需要回滚 `MonsterModule.SpawnDefaultLayout` 并重建服务端，本轮没做。
+  可见的替代口径：该用例只要求"phase 1 看到的某个 Wolf 视图在重连后仍在 AOI 内"，与布局几何无关
+  （新布局两只 Wolf 距原点 30m/18m，都在 80m AOI 内）；旧布局下同样成立。
+
+### 8.3 两处一行修正（+ 一处同族算术自查）
+
+1. `docs/superpowers/guides/p5-monster-server.md`（布局表下的注，第 37 行）：把"`MonsterWorldTests`
+   （PlayMode e2e，观察者原点）需起服复核"就地改写为当前事实——观察者已改站 `(5,-7.5)`、断言按
+   "实际发起伤害的那只 Wolf"归属、无 bots 服已实跑通过、`--bots 40` 的人墙是活服失败原因。
+2. `Assets/Scripts/Tests/PlayMode/MonsterWorldTests.cs`（`ObserverPosition` 注释）：
+   Slime 巡逻圈最近点 `9.0m / 23m` → **`8.46m / 22.95m`**（8.46 = 13.46 − 5：到巡逻**圆**的最近点，
+   不是到最近**路点**的距离；" > 8m 检测"的结论不变）。
+3. （同族自查，一并修）同一注释里"且落在巡逻方阵内（任何巡逻相位都会在 60s 内被发现）"不准确——
+   (5,-7.5) 在方阵**外**（西北边 p3(0,-15)→p0(10,-5) 外侧 2.5m）。改为："离狼巡逻方阵西北边 2.5m，
+   狼沿那条边走向 p0 时正对着它（离线探针含 40s 预跑相位：0.6s 内被感知、狼进到 1.82m；巡逻一圈 ~20s
+   ⇒ 60s 覆盖多圈）"。

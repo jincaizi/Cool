@@ -42,8 +42,9 @@ namespace KcpNet.PlayModeTests
         /// ⇒ 差距是人群把狼推离巡逻线，原点不宜再当夹具。
         /// 夹具改为把观察者经**真实移动上报链**（MovementReporter，同 CombatSyncTests/BlockMitigation
         /// 惯例）站到 (5,-7.5)：在 [3] Wolf (10,-15) 的**出生朝向**（面向原点）正前方 9.0m —— 15m 检测 +
-        /// 90° 视锥（半角 45°）内，且落在巡逻方阵内（任何巡逻相位都会在 60s 内被发现）；
-        /// 离两只 Slime 的巡逻圈最近点分别 9.0m / 23m（&gt; 8m 检测）⇒ 不会抢伤害来源；[0] Wolf 远在 26m 外。
+        /// 90° 视锥（半角 45°）内；它离狼巡逻方阵的西北边（p3(0,-15)→p0(10,-5)）2.5m，狼沿那条边走向 p0
+        /// 时正对着它（离线探针含 40s 预跑相位：0.6s 内被感知、狼进到 1.82m；巡逻一圈 ~20s ⇒ 60s 覆盖多圈）。
+        /// 离两只 Slime 的巡逻圈最近点分别 8.46m / 22.95m（&gt; 8m 检测）⇒ 不会抢伤害来源；[0] Wolf 远在 26m 外。
         /// 10m 以内的"首报瞬移"不会被 MovementValidator 纠偏（瞬移门槛 = 50m）。</summary>
         private static readonly Vector3 ObserverPosition = new Vector3(5f, 0f, -7.5f);
 

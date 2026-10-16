@@ -33,8 +33,10 @@ dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
 >（旧点下 [0] Wolf 是唯一按设计违反规则的槽位：巡逻圈最近切到 5.9m < 检测 15m，挂机玩家是被它打死的）。
 > **2026-10-17 第三次搬迁**：出生点 → `(-15,0.3,-30)`（地面实测 y≈0.256），布局同批收紧收进陆地
 >（旧 [3] (0,0,40) 在湖底 −9.08、旧 [1][2] 贴 ±40 图边）——六槽位仍全部满足该约束、挂机安全不变；
-> 但**对原点观察者的行为变了**（[0] 不再开局感知；[3]/[4] 巡逻圈会压到检测半径内）——
-> `MonsterWorldTests`（PlayMode e2e，观察者原点）需起服复核，见 `production/verify/layout-and-spawn-move.md`。
+> 但**对原点观察者的行为变了**（[0] 不再开局感知；原点也不在巡逻狼的视锥可达范围 ⇒ 60s 零施法）——
+> `MonsterWorldTests` 的观察者已随之改站 `(5,-7.5)`（[3] Wolf 出生朝向正前方 9m），断言按"实际发起
+> 伤害的那只 Wolf"归属，并已实跑：**无 bots 服务端（--monsters 4）通过**；`--bots 40` 的人墙会把狼
+> 挡在半路（活服失败的原因，不是布局）——证据见 `production/verify/layout-and-spawn-move.md` §7/§8。
 > 守备测试：`MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn`（全六槽位，几何）与
 > `Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster`（3 分钟挂机零施法，行为）。
 
