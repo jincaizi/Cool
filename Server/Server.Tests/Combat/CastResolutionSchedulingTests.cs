@@ -6,7 +6,7 @@ using Xunit;
 namespace KcpServer.Tests;
 
 /// <summary>N3：决策 / 判定两段化 + 判定帧延迟（resolveTick = decideTick + HitDelayTicks）——
-/// 前摇窗口内目标移出射程 / 绕到身后 / 施法者死亡都会改变结局。</summary>
+/// 前摇窗口内目标移出射程 / 绕到身后 / 施法者死亡或从 store 移除都会改变结局。</summary>
 public class CastResolutionSchedulingTests
 {
     private static (EntityStore Store, CombatResolver Resolver, long Caster, long Target) World(float targetZ)
@@ -76,9 +76,11 @@ public class CastResolutionSchedulingTests
     [Fact]
     public void Target_Circling_Behind_During_The_Window_Misses()
     {
-        // 绕背躲怪：判定帧在身后（夹角 180° > 半锥 60°）
+        // 绕背躲怪：走怪物真正的那条路径——**显式目标**（MonsterBtActions 传 m.TargetId），
+        // 判定帧在身后（夹角 180° > 半锥 60°）⇒ 这是 D-6（显式目标同样过锥）的回归钉——
+        // 退回归自动目标的话，D-6 存不存在都绿。
         var (store, resolver, caster, target) = World(1.5f);
-        resolver.Decide(caster, Swing(), 10);
+        resolver.Decide(caster, Swing(target), 10);
         resolver.DrainResolved(10);                                 // 模拟 tick 循环
         store.GetPlayer(target)!.UpdatePosition(new Vector3(0f, 0f, -1.5f), 0f, 0f, 1L, 0U);
 
@@ -98,6 +100,20 @@ public class CastResolutionSchedulingTests
         var resolved = resolver.DrainResolved(10 + CombatRules.HitDelayTicks(EntryOf(10001)));
 
         Assert.Empty(resolved);                                     // 整条结果被丢弃（不下发 DamageResult）
+        Assert.Equal(100f, store.GetPlayer(target)!.Hp, 4);
+    }
+
+    [Fact]
+    public void Caster_Removed_Before_The_Judgment_Drops_The_Swing()
+    {
+        var (store, resolver, caster, target) = World(1.5f);
+        resolver.Decide(caster, Swing(), 10);
+        resolver.DrainResolved(10);                                 // 模拟 tick 循环（此刻施法者还在）
+        store.RemovePlayer(caster);                                 // NpcDespawn/断线移除路径（不只是死亡）
+
+        var resolved = resolver.DrainResolved(10 + CombatRules.HitDelayTicks(EntryOf(10001)));
+
+        Assert.Empty(resolved);                                     // GetPlayer == null 分支：整条结果被丢弃
         Assert.Equal(100f, store.GetPlayer(target)!.Hp, 4);
     }
 

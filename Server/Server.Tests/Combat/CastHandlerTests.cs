@@ -1,5 +1,6 @@
 using System.Linq;
 using Cool.Protocol;
+using Cool.SyncCore;
 using Xunit;
 
 namespace KcpServer.Tests;
@@ -28,14 +29,16 @@ public class CastHandlerTests
             Shape = new HitShape { ShapeType = shapeType, Range = range, Angle = 120f, InnerRadius = 0.8f, InnerAngle = 90f }
         };
 
-    /// <summary>N2 迁移助手：决策 → 推进到到期 → 取回该次施法的结果。
-    /// 断言一字未改，只是把"一步到位"拆成两步——N3 起延迟生效后本助手**无需修改**。</summary>
+    /// <summary>N2 迁移助手：决策 → 推进到判定帧（decideTick + 本请求的 HitDelayTicks）→ 取回该次施法的结果。
+    /// 断言一字未改，只是把"一步到位"拆成两步；判定 tick 按表推导而非常数——
+    /// 硬编码裕量一旦小于表值，助手会静默返回"决策"对象（Hits 空），失败会指错地方。</summary>
     private static CombatResolver.CastResolution Resolve(CombatResolver resolver, long casterId,
         CastRequest request, uint decideTick)
     {
         var decision = resolver.Decide(casterId, request, decideTick);
         if (!decision.Accepted) return decision;
-        foreach (var r in resolver.DrainResolved(decideTick + 8))
+        CombatRules.TryGet(request.SkillId, out var entry); // 决策已保证表命中（防御分支）
+        foreach (var r in resolver.DrainResolved(decideTick + CombatRules.HitDelayTicks(entry!)))
             if (r.Broadcast!.CasterPlayerId == casterId && r.Broadcast.SkillId == request.SkillId)
                 return r;
         return decision;

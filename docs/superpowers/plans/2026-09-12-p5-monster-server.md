@@ -2142,7 +2142,9 @@ Expected: 2/2 PASS ×2 次类级连跑（test-order 干扰检查——同 P4 惯
 - [x] **Step 4: 审计日志留档**
 
 ```bash
-grep -c "npc cast rejected" production/verify/monster-audit.log   # 期望 0（怪物施法零拒绝）
+# 真实拒绝行 = "[Combat] cast rejected: caster={id} skill={id} reason={...}"；怪物 id ≥ NpcIdSeed(2,000,000)、
+# 玩家 id 远小于它 ⇒ `2[0-9]{6}` 只统计怪物路径的拒绝（口径 = 怪物施法零拒绝，不含玩家拒绝）
+grep -cE "cast rejected: caster=2[0-9]{6}" production/verify/monster-audit.log   # 期望 0（怪物施法零拒绝）
 grep "Monster mode\|monsters spawned" production/verify/monster-audit.log | head -3
 ```
 留档 `production/verify/monster-audit.log`（同 P4 cast-audit 惯例）。

@@ -73,8 +73,9 @@ dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
 dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --monsters 4
 # PlayMode（需先起服）MonsterWorldTests 2 用例：服务端驱动巡逻/追击/攻击 + 重连世界持久
 unity-mcp-cli run-tool tests-run --input '{"testMode":"PlayMode","testClass":"MonsterWorldTests"}' --timeout 300000
-# 审计日志：npc cast rejected = 0（怪物施法全部通过裁决）
-grep -c "npc cast rejected" production/verify/monster-audit.log
+# 审计日志：怪物施法零拒绝——真实拒绝行 = "[Combat] cast rejected: caster={id} skill={id} reason={...}"；
+# 怪物 id ≥ MonsterModule.NpcIdSeed = 2,000,000、玩家 id 远小于它 ⇒ "2 开头的 7 位 id" 只统计怪物路径
+grep -cE "cast rejected: caster=2[0-9]{6}" production/verify/monster-audit.log   # 期望 0
 ```
 
 ## 已知边界（P5 backlog）

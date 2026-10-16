@@ -41,12 +41,15 @@ public class CombatResolverNpcTests
         Shape = new HitShape { ShapeType = 0, Range = range, Angle = 120f }
     };
 
+    /// <summary>决策 → 推进到判定帧（decideTick + 本请求的 HitDelayTicks）→ 取回该次施法的结果。
+    /// 判定 tick 按表推导而非常数——硬编码裕量一旦小于表值，助手会静默返回"决策"对象（Hits 空）。</summary>
     private static CombatResolver.CastResolution Resolve(CombatResolver resolver, long casterId,
         CastRequest request, uint decideTick)
     {
         var decision = resolver.Decide(casterId, request, decideTick);
         if (!decision.Accepted) return decision;
-        foreach (var r in resolver.DrainResolved(decideTick + 8))
+        CombatRules.TryGet(request.SkillId, out var entry); // 决策已保证表命中（防御分支）
+        foreach (var r in resolver.DrainResolved(decideTick + CombatRules.HitDelayTicks(entry!)))
             if (r.Broadcast!.CasterPlayerId == casterId && r.Broadcast.SkillId == request.SkillId)
                 return r;
         return decision;

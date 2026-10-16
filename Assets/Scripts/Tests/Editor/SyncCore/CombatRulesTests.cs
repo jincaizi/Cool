@@ -164,6 +164,16 @@ namespace Hotfix.GameSystems.Tests.SyncCore
         }
 
         [Test]
+        public void SkillQ_HitDelay_Is_Pinned_To_The_Asset_Measured_Value()
+        {
+            // 与服务器侧同构的回归钉：20001 是资产实测值（0.30s），非怪物占位 0.35s——
+            // "≤ 冷却"不等式允许把它降级成 0.03 也全绿。
+            Assert.IsTrue(CombatRules.TryGet(20001, out var q));
+            Assert.AreEqual(0.30f, q.HitDelaySeconds, 0.0001f);
+            Assert.AreEqual(5U, CombatRules.HitDelayTicks(q));
+        }
+
+        [Test]
         public void Monster_HitDelay_Never_Exceeds_Its_Cooldown()
         {
             foreach (var skillId in new[] { 50001, 50002, 50003, 50004 })

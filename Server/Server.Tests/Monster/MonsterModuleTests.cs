@@ -201,7 +201,7 @@ public class MonsterModuleTests
             foreach (var (id, request) in module.DrainPendingCasts())
             {
                 resolver.Decide(id, request, t);
-                resolver.DrainResolved(t);      // N2：同 tick 到期
+                resolver.DrainResolved(t);      // 推进队列（本用例不消费结果；判定延迟 >0 ⇒ 决策当 tick 取不到这一条）
                 castTick = t;
                 casted = true;
             }
@@ -365,7 +365,7 @@ public class MonsterModuleTests
     /// `Hit_Window_Expiry_Restores_Locomotion_While_Target_Stays_In_Attack_Range` **间接**覆盖
     ///（它 :210 的前置断言在决策 tick 断言同一等式，破坏本不变量时它同样会红）；
     /// 本用例把它钉成**最小脚手架的专用钉**——不需要裁决链/伤害铺垫，两处写入被拆到不同 tick 时
-    /// 直接在 :381 失败。</summary>
+    /// 直接在 :384 失败。</summary>
     [Fact]
     public void Attack_Decision_And_Action_State_Happen_In_The_Same_Tick()
     {

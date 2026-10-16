@@ -22,7 +22,7 @@ namespace Cool.SyncCore
     /// <summary>
     /// 服务端权威命中裁决（spec §5-P4：判定几何两端同源）——纯几何，零 UnityEngine 依赖。
     /// 语义与客户端 AttackShape 对齐（XZ 平面；Angle 全角，半角余弦比较）：
-    ///  - Single（显式 targetId）：距离 ≤ Range + 前方 ±Angle/2 锥内（显式目标同样过锥，D-6）；
+    ///  - Single（显式 targetId）：距离 ≤ Range **且**位于前方 ±Angle/2 锥内（显式目标同样过锥，D-6）；
     ///  - Single（targetId=0，P4 客户端恒 0）：Range 内 + 施法者前方 ±Angle/2 锥内最近实体；
     ///    零距离退化（dist≈0）视为锥内命中——客户端 normalized 对零向量返回零向量（dot=0
     ///    &lt; halfCos 漏判），服务端修正（D-P4-2a）；

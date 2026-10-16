@@ -35,7 +35,7 @@ public class MonsterCombatIntegrationTests
                     Assert.True(t - lastCastTick >= 15, $"casts spaced only {t - lastCastTick} ticks (cooldown not enforced)");
                 lastCastTick = t;
             }
-            resolver.DrainResolved(t);   // N2：同 tick 到期，结果本用例不消费
+            resolver.DrainResolved(t);   // 推进队列（本用例不消费结果；判定延迟 >0 ⇒ 决策当 tick 取不到这一条）
         }
 
         // 120 tick：追击 ~45 tick 进入射程，此后每 15 tick 一次——期望 ≥3 次间隔施法

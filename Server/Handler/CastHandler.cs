@@ -112,6 +112,10 @@ namespace KcpServer
             if (caster == null || !caster.IsAlive) return null;
             if (!CombatRules.TryGet(pending.Request.SkillId, out var entry)) return null; // 决策已校验，防御分支
 
+            // 候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
+            //  玩家施法 → 玩家 + 怪物（PvE 挥击自动目标按锥内最近者自然命中怪物——
+            //    跨界误伤玩家 backlog 项落地；bot 压测实体同 P4 语义不排除）
+            //  怪物施法 → 仅已登录玩家（怪物互不打；bot 不可被怪物命中——**这条过滤不是死代码**）
             var candidates = new List<CombatCandidate>();
             foreach (var p in _store.All)
             {
@@ -190,7 +194,7 @@ namespace KcpServer
             => _resolver.Decide(casterId, request, tick);
 
         /// <summary>到期取出（Server3C 每 tick 在 TickRespawns 之前调用）</summary>
-        public System.Collections.Generic.List<CombatResolver.CastResolution> DrainResolved(uint tick)
+        public List<CombatResolver.CastResolution> DrainResolved(uint tick)
             => _resolver.DrainResolved(tick);
 
         /// <summary>决策阶段广播"挥砍开始"（F7：时间戳 = 剪辑起始时刻）。拒绝分支内部处理（日志 + 计数）。
@@ -266,6 +270,9 @@ namespace KcpServer
 
             // F17：包在 tick 之间处理，此刻 CurrentTick 仍是上一 tick 的值——
             // 本次决策归属"本轮即将运行的 tick"，+1 后与怪物路径（tick 内决策）口径一致。
+            // 语义出处：Server3C.CurrentTick 的注释（"packet 处理时比 lambda 已推进值落后一个迭代——勿'修正'为实时值"）。
+            // **本行是本分支最易被误删的一处**：删掉 `+ 1` 不会让任何测试变红（已知覆盖缺口，
+            // 见 CastResolutionSchedulingTests.Judgment_Lands_Exactly_On_DecideTick_Plus_HitDelay_Ticks 的注释）。
             var decision = _resolver.Decide(playerId.Value, request, _server.CurrentTick + 1);
             await BroadcastSwingAsync(playerId.Value, request, decision);
         }

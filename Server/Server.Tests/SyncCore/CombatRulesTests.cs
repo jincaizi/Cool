@@ -165,6 +165,18 @@ public class CombatRulesTests
     }
 
     [Fact]
+    public void SkillQ_HitDelay_Is_Pinned_To_The_Asset_Measured_Value()
+    {
+        // 回归钉：20001 是**资产实测值**（0.30s = ShapeBlock._hitboxTimings + CastTime），
+        // 与怪物那 4 条占位 0.35s 不同。此前 20001 只有"≤ 冷却"的不等式守着
+        //（Monster_HitDelay_Never_Exceeds_Its_Cooldown），把它降级成 0.03 也能全绿。
+        // 判定帧 = decideTick + ceil(0.30 × 15) = decideTick + 5。
+        Assert.True(CombatRules.TryGet(20001, out var q));
+        Assert.Equal(0.30f, q.HitDelaySeconds, 4);
+        Assert.Equal(5U, CombatRules.HitDelayTicks(q));
+    }
+
+    [Fact]
     public void Monster_HitDelay_Never_Exceeds_Its_Cooldown()
     {
         // 约束只对怪物成立：前摇结束时若冷却已过，怪物会立刻挥第二刀（第一刀的剪辑被截断）。
