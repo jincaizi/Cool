@@ -909,7 +909,7 @@ git commit -m "refactor(combat): split the cast decision from the hit resolution
             // F17：包在 tick 之间处理，此刻 CurrentTick 仍是上一 tick 的值——
             // 本次决策归属"本轮即将运行的 tick"，+1 后与怪物路径（tick 内决策）口径一致。
             var decision = _resolver.Decide(playerId.Value, request, _server.CurrentTick + 1);
-            await BroadcastSwingAsync(decision);
+            await BroadcastSwingAsync(playerId.Value, request, decision);   // 修复批：拒绝日志需要 casterId 与 skillId
         }
 ```
 
@@ -927,7 +927,7 @@ git commit -m "refactor(combat): split the cast decision from the hit resolution
                         foreach (var (npcId, request) in _monsterModule.DrainPendingCasts())
                         {
                             var decision = _castHandler.Decide(npcId, request, (uint)tick);
-                            _ = _castHandler.BroadcastSwingAsync(decision); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
+                            _ = _castHandler.BroadcastSwingAsync(npcId, request, decision); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
                         }
 
                         foreach (var npcId in _monsterModule.DrainRemovedNpcs())
@@ -1313,7 +1313,13 @@ git commit -m "test(combat): pin the busy-flag invariant and the decide-tick con
 服务端：`dotnet run --project Server/Server.csproj`（观察日志里的 `[Combat] cast rejected` 计数与 `[Aoi]` 统计）
 客户端：Unity 打开 `DemoDay` 场景进 PlayMode（或 WebGL 出包按项目既有 e2e 装置跑）
 
-- [ ] **步骤 2：逐条确认 §1 的四条成功判据**
+- [ ] **步骤 2：逐条确认 §1 的四条成功判据 + 最终审查追加的观察项**
+
+> **最终审查追加的两条观察项（都不是代码缺陷，只有肉眼能裁决）**：
+> 1. **绕背得手后怪物是否脱战**：`DetectTarget` 每 tick 都跑，而 `TargetDetector.CanDetect` 是**无粘性的严格视野锥**（Wolf 90° 全角 = ±45°）。玩家绕出 ±45° 后目标即刻丢失（`TargetId=null`、`LastKnownTargetPosition` 冻结），怪物只朝**陈旧点**转身 ⇒ ① 实际躲避门槛比 §3 数值表的 1.75m **更宽**（对玩家更有利，判据 3 大概率会过）；② 前摇结束后行为树落 `Return` ⇒ **怪物走回家**，§3 期待的"一直贴脸绕 → 每刀都空"的连续博弈不成立。若观感不可接受，护栏是"HOSTILE 且有目标时忽略视野锥（改用 detectionRadius）"——一行级改动。
+> 2. **打中抬手中的怪，它的挥砍表现还在不在**：前摇期被命中会跳过 BT，`ActionState` 被写 Hit/Idle/Run（表现被压掉），但那一刀仍按 D-4 结算（受击不取消）。按"有意"观察，若观感上像 bug 再议。
+> 3. **不带 `--monsters` 跑一次双端挥砍**（任务 4 修复的验证项）：确认玩家伤害落地、`[Combat] cast rejected` 日志带 `caster=` id。
+
 
 1. **怪挥砍命中帧与受击飘字同帧**：站进 Wolf 的攻击距离挨一刀——刀刃到肉的瞬间出飘字（残差 ≈132ms 一轮渲染延迟；若明显早于或晚于刀刃，按 R3 复核 50002 的 `HitDelaySeconds` 占位值）
 2. **玩家挥砍：伤害落在本地判定帧上**：砍 Slime——伤害数字出现时本地挥砍动画的判定帧刚好过去（BA_Heavy 0.35s 的一刀最能看出）
@@ -1379,3 +1385,52 @@ git commit -m "docs(combat): record the hit-frame alignment acceptance run"
 | `decideTick = CurrentTick + 1`（包路径） | N5 步骤 2 钉住**换算口径**；`HandleCastAsync` 里那一行 `+1` 本体仍靠审查（无 session 装置就无法驱动包路径） |
 
 要补自动化，得先建 `Server3C`/session 测试装置——那是独立的一项工作，**不在本计划内**（规格 §7 的原表述应在规格里同步更正）。
+
+---
+
+## 实现记录（2026-10-16，子代理驱动执行完毕）
+
+> 本节是本次执行的**持久化记录**（协调用的临时账本与报告已按流程清理）。任务 1–6 已全部落地并通过各自的任务级审查 + 一次覆盖整分支的最终审查；**任务 7（N6 手动端到端）尚待人类执行**。
+
+### 提交序列
+
+| # | 提交 | 内容 | 服务端测试 |
+|---|---|---|---|
+| — | `7822be6` | 计划任务编号（工作起点） | 214 |
+| 1 | `16b1b7e` | 逐技能判定延迟进表（`HitDelaySeconds` / `HitDelayTicks`）+ 两侧同构用例 | 214 |
+| 2 | `8b4cc0d` | `HitResolver` 显式目标补锥角（抽 `InCone`，两分支共用） | 217 |
+| 3 | `862b908` | `CombatResolver` 拆 `Decide`/`DrainResolved`（**行为零变化**：26 行删除全是调用形态改写） | 219 |
+| 4 | `0738043` + `e8e4129` | 延迟生效 + 广播拆分 + tick 接线；修复：drain 移出怪物条件块、拒绝日志带 caster id | 223 |
+| 5 | `5f3b942` + `42c2685` | 怪物前摇（站定 + 90°/s 转向 + 锁行为树）；修复：`Chase` 纳入前摇锁 + 回归用例 | 227 |
+| 6 | `4724d10` + `0eabdf4` | 两条守护用例（忙位不变式 / 判定 tick 差值）；修复：改名与注释以匹配真实覆盖 | 229 |
+| — | `5402de2` | 最终审查的零风险修复批（注释 / 文档 grep / 测试收紧） | **231** |
+| — | `68ec792` · `2c6efc0` · 本节 | 计划文档与裁定同步（控制者 lane） | — |
+
+Unity：EditMode **379 → 384 → 385**（381 是任务 1 之后的中间值，曾被账本误记为基线）；PlayMode **只能按并集判绿**（无服务器 13 红 / 有怪物 1 红 / 无怪物 2 红，三配置互斥）。
+
+### 实现期的人类裁定（三处，均已落地并在正文就地标注）
+
+1. **任务 4**：计划片段把 `DrainResolved` 嵌进 `if (_monsterModule != null)`，与计划自己写死的 F13（drain 必须早于 `TickRespawns`）冲突 ⇒ **移出块外**。不带 `--monsters` 时玩家施法判定永不结算、`_pending` 无界增长——这是合并前被审查抓掉的真实缺陷。
+2. **任务 5（A/B）**：计划的清理位置与它自己的用例 3 / 规格"前摇期**持续**朝向目标"冲突 ⇒ 选 **A**：清理挪到行为树**之后**（前摇恰好 6 tick、转向覆盖到判定帧，与 `HitDelayTicks(50002)=6` 精确对齐）。
+3. **任务 6**：F17 守护用例的名字/注释高报了覆盖（包路径的 `CurrentTick + 1` 无测试）⇒ **改名 + 改注释**，不补 session 级装置。
+
+### 最终审查（整分支）结论与修复批
+
+**结论：可以合并**（Critical 0）。修复批 `5402de2` 已带掉：两条因日志文案统一而**恒真**的验收 grep（`guides/p5-monster-server.md`、`plans/2026-09-12-...md`，改为按怪物 id 段 `caster=2[0-9]{6}` 统计）、两处事实错误的 `// N2：同 tick 到期` 注释、恢复候选集过滤的依据注释、pin 住 `20001 = 0.30s/5 tick`（两侧同构）、`+`→"且"、全限定名改短名、两个测试助手的硬编码裕量改按表推导、绕背用例改用**显式目标**路径、"施法者被移除"用例、包路径 `+1` 的交叉引用注释。定向复审：全部 ADDRESSED、零运行时风险未越线。
+
+### 已搁置项（带裁定，供后续立项参考）
+
+| 项 | 裁定 |
+|---|---|
+| 绕背得手 ⇒ 视野锥丢目标 ⇒ 怪脱战（§3"连续博弈"不成立；实测门槛比 1.75m 更宽） | **交 N6 用眼睛裁决**（见任务 7 观察项 1）；护栏是"HOSTILE 且有目标时忽略视野锥" |
+| 前摇期被命中 ⇒ `ActionState` 写 Idle/Run，表现被压掉但刀仍结算 | **有意**（D-4 受击不取消） |
+| 前摇期 `m.CurrentVelocity` 不刷新 ⇒ 前摇后首次 ORCA 锚点用陈旧位移 | 既有行为，多体有界，延后 |
+| `HitResolver` 的 `dist > shape.Range` 是 fail-open 写法（NaN 穿透射程门） | NaN 已被 `CombatRules.IsFinite` 闸门挡死，卫生项，延后 |
+| `DrainResolved` 空结果每 tick `new List`；`AttackResolveTick` 在决策被拒时也置位；`DrainRemovedNpcs` 先于 drain | 均无功能影响，延后 |
+| PlayMode "既有失败"（`Cheat_Casts_Are_Rejected_Server_Side`）的**证据缺口**（原始日志未留档）；更好的闭合方式 = 把断言按 `SourcePlayerId` 过滤 | 该失败与设计前基线一致，非本分支引入；建议的修法已记录，延后 |
+| 本次修复批新引入的两条注释级 Minor（`CastResolutionSchedulingTests.cs:143` 的行号指针被插行改旧；两条新 pin 注释对 20001 既往守护的措辞夸大） | 注释级、不承重，延后 |
+| 更早的设计文档里失效的行号引用（`specs/2026-10-12-dogknight-spiderboss-monsters-design.md:187` 等）；`MonsterModule.cs:121` 仍引用已不再出现的日志文案 | 同类残留，延后 |
+
+### 建议单独立项
+
+`Server3C` / `CastHandler` **没有 session 级测试装置**，导致三条不变量（两个广播时刻、包路径 `CurrentTick + 1`、`DrainResolved` 早于 `TickRespawns`）只能靠代码审查与手测兜底。每次都靠人眼不是长久之计——建议把"服务端 session 级测试装置"作为独立工作项。
