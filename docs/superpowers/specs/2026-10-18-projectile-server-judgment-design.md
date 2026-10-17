@@ -71,7 +71,7 @@
 - `ChargeProgress` 钳到 `[0,1]`（NaN 视为 0）；
 - **只有 `Kind == CircleAtPoint` 的技能**（20004/30001）校验落点；`LineAll`/`LineNearestSplash`（10002/20003）忽略这两个字段（保持既有行为）。
 
-**`HitShape` 不改**：线形/圆形的宽度与半径由服务端 `ProjectileSpec` 自持构造 ⇒ 不新增任何可篡改字段。`ValidateShape` 保持原样（`ProjectileSkillData` 发零形状，命中"无挥击"表项的最小上限）。
+**`HitShape` 不改**：线形/圆形的宽度与半径由服务端 `ProjectileSpec` 自持构造 ⇒ 不新增任何可篡改字段。`ValidateShape` 的**拒绝规则**保持原样（`ProjectileSkillData` 发零形状，命中"无挥击"表项的最小上限）；实现期把超限容差从 `+0.01` 收紧为 `+0.001`——float32 下 `2f + 0.01f` 与 `2.01f` 位级相同，旧容差会接受本规格要求拒绝的 2.01 AOE 半径；合法形状是序列化值的拷贝（无运算），无误拒风险。
 
 ---
 
