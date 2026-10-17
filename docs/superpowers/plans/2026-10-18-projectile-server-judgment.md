@@ -22,7 +22,7 @@
 | `Server/Handler/CastHandler.cs` | 修改 | `PendingCast` → 判定组；分段调度；起点捕获；首中即停；蓄力缩放 |
 | `Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs` | 修改 | `NotifySkillCast` 新参数；蓄力释放发送 |
 | `Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs` | 修改 | 新增 `OnChargeReleased` 事件 |
-| `Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs` | 修改 | 把 `OnChargeReleased` 接到桥 |
+| `Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs` | 修改 | 两处门控（`OnLocalSkillCast` / `OnLocalChargeReleased`）+ 接线；「可蓄力」= `ChargedSkillData` 或 `ProjectileSkillData.MaxChargeTime > 0` |
 | `Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQi/SwordQiProjectile.cs` | 修改 | 联网时跳过本地伤害 |
 | `Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Projectile/FireballProjectile.cs` | 修改 | 同上 |
 | `Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs` | 修改 | 同上 |
@@ -724,7 +724,7 @@ git commit -m "feat(server): 投射物判定组 —— 剑气分段/火球首中
 **文件：**
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs`
-- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`
 - 修改：`SwordQiProjectile.cs` / `FireballProjectile.cs` / `MeteorStrike.cs`
 - 测试：`CombatNetworkBridgeTests.cs`、新建 `NetworkModeDamageGuardTests.cs`
 
@@ -764,7 +764,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 1. `NotifySkillCast(int skillId, HitShape shape, Vector3? impactPoint = null, float chargeProgress = 0f)`：写 `ImpactX/Y/Z` 与 `ChargeProgress`；`IsSynced` 门控不变。
 2. `SkillCoordinator`：新增 `public event Action<SkillData, float, Vector3> OnChargeReleased;`，在 `TryReleaseCharge` 成功后触发，`impactPoint = _currentSkill.TargetPositionOrOwner()`（在 `SkillExecutor` 上加一个只读属性：`_targetCharacter != null ? _targetCharacter.transform.position : _owner.transform.position`）；取消蓄力不触发。
-3. `Sys3CEntry`：把 `OnChargeReleased` 接到桥（`(data, progress, point) => _combatBridge?.NotifySkillCast(data.SkillId, HitShapeConverter.FromSkillData(data), point, progress)`），并在 `OnSkillActivated` 触发处**跳过蓄力类**（`data is ChargedSkillData` 时不发）。
+3. `ClientNetworkHost`：抽一个「可蓄力」谓词 `IsChargeable(SkillData d) => d is ChargedSkillData || (d is ProjectileSkillData p && p.MaxChargeTime > 0f)`——**与 `SkillStateMachine._isCharged` 同款定义**，火球（`_maxChargeTime: 2`）因此也算可蓄力。`OnLocalSkillCast` 遇到可蓄力技能直接 return；`OnLocalChargeReleased` 处理可蓄力技能（`(data, progress, point) => _combatBridge?.NotifySkillCast(data.SkillId, HitShapeConverter.FromSkillData(data), point, progress)`）。退订与既有 `OnSkillActivated` 同在 `DetachCombatBridge`。
 4. 三个弹体：**只在伤害入口加守卫**，移动/生命周期/表现一律不动（每个文件顶部加 `using Hotfix.GameSystems.SyncLayer;`）：
 
 ```csharp
@@ -800,7 +800,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs \
         Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs \
         Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs \
-        Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs \
+        Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs \
         Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQi/SwordQiProjectile.cs \
         Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Projectile/FireballProjectile.cs \
         Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs \
