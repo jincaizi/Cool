@@ -761,9 +761,13 @@ namespace Hotfix.GameSystems.Sys3C
         {
             PhysicsRegistry.Instance.Unregister(this);
 
-            // T12 甲-3：本地角色没了（阵亡/断线回选人/换角色）→ 收起 HUD 并解绑，
-            // 否则选人界面顶着一根死人的血条（HUD 在进世界时由 Start 重新绑定并显示）。
+            // T12 甲-3：本地角色没了（阵亡/断线回选人/换角色）→ 收起 HUD 并解绑。
+            // **但「本地角色没了」不等于「这个实例被销毁」**：确认角色重建玩家时，新玩家已经
+            // Start（并显示 HUD），旧玩家的帧末销毁才跑到这里 —— 无条件收起会把新玩家的 HUD
+            // 一起收掉，且再没有别人显示它（2026-10-17 实测：HUD 永久消失）。
+            // 判据因此改成状态：场上还有「已启动的本地角色」就把 HUD 交给它。
             if (_statsProvider == null) return;
+            if (HasOtherStartedLocalEntry()) return;
             var uiManager = Hotfix.GameSystems.UI.UIManager.Instance;
             if (uiManager == null) return;
             var hud = uiManager.GetPanel<Hotfix.GameSystems.UI.PlayerHudPanel>();
@@ -772,6 +776,28 @@ namespace Hotfix.GameSystems.Sys3C
                 hud.Unbind();
                 uiManager.HideAlwaysAsync<Hotfix.GameSystems.UI.PlayerHudPanel>().Forget();
             }
+        }
+
+        /// <summary>
+        /// 场上是否还有**别的**已启动的本地角色。
+        ///
+        /// 判据必须是「已启动」（`_statsProvider != null`）：只有 Start 跑完的 entry 才绑过 HUD，
+        /// 也才会在 Start 里重新显示 HUD。`enabled` 单独不够 —— 远端头像预制体自带的
+        /// `Sys3CEntry` 是 `enabled=false`（bot 视图），而 `FindObjectsOfType` **会返回
+        /// 「激活对象上的禁用组件」**（本项目已在 `MobileInputBinder.PickLocalEntry` 记录过这个
+        /// 陷阱）。两者叠加：`enabled` 挡 bot 视图，`_statsProvider` 兜住「enabled 但 Start
+        /// 还没跑完」的窗口。
+        /// </summary>
+        private bool HasOtherStartedLocalEntry()
+        {
+            foreach (var entry in FindObjectsOfType<Sys3CEntry>())
+            {
+                if (entry == this) continue;
+                if (!entry.enabled) continue;
+                if (entry._statsProvider == null) continue;
+                return true;
+            }
+            return false;
         }
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
