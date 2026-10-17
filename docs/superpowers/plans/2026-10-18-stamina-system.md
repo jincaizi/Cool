@@ -8,6 +8,8 @@
 
 **技术栈：** Unity 2022.3.25f1、NUnit EditMode/PlayMode、UGUI（Screen Space Overlay + CanvasScaler）、Unity MCP `tests-run` / `assets-refresh` / `script-execute` / `screenshot-game-view`、纯 C#（无 HybridCLR）。
 
+**状态：** 已完成（2026-10-18）——7 个任务全部实现、逐任务审查通过；全量 EditMode 448/448、PlayMode 53/53。
+
 **规格：** `docs/superpowers/specs/2026-10-18-stamina-system-design.md`
 
 **执行前置：**
@@ -56,7 +58,7 @@
 - 创建：`Assets/Scripts/Hotfix/GameSystems/Stamina/StaminaSystem.cs`
 - 测试：`Assets/Scripts/Tests/Editor/StaminaSystemTests.cs`
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 创建 `Assets/Scripts/Tests/Editor/StaminaSystemTests.cs`：
 
@@ -250,7 +252,7 @@ namespace GameSys.EditorTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：
 
@@ -260,7 +262,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：编译失败，`Hotfix.GameSystems.Stamina` / `StaminaSystem` / `StaminaConfig` 不存在。
 
-- [ ] **步骤 3：实现 StaminaSystem**
+- [x] **步骤 3：实现 StaminaSystem**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/Stamina/StaminaSystem.cs`：
 
@@ -381,7 +383,7 @@ namespace Hotfix.GameSystems.Stamina
 }
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 运行：
 
@@ -392,7 +394,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS（11 条）。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Stamina/StaminaSystem.cs Assets/Scripts/Tests/Editor/StaminaSystemTests.cs
@@ -410,7 +412,7 @@ git commit -m "feat(stamina): 新增 StaminaSystem 纯逻辑与单元测试"
 - 测试：`Assets/Scripts/Tests/Editor/SkillInterruptionMatrixSpinTests.cs`
 - 测试：`Assets/Scripts/Tests/Editor/SkillStateMachineSpinTests.cs`
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 在 `SkillInterruptionMatrixSpinTests.cs` 末尾加入：
 
@@ -445,7 +447,7 @@ public void test_skill_state_machine_stamina_exhausted_interrupts()
 
 > 若 `SkillStateMachineSpinTests` 没有 `using Hotfix.GameSystems.Skills.Data;` / `Definition` / `Runtime`，补齐。
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"EditMode","testClass":"SkillInterruptionMatrixSpinTests"}' --timeout 240000
@@ -453,7 +455,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：编译失败，`InterruptionSource.StaminaExhausted` 不存在。
 
-- [ ] **步骤 3：实现枚举与两处放行**
+- [x] **步骤 3：实现枚举与两处放行**
 
 `SkillState.cs` 的 `InterruptionSource` 末尾追加：
 
@@ -480,7 +482,7 @@ InterruptionSource.StaminaExhausted => 85,
 InterruptionSource.StaminaExhausted => true,
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"EditMode","testClass":"SkillInterruptionMatrixSpinTests"}' --timeout 240000
@@ -489,7 +491,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Skills/Definition/SkillState.cs \
@@ -509,7 +511,7 @@ git commit -m "feat(stamina): 新增力竭打断来源并放行状态机/矩阵"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs`
 - 测试：`Assets/Scripts/Tests/Editor/SkillCoordinatorStaminaTests.cs`
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 创建 `Assets/Scripts/Tests/Editor/SkillCoordinatorStaminaTests.cs`：
 
@@ -741,7 +743,7 @@ namespace GameSys.EditorTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"EditMode","testClass":"SkillCoordinatorStaminaTests"}' --timeout 240000
@@ -749,7 +751,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：编译失败，`StaminaDrainPerSecond` / `SetStamina` 不存在。
 
-- [ ] **步骤 3：新增 SkillData 字段**
+- [x] **步骤 3：新增 SkillData 字段**
 
 在 `SkillData.cs` 的 `=== Cost ===` 区、`StaminaCost` 之后加入：
 
@@ -759,7 +761,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 ```
 
-- [ ] **步骤 4：修改 SkillCoordinator**
+- [x] **步骤 4：修改 SkillCoordinator**
 
 文件顶部加入：
 
@@ -851,7 +853,7 @@ private void HandleStaminaDepleted(SkillExecutor skill, SkillSubState sub)
 
 > `Mathf` 需要 `using UnityEngine;`（文件已有）。
 
-- [ ] **步骤 5：运行测试验证通过**
+- [x] **步骤 5：运行测试验证通过**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"EditMode","testClass":"SkillCoordinatorStaminaTests"}' --timeout 240000
@@ -859,7 +861,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS。
 
-- [ ] **步骤 6：回归既有技能测试**
+- [x] **步骤 6：回归既有技能测试**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"EditMode","testClass":"SkillCoordinatorChargeTests"}' --timeout 240000
@@ -868,7 +870,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS（不注入 `StaminaSystem` 时行为不变）。
 
-- [ ] **步骤 7：Commit**
+- [x] **步骤 7：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillData.cs \
@@ -886,7 +888,7 @@ git commit -m "feat(stamina): 技能持续扣精、激活门禁与力竭处理"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs`
 - 测试：`Assets/Scripts/Tests/PlayMode/StaminaRingTests.cs`
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 创建 `Assets/Scripts/Tests/PlayMode/StaminaRingTests.cs`：
 
@@ -1052,7 +1054,7 @@ namespace GameSys.PlayModeTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"PlayMode","testClass":"StaminaRingTests"}' --timeout 240000
@@ -1060,7 +1062,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：编译失败，`StaminaRingRenderer` 不存在。
 
-- [ ] **步骤 3：实现 StaminaRingRenderer**
+- [x] **步骤 3：实现 StaminaRingRenderer**
 
 创建 `Assets/Scripts/Hotfix/GameSystems/Stamina/StaminaRingRenderer.cs`：
 
@@ -1302,7 +1304,7 @@ namespace Hotfix.GameSystems.Stamina
 }
 ```
 
-- [ ] **步骤 4：修改 EntityDisplayManager**
+- [x] **步骤 4：修改 EntityDisplayManager**
 
 文件顶部加入：
 
@@ -1355,7 +1357,7 @@ _staminaRing?.Tick(_camera, Time.deltaTime);
 _staminaRing?.Cleanup();
 ```
 
-- [ ] **步骤 5：运行测试验证通过**
+- [x] **步骤 5：运行测试验证通过**
 
 ```bash
 unity-mcp-cli run-tool assets-refresh --path "E:/CodeForJob/Cool" --timeout 240000
@@ -1364,7 +1366,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS。
 
-- [ ] **步骤 6：Commit**
+- [x] **步骤 6：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Stamina/StaminaRingRenderer.cs \
@@ -1382,7 +1384,7 @@ git commit -m "feat(stamina): 世界锚定精力环渲染与 EntityDisplayManage
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`
 - 测试：`Assets/Scripts/Tests/PlayMode/StaminaIntegrationTests.cs`
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 创建 `Assets/Scripts/Tests/PlayMode/StaminaIntegrationTests.cs`：
 
@@ -1567,7 +1569,7 @@ namespace GameSys.PlayModeTests
 
 > 执行复审修复时追加（`fd87066`）：`test_stamina_defend_cannot_start_while_exhausted`——力竭时按住防御不进入、松手再按仍不进入、`Refill` 后松开再按可正常起盾；通过反射 `InvokeHandleInput` 调用私有 `HandleInput`，不依赖地面/整帧 `Update`。这正是起盾条件必须包含 `_stamina.CanStartConsuming` 的回归保护。
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"PlayMode","testClass":"StaminaIntegrationTests"}' --timeout 240000
@@ -1575,7 +1577,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：编译失败，`Sys3CEntry.Stamina` / `UpdateStamina` / `InputManager.SprintAllowed` / `SetSprintHeld` 不存在。
 
-- [ ] **步骤 3：修改 InputManager**
+- [x] **步骤 3：修改 InputManager**
 
 在 `SprintSpeed`/`MoveSpeed` 属性附近加入：
 
@@ -1615,7 +1617,7 @@ bool sprintHeld = IsSprintHeld();
 bool sprintHeld = IsSprintHeld() && SprintAllowed;
 ```
 
-- [ ] **步骤 4：修改 Sys3CEntry**
+- [x] **步骤 4：修改 Sys3CEntry**
 
 文件顶部加入：
 
@@ -1786,7 +1788,7 @@ _defendStaminaLatch = false;
 EntityDisplayManager.Instance?.UnbindStamina(transform);
 ```
 
-- [ ] **步骤 5：运行测试验证通过**
+- [x] **步骤 5：运行测试验证通过**
 
 ```bash
 unity-mcp-cli run-tool assets-refresh --path "E:/CodeForJob/Cool" --timeout 240000
@@ -1795,7 +1797,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS。
 
-- [ ] **步骤 6：回归死亡/复活测试**
+- [x] **步骤 6：回归死亡/复活测试**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"PlayMode","testClass":"PlayerDeathRespawnTests"}' --timeout 240000
@@ -1803,7 +1805,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS（`Refill` 在两条复活路径上，不改变 HP/位置语义）。
 
-- [ ] **步骤 7：Commit**
+- [x] **步骤 7：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs \
@@ -1822,7 +1824,7 @@ git commit -m "feat(stamina): 奔跑/举盾/消耗优先级与复活回满接线
 - 修改：`Assets/PreRes/SkillsCfg/Fireball_SkillQ.asset`
 - 测试：`Assets/Scripts/Tests/Editor/StaminaSkillAssetTests.cs`
 
-- [ ] **步骤 1：编写失败的资产测试**
+- [x] **步骤 1：编写失败的资产测试**
 
 创建 `Assets/Scripts/Tests/Editor/StaminaSkillAssetTests.cs`：
 
@@ -1857,7 +1859,7 @@ namespace GameSys.EditorTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"EditMode","testClass":"StaminaSkillAssetTests"}' --timeout 240000
@@ -1865,7 +1867,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：FAIL，三个资产的 `StaminaDrainPerSecond` 仍是 0。
 
-- [ ] **步骤 3：修改三个资产**
+- [x] **步骤 3：修改三个资产**
 
 在三个 `.asset` 的 `_staminaCost: 0` 之后各加一行（注意两个空格缩进）：
 
@@ -1890,7 +1892,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
   _staminaDrainPerSecond: 15
 ```
 
-- [ ] **步骤 4：刷新并运行资产测试**
+- [x] **步骤 4：刷新并运行资产测试**
 
 ```bash
 unity-mcp-cli run-tool assets-refresh --path "E:/CodeForJob/Cool" --timeout 240000
@@ -1899,7 +1901,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/PreRes/SkillsCfg/Spin_SkillR.asset \
@@ -1916,7 +1918,7 @@ git commit -m "chore(stamina): 配置持续技能每秒耗率"
 **文件：**
 - 不新增文件；运行全部测试 + MCP 截图/探针。
 
-- [ ] **步骤 1：全部 EditMode 测试**
+- [x] **步骤 1：全部 EditMode 测试**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"EditMode"}' --timeout 240000
@@ -1924,7 +1926,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS。
 
-- [ ] **步骤 2：全部 PlayMode 测试**
+- [x] **步骤 2：全部 PlayMode 测试**
 
 ```bash
 unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode":"PlayMode"}' --timeout 240000
@@ -1932,7 +1934,7 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" --input '{"testMode
 
 预期：全部 PASS。
 
-- [ ] **步骤 3：PlayMode 数值探针**
+- [x] **步骤 3：PlayMode 数值探针**
 
 在 Unity Editor 进入 PlayMode（DemoDay 场景，选人后进入世界），用 MCP `script-execute` 注入一个探针脚本，读取 `Object.FindObjectOfType<Sys3CEntry>().Stamina`：
 
@@ -1970,7 +1972,7 @@ public class StaminaProbe
 | 满精力 / 死亡 / 角色出屏 | 环不可见 |
 | 环收缩方向 | 12 点起逆时针；若反了改 `fillClockwise` |
 
-- [ ] **步骤 4：MCP 截图**
+- [x] **步骤 4：MCP 截图**
 
 用 `screenshot-game-view` 截取并保存到 `production/verify/`：
 
@@ -1979,7 +1981,7 @@ public class StaminaProbe
 - `stamina_defend.png` — 举盾中，环下降
 - `stamina_spin.png` — 旋转中，环下降
 
-- [ ] **步骤 5：手机竖屏检查**
+- [x] **步骤 5：手机竖屏检查**
 
 若当前 Game 视图可切竖屏（或 WebGL 构建后手机访问），确认：
 
@@ -1987,7 +1989,7 @@ public class StaminaProbe
 - 环不挡摇杆/按钮（`raycastTarget=false`）。
 - 位置在角色右上方，不粘屏幕边缘。
 
-- [ ] **步骤 6：Commit（如有截图/调参变更）**
+- [x] **步骤 6：Commit（如有截图/调参变更）**
 
 ```bash
 git add production/verify/stamina_*.png

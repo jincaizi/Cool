@@ -3,7 +3,7 @@
 **Date:** 2026-10-18
 **Engine:** Unity 2022.3.25f1
 **Layer:** `Hotfix/Sys3C`、`Hotfix/Skills`、`Hotfix/Nameplate`
-**状态:** 待实现
+**状态:** 已实现（2026-10-18）
 
 ---
 
@@ -431,7 +431,7 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 
 | 时机 | 行为 |
 |---|---|
-| `Sys3CEntry.Start` | **最先**创建 `StaminaSystem`（早于引用判空）；`_skillCoordinator` 创建后再注入 `SetStamina(...)`；随后尝试绑定 UI |
+| `Sys3CEntry.Start` | **最先**创建 `StaminaSystem`（早于引用判空）；`_skillCoordinator` 创建后再注入 `SetStamina(...)`；UI 绑定由下一行的 Update 懒绑定完成 |
 | UI 绑定 | `EntityDisplayManager.Instance` 为空时，`Update` 里用 `_staminaBound` 做一次性懒绑定 |
 | 死亡 | 不消耗；环隐藏；资源继续回复（不可见） |
 | 单机复活 `TickRespawn` | `Refill()` + 清防御锁存 |
