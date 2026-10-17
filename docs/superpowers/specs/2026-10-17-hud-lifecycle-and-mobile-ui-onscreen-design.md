@@ -210,7 +210,7 @@ public static bool Resolve(TouchOverride mode)
 | 2 | 销毁**最后一个**本地 entry 后，HUD 收起（alpha == 0） | `test_hud_hides_when_last_local_entry_dies`（防修复把 T12 的意图改坏） |
 | 3 | 编辑器里 `Resolve(Auto) == true` | `test_editor_auto_resolves_to_touch` |
 | 4 | 摇杆四角在屏内、中心在左下半屏；射线可命中；小拖 < 大拖且 ≤ 1；抬指归零；三按钮在屏内可命中 | `test_touch_ui_lands_on_screen_and_joystick_stays_analog` |
-| 5 | 手工：编辑器 Play `DemoDay` → 摇杆可见、鼠标可拖、三按钮可点；`ForceNoTouch` 后键鼠恢复 | 人工（截图留档 `production/verify/`） |
+| 5 | 人工只验**可见**（启动态 + 进入世界后各一张截图）；可拖/可点/模拟量由 `MobileTouchInputTests` 的断言承担。确认前被选人面板（3000）压暗、确认后可用 | 人工（截图留档 `production/verify/`） |
 | 6 | 全量 EditMode / PlayMode 无新增失败 | 回归 |
 
 ---
@@ -233,7 +233,7 @@ public static bool Resolve(TouchOverride mode)
 | `FindObjectsOfType` 出现在 `OnDestroy` | 只在**本地角色被销毁**时执行一次（非每帧）；调用方限定在 `_statsProvider != null` 之后 |
 | 编辑器默认触屏后，右半屏/左下角的鼠标点击被 `LookArea`/摇杆吃掉 | `MobileUiRoot` 的 Canvas `sortingOrder=**2500**`（2026-10-17 实测；此前误记为 100，来源是 T6 的生成脚本而非场景实际值）——**高于 Base(1000)/Main(2000)、低于 Popup(3000)**。当前只有 Base 层的 HUD/TargetPanel：HUD 在左上、与右半屏/左下不重叠，TargetPanel 无按钮 ⇒ 无实际影响；**将来在 Base/Main 层放带按钮的面板时要当心**：落在触控 UI 区域内的按钮会被吃掉。Popup 层（选人面板）始终在触控层之上，且它启动即全屏打开——触控 UI 在确认前本来就不该可点。 |
 | 编辑器默认触屏让「键鼠可玩」这一习惯失效 | 整条键鼠通道（移动/视角/按键）整体被替换，见 §3.1；`ForceNoTouch` 一档可切回。**不叠加**（键盘的视角读鼠标轴、摇杆的读观察区，同一时刻只有一个适配器） |
-| 触控 UI 在编辑器默认出现，e2e 用例可能依赖「默认键鼠」 | 已核对：只有 `MobileTouchInputTests` 加载 DemoDay，且它用显式档位断言 |
+| 触控 UI 在编辑器默认出现，e2e 用例可能依赖「默认键鼠」 | **两个类**会加载 DemoDay：`MobileTouchInputTests` 与 `ClientRespawnWaitTests`（后者需要本地服务器）；编辑器默认触屏会给 DemoDay 的本地角色装 Joystick 适配器——本次已补跑后者验证。核对命令：`grep -rn 'LoadScene("DemoDay")' Assets/Scripts/Tests` |
 | 本设计修不了「玩家的 `Start` 早退（`CharacterController`/`Animator` 为空）」导致的 HUD 不显示 | 已知边沿：那种情况会打 `Debug.LogError`，属另一类问题 |
 
 ---

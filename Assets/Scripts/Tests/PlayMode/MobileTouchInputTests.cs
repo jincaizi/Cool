@@ -115,8 +115,8 @@ namespace KcpNet.PlayModeTests
                 Assert.AreEqual("Joystick", AdapterNameOf(reborn),
                     "新玩家必须被重新绑定为触屏适配器 —— 否则手机上确认角色后摇杆与按钮整体静默失效");
 
-                // 收尾：本文件的两条用例**各自** LoadScene("DemoDay") 并各自清理 —— 其余用例
-                // 都从 Resources/PlayerEntryForTest 自己装配；不卸载就会把共享 play 会话留在
+                // 收尾：本文件的两条用例**各自** LoadScene("DemoDay") 并各自清理。两个类会加载
+                // DemoDay：本类与 ClientRespawnWaitTests；不卸载就会把共享 play 会话留在
                 // "联网 + 已重建玩家"的 DemoDay 上，给其后所有用例制造顺序依赖。
                 // 先清人工档位（编辑器里 Auto 也判触屏，适配器保持 Joystick，随场景卸载一起销毁），
                 // 再换空场景并卸载 DemoDay。

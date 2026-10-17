@@ -99,8 +99,8 @@ namespace KcpNet.PlayModeTests
                 Assert.IsTrue(player != null && player.IsDead,
                     "客户端不得自行站起来（D-5：复活只能由服务端的 RespawnNotice 驱动）");
 
-                // 收尾：本用例与 MobileTouchInputTests 是 Tests/ 下仅有的两个 LoadScene 用例，
-                // 不卸载就会把共享 play 会话留在 DemoDay 上，给其后所有用例制造顺序依赖。
+                // 收尾：两个会加载 DemoDay 的测试类（本类 1 个方法 + MobileTouchInputTests 2 个方法）
+                // 都要各自清理；不卸载就会把共享 play 会话留在 DemoDay 上，给其后所有用例制造顺序依赖。
                 // 宿主是场景里的对象——断开即可，随卸载一起销毁。
                 host.Disconnect();
                 SceneManager.SetActiveScene(SceneManager.CreateScene("N5CleanupScene"));
