@@ -59,6 +59,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public IEffectTarget Owner => _owner;
         public float ElapsedTime => _stateMachine.ElapsedTime;
 
+        /// <summary>施放时的目标位置（输入上报的落点；联网上报 30001 落点用）</summary>
+        public Vector3 TargetPosition => _targetPosition;
+
+        /// <summary>锁定目标的位置；无锁定目标时回落到施法者位置（蓄力释放上报落点用）</summary>
+        public Vector3 TargetPositionOrOwner =>
+            _targetCharacter != null ? _targetCharacter.transform.position : _owner.transform.position;
+
         public SkillExecutor(
             IEffectTarget owner,
             SkillData data,

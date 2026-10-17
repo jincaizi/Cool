@@ -1,4 +1,5 @@
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core.Pool;
 using UnityEngine;
@@ -55,18 +56,23 @@ namespace Hotfix.GameSystems.Skills.Runtime.Meteor
         {
             if (_exploded) return;
 
-            // 爆炸检测中心：落点 +1m（脚踝高度），否则站地目标打不到
-            Vector3 center = _impactPoint + Vector3.up * AnkleHeightOffset;
-            var targets = PhysicsRegistry.Instance.FindNearby(center, _config.ExplosionRadius, EntityType.Monster);
-            foreach (var target in targets)
+            // 联网：伤害权在服务端——只跳过伤害循环，ImpactVFX 与回池照旧
+            bool online = NetworkModeService.Load() == NetworkMode.Online;
+            if (!online)
             {
-                if (!target.IsAlive) continue;
-                int id = target.Transform.GetInstanceID();
-                if (!_hitIds.Add(id)) continue;
+                // 爆炸检测中心：落点 +1m（脚踝高度），否则站地目标打不到
+                Vector3 center = _impactPoint + Vector3.up * AnkleHeightOffset;
+                var targets = PhysicsRegistry.Instance.FindNearby(center, _config.ExplosionRadius, EntityType.Monster);
+                foreach (var target in targets)
+                {
+                    if (!target.IsAlive) continue;
+                    int id = target.Transform.GetInstanceID();
+                    if (!_hitIds.Add(id)) continue;
 
-                Vector3 dir = (target.Transform.position - center).normalized;
-                if (dir.sqrMagnitude < 0.0001f) dir = Vector3.up;
-                target.TakeDamage(_damage, dir);
+                    Vector3 dir = (target.Transform.position - center).normalized;
+                    if (dir.sqrMagnitude < 0.0001f) dir = Vector3.up;
+                    target.TakeDamage(_damage, dir);
+                }
             }
 
             if (_config.ImpactVFX != null)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Cool.Protocol;
 using Hotfix.GameSystems.Skills;
@@ -76,6 +77,22 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             bridge.NotifySkillCast(999999, SkillQShape()); // 999999 永不进表（D-P4-1 翻转后 30001 已同步）
 
             Assert.AreEqual(0, _client.Sent.Count);
+        }
+
+        [Test]
+        public void test_notify_skill_cast_carries_impact_and_charge()
+        {
+            // 任务 4：落点/蓄力进度必须随 CastRequest 上线（服务端 CircleAtPoint 判定依赖它们）
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry);
+            bridge.NotifySkillCast(20004,
+                new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2f, Angle = 120f },
+                impactPoint: new Vector3(0f, 0f, 10f), chargeProgress: 0.5f);
+
+            var cast = _client.Sent.Where(x => x.id == MessageId.CastRequest)
+                                   .Select(x => (CastRequest)x.msg).Single();
+            Assert.AreEqual(10f, cast.ImpactZ, 0.001f, "落点 Z 应写入");
+            Assert.AreEqual(0.5f, cast.ChargeProgress, 0.001f, "蓄力进度应写入");
         }
 
         [Test]

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core.Pool;
 using UnityEngine;
@@ -57,6 +58,8 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
 
         private void DetectAndDamage()
         {
+            if (NetworkModeService.Load() == NetworkMode.Online) return;   // 联网：伤害权在服务端
+
             // 固定目标类型：剑气为玩家攻击侧技能，只命中怪物
             var targets = PhysicsRegistry.Instance.FindNearby(transform.position,
                                                               _config.DetectRadius,

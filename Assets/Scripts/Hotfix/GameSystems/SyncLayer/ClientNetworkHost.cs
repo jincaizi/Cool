@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Hotfix.GameSystems.UI;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Network;
@@ -590,6 +591,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked));
             _adapter!.MessageReceived += _combatBridge.OnMessage;
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
+            _localEntry.SkillCoordinator.OnChargeReleased += OnLocalChargeReleased;
             // T12 乙-3：服务端判死 → 提示 + 回选人（重登即复活）
             _localEntry.OnServerDeath += HandleLocalPlayerDeath;
             // 施法广播除日志外还要**路由**到怪物排程：广播本身不含"这是哪只怪的哪一刀"之外的
@@ -619,7 +621,35 @@ namespace Hotfix.GameSystems.SyncLayer
         private void OnLocalSkillCast(SkillData skillData)
         {
             if (_combatBridge == null) return;
-            _combatBridge.NotifySkillCast(skillData.SkillId, HitShapeConverter.FromSkillData(skillData));
+
+            // 蓄力技能（ChargedSkillData）：激活时还没释放——落点/伤害取决于释放时刻，
+            // 改由 OnChargeReleased 在松开（或蓄满自动释放）时发一次，避免按"激活位置"误判
+            if (skillData is ChargedSkillData) return;
+
+            // 30001 陨石按落点做圆判定：落点 = 施放时目标位置；零值兜底与客户端
+            // SkillExecutor.SpawnMeteor 逐字一致（面向前方 12m）
+            Vector3? impactPoint = null;
+            if (skillData.SkillId == (int)SkillID.Ultimate)
+            {
+                Vector3 point = _localEntry.SkillCoordinator.CurrentSkill?.TargetPosition ?? Vector3.zero;
+                if (point.sqrMagnitude < 0.0001f)
+                    point = _localEntry.transform.position + _localEntry.transform.forward * 12f;
+                impactPoint = point;
+            }
+
+            // 10002/20003 不传落点：服务端沿施法者朝向做线形判定
+            _combatBridge.NotifySkillCast(skillData.SkillId, HitShapeConverter.FromSkillData(skillData),
+                impactPoint);
+        }
+
+        /// <summary>蓄力释放（松开/蓄满）→ 释放时刻的落点与进度随 CastRequest 上线</summary>
+        private void OnLocalChargeReleased(SkillData skillData, float chargeProgress, Vector3 impactPoint)
+        {
+            if (_combatBridge == null) return;
+            // 只有 ChargedSkillData 走"释放时发送"；可蓄力投射物（20003）激活时已发过，不再重复
+            if (skillData is not ChargedSkillData) return;
+            _combatBridge.NotifySkillCast(skillData.SkillId, HitShapeConverter.FromSkillData(skillData),
+                impactPoint, chargeProgress);
         }
 
         /// <summary>
@@ -636,7 +666,10 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_combatBridge == null || _adapter == null) return;
             _adapter.MessageReceived -= _combatBridge.OnMessage;
             if (_localEntry != null)
+            {
                 _localEntry.SkillCoordinator.OnSkillActivated -= OnLocalSkillCast;
+                _localEntry.SkillCoordinator.OnChargeReleased -= OnLocalChargeReleased;
+            }
             _combatBridge = null;
         }
 

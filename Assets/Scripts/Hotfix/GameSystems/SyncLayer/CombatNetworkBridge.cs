@@ -44,16 +44,28 @@ namespace Hotfix.GameSystems.SyncLayer
             _onDamageToLocalPlayer = onDamageToLocalPlayer;
         }
 
-        /// <summary>技能激活 → 表内技能发施法请求（非表技能静默忽略——本地表现不受影响，D-P4-1）</summary>
-        public void NotifySkillCast(int skillId, HitShape shape)
+        /// <summary>
+        /// 技能激活/蓄力释放 → 表内技能发施法请求（非表技能静默忽略——本地表现不受影响，D-P4-1）。
+        /// 落点（CircleAtPoint 类：20004/30001）与蓄力进度随包上线；服务端校验有限性与距离上限。
+        /// </summary>
+        public void NotifySkillCast(int skillId, HitShape shape,
+            Vector3? impactPoint = null, float chargeProgress = 0f)
         {
             if (!Cool.SyncCore.CombatRules.IsSynced(skillId)) return;
-            _client.Send(MessageId.CastRequest, new CastRequest
+            var request = new CastRequest
             {
                 SkillId = skillId,
                 TargetPlayerId = 0, // D-P4-2：客户端不锁定远程目标
-                Shape = shape
-            });
+                Shape = shape,
+                ChargeProgress = chargeProgress
+            };
+            if (impactPoint.HasValue)
+            {
+                request.ImpactX = impactPoint.Value.x;
+                request.ImpactY = impactPoint.Value.y;
+                request.ImpactZ = impactPoint.Value.z;
+            }
+            _client.Send(MessageId.CastRequest, request);
         }
 
         /// <summary>网络线程回调入口（宿主接线 adapter.MessageReceived）——只入队</summary>

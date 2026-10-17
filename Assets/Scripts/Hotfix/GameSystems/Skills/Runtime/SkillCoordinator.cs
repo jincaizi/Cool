@@ -24,6 +24,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         // 当前正在执行的技能
         private SkillExecutor _currentSkill;
         private SkillExecutor _queuedSkill;  // 预输入的技能
+        private bool _chargeReleaseReported;  // 本次施放是否已上报过蓄力释放
 
         // 事件
         public event Action<SkillData> OnSkillActivated;
@@ -31,6 +32,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public event Action<int, float> OnCooldownUpdate;  // skillId, progress
         public event Action<IEffectTarget> OnTargetHit;
         public event Action OnLightAttackCompleted;
+        /// <summary>蓄力释放（松开按钮或蓄满自动释放）：skillData / 释放进度 [0,1] / 释放瞬间落点。
+        /// 联网上报用——蓄力技能在 OnSkillActivated 时不发 CastRequest，改为在这里发（取消蓄力不触发）</summary>
+        public event Action<SkillData, float, Vector3> OnChargeReleased;
 
         // 属性
         public SkillExecutor CurrentSkill => _currentSkill;
@@ -95,9 +99,22 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 && _currentSkill.SkillId == skillId
                 && _currentSkill.CurrentSubState == SkillSubState.Charging)
             {
-                return _currentSkill.Release();
+                // 进度必须在 Release 之前取（Release 会把状态切到 Execution，GetChargeProgress 归 0）
+                float progress = _currentSkill.GetChargeProgress();
+                if (!_currentSkill.Release())
+                    return false;
+                ReportChargeReleased(progress);
+                return true;
             }
             return false;
+        }
+
+        /// <summary>上报一次蓄力释放（同一施放只报一次；取消蓄力走 Interrupt，不经过这里）</summary>
+        private void ReportChargeReleased(float progress)
+        {
+            if (_chargeReleaseReported) return;
+            _chargeReleaseReported = true;
+            OnChargeReleased?.Invoke(_currentSkill.Data, progress, _currentSkill.TargetPositionOrOwner);
         }
 
         /// <summary>
@@ -271,6 +288,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             _activeExecutors[skillId] = executor;
             _currentSkill = executor;
+            _chargeReleaseReported = false;   // 每次新施放复位（连击链/连续施放）
 
             // 扣除资源
             ConsumeResources(skillData);
@@ -366,8 +384,21 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public void Update(float deltaTime)
         {
+            bool wasCharging = _currentSkill != null
+                && _currentSkill.CurrentSubState == SkillSubState.Charging;
+
             // 更新当前技能
             _currentSkill?.Update(deltaTime);
+
+            // 蓄满自动释放：状态机在 MaxChargeTime 处直接 Charging → Execution（不经过
+            // TryReleaseCharge）——联网上报同样需要这次"释放时刻"的 CastRequest，进度按满计
+            if (wasCharging && !_chargeReleaseReported
+                && _currentSkill != null
+                && _currentSkill.CurrentSubState == SkillSubState.Execution
+                && _currentSkill.Data is ChargedSkillData)
+            {
+                ReportChargeReleased(1f);
+            }
 
             // 更新冷却管理器
             _cooldownManager.Update(deltaTime);

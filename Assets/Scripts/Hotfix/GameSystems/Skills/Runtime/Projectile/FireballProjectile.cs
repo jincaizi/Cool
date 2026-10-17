@@ -1,4 +1,5 @@
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core.Pool;
 using UnityEngine;
@@ -131,6 +132,8 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
 
         private void ApplyDamage(IDamageable target)
         {
+            if (NetworkModeService.Load() == NetworkMode.Online) return;   // 联网：伤害权在服务端
+
             Vector3 dir = (target.Transform.position - transform.position).normalized;
             if (dir.sqrMagnitude < 0.0001f) dir = _direction;
             target.TakeDamage(_damage, dir);
