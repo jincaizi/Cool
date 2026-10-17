@@ -73,7 +73,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var registry = new RemoteEntityRegistry(_root.transform);
             var bridge = new CombatNetworkBridge(_client, () => 1, registry);
 
-            bridge.NotifySkillCast(30001, SkillQShape()); // Ultimate 不进表（D-P4-1）
+            bridge.NotifySkillCast(999999, SkillQShape()); // 999999 永不进表（D-P4-1 翻转后 30001 已同步）
 
             Assert.AreEqual(0, _client.Sent.Count);
         }

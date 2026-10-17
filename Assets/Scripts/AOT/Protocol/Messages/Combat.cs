@@ -32,6 +32,14 @@ namespace Cool.Protocol
         [ProtoMember(2)] public long TargetPlayerId { get; set; }
 
         [ProtoMember(3)] public HitShape Shape { get; set; } = new HitShape();
+
+        /// <summary>落点（仅 CircleAtPoint 类技能使用：20004/30001）。服务端校验有限性与距施法者上限。</summary>
+        [ProtoMember(4)] public float ImpactX { get; set; }
+        [ProtoMember(5)] public float ImpactY { get; set; }
+        [ProtoMember(6)] public float ImpactZ { get; set; }
+
+        /// <summary>蓄力进度 [0,1]（仅 20004 使用；服务端钳制，NaN 视为 0）。</summary>
+        [ProtoMember(7)] public float ChargeProgress { get; set; }
     }
 
     /// <summary>施法广播（服务器 → caster 及视野内观察者；远程表现驱动，P4 表现占位）</summary>

@@ -14,8 +14,8 @@ public class CombatRulesTests
         Assert.True(CombatRules.IsSynced(10002));
         Assert.True(CombatRules.IsSynced(20001));
         Assert.True(CombatRules.IsSynced(20002));
-        Assert.False(CombatRules.IsSynced(20003)); // Fireball 投射物：P4 不进表（D-P4-1）
-        Assert.False(CombatRules.IsSynced(30001)); // Ultimate
+        Assert.True(CombatRules.IsSynced(20003));  // Fireball：2026-10-18 起进表（服务端线形判定，翻转 D-P4-1）
+        Assert.True(CombatRules.IsSynced(30001));  // Ultimate：落点圆判定（翻转 D-P4-1）
         Assert.False(CombatRules.IsSynced(999999));
     }
 
@@ -241,5 +241,77 @@ public class CombatRulesTests
         // 跨 0 的背向：350 与 190 夹角 180° ⇒ 不格挡
         Assert.False(CombatRules.IsBlocked(350f,
             (float)Math.Sin(190f * Math.PI / 180.0), (float)Math.Cos(190f * Math.PI / 180.0)));
+    }
+
+    // —— 投射物/蓄力/大招进表（2026-10-18，翻转 D-P4-1）——
+
+    [Fact]
+    public void test_projectile_skills_are_now_synced()
+    {
+        // D-P4-1 翻转（2026-10-18 规格）：投射物/蓄力/大招进表
+        Assert.True(CombatRules.IsSynced(20003), "火球应进表（服务端线形判定）");
+        Assert.True(CombatRules.IsSynced(20004), "蓄力火球应进表（释放点圆判定）");
+        Assert.True(CombatRules.IsSynced(30001), "陨石应进表（落点圆判定）");
+        Assert.False(CombatRules.IsSynced(999999), "未知技能仍不进表");
+    }
+
+    [Fact]
+    public void test_projectile_shape_caps_accept_the_shapes_clients_actually_send()
+    {
+        // 20003：ProjectileSkillData 无 ShapeBlock ⇒ 客户端发全零形状
+        Assert.True(CombatRules.TryGet(20003, out var fireball));
+        Assert.True(CombatRules.ValidateShape(new HitShape { ShapeType = 0 }, fireball));
+
+        // 20004：资产 _targetType=1 / _range=2 / _areaRadius=2 / _angle=120
+        Assert.True(CombatRules.TryGet(20004, out var charge));
+        Assert.True(CombatRules.ValidateShape(
+            new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2f, Angle = 120f }, charge));
+        Assert.False(CombatRules.ValidateShape(
+            new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2.01f, Angle = 120f }, charge),
+            "放大 AOE 半径必须被拒");
+
+        // 30001：资产 _targetType=0 / _range=2 / _angle=120
+        Assert.True(CombatRules.TryGet(30001, out var meteor));
+        Assert.True(CombatRules.ValidateShape(
+            new HitShape { ShapeType = 0, Range = 2f, Angle = 120f }, meteor));
+    }
+
+    [Fact]
+    public void test_projectile_table_values_match_client_assets()
+    {
+        // 表值 = 资产 _baseDamage / _criticalRateBonus / _cooldown（见规格 §5 的实证）
+        Assert.True(CombatRules.TryGet(20003, out var fb));
+        Assert.Equal(20f, fb.BaseDamage, 3);
+        Assert.Equal(0f, fb.CriticalRate, 3);
+        Assert.Equal(3f, fb.CooldownSeconds, 3);
+
+        Assert.True(CombatRules.TryGet(20004, out var cf));
+        Assert.Equal(40f, cf.BaseDamage, 3);
+        Assert.Equal(6f, cf.CooldownSeconds, 3);
+
+        Assert.True(CombatRules.TryGet(30001, out var mt));
+        Assert.Equal(80f, mt.BaseDamage, 3);
+        Assert.Equal(25f, mt.CooldownSeconds, 3);
+    }
+
+    [Fact]
+    public void test_validate_projectile_request_checks_finite_and_distance()
+    {
+        Assert.True(CombatRules.TryGet(30001, out var meteor));
+        var ok = new CastRequest { SkillId = 30001, ImpactX = 0f, ImpactY = 0f, ImpactZ = 10f };
+        Assert.Null(CombatRules.ValidateProjectileRequest(ok, meteor, casterX: 0f, casterZ: 0f));
+
+        var tooFar = new CastRequest { SkillId = 30001, ImpactX = 0f, ImpactY = 0f, ImpactZ = 31f };
+        Assert.Equal("impact-too-far",
+            CombatRules.ValidateProjectileRequest(tooFar, meteor, 0f, 0f));
+
+        var nan = new CastRequest { SkillId = 30001, ImpactX = float.NaN, ImpactY = 0f, ImpactZ = 1f };
+        Assert.Equal("impact-not-finite",
+            CombatRules.ValidateProjectileRequest(nan, meteor, 0f, 0f));
+
+        // 线形技能不校验落点
+        Assert.True(CombatRules.TryGet(10002, out var heavy));
+        Assert.Null(CombatRules.ValidateProjectileRequest(
+            new CastRequest { SkillId = 10002, ImpactX = float.NaN }, heavy, 0f, 0f));
     }
 }

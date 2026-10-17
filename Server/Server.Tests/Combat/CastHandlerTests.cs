@@ -50,7 +50,8 @@ public class CastHandlerTests
         var (store, resolver) = Setup();
         var caster = Spawn(store, 1, 0, 0);
         Spawn(store, 2, 0, 2);
-        var request = new CastRequest { SkillId = 30001, Shape = Q().Shape };
+        // 999999 永不进表；30001 自 2026-10-18 起已同步，不能再作未知技能样本
+        var request = new CastRequest { SkillId = 999999, Shape = Q().Shape };
 
         var resolution = Resolve(resolver, caster.PlayerId, request, 10);
 

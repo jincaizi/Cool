@@ -4,6 +4,41 @@ using Cool.Protocol;
 
 namespace Cool.SyncCore
 {
+    /// <summary>投射物判定种类（服务端判定用；2026-10-18）。</summary>
+    public enum ProjectileKind
+    {
+        LineAll = 0,            // 剑气：沿途全中（每目标一次）
+        LineNearestSplash = 1,  // 火球：段内最近者 → 以其为中心溅射，后续段作废
+        CircleAtPoint = 2,      // 蓄力火球 / 陨石：落点圆判定
+    }
+
+    /// <summary>投射物判定参数（表值来源见各表项注释）。</summary>
+    public sealed class ProjectileSpec
+    {
+        public ProjectileKind Kind { get; }
+        public float Length { get; }
+        public float HalfWidth { get; }
+        public float Radius { get; }
+        public int Stages { get; }
+        public float FirstDelaySeconds { get; }
+        public float TotalFlightSeconds { get; }
+        public float MaxImpactDistance { get; }
+        public bool ChargeScales { get; }
+        public float ChargeAreaMaxScale { get; }
+        public float ChargeDamageMaxScale { get; }
+
+        public ProjectileSpec(ProjectileKind kind, float length = 0f, float halfWidth = 0f, float radius = 0f,
+            int stages = 1, float firstDelaySeconds = 0f, float totalFlightSeconds = 0f,
+            float maxImpactDistance = 0f, bool chargeScales = false,
+            float chargeAreaMaxScale = 1f, float chargeDamageMaxScale = 1f)
+        {
+            Kind = kind; Length = length; HalfWidth = halfWidth; Radius = radius;
+            Stages = stages; FirstDelaySeconds = firstDelaySeconds; TotalFlightSeconds = totalFlightSeconds;
+            MaxImpactDistance = maxImpactDistance; ChargeScales = chargeScales;
+            ChargeAreaMaxScale = chargeAreaMaxScale; ChargeDamageMaxScale = chargeDamageMaxScale;
+        }
+    }
+
     /// <summary>
     /// P4 技能规则表（spec §5-P4：CombatRules 冷却/消耗/射程判定，双端同源）。
     /// 表值 = 客户端 PreRes/SkillsCfg 资产实测（2026-09-11）：
@@ -11,7 +46,7 @@ namespace Cool.SyncCore
     ///   BA_Heavy  (10002) Single  range 2.5  cd 0.5s dmg 90  crit 15%
     ///   SkillQ    (20001) Single  range 3.5  cd 6s   dmg 120 crit 20%
     ///   Spin R    (20002) Circle  radius 2.5 cd 5s   dmg 160 crit 25%
-    /// 其余技能（投射物/蓄力/引导/大招）P4 不进表——服务器拒收为未知技能（决策 D-P4-1）。
+    /// 投射物/蓄力/大招自 2026-10-18 起进表（翻转 D-P4-1）；引导仍不进表，服务器拒收为未知技能。
     /// 消耗（mana）资产全 0——服务器无 mana 池（YAGNI，决策 D-P4-3）。
     /// 伤害公式（D4：战斗骰只有服务器掷）：BaseDamage × (crit ? 1.5 : 1)；波动 0 与
     /// 客户端 GameSettings.DamageFluctuation 默认对齐（改该值须同步此处）。
@@ -32,9 +67,12 @@ namespace Cool.SyncCore
         /// 服务端在 决策 tick + HitDelayTicks 处做几何判定。</summary>
         public float HitDelaySeconds { get; }
 
+        /// <summary>投射物判定参数；null = 非投射物技能（既有瞬时技能）。</summary>
+        public ProjectileSpec? Projectile { get; }
+
         public SkillEntry(int skillId, int shapeType, float maxRange, float maxAreaRadius,
             float maxAngle, float cooldownSeconds, float baseDamage, float criticalRate,
-            float hitDelaySeconds)
+            float hitDelaySeconds, ProjectileSpec? projectile = null)
         {
             SkillId = skillId;
             ShapeType = shapeType;
@@ -45,6 +83,7 @@ namespace Cool.SyncCore
             BaseDamage = baseDamage;
             CriticalRate = criticalRate;
             HitDelaySeconds = hitDelaySeconds;
+            Projectile = projectile;
         }
     }
 
@@ -52,6 +91,9 @@ namespace Cool.SyncCore
     {
         public const float CritMultiplier = 1.5f;
         public const float TickRateHz = 15f;
+
+        /// <summary>形状上限的浮点容差（1mm）：只吸收序列化/运算抖动，不容纳 1cm 级的范围放大。</summary>
+        private const float ShapeEpsilon = 0.001f;
 
         // —— PvP 格挡减伤（2026-10-17；服务端裁决，客户端表现复用既有 DefendHit 链路）——
         // 表值自持（与判定延迟同一作风）：防御中且攻击者落在正面 BlockHalfAngleDeg 锥内 ⇒
@@ -76,9 +118,23 @@ namespace Cool.SyncCore
         {
             // 玩家四条：hitDelay = 客户端动画资产的判定帧实测（ShapeBlock._hitboxTimings + CastTime）
             [10001] = new SkillEntry(skillId: 10001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0f, baseDamage: 50f, criticalRate: 0.15f, hitDelaySeconds: 0.30f),
-            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f),
+            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, firstDelaySeconds: 0.35f, totalFlightSeconds: 12f / 18f)),
             [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f, hitDelaySeconds: 0.30f),
             [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f, hitDelaySeconds: 0f),
+            // 2026-10-18：投射物/蓄力进表（翻转 D-P4-1）。形状上限必须容纳客户端真实形状。
+            [20003] = new SkillEntry(20003, shapeType: 0, maxRange: 0f, maxAreaRadius: 0f, maxAngle: 0f,
+                cooldownSeconds: 3f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0f,
+                projectile: new ProjectileSpec(ProjectileKind.LineNearestSplash,
+                    length: 15f, halfWidth: 0.6f, radius: 1.5f, stages: 3,
+                    firstDelaySeconds: 0f, totalFlightSeconds: 15f / 18f)),
+            [20004] = new SkillEntry(20004, shapeType: 1, maxRange: 2f, maxAreaRadius: 2f, maxAngle: 120f,
+                cooldownSeconds: 6f, baseDamage: 40f, criticalRate: 0f, hitDelaySeconds: 0f,
+                projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint, radius: 2f,
+                    maxImpactDistance: 30f, chargeScales: true,
+                    chargeAreaMaxScale: 1.5f, chargeDamageMaxScale: 1.5f)),
+            [30001] = new SkillEntry(30001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f,
+                cooldownSeconds: 25f, baseDamage: 80f, criticalRate: 0f, hitDelaySeconds: 0.8f,
+                projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint, radius: 4f, maxImpactDistance: 30f)),
             // 怪物四条：**占位 0.35s**（人类裁定 D-8）。NPC 攻击剪辑无动画事件、判定帧未实测
             //（DogKnight Attack01 时长 0.833s@30fps ⇒ 0.35s ≈ 42% 处，合理但未验证）。
             // 实测后逐条替换：见 docs/superpowers/specs/2026-10-16-hit-judgment-timing-design.md R3。
@@ -114,11 +170,29 @@ namespace Cool.SyncCore
             if (!float.IsFinite(shape.Range) || !float.IsFinite(shape.Angle) || !float.IsFinite(shape.AreaRadius)) return false;
             if (shape.Range < 0f || shape.AreaRadius < 0f || shape.Angle < 0f) return false;
             if (shape.ShapeType != entry.ShapeType) return false;
-            if (shape.Range > entry.MaxRange + 0.01f) return false;
-            if (shape.AreaRadius > entry.MaxAreaRadius + 0.01f) return false;
-            if (shape.Angle > entry.MaxAngle + 0.01f) return false;
+            if (shape.Range > entry.MaxRange + ShapeEpsilon) return false;
+            if (shape.AreaRadius > entry.MaxAreaRadius + ShapeEpsilon) return false;
+            if (shape.Angle > entry.MaxAngle + ShapeEpsilon) return false;
             return true;
         }
+
+        /// <summary>落点/蓄力校验（仅 CircleAtPoint 需要落点）。返回 null = 通过，否则为拒绝原因。</summary>
+        public static string ValidateProjectileRequest(CastRequest request, SkillEntry entry,
+            float casterX, float casterZ)
+        {
+            var spec = entry.Projectile;
+            if (spec == null || spec.Kind != ProjectileKind.CircleAtPoint) return null;
+            if (!float.IsFinite(request.ImpactX) || !float.IsFinite(request.ImpactY)
+                || !float.IsFinite(request.ImpactZ)) return "impact-not-finite";
+            float dx = request.ImpactX - casterX;
+            float dz = request.ImpactZ - casterZ;
+            if (Math.Sqrt(dx * dx + dz * dz) > spec.MaxImpactDistance + 0.01f) return "impact-too-far";
+            return null;
+        }
+
+        /// <summary>蓄力进度钳制：NaN/负 → 0，>1 → 1。</summary>
+        public static float ClampChargeProgress(float raw)
+            => float.IsFinite(raw) ? Math.Clamp(raw, 0f, 1f) : 0f;
 
         /// <summary>冷却换算为 tick 数（15Hz 基准，向上取整）；表值静态且非负，uint 转换安全</summary>
         public static uint CooldownTicks(SkillEntry entry) =>

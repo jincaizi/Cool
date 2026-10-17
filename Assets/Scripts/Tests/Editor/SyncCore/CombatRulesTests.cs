@@ -13,8 +13,8 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             Assert.IsTrue(CombatRules.IsSynced(10002));
             Assert.IsTrue(CombatRules.IsSynced(20001));
             Assert.IsTrue(CombatRules.IsSynced(20002));
-            Assert.IsFalse(CombatRules.IsSynced(20003)); // Fireball 投射物：P4 不进表（D-P4-1）
-            Assert.IsFalse(CombatRules.IsSynced(30001)); // Ultimate
+            Assert.IsTrue(CombatRules.IsSynced(20003));  // Fireball：2026-10-18 起进表（服务端线形判定，翻转 D-P4-1）
+            Assert.IsTrue(CombatRules.IsSynced(30001));  // Ultimate：落点圆判定（翻转 D-P4-1）
             Assert.IsFalse(CombatRules.IsSynced(999999));
         }
 
@@ -182,6 +182,76 @@ namespace Hotfix.GameSystems.Tests.SyncCore
                 Assert.LessOrEqual(entry.HitDelaySeconds, entry.CooldownSeconds + 0.0001f,
                     $"skill {skillId} hitDelay > cooldown");
             }
+        }
+
+        [Test]
+        public void test_projectile_skills_are_now_synced()
+        {
+            // D-P4-1 翻转（2026-10-18 规格）：投射物/蓄力/大招进表
+            Assert.IsTrue(CombatRules.IsSynced(20003), "火球应进表（服务端线形判定）");
+            Assert.IsTrue(CombatRules.IsSynced(20004), "蓄力火球应进表（释放点圆判定）");
+            Assert.IsTrue(CombatRules.IsSynced(30001), "陨石应进表（落点圆判定）");
+            Assert.IsFalse(CombatRules.IsSynced(999999), "未知技能仍不进表");
+        }
+
+        [Test]
+        public void test_projectile_shape_caps_accept_the_shapes_clients_actually_send()
+        {
+            // 20003：ProjectileSkillData 无 ShapeBlock ⇒ 客户端发全零形状
+            Assert.IsTrue(CombatRules.TryGet(20003, out var fireball));
+            Assert.IsTrue(CombatRules.ValidateShape(new HitShape { ShapeType = 0 }, fireball));
+
+            // 20004：资产 _targetType=1 / _range=2 / _areaRadius=2 / _angle=120
+            Assert.IsTrue(CombatRules.TryGet(20004, out var charge));
+            Assert.IsTrue(CombatRules.ValidateShape(
+                new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2f, Angle = 120f }, charge));
+            Assert.IsFalse(CombatRules.ValidateShape(
+                new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2.01f, Angle = 120f }, charge),
+                "放大 AOE 半径必须被拒");
+
+            // 30001：资产 _targetType=0 / _range=2 / _angle=120
+            Assert.IsTrue(CombatRules.TryGet(30001, out var meteor));
+            Assert.IsTrue(CombatRules.ValidateShape(
+                new HitShape { ShapeType = 0, Range = 2f, Angle = 120f }, meteor));
+        }
+
+        [Test]
+        public void test_projectile_table_values_match_client_assets()
+        {
+            // 表值 = 资产 _baseDamage / _criticalRateBonus / _cooldown（见规格 §5 的实证）
+            Assert.IsTrue(CombatRules.TryGet(20003, out var fb));
+            Assert.AreEqual(20f, fb.BaseDamage, 0.001f);
+            Assert.AreEqual(0f, fb.CriticalRate, 0.001f);
+            Assert.AreEqual(3f, fb.CooldownSeconds, 0.001f);
+
+            Assert.IsTrue(CombatRules.TryGet(20004, out var cf));
+            Assert.AreEqual(40f, cf.BaseDamage, 0.001f);
+            Assert.AreEqual(6f, cf.CooldownSeconds, 0.001f);
+
+            Assert.IsTrue(CombatRules.TryGet(30001, out var mt));
+            Assert.AreEqual(80f, mt.BaseDamage, 0.001f);
+            Assert.AreEqual(25f, mt.CooldownSeconds, 0.001f);
+        }
+
+        [Test]
+        public void test_validate_projectile_request_checks_finite_and_distance()
+        {
+            Assert.IsTrue(CombatRules.TryGet(30001, out var meteor));
+            var ok = new CastRequest { SkillId = 30001, ImpactX = 0f, ImpactY = 0f, ImpactZ = 10f };
+            Assert.IsNull(CombatRules.ValidateProjectileRequest(ok, meteor, casterX: 0f, casterZ: 0f));
+
+            var tooFar = new CastRequest { SkillId = 30001, ImpactX = 0f, ImpactY = 0f, ImpactZ = 31f };
+            Assert.AreEqual("impact-too-far",
+                CombatRules.ValidateProjectileRequest(tooFar, meteor, 0f, 0f));
+
+            var nan = new CastRequest { SkillId = 30001, ImpactX = float.NaN, ImpactY = 0f, ImpactZ = 1f };
+            Assert.AreEqual("impact-not-finite",
+                CombatRules.ValidateProjectileRequest(nan, meteor, 0f, 0f));
+
+            // 线形技能不校验落点
+            Assert.IsTrue(CombatRules.TryGet(10002, out var heavy));
+            Assert.IsNull(CombatRules.ValidateProjectileRequest(
+                new CastRequest { SkillId = 10002, ImpactX = float.NaN }, heavy, 0f, 0f));
         }
     }
 }
