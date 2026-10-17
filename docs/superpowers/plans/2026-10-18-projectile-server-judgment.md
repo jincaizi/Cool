@@ -598,7 +598,10 @@ dotnet test Server/Server.Tests --filter "FullyQualifiedName~CombatResolverTests
                        && pending.StageTicks[pending.NextStage] <= tick)
                 {
                     var resolution = ResolveStage(pending);
-                    if (resolution != null && resolution.Hits.Count > 0)
+                    // **每个判定都产出一条**（可能 Hits 为空）——沿用原合同（原实现对每次判定都入列，
+                    // 空 Hits 由广播端 `BroadcastDamageAsync` 跳过）。按 Hits.Count 过滤会改变既有
+                    // 单段技能的返回值，可能打破既有测试。
+                    if (resolution != null)
                         (resolved ??= new List<CastResolution>()).Add(resolution);
                     pending.NextStage++;
                 }
