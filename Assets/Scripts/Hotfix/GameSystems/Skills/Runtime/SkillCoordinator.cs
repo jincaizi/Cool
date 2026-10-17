@@ -110,11 +110,16 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return false;
         }
 
-        /// <summary>上报一次蓄力释放（同一施放只报一次；取消蓄力走 Interrupt，不经过这里）</summary>
+        /// <summary>上报一次蓄力释放（同一施放只报一次；取消蓄力走 Interrupt，不经过这里）。
+        /// **冷却在此起算**：服务端在 CastRequest 到达（=释放）时 RecordCast，客户端必须同源——
+        /// 激活侧对可蓄力技能跳过 StartCooldown（否则 20003 cd 3s/满蓄 2s 会本地先就绪、
+        /// 服务端仍拒收，约每两次满蓄力就有一次无伤害）。取消蓄力不经过这里 ⇒ 不占冷却。</summary>
         private void ReportChargeReleased(float progress)
         {
             if (_chargeReleaseReported) return;
             _chargeReleaseReported = true;
+            if (_currentSkill != null && SkillCastReporter.IsChargeable(_currentSkill.Data))
+                _cooldownManager.StartCooldown(_currentSkill.SkillId, _currentSkill.Data.Cooldown);
             OnChargeReleased?.Invoke(_currentSkill.Data, progress, _currentSkill.TargetPositionOrOwner);
         }
 
@@ -294,8 +299,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // 扣除资源
             ConsumeResources(skillData);
 
-            // 启动冷却
-            _cooldownManager.StartCooldown(skillId, skillData.Cooldown);
+            // 启动冷却（可蓄力技能除外：冷却按"释放"起算，见 ReportChargeReleased——
+            // 与服务端「CastRequest 到达才 RecordCast」同源）
+            if (!SkillCastReporter.IsChargeable(skillData))
+                _cooldownManager.StartCooldown(skillId, skillData.Cooldown);
 
             // 尝试开始释放
             if (!executor.TryStart())

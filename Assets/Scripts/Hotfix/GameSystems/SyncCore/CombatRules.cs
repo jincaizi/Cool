@@ -20,22 +20,28 @@ namespace Cool.SyncCore
         public float HalfWidth { get; }
         public float Radius { get; }
         public int Stages { get; }
-        public float FirstDelaySeconds { get; }
         public float TotalFlightSeconds { get; }
         public float MaxImpactDistance { get; }
         public bool ChargeScales { get; }
         public float ChargeAreaMaxScale { get; }
         public float ChargeDamageMaxScale { get; }
 
+        /// <summary>投射物之外是否**同时**保留挥击伤害实例（10002 = true）。
+        /// 单机里 BA_Heavy 的 0.35s 挥击与剑气是两个独立伤害实例；投射物分支若把它吞掉，
+        /// 近身目标只会吃一半伤害。20003/20004/30001 单机无挥击 ⇒ 保持 false（否则多算）。</summary>
+        public bool KeepsSwing { get; }
+
         public ProjectileSpec(ProjectileKind kind, float length = 0f, float halfWidth = 0f, float radius = 0f,
-            int stages = 1, float firstDelaySeconds = 0f, float totalFlightSeconds = 0f,
+            int stages = 1, float totalFlightSeconds = 0f,
             float maxImpactDistance = 0f, bool chargeScales = false,
-            float chargeAreaMaxScale = 1f, float chargeDamageMaxScale = 1f)
+            float chargeAreaMaxScale = 1f, float chargeDamageMaxScale = 1f,
+            bool keepsSwing = false)
         {
             Kind = kind; Length = length; HalfWidth = halfWidth; Radius = radius;
-            Stages = stages; FirstDelaySeconds = firstDelaySeconds; TotalFlightSeconds = totalFlightSeconds;
+            Stages = stages; TotalFlightSeconds = totalFlightSeconds;
             MaxImpactDistance = maxImpactDistance; ChargeScales = chargeScales;
             ChargeAreaMaxScale = chargeAreaMaxScale; ChargeDamageMaxScale = chargeDamageMaxScale;
+            KeepsSwing = keepsSwing;
         }
     }
 
@@ -118,7 +124,8 @@ namespace Cool.SyncCore
         {
             // 玩家四条：hitDelay = 客户端动画资产的判定帧实测（ShapeBlock._hitboxTimings + CastTime）
             [10001] = new SkillEntry(skillId: 10001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0f, baseDamage: 50f, criticalRate: 0.15f, hitDelaySeconds: 0.30f),
-            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, firstDelaySeconds: 0.35f, totalFlightSeconds: 12f / 18f)),
+            // 10002：单机 BA_Heavy 的 0.35s 挥击（[0.35]）+ 剑气是两个独立伤害实例 ⇒ keepsSwing: true
+            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, totalFlightSeconds: 12f / 18f, keepsSwing: true)),
             [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f, hitDelaySeconds: 0.30f),
             [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f, hitDelaySeconds: 0f),
             // 2026-10-18：投射物/蓄力进表（翻转 D-P4-1）。形状上限必须容纳客户端真实形状。
@@ -126,7 +133,7 @@ namespace Cool.SyncCore
                 cooldownSeconds: 3f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0f,
                 projectile: new ProjectileSpec(ProjectileKind.LineNearestSplash,
                     length: 15f, halfWidth: 0.6f, radius: 1.5f, stages: 3,
-                    firstDelaySeconds: 0f, totalFlightSeconds: 15f / 18f)),
+                    totalFlightSeconds: 15f / 18f)),
             [20004] = new SkillEntry(20004, shapeType: 1, maxRange: 2f, maxAreaRadius: 2f, maxAngle: 120f,
                 cooldownSeconds: 6f, baseDamage: 40f, criticalRate: 0f, hitDelaySeconds: 0f,
                 projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint, radius: 2f,

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Cool.Protocol;
 using Hotfix.GameSystems.Skills.Data;
@@ -359,6 +360,136 @@ namespace GameSys.EditorTests
             Assert.AreEqual(SkillSubState.Cancelled, coordinator.CurrentSubState);
             Assert.AreEqual(0, client.Sent.Count,
                 "取消蓄力不得发送 CastRequest（否则服务端会产生幽灵伤害并进入冷却）");
+        }
+
+        // ====================================================================================
+        // 最终审查修复波（Critical）：客户端冷却起点必须与服务端一致——服务端在 CastRequest
+        // 到达（=释放）时 RecordCast；客户端此前在激活时 StartCooldown，20003（cd 3s / 满蓄 2s）
+        // 会出现"本地已就绪、服务端仍拒收"⇒ 约每两次满蓄力就有一次无伤害。
+        // 断言：激活未释放 ⇒ 冷却是 0；释放 ⇒ 按 skillData.Cooldown 起算；取消 ⇒ 仍为 0。
+        // ====================================================================================
+
+        /// <summary>
+        /// 真实激活路径（HandleInput → TryActivateSkill）：与注入式装置不同，这里必须让
+        /// 协调器自己走一遍激活，才能观察"激活时是否启动冷却"。
+        /// 事件照 <see cref="CreateCoordinatorWithBridge"/> 接真实桥上报道具。
+        /// </summary>
+        private (SkillCoordinator Coordinator, RecordingClient Client) ActivateChargeable(SkillData data)
+        {
+            _ownerGo = new GameObject("ChargeOwner");
+            var owner = new TestHelpers.FakeTarget(_ownerGo.transform);
+            var coordinator = new SkillCoordinator(owner);
+            coordinator.RegisterSkill(data);
+
+            var client = new RecordingClient();
+            var bridge = new CombatNetworkBridge(client, () => 1L,
+                new RemoteEntityRegistry(_ownerGo.transform));
+            coordinator.OnSkillActivated += d =>
+                SkillCastReporter.ReportActivation(bridge, d, Vector3.zero, _ownerGo.transform);
+            coordinator.OnChargeReleased += (d, p, pt) =>
+                SkillCastReporter.ReportChargeRelease(bridge, d, p, pt);
+
+            coordinator.HandleInput(SkillInput.SkillToPosition(data.SkillId, Vector3.forward * 5f));
+            Assert.IsNotNull(coordinator.CurrentSkill, "技能应已激活");
+            Assert.AreEqual(SkillSubState.Casting, coordinator.CurrentSubState,
+                "蓄力技能激活后应进入 Casting");
+            return (coordinator, client);
+        }
+
+        /// <summary>
+        /// 把**真实激活后**的执行器换成假时钟机器，并继承旧机器的全部状态（含事件委托、
+        /// 当前状态与计时字段）。<see cref="InjectMachine"/> 只能在 TryStart 前用（新机器从
+        /// Ready 起步），这里状态机已在 Casting，必须整表拷贝才能继续推进到 Charging。
+        /// </summary>
+        private static FakeTimeMachine InjectMachinePreservingState(SkillExecutor executor)
+        {
+            var oldMachine = TestHelpers.GetField(executor, "_stateMachine");
+            var machine = new FakeTimeMachine(executor.Data);
+            var flags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            foreach (var field in typeof(SkillStateMachine).GetFields(flags))
+                field.SetValue(machine, field.GetValue(oldMachine));
+            // 时间基准接续真实时钟（旧机器 Casting 起点 = Time.time），之后由测试推进 Now
+            machine.Now = Time.time;
+            TestHelpers.SetField(executor, "_stateMachine", machine);
+            return machine;
+        }
+
+        /// <summary>真实激活 → 假时钟推过 Casting（0.1s）→ Charging</summary>
+        private static FakeTimeMachine AdvanceRealSkillToCharging(SkillCoordinator coordinator)
+        {
+            var machine = InjectMachinePreservingState(coordinator.CurrentSkill);
+            machine.Now += 0.15f;
+            coordinator.CurrentSkill.Update(0.01f);
+            Assert.AreEqual(SkillSubState.Charging, coordinator.CurrentSubState, "应已进入蓄力");
+            return machine;
+        }
+
+        [Test]
+        public void test_chargeable_activation_does_not_start_cooldown()
+        {
+            // Arrange
+            var data = CreateChargeableProjectileData();
+            TestHelpers.SetField(data, "_cooldown", 3f);
+
+            // Act
+            var (coordinator, _) = ActivateChargeable(data);
+
+            // Assert（激活未释放 ⇒ 冷却不得起算）
+            var afterActivate = coordinator.GetCooldownInfo(20003);
+            Assert.IsFalse(afterActivate.IsOnCooldown, "可蓄力技能激活时不得启动冷却");
+            Assert.AreEqual(0f, afterActivate.Remaining, 0.001f);
+            Assert.AreEqual(0f, afterActivate.Total, 0.001f);
+
+            AdvanceRealSkillToCharging(coordinator);
+            var whileCharging = coordinator.GetCooldownInfo(20003);
+            Assert.IsFalse(whileCharging.IsOnCooldown, "蓄力中（未释放）冷却仍不得起算");
+            Assert.AreEqual(0f, whileCharging.Total, 0.001f);
+        }
+
+        [Test]
+        public void test_charge_release_starts_cooldown_from_release()
+        {
+            // Arrange
+            var data = CreateChargeableProjectileData();
+            TestHelpers.SetField(data, "_cooldown", 3f);
+            var (coordinator, client) = ActivateChargeable(data);
+            var machine = AdvanceRealSkillToCharging(coordinator);
+
+            // 释放前仍未起算——把冷却起点钉在"释放"而不是"激活"
+            Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown, "释放前冷却不得起算");
+
+            // Act
+            machine.Now += 0.5f;                 // 进度 0.25（与发送条数断言无关，保持真实路径）
+            coordinator.CurrentSkill.Update(0.01f);
+            Assert.IsTrue(coordinator.TryReleaseCharge(20003), "蓄力中的火球应被释放");
+
+            // Assert（按 skillData.Cooldown 起算）
+            var info = coordinator.GetCooldownInfo(20003);
+            Assert.IsTrue(info.IsOnCooldown, "释放后应按 skillData.Cooldown 启动冷却");
+            Assert.AreEqual(3f, info.Total, 0.001f);
+            Assert.Greater(info.Remaining, 2.9f, "刚释放时剩余冷却应接近完整时长");
+            Assert.AreEqual(1, client.Sent.Count, "释放应恰好发送一条 CastRequest");
+        }
+
+        [Test]
+        public void test_charge_cancel_does_not_start_cooldown()
+        {
+            // Arrange
+            var data = CreateChargedData();
+            TestHelpers.SetField(data, "_cooldown", 5f);
+            var (coordinator, client) = ActivateChargeable(data);
+            AdvanceRealSkillToCharging(coordinator);
+
+            // Act（蓄力中被打断 = 取消蓄力）
+            coordinator.InterruptCurrentSkill(InterruptionSource.Stun);
+
+            // Assert（真实激活路径下执行器已登记，打断后会被清理 ⇒ 回到 None）
+            Assert.AreEqual(SkillSubState.None, coordinator.CurrentSubState, "打断后执行器应被清理");
+            var info = coordinator.GetCooldownInfo(20002);
+            Assert.IsFalse(info.IsOnCooldown, "取消蓄力不占冷却");
+            Assert.AreEqual(0f, info.Remaining, 0.001f);
+            Assert.AreEqual(0f, info.Total, 0.001f);
+            Assert.AreEqual(0, client.Sent.Count, "取消蓄力不得发送 CastRequest");
         }
     }
 }

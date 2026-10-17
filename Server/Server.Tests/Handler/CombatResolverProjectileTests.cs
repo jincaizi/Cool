@@ -35,12 +35,42 @@ public class CombatResolverProjectileTests
     [Fact]
     public void SwordQi_Line_Hits_Target_Outside_Swing_Cone()
     {
-        // 目标在 6m 正前方：挥击锥（2.5m）打不到，剑气的 12m 线可以
+        // 目标在 6m 正前方：挥击锥（2.5m）打不到，剑气的 12m 线可以。
+        // 挥击实例仍在首段结算（10002 的 KeepsSwing=true），只是该目标在锥外 ⇒ 只有线形一条。
         var resolver = new CombatResolver(MakeStore(targetAt: (0f, 6f)), new Random(1));
-        Assert.True(resolver.Decide(1, new CastRequest { SkillId = 10002 }, tick: 0).Accepted);
+        var request = new CastRequest
+        {
+            SkillId = 10002,
+            Shape = new HitShape { ShapeType = 0, Range = 2.5f, Angle = 120f }
+        };
+        Assert.True(resolver.Decide(1, request, tick: 0).Accepted);
 
-        var hitIds = Drain(resolver, 40).SelectMany(r => r.Hits).Select(h => h.TargetPlayerId).ToList();
-        Assert.Contains(2L, hitIds);
+        var hits = Drain(resolver, 40).SelectMany(r => r.Hits).ToList();
+        var hit = Assert.Single(hits);                       // 只有线形实例
+        Assert.Equal(2L, hit.TargetPlayerId);
+    }
+
+    [Fact]
+    public void SwordQi_Close_Target_Inside_Swing_Cone_Takes_Swing_And_Line_Instances()
+    {
+        // 规格 §3.2：剑气与挥击是两个独立伤害实例（与单机一致，不跨组去重）。
+        // 目标在 2m：既在挥击锥（2.5m）内，也在剑气首段 [0,4] 的线上 ⇒ 两次结算、两个 HitEntry。
+        // 删掉 ResolveStage 里的挥击实例（或把 KeepsSwing 改回 false）本条必红。
+        var store = MakeStore(targetAt: (0f, 2f));
+        var resolver = new CombatResolver(store, new Random(1));
+        var request = new CastRequest
+        {
+            SkillId = 10002,
+            Shape = new HitShape { ShapeType = 0, Range = 2.5f, Angle = 120f }
+        };
+        Assert.True(resolver.Decide(1, request, tick: 0).Accepted);
+
+        var hits = Drain(resolver, 40).SelectMany(r => r.Hits)
+            .Where(h => h.TargetPlayerId == 2L).ToList();
+
+        Assert.Equal(2, hits.Count);                          // 挥击 + 剑气
+        Assert.All(hits, h => Assert.Equal(90f * (h.IsCritical ? 1.5f : 1f), h.Damage, 0.001f));
+        Assert.Equal(100f - hits[0].Damage - hits[1].Damage, store.GetPlayer(2)!.Hp, 0.001f);
     }
 
     [Fact]

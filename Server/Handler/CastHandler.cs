@@ -43,8 +43,7 @@ namespace KcpServer
             public readonly bool IsNpcCaster;
             public readonly ProjectileSpec? Projectile;
             public readonly float Charge;
-            public readonly uint FirstTick;
-            public readonly uint[] StageTicks;              // 升序；无 Projectile 时长度 1 = {FirstTick}
+            public readonly uint[] StageTicks;              // 升序；无 Projectile 时长度 1 = 首段 tick
             public int NextStage;                            // 下一段下标
             public readonly HashSet<long> GroupHitIds = new HashSet<long>();  // LineAll 组内去重
             public bool Spent;                               // 火球首中即停
@@ -57,7 +56,6 @@ namespace KcpServer
             {
                 CasterId = casterId; Request = request; Broadcast = broadcast;
                 IsNpcCaster = isNpcCaster; Projectile = projectile; Charge = charge;
-                FirstTick = firstTick;
                 StageTicks = BuildStageTicks(projectile, firstTick);
             }
 
@@ -74,7 +72,8 @@ namespace KcpServer
 
         private readonly List<PendingCast> _pending = new List<PendingCast>();
 
-        /// <summary>决策：校验 + 冷却记录 + 生成广播 + 入队。判定（几何/掷骰/扣血）推迟到 ResolveTick。</summary>
+        /// <summary>决策：校验 + 冷却记录 + 生成广播 + 入队。判定（几何/掷骰/扣血）推迟到首段到期 tick
+        /// （DrainResolved → ResolveStage）。</summary>
         public CastResolution Decide(long casterId, CastRequest request, uint tick)
         {
             var resolution = new CastResolution();
@@ -157,12 +156,11 @@ namespace KcpServer
             var candidates = BuildCandidates(pending);            // 原 ResolveHits 里的候选构造，抽成方法
             var spec = pending.Projectile;
             List<long> hitIds;
+            List<long>? swingHitIds = null;
 
             if (spec == null)
             {
-                hitIds = HitResolver.Resolve(
-                    new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z),
-                    caster.Rotation, pending.Request.TargetPlayerId, pending.Request.Shape, candidates);
+                hitIds = ResolveSwing(caster, pending.Request, candidates);
             }
             else
             {
@@ -173,6 +171,11 @@ namespace KcpServer
                     pending.Yaw = caster.Rotation;
                     pending.OriginCaptured = true;
                 }
+                // 10002：单机里 0.35s 挥击与剑气是两个独立伤害实例（spec §3.2），投射物分支
+                // 不能把挥击吞掉。只在首段结算一次，用施法者当前位置/朝向（与 spec==null 同源）。
+                if (spec.KeepsSwing && pending.NextStage == 0)
+                    swingHitIds = ResolveSwing(caster, pending.Request, candidates);
+
                 int stage = pending.NextStage;
                 hitIds = spec.Kind switch
                 {
@@ -192,49 +195,71 @@ namespace KcpServer
             {
                 Accepted = true, IsNpcCaster = pending.IsNpcCaster, Broadcast = pending.Broadcast
             };
+            // 挥击实例先行（单机判定帧顺序：挥击结算、同帧再生成剑气），且**不写入 GroupHitIds、
+            // 不受其 banned 过滤**——同一目标在挥击与剑气两条线上各结算一次（不跨组去重）
+            if (swingHitIds != null)
+            {
+                foreach (var targetId in swingHitIds)
+                    ApplyHit(pending, caster, entry, spec, targetId, resolution);
+            }
             foreach (var targetId in hitIds)
             {
                 if (!pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
-                var target = _store.GetPlayer(targetId);
-                if (target == null) continue;
-
-                // 掷骰顺序不变：暴击照常掷，格挡只在最后乘倍率（确定性可复现——固定种子的
-                // 期望值不因格挡分支错位；调换这里两句会让既有种子序列整体漂移）
-                float damage = RollDamage(entry, out bool isCritical);
-                if (spec != null && spec.ChargeScales)
-                    damage *= 1f + (spec.ChargeDamageMaxScale - 1f) * pending.Charge;
-
-                // 格挡减伤（D-P4-8 服务端化）：防御中 + 攻击者落在受击者正面 BlockHalfAngleDeg 锥内
-                // + 盾未耗尽 ⇒ 伤害 × BlockDamageScale、扣耐久、命中条目标记 IsBlocked。
-                // **信任面（诚实登记）**：IsDefending 由客户端上报、yaw 来自客户端上报的位置同步——
-                // 服务端只做几何与耐久校验，与既有"客户端权威位置 + 服务端部分校验"同一哲学，
-                // 不是防作弊闸门（位置校验的边界就是本裁决的边界）。
-                bool blocked = target.IsDefending
-                    && target.ShieldDurability > 0f
-                    && CombatRules.IsBlocked(target.Rotation,
-                        caster.Position.X - target.Position.X,
-                        caster.Position.Z - target.Position.Z);
-                if (blocked)
-                {
-                    damage *= CombatRules.BlockDamageScale;
-                    target.ConsumeShieldDurability(CombatRules.ShieldDurabilityPerBlock);
-                }
-
-                target.ApplyDamage(damage);
-                resolution.Hits.Add(new HitEntry
-                {
-                    TargetPlayerId = targetId,
-                    Damage = damage,
-                    IsCritical = isCritical,
-                    IsBlocked = blocked,
-                    TargetRemainingHp = target.Hp, // 扣后权威余血（T12 甲-2）——格挡分支同样成立
-                    HitX = target.Position.X,
-                    HitZ = target.Position.Z
-                });
+                ApplyHit(pending, caster, entry, spec, targetId, resolution);
             }
             if (spec != null && spec.Kind == ProjectileKind.LineNearestSplash && hitIds.Count > 0)
                 pending.Spent = true;
             return resolution;
+        }
+
+        /// <summary>挥击实例几何（与 spec==null 同源）：施法者位置/朝向 + 请求形状 + 锁定目标。</summary>
+        private static List<long> ResolveSwing(PlayerState caster, CastRequest request,
+            List<CombatCandidate> candidates)
+            => HitResolver.Resolve(
+                new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z),
+                caster.Rotation, request.TargetPlayerId, request.Shape, candidates);
+
+        /// <summary>对一个命中目标结算：掷骰（+蓄力倍率）→ 格挡 → 扣血 → HitEntry。
+        /// 调用方决定是否先经 GroupHitIds（挥击实例不经过去重，与剑气各算一次）。</summary>
+        private void ApplyHit(PendingCast pending, PlayerState caster, SkillEntry entry,
+            ProjectileSpec? spec, long targetId, CastResolution resolution)
+        {
+            var target = _store.GetPlayer(targetId);
+            if (target == null) return;
+
+            // 掷骰顺序不变：暴击照常掷，格挡只在最后乘倍率（确定性可复现——固定种子的
+            // 期望值不因格挡分支错位；调换这里两句会让既有种子序列整体漂移）
+            float damage = RollDamage(entry, out bool isCritical);
+            if (spec != null && spec.ChargeScales)
+                damage *= 1f + (spec.ChargeDamageMaxScale - 1f) * pending.Charge;
+
+            // 格挡减伤（D-P4-8 服务端化）：防御中 + 攻击者落在受击者正面 BlockHalfAngleDeg 锥内
+            // + 盾未耗尽 ⇒ 伤害 × BlockDamageScale、扣耐久、命中条目标记 IsBlocked。
+            // **信任面（诚实登记）**：IsDefending 由客户端上报、yaw 来自客户端上报的位置同步——
+            // 服务端只做几何与耐久校验，与既有"客户端权威位置 + 服务端部分校验"同一哲学，
+            // 不是防作弊闸门（位置校验的边界就是本裁决的边界）。
+            bool blocked = target.IsDefending
+                && target.ShieldDurability > 0f
+                && CombatRules.IsBlocked(target.Rotation,
+                    caster.Position.X - target.Position.X,
+                    caster.Position.Z - target.Position.Z);
+            if (blocked)
+            {
+                damage *= CombatRules.BlockDamageScale;
+                target.ConsumeShieldDurability(CombatRules.ShieldDurabilityPerBlock);
+            }
+
+            target.ApplyDamage(damage);
+            resolution.Hits.Add(new HitEntry
+            {
+                TargetPlayerId = targetId,
+                Damage = damage,
+                IsCritical = isCritical,
+                IsBlocked = blocked,
+                TargetRemainingHp = target.Hp, // 扣后权威余血（T12 甲-2）——格挡分支同样成立
+                HitX = target.Position.X,
+                HitZ = target.Position.Z
+            });
         }
 
         /// <summary>候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
