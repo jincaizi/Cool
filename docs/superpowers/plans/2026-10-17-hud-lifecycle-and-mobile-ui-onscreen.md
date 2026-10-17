@@ -329,9 +329,10 @@ unity-mcp-cli run-tool tests-run --path "E:/CodeForJob/Cool" \
 3. `TouchInputAvailability.cs` 类注释里那句「因此判定顺序为：**URL 参数 > 人工档位 > (isMobilePlatform || 特性检测)**。」
    - 改：`/// 因此判定顺序为：**URL 参数 > 人工档位 > 编辑器⇒真 > (isMobilePlatform || 特性检测)**。`
 
-4. `docs/superpowers/guides/webgl-mobile-acceptance.md` 的「本地测不到的边界」表：在
-   `Application.isMobilePlatform` 那一行下面补一行：
-   `| 编辑器里的触控 UI | 2026-10-17 起**编辑器 Play 默认就进触屏分支**（摇杆可见可用）；`?touch=1` 仍是出包后的兜底 |`
+4. `docs/superpowers/guides/webgl-mobile-acceptance.md`：在「为什么这一块特别需要人工」的表格**之后**、
+   「正因为第一条不可靠…」那段**之前**，补一句：
+   `注意（2026-10-17 起）：编辑器 Play 默认就进触屏分支，摇杆在编辑器里可见可用；上表列的是`
+   `**出包后**仍只能靠人眼确认的边界。`
 
 5. （可选）`docs/superpowers/guides/webgl-demo-boundaries.md:71-76` 的面试话术末尾加一句：
    「编辑器里我默认按触屏走，方便迭代；`UNITY_EDITOR` 分支不进包，出包不受影响。」
@@ -502,15 +503,15 @@ git commit -m "feat(input): 编辑器默认按触屏 —— 摇杆 UI 可看可�
         }
 ```
 
-顶部 using 需补齐（按现有文件顺序）：
+顶部 using 需补齐（现有文件**没有**这三条，缺一条就编译不过）：
 
 ```csharp
-using System.Collections.Generic;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;   // 仅当已有需要；RaycastResult 在 EventSystems 里
+using System.Collections.Generic;   // List<RaycastResult>
+using UnityEngine.EventSystems;     // PointerEventData / ExecuteEvents / RaycastResult
+using Hotfix.GameSystems.UI;        // VirtualJoystick
 ```
 
-（`RaycastResult` 在 `UnityEngine.EventSystems`；`VirtualJoystick` 在 `Hotfix.GameSystems.UI`，该命名空间已被本文件引入。）
+（`MobileInputBinder` / `TouchOverride` 在已引用的 `Hotfix.GameSystems.Sys3C.Input` 里，不用加。）
 
 - [ ] **步骤 2：更新本文件的两处注释**
 
