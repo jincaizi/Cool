@@ -312,7 +312,7 @@ git commit -m "feat(sync): 投射物技能进表 + 落点/蓄力请求校验（�
         public void test_line_nearest_returns_only_nearest_in_band()
         {
             var cands = new List<CombatCandidate> { C(1, 0f, 8f), C(2, 0.5f, 3f), C(3, 3f, 1f) };
-            var nearest = HitResolver.ResolveLineNearest(new Vec3(0f, 0f, 0f), 0f, 4f, 8f, 1f, null, cands, out var hitPos);
+            var nearest = HitResolver.ResolveLineNearest(new Vec3(0f, 0f, 0f), 0f, 0f, 8f, 1f, null, cands, out var hitPos);   // 带区 [0,8]：id=2 在 z=3 才是带内最近者
             Assert.AreEqual(2L, nearest);
             Assert.AreEqual(3f, hitPos.Z, 0.001f, "溅射中心 = 命中者位置");
         }
