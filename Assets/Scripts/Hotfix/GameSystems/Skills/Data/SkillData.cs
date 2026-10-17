@@ -43,6 +43,10 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] protected int _staminaCost;
         public int StaminaCost => _staminaCost;
 
+        [Tooltip("持续型技能（蓄力/引导/旋转）每秒消耗的精力；0 = 不消耗")]
+        [SerializeField] protected float _staminaDrainPerSecond;
+        public float StaminaDrainPerSecond => _staminaDrainPerSecond;
+
         [Header("=== Animation ===")]
         [Tooltip("Animator Trigger参数名")]
         [SerializeField] protected string _animatorTrigger;

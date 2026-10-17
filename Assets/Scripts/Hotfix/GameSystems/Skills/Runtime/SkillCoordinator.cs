@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
+using Hotfix.GameSystems.Stamina;
 using Hotfix.GameSystems.SyncLayer;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly SkillInputBuffer _inputBuffer;
         private readonly SkillInterruptionMatrix _interruptionMatrix;
         private IDashComponent _dashComponent;
+        private StaminaSystem _stamina;
 
         // 当前正在执行的技能
         private SkillExecutor _currentSkill;
@@ -54,6 +56,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _inputBuffer = new SkillInputBuffer();
             _interruptionMatrix = new SkillInterruptionMatrix();
         }
+
+        /// <summary>可选注入；不注入时技能系统行为完全不变（测试/无精力宿主）。</summary>
+        public void SetStamina(StaminaSystem stamina) => _stamina = stamina;
 
         /// <summary>
         /// 注册技能数据
@@ -410,6 +415,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 ReportChargeReleased(1f);
             }
 
+            // 持续型技能扣精（蓄力/引导/旋转）
+            UpdateSustainedStamina(deltaTime);
+
             // 更新冷却管理器
             _cooldownManager.Update(deltaTime);
 
@@ -505,9 +513,51 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private bool HasEnoughResources(SkillData skillData)
         {
-            // TODO: 检查玩家资源（魔法、耐力等）
-            // 这里应该从角色属性中获取
-            return true;
+            if (_stamina == null) return true;
+            if (!IsSustained(skillData) || skillData.StaminaDrainPerSecond <= 0f) return true;
+            return _stamina.CanStartConsuming;
+        }
+
+        private static bool IsSustained(SkillData data) =>
+            data is ChargedSkillData
+            || data is ChanneledSkillData
+            || data is SpinSkillData
+            || (data is ProjectileSkillData projectile && projectile.MaxChargeTime > 0f);
+
+        private void UpdateSustainedStamina(float deltaTime)
+        {
+            var skill = _currentSkill; // 抓局部：完成回调可能把字段置空
+            if (skill == null || !skill.IsActive || _stamina == null) return;
+
+            var sub = skill.CurrentSubState;
+            if (sub != SkillSubState.Charging
+                && sub != SkillSubState.Channeling
+                && sub != SkillSubState.Spinning)
+                return;
+
+            float rate = skill.Data.StaminaDrainPerSecond;
+            if (rate <= 0f) return;
+
+            float staminaDt = float.IsFinite(deltaTime)
+                ? Mathf.Clamp(deltaTime, 0f, 0.1f)
+                : 0f;
+            if (!_stamina.TryConsume(rate * staminaDt))
+                HandleStaminaDepleted(skill, sub);
+        }
+
+        private void HandleStaminaDepleted(SkillExecutor skill, SkillSubState sub)
+        {
+            bool resolved = sub switch
+            {
+                SkillSubState.Charging => TryReleaseCharge(skill.SkillId),
+                SkillSubState.Channeling or SkillSubState.Spinning
+                    => skill.TryInterrupt(InterruptionSource.StaminaExhausted),
+                _ => false
+            };
+
+            // 保险丝：两处放行是主防线；万一未来改动让打断被拒，
+            // ForceComplete 防技能卡在持续态、每帧扣 0 精、玩家被软锁。
+            if (!resolved) skill.ForceComplete();
         }
 
         private void ConsumeResources(SkillData skillData)
