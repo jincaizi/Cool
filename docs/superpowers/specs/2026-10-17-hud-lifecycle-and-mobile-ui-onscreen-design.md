@@ -110,6 +110,20 @@ private bool HasOtherStartedLocalEntry()
 
 **明确不声称**：这条不变量只管「本地角色被销毁」这条边沿。开场时 HUD 先显示、纯观察者模式（无本地角色）下 HUD 该不该显示 —— 现状保留，不在本设计范围。
 
+### 1.5 回归守卫（两条边沿）
+
+新文件 `Assets/Scripts/Tests/PlayMode/HudLifecycleTests.cs`（PlayMode，**不加载 DemoDay**）：
+
+| 用例 | 装置 | 断言 |
+|---|---|---|
+| `test_hud_stays_visible_when_player_rebuilt_while_old_dies` | `UIBootstrap.EnsureUIManager()`（真面板，幂等，复用 `UIBootstrapTests` 的接缝）+ `PlayerEntryForTest` 实例化 A，等 A 的 `StatsProvider != null`（此时 HUD 已绑并显示）；**同帧先 `Destroy(A)` 再 `Instantiate(B)`** | 等 B 的 `StatsProvider != null` **再等 2 帧**（确保 A 的帧末销毁已发生；`PlayerHudBindingTests.Frames(2)` 同惯例）→ HUD `IsVisible==true` 且 `alpha==1`。**修复前为红** |
+| `test_hud_hides_when_last_local_entry_dies` | 同上，只销毁唯一 entry | HUD 收起（`alpha==0`）——防修复把 T12「回选人收起 HUD」的意图改坏 |
+
+- **不加载场景的理由**：`MobileTouchInputTests` 是全项目唯一 LoadScene 的用例（且它当场清理），再加一个会引入场景秩序债；本用例只需要「真 UIManager + 两个本地角色」，`PlayerEntryForTest` 足够。
+- **销毁顺序必须与 `PlayerSpawner` 一致**（先 `Destroy` 后 `Instantiate`，同一帧）：顺序反了就走不到「新玩家已 Start、旧玩家帧末才销毁」这条真实时序，测试会变成假绿。
+- `HasOtherStartedLocalEntry()` 保持 **private**：两条用例只复刻 `PlayerSpawner` 的那两次调用（或直接销毁唯一 entry），不访问 helper，不为测试新开内部 API。
+- 收尾：`TearDown` 销毁本用例的实例（销毁最后一个时 HUD 会自我收起，正好回到干净状态）。
+
 ---
 
 ## 2. 缺陷二：移动端 UI 的「上屏」没有验收
@@ -166,7 +180,8 @@ public static bool Resolve(TouchOverride mode)
 ```
 
 - **编辑器效果**：摇杆与三按钮默认出现，且**能用**（鼠标拖摇杆走路、点三按钮攻击/防御/跳跃）。
-- **代价（接受）**：编辑器里 WASD/空格不再驱动角色（适配器被换成 Joystick）。要切回键鼠：Play 时把 `MobileInput` 上的 `TouchOverride` 拨到 `ForceNoTouch`（运行时改，退出即还原）。
+- **代价（接受）**：编辑器里**整条键鼠通道**都不再驱动角色 —— 不只 WASD/空格：适配器被**整体替换**成 `JoystickInputAdapter`（移动 = 摇杆、视角 = 观察区拖拽），而键盘适配器的视角读的是 `Input.GetAxisRaw("Mouse X/Y")`。因此**不存在两套输入叠加**（同一时刻只有一个适配器），但编辑器里也只剩「鼠标拖摇杆 + 点三按钮」。要切回键鼠：Play 时把 `MobileInput` 上的 `TouchOverride` 拨到 `ForceNoTouch`（运行时改，退出即还原）。
+- **附带**：编辑器里自动判定不再经过 `TouchFeatureDetected()`（其编辑器分支读 `Input.touchSupported`）；显式档位与 URL 覆盖的判定分支不受影响。
 - **出包不受影响**：`#if UNITY_EDITOR` 是编译期的，WebGL 产物里 `Auto` 仍是「`isMobilePlatform` || 特性检测」⇒ 面试 demo 在桌面浏览器保持键鼠，「PC 浏览器维持键鼠」这条不变量只在**编辑器**被放开。
 
 ### 3.2 同批必须更新的话术与注释（否则留下假话）
@@ -174,9 +189,9 @@ public static bool Resolve(TouchOverride mode)
 | 位置 | 现在写的 | 改后 |
 |---|---|---|
 | `MobileInputBinder.cs:12` | 「PC 浏览器与编辑器维持键鼠，不影响既有验收」 | 「PC **浏览器**维持键鼠；**编辑器默认按触屏**（便于迭代），可用 Inspector 档位切回」 |
-| `MobileInputBinder.cs:31-35`（`TouchOverride` 文档块） | 「`Application.isMobilePlatform` 在编辑器恒 false，那条分支按构造测不到」 | 该句的因果已变（编辑器现在默认就走那条分支）；保留「出包后只能靠 URL 覆盖」的原意 |
+| `MobileInputBinder.cs:28-35`（`TouchOverride` 文档块，其中 `:33` 是失效句） | 「`Application.isMobilePlatform` 在编辑器恒 false，那条分支按构造测不到」 | 该句的因果已变（编辑器现在默认就走那条分支）；保留「出包后只能靠 URL 覆盖」的原意 |
 | `TouchInputAvailability.cs:20` | 判定顺序「URL 参数 > 人工档位 > (isMobilePlatform \|\| 特性检测)」 | 插入一层：「URL 参数 > 人工档位 > **编辑器⇒真** > (isMobilePlatform \|\| 特性检测)」 |
-| `MobileTouchInputTests.cs:18` | 「在编辑器恒 false，所以这条分支此前按构造测不到」 | 改为「编辑器现在默认进该分支；本用例仍用显式档位断言，不依赖 `Auto` 的结果」 |
+| `MobileTouchInputTests.cs:18-19` | 「在编辑器恒 false，所以这条分支此前按构造测不到」 | 改为「编辑器现在默认进该分支；本用例仍用显式档位断言，不依赖 `Auto` 的结果」 |
 | `MobileTouchInputTests.cs:114-117` | 「本用例是 Tests/ 下**唯一** LoadScene 的用例」 | 本文件现在有两个 LoadScene 用例（各自清理），该句作废 |
 | `docs/superpowers/guides/webgl-mobile-acceptance.md` §边界表 | 「`Application.isMobilePlatform` 在编辑器恒 false ⇒ 测不到」 | 补一句：编辑器 Play 现在默认就能看到触控 UI（`?touch=1` 仍是出包后的兜底） |
 | `docs/superpowers/guides/webgl-demo-boundaries.md:71-76`（面试话术，可选） | 三层判定 + 一个手工兜底 | 可加一句「编辑器里我默认按触屏走，方便迭代，出包不受影响」 |
@@ -217,6 +232,25 @@ public static bool Resolve(TouchOverride mode)
 |---|---|
 | `FindObjectsOfType` 出现在 `OnDestroy` | 只在**本地角色被销毁**时执行一次（非每帧）；调用方限定在 `_statsProvider != null` 之后 |
 | 编辑器默认触屏后，右半屏的鼠标点击被 `LookArea` 吃掉 | `MobileUiRoot` 的 Canvas `sortingOrder=100`，而 `UIManager` 的层 Canvas 从 1000 起 ⇒ 面板永远在触控层之上，点面板不受影响；点世界（右半屏 = 视角）在触屏语义下本就是预期 |
-| 编辑器默认触屏让「键鼠可玩」这一习惯失效 | 已接受的代价；`ForceNoTouch` 一档可切回 |
+| 编辑器默认触屏让「键鼠可玩」这一习惯失效 | 整条键鼠通道（移动/视角/按键）整体被替换，见 §3.1；`ForceNoTouch` 一档可切回。**不叠加**（键盘的视角读鼠标轴、摇杆的读观察区，同一时刻只有一个适配器） |
 | 触控 UI 在编辑器默认出现，e2e 用例可能依赖「默认键鼠」 | 已核对：只有 `MobileTouchInputTests` 加载 DemoDay，且它用显式档位断言 |
 | 本设计修不了「玩家的 `Start` 早退（`CharacterController`/`Animator` 为空）」导致的 HUD 不显示 | 已知边沿：那种情况会打 `Debug.LogError`，属另一类问题 |
+
+---
+
+## 7. 复核记录（2026-10-17，自审）
+
+逐条对代码核对后的结论与修正：
+
+| 核对项 | 结论 |
+|---|---|
+| `FindObjectsOfType` 会不会返回预制体资产 | **不会**（只有 `Resources.FindObjectsOfTypeAll` 会；实机探针里 3 个预制体资产只在后者出现） |
+| bot 远端视图会不会被误判成本地角色 | 不会：它们是 `enabled=false` 的组件（`FindObjectsOfType` 会返回它），靠 `enabled` 过滤掉；`_statsProvider` 再兜一层「Start 没跑完」 |
+| 同一帧销毁两个本地角色时判据会不会漏 | 不会：Unity 逐个销毁，先销毁的不会出现在后一个对象的查询结果里 ⇒ 最终那个一定能收起 HUD |
+| 销毁顺序 | `PlayerSpawner.OnCharacterSelected` 是**先 `Destroy` 后 `Instantiate`**；§1.5 的测试装置已按同一顺序钉死 |
+| 两套输入适配器是否叠加 | **不叠加**：`MobileInputBinder` 整体替换适配器；键盘的视角读 `Input.GetAxisRaw("Mouse X/Y")`，摇杆的读观察区 |
+| 编辑器里自动判定改真后，`TouchFeatureDetected()` 的编辑器分支 | 成为自动路径的死代码（显式档位/URL 覆盖不受影响）——已记入 §3.1 |
+| `IEffectTarget.Heal` / `ITargetable` HP 系列对 `_stats` 的守卫 | 本来就有；§1.4 的判空与它们是同一约定（2026-10-17 的 npc 视图 NRE 修复把 `IsAlive`/`TakeDamage` 补齐，同族已完整） |
+| 右半屏点击被 `LookArea` 吃掉时面板是否受影响 | 不受影响：`MobileUiRoot` Canvas `sortOrder=100` < 层 Canvas 1000+（实机读数） |
+
+**修正了三处**：①新增 §1.5（原文只在 §4 列断言，没写测试装置/等待配方/private 决定）；②§3.1 的「代价」原文只提 WASD/空格，实际是**整条键鼠通道**；③§3.2 的两处行号收紧（`:28-35`、`:18-19`）。
