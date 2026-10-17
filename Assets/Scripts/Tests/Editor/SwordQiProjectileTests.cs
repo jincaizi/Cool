@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Runtime.SwordQi;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using NUnit.Framework;
 using UnityEngine;
@@ -14,6 +15,9 @@ namespace GameSys.EditorTests
         // 假目标（普通 C# 类，entity == null 永远为 false）会在后续 FindNearby
         // 的补充路径里触发 MissingReferenceException（entity.Transform.position）
         private readonly List<IDamageable> _registered = new List<IDamageable>();
+        // 弹体伤害入口读全局 NetworkModeService：测试必须钉死单机，否则存档为 Online 时
+        // 本地伤害被（正确地）短路，本文件的"应命中"断言会全部变红（同 PlayerHudBindingTests 做法）
+        private NetworkMode _previousMode;
 
         private class FakeDamageable : IDamageable
         {
@@ -43,9 +47,17 @@ namespace GameSys.EditorTests
             return go;
         }
 
+        [SetUp]
+        public void SetUp()
+        {
+            _previousMode = NetworkModeService.Load();
+            NetworkModeService.Save(NetworkMode.SinglePlayer);
+        }
+
         [TearDown]
         public void TearDown()
         {
+            NetworkModeService.Save(_previousMode);
             foreach (var e in _registered)
                 PhysicsRegistry.Instance.Unregister(e);
             _registered.Clear();

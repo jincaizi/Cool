@@ -68,13 +68,28 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             SwordQiSpawner.DisposeForTests();
             FireballSpawner.DisposeForTests();
             MeteorSpawner.DisposeForTests();
+
+            // EditMode 下 Object.Destroy 不生效（见各驱动方法的 LogAssert）——Explode 实例化的
+            // VFX 克隆会残留在测试场景；它们是根级 "(Clone)"，按此清理
+            DestroyLeftoverVfx();
+        }
+
+        private static void DestroyLeftoverVfx()
+        {
+            foreach (var go in Object.FindObjectsOfType<GameObject>())
+            {
+                if (go == null) continue;
+                if (go.transform.parent != null) continue;
+                if (!go.name.EndsWith("(Clone)")) continue;
+                Object.DestroyImmediate(go);
+            }
         }
 
         // ------------------------------------------------------------------------------------
         // 剑气（10002 SwordQi_Heavy）：判定带沿 18m/s 直线前进，目标在 z=3 的飞行路径上
         // ------------------------------------------------------------------------------------
 
-        private static void FireSwordQi()
+        private static SwordQiProjectile FireSwordQi()
         {
             var cfg = UnityEditor.AssetDatabase.LoadAssetAtPath<SwordQiConfig>(SwordQiConfigPath);
             Assert.IsNotNull(cfg, SwordQiConfigPath + " 未找到");
@@ -82,17 +97,19 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
             var qi = Object.FindObjectOfType<SwordQiProjectile>();
             Assert.IsNotNull(qi, "剑气未生成（Spawner/预制体接线核对）");
-            // 飞满 3m（10 小步）——目标必然经过判定带（DetectRadius 2m）
+            // 飞满 13m > 射程 12m（10 小步）：途经 z=3 的目标（DetectRadius 2m）后回池
             for (int i = 0; i < 10; i++)
-                qi.Tick(3f / cfg.Speed / 10f);
+                qi.Tick(13f / cfg.Speed / 10f);
+            return qi;
         }
 
         [Test]
         public void test_sword_qi_online_skips_local_damage()
         {
             NetworkModeService.Save(NetworkMode.Online);
-            FireSwordQi();
+            var qi = FireSwordQi();
             Assert.AreEqual(0, _target.HitCount, "联网：剑气伤害权在服务端，本地不得结算");
+            Assert.IsFalse(qi.gameObject.activeSelf, "联网只跳伤害入口：飞满射程仍须回池");
         }
 
         [Test]
@@ -108,7 +125,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         // 在 0.6m 命中半径内）。联网下仍会 Explode（VFX/回池），但不得造成伤害。
         // ------------------------------------------------------------------------------------
 
-        private static void FireFireball()
+        private static FireballProjectile FireFireball()
         {
             // EditMode 下 Object.Destroy 非法：Explode 的 VFX 清理在生产（PlayMode）没问题，
             // 测试里会记一条固定错误——按预期日志消费掉，其他未预期错误仍会让用例失败
@@ -123,14 +140,16 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             // 20 × 0.02s = 0.4s，覆盖 z=3 处的命中窗口（t≈0.17s）
             for (int i = 0; i < 20; i++)
                 fb.Tick(0.02f);
+            return fb;
         }
 
         [Test]
         public void test_fireball_online_skips_local_damage()
         {
             NetworkModeService.Save(NetworkMode.Online);
-            FireFireball();
+            var fb = FireFireball();
             Assert.AreEqual(0, _target.HitCount, "联网：火球伤害权在服务端，本地不得结算");
+            Assert.IsFalse(fb.gameObject.activeSelf, "联网只短路 ApplyDamage：命中仍须爆炸/回池");
         }
 
         [Test]
@@ -146,7 +165,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         // 目标站在落点上。联网下 ImpactVFX/回池照旧，但伤害循环整段跳过。
         // ------------------------------------------------------------------------------------
 
-        private static void DropMeteor()
+        private static MeteorStrike DropMeteor()
         {
             // 同火球：Explode 的 ImpactVFX 清理在 EditMode 下会记一条 "Destroy may not be called..."
             LogAssert.Expect(LogType.Error, new Regex("Destroy may not be called from edit mode"));
@@ -158,14 +177,16 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var strike = Object.FindObjectOfType<MeteorStrike>();
             Assert.IsNotNull(strike, "陨石未生成（Spawner/预制体接线核对）");
             strike.Tick(0.9f); // > WarnDuration 0.8s
+            return strike;
         }
 
         [Test]
         public void test_meteor_online_skips_local_damage()
         {
             NetworkModeService.Save(NetworkMode.Online);
-            DropMeteor();
+            var strike = DropMeteor();
             Assert.AreEqual(0, _target.HitCount, "联网：陨石伤害权在服务端，本地不得结算");
+            Assert.IsFalse(strike.gameObject.activeSelf, "联网只跳过伤害循环：ImpactVFX 与回池照旧");
         }
 
         [Test]

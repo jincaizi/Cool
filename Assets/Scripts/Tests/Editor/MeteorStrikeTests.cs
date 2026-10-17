@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Runtime.Meteor;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using NUnit.Framework;
 using UnityEngine;
@@ -11,6 +12,9 @@ namespace GameSys.EditorTests
     {
         private readonly List<GameObject> _gos = new List<GameObject>();
         private readonly List<IDamageable> _registered = new List<IDamageable>();
+        // 爆炸伤害入口读全局 NetworkModeService：测试必须钉死单机（存档为 Online 时
+        // 本地伤害被（正确地）短路，本文件的"应命中"断言会全部变红）
+        private NetworkMode _previousMode;
 
         private class FakeDamageable : IDamageable
         {
@@ -23,9 +27,17 @@ namespace GameSys.EditorTests
             public void TakeDamage(DamageBlock d, Vector3 dir, HitContact c) { TakeDamage(d, dir); }
         }
 
+        [SetUp]
+        public void SetUp()
+        {
+            _previousMode = NetworkModeService.Load();
+            NetworkModeService.Save(NetworkMode.SinglePlayer);
+        }
+
         [TearDown]
         public void TearDown()
         {
+            NetworkModeService.Save(_previousMode);
             foreach (var e in _registered)
                 PhysicsRegistry.Instance.Unregister(e);
             _registered.Clear();
