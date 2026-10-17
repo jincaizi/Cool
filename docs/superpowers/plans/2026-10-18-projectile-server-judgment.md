@@ -662,7 +662,9 @@ dotnet test Server/Server.Tests --filter "FullyQualifiedName~CombatResolverTests
                 float damage = RollDamage(entry, out bool isCritical);
                 if (spec != null && spec.ChargeScales)
                     damage *= 1f + (spec.ChargeDamageMaxScale - 1f) * pending.Charge;
-                // …（格挡判定与 ApplyDamage/HitEntry 组装沿用原代码，逐字不变）…
+                // 把原 ResolveHits 里从 `bool blocked = target.IsDefending` 起、到
+                // `resolution.Hits.Add(new HitEntry { … });` 止的整段，**原样搬进本循环体**，
+                // 一个字符都不改（格挡条件、RollDamage 调用顺序、HitEntry 字段全部保持）。
             }
             if (spec != null && spec.Kind == ProjectileKind.LineNearestSplash && hitIds.Count > 0)
                 pending.Spent = true;
