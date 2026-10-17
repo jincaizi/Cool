@@ -140,9 +140,9 @@ public sealed class ProjectileSpec
 |---|---|
 | `HitShapeConverter.GetShape` | 无需新增分支（`ProjectileSkillData` 无 Shape，发零形状；表项上限为 0 ⇒ 校验通过且无挥击判定）。**加一条注释说明这是刻意的** |
 | `CombatNetworkBridge.NotifySkillCast` | 增加可选参数 `impactPoint`、`chargeProgress`；写入 `CastRequest` |
-| `CombatNetworkBridge` 接线 | **非蓄力技能**：沿用 `OnSkillActivated` 发送。其中 30001 带 `ImpactPoint = _targetPosition`（客户端 `SpawnMeteor` 对零值兜底为"施法者前方 12m"，接线处照抄同一兜底）；10002/20003 **不使用** `ImpactPoint`（剑气/火球都沿施法者朝向）。**蓄力技能（20004）**：激活时**不发**，在释放时发送，`ImpactPoint` = 释放时刻的目标位置（无锁定则为施法者位置，与 `DetectAOETargets` 的中心一致）+ `ChargeProgress` |
+| `CombatNetworkBridge` 接线 | **非蓄力技能**：沿用 `OnSkillActivated` 发送。其中 30001 带 `ImpactPoint = _targetPosition`（客户端 `SpawnMeteor` 对零值兜底为"施法者前方 12m"，接线处照抄同一兜底）；10002/20003 **不使用** `ImpactPoint`（剑气/火球都沿施法者朝向）。**可蓄力技能（20004；以及 `MaxChargeTime > 0` 的可蓄力投射物 20003）**：激活时**不发**，在释放时发送，`ImpactPoint` = 释放时刻的目标位置（无锁定则为施法者位置，与 `DetectAOETargets` 的中心一致）+ `ChargeProgress` |
 | `SkillCoordinator` | 新增 `event Action<SkillData, float, Vector3> OnChargeReleased`（`skillData, chargeProgress, impactPoint`），在 `TryReleaseCharge` 成功后触发；`impactPoint = _targetCharacter?.transform.position ?? 本地施法者位置`（与 `DetectAOETargets` 的中心一致）。取消蓄力不触发、不发请求、不占冷却 |
-| `Sys3CEntry` | 把 `OnChargeReleased` 转给 `CombatNetworkBridge`（与既有 `OnSkillActivated` 接线同处） |
+| `ClientNetworkHost` | 两处门控共用同一个「可蓄力」谓词：`ChargedSkillData` **或** `ProjectileSkillData.MaxChargeTime > 0`（火球资产 `_maxChargeTime: 2` ⇒ 20003 也是可蓄力技能，必须走释放时发送；否则蓄力开始就发请求 ⇒ 取消蓄力产生幽灵伤害、真正释放被冷却拒收）。`OnLocalSkillCast` 跳过可蓄力；`OnLocalChargeReleased` 处理可蓄力 |
 | `SwordQiProjectile` / `FireballProjectile` / `MeteorStrike` | **联网时跳过本地伤害**（`NetworkModeService.Load() == Online` 直接 return，保留表现）；单机行为逐字不变 |
 | `CombatRulesTests`（客户端 + `Server/Server.Tests` 两处） | 翻转 `IsSynced(20003/30001)` 断言；新增 20004 |
 
