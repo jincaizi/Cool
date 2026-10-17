@@ -1,6 +1,8 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using DataDefinition;
+using Hotfix.GameSystems.Stamina;
 
 namespace Hotfix.GameSystems.Nameplate
 {
@@ -12,12 +14,19 @@ namespace Hotfix.GameSystems.Nameplate
         [SerializeField] private FloatTextSettings _playerDamageSettings;
         [SerializeField] private FloatTextSettings _skillNameSettings;
 
+        [Header("Stamina Ring")]
+        [SerializeField] private float _staminaRingDiameter = 64f;
+        [SerializeField] private float _staminaRingWidth = 10f;
+        [SerializeField] private Vector2 _staminaRingOffset = new Vector2(64f, 24f);
+        [SerializeField] private float _staminaRingHeadHeight = 1.7f;
+
         private Canvas _canvas;
         private Camera _camera;
         private NameplateRenderer _nameplate;
         private FloatTextRenderer _floatText;
         private DisplayEventBridge _eventBridge;
         private DamageScreenEffect _damageScreenEffect;
+        private StaminaRingRenderer _staminaRing;
 
         public static EntityDisplayManager Instance { get; private set; }
 
@@ -69,6 +78,7 @@ namespace Hotfix.GameSystems.Nameplate
             if (_camera == null) { _camera = Camera.main; if (_camera == null) return; }
             _floatText.Camera = _camera;
             _nameplate.Tick(_camera);
+            _staminaRing?.Tick(_camera, Time.deltaTime);
             _floatText.PurgeExpiredMerges();
         }
 
@@ -77,6 +87,7 @@ namespace Hotfix.GameSystems.Nameplate
             _nameplate?.Cleanup();
             _floatText?.Cleanup();
             _damageScreenEffect?.Cleanup();
+            _staminaRing?.Cleanup();
         }
 
         // ===== Nameplate API =====
@@ -111,6 +122,24 @@ namespace Hotfix.GameSystems.Nameplate
         public void ShowDamageText(int entityId, Vector3 worldPos, FloatTextSettings settings, int value)
         {
             _floatText.ShowDamageText(entityId, worldPos, settings, value);
+        }
+
+        // ===== Stamina Ring API =====
+
+        public void BindStamina(Transform owner, StaminaSystem stamina, Func<bool> visible)
+        {
+            if (_staminaRing == null)
+            {
+                _staminaRing = new StaminaRingRenderer(
+                    _canvas, _staminaRingDiameter, _staminaRingWidth,
+                    _staminaRingOffset, _staminaRingHeadHeight);
+            }
+            _staminaRing.Bind(owner, stamina, visible);
+        }
+
+        public void UnbindStamina(Transform owner)
+        {
+            _staminaRing?.Unbind(owner);
         }
     }
 }
