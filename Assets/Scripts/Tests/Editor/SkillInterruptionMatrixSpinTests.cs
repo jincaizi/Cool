@@ -35,5 +35,13 @@ namespace GameSys.EditorTests
             var matrix = new SkillInterruptionMatrix();
             Assert.IsFalse(matrix.CanBeInterrupted(CreateSpinData(), InterruptionSource.AnotherSkill), "旋转期间不可被其他技能打断");
         }
+
+        [Test]
+        public void test_skill_spin_stamina_exhausted_is_interruptible()
+        {
+            var matrix = new SkillInterruptionMatrix();
+            Assert.IsTrue(matrix.CanBeInterrupted(CreateSpinData(), InterruptionSource.StaminaExhausted),
+                "力竭必须能打断旋转，无视霸体");
+        }
     }
 }

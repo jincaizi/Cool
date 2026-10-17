@@ -131,6 +131,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             if (skillData == null) return false;
 
+            if (source == InterruptionSource.StaminaExhausted) return true;
+
             // 优先检查技能自定义规则
             if (_customRules.TryGetValue(skillData.SkillId, out var customRule))
             {
@@ -247,6 +249,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             {
                 InterruptionSource.Stun => 100,          // 最高优先级
                 InterruptionSource.DamageTaken => 90,
+                InterruptionSource.StaminaExhausted => 85,
                 InterruptionSource.Parry => 80,
                 InterruptionSource.AnotherSkill => 70,
                 InterruptionSource.RollDodge => 60,

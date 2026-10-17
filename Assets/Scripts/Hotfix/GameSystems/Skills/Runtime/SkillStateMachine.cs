@@ -373,6 +373,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 InterruptionSource.DamageTaken => _skillData.CanBeInterruptedByDamage,
                 InterruptionSource.MovementInput => _skillData.CanBeInterruptedByMovement,
                 InterruptionSource.Stun => true,
+                InterruptionSource.StaminaExhausted => true,
                 InterruptionSource.RollDodge => true,
                 InterruptionSource.Parry => true,
                 _ => false

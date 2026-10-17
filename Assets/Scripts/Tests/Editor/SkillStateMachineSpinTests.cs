@@ -221,5 +221,20 @@ namespace GameSys.EditorTests
             machine.Complete();   // 防御：Cancel 后 Complete 不得重复触发完成事件
             Assert.AreEqual(1, _completedCount, "Complete 在已完成后不得再次触发");
         }
+
+        [Test]
+        public void test_skill_state_machine_stamina_exhausted_interrupts()
+        {
+            var data = ScriptableObject.CreateInstance<SpinSkillData>();
+            TestHelpers.SetField(data, "_skillId", 20002);
+            TestHelpers.SetField(data, "_skillType", SkillType.Spin);
+
+            var machine = new SkillStateMachine(data);
+            Assert.IsTrue(machine.TryStart());
+            Assert.AreEqual(SkillSubState.Spinning, machine.CurrentState);
+
+            Assert.IsTrue(machine.Interrupt(InterruptionSource.StaminaExhausted));
+            Assert.AreEqual(SkillSubState.Cancelled, machine.CurrentState);
+        }
     }
 }

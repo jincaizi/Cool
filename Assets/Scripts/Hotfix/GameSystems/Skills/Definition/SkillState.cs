@@ -54,6 +54,7 @@ namespace Hotfix.GameSystems.Skills.Definition
         Stun,               // 硬控（眩晕等）
         RollDodge,          // 翻滚
         Parry,              // 招架
-        TimeOut             // 超时
+        TimeOut,            // 超时
+        StaminaExhausted    // 精力力竭（无视霸体）
     }
 }
