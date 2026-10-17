@@ -65,6 +65,13 @@ namespace GameSys.PlayModeTests
             method.Invoke(_entry, new object[] { deltaTime });
         }
 
+        private void InvokeHandleInput()
+        {
+            var method = typeof(Sys3CEntry).GetMethod("HandleInput", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.IsNotNull(method, "HandleInput 不存在");
+            method.Invoke(_entry, null);
+        }
+
         [Test]
         public void test_stamina_sprint_drains_when_grounded_and_unlocked()
         {
@@ -158,6 +165,32 @@ namespace GameSys.PlayModeTests
 
             Assert.AreEqual(100f, _entry.Stamina.Current, 0.01f);
             Assert.IsFalse(_entry.Stamina.IsExhausted);
+        }
+
+        [Test]
+        public void test_stamina_defend_cannot_start_while_exhausted()
+        {
+            _entry.Stamina.Refill();
+            SetData(d => { d.BaseState = BaseState.Idle; d.IsGrounded = true; return d; });
+            _entry.Stamina.TryConsume(100f);
+            Assert.IsTrue(_entry.Stamina.IsExhausted);
+
+            _input.SetDefendHeld(true);
+            InvokeHandleInput();
+            Assert.IsFalse(_cc.IsDefending, "力竭时不得起盾");
+
+            _input.SetDefendHeld(false);
+            InvokeHandleInput();                 // 松开清锁存
+            _input.SetDefendHeld(true);
+            InvokeHandleInput();
+            Assert.IsFalse(_cc.IsDefending, "力竭窗口内松手再按仍不得起盾");
+
+            _entry.Stamina.Refill();
+            _input.SetDefendHeld(false);
+            InvokeHandleInput();                 // 松开清锁存（锁存只在松手时解除）
+            _input.SetDefendHeld(true);
+            InvokeHandleInput();
+            Assert.IsTrue(_cc.IsDefending, "精力回满后（松开再按）应可正常起盾");
         }
 
         [Test]

@@ -306,7 +306,8 @@ namespace Hotfix.GameSystems.Sys3C
             // 防御处理（按住右键举盾，松开放下）
             if (_inputManager.IsDefendHeld())
             {
-                if (!_defendStaminaLatch && _fsmManager.CanDefend && _cc.TryEnterDefend())
+                if (!_defendStaminaLatch && _stamina.CanStartConsuming
+                    && _fsmManager.CanDefend && _cc.TryEnterDefend())
                 {
                     _fsmManager.EnterDefend();
                 }
