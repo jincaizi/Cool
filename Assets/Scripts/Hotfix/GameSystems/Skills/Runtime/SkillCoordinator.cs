@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
+using Hotfix.GameSystems.SyncLayer;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Runtime
@@ -391,11 +392,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _currentSkill?.Update(deltaTime);
 
             // 蓄满自动释放：状态机在 MaxChargeTime 处直接 Charging → Execution（不经过
-            // TryReleaseCharge）——联网上报同样需要这次"释放时刻"的 CastRequest，进度按满计
+            // TryReleaseCharge）——联网上报同样需要这次"释放时刻"的 CastRequest，进度按满计。
+            // 判定必须用 SkillCastReporter.IsChargeable（与激活侧同源）：20003 火球是
+            // ProjectileSkillData（MaxChargeTime>0），只认 ChargedSkillData 会让它一条都发不出
             if (wasCharging && !_chargeReleaseReported
                 && _currentSkill != null
                 && _currentSkill.CurrentSubState == SkillSubState.Execution
-                && _currentSkill.Data is ChargedSkillData)
+                && SkillCastReporter.IsChargeable(_currentSkill.Data))
             {
                 ReportChargeReleased(1f);
             }

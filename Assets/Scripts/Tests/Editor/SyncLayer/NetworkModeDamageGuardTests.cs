@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Runtime.Meteor;
@@ -7,6 +8,7 @@ using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Hotfix.GameSystems.Tests.SyncLayer
@@ -44,10 +46,13 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         private NetworkMode _originalMode;
         private GameObject _targetGo;
         private FakeTarget _target;
+        /// <summary>用例开始时的场景根对象集合——TearDown 只销毁本用例新建出来的根对象</summary>
+        private HashSet<int> _rootsBeforeTest;
 
         [SetUp]
         public void SetUp()
         {
+            _rootsBeforeTest = SnapshotSceneRoots();
             _originalMode = NetworkModeService.Load();
             _targetGo = new GameObject("GuardFakeTarget");
             _targetGo.transform.position = new Vector3(0f, 0f, 3f);
@@ -70,19 +75,23 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             MeteorSpawner.DisposeForTests();
 
             // EditMode 下 Object.Destroy 不生效（见各驱动方法的 LogAssert）——Explode 实例化的
-            // VFX 克隆会残留在测试场景；它们是根级 "(Clone)"，按此清理
-            DestroyLeftoverVfx();
+            // VFX 克隆会残留在测试场景。只清理**本用例新建的根对象**（快照差集），
+            // 不用"名字以 (Clone) 结尾"这种全局启发式（会误删用户/其他用例的克隆）
+            foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                if (root == null) continue;
+                if (_rootsBeforeTest.Contains(root.GetInstanceID())) continue;
+                Object.DestroyImmediate(root);
+            }
         }
 
-        private static void DestroyLeftoverVfx()
+        /// <summary>场景根对象快照（`GetRootGameObjects` 含未激活根对象，优于 FindObjectsOfType）</summary>
+        private static HashSet<int> SnapshotSceneRoots()
         {
-            foreach (var go in Object.FindObjectsOfType<GameObject>())
-            {
-                if (go == null) continue;
-                if (go.transform.parent != null) continue;
-                if (!go.name.EndsWith("(Clone)")) continue;
-                Object.DestroyImmediate(go);
-            }
+            var ids = new HashSet<int>();
+            foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+                if (root != null) ids.Add(root.GetInstanceID());
+            return ids;
         }
 
         // ------------------------------------------------------------------------------------

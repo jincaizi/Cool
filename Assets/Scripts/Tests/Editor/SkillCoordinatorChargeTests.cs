@@ -314,6 +314,38 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_chargeable_projectile_full_charge_auto_release_sends_exactly_one_cast_request()
+        {
+            // 回归：按住火球超过 MaxChargeTime（常规操作）→ 状态机自动 Charging→Execution。
+            // 满蓄力监视器若只认 ChargedSkillData，20003 会一条 CastRequest 都发不出去。
+            var data = CreateChargeableProjectileData();
+            var (coordinator, client, machine) = CreateCoordinatorWithBridge(data);
+            int released = 0;
+            float releasedProgress = -1f;
+            coordinator.OnChargeReleased += (d, p, pt) =>
+            {
+                released++;
+                releasedProgress = p;
+            };
+
+            // Act
+            machine.Now = 2.15f; // 蓄力 2.0s == MaxChargeTime
+            coordinator.Update(0.01f);
+
+            // Assert
+            Assert.AreEqual(SkillSubState.Execution, coordinator.CurrentSubState);
+            Assert.AreEqual(1, released, "可蓄力投射物满蓄力自动释放也必须上报一次");
+            Assert.AreEqual(1f, releasedProgress, 0.001f, "自动释放的进度按满计");
+            Assert.AreEqual(1, client.Sent.Count, "满蓄力自动释放应恰好一条 CastRequest");
+            var cast = (CastRequest)client.Sent[0].msg;
+            Assert.AreEqual(20003, cast.SkillId);
+
+            coordinator.Update(0.01f); // 后续帧不得重复上报
+            Assert.AreEqual(1, released);
+            Assert.AreEqual(1, client.Sent.Count);
+        }
+
+        [Test]
         public void test_chargeable_projectile_cancel_sends_no_cast_request()
         {
             // Arrange
