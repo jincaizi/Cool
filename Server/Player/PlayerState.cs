@@ -36,7 +36,7 @@ namespace KcpServer
 
         /// <summary>
         /// 盾耐久（服务端权威）。格挡成功每击消耗 ShieldDurabilityPerBlock、下限 0；
-        /// **归零 ⇒ IsDefending 不再产生减伤**（判定在 CastHandler.ResolveHits 的格挡条件）。
+        /// **归零 ⇒ IsDefending 不再产生减伤**（判定在 CastHandler.ResolveStage 的格挡条件）。
         /// 恢复口径（本实现的选择）：**不做战斗内恢复**；登录重建 PlayerState 与复活
         /// （TryRespawn）时回满——与 Hp 同款"复活即满"语义，少一个 YAGNI 的回复计时器
         /// </summary>

@@ -38,7 +38,8 @@ namespace Cool.Protocol
         [ProtoMember(5)] public float ImpactY { get; set; }
         [ProtoMember(6)] public float ImpactZ { get; set; }
 
-        /// <summary>蓄力进度 [0,1]（仅 20004 使用；服务端钳制，NaN 视为 0）。</summary>
+        /// <summary>蓄力进度 [0,1]：20004 用于半径/伤害缩放；20003 释放时也随包发送
+        /// （服务端忽略，仅 20004 的 ChargeScales 消费）。服务端钳制，NaN 视为 0。</summary>
         [ProtoMember(7)] public float ChargeProgress { get; set; }
     }
 

@@ -26,7 +26,7 @@ public class BlockMitigationTests
         var store = new EntityStore();
         store.AddPlayer(Player, "P");
         var player = store.GetPlayer(Player)!;
-        player.IsLoggedIn = true;   // 怪物施法的候选集过滤要求玩家已登录（CombatResolver.ResolveHits）
+        player.IsLoggedIn = true;   // 怪物施法的候选集过滤要求玩家已登录（CombatResolver.ResolveStage）
         player.UpdatePosition(new Vector3(0f, 0f, 0f), playerYaw, 0f, 0L, 0U);
         player.IsDefending = defending;
         player.ShieldDurability = shieldDurability;

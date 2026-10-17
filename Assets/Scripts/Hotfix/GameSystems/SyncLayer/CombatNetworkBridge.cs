@@ -138,7 +138,9 @@ namespace Hotfix.GameSystems.SyncLayer
             AreaRadius = block.AreaRadius
         };
 
-        /// <summary>SkillData → ShapeBlock（与 SkillExecutor.GetShape 同款取形模式）</summary>
+        /// <summary>SkillData → ShapeBlock（与 SkillExecutor.GetShape 同款取形模式）。
+        /// <c>ProjectileSkillData</c> 无 ShapeBlock，客户端发零形状是刻意的；对应表项
+        /// maxRange/maxAngle=0 ⇒ 校验通过且不产生挥击判定（10002 的挥击由 KeepsSwing 单独表达）。</summary>
         public static ShapeBlock? GetShape(SkillData data)
             => (data as ComboSkillData)?.Shape
                 ?? (data as InstantSkillData)?.Shape

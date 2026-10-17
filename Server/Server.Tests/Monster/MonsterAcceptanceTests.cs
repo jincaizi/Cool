@@ -119,7 +119,7 @@ public class MonsterAcceptanceTests
 
     /// <summary>
     /// 决策 → 前摇期内击杀怪物 → 判定帧这一刀必须**没有伤害**：施法者死亡在判定时复查
-    /// （CombatResolver.ResolveHits 的 `!caster.IsAlive` → 返回 null 丢弃），不是"回头补一刀"。
+    /// （CombatResolver.ResolveStage 的 `!caster.IsAlive` → 返回 null 丢弃），不是"回头补一刀"。
     /// Wolf skill 50002：范围 2.0 / Angle 120 / HitDelay 0.35s（=6 tick）。
     /// </summary>
     [Fact]
