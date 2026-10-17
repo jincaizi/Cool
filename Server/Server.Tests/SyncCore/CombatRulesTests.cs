@@ -314,4 +314,12 @@ public class CombatRulesTests
         Assert.Null(CombatRules.ValidateProjectileRequest(
             new CastRequest { SkillId = 10002, ImpactX = float.NaN }, heavy, 0f, 0f));
     }
+
+    [Fact]
+    public void test_clamp_charge_progress_handles_nan_and_bounds()
+    {
+        Assert.Equal(0f, CombatRules.ClampChargeProgress(float.NaN), 4);
+        Assert.Equal(0f, CombatRules.ClampChargeProgress(-0.5f), 4);
+        Assert.Equal(1f, CombatRules.ClampChargeProgress(1.5f), 4);
+    }
 }

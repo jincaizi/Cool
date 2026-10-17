@@ -138,5 +138,46 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Circle25, candidates);
             Assert.That(hits, Is.EqualTo(new long[] { 2 }));
         }
+
+        [Test]
+        public void test_line_all_hits_band_and_skips_outside()
+        {
+            // yaw=0 → +Z；线从 (0,0) 起、长 10、半宽 1
+            var cands = new List<CombatCandidate>
+            {
+                C(1, 0f, 5f),    // 带内
+                C(2, 0.9f, 2f),  // 带内（贴边）
+                C(3, 1.2f, 5f),  // 带外
+                C(4, 0f, -3f),   // 背后
+                C(5, 0f, 11f),   // 超出长度
+            };
+            var hits = HitResolver.ResolveLineAll(new Vec3(0f, 0f, 0f), 0f, 0f, 10f, 1f, null, cands);
+            CollectionAssert.AreEquivalent(new long[] { 1, 2 }, hits);
+        }
+
+        [Test]
+        public void test_line_all_respects_banned_ids()
+        {
+            var cands = new List<CombatCandidate> { C(1, 0f, 5f), C(2, 0f, 3f) };
+            var hits = HitResolver.ResolveLineAll(new Vec3(0f, 0f, 0f), 0f, 0f, 10f, 1f, new HashSet<long> { 1 }, cands);
+            CollectionAssert.AreEqual(new long[] { 2 }, hits);
+        }
+
+        [Test]
+        public void test_line_nearest_returns_only_nearest_in_band()
+        {
+            var cands = new List<CombatCandidate> { C(1, 0f, 8f), C(2, 0.5f, 3f), C(3, 3f, 1f) };
+            var nearest = HitResolver.ResolveLineNearest(new Vec3(0f, 0f, 0f), 0f, 0f, 8f, 1f, null, cands, out var hitPos);
+            Assert.AreEqual(2L, nearest);
+            Assert.AreEqual(3f, hitPos.Z, 0.001f, "溅射中心 = 命中者位置");
+        }
+
+        [Test]
+        public void test_circle_at_point_hits_inside_radius_only()
+        {
+            var cands = new List<CombatCandidate> { C(1, 3f, 0f), C(2, 4.5f, 0f), C(3, 0f, 4f) };
+            var hits = HitResolver.ResolveCircle(new Vec3(0f, 0f, 0f), 4f, cands);
+            CollectionAssert.AreEquivalent(new long[] { 1, 3 }, hits);
+        }
     }
 }

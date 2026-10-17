@@ -253,5 +253,13 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             Assert.IsNull(CombatRules.ValidateProjectileRequest(
                 new CastRequest { SkillId = 10002, ImpactX = float.NaN }, heavy, 0f, 0f));
         }
+
+        [Test]
+        public void test_clamp_charge_progress_handles_nan_and_bounds()
+        {
+            Assert.AreEqual(0f, CombatRules.ClampChargeProgress(float.NaN), 0.0001f);
+            Assert.AreEqual(0f, CombatRules.ClampChargeProgress(-0.5f), 0.0001f);
+            Assert.AreEqual(1f, CombatRules.ClampChargeProgress(1.5f), 0.0001f);
+        }
     }
 }

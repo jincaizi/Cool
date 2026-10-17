@@ -92,7 +92,7 @@ namespace Cool.SyncCore
         public const float CritMultiplier = 1.5f;
         public const float TickRateHz = 15f;
 
-        /// <summary>形状上限的浮点容差（1mm）：只吸收序列化/运算抖动，不容纳 1cm 级的范围放大。</summary>
+        /// <summary>米制字段与角度字段共用的浮点容差：只吸收序列化/运算抖动，不容纳 1cm 级的范围放大。</summary>
         private const float ShapeEpsilon = 0.001f;
 
         // —— PvP 格挡减伤（2026-10-17；服务端裁决，客户端表现复用既有 DefendHit 链路）——
@@ -176,8 +176,8 @@ namespace Cool.SyncCore
             return true;
         }
 
-        /// <summary>落点/蓄力校验（仅 CircleAtPoint 需要落点）。返回 null = 通过，否则为拒绝原因。</summary>
-        public static string ValidateProjectileRequest(CastRequest request, SkillEntry entry,
+        /// <summary>落点校验（仅 CircleAtPoint）。返回 null = 通过，否则为拒绝原因。</summary>
+        public static string? ValidateProjectileRequest(CastRequest request, SkillEntry entry,
             float casterX, float casterZ)
         {
             var spec = entry.Projectile;
@@ -190,7 +190,7 @@ namespace Cool.SyncCore
             return null;
         }
 
-        /// <summary>蓄力进度钳制：NaN/负 → 0，>1 → 1。</summary>
+        /// <summary>蓄力进度钳制：非有限 → 0，>1 → 1，负 → 0。</summary>
         public static float ClampChargeProgress(float raw)
             => float.IsFinite(raw) ? Math.Clamp(raw, 0f, 1f) : 0f;
 

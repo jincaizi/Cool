@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cool.Protocol;
 
 namespace Cool.SyncCore
@@ -100,6 +101,68 @@ namespace Cool.SyncCore
             float dx = a.X - b.X;
             float dz = a.Z - b.Z;
             return (float)Math.Sqrt(dx * dx + dz * dz);
+        }
+
+        /// <summary>线形判定：从 origin 沿 yaw、在 [startDistance, startDistance+length] × ±halfWidth 的带内全中。
+        /// banned 里的 id 跳过（分组去重用）。纯 XZ。</summary>
+        public static List<long> ResolveLineAll(Vec3 origin, float yawDeg, float startDistance, float length,
+            float halfWidth, IReadOnlyCollection<long>? banned, IReadOnlyList<CombatCandidate> candidates)
+        {
+            var hits = new List<long>();
+            if (candidates == null) return hits;
+            float fx = (float)Math.Sin(yawDeg * Math.PI / 180.0);
+            float fz = (float)Math.Cos(yawDeg * Math.PI / 180.0);
+            foreach (var c in candidates)
+            {
+                if (!c.Alive) continue;
+                if (banned != null && banned.Contains(c.Id)) continue;
+                float dx = c.Position.X - origin.X;
+                float dz = c.Position.Z - origin.Z;
+                float along = dx * fx + dz * fz;
+                if (along < startDistance || along > startDistance + length) continue;
+                float lateral = Math.Abs(dx * fz - dz * fx);   // 2D 叉积的模 = 横向距离
+                if (lateral > halfWidth) continue;
+                hits.Add(c.Id);
+            }
+            return hits;
+        }
+
+        /// <summary>线形找最近者（同 LineAll 的带内过滤），返回 id 与命中位置；无命中返回 0。</summary>
+        public static long ResolveLineNearest(Vec3 origin, float yawDeg, float startDistance, float length,
+            float halfWidth, IReadOnlyCollection<long>? banned, IReadOnlyList<CombatCandidate> candidates,
+            out Vec3 hitPosition)
+        {
+            hitPosition = default;
+            if (candidates == null) return 0;
+            float fx = (float)Math.Sin(yawDeg * Math.PI / 180.0);
+            float fz = (float)Math.Cos(yawDeg * Math.PI / 180.0);
+            long best = 0;
+            float bestAlong = float.MaxValue;
+            foreach (var c in candidates)
+            {
+                if (!c.Alive) continue;
+                if (banned != null && banned.Contains(c.Id)) continue;
+                float dx = c.Position.X - origin.X;
+                float dz = c.Position.Z - origin.Z;
+                float along = dx * fx + dz * fz;
+                if (along < startDistance || along > startDistance + length) continue;
+                if (Math.Abs(dx * fz - dz * fx) > halfWidth) continue;
+                if (along < bestAlong) { best = c.Id; bestAlong = along; hitPosition = c.Position; }
+            }
+            return best;
+        }
+
+        /// <summary>以 center 为圆心的 AOE（与 ShapeType=1 同语义，供落点判定直接调用）。</summary>
+        public static List<long> ResolveCircle(Vec3 center, float radius, IReadOnlyList<CombatCandidate> candidates)
+        {
+            var hits = new List<long>();
+            if (candidates == null) return hits;
+            foreach (var c in candidates)
+            {
+                if (!c.Alive) continue;
+                if (DistXZ(center, c.Position) <= radius) hits.Add(c.Id);
+            }
+            return hits;
         }
     }
 }
