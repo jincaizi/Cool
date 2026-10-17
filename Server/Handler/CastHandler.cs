@@ -33,19 +33,42 @@ namespace KcpServer
             public readonly List<HitEntry> Hits = new List<HitEntry>();
         }
 
-        private readonly struct PendingCast
+        /// <summary>一次施法的判定组（同一施法可排多段——剑气/火球分段推进）。可变 class：
+        /// <see cref="NextStage"/>/<see cref="Spent"/> 等在 DrainResolved 推进时原地更新。</summary>
+        private sealed class PendingCast
         {
             public readonly long CasterId;
             public readonly CastRequest Request;
-            public readonly uint ResolveTick;
             public readonly CastBroadcast Broadcast;
             public readonly bool IsNpcCaster;
+            public readonly ProjectileSpec? Projectile;
+            public readonly float Charge;
+            public readonly uint FirstTick;
+            public readonly uint[] StageTicks;              // 升序；无 Projectile 时长度 1 = {FirstTick}
+            public int NextStage;                            // 下一段下标
+            public readonly HashSet<long> GroupHitIds = new HashSet<long>();  // LineAll 组内去重
+            public bool Spent;                               // 火球首中即停
+            public bool OriginCaptured;
+            public Vec3 Origin;                              // 首段捕获的施法者位置
+            public float Yaw;
 
-            public PendingCast(long casterId, CastRequest request, uint resolveTick,
-                CastBroadcast broadcast, bool isNpcCaster)
+            public PendingCast(long casterId, CastRequest request, CastBroadcast broadcast,
+                bool isNpcCaster, ProjectileSpec? projectile, float charge, uint firstTick)
             {
-                CasterId = casterId; Request = request; ResolveTick = resolveTick;
-                Broadcast = broadcast; IsNpcCaster = isNpcCaster;
+                CasterId = casterId; Request = request; Broadcast = broadcast;
+                IsNpcCaster = isNpcCaster; Projectile = projectile; Charge = charge;
+                FirstTick = firstTick;
+                StageTicks = BuildStageTicks(projectile, firstTick);
+            }
+
+            private static uint[] BuildStageTicks(ProjectileSpec? spec, uint firstTick)
+            {
+                if (spec == null || spec.Stages <= 1) return new[] { firstTick };
+                var ticks = new uint[spec.Stages];
+                for (int k = 0; k < spec.Stages; k++)
+                    ticks[k] = firstTick + (uint)Math.Ceiling(
+                        k * spec.TotalFlightSeconds / spec.Stages * CombatRules.TickRateHz);
+                return ticks;
             }
         }
 
@@ -65,6 +88,13 @@ namespace KcpServer
             if (!caster.IsCastReady(request.SkillId, tick, CombatRules.CooldownTicks(entry)))
                 return Reject(resolution, "cooldown");
 
+            // 2026-10-18：投射物落点/蓄力校验（只有 CircleAtPoint 需要落点）
+            var projectileError = CombatRules.ValidateProjectileRequest(request, entry,
+                caster.Position.X, caster.Position.Z);
+            if (projectileError != null) return Reject(resolution, projectileError);
+            var charge = CombatRules.ClampChargeProgress(request.ChargeProgress);
+            var firstTick = tick + CombatRules.HitDelayTicks(entry);
+
             // D-3：冷却记录在决策（空挥也冷却，D-P4-5）
             caster.RecordCast(request.SkillId, tick);
 
@@ -83,12 +113,12 @@ namespace KcpServer
                 ServerTimestamp = ServerClock.NowTicks()
             };
             // D-1/D-2：判定帧延迟由服务端表自持——判定发生在 tick + HitDelayTicks
-            _pending.Add(new PendingCast(casterId, request, tick + CombatRules.HitDelayTicks(entry),
-                resolution.Broadcast, resolution.IsNpcCaster));
+            _pending.Add(new PendingCast(casterId, request, resolution.Broadcast, resolution.IsNpcCaster,
+                entry.Projectile, charge, firstTick));
             return resolution;
         }
 
-        /// <summary>取出到期（含本 tick）的待判定施法并裁决。单遍压缩，出队顺序 = 入队顺序（确定性）。</summary>
+        /// <summary>取出到期（含本 tick）的待判定施法并按段裁决。单遍压缩，出队顺序 = 入队顺序（确定性）。</summary>
         public List<CastResolution> DrainResolved(uint tick)
         {
             List<CastResolution>? resolved = null;
@@ -96,53 +126,83 @@ namespace KcpServer
             for (int read = 0; read < _pending.Count; read++)
             {
                 var pending = _pending[read];
-                if (pending.ResolveTick > tick) { _pending[write++] = pending; continue; }
-                var resolution = ResolveHits(pending);
-                if (resolution == null) continue;          // 施法者已死/已移除：丢弃这一刀（D-4）
-                (resolved ??= new List<CastResolution>()).Add(resolution);
+                bool keep = false;
+                while (!pending.Spent
+                       && pending.NextStage < pending.StageTicks.Length
+                       && pending.StageTicks[pending.NextStage] <= tick)
+                {
+                    var resolution = ResolveStage(pending);
+                    // **每个判定都产出一条**（可能 Hits 为空）——沿用原合同（原实现对每次判定都入列，
+                    // 空 Hits 由广播端 `BroadcastDamageAsync` 跳过）。按 Hits.Count 过滤会改变既有
+                    // 单段技能的返回值，可能打破既有测试。
+                    if (resolution != null)
+                        (resolved ??= new List<CastResolution>()).Add(resolution);
+                    pending.NextStage++;
+                }
+                if (!pending.Spent && pending.NextStage < pending.StageTicks.Length) keep = true;
+                if (keep) _pending[write++] = pending;
             }
             if (write < _pending.Count) _pending.RemoveRange(write, _pending.Count - write);
             return resolved ?? new List<CastResolution>();
         }
 
-        /// <summary>判定帧：复查施法者存活 → 几何 → 服务端掷骰 → 扣血。返回 null 表示丢弃。</summary>
-        private CastResolution? ResolveHits(PendingCast pending)
+        /// <summary>判定一段：复查施法者存活 → 几何（按投射物种类）→ 服务端掷骰 → 扣血。
+        /// 返回 null 表示丢弃（施法者已死/已移除/表项消失）。</summary>
+        private CastResolution? ResolveStage(PendingCast pending)
         {
             var caster = _store.GetPlayer(pending.CasterId);
-            if (caster == null || !caster.IsAlive) return null;
+            if (caster == null || !caster.IsAlive) return null;   // 施法者已死：整组丢弃
             if (!CombatRules.TryGet(pending.Request.SkillId, out var entry)) return null; // 决策已校验，防御分支
 
-            // 候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
-            //  玩家施法 → 玩家 + 怪物（PvE 挥击自动目标按锥内最近者自然命中怪物——
-            //    跨界误伤玩家 backlog 项落地；bot 压测实体同 P4 语义不排除）
-            //  怪物施法 → 仅已登录玩家（怪物互不打；bot 不可被怪物命中——**这条过滤不是死代码**）
-            var candidates = new List<CombatCandidate>();
-            foreach (var p in _store.All)
-            {
-                if (p.PlayerId == pending.CasterId) continue;
-                if (pending.IsNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
-                candidates.Add(new CombatCandidate(p.PlayerId,
-                    new Vec3(p.Position.X, p.Position.Y, p.Position.Z), p.IsAlive));
-            }
+            var candidates = BuildCandidates(pending);            // 原 ResolveHits 里的候选构造，抽成方法
+            var spec = pending.Projectile;
+            List<long> hitIds;
 
-            var hitIds = HitResolver.Resolve(
-                new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z),
-                caster.Rotation, pending.Request.TargetPlayerId, pending.Request.Shape, candidates);
+            if (spec == null)
+            {
+                hitIds = HitResolver.Resolve(
+                    new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z),
+                    caster.Rotation, pending.Request.TargetPlayerId, pending.Request.Shape, candidates);
+            }
+            else
+            {
+                if (!pending.OriginCaptured)
+                {
+                    // 首段捕获一次：剑气/火球沿施法者当时的朝向，不随后续移动改变
+                    pending.Origin = new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z);
+                    pending.Yaw = caster.Rotation;
+                    pending.OriginCaptured = true;
+                }
+                int stage = pending.NextStage;
+                hitIds = spec.Kind switch
+                {
+                    ProjectileKind.LineAll => HitResolver.ResolveLineAll(
+                        pending.Origin, pending.Yaw,
+                        stage * spec.Length / spec.Stages, spec.Length / spec.Stages,
+                        spec.HalfWidth, pending.GroupHitIds, candidates),
+                    ProjectileKind.LineNearestSplash => ResolveNearestStage(pending, spec, stage, candidates),
+                    ProjectileKind.CircleAtPoint => HitResolver.ResolveCircle(
+                        new Vec3(pending.Request.ImpactX, pending.Request.ImpactY, pending.Request.ImpactZ),
+                        ScaledRadius(spec, pending.Charge), candidates),
+                    _ => new List<long>(),
+                };
+            }
 
             var resolution = new CastResolution
             {
-                Accepted = true,
-                IsNpcCaster = pending.IsNpcCaster,
-                Broadcast = pending.Broadcast
+                Accepted = true, IsNpcCaster = pending.IsNpcCaster, Broadcast = pending.Broadcast
             };
             foreach (var targetId in hitIds)
             {
+                if (!pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
                 var target = _store.GetPlayer(targetId);
                 if (target == null) continue;
 
                 // 掷骰顺序不变：暴击照常掷，格挡只在最后乘倍率（确定性可复现——固定种子的
                 // 期望值不因格挡分支错位；调换这里两句会让既有种子序列整体漂移）
                 float damage = RollDamage(entry, out bool isCritical);
+                if (spec != null && spec.ChargeScales)
+                    damage *= 1f + (spec.ChargeDamageMaxScale - 1f) * pending.Charge;
 
                 // 格挡减伤（D-P4-8 服务端化）：防御中 + 攻击者落在受击者正面 BlockHalfAngleDeg 锥内
                 // + 盾未耗尽 ⇒ 伤害 × BlockDamageScale、扣耐久、命中条目标记 IsBlocked。
@@ -172,7 +232,46 @@ namespace KcpServer
                     HitZ = target.Position.Z
                 });
             }
+            if (spec != null && spec.Kind == ProjectileKind.LineNearestSplash && hitIds.Count > 0)
+                pending.Spent = true;
             return resolution;
+        }
+
+        /// <summary>候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
+        ///  玩家施法 → 玩家 + 怪物（PvE 挥击自动目标按锥内最近者自然命中怪物——
+        ///    跨界误伤玩家 backlog 项落地；bot 压测实体同 P4 语义不排除）
+        ///  怪物施法 → 仅已登录玩家（怪物互不打；bot 不可被怪物命中——**这条过滤不是死代码**）</summary>
+        private List<CombatCandidate> BuildCandidates(PendingCast pending)
+        {
+            var candidates = new List<CombatCandidate>();
+            foreach (var p in _store.All)
+            {
+                if (p.PlayerId == pending.CasterId) continue;
+                if (pending.IsNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
+                candidates.Add(new CombatCandidate(p.PlayerId,
+                    new Vec3(p.Position.X, p.Position.Y, p.Position.Z), p.IsAlive));
+            }
+            return candidates;
+        }
+
+        private static float ScaledRadius(ProjectileSpec spec, float charge)
+            => spec.ChargeScales
+                ? spec.Radius * (1f + (spec.ChargeAreaMaxScale - 1f) * charge)
+                : spec.Radius;
+
+        private List<long> ResolveNearestStage(PendingCast pending, ProjectileSpec spec, int stage,
+            List<CombatCandidate> candidates)
+        {
+            long nearest = HitResolver.ResolveLineNearest(
+                pending.Origin, pending.Yaw,
+                stage * spec.Length / spec.Stages, spec.Length / spec.Stages,
+                spec.HalfWidth, pending.GroupHitIds, candidates, out var hitPos);
+            if (nearest == 0) return new List<long>();
+            // 爆炸：以命中者位置为中心做半径 Round；组长已在 GroupHitIds 里，跳过重复
+            var splash = HitResolver.ResolveCircle(hitPos, spec.Radius, candidates);
+            splash.Remove(nearest);
+            splash.Insert(0, nearest);
+            return splash;
         }
 
         /// <summary>D4：战斗骰只有服务器掷——暴击 ×1.5；波动 0 与客户端 GameSettings.DamageFluctuation 默认对齐（D-P4-4）</summary>
