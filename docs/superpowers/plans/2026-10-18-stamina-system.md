@@ -1565,6 +1565,8 @@ namespace GameSys.PlayModeTests
 }
 ```
 
+> 执行复审修复时追加（`fd87066`）：`test_stamina_defend_cannot_start_while_exhausted`——力竭时按住防御不进入、松手再按仍不进入、`Refill` 后松开再按可正常起盾；通过反射 `InvokeHandleInput` 调用私有 `HandleInput`，不依赖地面/整帧 `Update`。这正是起盾条件必须包含 `_stamina.CanStartConsuming` 的回归保护。
+
 - [ ] **步骤 2：运行测试验证失败**
 
 ```bash
@@ -1683,7 +1685,8 @@ UpdateStamina(Time.deltaTime);
 ```csharp
 if (_inputManager.IsDefendHeld())
 {
-    if (!_defendStaminaLatch && _fsmManager.CanDefend && _cc.TryEnterDefend())
+    if (!_defendStaminaLatch && _stamina.CanStartConsuming
+        && _fsmManager.CanDefend && _cc.TryEnterDefend())
     {
         _fsmManager.EnterDefend();
     }

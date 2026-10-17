@@ -271,7 +271,8 @@ static bool IsSustained(SkillData d) =>
   ```csharp
   if (_inputManager.IsDefendHeld())
   {
-      if (!_defendStaminaLatch && _fsmManager.CanDefend && _cc.TryEnterDefend())
+      if (!_defendStaminaLatch && _stamina.CanStartConsuming
+          && _fsmManager.CanDefend && _cc.TryEnterDefend())
           _fsmManager.EnterDefend();
       else if (!_stamina.CanStartConsuming)
           _defendStaminaLatch = true;   // 力竭时按下/按住：必须松开再按
