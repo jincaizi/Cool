@@ -557,7 +557,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             // 保险丝：两处放行是主防线；万一未来改动让打断被拒，
             // ForceComplete 防技能卡在持续态、每帧扣 0 精、玩家被软锁。
-            if (!resolved) skill.ForceComplete();
+            // 不能只信 TryInterrupt 的返回值：矩阵放行但状态机拒绝时它仍返回 true，
+            // 必须按真实状态判定——蓄力看 Release 是否成功（成功必然进 Execution），
+            // 引导/旋转必须看到状态机真的落到 Cancelled。
+            bool applied = sub == SkillSubState.Charging
+                ? resolved
+                : skill.CurrentSubState == SkillSubState.Cancelled;
+            if (!applied) skill.ForceComplete();
         }
 
         private void ConsumeResources(SkillData skillData)

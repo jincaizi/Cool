@@ -194,6 +194,38 @@ namespace GameSys.PlayModeTests
         }
 
         [Test]
+        public void test_stamina_defend_latch_survives_recovery_while_held()
+        {
+            _entry.Stamina.Refill();
+            SetData(d => { d.BaseState = BaseState.Idle; d.IsGrounded = true; return d; });
+
+            _input.SetDefendHeld(true);
+            InvokeHandleInput();
+            Assert.IsTrue(_cc.IsDefending, "精力充足时按住防御应起盾");
+
+            _entry.Stamina.TryConsume(99.5f); // 剩 0.5，下一次 1.0 的防御消耗扣不动
+            InvokeUpdateStamina(1f);
+            Assert.IsFalse(_cc.IsDefending, "力竭必须强制收盾");
+            Assert.IsTrue(_entry.Stamina.IsExhausted);
+
+            // 保持按住：0.75s 回复延迟 + 约 0.6s 回到 20% 力竭解除线
+            for (int i = 0; i < 14; i++)
+                _entry.Stamina.Tick(0.1f);
+            Assert.IsFalse(_entry.Stamina.IsExhausted, "约 1.4s 后精力应已回到 20% 以上");
+            Assert.Greater(_entry.Stamina.Current, 20f);
+
+            InvokeHandleInput();
+            Assert.IsFalse(_cc.IsDefending,
+                "强制收盾的锁存必须跨越精力恢复，按住不得自动重举");
+
+            _input.SetDefendHeld(false);
+            InvokeHandleInput();                 // 松开清锁存
+            _input.SetDefendHeld(true);
+            InvokeHandleInput();
+            Assert.IsTrue(_cc.IsDefending, "松开再按应可正常起盾");
+        }
+
+        [Test]
         public void test_input_sprint_gate_respects_allowed()
         {
             _input.SetAdapter(new FakeInputAdapter());

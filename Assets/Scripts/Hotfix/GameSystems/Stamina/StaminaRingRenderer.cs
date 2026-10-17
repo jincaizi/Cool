@@ -26,6 +26,7 @@ namespace Hotfix.GameSystems.Stamina
         private readonly GameObject _root;
         private readonly RectTransform _rect;
         private readonly CanvasGroup _group;
+        private readonly Image _track;
         private readonly Image _fill;
         private readonly Sprite _sprite;
 
@@ -61,7 +62,7 @@ namespace Hotfix.GameSystems.Stamina
             _group.blocksRaycasts = false;
 
             _sprite = CreateRingSprite(size, thickness);
-            CreateImage("Track", Image.Type.Simple, TrackColor);
+            _track = CreateImage("Track", Image.Type.Simple, TrackColor);
             _fill = CreateImage("Fill", Image.Type.Filled, FillColor);
             _fill.fillMethod = Image.FillMethod.Radial360;
             _fill.fillOrigin = (int)Image.Origin360.Top;
@@ -87,6 +88,7 @@ namespace Hotfix.GameSystems.Stamina
             _wasExhausted = stamina != null && stamina.IsExhausted;
             _group.alpha = 0f;
             _fill.color = FillColor;
+            _track.color = TrackColor;
             _fill.fillAmount = stamina != null ? stamina.Ratio : 0f;
             _root.SetActive(false);
             _active = false;
@@ -155,7 +157,11 @@ namespace Hotfix.GameSystems.Stamina
             float scale = _canvas != null ? _canvas.scaleFactor : 1f;
             _rect.position = screen + new Vector3(_offset.x * scale, _offset.y * scale, 0f);
             _fill.fillAmount = ratio;
-            _fill.color = _flashTimer > 0f ? FlashColor : FillColor;
+            // 力竭瞬间 ratio=0，Fill 被缩成 0 像素；只染 Fill 的闪烁不可见。
+            // Track 是完整环，闪烁期间两环一起染红才能看到整环红闪。
+            bool flashing = _flashTimer > 0f;
+            _fill.color = flashing ? FlashColor : FillColor;
+            _track.color = flashing ? FlashColor : TrackColor;
             _group.alpha = _alpha;
         }
 

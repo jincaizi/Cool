@@ -55,6 +55,16 @@ namespace GameSys.PlayModeTests
                 .GetField("_root", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(_ring);
 
+        private Image Track =>
+            (Image)typeof(StaminaRingRenderer)
+                .GetField("_track", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(_ring);
+
+        private Image Fill =>
+            (Image)typeof(StaminaRingRenderer)
+                .GetField("_fill", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(_ring);
+
         [Test]
         public void test_stamina_ring_fill_matches_ratio()
         {
@@ -105,8 +115,20 @@ namespace GameSys.PlayModeTests
             _ring.Tick(_camera, 0.1f);
             Assert.IsTrue(_ring.IsFlashing, "力竭上升沿应闪红");
 
+            // 力竭瞬间 fillAmount=0，Fill 是 0 像素；闪烁必须染在完整环 Track 上才可见。
+            var trackFlash = Track.color;
+            Assert.Greater(trackFlash.r, 0.9f, "闪烁时 Track 应染红，否则画面上看不到红闪");
+            Assert.Less(trackFlash.g, 0.5f, "闪烁时 Track 应染红");
+            var fillFlash = Fill.color;
+            Assert.Greater(fillFlash.r, 0.9f, "闪烁时 Fill 也应染红");
+            Assert.Less(fillFlash.g, 0.5f, "闪烁时 Fill 也应染红");
+
             _ring.Tick(_camera, 0.4f);
             Assert.IsFalse(_ring.IsFlashing, "0.35s 后应停止");
+
+            var trackRestored = Track.color;
+            Assert.Greater(trackRestored.g, trackRestored.r, "闪烁结束 Track 应恢复深色");
+            Assert.Greater(Fill.color.g, 0.9f, "闪烁结束 Fill 应恢复绿色");
 
             _ring.Tick(_camera, 0.1f);
             Assert.IsFalse(_ring.IsFlashing, "力竭持续期间不得重复闪");
