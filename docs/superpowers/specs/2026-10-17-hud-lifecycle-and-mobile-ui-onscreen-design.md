@@ -231,7 +231,7 @@ public static bool Resolve(TouchOverride mode)
 | 风险 | 评估 |
 |---|---|
 | `FindObjectsOfType` 出现在 `OnDestroy` | 只在**本地角色被销毁**时执行一次（非每帧）；调用方限定在 `_statsProvider != null` 之后 |
-| 编辑器默认触屏后，右半屏的鼠标点击被 `LookArea` 吃掉 | `MobileUiRoot` 的 Canvas `sortingOrder=100`，而 `UIManager` 的层 Canvas 从 1000 起 ⇒ 面板永远在触控层之上，点面板不受影响；点世界（右半屏 = 视角）在触屏语义下本就是预期 |
+| 编辑器默认触屏后，右半屏/左下角的鼠标点击被 `LookArea`/摇杆吃掉 | `MobileUiRoot` 的 Canvas `sortingOrder=**2500**`（2026-10-17 实测；此前误记为 100，来源是 T6 的生成脚本而非场景实际值）——**高于 Base(1000)/Main(2000)、低于 Popup(3000)**。当前只有 Base 层的 HUD/TargetPanel：HUD 在左上、与右半屏/左下不重叠，TargetPanel 无按钮 ⇒ 无实际影响；**将来在 Base/Main 层放带按钮的面板时要当心**：落在触控 UI 区域内的按钮会被吃掉。Popup 层（选人面板）始终在触控层之上，且它启动即全屏打开——触控 UI 在确认前本来就不该可点。 |
 | 编辑器默认触屏让「键鼠可玩」这一习惯失效 | 整条键鼠通道（移动/视角/按键）整体被替换，见 §3.1；`ForceNoTouch` 一档可切回。**不叠加**（键盘的视角读鼠标轴、摇杆的读观察区，同一时刻只有一个适配器） |
 | 触控 UI 在编辑器默认出现，e2e 用例可能依赖「默认键鼠」 | 已核对：只有 `MobileTouchInputTests` 加载 DemoDay，且它用显式档位断言 |
 | 本设计修不了「玩家的 `Start` 早退（`CharacterController`/`Animator` 为空）」导致的 HUD 不显示 | 已知边沿：那种情况会打 `Debug.LogError`，属另一类问题 |
@@ -251,6 +251,8 @@ public static bool Resolve(TouchOverride mode)
 | 两套输入适配器是否叠加 | **不叠加**：`MobileInputBinder` 整体替换适配器；键盘的视角读 `Input.GetAxisRaw("Mouse X/Y")`，摇杆的读观察区 |
 | 编辑器里自动判定改真后，`TouchFeatureDetected()` 的编辑器分支 | 成为自动路径的死代码（显式档位/URL 覆盖不受影响）——已记入 §3.1 |
 | `IEffectTarget.Heal` / `ITargetable` HP 系列对 `_stats` 的守卫 | 本来就有；§1.4 的判空与它们是同一约定（2026-10-17 的 npc 视图 NRE 修复把 `IsAlive`/`TakeDamage` 补齐，同族已完整） |
-| 右半屏点击被 `LookArea` 吃掉时面板是否受影响 | 不受影响：`MobileUiRoot` Canvas `sortOrder=100` < 层 Canvas 1000+（实机读数） |
+| 右半屏点击被 `LookArea` 吃掉时面板是否受影响 | **本条在实现期被推翻**：`MobileUiRoot` 实际 `sortOrder=2500`（Base/Main 之上、Popup 之下）⇒ Base/Main 层落在触控区域内的按钮会被吃掉（当前布局无此情况，见 §6）；Popup 层安全 |
 
 **修正了三处**：①新增 §1.5（原文只在 §4 列断言，没写测试装置/等待配方/private 决定）；②§3.1 的「代价」原文只提 WASD/空格，实际是**整条键鼠通道**；③§3.2 的两处行号收紧（`:28-35`、`:18-19`）。
+
+**实现期补充修正（2026-10-17，任务 3）**：`MobileUiRoot` 的 Canvas 排序号实测为 **2500**（原文按 T6 生成脚本记为 100），据此更正 §6/§7 并补出「Base/Main 层落在触控区域内的按钮会被触控层吃掉」这条约束。同时任务 3 的测试装置补了一个计划遗漏：**选人面板启动即全屏打开（Popup 3000）会盖住触控层**，用例须按真实流程先 `CloseAsync<CharacterSelectPanel>()` 再做上屏/射线断言。
