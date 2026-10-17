@@ -141,6 +141,15 @@ namespace KcpNet.PlayModeTests
         /// 现有断言只到 `MobileUiRoot.activeSelf`，而「激活」不等于「可见可点」：节点可以
         /// 0 尺寸、在屏外、或被别的 raycast 目标盖住（T6 当年只有程序化探针，没有这条）。
         /// 显式档位而非 Auto：与本文件既有约定一致，不依赖宿主有没有触摸屏。
+        ///
+        /// 边界（不过度声称）：
+        /// - 本用例验的是**触控 UI 这一层**（几何/命中/模拟量）。`Value` → `JoystickInputAdapter`
+        ///   → `InputManager` 那条链已由本文件既有用例与 `MobileInputAdapterTests` 覆盖，不在此重复。
+        /// - 摇杆的**视觉样式**（当前是半透明方块背景 + 方块手柄，不是圆形摇杆头）不在断言范围。
+        /// - 真手指只在手机上能验；本用例走的是合成指针事件（与验收清单 3.2 的
+        ///   `EventSystem.RaycastAll` 那条路同一条）。
+        /// - 装置只到「关闭选人面板」这一步：**不覆盖**确认后 `OnClosed → LoadScene("DemoDay")`
+        ///   的场景重载与玩家重建（那是既有用例 ④ 与 `HudLifecycleTests` 的范围）。
         /// </summary>
         [UnityTest]
         public IEnumerator test_touch_ui_lands_on_screen_and_joystick_stays_analog()
