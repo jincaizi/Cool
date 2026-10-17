@@ -21,6 +21,7 @@ MonoBehaviour:
   _manaCost: 0
   _cooldown: 3
   _staminaCost: 0
+  _staminaDrainPerSecond: 15
   _animatorTrigger: Fireball
   _castClip: {fileID: 0}
   _releaseClip: {fileID: 0}

@@ -21,6 +21,7 @@ MonoBehaviour:
   _manaCost: 0
   _cooldown: 5
   _staminaCost: 0
+  _staminaDrainPerSecond: 20
   _animatorTrigger: SkillR
   _castClip: {fileID: 1827226128182048838, guid: 11cede249330b1744a2bc174ddb6111c, type: 3}
   _releaseClip: {fileID: 1827226128182048838, guid: 5729b70d60fdcac45bd03f32c0b8dbea, type: 3}
