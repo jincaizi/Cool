@@ -17,7 +17,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
     /// 报告准确信息"；已知失效场景：iPad 默认桌面视图下 `isMobilePlatform == false` 且
     /// `SystemInfo.deviceType == Desktop` —— 手机形态会静默退化成键鼠。
     ///
-    /// 因此判定顺序为：**URL 参数 > 人工档位 > (isMobilePlatform || 特性检测)**。
+    /// 因此判定顺序为：**URL 参数 > 人工档位 > 编辑器⇒真 > (isMobilePlatform || 特性检测)**。
     /// 特性检测在 WebGL 走 jslib（`navigator.maxTouchPoints` / `'ontouchend' in document`），
     /// 其它平台走 `Input.touchSupported`。
     /// </summary>
@@ -67,14 +67,25 @@ namespace Hotfix.GameSystems.Sys3C.Input
 #endif
         }
 
-        /// <summary>最终裁决：URL > 人工档位 > 自动判定</summary>
+        /// <summary>
+        /// 最终裁决：URL > 人工档位 > 自动判定。
+        ///
+        /// 自动判定在**编辑器**里恒为触屏（2026-10-17 产品决定）：摇杆与三按钮因此在编辑器里
+        /// 默认可见可用，方便迭代。`UNITY_EDITOR` 是编译期的，出包后仍走
+        /// `isMobilePlatform || 特性检测`（桌面浏览器里的面试 demo 保持键鼠）。
+        /// 编辑器里要键鼠：运行时把 `MobileInputBinder.TouchOverride` 拨成 `ForceNoTouch`。
+        /// </summary>
         public static bool Resolve(TouchOverride mode)
         {
             bool? fromUrl = FromUrlQuery();
             if (fromUrl.HasValue) return fromUrl.Value;
             if (mode == TouchOverride.ForceTouch) return true;
             if (mode == TouchOverride.ForceNoTouch) return false;
+#if UNITY_EDITOR
+            return true;   // 编辑器默认按触屏：摇杆 UI 可看可用（出包不含本分支）
+#else
             return Application.isMobilePlatform || TouchFeatureDetected();
+#endif
         }
     }
 }

@@ -9,7 +9,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
 {
     /// <summary>
     /// 移动端输入接线 —— 只在触屏形态生效（WebGL 跑在手机上即为触屏）。
-    /// PC 浏览器与编辑器维持键鼠，不影响既有验收。
+    /// PC **浏览器**维持键鼠；**编辑器默认按触屏**（摇杆 UI 可看可用，便于迭代），
+    /// 要键鼠就在运行时把 TouchOverride 拨成 ForceNoTouch。
     ///
     /// 本组件必须挂在**常驻激活**的对象上：`_mobileUiRoot` 默认不激活，
     /// 若挂在它自身之下，`Update` 永不执行，手机上 UI 永远不会出现。
@@ -30,7 +31,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// （面试现场若自动判据失效，靠的就是那个参数）。
         ///
         /// 本字段在运行时被读取（变化即重算），因此它同时是 PlayMode 测试进入移动端分支的接缝
-        /// （否则 `Application.isMobilePlatform` 在编辑器恒 false，那条分支按构造测不到）。
+        /// （编辑器现在**默认**就进那条分支，所以这条接缝仍是"显式档位"而非"Auto 的结果"）。
         /// </summary>
         public TouchOverride TouchOverride = TouchOverride.Auto;
 
