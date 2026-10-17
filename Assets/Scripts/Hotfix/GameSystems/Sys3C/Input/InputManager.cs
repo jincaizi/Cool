@@ -17,6 +17,17 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public float MoveSpeed { get; set; } = 5.0f;
         public float SprintSpeed { get; set; } = 9.0f;
 
+        /// <summary>力竭门禁：false 时 GetMoveCommand 不会产出冲刺。</summary>
+        public bool SprintAllowed { get; set; } = true;
+
+        private bool _sprintHeldFromUI;
+
+        /// <summary>测试/未来 UI 挂钩（与 SetDefendHeld 同形）；不新增手机按钮。</summary>
+        public void SetSprintHeld(bool held)
+        {
+            _sprintHeldFromUI = held;
+        }
+
         // 相机旋转灵敏度
         public float CameraSensitivityX { get; set; } = 2.0f;
         public float CameraSensitivityY { get; set; } = 2.0f;
@@ -82,7 +93,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         {
             Vector3 moveInput = _adapter.GetMoveInput();
 
-            bool sprintHeld = IsSprintHeld();
+            bool sprintHeld = IsSprintHeld() && SprintAllowed;
             float speed = sprintHeld ? SprintSpeed : MoveSpeed;
 
             if (moveInput.sqrMagnitude > 0.01f)
@@ -176,7 +187,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSprintHeld()
         {
-            return UnityInput.GetKey(KeyCode.LeftShift);
+            return _sprintHeldFromUI || UnityInput.GetKey(KeyCode.LeftShift);
         }
 
         // UI 按钮设置的防御状态（手游平台使用）

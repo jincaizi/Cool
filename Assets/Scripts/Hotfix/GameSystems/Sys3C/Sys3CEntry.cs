@@ -17,6 +17,8 @@ using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Skills.Runtime;
 using Hotfix.GameSystems.Monster;
+using Hotfix.GameSystems.Stamina;
+using Hotfix.GameSystems.Nameplate;
 
 namespace Hotfix.GameSystems.Sys3C
 {
@@ -67,6 +69,20 @@ namespace Hotfix.GameSystems.Sys3C
         [Header("Skills")]
         [SerializeField] private SkillData[] _characterSkills;
 
+        [Header("Stamina")]
+        [SerializeField] private float _maxStamina = 100f;
+        [SerializeField] private float _sprintStaminaPerSecond = 20f;
+        [SerializeField] private float _defendStaminaPerSecond = 10f;
+        [SerializeField] private float _staminaRegenPerSecond = 100f / 3f;
+        [SerializeField] private float _staminaRegenDelay = 0.75f;
+        [SerializeField, Range(0f, 1f)] private float _staminaExhaustRecoverRatio = 0.2f;
+
+        private StaminaSystem _stamina;
+        private bool _defendStaminaLatch;
+        private bool _staminaBound;
+
+        public StaminaSystem Stamina => _stamina;
+
         private Hotfix.GameSystems.Sys3C.Character.CharacterController _cc;
         private FSMManager _fsmManager;
         private SkillCoordinator _skillCoordinator;
@@ -91,6 +107,16 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void Start()
         {
+            _stamina = new StaminaSystem(new StaminaConfig
+            {
+                Max = _maxStamina,
+                SprintDrainPerSecond = _sprintStaminaPerSecond,
+                DefendDrainPerSecond = _defendStaminaPerSecond,
+                RegenPerSecond = _staminaRegenPerSecond,
+                RegenDelay = _staminaRegenDelay,
+                ExhaustRecoverRatio = _staminaExhaustRecoverRatio
+            });
+
             _currentHP = _maxHP;
 
             // D-P6-13：复活回初始生成点。未显式配置时按出生位置记录
@@ -123,6 +149,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             _skillCoordinator = new SkillCoordinator(new SkillOwnerProxy(transform));
             _skillCoordinator.SetDashComponent(_dashComponent);
+            _skillCoordinator.SetStamina(_stamina);
             _skillCoordinator.OnSkillActivated += HandleSkillActivated;
             _skillCoordinator.OnTargetHit += (target) =>
             {
@@ -192,6 +219,7 @@ namespace Hotfix.GameSystems.Sys3C
         private void Update()
         {
             TickRespawn(Time.deltaTime);
+            TryBindStaminaUi();
 
             // T12 甲-3：HP 脏检查（全项目唯一读数点）——服务端伤害/怪物伤害/复活回满
             // 都是写 _currentHP，这里统一推动 HUD 血条，不必在每个扣血点插桩。
@@ -202,6 +230,7 @@ namespace Hotfix.GameSystems.Sys3C
             }
 
             _inputManager.Update();
+            _inputManager.SprintAllowed = _stamina.CanStartConsuming;
             // P6 ③：相机旋转接线——HandleRotationInput 此前全项目零调用者，相机角度永远停在初始值。
             // 键鼠/手柄的观察输入由 InputManager 的 adapter 提供（PC 形态无需触屏适配）。
             if (_camera != null)
@@ -230,6 +259,7 @@ namespace Hotfix.GameSystems.Sys3C
             ApplyPushVector();
             _fsmManager.Update(Time.deltaTime);
             _skillCoordinator.Update(Time.deltaTime);
+            UpdateStamina(Time.deltaTime);
             _dashComponent.Update();
 
             // Dynamic movement/rotation control: respect skill settings
@@ -276,13 +306,18 @@ namespace Hotfix.GameSystems.Sys3C
             // 防御处理（按住右键举盾，松开放下）
             if (_inputManager.IsDefendHeld())
             {
-                if (_fsmManager.CanDefend && _cc.TryEnterDefend())
+                if (!_defendStaminaLatch && _fsmManager.CanDefend && _cc.TryEnterDefend())
                 {
                     _fsmManager.EnterDefend();
+                }
+                else if (!_stamina.CanStartConsuming)
+                {
+                    _defendStaminaLatch = true;
                 }
             }
             else
             {
+                _defendStaminaLatch = false;
                 if (_cc.IsDefending)
                 {
                     _cc.TryExitDefend();
@@ -377,6 +412,62 @@ namespace Hotfix.GameSystems.Sys3C
                 }
             }
 
+        }
+
+        private void TryBindStaminaUi()
+        {
+            if (_staminaBound) return;
+            var display = EntityDisplayManager.Instance;
+            if (display == null) return;
+
+            display.BindStamina(transform, _stamina, () => !_isDead && isActiveAndEnabled);
+            _staminaBound = true;
+        }
+
+        private void UpdateStamina(float deltaTime)
+        {
+            if (_isDead)
+            {
+                _stamina.Tick(deltaTime);
+                return;
+            }
+
+            var sub = _skillCoordinator.CurrentSubState;
+            bool sustained = sub == SkillSubState.Charging
+                          || sub == SkillSubState.Channeling
+                          || sub == SkillSubState.Spinning;
+
+            float staminaDt = float.IsFinite(deltaTime)
+                ? Mathf.Clamp(deltaTime, 0f, 0.1f)
+                : 0f;
+
+            if (!sustained && !_stamina.IsExhausted)
+            {
+                if (_cc.IsDefending && !_cc.StatusControllerAdapter.IsStunned)
+                {
+                    if (!_stamina.TryConsume(_defendStaminaPerSecond * staminaDt))
+                        ForceExitDefendByExhaustion();
+                }
+                else if (!_cc.IsDefending
+                         && !_cc.StatusControllerAdapter.IsStunned
+                         && _cc.Data.BaseState == BaseState.Sprint
+                         && _cc.Data.IsGrounded
+                         && !_cc.LockMovement
+                         && _fsmManager.Coordinator.ActiveLayer != LayerType.Hit)
+                {
+                    _stamina.TryConsume(_sprintStaminaPerSecond * staminaDt);
+                }
+            }
+
+            _stamina.Tick(deltaTime);
+        }
+
+        private void ForceExitDefendByExhaustion()
+        {
+            _defendStaminaLatch = true;
+            if (!_cc.IsDefending) return;
+            _cc.TryExitDefend();
+            _fsmManager.ExitDefend();
         }
 
         private string _lastSkillTrigger;
@@ -690,6 +781,8 @@ namespace Hotfix.GameSystems.Sys3C
         public void ApplyServerRespawn(float hp)
         {
             _currentHP = hp;
+            _stamina.Refill();
+            _defendStaminaLatch = false;
             _isDead = false;
             _fsmManager.HitFSM.EnterRespawn();
             // 死亡锁（StateCoordinator.HandleDeath 的 LockState + LockLayer(Base)）必须一起解除，
@@ -711,6 +804,8 @@ namespace Hotfix.GameSystems.Sys3C
 
             _isDead = false;
             _currentHP = _maxHP;
+            _stamina.Refill();
+            _defendStaminaLatch = false;
             // N4：死亡剪辑播完后 HitFSM 停在 **Down**（躺卧）而不是 Death；
             // 旧路径用的 Resurrect() 只认 Death，在这里会静默不生效 ⇒ 复活者永远躺着，
             // 且 Down 的霸体让之后每一次命中都被优先级拒掉。EnterRespawn 覆盖 Down 与 Death。
@@ -759,6 +854,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void OnDestroy()
         {
+            EntityDisplayManager.Instance?.UnbindStamina(transform);
             PhysicsRegistry.Instance.Unregister(this);
 
             // T12 甲-3：本地角色没了（阵亡/断线回选人/换角色）→ 收起 HUD 并解绑。
