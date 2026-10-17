@@ -17,9 +17,9 @@
 |---|---|---|
 | 权威归属 | **纯客户端** | 不改协议、不改服务端；演示/PvE 可接受"改客户端可绕过"的限制 |
 | 消耗来源 | 奔跑 / 举盾 / 引导 / 旋转 / 蓄力（含可蓄力投射物） | 用户点名的三类 + 蓄力类完整覆盖 |
-| 每帧消耗数 | **1 种**（持续技能 > 举盾 > 奔跑） | 避免双扣；技能与举盾本就互斥，只有奔跑会重叠 |
+| 每帧消耗数 | **1 种**（持续技能 > 举盾 > 奔跑） | 避免双扣；非持续技能期间若**实际冲刺**仍照常扣奔跑（2026-10-18 审查修订） |
 | 奔跑判定 | `_cc.Data.BaseState == BaseState.Sprint` | 真实移动状态；站着按 Shift、锁移动、眩晕、死亡都不空扣 |
-| 空中冲刺 | **不扣** | `JumpStart/JumpAir` 时 BaseState 不是 Sprint；冲刺视为地面动作 |
+| 空中冲刺 | **不扣** | `BaseState == Sprint && IsGrounded` 双重判定；Jump/走下平台都不扣，冲刺视为地面动作 |
 | 技能扣精阶段 | 仅 `Charging / Channeling / Spinning` | Casting 是前摇、Execution/Recovery 是收尾，不是持续阶段 |
 | 持续阶段 rate=0 | 压制奔跑扣精、但不扣精 | 角色在放技能，不是在冲刺 |
 | 力竭行为 | 中断当前动作 + **20% 门槛** | 最接近塞尔达的"力竭"；防 0% 附近反复中断/重启 |
@@ -62,7 +62,7 @@
 1. 本地玩家拥有精力资源，奔跑/举盾/持续技能按秒消耗。
 2. 归零力竭：立即中断当前动作，回到 20% 前不能再开始消耗动作。
 3. 角色右上方显示绿色粗环：未满显示、消耗缩短、回满淡出、归零闪红。
-4. 纯客户端，不新增协议字段、不改服务端、不改场景/预制体。
+4. 纯客户端，不新增协议字段、不改服务端、不改场景；默认值不需要改预制体。
 5. 数据可调：消耗/回复数值在 Inspector，技能耗率在技能资产。
 
 ### 非目标
@@ -100,14 +100,15 @@ public struct StaminaConfig
 | `IsExhausted` | 曾经扣到 0；回到 `Max × ExhaustRecoverRatio` 时清除 |
 | `IsFull` | `Current >= Max - 0.001` |
 | `CanStartConsuming` | `!IsExhausted && Current > 0` |
-| `TryConsume(amount)` | `amount <= 0` 直接返回 true 且**不重置回复延迟**；`Current < amount` ⇒ `Current = 0`、`IsExhausted = true`、重置延迟、返回 **false**；否则扣减、重置延迟、返回 true |
-| `Tick(dt)` | 累加"距上次消耗尝试"的时间；≥ `RegenDelay` 后按 `RegenPerSecond × dt` 回复；回复到阈值时清除 `IsExhausted` |
+| `TryConsume(amount)` | `amount` 非有限或 `<= 0` 直接返回 true 且**不重置回复延迟**；`Current < amount` ⇒ `Current = 0`、`IsExhausted = true`、重置延迟、返回 **false**；否则扣减、重置延迟、返回 true |
+| `Tick(dt)` | `dt` 非有限或为负按 0；单帧钳到 `[0, 0.1]`。累加"距上次消耗尝试"的时间；≥ `RegenDelay` 后按 `RegenPerSecond × dt` 回复；回复到阈值时清除 `IsExhausted` |
 | `Refill()` | `Current = Max`、清 `IsExhausted`、重置延迟 |
 
 **契约**
 - 消耗失败会**把当前值清零**（UI 显示空环），并返回 false；调用方必须立即停止动作。
 - 回复计时使用内部累加器，不读 `Time.time`，EditMode 测试可确定性模拟。
-- 构造时钳制配置：`Max >= 1`、各速率 `>= 0`、`RegenDelay >= 0`、`ExhaustRecoverRatio ∈ [0,1]`。
+- **数值防护**（对齐本项目 `MovementValidator` 的 NaN/∞ 防护纪律）：`TryConsume` 忽略非有限/≤0 的 amount；`Tick` 忽略非有限/负 dt 并把单帧 dt 钳到 `[0, 0.1]`；构造时把非有限配置回退到默认值，并钳制 `Max >= 1`、各速率 `>= 0`、`RegenDelay >= 0`、`ExhaustRecoverRatio ∈ [0,1]`。
+- 消耗侧的 dt 同样钳到 `[0, 0.1]`（见 §5.3），避免一次卡顿把整条精力抽空。
 
 ### 3.2 默认数值
 
@@ -133,13 +134,46 @@ public struct StaminaConfig
 
 在 `Sys3CEntry.Update` 中、`_skillCoordinator.Update()` **之后**调用 `UpdateStamina(dt)`：
 
-1. **持续技能阶段**（`Charging / Channeling / Spinning`）→ 由 `SkillCoordinator` 在自身 `Update` 内扣技能耗率。
-2. **任何其他活跃技能**（Casting/Execution/Recovery 等）→ 不扣举盾/奔跑。
-3. **举盾中**（`_cc.IsDefending && !眩晕 && !死亡`）→ 扣举盾。
-4. **实际地面冲刺**（`_cc.Data.BaseState == BaseState.Sprint && !举盾 && !眩晕 && !死亡`）→ 扣奔跑。
-5. 都没有 → 只 `Tick` 回复。
+1. **持续技能阶段**（`Charging / Channeling / Spinning`）→ 由 `SkillCoordinator` 在自身 `Update` 内扣技能耗率；本帧不再考虑举盾/奔跑（rate=0 也压制）。
+2. **举盾中**（`_cc.IsDefending && !_cc.StatusControllerAdapter.IsStunned && !_isDead`）→ 扣举盾。
+3. **实际地面冲刺**（`_cc.Data.BaseState == BaseState.Sprint && _cc.Data.IsGrounded && !举盾 && !眩晕 && !死亡 && _fsmManager.Coordinator.ActiveLayer != LayerType.Hit`）→ 扣奔跑。
+4. 都没有 → 只 `Tick` 回复。
 
-若本帧技能扣精已把精力置为力竭，跳过 3/4 分支，只 `Tick`。最后**每帧只调用一次** `_stamina.Tick(dt)`。技能扣精保持在内聚位置（`SkillCoordinator`），优先级由 `Sys3CEntry` 统一裁决。
+**非持续技能（Casting/Execution/Recovery）本身不扣精，但期间若实际冲刺（BaseState=Sprint），仍按第 3 条扣奔跑**——这是 2026-10-18 审查修订：旧版"任何活跃技能期间都不扣奔跑"会让长前摇/收尾期间按住 Shift 以冲刺速度移动却完全不付精力。
+
+若本帧技能扣精已把精力置为力竭，跳过 2/3 分支，只 `Tick`。最后**每帧只调用一次** `_stamina.Tick(dt)`。技能扣精保持在内聚位置（`SkillCoordinator`），优先级由 `Sys3CEntry` 统一裁决。
+
+```csharp
+private void UpdateStamina(float dt)
+{
+    if (_isDead) { _stamina.Tick(dt); return; }
+
+    var sub = _skillCoordinator.CurrentSubState;
+    bool sustained = sub == SkillSubState.Charging
+                  || sub == SkillSubState.Channeling
+                  || sub == SkillSubState.Spinning;
+    float staminaDt = float.IsFinite(dt) ? Mathf.Clamp(dt, 0f, 0.1f) : 0f;
+
+    if (!sustained && !_stamina.IsExhausted)
+    {
+        if (_cc.IsDefending && !_cc.StatusControllerAdapter.IsStunned)
+        {
+            if (!_stamina.TryConsume(_defendStaminaPerSecond * staminaDt))
+                ForceExitDefendByExhaustion();      // 强制收盾 + 置锁存
+        }
+        else if (!_cc.IsDefending
+                 && !_cc.StatusControllerAdapter.IsStunned
+                 && _cc.Data.BaseState == BaseState.Sprint
+                 && _cc.Data.IsGrounded
+                 && _fsmManager.Coordinator.ActiveLayer != LayerType.Hit)
+        {
+            _stamina.TryConsume(_sprintStaminaPerSecond * staminaDt);
+        }
+    }
+
+    _stamina.Tick(dt);
+}
+```
 
 ### 4.2 每种技能 × 每个阶段
 
@@ -168,6 +202,8 @@ static bool IsSustained(SkillData d) =>
 
 只有 `IsSustained(d) && d.StaminaDrainPerSecond > 0` 的技能会在力竭时被拒绝激活、才会扣精。
 
+**持续性优先但不豁免非持续技能期间的冲刺**：`Charging / Channeling / Spinning` 期间压制举盾/奔跑；`Casting / Execution / Recovery` 期间若玩家实际在冲刺，照常扣奔跑。
+
 ### 4.3 各技能连招/中断语义
 
 - **不退还**：已扣精力与已起冷却在任何中断路径都不返还。
@@ -182,15 +218,16 @@ static bool IsSustained(SkillData d) =>
 | 场景 | 扣精 | 回复 |
 |---|---|---|
 | 站立 / 行走 | 否 | 是（延迟后） |
-| 地面冲刺（BaseState=Sprint） | 20/s | 否 |
+| 地面冲刺（BaseState=Sprint，含非持续技能期间） | 20/s | 否 |
+| 非持续技能（Casting/Execution/Recovery）期间实际冲刺 | 20/s | 否 |
 | 空中保持 Shift | 否 | 是 |
 | 按住 Shift 但站着 | 否 | 是 |
 | 举盾中（未眩晕） | 10/s | 否 |
 | 举盾中眩晕 | 否 | 是 |
 | 持续技能阶段 rate>0 | rate/s | 否 |
 | 持续技能阶段 rate=0 | 否 | 是 |
-| 技能 Casting / Execution / Recovery | 否 | 是 |
-| 普攻 / 瞬发技能期间 | 否 | 是 |
+| 技能 Casting / Execution / Recovery（未冲刺） | 否 | 是 |
+| 普攻 / 瞬发技能期间（未冲刺） | 否 | 是 |
 | 锁移动 / 眩晕 / 受击 | 否 | 是 |
 | 死亡 | 否（环隐藏） | 是；复活回满 |
 | 力竭后未到 20% | 否（消耗动作被拒） | 是 |
@@ -212,9 +249,13 @@ static bool IsSustained(SkillData d) =>
   bool sprintHeld = IsSprintHeld() && SprintAllowed;
   ```
   默认 true，现有调用方/测试行为不变。
-- `Sys3CEntry.Update` 在 `GetMoveCommand` 之前：`_inputManager.SprintAllowed = !_stamina.IsExhausted;`
-- 扣精条件：`!_skillCoordinator.IsSkillActive && !_cc.IsDefending && !StatusControllerAdapter.IsStunned && !_isDead && _cc.Data.BaseState == BaseState.Sprint`。
-- 扣精量：`SprintDrainPerSecond × dt`。
+- `Sys3CEntry.Update` 在 `GetMoveCommand` 之前：`_inputManager.SprintAllowed = _stamina.CanStartConsuming;`
+- 扣精条件：`_cc.Data.BaseState == BaseState.Sprint && _cc.Data.IsGrounded && !_cc.IsDefending && !_cc.StatusControllerAdapter.IsStunned && !_isDead && _fsmManager.Coordinator.ActiveLayer != LayerType.Hit`。
+  - `IsGrounded` 是必须的：走下平台时 `IsGrounded` 会先变 false，但 `BaseState` 可能仍停在 Sprint；没有这个守卫会"空中空扣"。
+  - `StatusControllerAdapter` 是 [CharacterController.cs:121-129](Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs#L121-L129) 的**实例属性**，不是静态类；必须写 `_cc.StatusControllerAdapter.IsStunned`。
+  - `ActiveLayer != Hit` 用来兑现"受击不扣奔跑"——被打时 BaseState 可能仍停在 Sprint。
+- 扣精量：`SprintDrainPerSecond × dt`（dt 钳到 `[0, 0.1]`）。
+- 非持续技能（Casting/Execution/Recovery）本身不扣精；但期间若实际冲刺（BaseState=Sprint），仍按本条扣奔跑。持续技能阶段由优先级压制，不会走到这里。
 - 精力归零当帧仍可能以冲刺速度移动一帧；下一帧 `SprintAllowed=false`，自动回到走路。
 - 力竭门禁只影响"是否进入冲刺"；举盾限速、技能移速倍率、空中控制等既有逻辑**不变**。
 
@@ -235,7 +276,7 @@ static bool IsSustained(SkillData d) =>
       if (_cc.IsDefending) { _cc.TryExitDefend(); _fsmManager.ExitDefend(); }
   }
   ```
-- 举盾期间每帧 `TryConsume(DefendDrainPerSecond × dt)`；失败 ⇒ `TryExitDefend()` + `ExitDefend()` + 置锁存。
+- 举盾期间每帧 `TryConsume(DefendDrainPerSecond × staminaDt)`（`staminaDt` 为钳制后的 dt，见 §4.1）；失败 ⇒ `TryExitDefend()` + `ExitDefend()` + 置锁存。
 - 眩晕/死亡期间不扣；盾破/背面受击的既有退出路径不变。
 - 服务端 `IsDefending` 上报链路不改：强制收盾后下一次位置同步自然上报 `false`。
 
@@ -272,22 +313,27 @@ private void UpdateSustainedStamina(float deltaTime)
     if (sub != Charging && sub != Channeling && sub != Spinning) return;
     float rate = skill.Data.StaminaDrainPerSecond;
     if (rate <= 0f) return;
-    if (!_stamina.TryConsume(rate * deltaTime))
+    float staminaDt = float.IsFinite(deltaTime) ? Mathf.Clamp(deltaTime, 0f, 0.1f) : 0f;
+    if (!_stamina.TryConsume(rate * staminaDt))
         HandleStaminaDepleted(skill, sub);
 }
 
 private void HandleStaminaDepleted(SkillExecutor skill, SkillSubState sub)
 {
-    switch (sub)
+    bool resolved = sub switch
     {
-        case Charging:   TryReleaseCharge(skill.SkillId); break;
-        case Channeling:
-        case Spinning:   skill.TryInterrupt(InterruptionSource.StaminaExhausted); break;
-    }
+        SkillSubState.Charging => TryReleaseCharge(skill.SkillId),
+        SkillSubState.Channeling or SkillSubState.Spinning
+            => skill.TryInterrupt(InterruptionSource.StaminaExhausted),
+        _ => false
+    };
+    // 保险丝：两处放行是主防线；万一未来改动让打断被拒，
+    // ForceComplete 防技能卡在持续态、每帧扣 0 精、玩家被软锁。
+    if (!resolved) skill.ForceComplete();
 }
 ```
 
-处理完立即返回；被中断后的清理/缓冲输入由现有事件链负责。
+处理完立即返回；被中断后的清理/缓冲输入由现有事件链负责。消耗侧 dt 同样钳到 `[0, 0.1]`，避免一次卡顿把整条精力抽空。
 
 ### 5.4 新打断来源
 
@@ -310,30 +356,32 @@ private void HandleStaminaDepleted(SkillExecutor skill, SkillSubState sub)
   public void UnbindStamina(Transform owner);   // 按 Transform 引用匹配
   ```
 - `LateUpdate` 在 `_nameplate.Tick(_camera)` 之后调用 `_staminaRing?.Tick(_camera, Time.deltaTime)`；`OnDestroy` 调用 `Cleanup()`。
+- **懒绑定**：`Sys3CEntry.Start` 先尝试绑定；若 `EntityDisplayManager.Instance` 为空（异步初始化/测试场景），在 `Update` 里用 `_staminaBound` 做一次性重试。避免一次空引用就永远不显示环。
+- **复用复位**：`Bind` 必须复位视觉状态——`CanvasGroup.alpha = 0`、红闪计时 = 0、`fillAmount = Current/Max`、可见性重算。否则角色重选时新角色会继承旧角色的红环/半透明环。
 - 无 `EntityDisplayManager` 的场景（测试）只跑逻辑，不报错。
 
 ### 6.2 视觉规格（风格 A）
 
 | 项 | 规格 |
 |---|---|
-| 外径 | 64 参考像素（CanvasScaler 缩放） |
-| 环宽 | 约 10px（128×128 贴图，厚 20px） |
+| 外径 | 默认 64 参考像素（CanvasScaler 缩放；`EntityDisplayManager` 序列化可调） |
+| 环宽 | 默认约 10px（128×128 贴图，厚 20px；序列化可调） |
 | 背景环 | 同形状白环染 `rgba(10,20,12,0.55)` |
 | 填充环 | 绿色 `#5DFF6A` |
-| 填充方式 | `Image.Type.Filled` + `Radial360`，`fillOrigin = Top`，`fillClockwise = false`（12 点起逆时针缩短） |
+| 填充方式 | `Image.Type.Filled` + `Radial360`，`fillOrigin = Top`，`fillClockwise = false`（12 点起逆时针缩短）；实现后目视确认一次方向 |
 | 贴图 | 运行时生成 128×128 抗锯齿白环；一次创建，`Cleanup` 销毁 |
-| 定位 | `owner.position + up × 1.7m` 投影到屏幕；相机后方（z≤0）隐藏 |
-| 偏移 | `(64, 24) × canvas.scaleFactor`（保证不同分辨率下与环同比例） |
-| 安全边距 | 环心钳制在屏幕内，边距 `(半径 + 4) × scaleFactor` |
+| 定位 | `owner.position + up × 1.7m`（默认值，序列化可调）投影到屏幕 |
+| 偏移 | `(64, 24) × canvas.scaleFactor`（默认值，保证不同分辨率下与环同比例） |
+| 出屏处理 | 相机后方（z≤0）或锚点投影出屏 ⇒ **整环隐藏**；**不做边缘钳制**（避免环粘在屏幕边缘像 UI bug） |
 | 显示 | 精力未满：0.1s 淡入；回满：0.25s 淡出后停用；淡出中重新消耗则反向淡入 |
 | 力竭 | `IsExhausted` 上升沿整环闪红 0.35s，只触发一次 |
-| 死亡 | 绑定传入 `() => !_isDead`；死亡期间整环隐藏 |
+| 死亡/禁用 | 绑定传入 `() => !_isDead && isActiveAndEnabled`；死亡或临时禁用期间整环隐藏 |
 | 交互 | 两张 `Image.raycastTarget = false`；`CanvasGroup.blocksRaycasts = false` |
 | 层级 | 显示时 `SetAsLastSibling()`，压在名牌/浮动文字之上 |
 
 ### 6.3 测试可见状态
 
-`StaminaRingRenderer` 暴露只读 `FillAmount` 与 `IsVisible` 供测试断言，不额外增加运行时代价。
+`StaminaRingRenderer` 暴露只读 `FillAmount` 与 `IsVisible` 供测试断言，不额外增加运行时代价。尺寸/偏移/头锚点来自 `EntityDisplayManager` 的序列化配置（默认值见 §6.2），测试可直接读取。
 
 ---
 
@@ -364,17 +412,22 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 
 `Sys3CEntry` 新增 `[Header("Stamina")]` 序列化字段（默认值见 §3.2），并暴露 `public StaminaSystem Stamina => _stamina;` 供测试/调试。
 
+### 7.4 表现参数
+
+`EntityDisplayManager` 增加 `[Header("Stamina Ring")]` 序列化字段：外径（默认 64）、环宽（默认 10）、屏幕偏移（默认 64,24）、头锚点高度（默认 1.7m）。默认值即 §6.2；真机调参时保存对应场景/预制体即可，不需要改代码重出包。
+
 ---
 
 ## 8. 生命周期
 
 | 时机 | 行为 |
 |---|---|
-| `Sys3CEntry.Start` | **最先**创建 `StaminaSystem`（早于引用判空）；`_skillCoordinator` 创建后再注入 `SetStamina(...)`；随后绑定 UI |
+| `Sys3CEntry.Start` | **最先**创建 `StaminaSystem`（早于引用判空）；`_skillCoordinator` 创建后再注入 `SetStamina(...)`；随后尝试绑定 UI |
+| UI 绑定 | `EntityDisplayManager.Instance` 为空时，`Update` 里用 `_staminaBound` 做一次性懒绑定 |
 | 死亡 | 不消耗；环隐藏；资源继续回复（不可见） |
 | 单机复活 `TickRespawn` | `Refill()` + 清防御锁存 |
 | 联网复活 `ApplyServerRespawn` | `Refill()` + 清防御锁存 |
-| 角色重选 | 旧角色 `OnDestroy` 解绑（按引用匹配，不会误清新角色的环）；新角色 `Start` 重新绑定 |
+| 角色重选 | 旧角色 `OnDestroy` 解绑（按引用匹配，不会误清新角色的环）；新角色 `Start` 重新绑定，`Bind` 复位视觉状态 |
 | 场景切换 | `EntityDisplayManager` 常驻；环随解绑隐藏 |
 
 ---
@@ -390,6 +443,9 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 - `test_stamina_try_consume_insufficient_clamps_to_zero_and_returns_false`
 - `test_stamina_zero_consume_does_not_reset_regen_delay`
 - `test_stamina_refill_restores_full_and_clears_exhausted`
+- `test_stamina_non_finite_consume_is_noop`
+- `test_stamina_non_finite_and_negative_dt_is_ignored`
+- `test_stamina_construct_clamps_non_finite_config`
 
 全部用固定 `dt`（如 1/60）循环推进，不读真实时间。
 
@@ -402,7 +458,7 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 - `test_skill_combo_zero_drain_activates_while_exhausted`
 - `test_skill_sustained_with_drain_cannot_activate_while_exhausted`
 - `test_skill_casting_does_not_drain`
-- `test_skill_execution_recovery_do_not_drain`
+- `test_skill_execution_recovery_skill_drain_is_zero`（技能自身不扣；冲刺扣精由 `Sys3CEntry` 另行裁决）
 
 复用现有 `FakeTimeMachine` / `TestHelpers.FakeTarget` 范式。
 
@@ -419,6 +475,9 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 - `test_stamina_ring_position_is_right_of_head_and_scales_with_canvas`
 - `test_stamina_ring_images_disable_raycast`
 - `test_stamina_ring_exhaust_flash_triggers_once`
+- `test_stamina_ring_rebind_resets_visual_state`
+- `test_stamina_ring_unbind_ignores_other_owner`
+- `test_stamina_ring_hides_when_anchor_offscreen`
 
 ### 9.5 验收数字（人工 + MCP 截图）
 
@@ -430,9 +489,12 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 | 满精力旋转 | 3s 共扣 60，结束剩 40 |
 | 满精力蓄力 | 2s 共扣 30 |
 | 先冲刺 3s 再旋转 | 旋转约 2s 时力竭并中断 |
+| 非持续技能 Execution/Recovery 期间按住 Shift 移动 | 照常扣奔跑 20/s（验证"实际冲刺付费"） |
+| 环收缩方向 | 12 点起逆时针；若反了改 `fillClockwise` |
+| 角色出屏 / 相机后方 | 环隐藏（不在屏幕边缘停留） |
 | 满精力 | 环不可见 |
 | 死亡 | 环隐藏；复活满精力、不可见 |
-| 手机竖屏 | 环清晰、不挡摇杆/按钮 |
+| 手机竖屏 | 环清晰、不挡摇杆/按钮；默认 64 参考像素约 25 物理像素，偏小则调序列化外径 |
 
 ---
 
@@ -461,7 +523,7 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 - `Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset` — 15
 - `Assets/PreRes/SkillsCfg/Fireball_SkillQ.asset` — 15
 
-**不改**：协议、服务端、场景、玩家预制体、HUD 预制体。
+**不改**：协议、服务端、场景/预制体（默认值即可）。若在 Inspector 调环尺寸/偏移或精力数值，需要保存对应场景/预制体——这是可选的调参动作，不是实现前置。
 
 ---
 
@@ -472,24 +534,31 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 1. **纯客户端权威**：修改过的客户端可绕过精力限制。
 2. 远程玩家/怪物没有精力环，也没有精力同步。
 3. 手机端没有冲刺按钮，精力主要作用于举盾与技能。
-4. 空中保持 Shift 不扣奔跑精力（`BaseState` 已离开 Sprint）。
+4. 空中保持 Shift 不扣奔跑精力（`IsGrounded` 为 false；包含跳跃与走下平台）。
 5. 持续阶段 `rate=0` 会压制奔跑扣精但不扣精（技能动作优先）。
 6. 已扣精力/已起冷却不退还。
 7. `StaminaCost`（瞬发一次性消耗）本次不接线。
 8. 20% 解锁阈值不在 UI 上标记。
-9. 环在角色出屏/相机后方时隐藏，没有屏外指示。
+9. 环在锚点出屏/相机后方时隐藏，没有屏外指示。
 10. 环为屏幕空间投影，不随相机距离缩放。
+11. **在线旋转的既有语义**：服务端把 20002 旋转按**单次圆形判定**结算（`CombatRules` 表值 160 伤害、hitDelay 0）。客户端力竭中断只会停止本地表现/后续 tick，**撤不回服务端已裁决的伤害**；协议没有取消消息，本设计不改这一点。
+12. **在线引导技能**：`CombatRules` 明说"引导仍不进表，服务器拒收为未知技能"。即使未来加了引导资产，联网下也不会产生服务端伤害；本设计只保证本地精力语义。
+13. **强制收盾的同步窗口**：服务端 `IsDefending` 由下一次位置同步刷新，因此力竭收盾后最多有一个同步间隔（约 1 tick）仍被服务端视为举盾中。
+14. 环默认 64 参考像素，手机竖屏约 25 物理像素；已提供序列化外径/偏移供真机调参。
 
 ### 风险与缓解
 
 | 风险 | 缓解 |
 |---|---|
-| 力竭打断静默失败（矩阵/状态机任一漏改） | 两处放行 + 两条 EditMode 回归测试 |
+| 力竭打断静默失败（矩阵/状态机任一漏改） | 两处放行 + 两条 EditMode 回归测试 + `ForceComplete` 保险丝 |
 | 技能完成回调导致 `_currentSkill` 重入 | 扣精前抓局部引用、处理完立即 return |
+| 非有限数值污染精力 | `TryConsume`/`Tick`/构造三处防护 + EditMode 断言 |
 | 资产字段序列化静默失败 | 资产值 EditMode 断言 |
 | 环拦截触屏/鼠标 | `raycastTarget=false` + PlayMode 断言 |
-| 角色重选误清新环 | `Unbind(Transform)` 按引用匹配 |
-| 双扣 | 单帧单一消耗优先级；技能活跃时跳过举盾/奔跑 |
+| 角色重选误清新环 | `Unbind(Transform)` 按引用匹配 + PlayMode 断言 |
+| 角色重选继承旧环视觉状态 | `Bind` 复位 alpha/红闪/fill + PlayMode 断言 |
+| `EntityDisplayManager` 异步初始化导致漏绑 | `_staminaBound` 一次性懒绑定 |
+| 双扣 | 单帧单一消耗优先级：持续技能 > 举盾 > 奔跑；非持续技能期间只按 `BaseState.Sprint` 扣奔跑 |
 | UI 在不同分辨率下偏移失真 | 偏移乘 `canvas.scaleFactor`；PlayMode 位置断言 |
 
 ---
