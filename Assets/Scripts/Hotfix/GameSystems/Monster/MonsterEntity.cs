@@ -33,7 +33,9 @@ namespace Hotfix.GameSystems.Monster
         private Vector3 _spawnPoint;
         private Collider _collider;
 
-        bool IDamageable.IsAlive => !_stats.IsDead;
+        // _stats 由 Init 建立：npc 视图（联网模式的怪物表现）从不调 Init，所以这里必须判空 ——
+        // 否则视图会被判成「活着」而选进目标集合。同文件 ITargetable 的 HP 系列本来就在判空。
+        bool IDamageable.IsAlive => _stats != null && !_stats.IsDead;
         Transform IDamageable.Transform => transform;
 
         public event Action OnDeathComplete;
@@ -171,7 +173,10 @@ namespace Hotfix.GameSystems.Monster
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection, HitContact contact)
         {
-            if (_stats.IsDead) return;
+            // 未 Init（npc 视图）⇒ 本轮伤害与它无关，安静返回。**这条守卫不能省**：视图的剥离是
+            // 「先禁再销毁」，销毁帧末才生效，而 `enabled = false` 挡不住接口调用 —— 创建帧内
+            // 仍可能被同帧判定命中（与 StripCollider 注释里那条窗口同类）。
+            if (_stats == null || _stats.IsDead) return;
 
             // None → 方向重建（无碰撞箱路径也能拿真实部位）
             HitContact resolved = contact.HasContact || _collider == null

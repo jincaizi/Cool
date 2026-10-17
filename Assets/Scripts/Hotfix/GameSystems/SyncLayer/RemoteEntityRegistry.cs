@@ -517,6 +517,8 @@ namespace Hotfix.GameSystems.SyncLayer
                     var model = Object.Instantiate(prefab, _root, false);
                     // 名字**保留预制体名作前缀**再补实体身份：验收/诊断要靠前缀认"这条是真模型还是球体"
                     model.name = $"{prefab.name}_{playerId}_T{snapshot.TemplateId}";
+                    // 视图是**表现**，不得参与伤害链：摘掉预制体自带的玩法组件（见 StripGameplay）。
+                    StripGameplay(model);
                     // AddComponent 同步跑 Awake——与真人路径的 avatar.AddComponent<RemoteEntityAnimator>() 同惯例：
                     // 驱动在 Awake 里用 GetComponentInChildren 找到模型自带的 Animator。本类是普通类，
                     // 项目规则禁止在非 MonoBehaviour 上下文 GetComponent，所以驱动只能这样加（预制体本身保持纯美术）。
@@ -586,6 +588,35 @@ namespace Hotfix.GameSystems.SyncLayer
                 collider.enabled = false;
                 if (Application.isPlaying) Object.Destroy(collider);
                 else Object.DestroyImmediate(collider);
+            }
+        }
+
+        /// <summary>
+        /// 摘掉 npc 视图上预制体自带的**玩法组件** —— 视图只负责表现，本地伤害链不得够得着它。
+        ///
+        /// 原缺陷（2026-10-17，联网模式下打怪必抛）：`SlimePBR` / `TurtleShellPBR` 这两个预制体
+        /// 带着完整的 `MonsterEntity`（`IDamageable` + `IEffectTarget`）。视图路径从不调 `Init`，
+        /// 于是视图上那个实体的 `_stats` 是 null；而技能判定走
+        /// `Physics.OverlapSphereNonAlloc(shape.TargetMask)` + `TryGetComponent&lt;IEffectTarget&gt;()`
+        /// **不是注册表**，因此预制体那个 enabled 的 CapsuleCollider 一路把未初始化的实体送进了
+        /// `TakeDamage`（`MonsterEntity.cs:174` 第一句 NRE）。DogKnight / Spider 预制体不带玩法组件，
+        /// 这正是该缺陷「常出现但不是必现」的原因。
+        ///
+        /// 每个组件都「先禁再销毁」，理由与 StripCollider 逐字相同：`Destroy` 帧末才生效，
+        /// 创建帧内它仍在；而 `enabled = false` **挡不住接口调用**，所以那一帧由
+        /// `MonsterEntity.TakeDamage` / `IsAlive` 的 `_stats` 判空兜住（两处配合才闭环）。
+        ///
+        /// **只摘玩法组件**：模型、Animator、渲染与 NpcEntityAnimator 驱动全部保留。
+        /// 其它组件（HitZone / AttackHitbox / NavMeshAgent）在视图上的行为未调查、也未被该缺陷
+        /// 触及，故不动 —— 顺手改会改变既有表现。
+        /// </summary>
+        private static void StripGameplay(GameObject model)
+        {
+            foreach (var entity in model.GetComponentsInChildren<Hotfix.GameSystems.Monster.MonsterEntity>(true))
+            {
+                entity.enabled = false;
+                if (Application.isPlaying) Object.Destroy(entity);
+                else Object.DestroyImmediate(entity);
             }
         }
     }
