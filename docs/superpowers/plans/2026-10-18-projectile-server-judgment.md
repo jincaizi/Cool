@@ -484,7 +484,10 @@ public class CombatResolverProjectileTests
         var resolver = new CombatResolver(MakeStore(targetAt: (0f, 10f)), new Random(1));
         var charge = new CastRequest
         {
-            SkillId = 20004, ImpactX = 0f, ImpactY = 0f, ImpactZ = 10f, ChargeProgress = 1f
+            SkillId = 20004,
+            // 客户端真实形状：资产 _targetType=1 / _range=2 / _areaRadius=2 / _angle=120
+            Shape = new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2f, Angle = 120f },
+            ImpactX = 0f, ImpactY = 0f, ImpactZ = 10f, ChargeProgress = 1f
         };
         Assert.True(resolver.Decide(1, charge, tick: 0).Accepted);
 
@@ -522,7 +525,7 @@ public class CombatResolverProjectileTests
 - [ ] **步骤 2：运行验证失败**
 
 ```bash
-dotnet test Server/Server.Tests --filter "FullyQualifiedName~CombatResolverTests"
+dotnet test Server/Server.Tests --filter "FullyQualifiedName~CombatResolverProjectileTests"
 ```
 
 预期：4 条失败（剑气不命中、火球无命中、蓄力伤害缺失、过远未拒）。
