@@ -10,6 +10,8 @@
 
 **状态：** 已完成（2026-10-18）——7 个任务全部实现、逐任务审查通过；全量 EditMode 448/448、PlayMode 53/53。
 
+**后续调整（2026-10-18）：** 未力竭回复延迟 0.2s、力竭回复延迟 0.75s（双档）。`StaminaConfig.ShortRegenDelay` 与 `Sys3CEntry._staminaShortRegenDelay` 已加入；测试见 `StaminaSystemTests`（12 条）。
+
 **规格：** `docs/superpowers/specs/2026-10-18-stamina-system-design.md`
 
 **执行前置：**

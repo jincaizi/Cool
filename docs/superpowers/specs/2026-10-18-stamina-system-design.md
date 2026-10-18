@@ -4,6 +4,7 @@
 **Engine:** Unity 2022.3.25f1
 **Layer:** `Hotfix/Sys3C`、`Hotfix/Skills`、`Hotfix/Nameplate`
 **状态:** 已实现（2026-10-18）
+**修订（2026-10-18）：** 未力竭回复延迟改为 0.2s；力竭仍为 0.75s（双档延迟，用户选择）。
 
 ---
 
@@ -25,7 +26,7 @@
 | 力竭行为 | 中断当前动作 + **20% 门槛** | 最接近塞尔达的"力竭"；防 0% 附近反复中断/重启 |
 | 力竭拦截面 | 只拦"开始新的消耗动作" | 普攻、瞬发技能、移动、跳跃、回复不受影响 |
 | 举盾锁存 | 被拒/强制收盾后**必须松开再按** | 防止按住不放时精力回到 20% 自动反复起盾 |
-| 回复 | 最后一次消耗尝试后 0.75s 开始，33.3/s | 消耗期间（每帧都尝试扣）绝不回复 |
+| 回复 | 未力竭：最后一次消耗尝试后 **0.2s**；力竭：**0.75s**；33.3/s | 消耗期间（每帧都尝试扣）绝不回复；短延迟让停手更跟手，长延迟保留力竭惩罚 |
 | 归还策略 | **不退还**已扣精力/已起冷却 | 旋转中断、蓄力提前释放、技能被打断一律不返还 |
 | UI 位置 | 角色右上方世界锚定（屏幕投影） | 用户选定 C 方案（塞尔达式），不挂昵称 |
 | UI 风格 | 塞尔达式粗环 + 深色底 | 用户选定 A 方案；草地背景下对比度最好 |
@@ -89,7 +90,8 @@ public struct StaminaConfig
     public float SprintDrainPerSecond;      // 20
     public float DefendDrainPerSecond;      // 10
     public float RegenPerSecond;            // 33.333
-    public float RegenDelay;                // 0.75
+    public float RegenDelay;                // 0.75（力竭后长延迟）
+    public float ShortRegenDelay;           // 0.2（未力竭短延迟）
     public float ExhaustRecoverRatio;       // 0.2
 }
 ```
@@ -101,14 +103,14 @@ public struct StaminaConfig
 | `IsFull` | `Current >= Max - 0.001` |
 | `CanStartConsuming` | `!IsExhausted && Current > 0` |
 | `TryConsume(amount)` | `amount` 非有限或 `<= 0` 直接返回 true 且**不重置回复延迟**；`Current <= amount` ⇒ `Current = 0`、`IsExhausted = true`、重置延迟、返回 **false**；否则扣减、重置延迟、返回 true |
-| `Tick(dt)` | `dt` 非有限或为负按 0；单帧钳到 `[0, 0.1]`。累加"距上次消耗尝试"的时间；≥ `RegenDelay` 后按 `RegenPerSecond × dt` 回复（`Current` 钳到 `Max`）；回复到阈值时清除 `IsExhausted` |
+| `Tick(dt)` | `dt` 非有限或为负按 0；单帧钳到 `[0, 0.1]`。累加"距上次消耗尝试"的时间；≥ `IsExhausted ? RegenDelay : ShortRegenDelay` 后按 `RegenPerSecond × dt` 回复（`Current` 钳到 `Max`）；回复到阈值时清除 `IsExhausted` |
 | `Refill()` | `Current = Max`、清 `IsExhausted`、重置延迟 |
 
 **契约**
 - 消耗失败会**把当前值清零**（UI 显示空环），并返回 false；调用方必须立即停止动作。
 - **恰好扣到 0 也算力竭**（`Current <= amount`，不是 `<`）。否则会出现 `Current == 0` 但 `IsExhausted == false`，`CanStartConsuming` 暂时为 false，回复一点后又绕过 20% 门槛立刻可动。
 - 回复计时使用内部累加器，不读 `Time.time`，EditMode 测试可确定性模拟。
-- **数值防护**（对齐本项目 `MovementValidator` 的 NaN/∞ 防护纪律）：`TryConsume` 忽略非有限/≤0 的 amount；`Tick` 忽略非有限/负 dt 并把单帧 dt 钳到 `[0, 0.1]`；构造时把非有限配置回退到 §3.2 的默认值，并钳制 `Max >= 1`、各速率 `>= 0`、`RegenDelay >= 0`、`ExhaustRecoverRatio ∈ [0,1]`。
+- **数值防护**（对齐本项目 `MovementValidator` 的 NaN/∞ 防护纪律）：`TryConsume` 忽略非有限/≤0 的 amount；`Tick` 忽略非有限/负 dt 并把单帧 dt 钳到 `[0, 0.1]`；构造时把非有限配置回退到 §3.2 的默认值，并钳制 `Max >= 1`、各速率 `>= 0`、`RegenDelay >= 0`、`ShortRegenDelay >= 0`、`ExhaustRecoverRatio ∈ [0,1]`。
 - 消耗侧的 dt 同样钳到 `[0, 0.1]`（见 §5.3），避免一次卡顿把整条精力抽空。
 
 ### 3.2 默认数值
@@ -118,7 +120,8 @@ public struct StaminaConfig
 | 上限 | 100 | — |
 | 奔跑消耗 | 20/s | 满精力 5.0s |
 | 举盾消耗 | 10/s | 满精力 10.0s |
-| 回复延迟 | 0.75s | 停手后短暂停顿 |
+| 未力竭回复延迟 | 0.2s | 停手更跟手；短于一次消耗节奏，消耗期间不会回复 |
+| 力竭回复延迟 | 0.75s | 保留力竭惩罚 |
 | 回复速度 | 33.333/s | 约 3.0s 回满 |
 | 力竭解锁 | 20% | 0 → 20% 约 1.35s（0.75 + 0.6） |
 | 旋转耗率 | 20/s | 3s 共 60 |
@@ -237,7 +240,7 @@ static bool IsSustained(SkillData d) =>
 | 死亡 | 否（环隐藏） | 是；复活回满 |
 | 力竭后未到 20% | 否（消耗动作被拒） | 是 |
 
-**回复计时**：最后一次 `TryConsume`（成功或失败）之后 0.75s 开始回复，33.333/s。持续消耗每帧都会重置延迟，因此消耗期间绝不回复。
+**回复计时**：最后一次 `TryConsume`（成功或失败）之后开始计时——**未力竭 0.2s**、**力竭 0.75s**——然后按 33.333/s 回复。持续消耗每帧都会重置延迟，因此消耗期间绝不回复。
 
 **力竭**：`Current == 0` 时置位；`Current >= Max × 0.2` 清除。只拦截**开始新的消耗动作**（奔跑、举盾、带消耗的持续技能）；普攻、瞬发技能、移动、跳跃、回复不受影响。
 
@@ -419,7 +422,7 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 
 ### 7.3 玩家配置
 
-`Sys3CEntry` 新增 `[Header("Stamina")]` 序列化字段（默认值见 §3.2），并暴露 `public StaminaSystem Stamina => _stamina;` 供测试/调试。
+`Sys3CEntry` 新增 `[Header("Stamina")]` 序列化字段（默认值见 §3.2），其中两个回复延迟字段：`_staminaRegenDelay`（力竭后，默认 0.75s）与 `_staminaShortRegenDelay`（未力竭，默认 0.2s）。并暴露 `public StaminaSystem Stamina => _stamina;` 供测试/调试。
 
 ### 7.4 表现参数
 
@@ -448,6 +451,7 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 - `test_stamina_sprint_rate_empties_in_five_seconds`
 - `test_stamina_exhausted_blocks_start_until_twenty_percent`
 - `test_stamina_regen_starts_after_delay`
+- `test_stamina_short_delay_when_not_exhausted_long_after_exhaustion`
 - `test_stamina_consume_attempt_resets_regen_delay_even_when_insufficient`
 - `test_stamina_try_consume_insufficient_clamps_to_zero_and_returns_false`
 - `test_stamina_try_consume_exact_remaining_triggers_exhaustion`（等号边界，防绕过 20% 门槛）
@@ -496,7 +500,8 @@ public float StaminaDrainPerSecond => _staminaDrainPerSecond;
 | 场景 | 期望 |
 |---|---|
 | 满精力地面冲刺 | 5.0s ± 1 帧抽空；强制走路；环闪红 |
-| 停止消耗后 | 1.35s 后回到 20%，可再次冲刺 |
+| 未力竭时停止消耗 | 0.2s 后开始回复 |
+| 力竭后停止消耗 | 1.35s 后回到 20%，可再次冲刺 |
 | 满精力举盾 | 10.0s 抽空并强制收盾；松开再按才能重举 |
 | 满精力旋转 | 3s 共扣约 60（±1 帧耗率），结束剩约 40 |
 | 满精力蓄力 | 2s 共扣约 30（±1 帧耗率） |

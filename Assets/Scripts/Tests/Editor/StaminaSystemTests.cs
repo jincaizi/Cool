@@ -67,25 +67,44 @@ namespace GameSys.EditorTests
             stamina.TryConsume(10f);
             float afterConsume = stamina.Current;
 
-            TickFor(stamina, 0.70f);
-            Assert.AreEqual(afterConsume, stamina.Current, 0.001f, "0.75s 延迟内不得回复");
+            TickFor(stamina, 0.15f);
+            Assert.AreEqual(afterConsume, stamina.Current, 0.001f, "未力竭短延迟 0.2s 内不得回复");
 
             TickFor(stamina, 0.10f);
-            Assert.Greater(stamina.Current, afterConsume, "延迟结束后应开始回复");
+            Assert.Greater(stamina.Current, afterConsume, "短延迟结束后应开始回复");
+        }
+
+        [Test]
+        public void test_stamina_short_delay_when_not_exhausted_long_after_exhaustion()
+        {
+            var notExhausted = Create();
+            notExhausted.TryConsume(10f);
+            float afterShort = notExhausted.Current;
+            TickFor(notExhausted, 0.15f);
+            Assert.AreEqual(afterShort, notExhausted.Current, 0.001f);
+            TickFor(notExhausted, 0.10f);
+            Assert.Greater(notExhausted.Current, afterShort, "未力竭 0.2s 后开始回复");
+
+            var exhausted = Create();
+            DrainToExhaustion(exhausted);
+            TickFor(exhausted, 0.70f);
+            Assert.AreEqual(0f, exhausted.Current, 0.001f, "力竭 0.75s 内不得回复");
+            TickFor(exhausted, 0.10f);
+            Assert.Greater(exhausted.Current, 0f, "力竭 0.75s 后开始回复");
         }
 
         [Test]
         public void test_stamina_consume_attempt_resets_regen_delay_even_when_insufficient()
         {
             var stamina = Create();
-            stamina.TryConsume(95f);
+            DrainToExhaustion(stamina);
             TickFor(stamina, 0.70f);
 
             Assert.IsFalse(stamina.TryConsume(10f));
             Assert.AreEqual(0f, stamina.Current, 0.001f);
 
             TickFor(stamina, 0.70f);
-            Assert.AreEqual(0f, stamina.Current, 0.001f, "失败尝试也必须重置回复延迟");
+            Assert.AreEqual(0f, stamina.Current, 0.001f, "失败尝试也必须重置力竭后的长延迟");
 
             TickFor(stamina, 0.10f);
             Assert.Greater(stamina.Current, 0f);
@@ -118,11 +137,11 @@ namespace GameSys.EditorTests
         {
             var stamina = Create();
             stamina.TryConsume(10f);
-            TickFor(stamina, 0.70f);
+            TickFor(stamina, 0.15f);
 
             Assert.IsTrue(stamina.TryConsume(0f));
-            TickFor(stamina, 0.10f);
-            Assert.Greater(stamina.Current, 90f, "0 消耗不得重置延迟");
+            TickFor(stamina, 0.08f);
+            Assert.Greater(stamina.Current, 90f, "0 消耗不得重置短回复延迟");
         }
 
         [Test]
@@ -174,6 +193,7 @@ namespace GameSys.EditorTests
                 DefendDrainPerSecond = 10f,
                 RegenPerSecond = float.NaN,
                 RegenDelay = float.NaN,
+                ShortRegenDelay = float.NaN,
                 ExhaustRecoverRatio = float.NaN
             });
 

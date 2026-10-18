@@ -74,7 +74,10 @@ namespace Hotfix.GameSystems.Sys3C
         [SerializeField] private float _sprintStaminaPerSecond = 20f;
         [SerializeField] private float _defendStaminaPerSecond = 10f;
         [SerializeField] private float _staminaRegenPerSecond = 100f / 3f;
-        [SerializeField] private float _staminaRegenDelay = 0.75f;
+        [SerializeField, Tooltip("力竭后的回复延迟（秒）")]
+        private float _staminaRegenDelay = 0.75f;
+        [SerializeField, Tooltip("未力竭时的回复延迟（秒）")]
+        private float _staminaShortRegenDelay = 0.2f;
         [SerializeField, Range(0f, 1f)] private float _staminaExhaustRecoverRatio = 0.2f;
 
         private StaminaSystem _stamina;
@@ -114,6 +117,7 @@ namespace Hotfix.GameSystems.Sys3C
                 DefendDrainPerSecond = _defendStaminaPerSecond,
                 RegenPerSecond = _staminaRegenPerSecond,
                 RegenDelay = _staminaRegenDelay,
+                ShortRegenDelay = _staminaShortRegenDelay,
                 ExhaustRecoverRatio = _staminaExhaustRecoverRatio
             });
 

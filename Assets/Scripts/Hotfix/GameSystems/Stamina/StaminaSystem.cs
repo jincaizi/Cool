@@ -8,7 +8,8 @@ namespace Hotfix.GameSystems.Stamina
         public float SprintDrainPerSecond;
         public float DefendDrainPerSecond;
         public float RegenPerSecond;
-        public float RegenDelay;
+        public float RegenDelay;          // 力竭后的长延迟
+        public float ShortRegenDelay;     // 未力竭时的短延迟
         public float ExhaustRecoverRatio;
 
         public static StaminaConfig Default => new StaminaConfig
@@ -18,6 +19,7 @@ namespace Hotfix.GameSystems.Stamina
             DefendDrainPerSecond = 10f,
             RegenPerSecond = 100f / 3f,
             RegenDelay = 0.75f,
+            ShortRegenDelay = 0.2f,
             ExhaustRecoverRatio = 0.2f
         };
     }
@@ -33,6 +35,7 @@ namespace Hotfix.GameSystems.Stamina
         private readonly float _max;
         private readonly float _regenPerSecond;
         private readonly float _regenDelay;
+        private readonly float _shortRegenDelay;
         private readonly float _exhaustRecoverRatio;
 
         private float _current;
@@ -45,6 +48,7 @@ namespace Hotfix.GameSystems.Stamina
             _max = FiniteOrDefault(config.Max, defaults.Max, 1f);
             _regenPerSecond = FiniteOrDefault(config.RegenPerSecond, defaults.RegenPerSecond, 0f);
             _regenDelay = FiniteOrDefault(config.RegenDelay, defaults.RegenDelay, 0f);
+            _shortRegenDelay = FiniteOrDefault(config.ShortRegenDelay, defaults.ShortRegenDelay, 0f);
             _exhaustRecoverRatio = Mathf.Clamp01(
                 FiniteOrDefault(config.ExhaustRecoverRatio, defaults.ExhaustRecoverRatio, 0f));
 
@@ -88,7 +92,8 @@ namespace Hotfix.GameSystems.Stamina
             if (dt <= 0f) return;
 
             _sinceLastConsume += dt;
-            if (_sinceLastConsume < _regenDelay) return;
+            float delay = _exhausted ? _regenDelay : _shortRegenDelay;
+            if (_sinceLastConsume < delay) return;
 
             if (_current < _max)
                 _current = Mathf.Min(_max, _current + _regenPerSecond * dt);
