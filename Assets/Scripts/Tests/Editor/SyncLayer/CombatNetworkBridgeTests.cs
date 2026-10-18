@@ -69,6 +69,30 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void test_heavy_attack_reports_sword_qi_cast_with_asset_shape()
+        {
+            // 10002 的剑气依赖客户端在激活时上报 CastRequest；形状取 BA_Heavy 资产，
+            // 服务端沿施法者朝向做 12m 线形判定（不传落点）。
+            var heavy = UnityEditor.AssetDatabase.LoadAssetAtPath<Hotfix.GameSystems.Skills.Data.InstantSkillData>(
+                "Assets/PreRes/SkillsCfg/BA_Heavy.asset");
+            Assert.NotNull(heavy, "BA_Heavy.asset 未找到——PreRes 路径核对");
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry);
+
+            SkillCastReporter.ReportActivation(bridge, heavy, Vector3.zero, _root.transform);
+
+            Assert.AreEqual(1, _client.Sent.Count, "10002 激活应发一条 CastRequest");
+            Assert.AreEqual(MessageId.CastRequest, _client.Sent[0].id);
+            var cast = (CastRequest)_client.Sent[0].msg;
+            Assert.AreEqual(10002, cast.SkillId);
+            Assert.AreEqual(0, cast.Shape.ShapeType);
+            Assert.AreEqual(2.5f, cast.Shape.Range, 0.001f);
+            Assert.AreEqual(120f, cast.Shape.Angle, 0.001f);
+            Assert.AreEqual(0f, cast.ImpactX, 0.001f, "剑气沿施法者朝向，不传落点");
+            Assert.AreEqual(0f, cast.ImpactZ, 0.001f);
+        }
+
+        [Test]
         public void NotifySkillCast_Ignores_Non_Synced_Skill()
         {
             var registry = new RemoteEntityRegistry(_root.transform);
@@ -264,10 +288,11 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
-        public void Monster_Target_Damage_Emits_Float_Text_Over_Npc_View()
+        public void Monster_Target_Damage_Emits_MonsterTakeDamageEvent_With_Crit_Flag()
         {
-            // 玩家打怪：DamageResult.TargetPlayerId = 怪物 id → 怪物视图（Npc 快照创建）飘字
-            // ——既有 PlayerTakeDamageEvent 链对 Npc 视图零改动生效（锁定回归）。
+            // 玩家打怪：DamageResult.TargetPlayerId = 怪物 id → 怪物视图（Npc 快照创建）
+            // **必须走 MonsterTakeDamageEvent**（DisplayEventBridge 用它选红字/暴击橙），
+            // 不能复用玩家灰字 PlayerTakeDamageEvent。
             var registry = new RemoteEntityRegistry(_root.transform);
             registry.ApplySnapshot(new EntitySnapshot
             {
@@ -280,26 +305,34 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var view = registry.GetView(2_000_001);
             Assert.NotNull(view, "Npc 视图未创建");
 
-            PlayerTakeDamageEvent? captured = null;
-            Action<PlayerTakeDamageEvent> handler = e => captured = e;
-            EventBus.Subscribe(handler);
+            MonsterTakeDamageEvent? monsterCaptured = null;
+            PlayerTakeDamageEvent? playerCaptured = null;
+            Action<MonsterTakeDamageEvent> monsterHandler = e => monsterCaptured = e;
+            Action<PlayerTakeDamageEvent> playerHandler = e => playerCaptured = e;
+            EventBus.Subscribe(monsterHandler);
+            EventBus.Subscribe(playerHandler);
             try
             {
                 var bridge = new CombatNetworkBridge(_client, () => 1, registry);
                 bridge.OnMessage(MessageId.DamageResult, new DamageResult
                 {
-                    SourcePlayerId = 1, SkillId = 10001,
-                    Hits = { new HitEntry { TargetPlayerId = 2_000_001, Damage = 50f, IsCritical = false, TargetRemainingHp = 50f } }
+                    SourcePlayerId = 1, SkillId = 10002,
+                    Hits = { new HitEntry { TargetPlayerId = 2_000_001, Damage = 57.4f, IsCritical = true, TargetRemainingHp = 42.6f } }
                 });
                 bridge.Update();
 
-                Assert.NotNull(captured, "怪物受击未发 PlayerTakeDamageEvent");
-                Assert.AreEqual(view.GameObject.GetInstanceID(), captured.Value.EntityId);
-                Assert.AreEqual(50, captured.Value.Damage);
+                Assert.NotNull(monsterCaptured, "怪物受击必须发 MonsterTakeDamageEvent（红字/暴击橙）");
+                Assert.IsNull(playerCaptured, "怪物受击不得发 PlayerTakeDamageEvent（灰字）");
+                Assert.AreEqual(view.GameObject.GetInstanceID(), monsterCaptured.Value.EntityId);
+                Assert.AreEqual(58, monsterCaptured.Value.Damage); // CeilToInt(57.4)
+                Assert.IsTrue(monsterCaptured.Value.IsCritical, "暴击标志必须保留，DisplayEventBridge 据此选暴击色");
+                Assert.AreEqual(10002, monsterCaptured.Value.SkillId);
+                Assert.IsTrue(monsterCaptured.Value.IsLocalSource, "本地玩家命中才允许触发本地命中反馈/镜头震动");
             }
             finally
             {
-                EventBus.Unsubscribe(handler);
+                EventBus.Unsubscribe(monsterHandler);
+                EventBus.Unsubscribe(playerHandler);
             }
         }
 

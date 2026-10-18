@@ -49,6 +49,7 @@ namespace Hotfix.GameSystems.VFX
 
         private void OnMonsterHit(MonsterTakeDamageEvent e)
         {
+            if (!e.IsLocalSource) return;   // 远程玩家打怪只飘字，不播本地命中反馈
             Spawn(e.HitPosition, e.Part, e.ElementColor, e.IsCritical, e.SkillId);
         }
 

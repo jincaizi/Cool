@@ -44,6 +44,7 @@ namespace Hotfix.GameSystems.VFX
         private void OnMonsterDamaged(MonsterTakeDamageEvent e)
         {
             if (!EnableVFX) return;
+            if (!e.IsLocalSource) return;   // 远程玩家的命中只保留飘字
 
             var prefab = e.IsCritical && _criticalHitParticles != null
                 ? _criticalHitParticles : _normalHitParticles;

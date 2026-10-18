@@ -37,6 +37,7 @@ namespace Hotfix.GameSystems.VFX
         private void OnHit(MonsterTakeDamageEvent e)
         {
             if (!EnableVFX) return;
+            if (!e.IsLocalSource) return;   // 别人打怪不晃本地镜头
             float intensity = e.SkillId > 0
                 ? _profile.SkillShakeIntensity
                 : _profile.NormalShakeIntensity;

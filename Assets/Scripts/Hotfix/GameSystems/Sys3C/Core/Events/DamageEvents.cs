@@ -61,11 +61,18 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
         public HitZonePart Part;
         public Color ElementColor;
 
+        /// <summary>
+        /// 是否本地玩家造成。联机下远程玩家的命中只走飘字，不触发本地镜头震动/命中粒子
+        /// （否则别人打怪会让本地屏幕抖）。
+        /// </summary>
+        public bool IsLocalSource;
+
         public MonsterTakeDamageEvent(
             int entityId, Vector3 hitPos, Vector3 hitDir,
             int damage, bool isCritical = false,
             int skillId = 0, int comboIndex = 1,
-            HitZonePart part = HitZonePart.Torso, Color elementColor = default)
+            HitZonePart part = HitZonePart.Torso, Color elementColor = default,
+            bool isLocalSource = true)
         {
             EntityId = entityId;
             HitPosition = hitPos;
@@ -76,6 +83,7 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
             ComboIndex = comboIndex;
             Part = part;
             ElementColor = elementColor == default ? Color.white : elementColor;
+            IsLocalSource = isLocalSource;
         }
     }
 

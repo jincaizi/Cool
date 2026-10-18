@@ -15,8 +15,10 @@ namespace Hotfix.GameSystems.SyncLayer
     ///    本地表现即时播放不变（预测反馈）；伤害数字等服务端结果（D-P4-8）。
     ///  - 入站：CastBroadcast → OnCastBroadcast 事件（P4 表现占位：宿主日志）；
     ///    DamageResult → 本地玩家走 onDamageToLocalPlayer 注入（宿主接 Sys3CEntry.ApplyServerDamage，
-    ///    含格挡标志——宿主据此走格挡受击表现而不是普通受击），
-    ///    远程实体直接 Emit PlayerTakeDamageEvent——现有 DisplayEventBridge/FloatText 链自动飘字。
+    ///    含格挡标志——宿主据此走格挡受击表现而不是普通受击）；
+    ///    远程 **Npc** 视图 Emit MonsterTakeDamageEvent（走怪物红字/暴击橙），
+    ///    远程 **玩家/bot** 视图 Emit PlayerTakeDamageEvent（走玩家灰字），
+    ///    由 DisplayEventBridge/FloatText 链自动飘字。
     /// 线程模型：adapter 回调线程只入队，Update（主线程）消费——与 ClientNetworkManager 同纪律。
     /// </summary>
     public sealed class CombatNetworkBridge
@@ -112,13 +114,25 @@ namespace Hotfix.GameSystems.SyncLayer
                 // 无同步通道（表现层只做本地玩家，P4 backlog——见格挡减伤交付报告）
                 var view = _registry.GetView(hit.TargetPlayerId);
                 if (view == null) continue; // 视野外无视图（AOI 下不应发生——防御跳过）
-                EventBus.Emit(new PlayerTakeDamageEvent(
-                    view.GameObject.GetInstanceID(),
-                    view.Position + Vector3.up * 1.5f,
-                    HitZonePart.Torso,
-                    Vector3.zero,
-                    Mathf.CeilToInt(hit.Damage),
-                    Color.white));
+
+                int viewId = view.GameObject.GetInstanceID();
+                Vector3 hitPos = view.Position + Vector3.up * 1.5f;
+                if (view.Kind == (byte)EntityKind.Npc)
+                {
+                    // 怪物走 MonsterTakeDamageEvent：DisplayEventBridge 用它选红字/暴击橙，
+                    // 不能复用玩家灰字（2026-10-18 修复：此前玩家打怪整片灰字）。
+                    EventBus.Emit(new MonsterTakeDamageEvent(
+                        viewId, hitPos, Vector3.zero,
+                        Mathf.CeilToInt(hit.Damage), hit.IsCritical,
+                        result.SkillId, 1, HitZonePart.Torso, Color.white,
+                        result.SourcePlayerId == localId));
+                }
+                else
+                {
+                    EventBus.Emit(new PlayerTakeDamageEvent(
+                        viewId, hitPos, HitZonePart.Torso, Vector3.zero,
+                        Mathf.CeilToInt(hit.Damage), Color.white));
+                }
             }
         }
     }
