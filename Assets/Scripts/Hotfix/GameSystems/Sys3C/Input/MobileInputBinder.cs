@@ -8,12 +8,13 @@ using Hotfix.GameSystems.UI;
 namespace Hotfix.GameSystems.Sys3C.Input
 {
     /// <summary>
-    /// 移动端输入接线 —— 只在触屏形态生效（WebGL 跑在手机上即为触屏）。
-    /// PC **浏览器**维持键鼠；**编辑器默认按触屏**（摇杆 UI 可看可用，便于迭代），
-    /// 要键鼠就在运行时把 TouchOverride 拨成 ForceNoTouch。
+    /// 触控输入接线 —— 移动端、编辑器与 PC 都显示摇杆/按钮（2026-10-18 产品决定）。
+    /// **WASD/鼠标仍可用**：安装 JoystickInputAdapter 时注入 KeyboardInputAdapter 兜底，
+    /// 摇杆/观察区空闲时自动回退到键鼠。需要纯键鼠时把 TouchOverride 拨成 ForceNoTouch，
+    /// 或用 URL `?touch=0`。
     ///
     /// 本组件必须挂在**常驻激活**的对象上：`_mobileUiRoot` 默认不激活，
-    /// 若挂在它自身之下，`Update` 永不执行，手机上 UI 永远不会出现。
+    /// 若挂在它自身之下，`Update` 永不执行，UI 永远不会出现。
     /// </summary>
     public class MobileInputBinder : MonoBehaviour
     {
@@ -83,7 +84,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
 
             inputManager.SetAdapter(new JoystickInputAdapter(
                 () => _joystick != null ? _joystick.Value : Vector2.zero,
-                () => _lookArea != null ? _lookArea.Delta : Vector2.zero));
+                () => _lookArea != null ? _lookArea.Delta : Vector2.zero,
+                new KeyboardInputAdapter()));
             _inputManager = inputManager;
         }
 

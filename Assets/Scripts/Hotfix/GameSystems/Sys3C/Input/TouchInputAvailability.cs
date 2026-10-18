@@ -17,9 +17,10 @@ namespace Hotfix.GameSystems.Sys3C.Input
     /// 报告准确信息"；已知失效场景：iPad 默认桌面视图下 `isMobilePlatform == false` 且
     /// `SystemInfo.deviceType == Desktop` —— 手机形态会静默退化成键鼠。
     ///
-    /// 因此判定顺序为：**URL 参数 > 人工档位 > 编辑器⇒真 > (isMobilePlatform || 特性检测)**。
-    /// 特性检测在 WebGL 走 jslib（`navigator.maxTouchPoints` / `'ontouchend' in document`），
-    /// 其它平台走 `Input.touchSupported`。
+    /// 判定顺序：**URL 参数 > 人工档位 > 自动**。自动档自 2026-10-18 起默认显示触控 UI
+    /// （编辑器/PC/移动端一致）；WASD/鼠标由 JoystickInputAdapter 的键盘兜底保留。
+    /// 特性检测（WebGL jslib `navigator.maxTouchPoints` / `'ontouchend' in document`，
+    /// 其它平台 `Input.touchSupported`）保留给需要按设备细分的未来调用方。
     /// </summary>
     public static class TouchInputAvailability
     {
@@ -70,10 +71,10 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// <summary>
         /// 最终裁决：URL > 人工档位 > 自动判定。
         ///
-        /// 自动判定在**编辑器**里恒为触屏（2026-10-17 产品决定）：摇杆与三按钮因此在编辑器里
-        /// 默认可见可用，方便迭代。`UNITY_EDITOR` 是编译期的，出包后仍走
-        /// `isMobilePlatform || 特性检测`（桌面浏览器里的面试 demo 保持键鼠）。
-        /// 编辑器里要键鼠：运行时把 `MobileInputBinder.TouchOverride` 拨成 `ForceNoTouch`。
+        /// 2026-10-18 产品决定：**编辑器、PC 与移动端都显示触控 UI**（摇杆 + 三按钮）。
+        /// WASD/鼠标仍可用 —— `MobileInputBinder` 给 JoystickInputAdapter 注入
+        /// KeyboardInputAdapter 兜底，摇杆/观察区空闲时回退键鼠。
+        /// 需要纯键鼠时用 `ForceNoTouch` 或 URL `?touch=0`。
         /// </summary>
         public static bool Resolve(TouchOverride mode)
         {
@@ -81,11 +82,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
             if (fromUrl.HasValue) return fromUrl.Value;
             if (mode == TouchOverride.ForceTouch) return true;
             if (mode == TouchOverride.ForceNoTouch) return false;
-#if UNITY_EDITOR
-            return true;   // 编辑器默认按触屏：摇杆 UI 可看可用（出包不含本分支）
-#else
-            return Application.isMobilePlatform || TouchFeatureDetected();
-#endif
+
+            // 自动判定：默认显示触控 UI（PC 也可用摇杆；WASD 由混合适配器保留）。
+            return true;
         }
     }
 }

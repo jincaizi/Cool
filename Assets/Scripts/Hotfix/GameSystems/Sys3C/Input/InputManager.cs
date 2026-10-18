@@ -51,7 +51,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _adapter = new KeyboardInputAdapter();
         }
 
-        /// <summary>按平台注入适配器 —— 移动端由 MobileInputBinder 调用；不调用则维持键鼠。</summary>
+        /// <summary>注入适配器 —— 触控 UI 显示时由 MobileInputBinder 安装 Joystick（含 KeyboardInputAdapter 兜底）；
+        /// 不调用则维持键鼠。</summary>
         public void SetAdapter(IInputAdapter adapter)
         {
             if (adapter != null) _adapter = adapter;

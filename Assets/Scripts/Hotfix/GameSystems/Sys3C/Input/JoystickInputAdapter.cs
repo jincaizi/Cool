@@ -18,29 +18,41 @@ namespace Hotfix.GameSystems.Sys3C.Input
 
         private readonly Func<Vector2> _moveSource;
         private readonly Func<Vector2> _lookSource;
+        private readonly IInputAdapter _fallback;
 
         public string AdapterName => "Joystick";
 
-        public JoystickInputAdapter(Func<Vector2> moveSource, Func<Vector2> lookSource)
+        public JoystickInputAdapter(Func<Vector2> moveSource, Func<Vector2> lookSource,
+            IInputAdapter fallback = null)
         {
             _moveSource = moveSource;
             _lookSource = lookSource;
+            _fallback = fallback;
         }
 
         /// <summary>
         /// 摇杆输入 → 世界方向。
         /// **不 normalize**：保留模拟量，推一半走一半（P6 审查记录的坑）。
-        /// 死区以下的抖动视为无输入。
+        /// 死区以下的抖动视为无输入；此时回退到 fallback（PC/Editor 上的 WASD）。
         /// </summary>
         public Vector3 GetMoveInput()
         {
             Vector2 v = _moveSource();
-            if (v.sqrMagnitude < DeadZone * DeadZone) return Vector3.zero;
+            if (v.sqrMagnitude < DeadZone * DeadZone)
+                return _fallback != null ? _fallback.GetMoveInput() : Vector3.zero;
             return new Vector3(v.x, 0f, v.y);   // 注意是 v.y → z（俯视平面）
         }
 
-        /// <summary>触屏拖拽量原样透传（灵敏度由相机侧既有参数负责，不在此再缩放）</summary>
-        public Vector2 GetCameraRotationInput() => _lookSource();
+        /// <summary>
+        /// 触屏拖拽量原样透传（灵敏度由相机侧既有参数负责，不在此再缩放）；
+        /// 触屏空闲时回退到 fallback（PC/Editor 上的鼠标视角）。
+        /// </summary>
+        public Vector2 GetCameraRotationInput()
+        {
+            Vector2 look = _lookSource();
+            if (look.sqrMagnitude > 0f) return look;
+            return _fallback != null ? _fallback.GetCameraRotationInput() : Vector2.zero;
+        }
 
         public bool HasMoveInput() => GetMoveInput().sqrMagnitude > 0f;
 

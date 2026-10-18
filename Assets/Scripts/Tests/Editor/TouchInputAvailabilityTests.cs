@@ -51,12 +51,12 @@ namespace GameSys.EditorTests
         [Test]
         public void test_editor_auto_resolves_to_touch()
         {
-            // 产品决定（2026-10-17）：编辑器默认按触屏 —— 摇杆 UI 在编辑器里可看可用。
-            // 这是**决策钉**、不是行为保证：若将来要改回键鼠默认，必须同时改这条测试与
-            // MobileInputBinder 的注释，否则摇杆会静默从编辑器里消失。
-            // 出包不受影响：UNITY_EDITOR 分支不进包，桌面浏览器仍是 isMobilePlatform/特性检测。
+            // 产品决定（2026-10-18）：编辑器、PC 与移动端都显示触控 UI —— 摇杆可看可用；
+            // WASD/鼠标由 MobileInputBinder 注入的 KeyboardInputAdapter 兜底保留。
+            // 这是**决策钉**：若将来要改回"仅触屏设备显示"，必须同时改 Resolve、
+            // MobileInputBinder 的注释与本测试，否则摇杆会静默从 PC/编辑器里消失。
             Assert.IsTrue(TouchInputAvailability.Resolve(TouchOverride.Auto),
-                "编辑器里 Auto 必须判为触屏");
+                "编辑器/PC 里 Auto 必须判为触屏");
         }
     }
 }
