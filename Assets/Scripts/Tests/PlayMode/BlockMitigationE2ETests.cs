@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cool.Protocol;
 using Cool.SyncCore;
 using KcpNet;
@@ -28,6 +29,7 @@ namespace KcpNet.PlayModeTests
         {
             public readonly KcpNetClientAdapter Adapter = new KcpNetClientAdapter();
             public ClientNetworkManager Manager = null!;
+            public RemoteEntityRegistry Registry = null!;
             public readonly List<DamageResult> Damages = new List<DamageResult>();
         }
 
@@ -42,8 +44,10 @@ namespace KcpNet.PlayModeTests
             public Rig()
             {
                 Root = new GameObject("BlockMitigationRoot");
-                A.Manager = new ClientNetworkManager(A.Adapter, new RemoteEntityRegistry(Root.transform), "Block_A");
-                B.Manager = new ClientNetworkManager(B.Adapter, new RemoteEntityRegistry(Root.transform), "Block_B");
+                A.Registry = new RemoteEntityRegistry(Root.transform);
+                B.Registry = new RemoteEntityRegistry(Root.transform);
+                A.Manager = new ClientNetworkManager(A.Adapter, A.Registry, "Block_A");
+                B.Manager = new ClientNetworkManager(B.Adapter, B.Registry, "Block_B");
                 // A：原点朝 +Z（面朝 B，施法锥 ±60° 需要）；不动不转
                 A.Manager.AttachMovementReporter(() => new Vec3(0f, 0f, 0f), () => 0f, () => 0f);
                 // B：+Z 1.5m 处朝 -Z（面朝 A，格挡锥 ±60° 需要）；防御标志随每次上报上行
@@ -124,7 +128,80 @@ namespace KcpNet.PlayModeTests
             }
         }
 
+        /// <summary>
+        /// 剑气格挡的联机验收（spec §3.2 / §7.4）：B 举盾面朝 A 于 (0, 0, 1.5)，A 在原点施放
+        /// 10002（挥击 + 剑气两个独立伤害实例）⇒ B 收到**两条** IsBlocked 命中（挥击也不被吞掉），
+        /// A 收到 ProjectileStopped=true 且停点 = 格挡者位置 (0, 0, 1.5)（服务端在格挡者处吸收剑气）。
+        /// 期望值不写死伤害数字：仍从 CombatRules 读，走既有掷骰域断言。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator SwordQi_Block_Reports_Stop_To_Caster_And_IsBlocked_To_Target()
+        {
+            var rig = new Rig();
+            try
+            {
+                yield return ConnectAndWaitInWorld(rig.A, rig.B);
+                // 类级连跑：上一用例断线的玩家在服务端有 15s 静默窗口（ghost），且与本用例
+                // 的 A/B 同位置——不先等它们回收，剑气会多命中 ghost、B 也拿不到自己的剑气那条
+                yield return WaitUntilOnlyPeer(rig.A, rig.B);
+                Assert.IsTrue(CombatRules.TryGet(10002, out var entry), "10002 不在共享表内");
+                long casterId = rig.A.Manager.LocalPlayerId;
+
+                rig.Defending = true;
+                yield return DriveFor(rig, 0.5f); // 覆盖至少数个上报周期
+
+                rig.A.Adapter.Send(MessageId.CastRequest, new CastRequest
+                {
+                    SkillId = 10002,
+                    TargetPlayerId = rig.B.Manager.LocalPlayerId,
+                    Shape = new HitShape { ShapeType = 0, Range = 2.5f, Angle = 120f }
+                });
+
+                float deadline = Time.realtimeSinceStartup + 10f;
+                while (FindCast(rig.B.Damages, casterId, 0) == null
+                       && Time.realtimeSinceStartup < deadline)
+                {
+                    DriveOneFrame(rig);
+                    yield return null;
+                }
+
+                var atTarget = FindCast(rig.B.Damages, casterId, 0);
+                Assert.IsNotNull(atTarget, "B 没收到剑气伤害结果");
+                Assert.AreEqual(2, atTarget!.Hits.Count, "近距离 10002 = 挥击 + 剑气两条命中");
+                Assert.IsTrue(atTarget.Hits.All(h => h.IsBlocked), "两条命中都应被格挡");
+                foreach (var hit in atTarget.Hits)
+                    AssertDamageInDomain(hit.Damage, entry!, blocked: true, "剑气格挡");
+
+                yield return AwaitCasterCopy(rig, casterId, expectedCastIndex: 0);
+                var atCaster = FindCast(rig.A.Damages, casterId, 0);
+                Assert.IsNotNull(atCaster, "A 没收到自己的剑气结果");
+                Assert.IsTrue(atCaster!.ProjectileStopped, "服务端未下发剑气停点");
+                Assert.AreEqual(0f, atCaster.StopX, 0.01f);
+                Assert.AreEqual(1.5f, atCaster.StopZ, 0.01f);
+            }
+            finally
+            {
+                rig.Dispose();
+            }
+        }
+
         // ---------------------------------------------------------------- 助手
+
+        /// <summary>等双方视野里只剩对方：类级连跑时上一个用例断线的玩家要等服务器 15s 静默
+        /// 超时 + 客户端 1.2s 缺席过期才消失（ghost）。前提是服务器干净启动
+        ///（不带 --bots/--monsters）——否则命中数断言本就不成立。</summary>
+        private static IEnumerator WaitUntilOnlyPeer(Ctx a, Ctx b)
+        {
+            float deadline = Time.realtimeSinceStartup + 25f;
+            while ((a.Registry.Count != 1 || b.Registry.Count != 1)
+                   && Time.realtimeSinceStartup < deadline)
+            {
+                DriveOneFrame(a, b);
+                yield return null;
+            }
+            Assert.AreEqual(1, a.Registry.Count, "A 视野内应只有 B（陈旧 ghost 未回收？服务器须干净启动）");
+            Assert.AreEqual(1, b.Registry.Count, "B 视野内应只有 A（陈旧 ghost 未回收？服务器须干净启动）");
+        }
 
         private static IEnumerator ConnectAndWaitInWorld(Ctx a, Ctx b)
         {
