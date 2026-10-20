@@ -89,5 +89,14 @@ namespace Cool.Protocol
         [ProtoMember(3)] public long ServerTimestamp { get; set; }
         /// <summary>必须声明为 IList——List&lt;T&gt; 在 IL2CPP 上触发 protobuf-net tuple 探测的 icall 缺口（见 ProtocolShapeGuardTests）</summary>
         [ProtoMember(4)] public IList<HitEntry> Hits { get; set; } = new List<HitEntry>();
+
+        /// <summary>本次结果是否包含 LineAll 线形吸收（服务端只在剑气被格挡时置位）</summary>
+        [ProtoMember(5)] public bool ProjectileStopped { get; set; }
+
+        /// <summary>吸收点世界 X（ProjectileStopped=true 时有效）</summary>
+        [ProtoMember(6)] public float StopX { get; set; }
+
+        /// <summary>吸收点世界 Z（ProjectileStopped=true 时有效）</summary>
+        [ProtoMember(7)] public float StopZ { get; set; }
     }
 }

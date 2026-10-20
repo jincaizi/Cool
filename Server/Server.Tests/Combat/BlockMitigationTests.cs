@@ -6,8 +6,9 @@ using Xunit;
 namespace KcpServer.Tests;
 
 /// <summary>
-/// PvP 格挡减伤（D-P4-8 服务端化）：防御中 + 攻击者落在受击者正面 BlockHalfAngleDeg 锥内
-/// ⇒ 伤害 × BlockDamageScale + 扣耐久；锥外 / 未防御 / 盾耗尽 ⇒ 全额。
+/// PvP 格挡减伤（D-P4-8 服务端化）：防御中 + 攻击者落在正面 BlockHalfAngleDeg 锥内
+/// ⇒ 伤害 × BlockDamageScale；锥外 / 未防御 ⇒ 全额。盾耐久已删除（2026-10-21），
+/// 盾寿命只由客户端精力控制。
 /// CombatResolver 纯核心直测（装置照 CombatResolverNpcTests，固定种子）。
 /// </summary>
 public class BlockMitigationTests
@@ -20,8 +21,7 @@ public class BlockMitigationTests
     /// 怪物在 +Z <paramref name="npcZ"/> 处、朝向玩家（yaw 180——怪物挥击自身的锥校验需要）。
     /// </summary>
     private static (EntityStore Store, CombatResolver Resolver) World(
-        float npcZ, float playerYaw = 0f, bool defending = false,
-        float shieldDurability = CombatRules.ShieldMaxDurability)
+        float npcZ, float playerYaw = 0f, bool defending = false)
     {
         var store = new EntityStore();
         store.AddPlayer(Player, "P");
@@ -29,7 +29,6 @@ public class BlockMitigationTests
         player.IsLoggedIn = true;   // 怪物施法的候选集过滤要求玩家已登录（CombatResolver.ResolveStage）
         player.UpdatePosition(new Vector3(0f, 0f, 0f), playerYaw, 0f, 0L, 0U);
         player.IsDefending = defending;
-        player.ShieldDurability = shieldDurability;
         store.AddNpc(Npc, "Slime#1", 1, 100f, new Vector3(0f, 0f, npcZ));
         store.GetPlayer(Npc)!.Rotation = 180f;
 
@@ -67,7 +66,7 @@ public class BlockMitigationTests
         return decision;
     }
 
-    /// <summary>① 防御中 + 锥内 ⇒ 伤害 = BaseDamage × BlockDamageScale（精确值 + 余血/耐久口径）。</summary>
+    /// <summary>① 防御中 + 锥内 ⇒ 伤害 = BaseDamage × BlockDamageScale（精确值 + 余血口径）。</summary>
     [Fact]
     public void Defending_In_Cone_Takes_BlockDamageScale_Damage()
     {
@@ -80,11 +79,9 @@ public class BlockMitigationTests
         Assert.Equal(10f * CombatRules.BlockDamageScale, hit.Damage, 4);   // 3（50001 无暴击域）
         Assert.Equal(100f - 3f, player.Hp, 4);
         Assert.Equal(player.Hp, hit.TargetRemainingHp, 4);                 // 扣后权威余血（T12 甲-2）
-        Assert.Equal(CombatRules.ShieldMaxDurability - CombatRules.ShieldDurabilityPerBlock,
-            player.ShieldDurability, 4);                                   // 100 − 25 = 75
     }
 
-    /// <summary>② 防御中但锥外（背对攻击者）⇒ 全额，且不耗耐久。</summary>
+    /// <summary>② 防御中但锥外（背对攻击者）⇒ 全额，且不格挡。</summary>
     [Fact]
     public void Defending_But_Facing_Away_Takes_Full_Damage()
     {
@@ -96,7 +93,6 @@ public class BlockMitigationTests
         Assert.False(hit.IsBlocked);
         Assert.Equal(10f, hit.Damage, 4);
         Assert.Equal(90f, player.Hp, 4);
-        Assert.Equal(CombatRules.ShieldMaxDurability, player.ShieldDurability, 4);
     }
 
     /// <summary>③ 未防御 ⇒ 全额（回归：格挡接入不改变既有裁决）。</summary>
@@ -113,26 +109,20 @@ public class BlockMitigationTests
         Assert.Equal(90f, player.Hp, 4);
     }
 
-    /// <summary>④ 耐久耗尽后再挨一击 ⇒ 全额（4 次格挡 × 25 = 100 ⇒ 第 5 击起不再减伤）。</summary>
+    /// <summary>④ 耐久删除后：连续格挡不再有上限（旧的“第 5 击不再减伤”已不适用）。</summary>
     [Fact]
-    public void Depleted_Shield_Stops_Mitigating_From_The_Fifth_Hit()
+    public void Defending_Blocks_Repeatedly_Without_Durability_Limit()
     {
         var (store, resolver) = World(npcZ: 1.2f, defending: true);
         var player = store.GetPlayer(Player)!;
 
-        // 50001 冷却 1s = 15 tick ⇒ 每次决策 +30 tick 拉开（> 冷却 + 判定延迟 6 tick）
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 8; i++)
         {
             var blocked = Assert.Single(Resolve(resolver, Npc, MonsterBite(), (uint)(10 + i * 30)).Hits);
-            Assert.True(blocked.IsBlocked, $"第 {i + 1} 次格挡应命中（耐久 {player.ShieldDurability}）");
+            Assert.True(blocked.IsBlocked, $"第 {i + 1} 次格挡应命中");
+            Assert.Equal(3f, blocked.Damage, 4);
         }
-        Assert.Equal(0f, player.ShieldDurability, 4);
-
-        var fifth = Assert.Single(Resolve(resolver, Npc, MonsterBite(), 130).Hits);
-
-        Assert.False(fifth.IsBlocked);                                    // 归零后 IsDefending 不再减伤
-        Assert.Equal(10f, fifth.Damage, 4);
-        Assert.Equal(4 * 3f + 10f, 100f - player.Hp, 4);                  // 4×3 格挡 + 1 全额
+        Assert.Equal(100f - 8 * 3f, player.Hp, 4);   // 8 × 3 = 24
     }
 
     /// <summary>

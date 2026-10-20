@@ -102,8 +102,9 @@ namespace Cool.SyncCore
         private const float ShapeEpsilon = 0.001f;
 
         // —— PvP 格挡减伤（2026-10-17；服务端裁决，客户端表现复用既有 DefendHit 链路）——
-        // 表值自持（与判定延迟同一作风）：防御中且攻击者落在正面 BlockHalfAngleDeg 锥内 ⇒
-        // 伤害 × BlockDamageScale；每格挡一次扣 ShieldDurabilityPerBlock 耐久，归零后不再减伤。
+        // 防御中且攻击者落在正面 BlockHalfAngleDeg 锥内 ⇒ 伤害 × BlockDamageScale。
+        // 盾资源只由客户端精力控制（2026-10-21 删除耐久）：服务端不持有盾耐久，
+        // 只做姿态 + 几何判断。
 
         /// <summary>格挡后伤害倍率（格挡成功 ⇒ damage × 该值）</summary>
         public const float BlockDamageScale = 0.3f;
@@ -111,14 +112,6 @@ namespace Cool.SyncCore
         /// <summary>格挡锥半角（度）：受击者朝向与"受击者→攻击者"方向夹角 ≤ 半角 ⇒ 格挡命中。
         /// **半角**语义（锥全角 120°）——与 HitShape.Angle（全角）不同，勿混</summary>
         public const float BlockHalfAngleDeg = 60f;
-
-        /// <summary>盾耐久上限（服务端权威 PlayerState.ShieldDurability 的初值；登录/复活回满）。
-        /// 与客户端本地盾（CharacterController._shieldDurability 上限 50）**不同值域**：本地盾服务于
-        /// 单机权威战斗，服务端盾服务联网裁决，两者不互抄</summary>
-        public const float ShieldMaxDurability = 100f;
-
-        /// <summary>每次格挡消耗的耐久（100 / 25 = 4 次格挡后耗尽）</summary>
-        public const float ShieldDurabilityPerBlock = 25f;
 
         private static readonly Dictionary<int, SkillEntry> Table = new Dictionary<int, SkillEntry>
         {

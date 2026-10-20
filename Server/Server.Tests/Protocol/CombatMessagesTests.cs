@@ -40,6 +40,9 @@ public class CombatMessagesTests
             SourcePlayerId = 1,
             SkillId = 20001,
             ServerTimestamp = 1_700_000_000_000_0000L,
+            ProjectileStopped = true,
+            StopX = 1.5f,
+            StopZ = 6f,
             Hits =
             {
                 new HitEntry
@@ -70,6 +73,9 @@ public class CombatMessagesTests
         Assert.True(damage.Hits[1].IsCritical);
         Assert.Equal(42f, damage.Hits[1].TargetRemainingHp, 4);
         Assert.False(damage.Hits[1].IsBlocked);
+        Assert.True(damage.ProjectileStopped, "ProjectileStopped 未上线——客户端剑气停点整条链静默失效");
+        Assert.Equal(1.5f, damage.StopX, 4);
+        Assert.Equal(6f, damage.StopZ, 4);
     }
 
     [Fact]

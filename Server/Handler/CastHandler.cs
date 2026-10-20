@@ -31,6 +31,10 @@ namespace KcpServer
             public CastBroadcast? Broadcast;
             public bool IsNpcCaster;
             public readonly List<HitEntry> Hits = new List<HitEntry>();
+
+            /// <summary>LineAll 线形命中被格挡吸收时的停点（2026-10-21）</summary>
+            public bool ProjectileStopped;
+            public Vec3 StopPosition;
         }
 
         /// <summary>一次施法的判定组（同一施法可排多段——剑气/火球分段推进）。可变 class：
@@ -195,21 +199,61 @@ namespace KcpServer
             {
                 Accepted = true, IsNpcCaster = pending.IsNpcCaster, Broadcast = pending.Broadcast
             };
+
+            var casterPos = new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z);
             // 挥击实例先行（单机判定帧顺序：挥击结算、同帧再生成剑气），且**不写入 GroupHitIds、
             // 不受其 banned 过滤**——同一目标在挥击与剑气两条线上各结算一次（不跨组去重）
             if (swingHitIds != null)
             {
                 foreach (var targetId in swingHitIds)
-                    ApplyHit(pending, caster, entry, spec, targetId, resolution);
+                    ApplyHit(pending, entry, spec, targetId, casterPos, resolution);
             }
+
+            // 剑气沿施法方向推进：按沿线距离排序，格挡者之前的先结算、之后的被吸收跳过
+            if (spec != null && spec.Kind == ProjectileKind.LineAll)
+                hitIds.Sort((a, b) => CompareAlong(pending, a, b));
+
+            var lineAttackerPos = spec != null && spec.Kind == ProjectileKind.LineAll
+                ? pending.Origin
+                : casterPos;
+
             foreach (var targetId in hitIds)
             {
                 if (!pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
-                ApplyHit(pending, caster, entry, spec, targetId, resolution);
+                bool blocked = ApplyHit(pending, entry, spec, targetId, lineAttackerPos, resolution);
+                if (blocked && spec != null && spec.Kind == ProjectileKind.LineAll)
+                {
+                    var blocker = _store.GetPlayer(targetId);
+                    if (blocker != null)
+                        resolution.StopPosition = new Vec3(
+                            blocker.Position.X, blocker.Position.Y, blocker.Position.Z);
+                    resolution.ProjectileStopped = true;
+                    pending.Spent = true;
+                    break;
+                }
             }
+
             if (spec != null && spec.Kind == ProjectileKind.LineNearestSplash && hitIds.Count > 0)
                 pending.Spent = true;
             return resolution;
+        }
+
+        private int CompareAlong(PendingCast pending, long a, long b)
+        {
+            float da = AlongDistance(pending, a);
+            float db = AlongDistance(pending, b);
+            int byDistance = da.CompareTo(db);
+            return byDistance != 0 ? byDistance : a.CompareTo(b);
+        }
+
+        private float AlongDistance(PendingCast pending, long targetId)
+        {
+            var target = _store.GetPlayer(targetId);
+            if (target == null) return float.MaxValue;
+            float fx = (float)Math.Sin(pending.Yaw * Math.PI / 180.0);
+            float fz = (float)Math.Cos(pending.Yaw * Math.PI / 180.0);
+            return (target.Position.X - pending.Origin.X) * fx
+                 + (target.Position.Z - pending.Origin.Z) * fz;
         }
 
         /// <summary>挥击实例几何（与 spec==null 同源）：施法者位置/朝向 + 请求形状 + 锁定目标。</summary>
@@ -219,13 +263,13 @@ namespace KcpServer
                 new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z),
                 caster.Rotation, request.TargetPlayerId, request.Shape, candidates);
 
-        /// <summary>对一个命中目标结算：掷骰（+蓄力倍率）→ 格挡 → 扣血 → HitEntry。
+        /// <summary>对一个命中目标结算：掷骰（+蓄力倍率）→ 格挡 → 扣血 → HitEntry；返回是否格挡。
         /// 调用方决定是否先经 GroupHitIds（挥击实例不经过去重，与剑气各算一次）。</summary>
-        private void ApplyHit(PendingCast pending, PlayerState caster, SkillEntry entry,
-            ProjectileSpec? spec, long targetId, CastResolution resolution)
+        private bool ApplyHit(PendingCast pending, SkillEntry entry, ProjectileSpec? spec,
+            long targetId, Vec3 attackerPos, CastResolution resolution)
         {
             var target = _store.GetPlayer(targetId);
-            if (target == null) return;
+            if (target == null) return false;
 
             // 掷骰顺序不变：暴击照常掷，格挡只在最后乘倍率（确定性可复现——固定种子的
             // 期望值不因格挡分支错位；调换这里两句会让既有种子序列整体漂移）
@@ -234,20 +278,18 @@ namespace KcpServer
                 damage *= 1f + (spec.ChargeDamageMaxScale - 1f) * pending.Charge;
 
             // 格挡减伤（D-P4-8 服务端化）：防御中 + 攻击者落在受击者正面 BlockHalfAngleDeg 锥内
-            // + 盾未耗尽 ⇒ 伤害 × BlockDamageScale、扣耐久、命中条目标记 IsBlocked。
+            // ⇒ 伤害 × BlockDamageScale、命中条目标记 IsBlocked。盾资源只由客户端精力控制
+            //（2026-10-21 删除服务端耐久）。
             // **信任面（诚实登记）**：IsDefending 由客户端上报、yaw 来自客户端上报的位置同步——
-            // 服务端只做几何与耐久校验，与既有"客户端权威位置 + 服务端部分校验"同一哲学，
+            // 服务端只做姿态 + 几何判断，与既有"客户端权威位置 + 服务端部分校验"同一哲学，
             // 不是防作弊闸门（位置校验的边界就是本裁决的边界）。
-            bool blocked = target.IsDefending
-                && target.ShieldDurability > 0f
+            bool blocked = target.IsAlive
+                && target.IsDefending
                 && CombatRules.IsBlocked(target.Rotation,
-                    caster.Position.X - target.Position.X,
-                    caster.Position.Z - target.Position.Z);
+                    attackerPos.X - target.Position.X,
+                    attackerPos.Z - target.Position.Z);
             if (blocked)
-            {
                 damage *= CombatRules.BlockDamageScale;
-                target.ConsumeShieldDurability(CombatRules.ShieldDurabilityPerBlock);
-            }
 
             target.ApplyDamage(damage);
             resolution.Hits.Add(new HitEntry
@@ -260,6 +302,7 @@ namespace KcpServer
                 HitX = target.Position.X,
                 HitZ = target.Position.Z
             });
+            return blocked;
         }
 
         /// <summary>候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
@@ -387,7 +430,10 @@ namespace KcpServer
                 SourcePlayerId = resolution.Broadcast.CasterPlayerId,
                 SkillId = resolution.Broadcast.SkillId,
                 ServerTimestamp = ServerClock.NowTicks(),
-                Hits = resolution.Hits
+                Hits = resolution.Hits,
+                ProjectileStopped = resolution.ProjectileStopped,
+                StopX = resolution.StopPosition.X,
+                StopZ = resolution.StopPosition.Z
             };
 
             var damageRecipients = new HashSet<long>();

@@ -170,6 +170,26 @@ namespace Cool.Protocol.Tests
                 "IsBlocked 必须挂在 tag 7（既有 1..6 是已发布的 wire 契约）");
         }
 
+        [Test]
+        public void DamageResult_ProjectileStop_Tags_Are_Pinned()
+        {
+            var stopped = typeof(Cool.Protocol.DamageResult).GetProperty("ProjectileStopped");
+            Assert.IsNotNull(stopped, "DamageResult 必须有 ProjectileStopped");
+            Assert.AreEqual(typeof(bool), stopped!.PropertyType);
+            Assert.AreEqual(5, GetProtoMemberTag(stopped),
+                "ProjectileStopped 必须挂在 tag 5（1..4 已发布）");
+
+            var stopX = typeof(Cool.Protocol.DamageResult).GetProperty("StopX");
+            Assert.IsNotNull(stopX);
+            Assert.AreEqual(typeof(float), stopX!.PropertyType);
+            Assert.AreEqual(6, GetProtoMemberTag(stopX), "StopX 必须挂在 tag 6");
+
+            var stopZ = typeof(Cool.Protocol.DamageResult).GetProperty("StopZ");
+            Assert.IsNotNull(stopZ);
+            Assert.AreEqual(typeof(float), stopZ!.PropertyType);
+            Assert.AreEqual(7, GetProtoMemberTag(stopZ), "StopZ 必须挂在 tag 7");
+        }
+
         /// <summary>
         /// 按名字认 [ProtoMember]：本测试程序集引用不到 protobuf-net 插件（Unity 不给它自动引用
         /// 预编译 DLL，GameSys.EditorTests.csproj 里没有该 Reference），所以不能写 ProtoBuf.ProtoMemberAttribute。

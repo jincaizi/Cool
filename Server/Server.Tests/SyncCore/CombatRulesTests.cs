@@ -198,8 +198,6 @@ public class CombatRulesTests
         // 表值自持（与判定延迟同一作风）：改这些值 = 平衡改动，必须在这里显式改
         Assert.Equal(0.3f, CombatRules.BlockDamageScale, 4);
         Assert.Equal(60f, CombatRules.BlockHalfAngleDeg, 4);
-        Assert.Equal(100f, CombatRules.ShieldMaxDurability, 4);
-        Assert.Equal(25f, CombatRules.ShieldDurabilityPerBlock, 4);
     }
 
     [Fact]
