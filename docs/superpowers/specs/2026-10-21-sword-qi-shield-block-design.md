@@ -100,7 +100,7 @@
 
 服务端每段结算：
 
-1. 候选 = 现有 `BuildCandidates`（玩家施法：玩家+怪物；怪物施法：已登录玩家）。
+1. 候选 = 现有 `BuildCandidates`（玩家施法：玩家/bot + 怪物；怪物施法：已登录玩家；bot 不举盾）。
 2. 计算该段的 `hitIds` 后，按**沿 `pending.Yaw` 距 `pending.Origin` 的距离升序**排序；
    同距离按 playerId 升序，保证确定性。
 3. 依次结算；对每个目标：
@@ -157,7 +157,8 @@
 - `SwordQiSpawner` 维护活跃剑气列表，`StopNearest(point)` 选择：
   - 横向距离最小者优先；
   - 已飞过停点（`along < traveled - 1.5m`）加 1000 惩罚；
-  - 横向相同时优先飞行距离更短（更新的一发）；
+  - 存在未飞过候选时：横向相同按飞行距离更短（更新的一发）优先；
+  - **全部候选都已飞过**时：选 `traveled - along` 最小（刚飞过最少）的一发并立即释放；
   - 没有活跃剑气 ⇒ no-op（**不做** pending 队列，避免停掉下一次施法）。
 - `SwordQiProjectile.StopAtPoint(point)`：
   - 把 `point - spawn` 与 `direction` 压到 XZ 后投影得到沿程距离；
@@ -320,7 +321,7 @@
 
 - `test_sword_qi_spawner_stop_nearest_picks_projectile_on_its_line`
 - `test_sword_qi_spawner_stop_nearest_prefers_projectile_not_passed`
-  （qi1 飞到 6m、qi2 到 1m，停点 5m；断言 qi2 `StopDistance≈5`、qi1 保持 Range）
+  （qi1 飞到 7m、qi2 到 1m，停点 5m；qi1 越过停点 2m > 1.5m 容差，断言 qi2 `StopDistance≈5`、qi1 保持 Range）
 - `test_sword_qi_spawner_stop_without_active_is_noop`
 
 ### 7.3 客户端 PlayMode（新增 `BlockStaminaTests.cs`，需 `.meta`）
@@ -397,7 +398,7 @@
 | 强制收盾同步窗口 | 客户端力竭收盾后，服务端最多还会在一个位置同步间隔内继续判格挡 |
 | 视觉停点误差 | 视觉生成点 `(0.8,1.0,0.6)` 与判定原点不同，停点可能差 ≤1m |
 | 重叠施法选择 | 两发剑气重叠时按“横向最近、未飞过、优先新发”启发式；不同朝向且横向接近时仍可能选错（已登记，不阻塞） |
-| 结果包延迟 | 若结果包晚于剑气飞过停点，客户端会立即释放（视觉已在终点附近） |
+| 结果包延迟 | 若结果包晚于剑气飞过停点，选“刚飞过停点最少”的一发立即释放（视觉已在终点附近） |
 | 无活跃剑气 | 结果到达时本地没有活跃剑气 ⇒ no-op；不做 pending 队列（避免误停下一次施法） |
 | 死亡/复活首帧 | 本次已在死亡与两个复活入口幂等退出防御；服务端 `IsAlive` 同时挡住死者格挡 |
 | 离线/联机格挡数值差异 | 离线 80%/160°、联机 70%/120° 为既有差异，本设计不动 |
