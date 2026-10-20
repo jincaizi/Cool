@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C.Core.Pool;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
         private static Transform _root;
         private static Transform _container;
         private static bool _ownsContainer;
+        private static readonly List<SwordQiProjectile> _active = new List<SwordQiProjectile>();
 
         public static void Spawn(SwordQiConfig config, DamageBlock damage, Vector3 origin, Vector3 direction)
         {
@@ -57,11 +59,67 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
 
             var qi = _pool.Get();
             qi.OnSpawn(config, damage, origin, direction, _pool);
+            PruneActive();
+            _active.Add(qi);
+        }
+
+        private static void PruneActive()
+        {
+            for (int i = _active.Count - 1; i >= 0; i--)
+            {
+                var qi = _active[i];
+                if (qi == null || !qi.IsActive) _active.RemoveAt(i);
+            }
+        }
+
+        /// <summary>联机：按服务端停点选择一发在飞的剑气，让它飞到停点后回池。
+        /// 优先未飞过的；全部已飞过时选刚飞过最少的一发。</summary>
+        public static void StopNearest(Vector3 worldPoint)
+        {
+            PruneActive();
+            if (_active.Count == 0) return;
+
+            SwordQiProjectile best = null;
+            float bestScore = float.MaxValue;
+            bool anyNotPassed = false;
+
+            foreach (var qi in _active)
+            {
+                float along = qi.DistanceAlong(worldPoint);
+                bool passed = along < qi.Traveled - 1.5f;
+                if (!passed) anyNotPassed = true;
+                float score = qi.LateralDistance(worldPoint) + (passed ? 1000f : 0f);
+                if (best == null
+                    || score < bestScore
+                    || (Mathf.Approximately(score, bestScore) && qi.Traveled < best.Traveled))
+                {
+                    best = qi;
+                    bestScore = score;
+                }
+            }
+
+            if (!anyNotPassed)
+            {
+                best = null;
+                float leastPast = float.MaxValue;
+                foreach (var qi in _active)
+                {
+                    float past = qi.Traveled - qi.DistanceAlong(worldPoint);
+                    if (past < leastPast)
+                    {
+                        leastPast = past;
+                        best = qi;
+                    }
+                }
+            }
+
+            best?.StopAtPoint(worldPoint);
         }
 
         /// <summary>测试专用：清空静态池状态（避免 EditMode 测试间串扰）</summary>
         public static void DisposeForTests()
         {
+            _active.Clear();
             if (_root != null)
                 Object.DestroyImmediate(_root.gameObject);
             _pool = null;

@@ -505,5 +505,124 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 animator.Update(0.05f);
             } while (++guard < 20 && animator.IsInTransition(0));
         }
+
+        [Test]
+        public void OnDamageResult_ProjectileStopped_LocalCaster_Raises_Stop_Event()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry);
+            int raised = 0;
+            Vector3 stop = Vector3.zero;
+            bridge.OnLineProjectileStopped += p => { raised++; stop = p; };
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 1L,
+                SkillId = 10002,
+                ProjectileStopped = true,
+                StopX = 0f,
+                StopZ = 6f
+            });
+            bridge.Update();
+
+            Assert.AreEqual(1, raised);
+            Assert.AreEqual(0f, stop.x, 0.001f);
+            Assert.AreEqual(6f, stop.z, 0.001f);
+        }
+
+        [Test]
+        public void OnDamageResult_ProjectileStopped_RemoteCaster_Does_Not_Raise()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry);
+            int raised = 0;
+            bridge.OnLineProjectileStopped += _ => raised++;
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 2L,
+                SkillId = 10002,
+                ProjectileStopped = true,
+                StopX = 0f,
+                StopZ = 6f
+            });
+            bridge.Update();
+
+            Assert.AreEqual(0, raised);
+        }
+
+        [Test]
+        public void OnDamageResult_ProjectileStopped_NonLineAllSkill_Does_Not_Raise()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry);
+            int raised = 0;
+            bridge.OnLineProjectileStopped += _ => raised++;
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 1L,
+                SkillId = 10001,
+                ProjectileStopped = true,
+                StopX = 0f,
+                StopZ = 6f
+            });
+            bridge.Update();
+
+            Assert.AreEqual(0, raised);
+        }
+
+        [Test]
+        public void OnDamageResult_BlockedHit_Without_StopFlag_Does_Not_Raise()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry);
+            int raised = 0;
+            bridge.OnLineProjectileStopped += _ => raised++;
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 1L,
+                SkillId = 10002,
+                ProjectileStopped = false,
+                Hits =
+                {
+                    new HitEntry
+                    {
+                        TargetPlayerId = 3L, Damage = 27f, IsBlocked = true,
+                        HitX = 0f, HitZ = 5f
+                    }
+                }
+            });
+            bridge.Update();
+
+            Assert.AreEqual(0, raised, "客户端不得回退到扫描 IsBlocked 来停剑气");
+        }
+
+        [Test]
+        public void OnDamageResult_MultipleBlockedHits_Raises_StopEvent_Once()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry);
+            int raised = 0;
+            bridge.OnLineProjectileStopped += _ => raised++;
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 1L,
+                SkillId = 10002,
+                ProjectileStopped = true,
+                StopX = 0f,
+                StopZ = 1.5f,
+                Hits =
+                {
+                    new HitEntry { TargetPlayerId = 3L, Damage = 27f, IsBlocked = true },
+                    new HitEntry { TargetPlayerId = 3L, Damage = 27f, IsBlocked = true }
+                }
+            });
+            bridge.Update();
+
+            Assert.AreEqual(1, raised);
+        }
     }
 }

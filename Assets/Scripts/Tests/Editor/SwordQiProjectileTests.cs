@@ -179,5 +179,47 @@ namespace GameSys.EditorTests
             // Assert
             Assert.AreEqual(42f, target.LastDamage.CalculatedDamage, 0.001f);
         }
+
+        [Test]
+        public void test_sword_qi_stop_at_point_releases_at_point()
+        {
+            var qi = CreateProjectile(CreateConfig(), DamageBlock.CreateDefault(10f, 0f),
+                                      Vector3.zero, Vector3.forward);
+
+            qi.StopAtPoint(new Vector3(0f, 0f, 5f));
+            for (int i = 0; i < 10; i++) qi.Tick(1f / 18f);
+
+            Assert.IsFalse(qi.gameObject.activeSelf, "飞到停点后应回池");
+        }
+
+        [Test]
+        public void test_sword_qi_stop_at_point_behind_releases_immediately()
+        {
+            var qi = CreateProjectile(CreateConfig(), DamageBlock.CreateDefault(10f, 0f),
+                                      Vector3.zero, Vector3.forward);
+
+            qi.Tick(3f / 18f);                         // 已飞 3m
+            qi.StopAtPoint(new Vector3(0f, 0f, 1f));   // 停点在身后
+            qi.Tick(1f / 18f);
+
+            Assert.IsFalse(qi.gameObject.activeSelf);
+        }
+
+        [Test]
+        public void test_sword_qi_stop_distance_resets_on_respawn()
+        {
+            var cfg = CreateConfig();
+            var qi = CreateProjectile(cfg, DamageBlock.CreateDefault(10f, 0f),
+                                      Vector3.zero, Vector3.forward);
+
+            qi.StopAtPoint(new Vector3(0f, 0f, 5f));
+            for (int i = 0; i < 6; i++) qi.Tick(1f / 18f);   // 6m > 5 → 回池
+            Assert.IsFalse(qi.gameObject.activeSelf);
+
+            qi.OnSpawn(cfg, DamageBlock.CreateDefault(10f, 0f), Vector3.zero, Vector3.forward, null);
+            for (int i = 0; i < 6; i++) qi.Tick(1f / 18f);   // 旧停点不得残留
+
+            Assert.IsTrue(qi.gameObject.activeSelf, "OnSpawn 必须重置停点");
+        }
     }
 }

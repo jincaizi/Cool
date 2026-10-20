@@ -17,6 +17,8 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
         private DamageBlock _damage;
         private Vector3 _direction;
         private float _traveled;
+        private Vector3 _spawnPosition;
+        private float _stopDistance;
         private readonly HashSet<int> _hitIds = new HashSet<int>();
         private bool _released;
         private ComponentPool<SwordQiProjectile> _pool;
@@ -31,10 +33,16 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
             _released = false;
             _traveled = 0f;
             _hitIds.Clear();
+            _spawnPosition = origin;
+            _stopDistance = config.Range;
             transform.position = origin;
             transform.rotation = Quaternion.LookRotation(direction);
             gameObject.SetActive(true);
         }
+
+        public bool IsActive => !_released;
+        public float StopDistance => _stopDistance;
+        public float Traveled => _traveled;
 
         private void Update()
         {
@@ -52,8 +60,44 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
 
             DetectAndDamage();
 
-            if (_traveled >= _config.Range)
+            if (_traveled >= _stopDistance)
                 Release();
+        }
+
+        /// <summary>联机停点：让剑气飞到服务端给定的沿程距离后回池。
+        /// 停点在身后时钳到当前已飞距离（下一帧立即释放）。</summary>
+        public void StopAtPoint(Vector3 worldPoint)
+        {
+            if (_released || _config == null) return;
+            Vector3 flat = worldPoint - _spawnPosition;
+            flat.y = 0f;
+            Vector3 dir = _direction;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) return;
+            float along = Vector3.Dot(flat, dir.normalized);
+            _stopDistance = Mathf.Clamp(along, _traveled, _config.Range);
+        }
+
+        internal float DistanceAlong(Vector3 worldPoint)
+        {
+            if (_config == null) return float.MaxValue;
+            Vector3 flat = worldPoint - _spawnPosition;
+            flat.y = 0f;
+            Vector3 dir = _direction;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) return float.MaxValue;
+            return Vector3.Dot(flat, dir.normalized);
+        }
+
+        internal float LateralDistance(Vector3 worldPoint)
+        {
+            if (_config == null) return float.MaxValue;
+            Vector3 flat = worldPoint - _spawnPosition;
+            flat.y = 0f;
+            Vector3 dir = _direction;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) return float.MaxValue;
+            return Vector3.Cross(dir.normalized, flat).magnitude;
         }
 
         private void DetectAndDamage()

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Runtime.SwordQi;
@@ -127,6 +128,70 @@ namespace GameSys.EditorTests
                 if (qi.gameObject != prefab) pooledTotal++;
             Assert.AreEqual(SwordQiSpawner.PrewarmCount, pooledTotal,
                             "总实例数应保持池预热数量（复用而非新建）");
+        }
+
+        [Test]
+        public void test_sword_qi_spawner_stop_nearest_picks_projectile_on_its_line()
+        {
+            var prefab = CreateQiPrefab();
+            _gos.Add(prefab);
+            var cfg = CreateConfig(prefab);
+            var template = prefab.GetComponent<SwordQiProjectile>();
+
+            SwordQiSpawner.Spawn(cfg, DamageBlock.CreateDefault(10f, 0f), Vector3.zero, Vector3.forward);
+            SwordQiSpawner.Spawn(cfg, DamageBlock.CreateDefault(10f, 0f), new Vector3(10f, 0f, 0f), Vector3.forward);
+
+            var qis = Object.FindObjectsOfType<SwordQiProjectile>().Where(q => q != template).ToArray();
+            Assert.AreEqual(2, qis.Length);
+            var first = qis.Single(q => Mathf.Abs(q.transform.position.x) < 0.1f);
+            var second = qis.Single(q => Mathf.Abs(q.transform.position.x - 10f) < 0.1f);
+            first.Tick(1f / 18f);
+            second.Tick(1f / 18f);
+
+            SwordQiSpawner.StopNearest(new Vector3(10f, 0f, 5f));
+
+            Assert.AreEqual(5f, second.StopDistance, 0.01f);
+            Assert.AreEqual(cfg.Range, first.StopDistance, 0.01f);
+        }
+
+        [Test]
+        public void test_sword_qi_spawner_stop_nearest_prefers_projectile_not_passed()
+        {
+            var prefab = CreateQiPrefab();
+            _gos.Add(prefab);
+            var cfg = CreateConfig(prefab);
+            var template = prefab.GetComponent<SwordQiProjectile>();
+
+            SwordQiSpawner.Spawn(cfg, DamageBlock.CreateDefault(10f, 0f), Vector3.zero, Vector3.forward);
+            var first = Object.FindObjectsOfType<SwordQiProjectile>()
+                .Single(q => q != template);
+            first.Tick(7f / 18f);                     // 已飞 7m，越过 5m 停点 2m
+
+            SwordQiSpawner.Spawn(cfg, DamageBlock.CreateDefault(10f, 0f), Vector3.zero, Vector3.forward);
+            var second = Object.FindObjectsOfType<SwordQiProjectile>()
+                .Single(q => q != template && q != first);
+            second.Tick(1f / 18f);                    // 只飞 1m
+
+            SwordQiSpawner.StopNearest(new Vector3(0f, 0f, 5f));
+
+            Assert.AreEqual(5f, second.StopDistance, 0.01f);
+            Assert.AreEqual(cfg.Range, first.StopDistance, 0.01f,
+                "已飞过停点的旧发不应被选中");
+        }
+
+        [Test]
+        public void test_sword_qi_spawner_stop_without_active_is_noop()
+        {
+            var prefab = CreateQiPrefab();
+            _gos.Add(prefab);
+            var cfg = CreateConfig(prefab);
+            var template = prefab.GetComponent<SwordQiProjectile>();
+
+            SwordQiSpawner.Spawn(cfg, DamageBlock.CreateDefault(10f, 0f), Vector3.zero, Vector3.forward);
+            var qi = Object.FindObjectsOfType<SwordQiProjectile>().Single(q => q != template);
+            qi.Release();
+
+            Assert.DoesNotThrow(() => SwordQiSpawner.StopNearest(new Vector3(0f, 0f, 5f)));
         }
     }
 }

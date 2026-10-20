@@ -37,6 +37,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>收到伤害结果（扣血/飘字已内部处理；测试与上层观察用）</summary>
         public event Action<DamageResult>? OnDamageResult;
 
+        /// <summary>本机施放的 LineAll 剑气被格挡吸收（停点；客户端据此结束剑气特效）</summary>
+        public event Action<Vector3>? OnLineProjectileStopped;
+
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
             RemoteEntityRegistry registry, Action<long, float, bool, Vector3, float, bool>? onDamageToLocalPlayer = null)
         {
@@ -133,6 +136,14 @@ namespace Hotfix.GameSystems.SyncLayer
                         viewId, hitPos, HitZonePart.Torso, Vector3.zero,
                         Mathf.CeilToInt(hit.Damage), Color.white));
                 }
+            }
+
+            if (result.ProjectileStopped
+                && result.SourcePlayerId == localId
+                && Cool.SyncCore.CombatRules.TryGet(result.SkillId, out var stopEntry)
+                && stopEntry.Projectile?.Kind == Cool.SyncCore.ProjectileKind.LineAll)
+            {
+                OnLineProjectileStopped?.Invoke(new Vector3(result.StopX, 0f, result.StopZ));
             }
         }
     }

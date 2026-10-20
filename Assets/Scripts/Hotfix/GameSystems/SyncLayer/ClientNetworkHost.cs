@@ -601,6 +601,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
                 _remoteEntities!.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp);
             };
+            _combatBridge.OnLineProjectileStopped += HandleLineProjectileStopped;
 
             // P5：联网模式下怪物由服务器驱动——禁用场景内全部本地 MonsterSpawner
             //（DemoDay 有 SlimeSpawner + TurtleShellSpawner 两个——单数 FindObjectOfType 会漏）
@@ -629,6 +630,9 @@ namespace Hotfix.GameSystems.SyncLayer
         private void OnLocalChargeReleased(SkillData skillData, float chargeProgress, Vector3 impactPoint)
             => SkillCastReporter.ReportChargeRelease(_combatBridge, skillData, chargeProgress, impactPoint);
 
+        private void HandleLineProjectileStopped(Vector3 point)
+            => Hotfix.GameSystems.Skills.Runtime.SwordQi.SwordQiSpawner.StopNearest(point);
+
         /// <summary>
         /// 摘除战斗桥订阅（adapter 消息 + 本地技能事件）。Disconnect 与 OnDestroy 共用——
         /// 宿主被销毁而本地 Sys3CEntry 存活时，避免桥对已销毁宿主留下悬空委托。
@@ -647,6 +651,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _localEntry.SkillCoordinator.OnSkillActivated -= OnLocalSkillCast;
                 _localEntry.SkillCoordinator.OnChargeReleased -= OnLocalChargeReleased;
             }
+            _combatBridge.OnLineProjectileStopped -= HandleLineProjectileStopped;
             _combatBridge = null;
         }
 
