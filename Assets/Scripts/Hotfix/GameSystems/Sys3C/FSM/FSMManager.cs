@@ -115,7 +115,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
 
             // P6 ①：受击表现接线。DamageEvent 的字段与 HitData 同构（Damage/KnockbackForce/
             // LaunchForce/StunDuration/HitDirection），直接映射，无需新增事件或协议。
-            // 与既有 HandleShieldBreak(:132)/TriggerHit(:144) 同款模式：EnterHit + 切 Hit 层。
+            // 与既有 TriggerHit(:144) 同款模式：EnterHit + 切 Hit 层。
             var hitData = new HitData
             {
                 Damage = damage,
@@ -152,18 +152,6 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         {
             _animator.SetBool(AnimHashes.IsDefending, false);
             _animator.SetLayerWeight(AnimHashes.DefendLayerIndex, 0f);
-        }
-
-        public void HandleShieldBreak(HitData hitData)
-        {
-            ExitDefend();
-            _hitFSM.EnterHit(new HitData
-            {
-                Damage = hitData.Damage,
-                HitDirection = hitData.HitDirection,
-                StunDuration = 1.5f
-            });
-            _stateCoordinator.SetActiveLayer(LayerType.Hit);
         }
 
         public void TriggerHit(float knockbackForce = 0f)

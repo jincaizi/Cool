@@ -79,6 +79,8 @@ namespace Hotfix.GameSystems.Sys3C
         [SerializeField, Tooltip("未力竭时的回复延迟（秒）")]
         private float _staminaShortRegenDelay = 0.2f;
         [SerializeField, Range(0f, 1f)] private float _staminaExhaustRecoverRatio = 0.2f;
+        [SerializeField, Tooltip("每次成功格挡额外消耗的精力")]
+        private float _blockStaminaCost = 15f;
 
         private StaminaSystem _stamina;
         private bool _defendStaminaLatch;
@@ -475,6 +477,15 @@ namespace Hotfix.GameSystems.Sys3C
             _fsmManager.ExitDefend();
         }
 
+        /// <summary>成功格挡的离散精力成本（与持盾每秒消耗叠加）。
+        /// 以服务端 IsBlocked 为准；精力不足也扣，随后由 ForceExit 收盾。</summary>
+        private void ConsumeBlockStamina()
+        {
+            if (_stamina == null) return;
+            if (!_stamina.TryConsume(_blockStaminaCost))
+                ForceExitDefendByExhaustion();
+        }
+
         private string _lastSkillTrigger;
         private bool _cleanupInProgress;
         private Skills.Definition.SkillSubState _prevSkillSubState;
@@ -571,8 +582,7 @@ namespace Hotfix.GameSystems.Sys3C
         /// 格挡分支（<paramref name="isBlocked"/>）：走**格挡受击**表现——复用单机格挡路径
         /// （<c>IDamageable.TakeDamage</c>）同款挂点 <c>HitFSM.EnterDefendHit</c> + Hit 层激活，
         /// 不新增状态/动画参数；浮字不发（与单机格挡一致：格挡成功本就跳过
-        /// <c>PlayerTakeDamageEvent</c>）。本地盾耐久**不**在此扣——联网裁决的盾在服务端
-        /// （PlayerState.ShieldDurability），本地盾那套只服务单机权威战斗，两值域不互抄。
+        /// <c>PlayerTakeDamageEvent</c>）。格挡的 15 点精力成本在本分支扣除（以服务端 IsBlocked 为准）。
         /// </summary>
         public void ApplyServerDamage(float damage, Vector3 hitDirection, float? serverRemainingHp = null,
             bool isBlocked = false)
@@ -598,6 +608,8 @@ namespace Hotfix.GameSystems.Sys3C
                     HitDirection = hitDirection
                 });
                 _fsmManager.Coordinator.SetActiveLayer(LayerType.Hit);
+
+                ConsumeBlockStamina();
 
                 if (_currentHP <= 0)
                 {
@@ -674,31 +686,10 @@ namespace Hotfix.GameSystems.Sys3C
                 _fsmManager.ExitDefend();
             }
 
-            // 格挡成功 → 扣耐久 + 播 DefendHit
+            // 格挡成功 → 扣精 + 播 DefendHit
             if (_cc.IsDefending && wasBlocked)
             {
-                float absorbed = baseDamage - finalDamage;
-                bool broken = _cc.AbsorbDamage(absorbed);
-                if (broken)
-                {
-                    _cc.OnShieldBreak();
-                    _fsmManager.HandleShieldBreak(new HitData
-                    {
-                        Damage = finalDamage,
-                        HitDirection = hitDirection
-                    });
-                    // 扣血（盾破时穿透伤害仍要扣除）
-                    _currentHP -= finalDamage;
-                    if (_currentHP <= 0)
-                    {
-                        _currentHP = 0;
-                        _skillCoordinator.ClearInputBuffer();
-                        _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
-                    }
-                    EvaluateLocalDeath();
-                    return;
-                }
-
+                ConsumeBlockStamina();
                 _fsmManager.HitFSM.EnterDefendHit(new HitData
                 {
                     Damage = finalDamage,
@@ -754,6 +745,9 @@ namespace Hotfix.GameSystems.Sys3C
             if (_isDead) return;
             if (_currentHP > 0f) return;
 
+            _cc.TryExitDefend();
+            _fsmManager.ExitDefend();
+
             if (IsOnlineMode())
             {
                 _isDead = true;
@@ -787,6 +781,8 @@ namespace Hotfix.GameSystems.Sys3C
         {
             _currentHP = hp;
             _stamina.Refill();
+            _cc.TryExitDefend();
+            _fsmManager.ExitDefend();
             _defendStaminaLatch = false;
             _isDead = false;
             _fsmManager.HitFSM.EnterRespawn();
@@ -810,6 +806,8 @@ namespace Hotfix.GameSystems.Sys3C
             _isDead = false;
             _currentHP = _maxHP;
             _stamina.Refill();
+            _cc.TryExitDefend();
+            _fsmManager.ExitDefend();
             _defendStaminaLatch = false;
             // N4：死亡剪辑播完后 HitFSM 停在 **Down**（躺卧）而不是 Death；
             // 旧路径用的 Resurrect() 只认 Death，在这里会静默不生效 ⇒ 复活者永远躺着，

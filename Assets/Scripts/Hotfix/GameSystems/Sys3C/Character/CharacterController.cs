@@ -40,20 +40,12 @@ namespace Hotfix.GameSystems.Sys3C.Character
         private bool _isDefending;
         public bool IsDefending => _isDefending;
 
-        // 盾耐久
-        private float _shieldDurability;
-        private const float MaxShieldDurability = 50f;
         public const float DefendSpeedMultiplier = 0.4f;
 
         /// <summary>
         /// 技能/状态移动速度倍率（旋转减速等），每帧由外部设置
         /// </summary>
         public float MoveSpeedScale { get; set; } = 1f;
-
-        public float ShieldDurabilityPercent =>
-            _shieldDurability / MaxShieldDurability;
-
-        public bool IsShieldBroken => _shieldDurability <= 0f;
 
         public CharacterData Data => _data;
         public bool IsGrounded => _groundDetector.IsGrounded();
@@ -533,7 +525,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
             _isDefending = true;
             _data.IsDefending = true;
-            _shieldDurability = MaxShieldDurability;
             return true;
         }
 
@@ -546,25 +537,6 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
             _isDefending = false;
             _data.IsDefending = false;
-        }
-
-        /// <summary>
-        /// 盾吸收伤害，返回是否盾已破。
-        /// </summary>
-        public bool AbsorbDamage(float absorbedAmount)
-        {
-            _shieldDurability -= absorbedAmount;
-            return _shieldDurability <= 0f;
-        }
-
-        /// <summary>
-        /// 盾被打破，强制退出防御。
-        /// </summary>
-        public void OnShieldBreak()
-        {
-            _isDefending = false;
-            _data.IsDefending = false;
-            _shieldDurability = 0f;
         }
     }
 }

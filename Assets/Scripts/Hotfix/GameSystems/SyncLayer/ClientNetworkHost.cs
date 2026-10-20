@@ -566,8 +566,8 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // 上报数据源：位置/旋转读 CharacterData（每帧自 transform 同步）；
             // 速度 = 水平真实速度（_controller.velocity——超速钳制链路依赖真实值，勿用 0-1 动画参数）；
-            // 防御状态 = 3C 的 `IsDefending` 真值源（服务端格挡减伤据此裁决——本地盾耐久不同步，
-            // 服务端 PlayerState.ShieldDurability 是权威）
+            // 防御状态 = 3C 的 `IsDefending` 真值源（服务端格挡减伤据此裁决——
+            // 盾资源只由客户端精力控制，服务端不持有盾耐久）
             _manager!.AttachMovementReporter(
                 () =>
                 {
