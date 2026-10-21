@@ -79,6 +79,12 @@ Server/bin/
 Server/obj/
 Server/Server.Tests/bin/
 
+# Verification artifacts (thousands of screenshots/logs — keep out of git status/hooks)
+production/verify/
+
+# Superpowers scratch (brainstorm/SDD workspaces)
+.superpowers/
+
 # Server3C.csproj is hand-authored (not Unity-generated)
 !Server/Server3C.csproj
 # Server.Tests.csproj is hand-authored (not Unity-generated)
