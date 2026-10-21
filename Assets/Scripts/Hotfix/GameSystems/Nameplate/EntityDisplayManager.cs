@@ -2,7 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using DataDefinition;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Stamina;
+using Hotfix.GameSystems.Sys3C.Core.Events;
 
 namespace Hotfix.GameSystems.Nameplate
 {
@@ -66,11 +68,18 @@ namespace Hotfix.GameSystems.Nameplate
         private void OnEnable()
         {
             _eventBridge?.Enable();
+            EventBus.Subscribe<LocalPlayerHitByPlayerEvent>(OnLocalPlayerHitByPlayer);
         }
 
         private void OnDisable()
         {
             _eventBridge?.Disable();
+            EventBus.Unsubscribe<LocalPlayerHitByPlayerEvent>(OnLocalPlayerHitByPlayer);
+        }
+
+        private void OnLocalPlayerHitByPlayer(LocalPlayerHitByPlayerEvent e)
+        {
+            _damageScreenEffect?.Flash();
         }
 
         private void LateUpdate()

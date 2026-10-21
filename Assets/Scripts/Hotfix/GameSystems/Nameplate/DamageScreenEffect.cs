@@ -31,9 +31,10 @@ namespace Hotfix.GameSystems.Nameplate
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             _overlay.sprite = GameSettings.Instance.HitFlashSprite;
-            var initColor = GameSettings.Instance.HitFlashColor;
+            var initColor = GameSettings.Instance.PlayerHitFlashColor;
             _overlay.color = new Color(initColor.r, initColor.g, initColor.b, 0f);
-            _cooldown = GameSettings.Instance.HitFlashCD;
+            _cooldown = GameSettings.Instance.PlayerHitFlashCooldown;
+            _lastFlashTime = -_cooldown; // 开局即可闪，不被初始冷却挡住
         }
 
         public void Flash()
