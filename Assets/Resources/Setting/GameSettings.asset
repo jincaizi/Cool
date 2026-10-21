@@ -18,3 +18,11 @@ MonoBehaviour:
   HitFlashColor: {r: 0.90188676, g: 0.2325391, b: 0.07997859, a: 1}
   HitFlashDuration: 1
   HitFlashCD: 20
+  LowHpThreshold: 0.2
+  LowHpTintColor: {r: 0.75, g: 0.05, b: 0.05, a: 0.45}
+  HitTintColor: {r: 1, g: 0.1, b: 0.1, a: 0.7}
+  HitTintDuration: 1
+  PlayerHitFlashColor: {r: 0.9, g: 0.05, b: 0.05, a: 1}
+  PlayerHitFlashCooldown: 0.8
+  HealVfxPrefab: {fileID: 0}
+  DamageFluctuation: 0

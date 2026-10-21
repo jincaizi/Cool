@@ -1,5 +1,6 @@
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.VFX;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Character
@@ -41,6 +42,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
             var spawnPos = _spawnPoint != null ? _spawnPoint.position : Vector3.zero;
             _currentPlayer = Instantiate(prefab, spawnPos, Quaternion.identity);
+            _currentPlayer.AddComponent<PlayerBodyTint>();
             EventBus.Emit(new PlayerSpawnedEvent(_currentPlayer.GetComponent<Animator>()));
         }
 
