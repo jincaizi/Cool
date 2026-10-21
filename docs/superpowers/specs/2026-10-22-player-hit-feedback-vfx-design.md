@@ -24,6 +24,7 @@
 |---|---|---|
 | 作用范围 | **仅本地玩家** | 屏幕闪屏只对本地有意义；远端玩家/怪物在客户端没有完整 HP 同步 |
 | 回血逻辑 | **真正实现 `Heal` + 粒子** | 当前玩家 `Heal` 是空实现，只做粒子会永远不触发 |
+| 回血触发源 | **仅 Editor/Development 的调试键 H** | 现有治疗链路打不到玩家（见 §4.3.1）；调试键用于实机验收，不进入正式包 |
 | 参数位置 | **GameSettings** | 现有 `HitFlash*` 已在同一资产，集中可调 |
 | 泛红实现 | **MaterialPropertyBlock 改 `_Color`** | 玩家全部 SkinnedMesh 共用 `PBR_Default`（Standard），零额外资源 |
 | 泛红叠加 | **低血量层 + 受击层** | 低血量持续、受击更亮；受击层衰减回落到底层 |
@@ -50,7 +51,7 @@
 | 8 | 怪物攻击也走 `CastRequest`，因此网络模式下玩家挨打同样经过 `DamageResult` | `Server/Monster/MonsterBtActions.cs:91-101` |
 | 9 | 怪物 NPC id 从 `2_000_000` 起；bot id 段为 `1_000_000+` | `Server/Monster/MonsterModule.cs:21`；`Server/Aoi/BotRunner.cs:90` |
 | 10 | `EntityKind`：Player=0 / Npc=1 / PlayerBot=2 | `AOT/Protocol/Messages/WorldSnapshot.cs:37-42` |
-| 11 | 玩家预制体 4 个 `SkinnedMeshRenderer` 全部引用同一材质 `PBR_Default`（guid `f323cced...`） | `Assets/Prefabs/Character/FemalePlayer.prefab:630-638` 等 |
+| 11 | 男/女玩家预制体各 4 个 `SkinnedMeshRenderer` 全部引用同一材质 `PBR_Default`（guid `f323cced...`） | `Assets/Prefabs/Character/FemalePlayer.prefab:630-638`；`Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab` 的 4 个 SMR |
 | 12 | `PBR_Default` 使用内置 Standard shader（fileID 46），支持 `_Color` | `Assets/RpgDuo/Material/PBR_Default.mat:11` |
 | 13 | 同一个玩家预制体被远端视图复用：`_playerAvatarPrefab = MaleCharacterPBR`，`RemoteEntityRegistry` 会实例化它 | `SyncLayer/ClientNetworkHost.cs:59`；`SyncLayer/RemoteEntityRegistry.cs:307` |
 | 14 | 本地玩家由 `PlayerSpawner` 在选角后运行时实例化 | `Sys3C/Character/PlayerSpawner.cs:43` |
@@ -58,6 +59,10 @@
 | 16 | 怪物受击闪红组件 `HitFlashVFX` 只订阅 targeted `MonsterTakeDamageEvent`，且静态开关默认关闭 | `VFX/HitFlashVFX.cs:11,31` |
 | 17 | 回血飘字配置存在（`FloatText_Heal.asset`、`FloatTextType.Heal`），但没有任何 Heal 事件/触发链路 | `Nameplate/FloatTextRenderer.cs:100` |
 | 18 | HUD HP 由 `Sys3CEntry.Update` 脏检查推动，所有写 `_currentHP` 的路径自动同步 | `Sys3C/Core/Combat/Sys3CEntryStatsProvider.cs:12-13`；`Sys3CEntry.cs:230-236` |
+| 19 | `Sys3CEntry` 只实现 `IDamageable`，**没有实现 `IEffectTarget`** | `Sys3CEntry.cs:25` |
+| 20 | 玩家侧唯一的 `IEffectTarget` 是 `SkillOwnerProxy`，其 `Heal` 为空、`Stats` 返回 null | `Sys3CEntry.cs:923-938` |
+| 21 | `SkillExecutor` 只对物理查询命中的 `IEffectTarget` 应用效果，并明确跳过施法者自身后代 | `Skills/Runtime/SkillExecutor.cs:596-600,640,669,683` |
+| 22 | `HealEffectData.IsTickEffect = true`，但 `OnTick`/`IsTickEffect` 全项目无调用者；也没有治疗技能资产 | `Skills/Effect/EffectData.cs:87-101,209` |
 
 ---
 
@@ -164,6 +169,24 @@ public void Heal(float amount)
 - HUD 由现有脏检查下一帧刷新，不额外插桩。
 - `SkillExecutor` 对非 `IDamageable` 目标调用 `Heal(-damage)` 的负数路径被 `amount <= 0` 忽略，语义不变。
 
+#### 4.3.1 治疗可达性与调试触发
+
+现状（详见 §1 第 19-21 行）：玩家不实现 `IEffectTarget`；`SkillOwnerProxy.Heal` 为空；`SkillExecutor` 又排除施法者自身，因此**没有生产治疗源能调用到玩家 `Heal`**。
+
+本次不改造技能目标筛选，只提供最小可验收触发：
+
+```csharp
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+// Sys3CEntry.Update 内，放在输入处理附近
+if (UnityEngine.Input.GetKeyDown(KeyCode.H))
+    Heal(30f);
+#endif
+```
+
+- 只在 Editor / Development Build 编译，正式包无此按键。
+- 不依赖 `InputManager` 的移动/技能输入，避免污染移动端适配。
+- 后续接入真正的治疗技能/消耗品时，直接调用 `Sys3CEntry.Heal` 即可，无需改表现层。
+
 ### 4.4 新增事件
 
 `Sys3C/Core/Events/PlayerFeedbackEvents.cs`：
@@ -218,7 +241,7 @@ public sealed class HitTintState
 - `Update`：
   - `_state.Tick(dt)`；
   - `hpPercent = entry.MaxHp > 0 ? entry.CurrentHp / entry.MaxHp : 1f`；
-  - `lowActive = !entry.IsDead && hpPercent < settings.LowHpThreshold`；
+  - `lowActive = !entry.IsDead && hpPercent > 0f && hpPercent < settings.LowHpThreshold`（HP=0 或尚未初始化时不亮）；
   - 组合：`c = Lerp(original, lowColor.rgb, lowColor.a * (lowActive ? 1 : 0))`，再 `c = Lerp(c, hitColor.rgb, hitColor.a * _state.Amount(duration))`；
   - 用 `MaterialPropertyBlock` 写 `_Color`；所有层都为 0 时 `SetPropertyBlock(null)` 清除。
 - `OnDisable/OnDestroy`：清 property block、取消订阅、清理状态。
@@ -229,8 +252,9 @@ public sealed class HitTintState
 同样由 `PlayerSpawner` 运行时挂载。
 
 - `OnEnable` 订阅 `PlayerHealedEvent`，按 `EntityId == gameObject.GetInstanceID()` 过滤。
-- 收到事件：`Instantiate(settings.HealVfxPrefab, transform.position + Vector3.up * 1.0f, Quaternion.identity, transform)`；`prefab == null` 时静默返回。
+- 收到事件：`Instantiate(settings.HealVfxPrefab, transform.position + Vector3.up * 1.0f, Quaternion.identity, transform)`；`GameSettings.Instance == null` 或 `prefab == null` 时静默返回。
 - 自动销毁：读取粒子 `main.duration + startLifetime` 的最大值再加 0.5s 作为生命周期；没有 ParticleSystem 时用 2s 兜底。
+- 粒子 `simulationSpace = Local`，随角色移动（回血效果应贴着身体，而不是留在原地）。
 
 ### 4.8 绿色回血粒子预制体
 
@@ -266,6 +290,8 @@ public GameObject HealVfxPrefab;
 
 现有 `HitFlash*` 字段保持原语义（怪物受击闪红用），不改。
 
+> 实现时必须把上述默认值**显式写进** `Assets/Resources/Setting/GameSettings.asset`。新增字段在旧资产里通常能用字段初始化器兜底，但显式写入可避免 Inspector 显示为 0/null（尤其 `HealVfxPrefab` 是对象引用）。
+
 ---
 
 ## 5. 测试计划
@@ -276,17 +302,18 @@ public GameObject HealVfxPrefab;
    - 首次触发成功；持续期间再次触发返回 false；
    - `Tick` 超过 duration 后可再次触发；
    - `Amount` 随时间线性下降。
-2. 协议：`DamageResult.SourceKind` protobuf 往返；shape guard 固定字段存在。
+2. 协议：`DamageResult.SourceKind` protobuf 往返；按现有 `ProtocolShapeGuardTests` 的惯例新增 `SourceKind` 必须挂在 **tag 8** 的 pin 测试。
 3. 服务端：NPC 施法 `SourceKind == Npc`；玩家/bot 施法 `SourceKind == Player`。
 4. `CombatNetworkBridge`：`SourceKind=Npc` → 本地回调 `sourceIsPlayer=false`；Player/PlayerBot → true。
 
 ### PlayMode
 
 1. `Heal`：正数加血并钳制 MaxHp；死亡时忽略；`PlayerHealedEvent` 只在实际回血时发；HUD `OnHPChanged` 收到更新。
-2. 受击泛红：实例化玩家 + 手动挂 `PlayerBodyTint`；发 `PlayerTakeDamageEvent` 后 MPB `_Color` 偏离原值；1s 内第二次受击不改变计时；结束后可再次触发。
-3. 低血量：把 HP 打到 20% 以下，MPB 持续偏红；治疗到阈值以上后恢复原色。
-4. 闪屏：玩家来源伤害后 overlay `color.a > 0`；NPC 来源伤害后保持 0。
-5. 回血粒子：实际回血后玩家子物体下出现 `HealGreenParticles(Clone)`；无效治疗不产生。
+2. 调试键：Editor/Development 下按 `H` → HP +30 且绿色粒子出现；用条件编译断言正式包不含该分支（代码审查即可）。
+3. 受击泛红：实例化玩家 + 手动挂 `PlayerBodyTint`；发 `PlayerTakeDamageEvent` 后 MPB `_Color` 偏离原值；1s 内第二次受击不改变计时；结束后可再次触发。
+4. 低血量：把 HP 打到 20% 以下，MPB 持续偏红；治疗到阈值以上后恢复原色。
+5. 闪屏：玩家来源伤害后 overlay `color.a > 0`；NPC 来源伤害后保持 0。
+6. 回血粒子：实际回血后玩家子物体下出现 `HealGreenParticles(Clone)`；无效治疗不产生。
 
 ### 视觉验收
 
@@ -302,13 +329,14 @@ MCP 截图对比三态：低血量持续泛红、受击瞬间泛红、回血绿�
 4. **格挡/死亡边界**：格挡不泛红不闪屏；死亡瞬间不泛红。这是有意行为，测试需固化。
 5. **低血量轮询**：每帧读两个 float，开销可忽略；不做事件是为了覆盖服务端伤害、治疗、复活三个写入源。
 6. **回血粒子资产**：新增 prefab 需要创建并纳入版本控制；若美术后续替换，只需改 GameSettings 引用。
+7. **正式包没有回血触发源**：调试键只在 Editor/Development 编译；正式包内的回血表现要等后续治疗技能/消耗品调用 `Sys3CEntry.Heal` 才会出现。这是本次有意的范围边界。
 
 ---
 
 ## 7. 实施顺序（供 writing-plans 参考）
 
 1. 协议 + 服务端 `SourceKind` + 客户端桥接 + 相关测试。
-2. `Sys3CEntry.Heal` + 两个新事件 + 测试。
+2. `Sys3CEntry.Heal` + 两个新事件 + Editor/Development 调试键 H + 测试。
 3. `HitTintState` + `PlayerBodyTint` + GameSettings 字段 + PlayerSpawner 挂载。
 4. `HealGreenParticles.prefab` + `PlayerHealVFX` + PlayerSpawner 挂载。
 5. `DamageScreenEffect` 参数化 + `EntityDisplayManager` 接线。
@@ -323,4 +351,5 @@ MCP 截图对比三态：低血量持续泛红、受击瞬间泛红、回血绿�
 - [ ] 玩家/bot 来源伤害触发红色闪屏；怪物来源不触发。
 - [ ] 格挡与死亡不触发泛红/闪屏。
 - [ ] 实际回血时出现绿色粒子；无效治疗/死亡状态不出现。
+- [ ] Editor/Development 下按 `H` 能回 30 HP 并看到绿色粒子；正式包不含该调试分支。
 - [ ] EditMode/PlayMode 测试全绿，数值断言覆盖 MPB 颜色、overlay alpha、HP 变化。
