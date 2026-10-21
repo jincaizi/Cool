@@ -79,4 +79,8 @@ NPC Mirror、Movement/ORCA、Remote Entity 分档。完整状态与逐系统细�
 - 小功能（≤2–3 个任务）优先内联执行；不要为每个小任务重复加载 brainstorming/writing-plans/SDD。
   评审批量给反馈、只读 diff/改动段；子代理用能胜任的最便宜模型，审查者只回“结论 + file:line”，详情写报告文件。
 - 工具输出：`git status --short`、`dotnet test --logger "console;verbosity=minimal"`、`Grep` 加 `head_limit`。
+- MCP：Unity MCP 只保留 7 个工具（`tests-run` / `assets-refresh` / `script-execute` / `screenshot-game-view` /
+  `console-get-logs` / `assets-get-data` / `editor-application-get-state`），配置在
+  `UserSettings/AI-Game-Developer-Config.json`；其余在 Unity 的 AI Game Developer 窗口按需开。
+  `agentmemory` 已从用户配置移除；`codegraph` 保留（`impact`/`trace`/`status` 无独立开关）。
 - 完整指南：`docs/agent-token-hygiene.md`；详细架构：`docs/agent-architecture.md`。

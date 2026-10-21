@@ -69,11 +69,16 @@ right before `/compact`.
 
 ### 4. Reduce the fixed prompt/tool surface
 
-- The project `.mcp.json` only starts the Unity MCP (`ai-game-developer`, ~40 tools);
-  the codegraph/memory/VSCode MCP servers come from the global config. Disable the
-  tool groups you never call in a session. For Unity work the usual set is
-  `tests-run`, `assets-refresh`, `script-execute`, `screenshot-game-view`; the
-  animation/animator/asset/scene/particle/component tools can be toggled off until needed.
+- The project `.mcp.json` starts the Unity MCP (`ai-game-developer`). Its tool list was
+  cut from **81 to 7** in `UserSettings/AI-Game-Developer-Config.json`, keeping only the
+  tools this project used: `tests-run`, `assets-refresh`, `script-execute`,
+  `screenshot-game-view`, `console-get-logs`, `assets-get-data`,
+  `editor-application-get-state`. Re-enable an extra tool in the Unity
+  **AI Game Developer** window when a task needs it.
+- The global `agentmemory` server was removed with `claude mcp remove agentmemory`
+  (its tools were unused and it warned about missing env vars). `codegraph` stays
+  because it is used; its `impact`/`trace`/`status` tools have no per-tool switch.
+  The VS Code `getDiagnostics` tool was used once and stays with the extension.
 - Keep the always-loaded `CLAUDE.md` small. The long per-system architecture text now
   lives in `docs/agent-architecture.md`; `CLAUDE.md` keeps the compact index and the
   guardrails. Read the detailed doc only when the task touches that system.
@@ -149,3 +154,7 @@ right before `/compact`.
 - `CLAUDE.md` moved its long architecture sections to `docs/agent-architecture.md`.
 - `tools/test-server.sh` (minimal logger) and `tools/unity-tests.sh` (JSON input +
   300s timeout) verified: 25/25 filtered server tests and 12/12 ProtocolShapeGuard tests.
+- Unity MCP tool config: **81 → 7 enabled** (`UserSettings/AI-Game-Developer-Config.json`;
+  backup `.bak-2026-10-21`), applied hot with `tool-set-enabled-state`; the reduced
+  schema is picked up by the next Claude Code session. `agentmemory` removed from the
+  user MCP config; only `codegraph` + `ai-game-developer` remain (plus the VS Code tool).
