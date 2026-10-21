@@ -111,8 +111,10 @@ namespace Hotfix.GameSystems.SyncLayer
                     // T12 甲-2：权威余血随包下传（协议早已有 TargetRemainingHp，此前零消费方）——
                     // 宿主用它对齐本地 HP，不再只看本地减法。
                     // IsBlocked 随同一回调下传：宿主走格挡受击表现（受击层既有 DefendHit 态）；
-                    // SourceKind 随包下传：宿主区分玩家来源（闪屏）与怪物攻击（只做受击表现）
-                    bool sourceIsPlayer = result.SourceKind != (int)EntityKind.Npc;
+                    // SourceKind 随包下传：显式白名单，只有 Player/PlayerBot 才算玩家来源；
+                    // 未知 kind（旧服务端默认 0 以外的值/未来新增）一律按非玩家处理（fail-closed，不闪屏）。
+                    bool sourceIsPlayer = result.SourceKind == (int)EntityKind.Player
+                                          || result.SourceKind == (int)EntityKind.PlayerBot;
                     _onDamageToLocalPlayer?.Invoke(hit.TargetPlayerId, hit.Damage, hit.IsCritical,
                         Vector3.zero, hit.TargetRemainingHp, hit.IsBlocked, sourceIsPlayer);
                     continue;

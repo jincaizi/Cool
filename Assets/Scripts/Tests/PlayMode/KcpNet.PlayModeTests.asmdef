@@ -6,6 +6,7 @@
         "Cool.Protocol",
         "GameSys",
         "SyncCore",
+        "DataDefinition",
         "Unity.TextMeshPro"
     ],
     "includePlatforms": [],

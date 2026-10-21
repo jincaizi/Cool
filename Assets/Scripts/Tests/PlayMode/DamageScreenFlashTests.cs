@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DataDefinition;
 using Hotfix.GameSystems.Nameplate;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.SyncLayer;
@@ -88,6 +89,26 @@ namespace GameSys.PlayModeTests
         }
 
         [UnityTest]
+        public IEnumerator test_lethal_player_source_damage_does_not_emit_flash_event()
+        {
+            int count = 0;
+            Action<LocalPlayerHitByPlayerEvent> handler = e => count++;
+            EventBus.Subscribe(handler);
+            try
+            {
+                _entry.ApplyServerDamage(10f, Vector3.zero, 0f,
+                    isBlocked: false, sourceIsPlayer: true);
+                yield return null;
+            }
+            finally
+            {
+                EventBus.Unsubscribe(handler);
+            }
+
+            Assert.AreEqual(0, count, "致死伤害不应触发玩家攻击闪屏事件");
+        }
+
+        [UnityTest]
         public IEnumerator test_player_source_event_flashes_overlay()
         {
             var existing = UnityEngine.Object.FindObjectOfType<EntityDisplayManager>();
@@ -97,12 +118,27 @@ namespace GameSys.PlayModeTests
             yield return null;
 
             EventBus.Emit(new LocalPlayerHitByPlayerEvent(123));
-            yield return new WaitForSeconds(0.12f);
 
-            var overlay = GameObject.Find("DamageOverlay");
-            Assert.IsNotNull(overlay, "闪屏 overlay 未创建");
-            var image = overlay.GetComponent<Image>();
+            // DOTween 首帧才把 alpha 推到 FlashAlpha：轮询最多 0.5s，避免固定等待的时序抖动
+            Image image = null;
+            var deadline = Time.time + 0.5f;
+            while (Time.time < deadline)
+            {
+                var overlay = GameObject.Find("DamageOverlay");
+                if (overlay != null)
+                {
+                    image = overlay.GetComponent<Image>();
+                    if (image != null && image.color.a > 0f) break;
+                }
+                yield return null;
+            }
+
+            Assert.IsNotNull(image, "闪屏 overlay 未创建");
             Assert.Greater(image.color.a, 0f, "玩家来源受击后 overlay 应可见");
+            var expected = GameSettings.Instance.PlayerHitFlashColor;
+            Assert.AreEqual(expected.r, image.color.r, 0.02f, "闪屏红通道应等于配置色");
+            Assert.AreEqual(expected.g, image.color.g, 0.02f, "闪屏绿通道应等于配置色");
+            Assert.AreEqual(expected.b, image.color.b, 0.02f, "闪屏蓝通道应等于配置色");
 
             UnityEngine.Object.Destroy(display);
         }

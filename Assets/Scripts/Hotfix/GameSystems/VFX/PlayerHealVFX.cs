@@ -6,6 +6,7 @@ using UnityEngine;
 namespace Hotfix.GameSystems.VFX
 {
     /// <summary>本地玩家实际回血时，在身体位置播放绿色粒子。</summary>
+    [DisallowMultipleComponent]
     public sealed class PlayerHealVFX : MonoBehaviour
     {
         private GameSettings _settings;

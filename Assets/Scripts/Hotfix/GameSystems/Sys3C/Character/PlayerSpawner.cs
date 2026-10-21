@@ -42,8 +42,10 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
             var spawnPos = _spawnPoint != null ? _spawnPoint.position : Vector3.zero;
             _currentPlayer = Instantiate(prefab, spawnPos, Quaternion.identity);
-            _currentPlayer.AddComponent<PlayerBodyTint>();
-            _currentPlayer.AddComponent<PlayerHealVFX>();
+            if (_currentPlayer.GetComponent<PlayerBodyTint>() == null)
+                _currentPlayer.AddComponent<PlayerBodyTint>();
+            if (_currentPlayer.GetComponent<PlayerHealVFX>() == null)
+                _currentPlayer.AddComponent<PlayerHealVFX>();
             EventBus.Emit(new PlayerSpawnedEvent(_currentPlayer.GetComponent<Animator>()));
         }
 

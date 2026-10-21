@@ -588,6 +588,9 @@ namespace Hotfix.GameSystems.Sys3C
         /// （<c>IDamageable.TakeDamage</c>）同款挂点 <c>HitFSM.EnterDefendHit</c> + Hit 层激活，
         /// 不新增状态/动画参数；浮字不发（与单机格挡一致：格挡成功本就跳过
         /// <c>PlayerTakeDamageEvent</c>）。格挡的 15 点精力成本在本分支扣除（以服务端 IsBlocked 为准）。
+        ///
+        /// <paramref name="sourceIsPlayer"/>：来源是玩家或 bot（服务端 <c>DamageResult.SourceKind</c>）。
+        /// 仅非格挡、非致死分支据此发 <c>LocalPlayerHitByPlayerEvent</c>（屏幕闪屏）；怪物来源不闪。
         /// </summary>
         public void ApplyServerDamage(float damage, Vector3 hitDirection, float? serverRemainingHp = null,
             bool isBlocked = false, bool sourceIsPlayer = false)
@@ -654,6 +657,7 @@ namespace Hotfix.GameSystems.Sys3C
         public void Heal(float amount)
         {
             if (amount <= 0f || _currentHP <= 0f) return; // 死亡不可治疗；负数/零忽略
+            if (_currentHP >= _maxHP) return;              // 已满/超上限：治疗不应把血量拉低
             float before = _currentHP;
             _currentHP = Mathf.Min(_maxHP, _currentHP + amount);
             float actual = _currentHP - before;

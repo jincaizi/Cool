@@ -38,6 +38,19 @@ namespace KcpServer
 
             /// <summary>下行 DamageResult 的来源种类（值同 EntityKind）</summary>
             public int SourceKind => IsNpcCaster ? (int)EntityKind.Npc : (int)EntityKind.Player;
+
+            /// <summary>下行 DamageResult 组装（字段搬运，不改判定结果）。</summary>
+            public DamageResult ToDamageResult(long serverTimestamp) => new DamageResult
+            {
+                SourcePlayerId = Broadcast!.CasterPlayerId,
+                SkillId = Broadcast.SkillId,
+                SourceKind = SourceKind,
+                ServerTimestamp = serverTimestamp,
+                Hits = Hits,
+                ProjectileStopped = ProjectileStopped,
+                StopX = StopPosition.X,
+                StopZ = StopPosition.Z
+            };
         }
 
         /// <summary>一次施法的判定组（同一施法可排多段——剑气/火球分段推进）。可变 class：
@@ -428,17 +441,7 @@ namespace KcpServer
         {
             if (resolution.Hits.Count == 0 || resolution.Broadcast == null) return;
 
-            var result = new DamageResult
-            {
-                SourcePlayerId = resolution.Broadcast.CasterPlayerId,
-                SkillId = resolution.Broadcast.SkillId,
-                SourceKind = resolution.SourceKind,
-                ServerTimestamp = ServerClock.NowTicks(),
-                Hits = resolution.Hits,
-                ProjectileStopped = resolution.ProjectileStopped,
-                StopX = resolution.StopPosition.X,
-                StopZ = resolution.StopPosition.Z
-            };
+            var result = resolution.ToDamageResult(ServerClock.NowTicks());
 
             var damageRecipients = new HashSet<long>();
             if (!resolution.IsNpcCaster) damageRecipients.Add(resolution.Broadcast.CasterPlayerId);

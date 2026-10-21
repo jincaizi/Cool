@@ -129,7 +129,8 @@ bot 施法时 `IsNpcCaster == false`，自然归类为 Player，符合“bot 按
 `CombatNetworkBridge` 的本地受伤回调增加一个参数 `bool sourceIsPlayer`：
 
 ```csharp
-bool sourceIsPlayer = result.SourceKind != (int)EntityKind.Npc;
+bool sourceIsPlayer = result.SourceKind == (int)EntityKind.Player
+                      || result.SourceKind == (int)EntityKind.PlayerBot; // 未知 kind fail-closed
 _onDamageToLocalPlayer?.Invoke(hit.TargetPlayerId, hit.Damage, hit.IsCritical,
     Vector3.zero, hit.TargetRemainingHp, hit.IsBlocked, sourceIsPlayer);
 ```
@@ -235,7 +236,11 @@ public sealed class HitTintState
 
 由 `PlayerSpawner` 在实例化玩家后 `AddComponent<PlayerBodyTint>()`，**不挂预制体**——同一预制体被远端视图复用，挂上去会污染远端。
 
-- `Awake`：`GetComponent<Sys3CEntry>()`；`GetComponentsInChildren<SkinnedMeshRenderer>(true)` 缓存；记录每个 renderer 的 `sharedMaterial.GetColor("_Color")` 原值（仅材质 `HasProperty("_Color")` 的 renderer 参与，避免缺属性材质报错）。只染 SkinnedMesh（身体/头/发/披风），不染武器、眼睛等 MeshRenderer。
+- `Awake`：`GetComponent<Sys3CEntry>()`；`GetComponentsInChildren<Renderer>(true).Where(IsBodyTarget)` 缓存；记录每个 renderer 的 `sharedMaterial.GetColor("_Color")` 原值（仅材质 `HasProperty("_Color")` 的 renderer 参与，避免缺属性材质报错）。
+- `public static bool IsBodyTarget(Renderer r)`（目标规则，测试可直用）：
+  - `SkinnedMeshRenderer` → true（身体/披风）；
+  - `MeshRenderer` 且 `gameObject.name` 以 `Head` 或 `Hair` 开头 → true（头/发）；
+  - 其余（Eye/Mouth/Backpack/Shield/武器等 MeshRenderer、SpriteRenderer）→ false。
 - `OnEnable`：`EventBus.Subscribe<PlayerTakeDamageEvent>(OnDamaged)`。
 - `OnDamaged`：`if (e.EntityId != gameObject.GetInstanceID()) return;` → `_state.TryTrigger(settings.HitTintDuration)`。
 - `Update`：
@@ -288,7 +293,7 @@ public float PlayerHitFlashCooldown = 0.8f;
 public GameObject HealVfxPrefab;
 ```
 
-现有 `HitFlash*` 字段保持原语义（怪物受击闪红用），不改。
+现有 `HitFlash*` 字段：`HitFlashDuration` 仍被 `HitFlashVFX` 使用；`HitFlashColor` / `HitFlashCD` 在本次之后已无消费者（仅记录，不删除字段）。
 
 > 实现时必须把上述默认值**显式写进** `Assets/Resources/Setting/GameSettings.asset`。新增字段在旧资产里通常能用字段初始化器兜底，但显式写入可避免 Inspector 显示为 0/null（尤其 `HealVfxPrefab` 是对象引用）。
 
@@ -303,17 +308,19 @@ public GameObject HealVfxPrefab;
    - `Tick` 超过 duration 后可再次触发；
    - `Amount` 随时间线性下降。
 2. 协议：`DamageResult.SourceKind` protobuf 往返；按现有 `ProtocolShapeGuardTests` 的惯例新增 `SourceKind` 必须挂在 **tag 8** 的 pin 测试。
-3. 服务端：NPC 施法 `SourceKind == Npc`；玩家/bot 施法 `SourceKind == Player`。
-4. `CombatNetworkBridge`：`SourceKind=Npc` → 本地回调 `sourceIsPlayer=false`；Player/PlayerBot → true。
+3. 服务端：`CastResolution.ToDamageResult` 字段搬运——NPC 施法 `SourceKind == Npc`；玩家/bot 施法 `SourceKind == Player`；`SourcePlayerId`/`SkillId`/`Hits`/`ServerTimestamp` 原样传递。
+4. `CombatNetworkBridge`：`SourceKind=Npc` → 本地回调 `sourceIsPlayer=false`；Player/PlayerBot → true；未知 kind（如 99）→ false（fail-closed）。
+5. `PlayerBodyTint.IsBodyTarget`：加载真预制体 `Assets/Prefabs/Character/FemalePlayer.prefab`——`Body05`（SMR）、`Head01_Male`/`Hair01`（MeshRenderer）为 true；`Eye01`/`Mouth01`/`Backpack01` 为 false。
 
 ### PlayMode
 
-1. `Heal`：正数加血并钳制 MaxHp；死亡时忽略；`PlayerHealedEvent` 只在实际回血时发；HUD `OnHPChanged` 收到更新。
+1. `Heal`：正数加血并钳制 MaxHp；死亡时忽略；已满/超上限时直接忽略（不得把 HP 拉低）；`PlayerHealedEvent` 只在实际回血时发；HUD `OnHPChanged` 收到更新。
 2. 调试键：Editor/Development 下按 `H` → HP +30 且绿色粒子出现；用条件编译断言正式包不含该分支（代码审查即可）。
-3. 受击泛红：实例化玩家 + 手动挂 `PlayerBodyTint`；发 `PlayerTakeDamageEvent` 后 MPB `_Color` 偏离原值；1s 内第二次受击不改变计时；结束后可再次触发。
+3. 受击泛红：实例化玩家 + 手动挂 `PlayerBodyTint`；发 `PlayerTakeDamageEvent` 后 MPB `_Color` 偏离原值；SMR 与 `Head01` MeshRenderer 同时变红；HP=0（IsDead 真/假）时 property block 保持空；1s 内第二次受击不改变计时；结束后可再次触发。
 4. 低血量：把 HP 打到 20% 以下，MPB 持续偏红；治疗到阈值以上后恢复原色。
-5. 闪屏：玩家来源伤害后 overlay `color.a > 0`；NPC 来源伤害后保持 0。
-6. 回血粒子：实际回血后玩家子物体下出现 `HealGreenParticles(Clone)`；无效治疗不产生。
+5. 闪屏：玩家来源伤害后 overlay `color.a > 0` 且 RGB 等于 `PlayerHitFlashColor`（容差 0.02）；NPC 来源伤害后保持 0；致死伤害不发 `LocalPlayerHitByPlayerEvent`。
+6. 回血粒子：实际回血后玩家子物体下出现 `HealGreenParticles(Clone)`；无效治疗、其他 EntityId 的治疗事件不产生。
+7. 生产接线：`PlayerSpawner` 收到 `CharacterSelectedEvent` 后生成的玩家同时挂有 `PlayerBodyTint` 与 `PlayerHealVFX`。
 
 ### 视觉验收
 
@@ -346,10 +353,11 @@ MCP 截图对比三态：低血量持续泛红、受击瞬间泛红、回血绿�
 
 ## 8. 验收标准
 
-- [ ] HP < 20% 时身体持续泛红；治疗回 20% 以上后颜色恢复。
-- [ ] 受击泛红约 1s；期间连续受击不重新计时；结束后可再次触发。
-- [ ] 玩家/bot 来源伤害触发红色闪屏；怪物来源不触发。
-- [ ] 格挡与死亡不触发泛红/闪屏。
+- [ ] HP < 20% 时身体与头/发持续泛红；治疗回 20% 以上后颜色恢复。
+- [ ] 受击泛红约 1s 且覆盖身体 SMR 与 Head*/Hair* MeshRenderer；期间连续受击不重新计时；结束后可再次触发。
+- [ ] 玩家/bot 来源伤害触发红色闪屏；怪物来源与未知来源不触发。
+- [ ] 格挡、致死与 HP=0 状态不触发泛红/闪屏。
 - [ ] 实际回血时出现绿色粒子；无效治疗/死亡状态不出现。
 - [ ] Editor/Development 下按 `H` 能回 30 HP 并看到绿色粒子；正式包不含该调试分支。
-- [ ] EditMode/PlayMode 测试全绿，数值断言覆盖 MPB 颜色、overlay alpha、HP 变化。
+- [ ] `PlayerSpawner` 生成的玩家同时挂有 `PlayerBodyTint` 与 `PlayerHealVFX`。
+- [ ] EditMode/PlayMode 测试全绿，数值断言覆盖 MPB 颜色、overlay alpha/RGB、HP 变化。

@@ -1,6 +1,8 @@
 using System.Collections;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C;
+using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.VFX;
 using NUnit.Framework;
 using UnityEngine;
@@ -48,6 +50,16 @@ namespace GameSys.PlayModeTests
             var spawned = _player.transform.Find("HealGreenParticles(Clone)");
             Assert.IsNotNull(spawned, "实际回血后应生成 HealGreenParticles(Clone)");
             Assert.IsNotNull(spawned.GetComponent<ParticleSystem>());
+        }
+
+        [UnityTest]
+        public IEnumerator test_heal_event_for_other_entity_spawns_no_particle()
+        {
+            EventBus.Emit(new PlayerHealedEvent(_player.GetInstanceID() + 1, 10f));
+            yield return null;
+
+            var spawned = _player.transform.Find("HealGreenParticles(Clone)");
+            Assert.IsNull(spawned, "其他实体的治疗事件不应在本地玩家身上生成粒子");
         }
     }
 }

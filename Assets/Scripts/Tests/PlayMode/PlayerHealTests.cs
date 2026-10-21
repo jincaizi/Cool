@@ -72,6 +72,30 @@ namespace GameSys.PlayModeTests
         }
 
         [UnityTest]
+        public IEnumerator test_heal_over_max_hp_does_not_lower_hp_or_emit()
+        {
+            _entry.ApplyServerDamage(0f, Vector3.zero, _entry.MaxHp + 50f);
+            Assert.AreEqual(_entry.MaxHp + 50f, _entry.CurrentHp, 0.01f, "前置：HP 已被推到上限之上");
+
+            bool emitted = false;
+            Action<PlayerHealedEvent> handler = e => emitted = true;
+            EventBus.Subscribe(handler);
+            try
+            {
+                _entry.Heal(30f);
+                yield return null;
+            }
+            finally
+            {
+                EventBus.Unsubscribe(handler);
+            }
+
+            Assert.AreEqual(_entry.MaxHp + 50f, _entry.CurrentHp, 0.01f,
+                "HP 已超上限时治疗不应把血量拉低");
+            Assert.IsFalse(emitted, "超上限治疗没有实际回血，不应发治疗事件");
+        }
+
+        [UnityTest]
         public IEnumerator test_heal_dead_player_is_ignored_and_emits_nothing()
         {
             _entry.ApplyServerDamage(100f, Vector3.zero, 0f);

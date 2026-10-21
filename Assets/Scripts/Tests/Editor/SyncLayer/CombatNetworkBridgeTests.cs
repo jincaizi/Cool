@@ -656,6 +656,28 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             AssertPlayerSource((int)EntityKind.PlayerBot);
         }
 
+        [Test]
+        public void test_combat_bridge_unknown_source_kind_is_not_player_source()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            bool? sinkSourceIsPlayer = null;
+            var bridge = new CombatNetworkBridge(_client, () => 7, registry,
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) =>
+                    sinkSourceIsPlayer = sourceIsPlayer);
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 3,
+                SourceKind = 99,
+                SkillId = 20001,
+                Hits = { new HitEntry { TargetPlayerId = 7, Damage = 10f, TargetRemainingHp = 90f } }
+            });
+            bridge.Update();
+
+            Assert.AreEqual(false, sinkSourceIsPlayer,
+                "未知 SourceKind 必须 fail-closed（不闪屏），不能按玩家来源处理");
+        }
+
         private void AssertPlayerSource(int sourceKind)
         {
             var registry = new RemoteEntityRegistry(_root.transform);

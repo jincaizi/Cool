@@ -223,4 +223,57 @@ public class CastHandlerTests
         Assert.Equal((int)EntityKind.Npc, npc.SourceKind);
         Assert.Equal((int)EntityKind.Player, player.SourceKind);
     }
+
+    [Fact]
+    public void test_to_damage_result_player_source_copies_fields()
+    {
+        var (store, resolver) = Setup();
+        var caster = Spawn(store, 1, 0, 0);
+        Spawn(store, 2, 0, 2);
+
+        var resolution = Resolve(resolver, caster.PlayerId, Q(), 10);
+        Assert.True(resolution.Accepted);
+
+        var result = resolution.ToDamageResult(1234L);
+
+        Assert.Equal((int)EntityKind.Player, result.SourceKind);
+        Assert.Equal(caster.PlayerId, result.SourcePlayerId);
+        Assert.Equal(20001, result.SkillId);
+        Assert.Equal(1234L, result.ServerTimestamp);
+        Assert.Same(resolution.Hits, result.Hits);
+        Assert.Single(result.Hits);
+    }
+
+    [Fact]
+    public void test_to_damage_result_npc_source_copies_fields()
+    {
+        var store = new EntityStore();
+        var resolver = new CombatResolver(store, new System.Random(12345));
+        long npcId = 2_000_001L;
+
+        var player = store.AddPlayer(1L, "P");
+        player.IsLoggedIn = true; // 怪物施法的候选只含已登录玩家（BuildCandidates）
+        player.UpdatePosition(new Vector3(0f, 0f, 0f), 0f, 0f, 1L, 0U);
+        store.AddNpc(npcId, "Slime", 1, 100f, new Vector3(0f, 0f, 1.5f));
+        store.GetPlayer(npcId)!.Rotation = 180f; // AddNpc 朝向 +Z；原点玩家在 -Z，显式目标也要过锥
+
+        var request = new CastRequest
+        {
+            SkillId = 50001,
+            TargetPlayerId = player.PlayerId,
+            Shape = new HitShape { ShapeType = 0, Range = 1.5f, Angle = 120f }
+        };
+        var resolution = Resolve(resolver, npcId, request, 10);
+        Assert.True(resolution.Accepted);
+        Assert.NotEmpty(resolution.Hits);
+
+        var result = resolution.ToDamageResult(9876L);
+
+        Assert.Equal((int)EntityKind.Npc, result.SourceKind);
+        Assert.Equal(npcId, result.SourcePlayerId);
+        Assert.Equal(50001, result.SkillId);
+        Assert.Equal(9876L, result.ServerTimestamp);
+        Assert.Same(resolution.Hits, result.Hits);
+        Assert.Single(result.Hits);
+    }
 }
