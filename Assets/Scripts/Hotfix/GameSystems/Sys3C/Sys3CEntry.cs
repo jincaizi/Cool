@@ -22,7 +22,7 @@ using Hotfix.GameSystems.Nameplate;
 
 namespace Hotfix.GameSystems.Sys3C
 {
-    public class Sys3CEntry : MonoBehaviour, IDamageable
+    public class Sys3CEntry : MonoBehaviour, IDamageable, IPlayerHpSource
     {
         [Header("Health")]
         [SerializeField] private float _maxHP = 100f;
@@ -48,6 +48,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         public float MaxHp => _maxHP;
         public float CurrentHp => _currentHP;
+        public float HpPercent => _maxHP > 0f ? _currentHP / _maxHP : 0f;
         public FSMManager Controller => _fsmManager;
         public bool IsDead => _isDead;
 
@@ -236,6 +237,10 @@ namespace Hotfix.GameSystems.Sys3C
             }
 
             _inputManager.Update();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (UnityEngine.Input.GetKeyDown(KeyCode.H))
+                Heal(30f);
+#endif
             _inputManager.SprintAllowed = _stamina.CanStartConsuming;
             // P6 ③：相机旋转接线——HandleRotationInput 此前全项目零调用者，相机角度永远停在初始值。
             // 键鼠/手柄的观察输入由 InputManager 的 adapter 提供（PC 形态无需触屏适配）。
@@ -633,6 +638,10 @@ namespace Hotfix.GameSystems.Sys3C
                     Mathf.CeilToInt(damage),
                     Color.white));
             }
+            if (sourceIsPlayer && _currentHP > 0)
+            {
+                EventBus.Emit(new LocalPlayerHitByPlayerEvent(gameObject.GetInstanceID()));
+            }
             if (_currentHP <= 0)
             {
                 _skillCoordinator.ClearInputBuffer();
@@ -640,6 +649,16 @@ namespace Hotfix.GameSystems.Sys3C
             }
 
             EvaluateLocalDeath();
+        }
+
+        public void Heal(float amount)
+        {
+            if (amount <= 0f || _currentHP <= 0f) return; // 死亡不可治疗；负数/零忽略
+            float before = _currentHP;
+            _currentHP = Mathf.Min(_maxHP, _currentHP + amount);
+            float actual = _currentHP - before;
+            if (actual > 0f)
+                EventBus.Emit(new PlayerHealedEvent(gameObject.GetInstanceID(), actual));
         }
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection)
