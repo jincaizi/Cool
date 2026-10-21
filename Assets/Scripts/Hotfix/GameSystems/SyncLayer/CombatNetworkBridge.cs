@@ -27,8 +27,9 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Func<long> _localPlayerId;
         private readonly RemoteEntityRegistry _registry;
         /// <summary>本地受击注入点：targetId / damage / isCritical / 方向 / 服务端权威余血（T12 甲-2）/
-        /// 是否被格挡（服务端裁决——宿主据此走格挡受击表现）</summary>
-        private readonly Action<long, float, bool, Vector3, float, bool>? _onDamageToLocalPlayer;
+        /// 是否被格挡（服务端裁决——宿主据此走格挡受击表现）/
+        /// 来源是否玩家或 bot（DamageResult.SourceKind——宿主据此区分玩家闪屏与怪物攻击）</summary>
+        private readonly Action<long, float, bool, Vector3, float, bool, bool>? _onDamageToLocalPlayer;
         private readonly ConcurrentQueue<IMessage> _incoming = new ConcurrentQueue<IMessage>();
 
         /// <summary>收到其他玩家施法（表现接线点；P4 宿主仅日志占位——远程实体为胶囊）</summary>
@@ -41,7 +42,8 @@ namespace Hotfix.GameSystems.SyncLayer
         public event Action<Vector3>? OnLineProjectileStopped;
 
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
-            RemoteEntityRegistry registry, Action<long, float, bool, Vector3, float, bool>? onDamageToLocalPlayer = null)
+            RemoteEntityRegistry registry,
+            Action<long, float, bool, Vector3, float, bool, bool>? onDamageToLocalPlayer = null)
         {
             _client = client;
             _localPlayerId = localPlayerId;
@@ -108,9 +110,11 @@ namespace Hotfix.GameSystems.SyncLayer
                 {
                     // T12 甲-2：权威余血随包下传（协议早已有 TargetRemainingHp，此前零消费方）——
                     // 宿主用它对齐本地 HP，不再只看本地减法。
-                    // IsBlocked 随同一回调下传：宿主走格挡受击表现（受击层既有 DefendHit 态）
+                    // IsBlocked 随同一回调下传：宿主走格挡受击表现（受击层既有 DefendHit 态）；
+                    // SourceKind 随包下传：宿主区分玩家来源（闪屏）与怪物攻击（只做受击表现）
+                    bool sourceIsPlayer = result.SourceKind != (int)EntityKind.Npc;
                     _onDamageToLocalPlayer?.Invoke(hit.TargetPlayerId, hit.Damage, hit.IsCritical,
-                        Vector3.zero, hit.TargetRemainingHp, hit.IsBlocked);
+                        Vector3.zero, hit.TargetRemainingHp, hit.IsBlocked, sourceIsPlayer);
                     continue;
                 }
                 // 远程实体：被格挡时沿用既有飘字链路（Damage 已是减免后的值）；远程格挡动画

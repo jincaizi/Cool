@@ -40,6 +40,7 @@ public class CombatMessagesTests
             SourcePlayerId = 1,
             SkillId = 20001,
             ServerTimestamp = 1_700_000_000_000_0000L,
+            SourceKind = (int)EntityKind.Npc,
             ProjectileStopped = true,
             StopX = 1.5f,
             StopZ = 6f,
@@ -76,6 +77,8 @@ public class CombatMessagesTests
         Assert.True(damage.ProjectileStopped, "ProjectileStopped 未上线——客户端剑气停点整条链静默失效");
         Assert.Equal(1.5f, damage.StopX, 4);
         Assert.Equal(6f, damage.StopZ, 4);
+        Assert.True(damage.SourceKind == (int)EntityKind.Npc,
+            "SourceKind 未上线——客户端无法区分玩家/怪物攻击，闪屏会乱触发");
     }
 
     [Fact]

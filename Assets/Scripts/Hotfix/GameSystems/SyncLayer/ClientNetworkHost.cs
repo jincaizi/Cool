@@ -584,10 +584,11 @@ namespace Hotfix.GameSystems.SyncLayer
             _manager.OnCorrectionNeeded += _netPolicy.ApplyServerCorrection;
 
             // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链
-            // （blocked = 服务端格挡裁决 → 本地走格挡受击表现，见 Sys3CEntry.ApplyServerDamage）
+            // （blocked = 服务端格挡裁决 → 本地走格挡受击表现，见 Sys3CEntry.ApplyServerDamage；
+            //  sourceIsPlayer = DamageResult.SourceKind → 宿主区分玩家来源闪屏与怪物攻击）
             _combatBridge = new CombatNetworkBridge(_adapter!, () => _manager!.LocalPlayerId, _remoteEntities!,
-                (targetId, dmg, crit, dir, remainingHp, blocked) =>
-                    _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked));
+                (targetId, dmg, crit, dir, remainingHp, blocked, sourceIsPlayer) =>
+                    _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked, sourceIsPlayer));
             _adapter!.MessageReceived += _combatBridge.OnMessage;
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
             _localEntry.SkillCoordinator.OnChargeReleased += OnLocalChargeReleased;

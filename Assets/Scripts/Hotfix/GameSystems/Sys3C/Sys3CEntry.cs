@@ -585,7 +585,7 @@ namespace Hotfix.GameSystems.Sys3C
         /// <c>PlayerTakeDamageEvent</c>）。格挡的 15 点精力成本在本分支扣除（以服务端 IsBlocked 为准）。
         /// </summary>
         public void ApplyServerDamage(float damage, Vector3 hitDirection, float? serverRemainingHp = null,
-            bool isBlocked = false)
+            bool isBlocked = false, bool sourceIsPlayer = false)
         {
             if (serverRemainingHp.HasValue)
             {

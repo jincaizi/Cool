@@ -213,4 +213,14 @@ public class CastHandlerTests
         Assert.True(resolution.Accepted); // 施法本身合法
         Assert.Empty(resolution.Hits);
     }
+
+    [Fact]
+    public void test_cast_resolution_source_kind_maps_npc_and_player()
+    {
+        var npc = new CombatResolver.CastResolution { IsNpcCaster = true };
+        var player = new CombatResolver.CastResolution { IsNpcCaster = false };
+
+        Assert.Equal((int)EntityKind.Npc, npc.SourceKind);
+        Assert.Equal((int)EntityKind.Player, player.SourceKind);
+    }
 }

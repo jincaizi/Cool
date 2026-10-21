@@ -98,5 +98,11 @@ namespace Cool.Protocol
 
         /// <summary>吸收点世界 Z（ProjectileStopped=true 时有效）</summary>
         [ProtoMember(7)] public float StopZ { get; set; }
+
+        /// <summary>
+        /// 来源种类（值同 EntityKind：0 Player / 1 Npc / 2 PlayerBot）。
+        /// 只加不删：tag 8，老客户端读默认 0。客户端据此区分玩家来源闪屏与怪物攻击。
+        /// </summary>
+        [ProtoMember(8)] public int SourceKind { get; set; }
     }
 }

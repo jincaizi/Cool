@@ -35,6 +35,9 @@ namespace KcpServer
             /// <summary>LineAll 线形命中被格挡吸收时的停点（2026-10-21）</summary>
             public bool ProjectileStopped;
             public Vec3 StopPosition;
+
+            /// <summary>下行 DamageResult 的来源种类（值同 EntityKind）</summary>
+            public int SourceKind => IsNpcCaster ? (int)EntityKind.Npc : (int)EntityKind.Player;
         }
 
         /// <summary>一次施法的判定组（同一施法可排多段——剑气/火球分段推进）。可变 class：
@@ -429,6 +432,7 @@ namespace KcpServer
             {
                 SourcePlayerId = resolution.Broadcast.CasterPlayerId,
                 SkillId = resolution.Broadcast.SkillId,
+                SourceKind = resolution.SourceKind,
                 ServerTimestamp = ServerClock.NowTicks(),
                 Hits = resolution.Hits,
                 ProjectileStopped = resolution.ProjectileStopped,

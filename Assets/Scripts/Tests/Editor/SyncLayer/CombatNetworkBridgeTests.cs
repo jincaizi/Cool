@@ -145,7 +145,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var registry = new RemoteEntityRegistry(_root.transform);
             long sinkTarget = 0; float sinkDamage = 0; bool sinkCrit = false; float sinkRemainingHp = -1f;
             var bridge = new CombatNetworkBridge(_client, () => 7, registry,
-                (targetId, damage, isCritical, dir, remainingHp, isBlocked) =>
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) =>
                 {
                     sinkTarget = targetId;
                     sinkDamage = damage;
@@ -156,6 +156,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             bridge.OnMessage(MessageId.DamageResult, new DamageResult
             {
                 SourcePlayerId = 1, SkillId = 20001,
+                SourceKind = (int)EntityKind.Player,
                 Hits = { new HitEntry { TargetPlayerId = 7, Damage = 120f, IsCritical = false, TargetRemainingHp = 20f } }
             });
             bridge.Update();
@@ -176,7 +177,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var registry = new RemoteEntityRegistry(_root.transform);
             bool sinkBlocked = false; float sinkDamage = 0f;
             var bridge = new CombatNetworkBridge(_client, () => 7, registry,
-                (targetId, damage, isCritical, dir, remainingHp, isBlocked) =>
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) =>
                 {
                     sinkDamage = damage;
                     sinkBlocked = isBlocked;
@@ -185,6 +186,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             bridge.OnMessage(MessageId.DamageResult, new DamageResult
             {
                 SourcePlayerId = 2_000_001, SkillId = 50001,
+                SourceKind = (int)EntityKind.Npc,
                 Hits = { new HitEntry { TargetPlayerId = 7, Damage = 3f, IsBlocked = true, TargetRemainingHp = 97f } }
             });
             bridge.Update();
@@ -270,7 +272,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var registry = new RemoteEntityRegistry(_root.transform);
             float sinkDamage = 0; float sinkRemainingHp = -1f;
             var bridge = new CombatNetworkBridge(_client, () => 7, registry,
-                (targetId, damage, isCritical, dir, remainingHp, isBlocked) =>
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) =>
                 {
                     sinkDamage = damage;
                     sinkRemainingHp = remainingHp;
@@ -279,6 +281,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             bridge.OnMessage(MessageId.DamageResult, new DamageResult
             {
                 SourcePlayerId = 2_000_001, SkillId = 50001,
+                SourceKind = (int)EntityKind.Npc,
                 Hits = { new HitEntry { TargetPlayerId = 7, Damage = 10f, IsCritical = false, TargetRemainingHp = 90f } }
             });
             bridge.Update();
@@ -623,6 +626,54 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             bridge.Update();
 
             Assert.AreEqual(1, raised);
+        }
+
+        [Test]
+        public void test_combat_bridge_npc_source_is_not_player_source()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            bool? sinkSourceIsPlayer = null;
+            var bridge = new CombatNetworkBridge(_client, () => 7, registry,
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) =>
+                    sinkSourceIsPlayer = sourceIsPlayer);
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 2_000_001,
+                SourceKind = (int)EntityKind.Npc,
+                SkillId = 50001,
+                Hits = { new HitEntry { TargetPlayerId = 7, Damage = 10f, TargetRemainingHp = 90f } }
+            });
+            bridge.Update();
+
+            Assert.AreEqual(false, sinkSourceIsPlayer, "怪物来源不能标记为玩家攻击，否则会触发红色闪屏");
+        }
+
+        [Test]
+        public void test_combat_bridge_player_and_bot_sources_are_player_source()
+        {
+            AssertPlayerSource((int)EntityKind.Player);
+            AssertPlayerSource((int)EntityKind.PlayerBot);
+        }
+
+        private void AssertPlayerSource(int sourceKind)
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            bool? sinkSourceIsPlayer = null;
+            var bridge = new CombatNetworkBridge(_client, () => 7, registry,
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) =>
+                    sinkSourceIsPlayer = sourceIsPlayer);
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 3,
+                SourceKind = sourceKind,
+                SkillId = 20001,
+                Hits = { new HitEntry { TargetPlayerId = 7, Damage = 10f, TargetRemainingHp = 90f } }
+            });
+            bridge.Update();
+
+            Assert.AreEqual(true, sinkSourceIsPlayer, "玩家/bot 来源必须标记为玩家攻击");
         }
     }
 }

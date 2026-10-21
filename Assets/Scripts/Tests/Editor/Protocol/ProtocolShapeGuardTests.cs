@@ -190,6 +190,17 @@ namespace Cool.Protocol.Tests
             Assert.AreEqual(7, GetProtoMemberTag(stopZ), "StopZ 必须挂在 tag 7");
         }
 
+        [Test]
+        public void DamageResult_SourceKind_Tag_Is_Pinned()
+        {
+            // 只加不删的机器化防线：1..7 已发布，SourceKind 必须追加在 tag 8
+            var prop = typeof(Cool.Protocol.DamageResult).GetProperty("SourceKind");
+            Assert.IsNotNull(prop, "DamageResult 必须有 SourceKind");
+            Assert.AreEqual(typeof(int), prop!.PropertyType);
+            Assert.AreEqual(8, GetProtoMemberTag(prop!),
+                "SourceKind 必须挂在 tag 8（1..7 是已发布的 wire 契约）");
+        }
+
         /// <summary>
         /// 按名字认 [ProtoMember]：本测试程序集引用不到 protobuf-net 插件（Unity 不给它自动引用
         /// 预编译 DLL，GameSys.EditorTests.csproj 里没有该 Reference），所以不能写 ProtoBuf.ProtoMemberAttribute。
