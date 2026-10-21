@@ -24,5 +24,5 @@ MonoBehaviour:
   HitTintDuration: 1
   PlayerHitFlashColor: {r: 0.9, g: 0.05, b: 0.05, a: 1}
   PlayerHitFlashCooldown: 0.8
-  HealVfxPrefab: {fileID: 0}
+  HealVfxPrefab: {fileID: 2562961696550095458, guid: 0c793d6a6d4be134ea5aae4803b09db7, type: 3}
   DamageFluctuation: 0
