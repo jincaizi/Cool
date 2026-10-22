@@ -237,5 +237,29 @@ namespace GameSys.PlayModeTests
             _input.SprintAllowed = false;
             Assert.IsFalse(_input.GetMoveCommand(Vector3.forward).IsSprint);
         }
+
+        [Test]
+        public void test_respawn_clears_sprint_exhaustion_latch()
+        {
+            // Arrange：按住冲刺，力竭后精力恢复，锁存生效
+            _input.SetAdapter(new FakeInputAdapter());
+            _input.SetSprintHeld(true);
+            _input.SprintAllowed = true;
+            Assert.IsTrue(_input.GetMoveCommand(Vector3.forward).IsSprint);
+
+            _input.SprintAllowed = false;
+            Assert.IsFalse(_input.GetMoveCommand(Vector3.forward).IsSprint);
+
+            _input.SprintAllowed = true;
+            Assert.IsFalse(_input.GetMoveCommand(Vector3.forward).IsSprint,
+                "力竭后仍按住不得自动恢复冲刺");
+
+            // Act：服务端复活（与 TickRespawn 共用 Refill + 清锁存语义）
+            _entry.ApplyServerRespawn(100f);
+
+            // Assert
+            Assert.IsTrue(_input.GetMoveCommand(Vector3.forward).IsSprint,
+                "复活后应清冲刺锁存，按住即可再次冲刺");
+        }
     }
 }

@@ -804,6 +804,7 @@ namespace Hotfix.GameSystems.Sys3C
         {
             _currentHP = hp;
             _stamina.Refill();
+            if (_inputManager != null) _inputManager.ResetSprintLatch();
             _cc.TryExitDefend();
             _fsmManager.ExitDefend();
             _defendStaminaLatch = false;
@@ -829,6 +830,7 @@ namespace Hotfix.GameSystems.Sys3C
             _isDead = false;
             _currentHP = _maxHP;
             _stamina.Refill();
+            if (_inputManager != null) _inputManager.ResetSprintLatch();
             _cc.TryExitDefend();
             _fsmManager.ExitDefend();
             _defendStaminaLatch = false;
