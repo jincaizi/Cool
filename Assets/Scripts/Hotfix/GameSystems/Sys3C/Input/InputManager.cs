@@ -337,7 +337,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
         }
 
         /// <summary>
-        /// 是否正在冲刺
+        /// 是否“按住冲刺且正在移动”。**不含 SprintAllowed / 力竭锁存**，当前无消费者。
+        /// 将来如需判断“实际是否在冲刺”，必须读 `GetMoveCommand().IsSprint`，
+        /// 否则力竭/锁存期间会误报。
         /// </summary>
         public bool IsSprinting()
         {

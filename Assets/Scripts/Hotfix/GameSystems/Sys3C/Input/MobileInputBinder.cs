@@ -119,6 +119,11 @@ namespace Hotfix.GameSystems.Sys3C.Input
             return null;
         }
 
+        /// <summary>
+        /// 帧末汇入动作按钮状态 —— 放在 LateUpdate 是为了与读取方（Sys3CEntry.Update）
+        /// 无执行顺序依赖：本帧按下的跳跃必定被下一帧读到且只读到一次。
+        /// 冲刺标志同样在帧末汇入，下一帧生效；它不依赖 `_buttons`（摇杆未配置按钮时也照喂）。
+        /// </summary>
         private void LateUpdate()
         {
             if (_inputManager == null) return;

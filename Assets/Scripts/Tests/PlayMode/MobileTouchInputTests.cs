@@ -364,6 +364,116 @@ namespace KcpNet.PlayModeTests
             }
         }
 
+        /// <summary>
+        /// 2026-10-23 最终审查补的覆盖缺口：binder 两条冲刺清理路径此前没有断言。
+        /// ① `Update` 的 `!_touch` 分支（切 ForceNoTouch）必须清掉 UI 冲刺标记 ——
+        ///   否则只是把 UI 藏了，切回键鼠后角色仍在冲刺；
+        /// ② `OnDisable`（停用/失焦）同样必须清掉。
+        ///
+        /// ① 用**真实摇杆满推**制造前置状态，而不是直接 `SetSprintHeld(true)`：
+        /// binder.LateUpdate 每帧把摇杆状态写进 InputManager，直接置位会在同一帧被覆写 ——
+        /// 断言照样通过，却覆盖不到清理行（假绿）。
+        /// 断言用 `IsSprintHeld()` 而非 `GetMoveCommand().IsSprint`：切键鼠后 adapter 是 Keyboard、
+        /// 没有移动输入，后者天然为 false，测不出标记是否残留。
+        /// ② `enabled = false` 同步触发 OnDisable，前置状态直接置位即可。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator test_sprint_flag_cleared_when_touch_revoked_and_when_binder_disabled()
+        {
+            bool prevIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;   // DemoDay 起网络但没有服务器，容忍其报错
+            MobileInputBinder binder = null;
+            try
+            {
+                SceneManager.LoadScene("DemoDay");
+                yield return null;
+                yield return null;
+
+                var host = FindRoot("MobileInput");
+                Assert.IsNotNull(host, "场景里应有常驻激活的 MobileInput 宿主");
+                binder = host.GetComponent<MobileInputBinder>();
+                Assert.IsNotNull(binder, "MobileInput 上应有 MobileInputBinder");
+                binder.TouchOverride = TouchOverride.ForceTouch;
+
+                // 等“被 binder 绑定为 Joystick”的本地 entry；不要直接取第一个
+                // （远端视图上也有一个被禁用的 Sys3CEntry）。
+                Sys3CEntry entry = null;
+                InputManager input = null;
+                for (int i = 0; i < 600; i++)
+                {
+                    foreach (var candidate in Object.FindObjectsOfType<Sys3CEntry>())
+                    {
+                        if (candidate == null) continue;
+                        if (AdapterNameOf(candidate) != "Joystick") continue;
+                        entry = candidate;
+                        input = candidate.GetComponent<InputManager>();
+                        break;
+                    }
+                    if (entry != null && input != null) break;
+                    yield return null;
+                }
+                Assert.IsNotNull(entry, "应有一个被绑定为 Joystick 的本地玩家");
+                Assert.IsNotNull(input, "本地玩家应有 InputManager");
+
+                var mobileRoot = FindRoot("MobileUiRoot");
+                Assert.IsNotNull(mobileRoot, "场景里应有 MobileUiRoot");
+                var joystick = mobileRoot.GetComponentInChildren<VirtualJoystick>(true);
+                Assert.IsNotNull(joystick, "MobileUiRoot 下应有 VirtualJoystick");
+                var eventSystem = EventSystem.current;
+                Assert.IsNotNull(eventSystem, "应有 EventSystem");
+                var joyRect = (RectTransform)joystick.transform;
+                var corners = new Vector3[4];
+                joyRect.GetWorldCorners(corners);
+                var center = new Vector2((corners[0].x + corners[2].x) * 0.5f,
+                                         (corners[0].y + corners[2].y) * 0.5f);
+
+                // ① 真实满推：Value 钳到 1，保持 0.2s 后由 binder.LateUpdate 汇入 InputManager。
+                ExecuteEvents.Execute(joystick.gameObject,
+                    new PointerEventData(eventSystem) { position = center },
+                    ExecuteEvents.pointerDownHandler);
+                ExecuteEvents.Execute(joystick.gameObject,
+                    new PointerEventData(eventSystem) { position = center + new Vector2(Screen.width, Screen.height) },
+                    ExecuteEvents.dragHandler);
+                Assert.AreEqual(1f, joystick.Value.magnitude, 0.001f, "拖到屏外后 Value 必须钳到 1");
+
+                for (int i = 0; i < 600 && !input.IsSprintHeld(); i++) yield return null;
+                Assert.IsTrue(input.IsSprintHeld(), "前置：满推保持后 UI 冲刺标记应已置位");
+
+                binder.TouchOverride = TouchOverride.ForceNoTouch;
+                for (int i = 0; i < 600 && AdapterNameOf(entry) != "Keyboard"; i++) yield return null;
+                Assert.AreEqual("Keyboard", AdapterNameOf(entry), "ForceNoTouch 必须把适配器还原成键鼠");
+                Assert.IsFalse(input.IsSprintHeld(),
+                    "切到 ForceNoTouch 必须清掉 UI 冲刺标记 —— 否则切回键鼠后角色仍在冲刺");
+
+                // ② 重新绑定后停用 binder（同步触发 OnDisable），UI 冲刺标记同样必须清掉。
+                binder.TouchOverride = TouchOverride.ForceTouch;
+                for (int i = 0; i < 600 && AdapterNameOf(entry) != "Joystick"; i++) yield return null;
+                Assert.AreEqual("Joystick", AdapterNameOf(entry), "再次切回触屏应能重新绑定");
+                input.SetSprintHeld(true);
+                Assert.IsTrue(input.IsSprintHeld(), "前置：UI 冲刺标记应已置位");
+                binder.enabled = false;   // OnDisable 同步执行
+                Assert.IsFalse(input.IsSprintHeld(),
+                    "禁用 MobileInputBinder 触发 OnDisable 后必须清掉 UI 冲刺标记");
+                binder.enabled = true;
+
+                // 收尾：清档位 + 卸载场景（与既有用例同一套清理）。
+                binder.TouchOverride = TouchOverride.Auto;
+                yield return null;
+                SceneManager.SetActiveScene(SceneManager.CreateScene("T7SprintFlagCleanupScene"));
+                var unload = SceneManager.UnloadSceneAsync("DemoDay");
+                while (unload != null && !unload.isDone) yield return null;
+            }
+            finally
+            {
+                if (binder != null)
+                {
+                    binder.enabled = true;
+                    binder.TouchOverride = TouchOverride.Auto;
+                }
+                LogAssert.ignoreFailingMessages = prevIgnore;
+            }
+        }
+
         /// <summary>合成一次 pointerDown + drag，返回摇杆 Value 的模长；最后合成 pointerUp 复位。</summary>
         private static float DragAndGetMagnitude(VirtualJoystick joystick, Vector2 start, float dx)
         {
