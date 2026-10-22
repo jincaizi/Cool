@@ -5,6 +5,7 @@
 **Layer:** `Hotfix/Sys3C`、`Hotfix/Skills`、`Hotfix/Nameplate`
 **状态:** 已实现（2026-10-18）
 **修订（2026-10-18）：** 未力竭回复延迟改为 0.2s；力竭仍为 0.75s（双档延迟，用户选择）。
+**修订（2026-10-23）：** 新增冲刺力竭锁存：`SprintAllowed` 变 false 时若仍按住冲刺，必须释放一次才能再次冲刺（键盘 + 摇杆一致）。见 `2026-10-23-mobile-joystick-sprint-design.md`。
 
 ---
 
@@ -265,7 +266,7 @@ static bool IsSustained(SkillData d) =>
   - `ActiveLayer != Hit` 用来兑现"受击不扣奔跑"——被打时 BaseState 可能仍停在 Sprint。
 - 扣精量：`SprintDrainPerSecond × dt`（dt 钳到 `[0, 0.1]`）。
 - 非持续技能（Casting/Execution/Recovery）本身不扣精；但期间若实际冲刺（BaseState=Sprint），仍按本条扣奔跑。持续技能阶段由优先级压制，不会走到这里。
-- 精力归零当帧仍可能以冲刺速度移动一帧；下一帧 `SprintAllowed=false`，自动回到走路。
+- 精力归零当帧仍可能以冲刺速度移动一帧；下一帧 `SprintAllowed=false` 回到走路。**力竭后仍按住冲刺不会自动恢复**：必须释放一次（2026-10-23 修订）。
 - 力竭门禁只影响"是否进入冲刺"；举盾限速、技能移速倍率、空中控制等既有逻辑**不变**。
 
 ### 5.2 举盾

@@ -21,11 +21,21 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public bool SprintAllowed { get; set; } = true;
 
         private bool _sprintHeldFromUI;
+        private bool _sprintHeldFromKeyboard;
 
-        /// <summary>测试/未来 UI 挂钩（与 SetDefendHeld 同形）；不新增手机按钮。</summary>
+        // 力竭锁存：SprintAllowed 变 false 时若仍按住冲刺，必须释放一次才能再次冲刺。
+        private bool _sprintBlockedUntilRelease;
+
+        /// <summary>由移动端摇杆手势 / UI 按键调用（手机端由 MobileInputBinder 每帧汇入）。</summary>
         public void SetSprintHeld(bool held)
         {
             _sprintHeldFromUI = held;
+        }
+
+        /// <summary>复活等“满精力重置”场景清掉力竭锁存。</summary>
+        public void ResetSprintLatch()
+        {
+            _sprintBlockedUntilRelease = false;
         }
 
         // 相机旋转灵敏度
@@ -71,6 +81,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skillMeteorConsumed = false;
             _lastReleaseDuration = -1f;
             _attackJustPressed = false;
+            _sprintHeldFromKeyboard = UnityInput.GetKey(KeyCode.LeftShift);
 
             bool mouseDown = UnityInput.GetMouseButton(0) || _attackHeldFromUI;
             if (mouseDown && !_attackHeld)
@@ -93,14 +104,25 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public MoveCommand GetMoveCommand(Vector3 cameraForward)
         {
             Vector3 moveInput = _adapter.GetMoveInput();
+            bool rawSprintHeld = IsSprintHeld();
 
-            bool sprintHeld = IsSprintHeld() && SprintAllowed;
+            if (!SprintAllowed && rawSprintHeld)
+                _sprintBlockedUntilRelease = true;
+            else if (!rawSprintHeld)
+                _sprintBlockedUntilRelease = false;
+
+            bool sprintHeld = rawSprintHeld && SprintAllowed && !_sprintBlockedUntilRelease;
             float speed = sprintHeld ? SprintSpeed : MoveSpeed;
 
             if (moveInput.sqrMagnitude > 0.01f)
             {
                 // 将输入从相机视角转换为世界方向
                 Vector3 worldMoveDir = ConvertToWorldDirection(moveInput, cameraForward);
+
+                // 冲刺是二元状态：忽略推杆深度。真实速度由 CharacterController.SprintSpeed（8.0f）决定；
+                // 不归一化的话，半推冲刺 4 m/s 会比满推走路 5 m/s 还慢。
+                if (sprintHeld) worldMoveDir = worldMoveDir.normalized;
+
                 Quaternion targetRotation = Quaternion.LookRotation(worldMoveDir);
 
                 return new MoveCommand
@@ -188,7 +210,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSprintHeld()
         {
-            return _sprintHeldFromUI || UnityInput.GetKey(KeyCode.LeftShift);
+            return _sprintHeldFromUI || _sprintHeldFromKeyboard;
         }
 
         // UI 按钮设置的防御状态（手游平台使用）
