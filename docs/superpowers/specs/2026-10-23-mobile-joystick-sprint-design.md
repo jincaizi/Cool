@@ -64,13 +64,13 @@
 
 | 状态 | 条件 | 结果 |
 |---|---|---|
-| 走路 | 模长 0–0.9 | 现有模拟量速度 0–4.5 m/s |
+| 走路 | 模长 < 0.9 | 现有模拟量速度 0–4.5 m/s |
 | 冲刺确认中 | 模长 ≥ 0.9，计时 < 0.2s | 仍按走路速度；计时器累加 |
 | 冲刺 | 计时 ≥ 0.2s | 固定 8 m/s |
 | 退出 | 模长 ≤ 0.8 或松手 / UI 隐藏 | 回走路 |
 
 - 计时中模长跌破 0.9 → 计时器归零（必须持续推满 0.2s）。
-- 冲刺中模长在 (0.8, 0.9) 之间 → 保持冲刺（迟滞）。
+- 冲刺中模长 > 0.8 → 保持冲刺（迟滞）；≤ 0.8 退出。
 - 方向仍由摇杆决定；冲刺中推杆深度不再影响速度。
 
 ### 3.2 视觉
@@ -78,6 +78,7 @@
 - `VirtualJoystick` 新增可选的 `Graphic _sprintIndicator`（手柄或外环的 Image）。
 - 冲刺时颜色变为 `_sprintColor`（默认橙色），退出恢复 `_idleColor`（`Awake` 时记录）。
 - 引用为空 → 纯逻辑，无视觉，不影响测试。
+- 场景装配：`DemoDay` 里把 `Joystick/Handle` 的 `Image` 拖到 `_sprintIndicator`；不配则只有逻辑、没有变色（手工验收会看不到反馈）。
 
 ### 3.3 参数
 
@@ -88,6 +89,8 @@
 | `_sprintHoldSeconds` | 0.2 | 保持时间（秒） |
 | `_sprintIndicator` | null | 可选变色目标（`UnityEngine.UI.Graphic`） |
 | `_sprintColor` | (1, 0.6, 0.1, 1) | 冲刺颜色 |
+
+> 参数在 `VirtualJoystick.Awake` 构造状态机时读取；运行时改 Inspector 不会热更新，需重进 Play（真机则改完重出包）。
 
 ---
 
@@ -108,7 +111,7 @@ public sealed class SprintGestureState
 - 非有限 `magnitude` / `deltaTime` 按 0 处理（与 `StaminaSystem` 的守卫同风格）。
 - 构造时钳制：`enter ∈ (0,1]`、`exit ∈ [0, enter)`、`hold ≥ 0`。
 - `Tick` 返回 `IsSprinting`，便于调用方直接使用。
-- 状态只用 `_held` + `_timer` 两个字段；无 Unity 依赖。
+- 状态字段只有 `_held` + `_timer`；配置字段在构造时钳制。无 Unity 依赖。
 
 ---
 
@@ -119,6 +122,7 @@ public sealed class SprintGestureState
 - `Awake` 创建 `SprintGestureState`，记录 `_idleColor`。
 - `Update`：`_state.Tick(_value.magnitude, Time.deltaTime)` + 按结果变色。
   - **必须每帧 Tick，不能只在 `OnDrag` 里计时**：手指按住不动时不会再有拖拽事件，只靠事件会永远进不了冲刺。
+  - 用 `Time.deltaTime`：命中停顿（`HitStopManager` 拨 `timeScale`）会同步放慢 0.2s 确认，属于合理的游戏时间语义；若真机觉得冲刺进入迟钝，再改 `unscaledDeltaTime`。
 - 暴露 `public bool IsSprintHeld => _state.IsSprinting;`。
 - `OnPointerUp` / `OnDisable`：`_state.Reset()`，恢复颜色。
 - **不改** `Value` 的模拟量语义；`OnDrag` 只更新 `_value`。
@@ -135,7 +139,9 @@ if (_buttons == null) return;
 ```
 
 - `!_touch` 切回键鼠分支：先 `SetSprintHeld(false)`，再 `SetAdapter(new KeyboardInputAdapter())`。
-- `OnDisable`：`_inputManager?.SetSprintHeld(false)`（与 `MobileActionButtons.OnDisable` 同思路）。
+- `OnDisable`：`if (_inputManager != null) _inputManager.SetSprintHeld(false);`
+  - **不要写 `_inputManager?.SetSprintHeld(false)`**：Unity 的已销毁对象不是 CLR null，`?.` 会绕过重载的 `==` 并抛 `MissingReferenceException`。
+- `LateUpdate` 读取的是**本帧** `VirtualJoystick.Update` 的结果，但 `InputManager.GetMoveCommand` 在本帧 `Sys3CEntry.Update` 里已经调用过，所以冲刺标志最多晚一帧生效 —— 与攻击 / 跳跃按钮的汇入范式一致。
 
 ### 5.3 InputManager
 
@@ -162,12 +168,15 @@ if (moveInput.sqrMagnitude > 0.01f)
 }
 ```
 
-- 冲刺命令的 `MoveDir.magnitude == 1`；`Speed == SprintSpeed`（字段保留，`CharacterController` 仍自行取速）。
+- 冲刺命令的 `MoveDir.magnitude == 1`。
+- **速度真值来自 `CharacterController.SprintSpeed`（8.0f）**：`ApplyHorizontalMovement` 用 `command.IsSprint` 自取 8 / 5，不读 `MoveCommand.Speed`。`InputManager.SprintSpeed` 当前是 9.0f，只填进无人消费的 `MoveCommand.Speed`；本次**不动**这两个字段，避免把 9 误当成“固定 8 m/s”的来源。
 - 锁存清空条件：原始输入释放（`rawSprintHeld == false`）。摇杆回落到 0.8 以下或松手都会让 `VirtualJoystick.IsSprintHeld` 变 false，因此“回杆一次”即可解除。
 
 ### 5.4 Sys3CEntry
 
-- 不改。`SprintAllowed = _stamina.CanStartConsuming` 与地面 Sprint 扣精逻辑原样复用。
+- `SprintAllowed = _stamina.CanStartConsuming` 与地面 Sprint 扣精逻辑原样复用。
+- **只加一处**：两个复活路径（`ApplyServerRespawn` 与 `TickRespawn`）都在 `_stamina.Refill()` 旁调用 `_inputManager.ResetSprintLatch()`，与现有 `_defendStaminaLatch = false` 对齐。否则“力竭时按住冲刺 → 死亡 → 满精力复活”会被旧锁存挡住，必须松手一次才能再跑。
+- `InputManager` 相应新增 `public void ResetSprintLatch() { _sprintBlockedUntilRelease = false; }`。
 
 ---
 
@@ -176,7 +185,7 @@ if (moveInput.sqrMagnitude > 0.01f)
 ### 6.1 速度
 
 - 冲刺：固定 8 m/s；防御 `×0.4`、技能 `MoveSpeedScale` 仍照常叠加（保持既有优先级）。
-- 走路：0–5 m/s 随推杆深度线性变化。
+- 非冲刺（含 0.2s 确认中）：0–5 m/s 随推杆深度线性变化。
 - 键盘：WASD 已归一化，行为不变。
 
 ### 6.2 精力
@@ -189,6 +198,7 @@ if (moveInput.sqrMagnitude > 0.01f)
 | 力竭后仍推满 | 0 | `SprintAllowed=false`，且锁存阻止恢复后自动再冲刺 |
 
 - 力竭锁存是**行为变更**：键盘按住 Shift 力竭后必须松开再按；摇杆必须回落到 0.8 以下或松手。
+- 归零当帧仍可能以冲刺速度移动并多扣一帧精力（既有 `UpdateStamina` 顺序所致；下一帧 `SprintAllowed=false` 回走路）。这是既有行为，不在本次修改。
 - 更新 `docs/superpowers/specs/2026-10-18-stamina-system-design.md` 的“精力归零……自动回到走路”描述，加 2026-10-23 修订行。
 
 ---
@@ -200,6 +210,7 @@ if (moveInput.sqrMagnitude > 0.01f)
 | 触控 UI 隐藏 / `?touch=0` | binder 切键鼠前清 `SetSprintHeld(false)`；摇杆 `OnDisable` 重置 |
 | 浏览器失焦、抬指事件丢失 | 依赖现有 `VirtualJoystick.OnDisable` 兜底（与移动值同一路径）；binder 不再喂 true |
 | 玩家重建（确认角色） | 新 `InputManager` 由 binder 重新绑定；旧状态随旧对象销毁 |
+| 力竭时按住冲刺 → 死亡 → 复活 | 两个复活路径（`ApplyServerRespawn` / `TickRespawn`）都清锁存（见 §5.4）；复活后可直接再冲刺 |
 | 摇杆空闲、键鼠兜底 | 移动回退到 WASD；Shift 仍可冲刺（`IsSprintHeld` 直接读键） |
 | 快速甩杆 / 微调方向 | 0.2s 保持门槛挡住，不进入冲刺 |
 | 推满但顶墙 | 仍会扣精力（既有 Shift 行为，不在本次修改） |
@@ -228,9 +239,9 @@ if (moveInput.sqrMagnitude > 0.01f)
 
 ### 8.3 PlayMode：`MobileTouchInputTests`
 
-新增独立用例 `test_joystick_full_push_sprints_after_hold_and_release_exits`（各自 `LoadScene` + 清理）：
+新增独立用例 `test_joystick_full_push_sprints_after_hold_and_release_exits`（各自 `LoadScene` + 清理；沿用现有用例的 `LogAssert.ignoreFailingMessages`）：
 
-1. 载入 DemoDay，`ForceTouch`，关闭选人面板，等待玩家与 Joystick 适配器。
+1. 载入 DemoDay，`ForceTouch`，关闭选人面板，遍历 `FindObjectsOfType<Sys3CEntry>()` 等到 `AdapterNameOf(entry) == "Joystick"`（**不要直接取第一个 `Sys3CEntry`** —— 远端视图上也有一个被禁用的）。
 2. `pointerDown` + `drag` 到一个远超半径的屏幕点（保证 `Value` 钳到 1.0，避免依赖 Canvas `scaleFactor`）。
 3. 等待 0.2s + 1 帧；断言本地 `InputManager.GetMoveCommand(Vector3.forward).IsSprint == true`。
 4. `pointerUp`；等待 1 帧；断言 `IsSprint == false`。
@@ -259,7 +270,7 @@ if (moveInput.sqrMagnitude > 0.01f)
 |---|---|
 | `Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md:138` | 输入表加“手机：摇杆满推保持 0.2s” |
 | `docs/superpowers/specs/2026-10-18-stamina-system-design.md` | 顶部加 2026-10-23 修订：力竭锁存；§5.1 的“自动回到走路”改为“需释放一次” |
-| `docs/superpowers/guides/webgl-mobile-acceptance.md` §3.3 | “满推=快走”改为“满推保持 0.2s=冲刺”；加冲刺 / 力竭检查项 |
+| `docs/superpowers/guides/webgl-mobile-acceptance.md` §3.3 + 文末勾选表 | “满推=快走”改为“满推保持 0.2s=冲刺”；补“冲刺时归一化是设计，不是模拟量丢失”；加冲刺 / 力竭检查项 |
 | `InputManager.SetSprintHeld` 注释 | 从“测试 / 未来 UI 挂钩”改为“摇杆手势 / UI 入口” |
 
 ---
@@ -274,6 +285,7 @@ if (moveInput.sqrMagnitude > 0.01f)
 | 力竭锁存让键盘玩家觉得多此一举 | 与举盾锁存一致；避免“跑两步停一下”的抖动 |
 | 0.8–0.9 迟滞区内速度固定 8 m/s | 由 0.2s 进入门槛保证是刻意动作；退出落差明显 |
 | 冲刺顶墙仍扣精力 | 既有行为，不在本次范围；如要修需独立判定“实际位移” |
+| `InputManager.IsSprinting()` 仍只做 `IsSprintHeld() && IsMoving()`，不含 `SprintAllowed` / 锁存 | 当前**零消费者**；本次不动。将来接入时必须改为读 `GetMoveCommand()` 的 `IsSprint`，否则力竭时会误报冲刺 |
 
 ---
 
