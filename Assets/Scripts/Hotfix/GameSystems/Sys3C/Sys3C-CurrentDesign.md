@@ -135,7 +135,7 @@ Death:
 | Q | RequestSkillQ() | ���能Q，可空中释放 |
 | R | RequestSkillR() | 技能R，仅地面 |
 | Space | RequestJump() | 跳跃 |
-| Shift (按住) | IsSprint | 冲刺 |
+| Shift (按住) / 手机摇杆满推保持 0.2s | IsSprint | 冲刺 |
 
 ---
 

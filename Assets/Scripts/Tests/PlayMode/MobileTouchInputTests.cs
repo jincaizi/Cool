@@ -266,6 +266,104 @@ namespace KcpNet.PlayModeTests
             }
         }
 
+        /// <summary>
+        /// 2026-10-23：摇杆满推保持 0.2s 必须进入冲刺；松手立即退出。
+        /// 独立用例（各自 LoadScene + 清理），不塞进几何用例的叙事。
+        /// 迟滞区间（0.85 保持 / 0.79 退出）由 EditMode 的 SprintGestureStateTests 覆盖，
+        /// 这里只验“手势 → binder → InputManager”这条真链路。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator test_joystick_full_push_sprints_after_hold_and_release_exits()
+        {
+            bool prevIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;   // DemoDay 起网络但没有服务器，容忍其报错
+            MobileInputBinder binder = null;
+            try
+            {
+                SceneManager.LoadScene("DemoDay");
+                yield return null;
+                yield return null;
+
+                var host = FindRoot("MobileInput");
+                Assert.IsNotNull(host, "场景里应有常驻激活的 MobileInput 宿主");
+                binder = host.GetComponent<MobileInputBinder>();
+                Assert.IsNotNull(binder, "MobileInput 上应有 MobileInputBinder");
+                binder.TouchOverride = TouchOverride.ForceTouch;
+
+                // 等“被 binder 绑定为 Joystick”的本地 entry；不要直接取第一个
+                // （远端视图上也有一个被禁用的 Sys3CEntry）。
+                Sys3CEntry entry = null;
+                InputManager input = null;
+                for (int i = 0; i < 600; i++)
+                {
+                    foreach (var candidate in Object.FindObjectsOfType<Sys3CEntry>())
+                    {
+                        if (candidate == null) continue;
+                        if (AdapterNameOf(candidate) != "Joystick") continue;
+                        entry = candidate;
+                        input = candidate.GetComponent<InputManager>();
+                        break;
+                    }
+                    if (entry != null && input != null) break;
+                    yield return null;
+                }
+                Assert.IsNotNull(entry, "应有一个被绑定为 Joystick 的本地玩家");
+                Assert.IsNotNull(input, "本地玩家应有 InputManager");
+
+                var mobileRoot = FindRoot("MobileUiRoot");
+                Assert.IsNotNull(mobileRoot, "场景里应有 MobileUiRoot");
+                var joystick = mobileRoot.GetComponentInChildren<VirtualJoystick>(true);
+                Assert.IsNotNull(joystick, "MobileUiRoot 下应有 VirtualJoystick");
+
+                var eventSystem = EventSystem.current;
+                Assert.IsNotNull(eventSystem, "应有 EventSystem");
+                var joyRect = (RectTransform)joystick.transform;
+                var corners = new Vector3[4];
+                joyRect.GetWorldCorners(corners);
+                var center = new Vector2((corners[0].x + corners[2].x) * 0.5f,
+                                         (corners[0].y + corners[2].y) * 0.5f);
+
+                // 按下并把摇杆推到远超半径的屏幕点：Value 必然钳到 1.0，
+                // 不依赖 Canvas.scaleFactor / Game View 尺寸。
+                var down = new PointerEventData(eventSystem) { position = center };
+                ExecuteEvents.Execute(joystick.gameObject, down, ExecuteEvents.pointerDownHandler);
+                var drag = new PointerEventData(eventSystem)
+                {
+                    position = center + new Vector2(Screen.width, Screen.height)
+                };
+                ExecuteEvents.Execute(joystick.gameObject, drag, ExecuteEvents.dragHandler);
+                Assert.AreEqual(1f, joystick.Value.magnitude, 0.001f,
+                    "拖到屏外后 Value 必须钳到 1");
+
+                // 满推保持 0.2s；多等一帧让 binder 的 LateUpdate 汇入 InputManager。
+                yield return new WaitForSeconds(0.2f);
+                yield return null;
+
+                Assert.IsTrue(input.GetMoveCommand(Vector3.forward).IsSprint,
+                    "满推保持 0.2s 后应进入冲刺");
+
+                // 抬手：立即退出冲刺。
+                var up = new PointerEventData(eventSystem) { position = drag.position };
+                ExecuteEvents.Execute(joystick.gameObject, up, ExecuteEvents.pointerUpHandler);
+                yield return null;
+
+                Assert.IsFalse(input.GetMoveCommand(Vector3.forward).IsSprint,
+                    "松手后必须退出冲刺");
+
+                // 收尾：清档位 + 卸载场景（与既有用例同一套清理）。
+                binder.TouchOverride = TouchOverride.Auto;
+                yield return null;
+                SceneManager.SetActiveScene(SceneManager.CreateScene("T7SprintCleanupScene"));
+                var unload = SceneManager.UnloadSceneAsync("DemoDay");
+                while (unload != null && !unload.isDone) yield return null;
+            }
+            finally
+            {
+                if (binder != null) binder.TouchOverride = TouchOverride.Auto;
+                LogAssert.ignoreFailingMessages = prevIgnore;
+            }
+        }
+
         /// <summary>合成一次 pointerDown + drag，返回摇杆 Value 的模长；最后合成 pointerUp 复位。</summary>
         private static float DragAndGetMagnitude(VirtualJoystick joystick, Vector2 start, float dx)
         {

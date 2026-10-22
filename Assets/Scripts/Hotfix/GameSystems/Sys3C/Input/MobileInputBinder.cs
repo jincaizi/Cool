@@ -68,6 +68,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 // Joystick 适配器还挂在玩家身上，而 LateUpdate 也还在喂它。
                 if (_inputManager != null)
                 {
+                    _inputManager.SetSprintHeld(false);
                     _inputManager.SetAdapter(new KeyboardInputAdapter());
                     _inputManager = null;
                 }
@@ -118,18 +119,28 @@ namespace Hotfix.GameSystems.Sys3C.Input
             return null;
         }
 
-        /// <summary>
-        /// 帧末汇入动作按钮状态 —— 放在 LateUpdate 是为了与读取方（Sys3CEntry.Update）
-        /// 无执行顺序依赖：本帧按下的跳跃必定被下一帧读到且只读到一次。
-        /// </summary>
         private void LateUpdate()
         {
-            if (_inputManager == null || _buttons == null) return;
+            if (_inputManager == null) return;
+
+            // 摇杆手势不依赖 MobileActionButtons：_buttons 未配置时也要喂。
+            _inputManager.SetSprintHeld(_joystick != null && _joystick.IsSprintHeld);
+
+            if (_buttons == null) return;
 
             _inputManager.SetAttackHeld(_buttons.AttackHeld);
             _inputManager.SetDefendHeld(_buttons.DefendHeld);
             _inputManager.SetJumpPressed(_buttons.JumpPressed);
             _buttons.ConsumeJump();
+        }
+
+        /// <summary>
+        /// 停用/失焦时清掉 UI 冲刺 —— 否则 InputManager 会保留最后一次 true，
+        /// 切回键鼠或场景卸载后角色仍在冲刺。
+        /// </summary>
+        private void OnDisable()
+        {
+            if (_inputManager != null) _inputManager.SetSprintHeld(false);
         }
     }
 }

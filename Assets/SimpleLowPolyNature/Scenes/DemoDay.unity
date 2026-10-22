@@ -14939,6 +14939,11 @@ MonoBehaviour:
   _background: {fileID: 1300757300}
   _handle: {fileID: 2145995258}
   _radius: 80
+  _sprintEnterThreshold: 0.9
+  _sprintExitThreshold: 0.8
+  _sprintHoldSeconds: 0.2
+  _sprintIndicator: {fileID: 2145995259}
+  _sprintColor: {r: 1, g: 0.6, b: 0.1, a: 1}
 --- !u!1001 &1910230235
 PrefabInstance:
   m_ObjectHideFlags: 0
