@@ -263,7 +263,7 @@ private sealed class TargetTint
   - `FreezeCount > 0`：`(0.55, 0.75, 1.0)`，强度 0.5；
   - 否则 `BurnCount > 0`：`(1.0, 0.35, 0.1)`，强度 `0.12 + 0.18 * (0.5 + 0.5 * sin(Phase))`，Phase 以 2Hz 推进；
   - 否则清除。
-- 目标 Transform 为 null 或被销毁时清理条目。
+- 目标 Transform 为 null 或被销毁时清理条目；移除事件到达时目标可能已销毁，`Clear()` 前必须判空。
 - `BodyTintRenderer` 只处理拥有 `_Color` 属性的材质；其他材质跳过，不报错。
 
 ## 5. 数据流
