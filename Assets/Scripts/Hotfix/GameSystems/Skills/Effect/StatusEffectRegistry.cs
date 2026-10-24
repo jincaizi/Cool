@@ -161,6 +161,9 @@ namespace Hotfix.GameSystems.Skills.Effect
 
             entry.Effect.Remove(entry.Caster, entry.Target);
 
+            if (entry.Effect is StunEffectData)
+                RestoreLongestStun(entry);
+
             EventBus.Emit(new StatusEffectRemovedEvent
             {
                 EntityId = entry.TargetGo.GetInstanceID(),
@@ -170,6 +173,21 @@ namespace Hotfix.GameSystems.Skills.Effect
             });
 
             _active.RemoveAt(index);
+        }
+
+        private void RestoreLongestStun(ActiveEffect removed)
+        {
+            float longest = 0f;
+            for (int i = 0; i < _active.Count; i++)
+            {
+                ActiveEffect other = _active[i];
+                if (other == removed || other.TargetGo != removed.TargetGo) continue;
+                if (!(other.Effect is StunEffectData)) continue;
+                longest = Mathf.Max(longest, other.Remaining);
+            }
+
+            if (longest > 0f)
+                removed.Target.StatusController?.AddStun(longest);
         }
 
         private ActiveEffect Find(int targetId, string key)

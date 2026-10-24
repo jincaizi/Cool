@@ -157,5 +157,30 @@ namespace GameSys.EditorTests
             Assert.AreEqual(1, effect.ApplyCount);
             Assert.AreEqual(0, effect.RemoveCount);
         }
+
+        [Test]
+        public void test_registry_short_stun_does_not_clear_longer_stun()
+        {
+            var shortStun = new StunEffectData
+            {
+                SetDuration = 1f,
+                SetEffectId = "short_stun"
+            };
+            var longStun = new StunEffectData
+            {
+                SetDuration = 3f,
+                SetEffectId = "long_stun"
+            };
+
+            _registry.Apply(_target, shortStun, null);
+            _registry.Apply(_target, longStun, null);
+            _registry.Tick(1.1f);
+
+            Assert.Greater(_status.StunDuration, 1.5f);
+            Assert.AreEqual(1, _status.RemoveCalls);
+
+            _registry.Tick(2f);
+            Assert.AreEqual(0f, _status.StunDuration, 0.001f);
+        }
     }
 }
