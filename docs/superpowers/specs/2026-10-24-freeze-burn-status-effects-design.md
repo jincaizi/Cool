@@ -209,8 +209,8 @@ if (!stunned)
 - 怪物的 `StatusControllerAdapter` **不由 Update 驱动**；冻结时长完全由 Registry 管理，Registry 移除效果时调用 `RemoveStun`。
 - `HandleDeath`：
   - `Animator.speed = 1f;`
-  - `StatusEffectManager.Instance?.RemoveAll(this);`
   - `_wasStunned = false;`
+  - **不调用 `RemoveAll`**：死亡可能在 Registry.Tick 的 `OnTick` 内部触发，`RemoveAll` 会在遍历中修改列表。状态由 Registry 在下一帧检测 `IsAlive == false` 后清理。
 - `ApplyDamageOverTime(float amount)`：
 
 ```csharp
