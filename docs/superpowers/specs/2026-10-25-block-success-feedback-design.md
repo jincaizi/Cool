@@ -16,7 +16,7 @@
 1. `DisplayEventBridge` → 头顶金色「格挡」飘字（复用闲置的 `FloatText_Block.asset`）
 2. `HitFeedbackSystem` → 盾面/接触点金色火花（复用现有 `HitSpark.prefab` 池）
 
-覆盖范围：本地玩家（单机 + 联机）与远程玩家/bot（攻击者与防御者两端可见）。
+覆盖范围：本地玩家（单机 + 联机）与远程玩家/bot（攻击者与防御者两端可见）。注意：bot 的代码路径已具备，但当前 bot AI 不会举盾（见 §5-8）。
 
 ### 已拍板的决策
 
@@ -53,6 +53,9 @@
 | 13 | `DefendHit` 动画是真实盾牌受击动作（`DefendHit_SwordAndShield.fbx`），动画链路本身正常 | `RpgDuo/Animator/Character3C.controller:1084` |
 | 14 | 联机本地受击回调的 `hitDirection` 恒为 `Vector3.zero`（协议无方向字段） | `SyncLayer/CombatNetworkBridge.cs:119` |
 | 15 | 单机格挡分支可获得真实接触点 `resolved.HitPoint`（世界坐标） | `Sys3C/Core/Combat/HitContact.cs:14-19`、`Sys3CEntry.cs:685-688` |
+| 16 | 服务端 bot（`BotRunner`）只更新位置/朝向，**从不设置 `IsDefending`** → bot 当前永远不会格挡 | `Server/Aoi/BotRunner.cs:91,137`、`Server/Player/PlayerState.cs:34` |
+| 17 | 本地玩家非格挡受击的飘字是**灰色**（0.85 灰、58pt），不是红色 | `FloatText_PlayerDamage.asset:18-21`、`DisplayEventBridge.cs:39-43` |
+| 18 | `HitFeedbackSystem` 也只挂在 DemoDay 场景 → 火花与飘字都只在 DemoDay 生效 | `DemoDay.unity:7573` |
 
 ---
 
@@ -139,13 +142,15 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
 
 | # | 场景 | 文件位置 | EntityId | HitPosition | TextPosition |
 |---|---|---|---|---|---|
-| 1 | 单机格挡 | `Sys3CEntry.IDamageable.TakeDamage` 的 `_cc.IsDefending && wasBlocked` 分支 | `gameObject.GetInstanceID()` | `resolved.HitPoint`（真实接触点） | `transform.position + Vector3.up * 1.5f` |
+| 1 | 单机格挡 | `Sys3CEntry.IDamageable.TakeDamage` 的 `_cc.IsDefending && wasBlocked` 分支 | `gameObject.GetInstanceID()` | `resolved.HasContact ? resolved.HitPoint : transform.position + Vector3.up * 1.3f + transform.forward * 0.4f`（优先真实接触点） | `transform.position + Vector3.up * 1.5f` |
 | 2 | 联机本地格挡 | `Sys3CEntry.ApplyServerDamage` 的 `isBlocked` 分支 | `gameObject.GetInstanceID()` | `transform.position + Vector3.up * 1.3f + transform.forward * 0.4f`（协议无方向，正面近似） | `transform.position + Vector3.up * 1.5f` |
-| 3 | 联机远程格挡 | `CombatNetworkBridge.ApplyDamageResult` 远程分支，`hit.IsBlocked == true` | `view.GameObject.GetInstanceID()` | `view.Position + Vector3.up * 1.2f` | `view.Position + Vector3.up * 1.5f` |
+| 3 | 联机远程格挡 | `CombatNetworkBridge.ApplyDamageResult` 远程分支，`hit.IsBlocked == true && view.Kind != (byte)EntityKind.Npc` | `view.GameObject.GetInstanceID()` | `view.Position + Vector3.up * 1.2f` | `view.Position + Vector3.up * 1.5f` |
 
-发射时序：三处都必须在 `EnterDefendHit` 与扣精力都完成之后、死亡判定之前发射，保证事件订阅者看到的动画状态与精力状态一致。
+发射时序：本地两条分支都在 `EnterDefendHit` 与扣精力都完成之后、死亡判定之前发射，保证事件订阅者看到的动画状态与精力状态一致；远程分支没有动画/精力动作，发事件后直接 `continue`。
 
-**发射点 3 的实现要点**：`if (hit.IsBlocked)` 必须放在 `view.Kind == Npc` 分支之前，命中后 `continue`——被格挡的远程命中不再走 `PlayerTakeDamageEvent` / `MonsterTakeDamageEvent`。服务端只对 Player 判格挡（证据 10），因此 Npc 路径实际不受影响。
+**发射点 1 的兜底**：`resolved.HasContact == false` 时（无碰撞箱路径 / 无接触上下文），`HitContact.None.HitPoint` 是零向量；必须回退到"胸前前方"点，否则火花会出现在世界原点。
+
+**发射点 3 的实现要点**：`if (hit.IsBlocked && view.Kind != (byte)EntityKind.Npc)` 必须放在 `var view = _registry.GetView(...); if (view == null) continue;` **之后**、`view.Kind == Npc` 分支**之前**，命中后 `continue`——被格挡的远程玩家/bot 命中不再走 `PlayerTakeDamageEvent`。服务端只对 Player 判格挡（证据 10），显式加 `Kind != Npc` 守卫是为了保证"即使未来服务端给 Npc 置 IsBlocked，怪物伤害数字也不会被吞掉"。
 
 **发射点 2 的边界**：`ApplyServerDamage` 的 `hitDirection` 恒为零，无法算真实接触点；但格挡判定要求攻击者在正面 ±60° 锥内，因此"角色正前方 0.4m"在视觉上成立。这是已知近似，不是 bug。
 
@@ -153,13 +158,20 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
 
 **`DisplayEventBridge`**（`Nameplate/DisplayEventBridge.cs`）：
 
-- 构造函数新增参数 `FloatTextSettings blockSettings`，保存为 `_blockSettings`
+- 构造函数签名改为 `(FloatTextRenderer floatText, FloatTextSettings damageSettings, FloatTextSettings critDamageSettings, FloatTextSettings playerDamageSettings, FloatTextSettings blockSettings)`，最后一个保存为 `_blockSettings`
 - `Enable()` / `Disable()` 增删 `EventBus.Subscribe<BlockSucceededEvent>(OnBlockSucceeded)`
-- 处理器逻辑：
+
+新增字段与常量：
 
 ```csharp
+private const float BlockMergeWindow = 0.2f;
+private readonly Dictionary<int, float> _lastBlockTime = new Dictionary<int, float>();
 private bool _warnedMissingBlockSettings;
+```
 
+处理器逻辑：
+
+```csharp
 private void OnBlockSucceeded(BlockSucceededEvent e)
 {
     if (!FloatTextRenderer.EnableVFX) return;
@@ -223,6 +235,7 @@ private void OnBlockSucceeded(BlockSucceededEvent e)
 ```
 
 - 不新建粒子池；格挡火花与命中火花共享 round-robin 池
+- `HitFeedbackSystem` 只挂在 DemoDay 场景（证据 18）；其他场景不会播火花
 
 ### 4.5 保持不变
 
@@ -242,6 +255,9 @@ private void OnBlockSucceeded(BlockSucceededEvent e)
 5. **致死格挡**：先发反馈，再走 `EvaluateLocalDeath`（与现有"先扣精再死亡"顺序一致）。
 6. **格挡后精力耗尽收盾**：反馈仍正常播放，随后 `ForceExitDefendByExhaustion` 收盾。
 7. 音频、屏幕闪光、震屏、顿帧、盾牌高亮均不改变。
+8. **bot 当前不会举盾**：服务端 `BotRunner` 从不设置 `IsDefending`（证据 16），所以"远程 bot 格挡"的代码路径已具备、但当前无法实测；等 bot AI 支持防御后自动生效。
+9. **表现只在 DemoDay 生效**：`EntityDisplayManager`（飘字）与 `HitFeedbackSystem`（火花）都只挂在 DemoDay 场景。
+10. **高优先级受击状态会吞掉 `DefendHit` 动画，但不吞反馈**：`HitFSM.EnterDefendHit` 在 Dizzy/Knockback/Launched/Down/GetUp/Death 状态会拒绝切换，此时飘字与火花仍会播放（格挡已经被判定成功）。
 
 ---
 
@@ -255,22 +271,26 @@ private void OnBlockSucceeded(BlockSucceededEvent e)
 |---|---|---|---|
 | `OnDamageResult_RemoteBlockedTarget_Emits_BlockSucceededEvent_Not_PlayerTakeDamageEvent` | 远程视图（Position 位）；订阅两个事件 | `HitEntry { TargetPlayerId=2, Damage=3, IsBlocked=true }` | 收到 `BlockSucceededEvent`，`EntityId == view.GameObject.GetInstanceID()`；`HitPosition ≈ view.Position + up*1.2`；**没有** `PlayerTakeDamageEvent` |
 | `OnDamageResult_RemoteUnblockedTarget_Does_Not_Emit_BlockSucceededEvent` | 同上 | `HitEntry { IsBlocked=false }` | 仍发 `PlayerTakeDamageEvent`，不发 `BlockSucceededEvent`（回归护栏） |
-| `OnDamageResult_LocalBlockedTarget_Does_Not_Emit_BlockSucceededEvent` | 本地 id=7；带 sink | `HitEntry { TargetPlayerId=7, IsBlocked=true }` | 桥只调用 sink，不发 `BlockSucceededEvent`（避免与 `ApplyServerDamage` 重复反馈） |
+| `OnDamageResult_LocalBlockedTarget_Does_Not_Emit_BlockSucceededEvent` | 本地 id=7；带 sink | `HitEntry { TargetPlayerId=7, IsBlocked=true }` | sink 必须被调用一次；桥不发 `BlockSucceededEvent`（避免与 `ApplyServerDamage` 重复反馈） |
 
 **`Assets/Scripts/Tests/PlayMode/BlockStaminaTests.cs`**（沿用文件内 snake_case 命名）：
 
 | 用例 | 断言 |
 |---|---|
-| `test_block_feedback_online_block_emits_block_succeeded_event` | `ApplyServerDamage(..., isBlocked: true)` 后收到一次事件；`TextPosition ≈ transform.position + up*1.5` |
-| `test_block_feedback_non_blocked_hit_does_not_emit_event` | `isBlocked: false` 时不发事件 |
+| `test_block_feedback_online_block_emits_block_succeeded_event` | `ApplyServerDamage(..., isBlocked: true)` 后收到一次事件；`EntityId == _entry.gameObject.GetInstanceID()`；`TextPosition ≈ transform.position + up*1.5` |
+| `test_block_feedback_online_non_blocked_does_not_emit_event` | `isBlocked: false` 时不发事件 |
+| `test_block_feedback_offline_block_emits_block_succeeded_event` | `EnterDefend()` 后 `((IDamageable)_entry).TakeDamage(DamageBlock.CreateDefault(50f, 0f), -_entry.transform.forward)`；收到一次事件，`EntityId` 正确，`TextPosition ≈ transform.position + up*1.5`，`HitPosition` 非零 |
+| `test_block_feedback_offline_non_blocked_does_not_emit_event` | 不进入防御时同一伤害不发事件 |
+
+所有新测试必须在 `try/finally` 中 `EventBus.Unsubscribe`，避免 EventBus 静态订阅跨用例泄漏。
 
 ### 6.2 手动验收
 
-1. **单机**：DemoDay 举盾正面被 DogKnight 攻击 → 头顶金色「格挡」+ 盾面金色火花；不出现伤害数字。
-2. **单机背面/未举盾**：红色伤害数字 + 原有火花，行为不变。
-3. **联机双方**：A 攻击举盾面朝 A 的 B → A 与 B 两端都看到「格挡」+ 火花；A 不再看到 B 的伤害数字。
+1. **单机**（选人面板选 SinglePlayer）：DemoDay 举盾正面被 DogKnight 攻击 → 头顶金色「格挡」+ 盾面金色火花；不出现伤害数字；`DefendHit` 动画仍正常播放。
+2. **单机背面/未举盾**：灰色伤害数字（`FloatText_PlayerDamage`）+ 原有火花，行为不变。
+3. **联机双方**（Online 模式 + 服务器）：A 攻击举盾面朝 A 的 B → A 与 B 两端都看到「格挡」+ 火花；A 不再看到 B 的伤害数字。
 4. **多段命中**：一次"挥击 + 剑气"两段格挡 → 只出现一次「格挡」，火花可多次。
-5. **远程**：A 攻击举盾的 bot → A 看到 bot 头上「格挡」+ 火花。
+5. **远程玩家**：A 攻击举盾的远程玩家 B → A 看到 B 头上「格挡」+ 火花。（bot 当前不会举盾，见 §5-8，无法实测）
 6. **回归**：普通命中、暴击、怪物受击飘字颜色/数字不变。
 7. **场景接线**：若 `_blockSettings` 未接，Console 出现一次警告而不是静默无飘字。
 
@@ -279,6 +299,7 @@ private void OnBlockSucceeded(BlockSucceededEvent e)
 - 6.1 全部自动化用例通过，既有测试全绿
 - 6.2 手动项全部通过
 - Unity Console 无新增错误/异常
+- 验证命令：`bash tools/unity-tests.sh EditMode`、`bash tools/unity-tests.sh PlayMode BlockStaminaTests`
 
 ---
 
