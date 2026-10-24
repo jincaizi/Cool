@@ -39,6 +39,8 @@ MonoBehaviour:
     _angle: 120
     _angleStart: 0
     _angleEnd: 90
+    _innerRadius: 0.5
+    _innerAngle: 60
     _areaRadius: 0
     _width: 1
     _stopAtFirst: 0
@@ -61,20 +63,22 @@ MonoBehaviour:
     _tickInterval: 1
     _totalTicks: 5
   AttackEffect:
-    _applyEffects:
-    - _type: 8
-      _effectId: 
-      _duration: 0
-      _maxStacks: 0
-      _stackingRule: 0
-      _isTickEffect: 1
-      _tickInterval: 0
+    _applyEffects: []
     _knockbackForce: 2.5
     _launchForce: 0
     _stunDuration: 0
     _statusType: 0
     _statusDuration: 0
     _statusValue: 0
+  AttackWindupTime: 0.2
+  AttackRecoveryTime: 0.3
+  HitReactDurations:
+  - 0
+  - 0.3
+  - 0.6
+  - 0.2
+  - 1
+  HitIFrameDuration: 0.15
   EnableDefend: 1
   DefendHPThreshold: 0.5
   DefendChaseTimeThreshold: 3
@@ -98,3 +102,6 @@ MonoBehaviour:
   DeathDestroyDelay: 3
   RingYOffset: 0
   NameplateData: {fileID: 11400000, guid: 69a01ca8a12c71d4ea562662726ffa31, type: 2}
+  references:
+    version: 2
+    RefIds: []
