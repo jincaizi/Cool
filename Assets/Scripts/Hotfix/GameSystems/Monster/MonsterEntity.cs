@@ -8,6 +8,7 @@ using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Combat;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Nameplate;
 
@@ -32,6 +33,9 @@ namespace Hotfix.GameSystems.Monster
         private AIContext _ctx;
         private Vector3 _spawnPoint;
         private Collider _collider;
+
+        private readonly StatusControllerAdapter _statusController = new();
+        private bool _wasStunned;
 
         // _stats 由 Init 建立：npc 视图（联网模式的怪物表现）从不调 Init，所以这里必须判空 ——
         // 否则视图会被判成「活着」而选进目标集合。同文件 ITargetable 的 HP 系列本来就在判空。
@@ -63,6 +67,7 @@ namespace Hotfix.GameSystems.Monster
         private void OnKnockback(KnockbackEvent e)
         {
             if (_stats == null || _stats.IsDead) return;
+            if (_statusController.IsStunned) return;
             _movement.ApplyKnockback(e.Direction, e.Force);
         }
 
@@ -155,7 +160,21 @@ namespace Hotfix.GameSystems.Monster
         private void Update()
         {
             if (_stats == null || _stats.IsDead || _brain == null) return;
-            _brain.Update(Time.deltaTime);
+
+            bool stunned = _statusController.IsStunned;
+            if (stunned != _wasStunned)
+            {
+                if (Animator != null)
+                    Animator.speed = stunned ? 0f : 1f;
+
+                if (stunned)
+                    _movement?.Stop();
+
+                _wasStunned = stunned;
+            }
+
+            if (!stunned)
+                _brain.Update(Time.deltaTime);
         }
 
         // Safety net: unsubscribe even if OnDisable is skipped (e.g., DestroyImmediate in editor)
@@ -197,7 +216,8 @@ namespace Hotfix.GameSystems.Monster
 
             var result = _damagePipeline.Process(ref ctx);
 
-            _brain.OnDamageReceived(result, hitDirection);
+            if (!_statusController.IsStunned)
+                _brain.OnDamageReceived(result, hitDirection);
 
             EmitDamageEvents(myId, data, hitDirection, result, resolved);
 
@@ -233,6 +253,9 @@ namespace Hotfix.GameSystems.Monster
 
         private void HandleDeath()
         {
+            if (Animator != null) Animator.speed = 1f;
+            _wasStunned = false;
+
             if (_movement != null)
             {
                 // Apply death knockback with configurable multiplier
@@ -342,7 +365,7 @@ namespace Hotfix.GameSystems.Monster
         IEffectStats IEffectTarget.Stats => null;
         IShieldSystem IEffectTarget.ShieldSystem => null;
         IPhysicsSystem IEffectTarget.PhysicsSystem => null;
-        IStatusController IEffectTarget.StatusController => null;
+        IStatusController IEffectTarget.StatusController => _statusController;
 
         void IEffectTarget.Heal(float amount)
         {
@@ -354,6 +377,16 @@ namespace Hotfix.GameSystems.Monster
             ((IDamageable)this).TakeDamage(damageBlock, Vector3.zero);
         }
 
-        void IEffectTarget.ApplyDamageOverTime(float amount) { }
+        void IEffectTarget.ApplyDamageOverTime(float amount)
+        {
+            if (_stats == null || _stats.IsDead || amount <= 0f) return;
+
+            _stats.ApplyDamage(amount);          // 纯扣血，绕过防御
+
+            EventBus.Emit(new MonsterDotDamageEvent(
+                GetInstanceID(),
+                transform.position + Vector3.up * 1.2f,
+                Mathf.CeilToInt(amount)));
+        }
     }
 }

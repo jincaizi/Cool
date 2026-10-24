@@ -88,6 +88,24 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
     }
 
     /// <summary>
+    /// 持续伤害事件（灼烧等）。与 MonsterTakeDamageEvent 分离，
+    /// 只用于飘字，不触发顿帧/震屏/命中粒子。
+    /// </summary>
+    public struct MonsterDotDamageEvent : IEvent
+    {
+        public int EntityId;
+        public Vector3 HitPosition;
+        public int Damage;
+
+        public MonsterDotDamageEvent(int entityId, Vector3 hitPosition, int damage)
+        {
+            EntityId = entityId;
+            HitPosition = hitPosition;
+            Damage = damage;
+        }
+    }
+
+    /// <summary>
     /// 击退事件
     /// </summary>
     public struct KnockbackEvent : IEvent
