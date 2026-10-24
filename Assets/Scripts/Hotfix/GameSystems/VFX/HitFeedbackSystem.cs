@@ -13,6 +13,8 @@ namespace Hotfix.GameSystems.VFX
     {
         [SerializeField] private GameObject _sparkPrefab;
         [SerializeField] private int _poolSize = 8;
+        [SerializeField] private Color _blockSparkColor = new Color(1f, 0.84f, 0f);
+        [SerializeField] private float _blockSparkScale = 0.8f;
 
         public static bool EnableVFX = true;
         public static HitFeedbackSystem Instance { get; private set; }
@@ -39,12 +41,14 @@ namespace Hotfix.GameSystems.VFX
         {
             EventBus.Subscribe<MonsterTakeDamageEvent>(OnMonsterHit);
             EventBus.Subscribe<PlayerTakeDamageEvent>(OnPlayerHit);
+            EventBus.Subscribe<BlockSucceededEvent>(OnBlockSucceeded);
         }
 
         private void OnDisable()
         {
             EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterHit);
             EventBus.Unsubscribe<PlayerTakeDamageEvent>(OnPlayerHit);
+            EventBus.Unsubscribe<BlockSucceededEvent>(OnBlockSucceeded);
         }
 
         private void OnMonsterHit(MonsterTakeDamageEvent e)
@@ -71,6 +75,15 @@ namespace Hotfix.GameSystems.VFX
             Color c = color.a <= 0f ? Color.white : color;  // 防御：事件未带有效色时用白
 
             _sparks[_cursor % _sparks.Length].Play(worldPos, c, scale);
+            _cursor++;
+        }
+
+        private void OnBlockSucceeded(BlockSucceededEvent e)
+        {
+            if (!EnableVFX) return;
+            if (_sparks == null || _sparks.Length == 0) return;
+
+            _sparks[_cursor % _sparks.Length].Play(e.HitPosition, _blockSparkColor, _blockSparkScale);
             _cursor++;
         }
     }
