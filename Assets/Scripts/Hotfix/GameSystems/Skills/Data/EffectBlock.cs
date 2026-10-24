@@ -8,6 +8,7 @@ namespace Hotfix.GameSystems.Skills.Data
     {
         [Header("=== On-Hit Effects ===")]
         [Tooltip("命中时施加的状态效果 (buff, debuff, stun, knockback等)")]
+        [SerializeReference]
         [SerializeField] private EffectData[] _applyEffects;
         public EffectData[] ApplyEffects => _applyEffects;
 

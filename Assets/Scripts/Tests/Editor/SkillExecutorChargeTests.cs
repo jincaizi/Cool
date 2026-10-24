@@ -52,6 +52,7 @@ namespace GameSys.EditorTests
             public IPhysicsSystem PhysicsSystem => null;
             public IStatusController StatusController => null;
             public void Heal(float amount) { }
+            public void ApplyDamageOverTime(float amount) { }
             public void TakeDamage(DamageBlock d, Vector3 dir) { HitCount++; LastDamage = d; }
             public void TakeDamage(DamageBlock d, Vector3 dir, HitContact c) { TakeDamage(d, dir); }
         }

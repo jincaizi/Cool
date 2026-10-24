@@ -353,5 +353,7 @@ namespace Hotfix.GameSystems.Monster
             var damageBlock = DamageBlock.CreateDefault(damage);
             ((IDamageable)this).TakeDamage(damageBlock, Vector3.zero);
         }
+
+        void IEffectTarget.ApplyDamageOverTime(float amount) { }
     }
 }

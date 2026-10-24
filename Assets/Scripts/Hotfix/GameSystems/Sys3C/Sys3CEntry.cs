@@ -958,6 +958,7 @@ namespace Hotfix.GameSystems.Sys3C
         public IPhysicsSystem PhysicsSystem => null;
         public IStatusController StatusController => null;
         public void Heal(float amount) { }
+        public void ApplyDamageOverTime(float amount) { }
 
         public SkillOwnerProxy(Transform t) { _transform = t; }
     }

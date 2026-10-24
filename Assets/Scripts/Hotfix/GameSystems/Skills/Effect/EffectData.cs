@@ -33,7 +33,13 @@ namespace Hotfix.GameSystems.Skills.Effect
         Stun,
         // 沉默目标(无法施法)
         [Tooltip("沉默目标(无法施法)")]
-        Silence
+        Silence,
+        // 冰冻目标(完全定身，复用眩晕逻辑)
+        [Tooltip("冰冻目标(完全定身，复用眩晕逻辑)")]
+        Freeze,
+        // 灼烧目标(按施法者攻击力持续掉血)
+        [Tooltip("灼烧目标(按施法者攻击力持续掉血)")]
+        Burn
     }
 
     public enum StackingRule
@@ -98,7 +104,7 @@ namespace Hotfix.GameSystems.Skills.Effect
 
         public virtual void Remove(IEffectTarget caster, IEffectTarget target) { }
 
-        public virtual void OnTick(IEffectTarget caster, IEffectTarget target) { }
+        public virtual void OnTick(IEffectTarget caster, IEffectTarget target, int stacks) { }
     }
 
     public interface IEffectTarget
@@ -109,6 +115,7 @@ namespace Hotfix.GameSystems.Skills.Effect
         IStatusController StatusController { get; }
         Transform transform { get; }
         void Heal(float amount);
+        void ApplyDamageOverTime(float amount);
     }
 
     public interface IEffectStats
@@ -319,12 +326,12 @@ namespace Hotfix.GameSystems.Skills.Effect
 
         public override void Apply(IEffectTarget caster, IEffectTarget target)
         {
-            target.StatusController.AddStun(_duration);
+            target.StatusController?.AddStun(_duration);
         }
 
         public override void Remove(IEffectTarget caster, IEffectTarget target)
         {
-            target.StatusController.RemoveStun();
+            target.StatusController?.RemoveStun();
         }
     }
 }
