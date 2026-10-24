@@ -91,11 +91,12 @@ namespace Hotfix.GameSystems.Skills.Effect
                     continue;
                 }
 
+                float step = Mathf.Min(deltaTime, entry.Remaining);
                 entry.Remaining -= deltaTime;
 
                 if (entry.Effect.IsTickEffect && entry.Effect.TickInterval > 0f)
                 {
-                    entry.TimeToNextTick -= deltaTime;
+                    entry.TimeToNextTick -= step;
                     while (entry.TimeToNextTick <= 0f)
                     {
                         entry.Effect.OnTick(entry.Caster, entry.Target, entry.Stacks);

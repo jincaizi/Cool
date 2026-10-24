@@ -62,6 +62,17 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_registry_large_step_does_not_tick_after_expiry()
+        {
+            var effect = new TestHelpers.CountingEffect(1.5f, isTick: true, interval: 1f);
+
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(2f);
+
+            Assert.AreEqual(1, effect.TickCount);
+        }
+
+        [Test]
         public void test_registry_duration_zero_applies_immediately_without_registration()
         {
             var effect = new TestHelpers.CountingEffect(0f);
