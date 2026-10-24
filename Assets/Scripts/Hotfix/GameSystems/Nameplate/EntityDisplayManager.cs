@@ -15,6 +15,7 @@ namespace Hotfix.GameSystems.Nameplate
         [SerializeField] private FloatTextSettings _critDamageSettings;
         [SerializeField] private FloatTextSettings _playerDamageSettings;
         [SerializeField] private FloatTextSettings _skillNameSettings;
+        [SerializeField] private FloatTextSettings _blockSettings;
 
         [Header("Stamina Ring")]
         [SerializeField] private float _staminaRingDiameter = 64f;
@@ -48,7 +49,7 @@ namespace Hotfix.GameSystems.Nameplate
 
             _eventBridge = new DisplayEventBridge(
                 _floatText,
-                _damageSettings, _critDamageSettings, _playerDamageSettings);
+                _damageSettings, _critDamageSettings, _playerDamageSettings, _blockSettings);
         }
 
         private void CreateCanvas()
