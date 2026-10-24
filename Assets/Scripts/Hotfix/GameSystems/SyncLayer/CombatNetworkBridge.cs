@@ -18,6 +18,7 @@ namespace Hotfix.GameSystems.SyncLayer
     ///    含格挡标志——宿主据此走格挡受击表现而不是普通受击）；
     ///    远程 **Npc** 视图 Emit MonsterTakeDamageEvent（走怪物红字/暴击橙），
     ///    远程 **玩家/bot** 视图 Emit PlayerTakeDamageEvent（走玩家灰字），
+    ///    被格挡时改发 BlockSucceededEvent（格挡飘字 + 火花），不再飘伤害数字；
     ///    由 DisplayEventBridge/FloatText 链自动飘字。
     /// 线程模型：adapter 回调线程只入队，Update（主线程）消费——与 ClientNetworkManager 同纪律。
     /// </summary>
@@ -119,13 +120,24 @@ namespace Hotfix.GameSystems.SyncLayer
                         Vector3.zero, hit.TargetRemainingHp, hit.IsBlocked, sourceIsPlayer);
                     continue;
                 }
-                // 远程实体：被格挡时沿用既有飘字链路（Damage 已是减免后的值）；远程格挡动画
-                // 无同步通道（表现层只做本地玩家，P4 backlog——见格挡减伤交付报告）
+                // 远程实体：被格挡时改发表现事件（飘字/火花），不再出减免后的伤害数字；
+                // 远程格挡动画仍无同步通道（P4 backlog——见格挡减伤交付报告）
                 var view = _registry.GetView(hit.TargetPlayerId);
                 if (view == null) continue; // 视野外无视图（AOI 下不应发生——防御跳过）
 
                 int viewId = view.GameObject.GetInstanceID();
                 Vector3 hitPos = view.Position + Vector3.up * 1.5f;
+
+                // 玩家/bot 专用；Npc 永不格挡，守卫防未来服务端给 Npc 置 IsBlocked 时吞掉红字
+                if (hit.IsBlocked && view.Kind != (byte)EntityKind.Npc)
+                {
+                    EventBus.Emit(new BlockSucceededEvent(
+                        view.GameObject.GetInstanceID(),
+                        view.Position + Vector3.up * 1.2f,
+                        hitPos));
+                    continue;
+                }
+
                 if (view.Kind == (byte)EntityKind.Npc)
                 {
                     // 怪物走 MonsterTakeDamageEvent：DisplayEventBridge 用它选红字/暴击橙，

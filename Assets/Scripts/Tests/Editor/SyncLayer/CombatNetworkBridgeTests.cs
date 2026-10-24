@@ -233,6 +233,121 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void OnDamageResult_RemoteBlockedTarget_Emits_BlockSucceededEvent_Not_PlayerTakeDamageEvent()
+        {
+            // 远程玩家/bot 被格挡：飘字改为「格挡」，不再出减免后的伤害数字
+            var registry = new RemoteEntityRegistry(_root.transform);
+            registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 2,
+                FieldMask = (ushort)EntityFieldMask.Position,
+                X = 1f, Y = 0f, Z = 2f
+            }, serverTicks: 1_000_000L);
+            var view = registry.GetView(2);
+            Assert.NotNull(view, "视图未创建——ApplySnapshot Position 位应触发");
+
+            BlockSucceededEvent? blockCaptured = null;
+            PlayerTakeDamageEvent? playerCaptured = null;
+            Action<BlockSucceededEvent> blockHandler = e => blockCaptured = e;
+            Action<PlayerTakeDamageEvent> playerHandler = e => playerCaptured = e;
+            EventBus.Subscribe(blockHandler);
+            EventBus.Subscribe(playerHandler);
+            try
+            {
+                var bridge = new CombatNetworkBridge(_client, () => 1, registry);
+                bridge.OnMessage(MessageId.DamageResult, new DamageResult
+                {
+                    SourcePlayerId = 1, SkillId = 20001,
+                    Hits = { new HitEntry { TargetPlayerId = 2, Damage = 3f, IsBlocked = true, TargetRemainingHp = 97f } }
+                });
+                bridge.Update();
+
+                Assert.IsTrue(blockCaptured.HasValue, "远程格挡未发 BlockSucceededEvent");
+                Assert.IsFalse(playerCaptured.HasValue,
+                    "远程格挡不得再发 PlayerTakeDamageEvent（伤害数字会被重复）");
+                Assert.AreEqual(view.GameObject.GetInstanceID(), blockCaptured.Value.EntityId);
+                Assert.AreEqual(view.Position.x, blockCaptured.Value.HitPosition.x, 0.001f);
+                Assert.AreEqual(view.Position.y + 1.2f, blockCaptured.Value.HitPosition.y, 0.001f);
+                Assert.AreEqual(view.Position.z, blockCaptured.Value.HitPosition.z, 0.001f);
+                Assert.AreEqual(view.Position.y + 1.5f, blockCaptured.Value.TextPosition.y, 0.001f);
+            }
+            finally
+            {
+                EventBus.Unsubscribe(blockHandler);
+                EventBus.Unsubscribe(playerHandler);
+            }
+        }
+
+        [Test]
+        public void OnDamageResult_RemoteUnblockedTarget_Does_Not_Emit_BlockSucceededEvent()
+        {
+            // 回归护栏：普通远程命中仍走 PlayerTakeDamageEvent
+            var registry = new RemoteEntityRegistry(_root.transform);
+            registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 2,
+                FieldMask = (ushort)EntityFieldMask.Position,
+                X = 1f, Y = 0f, Z = 2f
+            }, serverTicks: 1_000_000L);
+
+            BlockSucceededEvent? blockCaptured = null;
+            PlayerTakeDamageEvent? playerCaptured = null;
+            Action<BlockSucceededEvent> blockHandler = e => blockCaptured = e;
+            Action<PlayerTakeDamageEvent> playerHandler = e => playerCaptured = e;
+            EventBus.Subscribe(blockHandler);
+            EventBus.Subscribe(playerHandler);
+            try
+            {
+                var bridge = new CombatNetworkBridge(_client, () => 1, registry);
+                bridge.OnMessage(MessageId.DamageResult, new DamageResult
+                {
+                    SourcePlayerId = 1, SkillId = 20001,
+                    Hits = { new HitEntry { TargetPlayerId = 2, Damage = 57.4f, IsBlocked = false, TargetRemainingHp = 42.6f } }
+                });
+                bridge.Update();
+
+                Assert.IsFalse(blockCaptured.HasValue, "非格挡远程命中不得发 BlockSucceededEvent");
+                Assert.IsTrue(playerCaptured.HasValue, "非格挡远程命中必须仍走 PlayerTakeDamageEvent");
+            }
+            finally
+            {
+                EventBus.Unsubscribe(blockHandler);
+                EventBus.Unsubscribe(playerHandler);
+            }
+        }
+
+        [Test]
+        public void OnDamageResult_LocalBlockedTarget_Does_Not_Emit_BlockSucceededEvent()
+        {
+            // 本地格挡由 Sys3CEntry.ApplyServerDamage 发事件；桥不得越权重复发
+            var registry = new RemoteEntityRegistry(_root.transform);
+            int sinkCalls = 0;
+            var bridge = new CombatNetworkBridge(_client, () => 7, registry,
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) => sinkCalls++);
+
+            BlockSucceededEvent? blockCaptured = null;
+            Action<BlockSucceededEvent> blockHandler = e => blockCaptured = e;
+            EventBus.Subscribe(blockHandler);
+            try
+            {
+                bridge.OnMessage(MessageId.DamageResult, new DamageResult
+                {
+                    SourcePlayerId = 1, SkillId = 20001,
+                    Hits = { new HitEntry { TargetPlayerId = 7, Damage = 3f, IsBlocked = true, TargetRemainingHp = 97f } }
+                });
+                bridge.Update();
+
+                Assert.AreEqual(1, sinkCalls, "本地格挡必须走 ApplyServerDamage 注入点");
+                Assert.IsFalse(blockCaptured.HasValue,
+                    "桥不得越权发本地格挡事件（会与 ApplyServerDamage 重复）");
+            }
+            finally
+            {
+                EventBus.Unsubscribe(blockHandler);
+            }
+        }
+
+        [Test]
         public void OnCastBroadcast_Raises_Event()
         {
             var registry = new RemoteEntityRegistry(_root.transform);
