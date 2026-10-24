@@ -159,7 +159,7 @@ namespace Hotfix.GameSystems.Sys3C
                 _cc.StatsAdapter,
                 _cc.StatusControllerAdapter,
                 _cc.PhysicsSystemAdapter,
-                _cc.Heal));
+                Heal));
             _skillCoordinator.SetDashComponent(_dashComponent);
             _skillCoordinator.SetStamina(_stamina);
             _skillCoordinator.OnSkillActivated += HandleSkillActivated;
