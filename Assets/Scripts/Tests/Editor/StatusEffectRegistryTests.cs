@@ -147,6 +147,54 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_registry_real_frame_time_keeps_last_tick()
+        {
+            var effect = new TestHelpers.CountingEffect(3f, isTick: true, interval: 1f);
+
+            _registry.Apply(_target, effect, null);
+            for (int i = 0; i < 200; i++)
+                _registry.Tick(0.016f);
+
+            Assert.AreEqual(3, effect.TickCount);
+        }
+
+        [Test]
+        public void test_registry_refresh_preserves_tick_phase()
+        {
+            var effect = new TestHelpers.CountingEffect(3f, isTick: true, interval: 1f);
+
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(0.5f);
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(0.6f);
+
+            Assert.AreEqual(1, effect.TickCount);
+        }
+
+        [Test]
+        public void test_registry_burn_three_seconds_deals_sixty_damage()
+        {
+            var burn = new BurnEffectData();
+            burn.Initialize(0.2f, 5f, 3f, 1f);
+            var casterGo = new GameObject("StatusCaster");
+            try
+            {
+                var caster = new TestHelpers.FakeTarget(
+                    casterGo.transform, stats: new TestHelpers.FakeStats { AttackPower = 100f });
+
+                _registry.Apply(_target, burn, caster);
+                for (int i = 0; i < 200; i++)
+                    _registry.Tick(0.016f);
+
+                Assert.AreEqual(60f, _target.DotDamageTotal, 0.5f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(casterGo);
+            }
+        }
+
+        [Test]
         public void test_registry_duration_zero_applies_immediately_without_registration()
         {
             var effect = new TestHelpers.CountingEffect(0f);

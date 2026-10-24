@@ -430,6 +430,18 @@ namespace GameSys.EditorTests
             Assert.AreEqual(1, effect.ApplyCount);
             Assert.AreEqual(0, effect.RemoveCount);
         }
+
+        [Test]
+        public void test_registry_real_frame_time_keeps_last_tick()
+        {
+            var effect = new TestHelpers.CountingEffect(3f, isTick: true, interval: 1f);
+
+            _registry.Apply(_target, effect, null);
+            for (int i = 0; i < 200; i++)
+                _registry.Tick(0.016f);
+
+            Assert.AreEqual(3, effect.TickCount);
+        }
     }
 }
 ```
@@ -572,7 +584,7 @@ namespace Hotfix.GameSystems.Skills.Effect
                 if (entry.Effect.IsTickEffect && entry.Effect.TickInterval > 0f)
                 {
                     entry.TimeToNextTick -= step;
-                    while (entry.TimeToNextTick <= 0f)
+                    while (entry.TimeToNextTick <= 1e-3f)
                     {
                         entry.Effect.OnTick(entry.Caster, entry.Target, entry.Stacks);
                         entry.TimeToNextTick += entry.Effect.TickInterval;
@@ -614,7 +626,6 @@ namespace Hotfix.GameSystems.Skills.Effect
         private void Refresh(ActiveEffect entry, EffectData effect, IEffectTarget caster)
         {
             entry.Remaining = effect.Duration;
-            entry.TimeToNextTick = effect.IsTickEffect ? effect.TickInterval : 0f;
             entry.Caster = caster;
             entry.CasterGo = GetGameObject(caster);
         }
@@ -775,6 +786,19 @@ git commit -m "feat(status): 增加状态运行时注册表"
             Assert.AreEqual(0, effect.TickCount);
             Assert.AreEqual(1, effect.RemoveCount);
         }
+
+        [Test]
+        public void test_registry_refresh_preserves_tick_phase()
+        {
+            var effect = new TestHelpers.CountingEffect(3f, isTick: true, interval: 1f);
+
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(0.5f);
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(0.6f);
+
+            Assert.AreEqual(1, effect.TickCount);
+        }
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -806,7 +830,7 @@ git commit -m "feat(status): 增加状态运行时注册表"
             }
 ```
 
-`Tick` 中已有的死亡检查与 `RemoveAt` 保持任务 2 的实现（任务 2 已包含 `IsDead` 分支）。确认 `Refresh` 会重置 `TimeToNextTick`。
+`Tick` 中已有的死亡检查与 `RemoveAt` 保持任务 2 的实现（任务 2 已包含 `IsDead` 分支）。确认 `Refresh` 保留 `TimeToNextTick`（只重置 `Remaining`，不重置 tick 计时器）。
 
 - [ ] **步骤 4：运行测试验证通过**
 

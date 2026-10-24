@@ -108,7 +108,7 @@ namespace Hotfix.GameSystems.Skills.Effect
                 if (entry.Effect.IsTickEffect && entry.Effect.TickInterval > 0f)
                 {
                     entry.TimeToNextTick -= step;
-                    while (entry.TimeToNextTick <= 0f)
+                    while (entry.TimeToNextTick <= 1e-3f)
                     {
                         entry.Effect.OnTick(entry.Caster, entry.Target, entry.Stacks);
                         entry.TimeToNextTick += entry.Effect.TickInterval;
@@ -150,7 +150,6 @@ namespace Hotfix.GameSystems.Skills.Effect
         private void Refresh(ActiveEffect entry, EffectData effect, IEffectTarget caster)
         {
             entry.Remaining = effect.Duration;
-            entry.TimeToNextTick = effect.IsTickEffect ? effect.TickInterval : 0f;
             entry.Caster = caster;
             entry.CasterGo = GetGameObject(caster);
         }

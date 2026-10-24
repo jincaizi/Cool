@@ -289,7 +289,7 @@ private sealed class TargetTint
 
 | 场景 | 行为 |
 |---|---|
-| 重复施加 + `Refresh`（默认） | 重置剩余时间，**不重复 Apply**（避免治疗/伤害重复结算） |
+| 重复施加 + `Refresh`（默认） | 重置剩余时间，**不重复 Apply**（避免治疗/伤害重复结算），**保留 tick 相位**（不重置计时器；否则高频刷新会让 DoT 永不跳） |
 | 重复施加 + `Stack` | 层数 +1（上限 `MaxStacks`），重置剩余时间；灼烧每跳伤害 × 层数 |
 | 重复施加 + `Ignore` | 已存在时直接忽略 |
 | 多个控制类效果 | 只有最后一个控制类效果移除时才 `RemoveStun`；否则用最长剩余时间重新 `AddStun` |
@@ -317,6 +317,9 @@ private sealed class TargetTint
 5. 目标 `IsAlive == false` 后停止 tick 并清理。
 6. 短冰冻到期不解除长冰冻（两个 `StunEffectData`）。
 7. `StackingRule.Refresh` 多次施加只产生一个条目。
+8. 真实帧长（0.016s）下 3s/1s → 恰好 3 次 `OnTick`。
+9. `Refresh` 保留 tick 相位：0.5s 时刷新，0.6s 后仍应 tick 一次。
+10. 灼烧 3s/1s + AttackPower 100 → 累计 60 伤害。
 
 测试替身：实现 `IEffectTarget` + `IDamageable` 的测试类，使用真实 `GameObject` 提供 Transform；用计数型 `EffectData` 子类统计 Apply/OnTick/Remove。
 
@@ -368,3 +371,4 @@ private sealed class TargetTint
 - 状态不同步到远端客户端。
 - 投射物技能（火球）不触发效果。
 - `EffectId` 默认相同（`"freeze"` / `"burn"`）时，同类效果会互相刷新而不是并存；如需多套独立数值，在资产里配置不同 `EffectId`。
+- 灼烧需要手动在技能资产上配置 `BurnEffectData`；本次未改现有技能资产，PlayMode 验收时需临时添加。
