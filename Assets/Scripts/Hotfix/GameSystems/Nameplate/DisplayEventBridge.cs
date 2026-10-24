@@ -26,12 +26,14 @@ namespace Hotfix.GameSystems.Nameplate
         {
             EventBus.Subscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
             EventBus.Subscribe<PlayerTakeDamageEvent>(OnPlayerDamaged);
+            EventBus.Subscribe<MonsterDotDamageEvent>(OnMonsterDotDamaged);
         }
 
         public void Disable()
         {
             EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
             EventBus.Unsubscribe<PlayerTakeDamageEvent>(OnPlayerDamaged);
+            EventBus.Unsubscribe<MonsterDotDamageEvent>(OnMonsterDotDamaged);
         }
 
         private void OnPlayerDamaged(PlayerTakeDamageEvent e)
@@ -44,6 +46,11 @@ namespace Hotfix.GameSystems.Nameplate
         {
             var settings = e.IsCritical ? _critDamageSettings : _damageSettings;
             _floatText.ShowDamageText(e.EntityId, e.HitPosition, settings, e.Damage);
+        }
+
+        private void OnMonsterDotDamaged(MonsterDotDamageEvent e)
+        {
+            _floatText.ShowDamageText(e.EntityId, e.HitPosition, _damageSettings, e.Damage);
         }
     }
 }

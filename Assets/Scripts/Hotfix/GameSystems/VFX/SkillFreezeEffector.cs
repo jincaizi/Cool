@@ -13,6 +13,8 @@ namespace Hotfix.GameSystems.VFX
         // Reuse buffer to avoid per-hit array allocation in OverlapSphere
         private static readonly Collider[] _buffer = new Collider[16];
 
+        private static bool _warnedMissingManager;
+
         private void OnEnable()
         {
             EventBus.Subscribe<SkillHitTargetEvent>(OnHitTarget);
@@ -29,17 +31,27 @@ namespace Hotfix.GameSystems.VFX
         {
             if (!e.IsFullCharge || !WatchesSkill(e.SkillId)) return;
 
+            if (StatusEffectManager.Instance == null)
+            {
+                if (!_warnedMissingManager)
+                {
+                    _warnedMissingManager = true;
+                    Debug.LogError("[SkillFreezeEffector] StatusEffectManager 未挂载，冰冻已跳过");
+                }
+                return;
+            }
+
             int count = Physics.OverlapSphereNonAlloc(e.HitPosition, 2f, _buffer);
             for (int i = 0; i < count; i++)
             {
                 if (_buffer[i].TryGetComponent(out IEffectTarget target))
                 {
-                    var freezeEffect = new StunEffectData
+                    var freezeEffect = new FreezeEffectData
                     {
                         SetDuration = _freezeDuration,
                         SetCanBeCleanse = false
                     };
-                    freezeEffect.Apply(null, target);
+                    StatusEffectManager.Instance.Apply(target, freezeEffect, null);
                     break;
                 }
             }
