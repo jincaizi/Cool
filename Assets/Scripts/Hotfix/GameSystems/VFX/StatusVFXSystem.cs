@@ -77,7 +77,8 @@ namespace Hotfix.GameSystems.VFX
 
             if (state.FreezeCount == 0 && state.BurnCount == 0)
             {
-                state.Tint.Clear();
+                if (state.Target != null)
+                    state.Tint.Clear();
                 _tints.Remove(e.EntityId);
             }
         }

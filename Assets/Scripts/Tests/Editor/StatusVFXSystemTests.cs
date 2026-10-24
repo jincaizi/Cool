@@ -108,5 +108,49 @@ namespace GameSys.EditorTests
             Assert.DoesNotThrow(() => update.Invoke(_system, null));
             Assert.AreEqual(0, tints.Count);
         }
+
+        [Test]
+        public void test_status_vfx_removed_after_target_destroyed_does_not_throw()
+        {
+            var applied = typeof(StatusVFXSystem).GetMethod(
+                "OnApplied", BindingFlags.NonPublic | BindingFlags.Instance);
+            var removed = typeof(StatusVFXSystem).GetMethod(
+                "OnRemoved", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.IsNotNull(applied);
+            Assert.IsNotNull(removed);
+
+            int entityId = _targetGo.GetInstanceID();
+            applied.Invoke(_system, new object[]
+            {
+                new StatusEffectAppliedEvent
+                {
+                    EntityId = entityId,
+                    Target = _targetGo.transform,
+                    EffectType = EffectType.Freeze,
+                    EffectId = "freeze",
+                    Duration = 2f,
+                    Stacks = 1,
+                }
+            });
+
+            var tints = (IDictionary)TestHelpers.GetField(_system, "_tints");
+            Assert.AreEqual(1, tints.Count);
+
+            // 目标销毁后 Removed 事件先于 Update 清理到达，不应再对已销毁 Renderer 染色
+            Object.DestroyImmediate(_targetGo);
+            _targetGo = null;
+
+            Assert.DoesNotThrow(() => removed.Invoke(_system, new object[]
+            {
+                new StatusEffectRemovedEvent
+                {
+                    EntityId = entityId,
+                    Target = null,
+                    EffectType = EffectType.Freeze,
+                    EffectId = "freeze",
+                }
+            }));
+            Assert.AreEqual(0, tints.Count);
+        }
     }
 }
