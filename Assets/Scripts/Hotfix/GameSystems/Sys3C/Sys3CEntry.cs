@@ -154,7 +154,12 @@ namespace Hotfix.GameSystems.Sys3C
 
             _dashComponent = new SkillDashComponent(CharacterController, transform);
 
-            _skillCoordinator = new SkillCoordinator(new SkillOwnerProxy(transform));
+            _skillCoordinator = new SkillCoordinator(new SkillOwnerProxy(
+                transform,
+                _cc.StatsAdapter,
+                _cc.StatusControllerAdapter,
+                _cc.PhysicsSystemAdapter,
+                _cc.Heal));
             _skillCoordinator.SetDashComponent(_dashComponent);
             _skillCoordinator.SetStamina(_stamina);
             _skillCoordinator.OnSkillActivated += HandleSkillActivated;
@@ -952,14 +957,33 @@ namespace Hotfix.GameSystems.Sys3C
     internal sealed class SkillOwnerProxy : IEffectTarget
     {
         private readonly Transform _transform;
+        private readonly IEffectStats _stats;
+        private readonly IStatusController _statusController;
+        private readonly IPhysicsSystem _physicsSystem;
+        private readonly System.Action<float> _heal;
+
         public Transform transform => _transform;
-        public IEffectStats Stats => null;
+        public IEffectStats Stats => _stats;
         public IShieldSystem ShieldSystem => null;
-        public IPhysicsSystem PhysicsSystem => null;
-        public IStatusController StatusController => null;
-        public void Heal(float amount) { }
+        public IPhysicsSystem PhysicsSystem => _physicsSystem;
+        public IStatusController StatusController => _statusController;
+
+        public void Heal(float amount) => _heal?.Invoke(amount);
+
         public void ApplyDamageOverTime(float amount) { }
 
-        public SkillOwnerProxy(Transform t) { _transform = t; }
+        public SkillOwnerProxy(
+            Transform t,
+            IEffectStats stats,
+            IStatusController statusController,
+            IPhysicsSystem physicsSystem,
+            System.Action<float> heal)
+        {
+            _transform = t;
+            _stats = stats;
+            _statusController = statusController;
+            _physicsSystem = physicsSystem;
+            _heal = heal;
+        }
     }
 }

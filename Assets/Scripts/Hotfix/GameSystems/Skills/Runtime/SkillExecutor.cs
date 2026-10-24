@@ -19,6 +19,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
     public class SkillExecutor
     {
         public static bool EnableVFX = false;
+        private static bool _warnedMissingStatusManager;
         private static readonly Collider[] s_HitBuffer = new Collider[32];
         private static readonly Collider[] s_AoeBuffer = new Collider[64];
 
@@ -729,8 +730,29 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             var effect = GetEffect();
             if (effect?.ApplyEffects == null) return;
+
             foreach (var effectData in effect.ApplyEffects)
-                effectData?.Apply(_owner, target);
+            {
+                if (effectData == null) continue;
+
+                if (effectData.Duration > 0f)
+                {
+                    if (StatusEffectManager.Instance != null)
+                    {
+                        StatusEffectManager.Instance.Apply(target, effectData, _owner);
+                    }
+                    else if (!_warnedMissingStatusManager)
+                    {
+                        _warnedMissingStatusManager = true;
+                        Debug.LogError(
+                            "[SkillExecutor] StatusEffectManager 未挂载，带持续时间的效果已跳过");
+                    }
+                }
+                else
+                {
+                    effectData.Apply(_owner, target);
+                }
+            }
         }
 
         // Pooled instance of the release VFX. Re-instantiated only if destroyed.
