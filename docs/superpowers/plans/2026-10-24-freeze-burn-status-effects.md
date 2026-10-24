@@ -734,6 +734,20 @@ git commit -m "feat(status): 增加状态运行时注册表"
         }
 
         [Test]
+        public void test_registry_ignore_does_not_refresh_existing_duration()
+        {
+            var effect = new TestHelpers.CountingEffect(
+                2f, stackingRule: StackingRule.Ignore);
+
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(1f);
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(1.1f);
+
+            Assert.AreEqual(1, effect.RemoveCount);
+        }
+
+        [Test]
         public void test_registry_stack_increments_up_to_max()
         {
             var effect = new TestHelpers.CountingEffect(
@@ -798,7 +812,7 @@ git commit -m "feat(status): 增加状态运行时注册表"
 
 运行：`bash tools/unity-tests.sh EditMode StatusEffectRegistryTests`
 
-预期：PASS（8 个测试）。
+预期：PASS（10 个测试）。
 
 - [ ] **步骤 5：Commit**
 
