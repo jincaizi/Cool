@@ -41,8 +41,19 @@ namespace Hotfix.GameSystems.Skills.Effect
 
             if (existing != null)
             {
-                Refresh(existing, effect, caster);
-                return;
+                switch (effect.StackingRule)
+                {
+                    case StackingRule.Ignore:
+                        return;
+                    case StackingRule.Stack:
+                        existing.Stacks = Mathf.Min(
+                            existing.Stacks + 1, Mathf.Max(1, effect.MaxStacks));
+                        Refresh(existing, effect, caster);
+                        return;
+                    default:
+                        Refresh(existing, effect, caster);
+                        return;
+                }
             }
 
             effect.Apply(caster, target);

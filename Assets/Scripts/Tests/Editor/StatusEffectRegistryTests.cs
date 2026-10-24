@@ -11,6 +11,66 @@ namespace GameSys.EditorTests
         private TestHelpers.FakeStatusController _status;
         private TestHelpers.FakeTarget _target;
 
+        [Test]
+        public void test_registry_refresh_resets_duration_without_reapplying()
+        {
+            var effect = new TestHelpers.CountingEffect(2f);
+
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(1f);
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(1.5f);
+
+            Assert.AreEqual(1, effect.ApplyCount);
+            Assert.AreEqual(0, effect.RemoveCount);
+
+            _registry.Tick(0.6f);
+            Assert.AreEqual(1, effect.RemoveCount);
+        }
+
+        [Test]
+        public void test_registry_ignore_does_not_add_second_entry()
+        {
+            var effect = new TestHelpers.CountingEffect(
+                2f, stackingRule: StackingRule.Ignore);
+
+            _registry.Apply(_target, effect, null);
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(2.1f);
+
+            Assert.AreEqual(1, effect.ApplyCount);
+            Assert.AreEqual(1, effect.RemoveCount);
+        }
+
+        [Test]
+        public void test_registry_stack_increments_up_to_max()
+        {
+            var effect = new TestHelpers.CountingEffect(
+                3f, isTick: true, interval: 1f,
+                stackingRule: StackingRule.Stack, maxStacks: 2);
+
+            _registry.Apply(_target, effect, null);
+            _registry.Apply(_target, effect, null);
+            _registry.Apply(_target, effect, null);
+            _registry.Tick(1f);
+
+            Assert.AreEqual(1, effect.TickCount);
+            Assert.AreEqual(2, effect.LastStacks);
+        }
+
+        [Test]
+        public void test_registry_removes_dead_target()
+        {
+            var effect = new TestHelpers.CountingEffect(10f, isTick: true, interval: 1f);
+
+            _registry.Apply(_target, effect, null);
+            _target.IsAlive = false;
+            _registry.Tick(1f);
+
+            Assert.AreEqual(0, effect.TickCount);
+            Assert.AreEqual(1, effect.RemoveCount);
+        }
+
         [SetUp]
         public void SetUp()
         {
