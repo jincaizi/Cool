@@ -7231,6 +7231,10 @@ MonoBehaviour:
   _critDamageSettings: {fileID: 11400000, guid: 8cce06053e50ad74498ba1d9773dec40, type: 2}
   _playerDamageSettings: {fileID: 11400000, guid: 801f57803152fd5429119ec5acd922e3, type: 2}
   _skillNameSettings: {fileID: 11400000, guid: e82add030c5552c42a8ab7d69ec5bc6f, type: 2}
+  _staminaRingDiameter: 64
+  _staminaRingWidth: 10
+  _staminaRingOffset: {x: 64, y: 24}
+  _staminaRingHeadHeight: 1.7
 --- !u!4 &937939793
 Transform:
   m_ObjectHideFlags: 0
@@ -7442,6 +7446,9 @@ MonoBehaviour:
     Prefab: {fileID: 1931298151966786, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}
   - TemplateId: 2
     Prefab: {fileID: 1524411113276028, guid: e2aafa8770d34a9591b41bedf4e318ba, type: 3}
+  _npcGroundMask:
+    serializedVersion: 2
+    m_Bits: 1
   _showDebugOverlay: 1
 --- !u!4 &940694965
 Transform:
