@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4181ed7593b64e14baffb981a971546f, type: 3}
+  m_Name: SpiderConfig
+  m_EditorClassIdentifier: 
+  MonsterId: spider
+  DisplayName: Spider
+  Prefab: {fileID: 3451747886464063661, guid: abc3ca2db220c4443aa1c89c958fbce9, type: 3}
+  CombatAnimatorController: {fileID: 9100000, guid: 0870aa8a1b2b9244494f657fa487415d, type: 2}
+  MaxHP: 100
+  AttackPower: 20
+  Defense: 10
+  MoveSpeed: 3.5
+  DetectRange: 10
+  LeaveRange: 15
+  AttackRange: 2
+  AttackCooldown: 1.5
+  AttackCooldownVariance: 0.3
+  PatrolRadius: 5
+  PatrolRadiusVariance: 1
+  IdleDuration: 2
+  IdleDurationVariance: 0.5
+  AttackAnimCount: 1
+  AttackWeights:
+  - 1
+  AttackAnimSpeed: 1
+  AttackShape:
+    _targetType: 0
+    _range: 2
+    _angle: 120
+    _angleStart: 0
+    _angleEnd: 90
+    _innerRadius: 0.5
+    _innerAngle: 60
+    _areaRadius: 0
+    _width: 1
+    _stopAtFirst: 0
+    _targetMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    _hitboxTimings:
+    - 0.3
+  AttackDamage:
+    _baseDamage: 0
+    _attackRatio: 1
+    _scalingAttribute: 0
+    _damageType: 0
+    _criticalRateBonus: 0
+    _criticalDamageBonus: 0
+    _isTrueDamage: 0
+    _armorPenetration: 0
+    _knockbackForce: 3
+    _isDOT: 0
+    _tickInterval: 1
+    _totalTicks: 5
+  AttackEffect:
+    _applyEffects: []
+    _knockbackForce: 0
+    _launchForce: 0
+    _stunDuration: 0
+    _statusType: 0
+    _statusDuration: 0
+    _statusValue: 0
+  AttackWindupTime: 0.2
+  AttackRecoveryTime: 0.3
+  HitReactDurations:
+  - 0
+  - 0.3
+  - 0.6
+  - 0.2
+  - 1
+  HitIFrameDuration: 0.15
+  EnableDefend: 0
+  DefendHPThreshold: 0.5
+  DefendChaseTimeThreshold: 3
+  DefendDuration: 2
+  DefendDamageReduction: 0.8
+  DefendAngle: 180
+  DefendBlockCountToCounter: 2
+  DefendCounterDamageMultiplier: 1.5
+  DefendCooldown: 8
+  EnableTaunt: 0
+  TauntChance: 0.6
+  TauntDuration: 1.5
+  AlertRange: 15
+  ChaseAnimIsRun: 1
+  RotationSpeed: 10
+  SpawnMode: 0
+  FixedSpawnPositions: []
+  KnockbackDecay: 0.5
+  DeathKnockbackMultiplier: 1.5
+  LootTable: {fileID: 0}
+  DeathDestroyDelay: 3
+  RingYOffset: 0
+  NameplateData: {fileID: 0}
+

@@ -5,6 +5,7 @@ using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -65,6 +66,98 @@ namespace GameSys.EditorTests
             // 旧的多态效果条目已在迁移时清空，不能留下 null managed reference。
             Assert.IsNotNull(turtle.AttackEffect);
             Assert.AreEqual(0, turtle.AttackEffect.ApplyEffects.Length);
+        }
+
+        [Test]
+        public void test_dogknight_and_spider_configs_have_combat_animator()
+        {
+            var dog = AssetDatabase.LoadAssetAtPath<MonsterConfig>(
+                "Assets/Monstor/DogKnightConfig.asset");
+            var spider = AssetDatabase.LoadAssetAtPath<MonsterConfig>(
+                "Assets/Monstor/SpiderConfig.asset");
+
+            Assert.IsNotNull(dog);
+            Assert.IsNotNull(spider);
+            Assert.IsNotNull(dog.Prefab);
+            Assert.IsNotNull(spider.Prefab);
+            Assert.IsNotNull(dog.CombatAnimatorController);
+            Assert.IsNotNull(spider.CombatAnimatorController);
+            Assert.AreEqual("DogKnightCombat", dog.CombatAnimatorController.name);
+            Assert.AreEqual("SpiderCombat", spider.CombatAnimatorController.name);
+        }
+
+        [Test]
+        public void test_dogknight_and_spider_combat_prefabs_have_gameplay_components()
+        {
+            var dog = AssetDatabase.LoadAssetAtPath<MonsterConfig>(
+                "Assets/Monstor/DogKnightConfig.asset");
+            var spider = AssetDatabase.LoadAssetAtPath<MonsterConfig>(
+                "Assets/Monstor/SpiderConfig.asset");
+            Assert.IsNotNull(dog);
+            Assert.IsNotNull(spider);
+
+            AssertCombatPrefab(dog.Prefab, "DogKnightCombat");
+            AssertCombatPrefab(spider.Prefab, "SpiderCombat");
+        }
+
+        private static void AssertCombatPrefab(GameObject prefab, string expectedName)
+        {
+            Assert.IsNotNull(prefab);
+            Assert.AreEqual(expectedName, prefab.name);
+            Assert.IsNotNull(prefab.GetComponent<MonsterEntity>(), expectedName + " 缺少 MonsterEntity");
+            Assert.IsNotNull(prefab.GetComponent<UnityEngine.AI.NavMeshAgent>(),
+                expectedName + " 缺少 NavMeshAgent");
+            Assert.IsNotNull(prefab.GetComponent<Collider>(), expectedName + " 缺少 Collider");
+            Assert.IsNotNull(prefab.GetComponent<Hotfix.GameSystems.Combat.HitZone>(),
+                expectedName + " 缺少 HitZone");
+
+            var animator = prefab.GetComponent<Animator>();
+            Assert.IsNotNull(animator, expectedName + " 根节点缺少 Animator");
+            Assert.IsNotNull(animator.avatar, expectedName + " 根 Animator 缺少 Avatar");
+        }
+
+        [Test]
+        public void test_dogknight_and_spider_combat_controllers_have_death_states()
+        {
+            var dog = AssetDatabase.LoadAssetAtPath<AnimatorController>(
+                "Assets/Monstor/DogKnight/Animator/DogKnightCombat.controller");
+            var spider = AssetDatabase.LoadAssetAtPath<AnimatorController>(
+                "Assets/Monstor/fantasySpider/SpiderCombat.controller");
+
+            Assert.IsNotNull(dog);
+            Assert.IsNotNull(spider);
+            AssertHasDeath(dog);
+            AssertHasDeath(spider);
+        }
+
+        private static void AssertHasDeath(AnimatorController controller)
+        {
+            bool hasDeathParameter = false;
+            foreach (var parameter in controller.parameters)
+            {
+                if (parameter.name == "Death")
+                {
+                    hasDeathParameter = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(hasDeathParameter, controller.name + " 缺少 Death 参数");
+
+            bool hasDieState = false;
+            foreach (var layer in controller.layers)
+            {
+                foreach (var childState in layer.stateMachine.states)
+                {
+                    if (childState.state.name == "Die" && childState.state.motion != null)
+                    {
+                        hasDieState = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.IsTrue(hasDieState, controller.name + " 缺少 Die 状态或动画");
         }
 
         [Test]
