@@ -67,7 +67,7 @@ namespace GameSys.EditorTests
             public IPhysicsSystem PhysicsSystem => null;
             public IStatusController StatusController { get; }
             public bool IsAlive { get; set; }
-            public int DotDamageTotal { get; private set; }
+            public float DotDamageTotal { get; private set; }
 
             public FakeTarget(
                 Transform t,
@@ -85,7 +85,7 @@ namespace GameSys.EditorTests
 
             public void ApplyDamageOverTime(float amount)
             {
-                DotDamageTotal += Mathf.RoundToInt(amount);
+                DotDamageTotal += amount;
             }
 
             public Transform Transform => transform;
