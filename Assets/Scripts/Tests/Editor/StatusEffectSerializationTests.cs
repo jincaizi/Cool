@@ -32,5 +32,14 @@ namespace GameSys.EditorTests
             Assert.DoesNotThrow(() => effect.Apply(null, target));
             Assert.DoesNotThrow(() => effect.Remove(null, target));
         }
+
+        [Test]
+        public void test_freeze_effect_has_freeze_type_and_default_id()
+        {
+            var effect = new FreezeEffectData();
+
+            Assert.AreEqual(EffectType.Freeze, effect.Type);
+            Assert.AreEqual("freeze", effect.EffectId);
+        }
     }
 }

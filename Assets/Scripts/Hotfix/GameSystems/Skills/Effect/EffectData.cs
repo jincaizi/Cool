@@ -334,4 +334,16 @@ namespace Hotfix.GameSystems.Skills.Effect
             target.StatusController?.RemoveStun();
         }
     }
+
+    [System.Serializable]
+    public class FreezeEffectData : StunEffectData
+    {
+        public FreezeEffectData()
+        {
+            _type = EffectType.Freeze;
+            _effectId = "freeze";
+        }
+
+        public override string GetDisplayName() => $"Freeze: {_duration}s";
+    }
 }
