@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Reflection;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.Sys3C.Core.Events;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -141,6 +143,101 @@ namespace GameSys.PlayModeTests
             ((IDamageable)_entry).TakeDamage(
                 DamageBlock.CreateDefault(50f, 0f), -_entry.transform.forward);
             Assert.AreEqual(35f, _entry.Stamina.Current, 0.01f);
+        }
+
+        [Test]
+        public void test_block_feedback_online_block_emits_block_succeeded_event()
+        {
+            // Arrange
+            BlockSucceededEvent? captured = null;
+            System.Action<BlockSucceededEvent> handler = e => captured = e;
+            EventBus.Subscribe(handler);
+            try
+            {
+                // Act
+                _entry.ApplyServerDamage(10f, Vector3.zero, 90f, isBlocked: true);
+
+                // Assert
+                Assert.IsTrue(captured.HasValue, "联机格挡成功未发 BlockSucceededEvent");
+                Assert.AreEqual(_entry.gameObject.GetInstanceID(), captured.Value.EntityId);
+                Assert.AreEqual(_entry.transform.position.y + 1.5f,
+                    captured.Value.TextPosition.y, 0.001f);
+            }
+            finally
+            {
+                EventBus.Unsubscribe(handler);
+            }
+        }
+
+        [Test]
+        public void test_block_feedback_online_non_blocked_does_not_emit_event()
+        {
+            // Arrange
+            BlockSucceededEvent? captured = null;
+            System.Action<BlockSucceededEvent> handler = e => captured = e;
+            EventBus.Subscribe(handler);
+            try
+            {
+                // Act
+                _entry.ApplyServerDamage(10f, Vector3.zero, 90f, isBlocked: false);
+
+                // Assert
+                Assert.IsFalse(captured.HasValue, "非格挡命中不得发 BlockSucceededEvent");
+            }
+            finally
+            {
+                EventBus.Unsubscribe(handler);
+            }
+        }
+
+        [Test]
+        public void test_block_feedback_offline_block_emits_block_succeeded_event()
+        {
+            // Arrange
+            EnterDefend();
+            BlockSucceededEvent? captured = null;
+            System.Action<BlockSucceededEvent> handler = e => captured = e;
+            EventBus.Subscribe(handler);
+            try
+            {
+                // Act
+                ((IDamageable)_entry).TakeDamage(
+                    DamageBlock.CreateDefault(50f, 0f), -_entry.transform.forward);
+
+                // Assert
+                Assert.IsTrue(captured.HasValue, "单机格挡成功未发 BlockSucceededEvent");
+                Assert.AreEqual(_entry.gameObject.GetInstanceID(), captured.Value.EntityId);
+                Assert.AreEqual(_entry.transform.position.y + 1.5f,
+                    captured.Value.TextPosition.y, 0.001f);
+                Assert.Greater(captured.Value.HitPosition.sqrMagnitude, 0.0001f,
+                    "HitPosition 不得是零向量");
+            }
+            finally
+            {
+                EventBus.Unsubscribe(handler);
+            }
+        }
+
+        [Test]
+        public void test_block_feedback_offline_non_blocked_does_not_emit_event()
+        {
+            // Arrange
+            BlockSucceededEvent? captured = null;
+            System.Action<BlockSucceededEvent> handler = e => captured = e;
+            EventBus.Subscribe(handler);
+            try
+            {
+                // Act：不进入防御，正面受击走普通受击
+                ((IDamageable)_entry).TakeDamage(
+                    DamageBlock.CreateDefault(10f, 0f), -_entry.transform.forward);
+
+                // Assert
+                Assert.IsFalse(captured.HasValue, "未举盾受击不得发 BlockSucceededEvent");
+            }
+            finally
+            {
+                EventBus.Unsubscribe(handler);
+            }
         }
 
         [Test]

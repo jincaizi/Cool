@@ -496,6 +496,15 @@ namespace Hotfix.GameSystems.Sys3C
                 ForceExitDefendByExhaustion();
         }
 
+        /// <summary>格挡成功的纯表现事件（火花/飘字）；不参与结算。</summary>
+        private void EmitBlockSucceeded(Vector3 hitPosition)
+        {
+            EventBus.Emit(new BlockSucceededEvent(
+                gameObject.GetInstanceID(),
+                hitPosition,
+                transform.position + Vector3.up * 1.5f));
+        }
+
         private string _lastSkillTrigger;
         private bool _cleanupInProgress;
         private Skills.Definition.SkillSubState _prevSkillSubState;
@@ -591,8 +600,8 @@ namespace Hotfix.GameSystems.Sys3C
         ///
         /// 格挡分支（<paramref name="isBlocked"/>）：走**格挡受击**表现——复用单机格挡路径
         /// （<c>IDamageable.TakeDamage</c>）同款挂点 <c>HitFSM.EnterDefendHit</c> + Hit 层激活，
-        /// 不新增状态/动画参数；浮字不发（与单机格挡一致：格挡成功本就跳过
-        /// <c>PlayerTakeDamageEvent</c>）。格挡的 15 点精力成本在本分支扣除（以服务端 IsBlocked 为准）。
+        /// 不新增状态/动画参数；不飘伤害数字，改发 <c>BlockSucceededEvent</c>（格挡飘字 + 火花）。
+        /// 格挡的 15 点精力成本在本分支扣除（以服务端 IsBlocked 为准）。
         ///
         /// <paramref name="sourceIsPlayer"/>：来源是玩家或 bot（服务端 <c>DamageResult.SourceKind</c>）。
         /// 仅非格挡、非致死分支据此发 <c>LocalPlayerHitByPlayerEvent</c>（屏幕闪屏）；怪物来源不闪。
@@ -623,6 +632,10 @@ namespace Hotfix.GameSystems.Sys3C
                 _fsmManager.Coordinator.SetActiveLayer(LayerType.Hit);
 
                 ConsumeBlockStamina();
+
+                // 协议无方向字段（hitDirection 恒为零）：举盾时正面朝敌，用正前方近似盾面点
+                EmitBlockSucceeded(
+                    transform.position + Vector3.up * 1.3f + transform.forward * 0.4f);
 
                 if (_currentHP <= 0)
                 {
@@ -714,7 +727,7 @@ namespace Hotfix.GameSystems.Sys3C
                 _fsmManager.ExitDefend();
             }
 
-            // 格挡成功 → 扣精 + 播 DefendHit
+            // 格挡成功 → 扣精 + 播 DefendHit + 表现事件
             if (_cc.IsDefending && wasBlocked)
             {
                 ConsumeBlockStamina();
@@ -724,6 +737,12 @@ namespace Hotfix.GameSystems.Sys3C
                     HitDirection = hitDirection
                 });
                 _fsmManager.Coordinator.SetActiveLayer(LayerType.Hit);
+
+                // 有真实接触点就用接触点；无碰撞箱路径回退到胸前前方，避免零向量
+                Vector3 sparkPosition = resolved.HasContact
+                    ? resolved.HitPoint
+                    : transform.position + Vector3.up * 1.3f + transform.forward * 0.4f;
+                EmitBlockSucceeded(sparkPosition);
             }
 
             // 扣血
