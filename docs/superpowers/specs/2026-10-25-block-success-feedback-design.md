@@ -42,7 +42,7 @@
 | 2 | 联机本地玩家格挡成功同样只做这两件事 | `Sys3C/Sys3CEntry.cs:616-635` |
 | 3 | 本地格挡分支**不发** `PlayerTakeDamageEvent`，所以没有伤害数字、没有受击火花、不闪屏 | `Sys3C/Sys3CEntry.cs:616-635`、`717-727` |
 | 4 | `FloatTextType.Block` 已定义，渲染器已有 Block 漂移分支 | `Nameplate/FloatTextConfig.cs:9`、`FloatTextRenderer.cs:137-145` |
-| 5 | `FloatText_Block.asset` 已存在（金色 `(1,0.84,0)`、28pt、0.6s），但全项目无任何引用 | `Assets/PreRes/Settings/Display/FloatText_Block.asset:15-22` |
+| 5 | `FloatText_Block.asset` 已存在（金色 `(1,0.92,0.12)`、44pt、1.0s、0.3 黑描边），但全项目无任何引用 | `Assets/PreRes/Settings/Display/FloatText_Block.asset:15-25` |
 | 6 | `HitFeedbackSystem` 只订阅 `MonsterTakeDamageEvent` / `PlayerTakeDamageEvent` | `VFX/HitFeedbackSystem.cs:38-48` |
 | 7 | `HitSpark` 支持运行时改 `startColor` 与缩放 | `VFX/HitSpark.cs:17-26` |
 | 8 | `PlayerBodyTint` 只处理 `EntityId == 本地玩家实例ID` 的事件，远程实体不受影响 | `VFX/PlayerBodyTint.cs:60-64` |
