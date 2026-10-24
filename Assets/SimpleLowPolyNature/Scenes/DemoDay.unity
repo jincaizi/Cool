@@ -8099,6 +8099,12 @@ MonoBehaviour:
   - Config: {fileID: 11400000, guid: f5e15c082287de345a8cd42c2144ea3f, type: 2}
     Count: 8
     SpawnRadius: 8
+  - Config: {fileID: 11400000, guid: 5fdf5fe6121943c88423e68941d40e19, type: 2}
+    Count: 1
+    SpawnRadius: 3
+  - Config: {fileID: 11400000, guid: 0e90c69aa4234f75a80f8a114fb141ec, type: 2}
+    Count: 1
+    SpawnRadius: 3
   RespawnDelay: 30
 --- !u!4 &1032188191
 Transform:
