@@ -232,7 +232,7 @@ namespace GameSys.EditorTests
             public IPhysicsSystem PhysicsSystem => null;
             public IStatusController StatusController { get; }
             public bool IsAlive { get; set; }
-            public int DotDamageTotal { get; private set; }
+            public float DotDamageTotal { get; private set; }
 
             public FakeTarget(
                 Transform t,
@@ -250,7 +250,7 @@ namespace GameSys.EditorTests
 
             public void ApplyDamageOverTime(float amount)
             {
-                DotDamageTotal += Mathf.RoundToInt(amount);
+                DotDamageTotal += amount;
             }
 
             public Transform Transform => transform;
@@ -940,7 +940,7 @@ namespace GameSys.EditorTests
 
             burn.OnTick(caster, target, 1);
 
-            Assert.AreEqual(20, target.DotDamageTotal);
+            Assert.AreEqual(20f, target.DotDamageTotal, 0.001f);
         }
 
         [Test]
@@ -952,7 +952,7 @@ namespace GameSys.EditorTests
 
             burn.OnTick(null, target, 1);
 
-            Assert.AreEqual(5, target.DotDamageTotal);
+            Assert.AreEqual(5f, target.DotDamageTotal, 0.001f);
         }
 
         [Test]
@@ -966,7 +966,7 @@ namespace GameSys.EditorTests
 
             burn.OnTick(caster, target, 3);
 
-            Assert.AreEqual(60, target.DotDamageTotal);
+            Assert.AreEqual(60f, target.DotDamageTotal, 0.001f);
         }
     }
 }
