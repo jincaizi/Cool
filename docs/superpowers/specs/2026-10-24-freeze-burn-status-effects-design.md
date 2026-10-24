@@ -177,7 +177,7 @@ foreach (var effectData in effect.ApplyEffects)
 | `Stats` | `_cc.StatsAdapter` |
 | `StatusController` | `_cc.StatusControllerAdapter` |
 | `PhysicsSystem` | `_cc.PhysicsSystemAdapter` |
-| `Heal(float)` | `_cc.Heal(amount)` |
+| `Heal(float)` | `Sys3CEntry.Heal(amount)`（写 `_currentHP`，与 HUD/IsAlive 一致） |
 | `ApplyDamageOverTime(float)` | 空实现（玩家本次不作为目标） |
 
 ### 4.6 怪物接线

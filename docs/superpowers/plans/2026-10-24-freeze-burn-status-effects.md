@@ -1395,7 +1395,7 @@ namespace GameSys.EditorTests
                 _cc.StatsAdapter,
                 _cc.StatusControllerAdapter,
                 _cc.PhysicsSystemAdapter,
-                _cc.Heal));
+                Heal));
 ```
 
 替换文件末尾的 `SkillOwnerProxy`：
