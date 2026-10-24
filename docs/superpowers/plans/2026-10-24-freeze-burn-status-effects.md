@@ -912,7 +912,7 @@ git commit -m "feat(status): 支持叠层与死亡清理"
 
 运行：`bash tools/unity-tests.sh EditMode StatusEffectRegistryTests`
 
-预期：PASS（9 个测试）。
+预期：PASS（11 个测试）。
 
 - [ ] **步骤 5：Commit**
 
