@@ -15,6 +15,7 @@ MonoBehaviour:
   MonsterId: slime
   DisplayName: "\u53F2\u83B1\u59C6"
   Prefab: {fileID: 1931298151966786, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}
+  CombatAnimatorController: {fileID: 9100000, guid: 9bbcf96c9a254c5ba654027c656d7b39, type: 2}
   MaxHP: 100
   AttackPower: 10
   Defense: 5
@@ -39,6 +40,8 @@ MonoBehaviour:
     _angle: 120
     _angleStart: 0
     _angleEnd: 90
+    _innerRadius: 0.5
+    _innerAngle: 60
     _areaRadius: 0
     _width: 1
     _stopAtFirst: 0
@@ -68,6 +71,15 @@ MonoBehaviour:
     _statusType: 0
     _statusDuration: 0
     _statusValue: 0
+  AttackWindupTime: 0.2
+  AttackRecoveryTime: 0.3
+  HitReactDurations:
+  - 0
+  - 0.3
+  - 0.6
+  - 0.2
+  - 1
+  HitIFrameDuration: 0.15
   EnableDefend: 0
   DefendHPThreshold: 0.5
   DefendChaseTimeThreshold: 3
@@ -91,3 +103,7 @@ MonoBehaviour:
   DeathDestroyDelay: 3
   RingYOffset: 0
   NameplateData: {fileID: 11400000, guid: 6aa72c355a9e1634c9ad3bebb8508ae6, type: 2}
+  references:
+    version: 2
+    RefIds: []
+

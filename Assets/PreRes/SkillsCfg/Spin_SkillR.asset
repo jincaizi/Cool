@@ -45,6 +45,8 @@ MonoBehaviour:
     _isDOT: 0
     _tickInterval: 1
     _totalTicks: 5
+  _swordQi: {fileID: 0}
+  _meteor: {fileID: 0}
   _minDuration: 1
   _maxDuration: 3
   _tickInterval: 0.2
@@ -66,7 +68,8 @@ MonoBehaviour:
       m_Bits: 4294967295
     _hitboxTimings: []
   _effect:
-    _applyEffects: []
+    _applyEffects:
+    - rid: 449446828577390592
     _knockbackForce: 4
     _launchForce: 0
     _stunDuration: 0
@@ -80,3 +83,18 @@ MonoBehaviour:
     _hitStopDuration: 0.2
     _showCastingBar: 1
     _castingBarColor: {r: 0, g: 0, b: 1, a: 1}
+  references:
+    version: 2
+    RefIds:
+    - rid: 449446828577390592
+      type: {class: FreezeEffectData, ns: Hotfix.GameSystems.Skills.Effect, asm: GameSys}
+      data:
+        _type: 10
+        _effectId: freeze
+        _duration: 2
+        _maxStacks: 1
+        _stackingRule: 2
+        _isTickEffect: 0
+        _tickInterval: 1
+        _canBeCleanse: 0
+

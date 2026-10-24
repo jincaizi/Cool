@@ -80,6 +80,13 @@ namespace Hotfix.GameSystems.Monster
             _config = config;
             _spawnPoint = spawnPoint;
 
+            // 战斗形态切到 AI 控制器；Npc 视图不调 Init，继续沿用预制体上的 NpcAnimator_*。
+            if (Animator != null && config.CombatAnimatorController != null
+                && Animator.runtimeAnimatorController != config.CombatAnimatorController)
+            {
+                Animator.runtimeAnimatorController = config.CombatAnimatorController;
+            }
+
             PhysicsRegistry.Instance.Register(this, EntityType.Monster);
             EnsurePhysicsCollider();
 

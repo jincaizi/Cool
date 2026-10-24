@@ -22,6 +22,11 @@ namespace Hotfix.GameSystems.Monster
         [Tooltip("怪物预制体")]
         public GameObject Prefab;
 
+        // Combat AnimatorController. Npc views keep the prefab's NpcAnimator_* controller;
+        // MonsterEntity.Init swaps to this one for local AI combat.
+        [Tooltip("战斗形态使用的 AnimatorController；为空则沿用预制体上的控制器")]
+        public RuntimeAnimatorController CombatAnimatorController;
+
         [Header("Stats")]
         // Maximum health points
         [Tooltip("最大生命值")]

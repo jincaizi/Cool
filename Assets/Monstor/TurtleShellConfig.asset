@@ -15,6 +15,7 @@ MonoBehaviour:
   MonsterId: turtleshell
   DisplayName: "\u523A\u80CC\u9F9F"
   Prefab: {fileID: 1524411113276028, guid: e2aafa8770d34a9591b41bedf4e318ba, type: 3}
+  CombatAnimatorController: {fileID: 9100000, guid: 1f68948a5bb74f2fa9e9087a872750e9, type: 2}
   MaxHP: 250
   AttackPower: 8
   Defense: 5
@@ -105,3 +106,5 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+
+
