@@ -141,6 +141,23 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void HitShapeConverter_Projectile_Sends_Zero_Shape()
+        {
+            // 20003 火球是 ProjectileSkillData（无 ShapeBlock）。服务端表项 maxRange/maxAngle=0，
+            // 客户端必须发**零形状**；而 new ShapeBlock() 的默认不是零（Range=2/Angle=120/…），
+            // 曾让服务端以 shape-tampered 拒掉每一次火球（2026-11-01 浏览器 E2E）。
+            var fireball = UnityEditor.AssetDatabase.LoadAssetAtPath<Hotfix.GameSystems.Skills.Data.ProjectileSkillData>(
+                "Assets/PreRes/SkillsCfg/Fireball_SkillQ.asset");
+            Assert.NotNull(fireball, "Fireball_SkillQ.asset 未找到——PreRes 路径核对");
+
+            var shape = HitShapeConverter.FromSkillData(fireball);
+            Assert.AreEqual(0, shape.ShapeType);
+            Assert.AreEqual(0f, shape.Range, 0.001f);
+            Assert.AreEqual(0f, shape.Angle, 0.001f);
+            Assert.AreEqual(0f, shape.AreaRadius, 0.001f);
+        }
+
+        [Test]
         public void OnDamageResult_LocalTarget_Invokes_Damage_Sink()
         {
             var registry = new RemoteEntityRegistry(_root.transform);

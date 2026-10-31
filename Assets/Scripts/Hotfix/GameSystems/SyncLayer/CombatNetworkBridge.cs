@@ -201,6 +201,12 @@ namespace Hotfix.GameSystems.SyncLayer
                 ?? (data as SpinSkillData)?.Shape;
 
         public static HitShape FromSkillData(SkillData data)
-            => FromShapeBlock(GetShape(data) ?? new ShapeBlock());
+        {
+            var block = GetShape(data);
+            // 无形状技能（ProjectileSkillData）必须发**零形状**：服务端表项 maxRange/maxAngle=0，
+            // 任何非零值都会被判 shape-tampered。而 `new ShapeBlock()` 的字段默认值不是零
+            // （Range=2/Angle=120/…），2026-11-01 浏览器 E2E 里火球正是因此被服务端拒掉。
+            return block == null ? new HitShape() : FromShapeBlock(block);
+        }
     }
 }
