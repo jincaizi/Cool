@@ -6,6 +6,7 @@ using Cool.Protocol;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Sys3C.FSM;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -257,6 +258,61 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
             Assert.AreEqual(0.426f, view!.Targetable.HPPercent, 0.001f,
                 "Targetable 血条数据必须用服务端余血/最大血量");
+        }
+
+        [Test]
+        public void OnDamageResult_RemotePlayerBlocked_Plays_DefendHit_On_Remote_Animator()
+        {
+            // 任务 9：远程真人被格挡要有受击动画（DefendHit）——此前只有本地玩家有
+            var registry = new RemoteEntityRegistry(_root.transform);
+            registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 2,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                X = 1f, Y = 0f, Z = 2f, Kind = (byte)EntityKind.Player
+            }, serverTicks: 1_000_000L);
+            var view = registry.GetView(2);
+            Assert.NotNull(view, "视图未创建");
+            var animator = view!.GameObject.AddComponent<RemoteEntityAnimator>();
+            view.Animator = animator;   // internal setter（InternalsVisibleTo）
+
+            var bridge = new CombatNetworkBridge(_client, () => 1, registry);
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 1, SkillId = 20001,
+                Hits = { new HitEntry { TargetPlayerId = 2, Damage = 3f, IsBlocked = true, TargetRemainingHp = 97f } }
+            });
+            bridge.Update();
+
+            Assert.AreEqual((int)HitState.DefendHit, animator.LastHitState,
+                "远程玩家被格挡必须播 DefendHit（格挡分支在 PlayHit 之后 continue）");
+        }
+
+        [Test]
+        public void OnDamageResult_RemotePlayerUnblocked_Plays_Hit_On_Remote_Animator()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 2,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                X = 1f, Y = 0f, Z = 2f, Kind = (byte)EntityKind.Player
+            }, serverTicks: 1_000_000L);
+            var view = registry.GetView(2);
+            Assert.NotNull(view, "视图未创建");
+            var animator = view!.GameObject.AddComponent<RemoteEntityAnimator>();
+            view.Animator = animator;
+
+            var bridge = new CombatNetworkBridge(_client, () => 1, registry);
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 1, SkillId = 20001,
+                Hits = { new HitEntry { TargetPlayerId = 2, Damage = 57.4f, IsBlocked = false, TargetRemainingHp = 42.6f } }
+            });
+            bridge.Update();
+
+            Assert.AreEqual((int)HitState.Hit, animator.LastHitState,
+                "普通受击必须有远程受击动画");
         }
 
         [Test]

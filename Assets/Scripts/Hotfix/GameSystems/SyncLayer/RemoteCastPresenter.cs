@@ -75,24 +75,32 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly SkillPresentationCatalog? _catalog;
         private readonly Func<SkillData, Vector3, Vector3, IRemoteProjectileVisual?>? _projectileFactory;
         private readonly Action<GameObject, Vector3, Quaternion>? _castVfxSpawner;
+        private readonly Action<GameObject, Vector3, Quaternion>? _releaseVfxSpawner;
+        private readonly Action<MeteorConfig, DamageBlock, Vector3>? _meteorSpawner;
         private readonly List<Tracked> _tracked = new List<Tracked>();
 
         /// <param name="registry">远程视图来源；为 null 时只走测试接缝（EditMode 假视觉）</param>
         /// <param name="catalog">技能表现目录；为 null 时 OnCastBroadcast 直接返回</param>
         /// <param name="projectileFactory">测试注入；留空走 FireballSpawner/SwordQiSpawner</param>
         /// <param name="castVfxSpawner">测试注入；留空走一次性实例化</param>
+        /// <param name="releaseVfxSpawner">测试注入；留空走一次性实例化（20004 落点释放特效）</param>
+        /// <param name="meteorSpawner">测试注入；留空走 MeteorSpawner（30001 落点陨石）</param>
         public RemoteCastPresenter(
             RemoteEntityRegistry? registry,
             long localPlayerId,
             SkillPresentationCatalog? catalog,
             Func<SkillData, Vector3, Vector3, IRemoteProjectileVisual?>? projectileFactory = null,
-            Action<GameObject, Vector3, Quaternion>? castVfxSpawner = null)
+            Action<GameObject, Vector3, Quaternion>? castVfxSpawner = null,
+            Action<GameObject, Vector3, Quaternion>? releaseVfxSpawner = null,
+            Action<MeteorConfig, DamageBlock, Vector3>? meteorSpawner = null)
         {
             _registry = registry;
             _localPlayerId = localPlayerId;
             _catalog = catalog;
             _projectileFactory = projectileFactory;
             _castVfxSpawner = castVfxSpawner;
+            _releaseVfxSpawner = releaseVfxSpawner;
+            _meteorSpawner = meteorSpawner;
         }
 
         /// <summary>收到远程玩家的施法广播（CombatNetworkBridge.Update 主线程调用）。</summary>
@@ -111,19 +119,24 @@ namespace Hotfix.GameSystems.SyncLayer
 
             var presentation = GetPresentation(data);
             if (presentation?.CastVFX != null)
-                (_castVfxSpawner ?? DefaultCastVfx)(presentation.CastVFX, view.Position, view.Rotation);
+                (_castVfxSpawner ?? DefaultVfxSpawner)(presentation.CastVFX, view.Position, view.Rotation);
 
-            var visual = (_projectileFactory ?? DefaultFactory)(
-                data, view.Position, view.Rotation * Vector3.forward);
+            // 起点与本地 SkillExecutor 同源：脚底 + 按朝向旋转的资产偏移
+            // （火球缺了它会把地面算低 1.2m，剑气会整段在脚踝高度）。
+            Vector3 forward = view.Rotation * Vector3.forward;
+            Vector3 origin = ComputeProjectileOrigin(data, view.Position, forward);
+            var visual = (_projectileFactory ?? DefaultFactory)(data, origin, forward);
             if (visual != null)
                 _tracked.Add(new Tracked(broadcast.CasterPlayerId, broadcast.SkillId, visual));
 
             // 落点类技能没有飞行体：在服务端给定的落点直接生成表现
             var impact = new Vector3(broadcast.ImpactX, broadcast.ImpactY, broadcast.ImpactZ);
             if (data is ChargedSkillData && presentation?.ReleaseVFX != null)
-                SpawnVfx(presentation.ReleaseVFX, impact, Quaternion.identity);
+                (_releaseVfxSpawner ?? DefaultVfxSpawner)(
+                    presentation.ReleaseVFX, impact, Quaternion.identity);
             if (data.Meteor != null)
-                MeteorSpawner.Spawn(data.Meteor, data.Damage?.Clone(), impact);
+                (_meteorSpawner ?? MeteorSpawner.Spawn)(
+                    data.Meteor, data.Damage?.Clone(), impact);
         }
 
         /// <summary>远程伤害结果：对齐投射物停点/爆炸（本地施法者由本地执行器负责）。</summary>
@@ -176,6 +189,30 @@ namespace Hotfix.GameSystems.SyncLayer
 
         internal void ApplyDamageForTest(DamageResult result) => OnDamageResult(result);
 
+        /// <summary>跟踪表条目数（测试用于验证 Update 的清理与"普通命中不消费"）。</summary>
+        internal int TrackedCountForTest => _tracked.Count;
+
+        /// <summary>
+        /// 投射物起点：与本地 `SkillExecutor` 同源（`owner.position + TransformDirection(SpawnOffset)`）。
+        /// 只看平面朝向——远程视图的 yaw 只绕 Y，压平后仍等价；传零向量时退化为不旋转。
+        /// </summary>
+        internal static Vector3 ComputeProjectileOrigin(SkillData data, Vector3 position, Vector3 forward)
+        {
+            Vector3 offset = Vector3.zero;
+            if (data.SwordQi != null)
+                offset = data.SwordQi.SpawnOffset;
+            else if (data is ProjectileSkillData projectile)
+                offset = projectile.SpawnOffset;
+
+            if (offset == Vector3.zero) return position;
+
+            var flat = new Vector3(forward.x, 0f, forward.z);
+            Quaternion rotation = flat.sqrMagnitude > 0.0001f
+                ? Quaternion.LookRotation(flat.normalized, Vector3.up)
+                : Quaternion.identity;
+            return position + rotation * offset;
+        }
+
         private Tracked? FindEarliestActive(long casterId, int skillId)
         {
             foreach (var tracked in _tracked)
@@ -211,11 +248,8 @@ namespace Hotfix.GameSystems.SyncLayer
             return null;
         }
 
-        private static void DefaultCastVfx(GameObject prefab, Vector3 position, Quaternion rotation)
-            => SpawnVfx(prefab, position, rotation);
-
         /// <summary>一次性表现：实例化 + 自动销毁（与本地 SkillExecutor 的 ReleaseVFX 同寿命）。</summary>
-        private static void SpawnVfx(GameObject prefab, Vector3 position, Quaternion rotation)
+        private static void DefaultVfxSpawner(GameObject prefab, Vector3 position, Quaternion rotation)
         {
             if (prefab == null) return;
             var vfx = UnityEngine.Object.Instantiate(prefab, position, rotation);

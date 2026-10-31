@@ -123,7 +123,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     continue;
                 }
                 // 远程实体：被格挡时改发表现事件（飘字/火花），不再出减免后的伤害数字；
-                // 远程格挡动画仍无同步通道（P4 backlog——见格挡减伤交付报告）
+                // 远程真人的格挡受击动画已由上面的 PlayHit(IsBlocked) 触发（DefendHit）
                 var view = _registry.GetView(hit.TargetPlayerId);
                 if (view == null) continue; // 视野外无视图（AOI 下不应发生——防御跳过）
 

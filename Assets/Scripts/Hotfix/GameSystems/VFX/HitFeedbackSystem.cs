@@ -53,7 +53,8 @@ namespace Hotfix.GameSystems.VFX
 
         private void OnMonsterHit(MonsterTakeDamageEvent e)
         {
-            // 第三人也要看到命中火花；镜头震动/顿帧/命中粒子仍由各自系统的 IsLocalSource 守卫
+            // 第三人也要看到命中火花（只放火花）：镜头震动（CameraShakeManager）与命中粒子
+            // （HitParticleController）仍各自按 IsLocalSource 过滤；HitStopManager 的顿帧行为不在本任务修改范围
             Spawn(e.HitPosition, e.Part, e.ElementColor, e.IsCritical, e.SkillId);
         }
 
