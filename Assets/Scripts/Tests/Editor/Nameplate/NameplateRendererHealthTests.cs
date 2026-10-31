@@ -66,6 +66,25 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void Health_Template_Sizes_Name_Row_To_Content()
+        {
+            _renderer.RegisterWithHealth(9, CreateOwner("Owner"), new NameplateConfig("Wolf", showHPBar: true));
+
+            var root = _canvasGo.transform.Find("NameplateHealth") as RectTransform;
+            var nameRow = _canvasGo.transform.Find("NameplateHealth/NameRow") as RectTransform;
+            Assert.IsNotNull(root, "带血条模板根必须有 RectTransform");
+            Assert.IsNotNull(nameRow, "带血条模板必须有 NameRow");
+
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(root!);
+
+            Assert.LessOrEqual(nameRow!.rect.height, 40f,
+                "NameRow 高度应由名字/图标内容决定，而不是 RectTransform 默认 100");
+            Assert.AreEqual(nameRow.rect.height + 2f + 6f, root.rect.height, 2f,
+                "根高度 = 名字行 + spacing(2) + 血条(6)");
+        }
+
+        [Test]
         public void Pool_Reuse_Resets_Fill_Amount_And_Color()
         {
             // 第一个实体把血条打到 40% 后离开（Unregister → Return 入 _healthPool）

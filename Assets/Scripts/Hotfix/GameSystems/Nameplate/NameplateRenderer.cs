@@ -341,14 +341,15 @@ namespace Hotfix.GameSystems.Nameplate
 
             var rowLayout = nameRow.AddComponent<HorizontalLayoutGroup>();
             rowLayout.childAlignment = TextAnchor.MiddleCenter;
-            rowLayout.childControlWidth = false;
-            rowLayout.childControlHeight = false;
+            // **必须 true**：false 时首选尺寸取子对象 sizeDelta（TMP 默认约 100×100），
+            // ContentSizeFitter 会把名字行撑成 100 高，血条被顶到名字下方 ~100px。
+            rowLayout.childControlWidth = true;
+            rowLayout.childControlHeight = true;
             rowLayout.childForceExpandWidth = false;
             rowLayout.childForceExpandHeight = false;
             rowLayout.spacing = 4f;
 
-            // 根布局 childControlHeight=false，需要 NameRow 自报首选尺寸；否则其 RectTransform
-            // 保持默认 100×100，根高度被撑大、血条离头顶过远。
+            // 与 childControl=true 配合：名字行高度由 TMP 首选高度（约 18-24px）决定。
             var rowFitter = nameRow.AddComponent<ContentSizeFitter>();
             rowFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             rowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
