@@ -337,12 +337,7 @@ namespace KcpServer
         {
             foreach (var p in _entityStore.All)
             {
-                if (!p.IsAlive)
-                {
-                    p.MarkDead(tick);
-                    continue;
-                }
-                if (!p.TryRespawn(tick, TickIntervalMs)) continue;
+                if (!AdvanceRespawn(p, tick, TickIntervalMs)) continue;
 
                 // 只发给**有会话**的实体（bot 没有 session，没人可通知）
                 if (!p.IsLoggedIn) continue;
@@ -351,6 +346,18 @@ namespace KcpServer
                 _ = SendToSessionAsync(session, MessageId.RespawnNotice,
                     new RespawnNotice { Hp = p.Hp, Tick = tick });
             }
+        }
+
+        /// <summary>
+        /// 单个实体的复活推进（纯逻辑，供 TickRespawns 与回归测试共用）：死人先打死亡 tick，
+        /// 到点再复活。**两步都必须走**——只 MarkDead 不 TryRespawn 会让 8 秒复活永不发生
+        /// （2026-11-01 浏览器 E2E 实测：受害者收到死亡判定后 15 秒等不到 `RespawnNotice`，
+        /// 客户端兜底掉回选人界面）。
+        /// </summary>
+        internal static bool AdvanceRespawn(PlayerState p, long tick, uint tickMs)
+        {
+            if (!p.IsAlive) p.MarkDead(tick);
+            return p.TryRespawn(tick, tickMs);
         }
 
         /// <summary>每 tick 为各在线 observer 组装并广播其 AOI 可见快照（带节拍/静止保活）</summary>

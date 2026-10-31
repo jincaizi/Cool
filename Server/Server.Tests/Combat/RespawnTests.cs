@@ -35,6 +35,31 @@ namespace KcpServer.Tests
             Assert.False(p.TryRespawn(999999, TickMs));
         }
 
+        /// <summary>
+        /// 主循环扫描（不只是 PlayerState 本身）必须能把死人推到复活。旧实现是
+        /// `if (!IsAlive) { MarkDead; continue; }`——`continue` 让 TryRespawn 永不执行，
+        /// 单测只测 PlayerState 时全绿，线上却永远不复活。
+        /// </summary>
+        [Fact]
+        public void Dead_Player_Respawns_Through_The_Tick_Sweep()
+        {
+            var p = new PlayerState(1) { PlayerName = "A" };
+            p.ApplyDamage(150f);
+
+            const long deadTick = 1000;
+            Assert.False(Server3C.AdvanceRespawn(p, deadTick, TickMs));        // 第一遍：打死亡标记
+            Assert.False(p.IsAlive);
+
+            Assert.False(Server3C.AdvanceRespawn(p, deadTick + 121, TickMs));  // 8 秒前一个 tick
+            Assert.False(p.IsAlive);
+
+            Assert.True(Server3C.AdvanceRespawn(p, deadTick + 122, TickMs));   // 到点：复活
+            Assert.True(p.IsAlive);
+            Assert.Equal(p.MaxHp, p.Hp, 3);
+
+            Assert.False(Server3C.AdvanceRespawn(p, deadTick + 200, TickMs));  // 活着不再触发
+        }
+
         [Fact]
         public void Respawn_Does_Not_Fire_Twice()
         {
