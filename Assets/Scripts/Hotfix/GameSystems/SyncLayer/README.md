@@ -93,16 +93,30 @@ PlayMode：`RemoteRenderBranchTests`、`RemoteHitSnapshotPersistenceTests`（D6�
 快照不清受击表现）、`MovementSyncTests`、`CombatSyncTests`、`TwoClientWorldTests`、
 `ThreeClientCombatConsistencyTests`（A 打 B、C 旁观的 DamageResult 与 Targetable 余血一致性）。
 
-**未执行的人工/集成验收**（2026-10-31 分支审查登记，不能当作已通过）：
+**人工/集成验收**（2026-11-01 浏览器 E2E 更新；证据在 `production/verify/e2e/`，该目录被 gitignore）：
 
-- B 死亡 → C 旁观到 `Death` → `Down` → 8 秒后 `GetUp` 的 PlayMode 场景验收**未执行**；
-- A 打怪 → C 观察怪物血条 / 受击 / 死亡的 PlayMode 验收**未执行**；
-- 浏览器 E2E 全部**未执行**，清单见
+已执行：
+
+- **观察者扩播**：A 打 B 时，施法者 / 受击者 / 观察者收到同一批 `CastBroadcast` 与
+  `DamageResult`，伤害与余血逐值一致；观察端看到伤害数字与命中火花。
+- **目标锁定**：移动端「切换目标」后目标面板 + 选中环出现；`CastRequest.TargetPlayerId`
+  随包上线，服务端命中该锁定目标。
+- **死亡 → 复活**：观察端看到受击与倒地；受害者约 8 秒后收到 `RespawnNotice` 并复活。
+  修复前服务端 `TickRespawns` 对死者 `continue`、`TryRespawn` 永不执行——受害者等 15 秒
+  无通知后掉回选人界面；已由 `7327d89` 修复，回归测试
+  `RespawnTests.Dead_Player_Respawns_Through_The_Tick_Sweep`。**起身姿势本身未单独截帧**
+  （受害者复活时传送回出生点、与其他玩家重叠）；状态映射仍由
+  `RemoteEntityAnimatorContractTests` 在真实控制器上覆盖。
+- **390px 竖屏**：移动 UA + 390×844 视口下「切换目标」按钮与技能键不重叠。
+
+仍未执行：
+
+- E2E 第 2 条（远程施法不打断本地技能）与第 4 条（火球在服务端命中点爆炸 / 被格挡的剑气
+  在停点停下）未做视觉验证；
+- A 打怪 → C 观察怪物血条 / 受击 / 死亡的验收未执行；
+- 浏览器 E2E 清单其余条目见
   [`task-12-report.md`](../../../../../.superpowers/sdd/2026-10-31-multiplayer-combat-consistency/task-12-report.md)
   第 5 节。
-
-上述死亡/起身的**状态映射**已由 `RemoteEntityAnimatorContractTests` 在真实控制器上覆盖，
-但"服务端 8 秒复活 + 三端网络链路"的端到端表现仍需人工或真实三客户端测试补证。
 
 ```bash
 bash tools/unity-tests.sh EditMode RemoteTierPolicyTests
