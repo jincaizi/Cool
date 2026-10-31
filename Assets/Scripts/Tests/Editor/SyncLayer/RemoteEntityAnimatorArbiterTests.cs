@@ -127,9 +127,77 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         {
             _driver.ApplySnapshotState(dead: true);
             _driver.Tick(0.71f);
+            Assert.AreEqual((int)HitState.Down, _animator.GetInteger("HitState"));
+
+            // 模拟 FullRoot 重新启用：Animator 状态与层权重被重置
+            _animator.SetInteger("HitState", 0);
+            _driver.ResetLayerWeights();
+            Assert.AreEqual(0, _animator.GetInteger("HitState"));
+
             _driver.Reapply();
             Assert.AreEqual((int)HitState.Down, _animator.GetInteger("HitState"));
             Assert.AreEqual(1f, _animator.GetLayerWeight(AnimHashes.HitLayerIndex), 0.001f);
+        }
+
+        [Test]
+        public void Reapply_Replays_Defend_After_A_Tier_Upgrade()
+        {
+            _driver.SetDefending(true);
+            Assert.AreEqual(1f, _animator.GetLayerWeight(AnimHashes.DefendLayerIndex), 0.001f,
+                "前置：格挡姿态已写出");
+
+            // 模拟 FullRoot 重新启用：Animator 参数与层权重被重置
+            _animator.SetBool("IsDefending", false);
+            _driver.ResetLayerWeights();
+            Assert.IsFalse(_animator.GetBool("IsDefending"));
+            Assert.AreEqual(0f, _animator.GetLayerWeight(AnimHashes.DefendLayerIndex), 0.001f);
+
+            _driver.Reapply();
+            Assert.AreEqual(1f, _animator.GetLayerWeight(AnimHashes.DefendLayerIndex), 0.001f);
+            Assert.IsTrue(_animator.GetBool("IsDefending"));
+        }
+
+        [Test]
+        public void Death_And_Down_Ignore_PlayHit_And_PlayAttack()
+        {
+            _driver.ApplySnapshotState(dead: true);
+
+            _driver.PlayHit(blocked: false, duration: 0.5f);
+            _driver.PlayAttack("Attack", 0.5f);
+            Assert.AreEqual((int)HitState.Death, _animator.GetInteger("HitState"),
+                "Death 霸体：受击/攻击都不得改写表现");
+            Assert.AreEqual(1f, _animator.GetLayerWeight(AnimHashes.HitLayerIndex), 0.001f);
+            Assert.AreEqual(0f, _animator.GetLayerWeight(AnimHashes.AttackLayerIndex), 0.001f);
+
+            _driver.Tick(0.71f);   // Falling → Down
+            Assert.AreEqual((int)HitState.Down, _animator.GetInteger("HitState"));
+
+            _driver.PlayHit(blocked: true, duration: 0.5f);
+            _driver.PlayAttack("Attack", 0.5f);
+            Assert.AreEqual((int)HitState.Down, _animator.GetInteger("HitState"),
+                "Down 霸体：受击/攻击都不得改写表现");
+            Assert.AreEqual(1f, _animator.GetLayerWeight(AnimHashes.HitLayerIndex), 0.001f);
+            Assert.AreEqual(0f, _animator.GetLayerWeight(AnimHashes.AttackLayerIndex), 0.001f);
+        }
+
+        [Test]
+        public void GetUp_Is_Interrupted_By_PlayAttack()
+        {
+            _driver.ApplySnapshotState(dead: true);
+            _driver.Tick(0.71f);
+            _driver.ApplySnapshotState(dead: false);
+            Assert.AreEqual((int)HitState.GetUp, _animator.GetInteger("HitState"),
+                "前置：复活先进入 GetUp");
+
+            _driver.PlayAttack("Attack", 0.5f);
+            // `HitState` 整型参数只在 Hit 层有权重时被控制器消费；攻击接管后 Hit 层已被压到 0，
+            // 旧整型值保留是既有设计（不额外写参数）。实际表现看层权重，仲裁结果看 LastHitState。
+            Assert.AreNotEqual((int)HitState.GetUp, _driver.LastHitState,
+                "GetUp 非霸体：攻击必须能打断起身（仲裁结果不再是 GetUp）");
+            Assert.AreEqual(1f, _animator.GetLayerWeight(AnimHashes.AttackLayerIndex), 0.001f,
+                "攻击层必须接管表现");
+            Assert.AreEqual(0f, _animator.GetLayerWeight(AnimHashes.HitLayerIndex), 0.001f,
+                "GetUp 的 Hit 层必须让位给攻击");
         }
 
         [Test]
