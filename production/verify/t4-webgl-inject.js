@@ -39,6 +39,17 @@
         window.__sentHist[id] = (window.__sentHist[id] || 0) + 1;
         (window.__sentIds = window.__sentIds || []).push(id);
         if (window.__sentIds.length > 400) window.__sentIds.shift();
+        // 2026-11-01 E2E：留存 CastRequest(300) 的原始帧——目标锁定的 TargetPlayerId
+        // 必须能从线上字节读出来，而不是只看"发过一条 300"。上限 100 帧。
+        if (id === 300) {
+          window.__rawCastRequests = window.__rawCastRequests || [];
+          window.__rawCastRequests.push({
+            t: Date.now(),
+            hex: Array.prototype.slice.call(u)
+              .map(function (b) { return b.toString(16).padStart(2, '0'); }).join('')
+          });
+          if (window.__rawCastRequests.length > 100) window.__rawCastRequests.shift();
+        }
       }
     } catch (e) { window.__sentErr = String(e); }
     return origSend.call(this, data);
@@ -72,6 +83,15 @@
                   hex: Array.prototype.slice.call(u).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('')
                 });
                 if (window.__rawFrames.length > 300) window.__rawFrames.shift();
+              }
+              // 2026-11-01 E2E：世界快照（110）留最近 3 帧，离线解码实体位置。
+              if (id === 110) {
+                window.__rawSnapshots = window.__rawSnapshots || [];
+                window.__rawSnapshots.push({
+                  t: Date.now(),
+                  hex: Array.prototype.slice.call(u).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('')
+                });
+                if (window.__rawSnapshots.length > 3) window.__rawSnapshots.shift();
               }
             }
           } catch (e) { window.__recvErr = String(e); }

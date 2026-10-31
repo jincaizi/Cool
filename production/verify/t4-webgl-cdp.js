@@ -170,6 +170,12 @@ async function main() {
     if (kind === 'sleep') {
       console.log('... sleep ' + arg + 'ms');
       await sleep(Number(arg));
+    } else if (kind === 'viewport') {
+      // 2026-11-01 E2E：会话开头把视口写死为 1280x800，--window-size 因此不生效。
+      // 这一步按需覆盖（手机竖屏 390x844），后续步骤与截图都按这个尺寸走。
+      const [w, h] = arg.split('x').map(Number);
+      await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: true });
+      console.log('VIEWPORT ' + w + 'x' + h);
     } else if (kind === 'eval') {
       console.log('EVAL ' + arg + '\n  => ' + JSON.stringify(await evaluate(arg)));
     } else if (kind === 'shot') {
