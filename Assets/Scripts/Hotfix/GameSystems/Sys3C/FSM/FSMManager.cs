@@ -55,9 +55,7 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             _hitFSM.OnHitComplete += HandleHitComplete;
             _hitFSM.OnDeathComplete += HandleDeathComplete;
 
-            BaseStateBehaviour.SetCallback(HandleAnimationCompleted);
-            AttackStateBehaviour.SetCallback(HandleAnimationCompleted);
-            HitStateBehaviour.SetCallback(HandleHitAnimationCompleted);
+            AnimationCallbackRegistry.Register(_animator, HandleAnimationCompleted, HandleHitAnimationCompleted);
         }
 
         public void Update(float deltaTime)

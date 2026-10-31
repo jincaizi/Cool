@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
@@ -9,26 +8,15 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
         private static readonly int HASH_JumpAir = Animator.StringToHash("JumpAir");
         private static readonly int HASH_JumpEnd = Animator.StringToHash("JumpEnd");
 
-        private static Action<string> _onAnimationCompleted;
-
-        public static void SetCallback(Action<string> callback)
-        {
-            _onAnimationCompleted = callback;
-        }
-
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
         }
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if (stateInfo.shortNameHash == HASH_JumpEnd)
-            {
-                if (stateInfo.normalizedTime >= 0.9f)
-                {
-                    _onAnimationCompleted?.Invoke("JumpEnd");
-                }
-            }
+            if (!AnimationCallbackRegistry.TryGet(animator, out var entry)) return;
+            if (stateInfo.shortNameHash == HASH_JumpEnd && stateInfo.normalizedTime >= 0.9f)
+                entry.Attack?.Invoke("JumpEnd");
         }
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

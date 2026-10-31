@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
@@ -7,13 +6,6 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
     {
         private static readonly int HASH_Attack1 = Animator.StringToHash("BaseAttack");
         private static readonly int HASH_Attack2 = Animator.StringToHash("Attack02");
-
-        private static Action<string> _onAnimationCompleted;
-
-        public static void SetCallback(Action<string> callback)
-        {
-            _onAnimationCompleted = callback;
-        }
 
         private bool IsPlayingClip(AnimatorStateInfo stateInfo)
         {
@@ -36,10 +28,9 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            if (!AnimationCallbackRegistry.TryGet(animator, out var entry)) return;
             if (IsPlayingClip(stateInfo) && stateInfo.normalizedTime >= 0.95f && stateInfo.normalizedTime < 1.1f)
-            {
-                _onAnimationCompleted?.Invoke(GetStateName(stateInfo));
-            }
+                entry.Attack?.Invoke(GetStateName(stateInfo));
         }
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -49,10 +40,8 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
             // premature cleanup when SetTrigger starts a new animation.
             // This also catches fast animations where OnStateUpdate's 95%
             // window is skipped in a single frame.
-            if (IsPlayingClip(stateInfo))
-            {
-                _onAnimationCompleted?.Invoke(GetStateName(stateInfo));
-            }
+            if (!AnimationCallbackRegistry.TryGet(animator, out var entry)) return;
+            if (IsPlayingClip(stateInfo)) entry.Attack?.Invoke(GetStateName(stateInfo));
         }
     }
 }

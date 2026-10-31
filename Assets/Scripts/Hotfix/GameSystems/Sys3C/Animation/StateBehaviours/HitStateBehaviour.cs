@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
@@ -15,57 +14,41 @@ namespace Hotfix.GameSystems.Sys3C.Animation.StateBehaviours
         private static readonly int HASH_Death = Animator.StringToHash("Death");
         private static readonly int HASH_DefendHit = Animator.StringToHash("DefendHit");
 
-        private static Action<string> _onAnimationCompleted;
-
-        // 防止重复触发的标记
-        private static bool _hasTriggeredHitComplete;
-        private static float _lastNormalizedTime;
-
-        public static void SetCallback(Action<string> callback)
-        {
-            _onAnimationCompleted = callback;
-            _hasTriggeredHitComplete = false;
-            _lastNormalizedTime = 0f;
-        }
-
         override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            var stateHash = stateInfo.shortNameHash;
-
-            if (stateHash == HASH_Hit || stateHash == HASH_Knockback ||
-                stateHash == HASH_Launched || stateHash == HASH_Dizzy ||
-                stateHash == HASH_Down || stateHash == HASH_GetUp ||
-                stateHash == HASH_Death || stateHash == HASH_DefendHit)
+            if (!AnimationCallbackRegistry.TryGet(animator, out var entry)) return;
+            if (IsHitState(stateInfo.shortNameHash))
             {
-                _hasTriggeredHitComplete = false;
-                _lastNormalizedTime = 0f;
+                entry.HasTriggeredHitComplete = false;
+                entry.LastNormalizedTime = 0f;
             }
         }
 
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            var stateHash = stateInfo.shortNameHash;
-
+            if (!AnimationCallbackRegistry.TryGet(animator, out var entry)) return;
+            int stateHash = stateInfo.shortNameHash;
             // 检查是否是受击相关状态
-            if (IsHitState(stateHash) && !_hasTriggeredHitComplete)
+            if (IsHitState(stateHash) && !entry.HasTriggeredHitComplete)
             {
                 // 检测动画播放到末尾（normalizedTime >= 0.9）
-                if (stateInfo.normalizedTime >= 0.9f && stateInfo.normalizedTime > _lastNormalizedTime)
+                if (stateInfo.normalizedTime >= 0.9f && stateInfo.normalizedTime > entry.LastNormalizedTime)
                 {
-                    _hasTriggeredHitComplete = true;
-                    _onAnimationCompleted?.Invoke(GetStateName(stateHash));
+                    entry.HasTriggeredHitComplete = true;
+                    entry.Hit?.Invoke(GetStateName(stateHash));
                 }
-                _lastNormalizedTime = stateInfo.normalizedTime;
+                entry.LastNormalizedTime = stateInfo.normalizedTime;
             }
         }
 
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             // 动画结束后清理
+            if (!AnimationCallbackRegistry.TryGet(animator, out var entry)) return;
             if (IsHitState(stateInfo.shortNameHash))
             {
-                _hasTriggeredHitComplete = false;
-                _lastNormalizedTime = 0f;
+                entry.HasTriggeredHitComplete = false;
+                entry.LastNormalizedTime = 0f;
             }
         }
 

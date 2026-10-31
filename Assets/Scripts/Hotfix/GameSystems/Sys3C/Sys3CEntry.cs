@@ -906,6 +906,10 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void OnDestroy()
         {
+            // 注册表按 Animator 实例存回调（实例 ID 可能被后续对象复用）——
+            // 放在所有提前 return 之前，保证角色销毁时条目一定被清掉。
+            Hotfix.GameSystems.Sys3C.Animation.StateBehaviours.AnimationCallbackRegistry.Unregister(Animator);
+
             EntityDisplayManager.Instance?.UnbindStamina(transform);
             PhysicsRegistry.Instance.Unregister(this);
 

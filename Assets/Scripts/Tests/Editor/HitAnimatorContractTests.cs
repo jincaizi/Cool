@@ -67,9 +67,9 @@ namespace GameSys.EditorTests
         [SetUp]
         public void SetUp()
         {
-            // HitStateBehaviour 的回调是静态的，FSMManager 构造时会写它并跨测试泄漏。
-            // 本测试只关心 Animator 播没播，先置空以免触发别处留下的悬挂委托。
-            HitStateBehaviour.SetCallback(null);
+            // 回调按 Animator 实例注册，FSMManager 构造时会写注册表并跨测试泄漏。
+            // 本测试只关心 Animator 播没播，先清空以免触发别处留下的悬挂委托。
+            AnimationCallbackRegistry.ClearForTests();
 
             _controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(ControllerPath);
             Assert.IsNotNull(_controller, "Animator Controller 缺失: " + ControllerPath);
@@ -173,7 +173,7 @@ namespace GameSys.EditorTests
         {
             // Arrange（与 FSMManager 同款接线：状态机行为 → HitFSM.OnAnimationEnd）
             var (go, animator, fsm) = CreateRig();
-            HitStateBehaviour.SetCallback(fsm.OnAnimationEnd);
+            AnimationCallbackRegistry.Register(animator, null, fsm.OnAnimationEnd);
             const float step = 1f / 60f;
 
             try
@@ -203,7 +203,7 @@ namespace GameSys.EditorTests
             }
             finally
             {
-                HitStateBehaviour.SetCallback(null);
+                AnimationCallbackRegistry.Unregister(animator);
                 UnityEngine.Object.DestroyImmediate(go);
             }
         }
