@@ -189,6 +189,8 @@ public class CodecRoundtripTests
         var (_, decoded) = MessageCodec.Decode(bytes);
         var snapshot = Assert.IsType<WorldSnapshot>(decoded);
         var entity = Assert.Single(snapshot.Entities);
+        Assert.True((entity.FieldMask & (ushort)EntityFieldMask.Health) != 0);
+        Assert.True((entity.FieldMask & (ushort)EntityFieldMask.Defending) != 0);
         Assert.Equal(42.5f, entity.Hp, 4);
         Assert.Equal(100f, entity.MaxHp, 4);
         Assert.True(entity.IsDefending);
@@ -200,7 +202,7 @@ public class CodecRoundtripTests
         var source = new CastBroadcast
         {
             SkillId = 20004, CasterPlayerId = 3L,
-            ImpactX = 1f, ImpactY = 0f, ImpactZ = 9f,
+            ImpactX = 1f, ImpactY = 0.5f, ImpactZ = 9f,
             ChargeProgress = 0.75f,
             Shape = new HitShape { ShapeType = 1, AreaRadius = 2f }
         };
@@ -209,6 +211,7 @@ public class CodecRoundtripTests
         var (_, decoded) = MessageCodec.Decode(bytes);
         var cast = Assert.IsType<CastBroadcast>(decoded);
         Assert.Equal(1f, cast.ImpactX, 4);
+        Assert.Equal(0.5f, cast.ImpactY, 4);
         Assert.Equal(9f, cast.ImpactZ, 4);
         Assert.Equal(0.75f, cast.ChargeProgress, 4);
     }

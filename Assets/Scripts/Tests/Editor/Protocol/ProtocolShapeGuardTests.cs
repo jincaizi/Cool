@@ -214,10 +214,10 @@ namespace Cool.Protocol.Tests
             Assert.AreEqual(13, GetProtoMemberTag(hp));
             Assert.AreEqual(14, GetProtoMemberTag(maxHp));
             Assert.AreEqual(15, GetProtoMemberTag(def));
-            Assert.IsTrue(System.Enum.IsDefined(typeof(Cool.Protocol.EntityFieldMask), (ushort)(1 << 7)),
-                "Health 必须占 1 << 7");
-            Assert.IsTrue(System.Enum.IsDefined(typeof(Cool.Protocol.EntityFieldMask), (ushort)(1 << 8)),
-                "Defending 必须占 1 << 8");
+            Assert.AreEqual(1 << 7, (int)Cool.Protocol.EntityFieldMask.Health,
+                "Health 必须精确占 1 << 7");
+            Assert.AreEqual(1 << 8, (int)Cool.Protocol.EntityFieldMask.Defending,
+                "Defending 必须精确占 1 << 8");
         }
 
         [Test]
