@@ -9,6 +9,7 @@ using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Core.Events;
+using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Network;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -103,6 +104,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _entryLookedUp;
         private CombatNetworkBridge? _combatBridge;
         private RemoteCastPresenter? _remoteCastPresenter;
+        private NetworkTargetSelector? _networkTargetSelector;
 
         /// <summary>远程实体渲染根（Awake 建的 `RemotePlayers`）——本地角色查找要排除它整棵子树，
         /// 见 <see cref="FindLocalEntry"/></summary>
@@ -251,6 +253,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     _manager.OnCorrectionNeeded -= _netPolicy.ApplyServerCorrection;
             }
             DetachCombatBridge();
+            DetachTargetSelector();
             _netPolicy = null;
             _attachFailed = false;
             _attachRetryTimer = 0f;
@@ -316,6 +319,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 TryAttachLocalCharacter();
 
             _combatBridge?.Update();
+            // 目标锁定：T/按钮切换 + 每帧有效性（manager.Update 之后——用本帧渲染位姿判定）
+            if (_networkTargetSelector != null) _networkTargetSelector.Update();
             // 投射物停点/爆炸已在 OnDamageResult 里对齐；这里只清理已回收的视觉
             _remoteCastPresenter?.Update(Time.deltaTime);
         }
@@ -427,6 +432,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleLocalPlayerDeath()
         {
             if (_pendingReturnToMenu) return;             // 已在返回途中
+            // 本地死亡：清锁并暂停切换（spec §8.6）；复活由 ApplyServerRespawn 恢复
+            if (_networkTargetSelector != null) _networkTargetSelector.SetOwnerAlive(false);
             _awaitingServerRespawn = true;
             _respawnWaitElapsed = -1f;                    // <0：提示尚未上屏
             Debug.LogWarning("[NetHost] 本地玩家阵亡（服务端权威 HP 归零）——等待服务端复活（RespawnNotice）");
@@ -456,6 +463,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private void ApplyServerRespawn(float hp)
         {
             _awaitingServerRespawn = false;
+            // 复活：恢复目标切换（锁已在本死亡时清掉，玩家可重新 T 选目标）
+            if (_networkTargetSelector != null) _networkTargetSelector.SetOwnerAlive(true);
             // 通知到了 ⇒ 兜底撤回、死亡提示收走。这里敢直接清 _pendingReturnToMenu：
             // 连接失败/登录被拒/断线那三个入口之后都收不到任何消息，它只可能是死亡兜底设的。
             _pendingReturnToMenu = false;
@@ -555,7 +564,12 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>名册变化（主线程，`ClientNetworkManager.Update` 落库后触发）</summary>
         private void HandlePlayerNameChanged(long playerId, string displayName)
-            => _remoteEntities?.UpdatePlayerName(playerId, displayName);
+        {
+            _remoteEntities?.UpdatePlayerName(playerId, displayName);
+            // 名字晚到：正好锁定着它 → 重绑面板（TargetPanel.Bind 先 Clear，幂等）
+            if (_networkTargetSelector != null && _networkTargetSelector.LockedTargetId == playerId)
+                _networkTargetSelector.RefreshTargetPanel();
+        }
 
         /// <summary>建视图时查名册——名册可能先于快照到达（登录名册就是这种顺序）</summary>
         private string? ResolvePlayerName(long playerId)
@@ -651,6 +665,40 @@ namespace Hotfix.GameSystems.SyncLayer
             };
             _combatBridge.OnLineProjectileStopped += HandleLineProjectileStopped;
 
+            // 任务 10：目标锁定（T/移动端按钮）。只在联网装配时创建——单机零影响。
+            // UI 绑定照 CharacterAttackHandler.SelectTarget；UIManager 未就绪时回调内 ?. 静默跳过。
+            // 组件可能随本地角色复用时先 GetComponent，避免重装配在同一 GameObject 上叠第二个 selector。
+            var selector = _localEntry.GetComponent<NetworkTargetSelector>();
+            if (selector == null)
+                selector = _localEntry.gameObject.AddComponent<NetworkTargetSelector>();
+            selector.Initialize(
+                _remoteEntities!,
+                _localEntry.transform,
+                _localEntry.GetComponent<InputManager>(),
+                _localEntry.GetComponentInChildren<SelectionRing>(true),
+                target =>
+                {
+                    var ui = UIManager.Instance;
+                    if (ui == null) return;
+                    var panel = ui.GetPanel<TargetPanel>();
+                    if (panel == null) return;   // 面板未注册（测试宿主/别的场景）：静默跳过
+                    panel.Bind(target);
+                    ui.ShowAlwaysAsync<TargetPanel>().Forget();
+                },
+                () =>
+                {
+                    var ui = UIManager.Instance;
+                    if (ui == null) return;
+                    var panel = ui.GetPanel<TargetPanel>();
+                    if (panel == null) return;
+                    panel.Clear();
+                    ui.HideAlwaysAsync<TargetPanel>().Forget();
+                },
+                () => _manager?.LocalPlayerId ?? 0L);
+            _networkTargetSelector = selector;
+            // AOI 出界：ViewRemoved 先于视图销毁触发——先清锁（解绑选中环），否则环会随目标一起被销毁
+            _remoteEntities!.ViewRemoved += HandleRemoteViewRemoved;
+
             // P5：联网模式下怪物由服务器驱动——禁用场景内全部本地 MonsterSpawner
             //（DemoDay 有 SlimeSpawner + TurtleShellSpawner 两个——单数 FindObjectOfType 会漏）
             var localSpawners = FindObjectsOfType<Hotfix.GameSystems.Monster.MonsterSpawner>();
@@ -670,13 +718,26 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             // 可蓄力技能（ChargedSkillData / MaxChargeTime>0 的投射物如 20003）激活时不发，
             // 由 OnChargeReleased 在释放时刻发；30001 带落点。策略见 SkillCastReporter
+            if (_networkTargetSelector != null) _networkTargetSelector.EnsureTargetFor(skillData);
             Vector3 targetPosition = _localEntry.SkillCoordinator.CurrentSkill?.TargetPosition ?? Vector3.zero;
-            SkillCastReporter.ReportActivation(_combatBridge, skillData, targetPosition, _localEntry.transform);
+            SkillCastReporter.ReportActivation(_combatBridge, skillData, targetPosition, _localEntry.transform,
+                _networkTargetSelector != null ? _networkTargetSelector.LockedTargetId : 0L);
         }
 
         /// <summary>蓄力释放（松开/蓄满）→ 释放时刻的落点与进度随 CastRequest 上线</summary>
         private void OnLocalChargeReleased(SkillData skillData, float chargeProgress, Vector3 impactPoint)
-            => SkillCastReporter.ReportChargeRelease(_combatBridge, skillData, chargeProgress, impactPoint);
+        {
+            if (_networkTargetSelector != null) _networkTargetSelector.EnsureTargetFor(skillData);
+            SkillCastReporter.ReportChargeRelease(_combatBridge, skillData, chargeProgress, impactPoint,
+                _networkTargetSelector != null ? _networkTargetSelector.LockedTargetId : 0L);
+        }
+
+        /// <summary>远程视图移除（AOI 出界/离线）：目标就是当前锁定时先清锁（ViewRemoved 在 DestroyView 之前）</summary>
+        private void HandleRemoteViewRemoved(long entityId)
+        {
+            if (_networkTargetSelector != null && _networkTargetSelector.LockedTargetId == entityId)
+                _networkTargetSelector.ClearLock();
+        }
 
         private void HandleLineProjectileStopped(Vector3 point)
             => Hotfix.GameSystems.Skills.Runtime.SwordQi.SwordQiSpawner.StopNearest(point);
@@ -684,6 +745,22 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>远程 DamageResult → 投射物视觉停点/爆炸（本地施法者由 presenter 自行跳过）</summary>
         private void HandleRemoteDamageResult(DamageResult result)
             => _remoteCastPresenter?.OnDamageResult(result);
+
+        /// <summary>
+        /// 摘除目标锁定（断线 / 本地角色重建 / 宿主销毁共用）：先退订 AOI 视图移除，
+        /// 再让 selector 清锁解绑并断开引用——组件本身留在本地角色上（可复用），
+        /// Shutdown 后它自身的 Update 在 `_registry == null` 处早退。
+        /// </summary>
+        private void DetachTargetSelector()
+        {
+            if (_remoteEntities != null)
+                _remoteEntities.ViewRemoved -= HandleRemoteViewRemoved;
+            if (_networkTargetSelector != null)
+            {
+                _networkTargetSelector.Shutdown();
+                _networkTargetSelector = null;
+            }
+        }
 
         /// <summary>
         /// 摘除战斗桥订阅（adapter 消息 + 本地技能事件）。Disconnect 与 OnDestroy 共用——
@@ -763,6 +840,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _manager = null;
             }
             DetachCombatBridge();
+            DetachTargetSelector();
         }
     }
 }

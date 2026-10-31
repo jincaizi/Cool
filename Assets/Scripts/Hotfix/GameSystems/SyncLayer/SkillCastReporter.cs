@@ -27,7 +27,7 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 逐字一致：施法者位置 + 前向 × 12）。
         /// </summary>
         public static void ReportActivation(CombatNetworkBridge bridge, SkillData data,
-            Vector3 targetPosition, Transform owner)
+            Vector3 targetPosition, Transform owner, long targetId = 0)
         {
             if (bridge == null || data == null || IsChargeable(data)) return;
 
@@ -40,19 +40,22 @@ namespace Hotfix.GameSystems.SyncLayer
                 impactPoint = point;
             }
 
-            // 10002/20003 不传落点：服务端沿施法者朝向做线形判定
-            bridge.NotifySkillCast(data.SkillId, HitShapeConverter.FromSkillData(data), impactPoint);
+            // 10002/20003 不传落点：服务端沿施法者朝向做线形判定。
+            // targetId = 锁定目标（0 = 服务端自动目标，D-P4-2）
+            bridge.NotifySkillCast(data.SkillId, HitShapeConverter.FromSkillData(data), impactPoint,
+                targetId: targetId);
         }
 
         /// <summary>释放时上报：可蓄力技能发一次（落点 + 进度）；取消蓄力不会走到这里</summary>
         public static void ReportChargeRelease(CombatNetworkBridge bridge, SkillData data,
-            float chargeProgress, Vector3 impactPoint)
+            float chargeProgress, Vector3 impactPoint, long targetId = 0)
         {
             if (bridge == null || data == null || !IsChargeable(data)) return;
 
             // 只有 ChargedSkillData 按落点做圆判定；20003 是线形判定（沿施法者朝向），不传落点
             Vector3? impact = data is ChargedSkillData ? impactPoint : (Vector3?)null;
-            bridge.NotifySkillCast(data.SkillId, HitShapeConverter.FromSkillData(data), impact, chargeProgress);
+            bridge.NotifySkillCast(data.SkillId, HitShapeConverter.FromSkillData(data), impact,
+                chargeProgress, targetId);
         }
     }
 }

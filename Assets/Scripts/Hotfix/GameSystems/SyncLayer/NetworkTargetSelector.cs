@@ -1,0 +1,256 @@
+using System;
+using System.Collections.Generic;
+using Cool.Protocol;
+using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Sys3C;
+using Hotfix.GameSystems.Sys3C.Input;
+using UnityEngine;
+
+namespace Hotfix.GameSystems.SyncLayer
+{
+    /// <summary>
+    /// 联网目标锁定（spec §8.6）——T 键/移动端按钮在 Player/Npc 候选间循环，
+    /// 锁定后绑定 `TargetPanel` 与 `SelectionRing`；每帧校验目标死亡/出 AOI/超距并清锁。
+    /// 施法前宿主调 <see cref="EnsureTargetFor"/>：无有效锁定时按技能形状选最近候选，
+    /// <see cref="LockedTargetId"/> 随 `CastRequest.TargetPlayerId` 上线（服务端显式目标裁决）。
+    ///
+    /// 由 `ClientNetworkHost` 在联网装配本地角色时 `AddComponent` 并 `Initialize`（单机不创建）；
+    /// 宿主每帧显式调用 <see cref="Update"/>（任务简报接线要求）。**Unity 也会把 Update 当消息
+    /// 再调一次**——切换输入是一次性消费、校验/清锁幂等，重复调用不会二次切换或重复清锁。
+    /// 断线/角色重建由宿主调 <see cref="Shutdown"/>，之后 Update 在 `_registry == null` 处早退。
+    /// </summary>
+    public sealed class NetworkTargetSelector : MonoBehaviour
+    {
+        /// <summary>候选获取半径（米）——T/按钮切换与无形状技能的默认范围</summary>
+        public const float AcquireRange = 15f;
+
+        /// <summary>锁定保持半径（米）——超出即清锁（15/20 迟滞，避免边界抖动）</summary>
+        public const float DropRange = 20f;
+
+        /// <summary>候选快照（纯数据；<see cref="FilterCandidates"/> 可在无场景依赖下单测）</summary>
+        public readonly struct Candidate
+        {
+            public readonly long EntityId;
+            public readonly Vector3 Position;
+            public readonly byte Kind;
+            public readonly bool Dead;
+
+            public Candidate(long entityId, Vector3 position, byte kind, bool dead)
+            {
+                EntityId = entityId;
+                Position = position;
+                Kind = kind;
+                Dead = dead;
+            }
+        }
+
+        private RemoteEntityRegistry? _registry;
+        private Transform? _owner;
+        private InputManager? _input;
+        private SelectionRing? _ring;
+        private Action<NetworkTargetable>? _bindPanel;
+        private Action? _clearPanel;
+        private Func<long>? _localId;
+        private long _lockedId;
+        private bool _ownerAlive = true;
+
+        /// <summary>当前锁定实体 id；0 = 无锁定（CastRequest 回退服务端自动目标）</summary>
+        public long LockedTargetId => _lockedId;
+
+        public void Initialize(RemoteEntityRegistry registry, Transform owner,
+            InputManager? input, SelectionRing? ring,
+            Action<NetworkTargetable>? bindPanel, Action? clearPanel, Func<long>? localId)
+        {
+            ClearLock();   // 重装配时先解绑上一套面板/选中环
+            _registry = registry;
+            _owner = owner;
+            _input = input;
+            _ring = ring;
+            _bindPanel = bindPanel;
+            _clearPanel = clearPanel;
+            _localId = localId;
+            _ownerAlive = true;
+        }
+
+        /// <summary>断线/本地角色重建：清锁并断开全部引用（组件随角色复用，下次 Initialize 重新接线）</summary>
+        public void Shutdown()
+        {
+            ClearLock();
+            _registry = null;
+            _owner = null;
+            _input = null;
+            _ring = null;
+            _bindPanel = null;
+            _clearPanel = null;
+            _localId = null;
+            _ownerAlive = true;
+        }
+
+        /// <summary>本地玩家存活（服务端死亡/复活事件驱动）：死亡清锁并暂停切换，复活恢复</summary>
+        public void SetOwnerAlive(bool alive)
+        {
+            _ownerAlive = alive;
+            if (!alive) ClearLock();
+        }
+
+        public void Update()
+        {
+            if (_registry == null || _owner == null) return;
+            if (_ownerAlive && _input != null && _input.IsTargetSwitchPressed()) Cycle();
+            ValidateLocked();
+        }
+
+        /// <summary>
+        /// 施法前调用：已有**有效**锁定则保留；否则按技能形状（`HitShapeConverter.GetShape`；
+        /// 无形状 = `AcquireRange` / ±90°）选最近候选。形状内无候选 → 清锁，回退服务端自动目标。
+        /// </summary>
+        public void EnsureTargetFor(SkillData? data)
+        {
+            if (_registry == null || _owner == null) return;
+            if (!_ownerAlive)
+            {
+                ClearLock();   // 本地已阵亡：不锁定任何目标（施法应已被状态机拦截）
+                return;
+            }
+            if (IsLockStillValid(out _)) return;
+
+            var shape = data != null ? HitShapeConverter.GetShape(data) : null;
+            float range = shape != null && shape.Range > 0f ? shape.Range : AcquireRange;
+            float halfAngle = shape != null && shape.Angle > 0f ? shape.Angle * 0.5f : 90f;
+
+            var filtered = FilterCandidates(_owner.position, _owner.forward, BuildCandidates(), range, halfAngle);
+            if (filtered.Count == 0)
+            {
+                ClearLock();
+                return;
+            }
+            Bind(filtered[0].EntityId);
+        }
+
+        /// <summary>名册晚到：目标面板已绑定当前锁定时重绑（`TargetPanel.Bind` 先 Clear，幂等）</summary>
+        public void RefreshTargetPanel()
+        {
+            if (_lockedId == 0 || _registry == null) return;
+            var view = _registry.GetView(_lockedId);
+            if (view != null && view.Targetable != null) _bindPanel?.Invoke(view.Targetable);
+        }
+
+        /// <summary>清锁并解绑（目标死亡/出 AOI/超距/断线/本地死亡共用；幂等）</summary>
+        public void ClearLock()
+        {
+            if (_lockedId == 0) return;
+            _lockedId = 0;
+            _ring?.Detach();
+            _clearPanel?.Invoke();
+        }
+
+        /// <summary>
+        /// 候选筛选（纯函数）：仅 `Player` / `Npc`（未知 kind fail-closed），排除死亡、超距、
+        /// 前向锥外；按水平距离升序。`halfAngleDeg` 是**半角**（前方 ±halfAngleDeg），
+        /// forward 只取水平分量（零向量退化为世界 +Z）。
+        /// </summary>
+        public static List<Candidate> FilterCandidates(Vector3 origin, Vector3 forward,
+            IReadOnlyList<Candidate> candidates, float acquireRange, float halfAngleDeg)
+        {
+            var result = new List<Candidate>();
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+            forward.Normalize();
+
+            float halfCos = Mathf.Cos(Mathf.Clamp(halfAngleDeg, 0f, 180f) * Mathf.Deg2Rad);
+            float rangeSqr = acquireRange * acquireRange;
+
+            foreach (var candidate in candidates)
+            {
+                if (candidate.Kind != (byte)EntityKind.Player
+                    && candidate.Kind != (byte)EntityKind.Npc) continue;
+                if (candidate.Dead) continue;
+
+                Vector3 delta = candidate.Position - origin;
+                delta.y = 0f;   // 水平判定：高度差（怪物落地吸附/角色跳跃）不参与射程与锥角
+                float distanceSqr = delta.sqrMagnitude;
+                if (distanceSqr > rangeSqr) continue;
+                if (distanceSqr > 0.0001f
+                    && Vector3.Dot(forward, delta / Mathf.Sqrt(distanceSqr)) < halfCos) continue;
+                result.Add(candidate);
+            }
+
+            result.Sort((a, b) =>
+            {
+                Vector3 da = a.Position - origin;
+                Vector3 db = b.Position - origin;
+                da.y = 0f;
+                db.y = 0f;
+                return da.sqrMagnitude.CompareTo(db.sqrMagnitude);
+            });
+            return result;
+        }
+
+        private void Cycle()
+        {
+            var filtered = FilterCandidates(_owner!.position, _owner.forward, BuildCandidates(),
+                AcquireRange, 90f);
+            if (filtered.Count == 0)
+            {
+                ClearLock();
+                return;
+            }
+
+            // 当前锁定不在列表（刚出获取范围/已死亡）时 FindIndex = -1 → 取第一个（最近）
+            int current = filtered.FindIndex(c => c.EntityId == _lockedId);
+            Bind(filtered[(current + 1) % filtered.Count].EntityId);
+        }
+
+        private List<Candidate> BuildCandidates()
+        {
+            var candidates = new List<Candidate>();
+            if (_registry == null) return candidates;
+
+            long localId = _localId?.Invoke() ?? 0L;
+            foreach (long id in _registry.PlayerIds)
+            {
+                if (id == localId) continue;             // 排除自己（防御：本地玩家通常不在 AOI 快照里）
+                var view = _registry.GetView(id);
+                if (view == null) continue;              // 遍历期间被移除
+                candidates.Add(new Candidate(id, view.Position, view.Kind, view.Dead));
+            }
+            return candidates;
+        }
+
+        private bool IsLockStillValid(out RemoteEntityView? view)
+        {
+            view = null;
+            if (_registry == null || _owner == null || !_ownerAlive || _lockedId == 0) return false;
+
+            view = _registry.GetView(_lockedId);
+            if (view == null || view.Dead) return false;
+
+            Vector3 delta = view.Position - _owner.position;
+            delta.y = 0f;
+            return delta.sqrMagnitude <= DropRange * DropRange;
+        }
+
+        private void ValidateLocked()
+        {
+            if (_lockedId == 0) return;
+            if (!IsLockStillValid(out _)) ClearLock();
+        }
+
+        private void Bind(long entityId)
+        {
+            if (_registry == null) return;
+            var view = _registry.GetView(entityId);
+            if (view == null || view.Targetable == null)
+            {
+                ClearLock();   // 视图/适配器缺失：不留下"锁了但绑不上"的悬挂 id
+                return;
+            }
+
+            _lockedId = entityId;
+            _ring?.AttachTo(view.GameObject.transform, view.Targetable.SelectionRingYOffset);
+            _bindPanel?.Invoke(view.Targetable);
+        }
+
+        private void OnDestroy() => ClearLock();
+    }
+}
