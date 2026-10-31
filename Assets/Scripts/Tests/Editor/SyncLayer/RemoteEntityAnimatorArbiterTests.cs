@@ -111,7 +111,13 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             _driver.ApplySnapshotState(dead: false);
             Assert.AreEqual((int)HitState.GetUp, _animator.GetInteger("HitState"));
 
+            // I1：兜底起身时长从 0.5s 提到 0.9s（本地 GetUp 剪辑 0.8334s + 2 帧余量），
+            // 0.51s 只走完一半，必须仍在 GetUp。
             _driver.Tick(0.51f);
+            Assert.AreEqual((int)HitState.GetUp, _driver.LastHitState,
+                "0.51s < 0.9s 兜底：起身不得被提前截断");
+
+            _driver.Tick(0.4f);   // 累计 0.91s
             Assert.AreEqual(0f, _animator.GetLayerWeight(AnimHashes.HitLayerIndex), 0.001f);
         }
 

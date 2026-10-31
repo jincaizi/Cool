@@ -38,10 +38,18 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>步频上限（防御：反推速度已被钳过，这里只做兜底）</summary>
         public const float MaxLocomotionSpeed = 1.5f;
 
-        /// <summary>倒地剪辑的兜底时长：超过它就从 Death 换到 Down（真实剪辑长度在 PlayMode 验收）。</summary>
+        /// <summary>倒地剪辑的兜底时长：真实剪辑长度在进入状态后的下一帧校准，拿不到才用该值。</summary>
         private const float DeathFallDuration = 0.7f;
-        /// <summary>起身占位时长：到期把 Hit 层交还给 Base 层。</summary>
-        private const float GetUpDuration = 0.5f;
+        /// <summary>起身兜底时长：**必须 ≥ 本地 `FSMConfig.GetUpDuration`（0.9s）**——本地实测
+        /// GetUp 剪辑 0.8334s，旧值 0.5s 会把旁观端的起身动画截掉 40%。真实剪辑长度在进入状态后
+        /// 的下一帧校准，拿不到才用该值。</summary>
+        private const float GetUpDuration = 0.9f;
+        /// <summary>按真实剪辑长度校准时的尾量（2 帧 @30fps，即 FBX 的导入帧率）——与
+        /// `FSMConfig.GetUpDuration = 0.8334 + 0.0666` 的口径一致：计时器是超时兜底，不是截断器。</summary>
+        private const float ClipTailMargin = 0.0667f;
+
+        private static readonly int DeathStateHash = Animator.StringToHash("Death");
+        private static readonly int GetUpStateHash = Animator.StringToHash("GetUp");
 
         /// <summary>最近一次仲裁出的控制器 `HitState` 值（观察面——测试与调试读数用；
         /// 没有可驱动的 Animator 时也照样记录仲裁结果）。</summary>
@@ -81,6 +89,10 @@ namespace Hotfix.GameSystems.SyncLayer
         private DeathPhase _deathPhase;
         private string? _attackTrigger;
         private bool _attackTriggerApplied;
+        /// <summary>本次受击事件是否已点过 Trigger `Hit`（重复 RefreshLayers 不得重复点）</summary>
+        private bool _hitTriggerApplied;
+        /// <summary>进入 Death / GetUp 后还没读到真实剪辑长度（下一帧 Tick 里校准）</summary>
+        private bool _deathDurationNeedsCalibration;
 
         private int _lastLocomotionKey = int.MinValue;   // 去重：参数没变不重写
 
@@ -219,6 +231,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _deathPhase = DeathPhase.GettingUp;
                 _deathRemaining = GetUpDuration;
             }
+            _deathDurationNeedsCalibration = true;
 
             RefreshLayers();
         }
@@ -248,6 +261,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _hitRemaining = Mathf.Max(0.1f, duration);
             _hitBlocked = blocked;
             _attackRemaining = 0f;
+            _hitTriggerApplied = false;   // 新一次受击事件：允许再次点 Trigger `Hit`
             RefreshLayers();
         }
 
@@ -265,6 +279,9 @@ namespace Hotfix.GameSystems.SyncLayer
             bool hitWasActive = _hitRemaining > 0f;
             bool attackWasActive = _attackRemaining > 0f;
 
+            // 进入 Death / GetUp 后的下一帧（首个 Tick）用真实剪辑长度校准计时器。
+            if (_deathDurationNeedsCalibration) TryCalibrateDeathDuration();
+
             if (_attackRemaining > 0f) _attackRemaining = Mathf.Max(0f, _attackRemaining - deltaTime);
             if (_hitRemaining > 0f) _hitRemaining = Mathf.Max(0f, _hitRemaining - deltaTime);
             if (_deathRemaining > 0f) _deathRemaining = Mathf.Max(0f, _deathRemaining - deltaTime);
@@ -272,11 +289,13 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_deathPhase == DeathPhase.Falling && _deathRemaining <= 0f)
             {
                 _deathPhase = DeathPhase.Down;
+                _deathDurationNeedsCalibration = false;
                 RefreshLayers();
             }
             else if (_deathPhase == DeathPhase.GettingUp && _deathRemaining <= 0f)
             {
                 _deathPhase = DeathPhase.None;
+                _deathDurationNeedsCalibration = false;
                 RefreshLayers();
             }
             else if ((hitWasActive && _hitRemaining <= 0f) || (attackWasActive && _attackRemaining <= 0f))
@@ -315,6 +334,22 @@ namespace Hotfix.GameSystems.SyncLayer
             WriteLayerWeight(AnimHashes.DefendLayerIndex, 0f);
             if (_hasHitState) _animator.SetInteger(AnimHashes.HitState, (int)hitState);
 
+            // 真实 `Character3C.controller` 里，Hit 层从 Empty 进 Hit **只认 Trigger `Hit`**：
+            // Death/Down/GetUp/DefendHit 有 AnyState 的 `HitState` 整数转移，而普通受击（HitState==1）
+            // 没有。只写整数会让层停在无 motion 的 Empty —— 远程普通受击一个动画都不播（C1）。
+            if (hitState == HitState.Hit)
+            {
+                if (!_hitTriggerApplied && _availableParams.Contains(AnimHashes.Hit))
+                {
+                    _animator.SetTrigger(AnimHashes.Hit);
+                    _hitTriggerApplied = true;
+                }
+            }
+            else
+            {
+                ResetHitTrigger();   // 离开 Hit / 进入其它受击状态：清掉未消费的触发
+            }
+
             ResetAttackTrigger();
         }
 
@@ -327,6 +362,8 @@ namespace Hotfix.GameSystems.SyncLayer
             WriteLayerWeight(AnimHashes.DefendLayerIndex, 0f);
             WriteLayerWeight(AnimHashes.AttackLayerIndex, 1f);
             if (_hasAttackState) _animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Attacking);
+
+            ResetHitTrigger();   // 进入攻击：受击层让位，未消费的 Hit 触发必须清掉
 
             // 只在本次攻击开始时触发一次：后续刷新（受击结束/防守快照/重复快照）不得重复点。
             if (!_attackTriggerApplied
@@ -349,6 +386,7 @@ namespace Hotfix.GameSystems.SyncLayer
             WriteLayerWeight(AnimHashes.DefendLayerIndex, _defending ? 1f : 0f);
             if (_hasDefending) _animator.SetBool(AnimHashes.IsDefending, _defending);
 
+            ResetHitTrigger();
             ResetAttackTrigger();
         }
 
@@ -358,6 +396,57 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_animator != null && _availableParams.Contains(Animator.StringToHash(_attackTrigger)))
                 _animator.ResetTrigger(_attackTrigger);
             _attackTriggerApplied = false;
+        }
+
+        /// <summary>
+        /// 清掉未消费的 Trigger `Hit`。动画状态已离开 Hit 后，残留的触发会在下一次从 Empty
+        /// 进入 Hit 时被消费——病态情况下表现为"没挨打却抖一下"，所以离开 Hit / 进入其它
+        /// 状态时一律清掉（`m_KeepAnimatorStateOnDisable=0` 的重新启用路径也要经过这里）。
+        /// </summary>
+        private void ResetHitTrigger()
+        {
+            if (_animator != null && _availableParams.Contains(AnimHashes.Hit))
+                _animator.ResetTrigger(AnimHashes.Hit);
+            _hitTriggerApplied = false;
+        }
+
+        /// <summary>
+        /// 进入 Death / GetUp 后的下一帧，读 Hit 层当前（或正在混合进入的）状态的真实剪辑长度，
+        /// 把兜底计时器校准到 `length + ClipTailMargin`。拿不到匹配状态就保留兜底常量并在下一帧
+        /// 重试——AnyState 转移带 0.25s 混合，首个 Tick 可能仍停在来源状态上。
+        /// 只认状态名（shortNameHash），不硬编码剪辑资产。
+        /// </summary>
+        private void TryCalibrateDeathDuration()
+        {
+            if (_animator == null || _layerCount <= AnimHashes.HitLayerIndex)
+            {
+                _deathDurationNeedsCalibration = false;   // 无可驱动/层不足：保留兜底常量
+                return;
+            }
+
+            int expected = _deathPhase == DeathPhase.Falling ? DeathStateHash
+                : _deathPhase == DeathPhase.GettingUp ? GetUpStateHash
+                : 0;
+            if (expected == 0)
+            {
+                _deathDurationNeedsCalibration = false;
+                return;
+            }
+
+            var current = _animator.GetCurrentAnimatorStateInfo(AnimHashes.HitLayerIndex);
+            var next = _animator.IsInTransition(AnimHashes.HitLayerIndex)
+                ? _animator.GetNextAnimatorStateInfo(AnimHashes.HitLayerIndex)
+                : current;
+
+            if (next.shortNameHash == expected) CalibrateDeathDuration(next.length);
+            else if (current.shortNameHash == expected) CalibrateDeathDuration(current.length);
+        }
+
+        private void CalibrateDeathDuration(float clipLength)
+        {
+            if (clipLength <= 0f) return;   // 状态没有 motion（Empty/占位控制器）：等下一帧仍不匹配就保留兜底
+            _deathRemaining = clipLength + ClipTailMargin;
+            _deathDurationNeedsCalibration = false;
         }
 
         /// <summary>层能力检测：控制器层数不足时（美术预制体/占位控制器）跳过写入，避免错误日志。</summary>
@@ -384,12 +473,14 @@ namespace Hotfix.GameSystems.SyncLayer
                 {
                     _deathPhase = DeathPhase.Falling;
                     _deathRemaining = DeathFallDuration;   // 重新播倒下（升档时 Animator 已被重置）
+                    _deathDurationNeedsCalibration = true;
                 }
             }
             else if (_deathPhase == DeathPhase.GettingUp)
             {
                 _deathPhase = DeathPhase.None;             // 升档/OnEnable 不重播 GetUp
                 _deathRemaining = 0f;
+                _deathDurationNeedsCalibration = false;
             }
 
             RefreshLayers();
