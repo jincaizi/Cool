@@ -7,6 +7,9 @@ namespace Hotfix.GameSystems.Nameplate
 {
     public class NameplateRenderer
     {
+        /// <summary>血条填充色。创建与对象池复用（RegisterWithHealth）都写它，Return 复位也写它。</summary>
+        public static readonly Color HealthFillColor = new Color(0.85f, 0.2f, 0.2f, 1f);
+
         private readonly NameplateSettings _settings;
         private readonly Transform _canvasTransform;
         private readonly Stack<GameObject> _pool = new();
@@ -87,6 +90,8 @@ namespace Hotfix.GameSystems.Nameplate
             var nameText = root.transform.Find("NameRow/NameText").GetComponent<TextMeshProUGUI>();
             var classIcon = root.transform.Find("NameRow/ClassIcon").GetComponent<Image>();
             var healthFill = root.transform.Find("HPBar/Fill").GetComponent<Image>();
+            // 池对象可能被 Return 复位过——每次注册都显式设回血条色（不能只靠创建时的初始值）
+            healthFill.color = HealthFillColor;
 
             nameText.text = config.DisplayName;
             nameText.color = config.NameColor ?? _settings.DefaultColor;
@@ -261,7 +266,7 @@ namespace Hotfix.GameSystems.Nameplate
                 if (entry.HealthFill != null)
                 {
                     entry.HealthFill.fillAmount = 1f;
-                    entry.HealthFill.color = Color.white;
+                    entry.HealthFill.color = HealthFillColor;
                 }
                 _healthPool.Push(entry.Root);
                 return;
@@ -342,6 +347,12 @@ namespace Hotfix.GameSystems.Nameplate
             rowLayout.childForceExpandHeight = false;
             rowLayout.spacing = 4f;
 
+            // 根布局 childControlHeight=false，需要 NameRow 自报首选尺寸；否则其 RectTransform
+            // 保持默认 100×100，根高度被撑大、血条离头顶过远。
+            var rowFitter = nameRow.AddComponent<ContentSizeFitter>();
+            rowFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            rowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
             var iconGo = new GameObject("ClassIcon");
             iconGo.transform.SetParent(nameRow.transform, false);
             var icon = iconGo.AddComponent<Image>();
@@ -376,7 +387,7 @@ namespace Hotfix.GameSystems.Nameplate
             fill.fillMethod = Image.FillMethod.Horizontal;
             fill.fillOrigin = (int)Image.OriginHorizontal.Left;
             fill.fillAmount = 1f;
-            fill.color = new Color(0.85f, 0.2f, 0.2f, 1f);
+            fill.color = HealthFillColor;
             fill.raycastTarget = false;
             var fillRect = fillGo.GetComponent<RectTransform>();
             fillRect.anchorMin = Vector2.zero;

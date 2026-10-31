@@ -696,17 +696,30 @@ namespace Hotfix.GameSystems.SyncLayer
             public void Register(long entityId, Transform owner, string displayName)
             {
                 var mgr = EntityDisplayManager.Instance;
-                mgr?.RegisterWithHealth((int)entityId, owner, new NameplateConfig(displayName, showHPBar: true));
+                if (mgr == null) return;   // Unity 重载 ==：已销毁实例也判空
+                mgr.RegisterWithHealth((int)entityId, owner, new NameplateConfig(displayName, showHPBar: true));
             }
 
             public void UpdateName(long entityId, string displayName)
-                => EntityDisplayManager.Instance?.UpdateName((int)entityId, displayName);
+            {
+                var mgr = EntityDisplayManager.Instance;
+                if (mgr == null) return;
+                mgr.UpdateName((int)entityId, displayName);
+            }
 
             public void UpdateHp(long entityId, float percent)
-                => EntityDisplayManager.Instance?.UpdateHealth((int)entityId, percent);
+            {
+                var mgr = EntityDisplayManager.Instance;
+                if (mgr == null) return;
+                mgr.UpdateHealth((int)entityId, percent);
+            }
 
             public void Unregister(long entityId)
-                => EntityDisplayManager.Instance?.Unregister((int)entityId);
+            {
+                var mgr = EntityDisplayManager.Instance;
+                if (mgr == null) return;
+                mgr.Unregister((int)entityId);
+            }
         }
 
         private void OnDestroy()

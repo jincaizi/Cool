@@ -94,6 +94,8 @@ namespace Hotfix.GameSystems.Nameplate
 
         private void OnDestroy()
         {
+            // 双保险：sink 每帧可能查单例——先摘静态引用，避免外部拿到已销毁实例
+            if (Instance == this) Instance = null;
             _nameplate?.Cleanup();
             _floatText?.Cleanup();
             _damageScreenEffect?.Cleanup();
