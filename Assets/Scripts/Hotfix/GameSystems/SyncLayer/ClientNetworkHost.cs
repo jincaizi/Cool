@@ -122,6 +122,11 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _awaitingServerRespawn;
         private float _respawnWaitElapsed = -1f;   // <0 = 提示还没上屏（要读 Time，只能在主线程）
 
+        // 任务 10：本地阵亡 → selector 清锁/暂停切换。死亡回调的线程取决于传输
+        // （见 HandleLocalPlayerDeath 注释），这里与 _hasServerRespawn 同款——回调只置位，
+        // UI/Transform 操作留到主线程 Update 消费。
+        private bool _pendingTargetOwnerDeath;
+
         // 本次 Connect 实际解析出的端点——连接失败时上屏（收件人看不到 Console；
         // 读这里而非 PlayerPrefs：Connect 的参数可被显式覆盖，只有这里才是真正尝试的地址）
         private string _resolvedHost = string.Empty;
@@ -254,6 +259,7 @@ namespace Hotfix.GameSystems.SyncLayer
             }
             DetachCombatBridge();
             DetachTargetSelector();
+            _pendingTargetOwnerDeath = false;   // 旧装配的死亡通知不得跨会话作用到新 selector
             _netPolicy = null;
             _attachFailed = false;
             _attachRetryTimer = 0f;
@@ -319,8 +325,16 @@ namespace Hotfix.GameSystems.SyncLayer
                 TryAttachLocalCharacter();
 
             _combatBridge?.Update();
+
+            // 死亡回调可能来自网络线程：封送到主线程后才动 selector（UI/选中环）
+            if (_pendingTargetOwnerDeath)
+            {
+                _pendingTargetOwnerDeath = false;
+                if (_networkTargetSelector != null) _networkTargetSelector.SetOwnerAlive(false);
+            }
+
             // 目标锁定：T/按钮切换 + 每帧有效性（manager.Update 之后——用本帧渲染位姿判定）
-            if (_networkTargetSelector != null) _networkTargetSelector.Update();
+            if (_networkTargetSelector != null) _networkTargetSelector.Tick();
             // 投射物停点/爆炸已在 OnDamageResult 里对齐；这里只清理已回收的视觉
             _remoteCastPresenter?.Update(Time.deltaTime);
         }
@@ -432,8 +446,9 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleLocalPlayerDeath()
         {
             if (_pendingReturnToMenu) return;             // 已在返回途中
-            // 本地死亡：清锁并暂停切换（spec §8.6）；复活由 ApplyServerRespawn 恢复
-            if (_networkTargetSelector != null) _networkTargetSelector.SetOwnerAlive(false);
+            // 本地死亡：清锁并暂停切换（spec §8.6）。**只置位**——本回调可能在网络线程，
+            // selector 要动 UI/Transform，统一由 Update（主线程）消费。
+            _pendingTargetOwnerDeath = true;
             _awaitingServerRespawn = true;
             _respawnWaitElapsed = -1f;                    // <0：提示尚未上屏
             Debug.LogWarning("[NetHost] 本地玩家阵亡（服务端权威 HP 归零）——等待服务端复活（RespawnNotice）");
@@ -831,6 +846,11 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void OnDestroy()
         {
+            // 先摘订阅、再 Dispose（与 Disconnect → ResetAttachment 同序）：
+            // manager.Dispose 里的 registry.Clear 会发 ViewRemoved，此时 selector 若仍在订阅
+            // 会去动 UI/选中环（销毁过程中的 Unity 对象操作）。
+            DetachCombatBridge();
+            DetachTargetSelector();
             if (_manager != null)
             {
                 _manager.OnEnterWorld -= HandleEnterWorld;
@@ -839,8 +859,6 @@ namespace Hotfix.GameSystems.SyncLayer
                 _manager.Dispose();
                 _manager = null;
             }
-            DetachCombatBridge();
-            DetachTargetSelector();
         }
     }
 }

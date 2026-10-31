@@ -83,10 +83,10 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             return view;
         }
 
-        private void PressSwitchAndUpdate()
+        private void PressSwitchAndTick()
         {
             _input.SetTargetSwitchPressedFromUI(true);
-            _selector.Update();
+            _selector.Tick();
         }
 
         // ------------------------------------------------------------------
@@ -169,15 +169,15 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             CreateView(2L, new Vector3(0, 0, 3f));
             CreateView(3L, new Vector3(0, 0, 5f));
 
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(2L, _selector.LockedTargetId, "首次切换选最近目标");
             Assert.IsNotNull(_bound);
             Assert.AreEqual(2L, _bound!.EntityId);
 
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(3L, _selector.LockedTargetId, "再次切换选下一个候选");
 
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(2L, _selector.LockedTargetId, "候选列表循环回绕");
             Assert.AreEqual(3, _bindCalls);
             Assert.AreEqual(0, _clearCalls);
@@ -187,11 +187,11 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         public void Update_Clears_Lock_When_Target_Dies()
         {
             var view = CreateView(2L, new Vector3(0, 0, 3f));
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(2L, _selector.LockedTargetId);
 
             view.Dead = true;
-            _selector.Update();
+            _selector.Tick();
 
             Assert.AreEqual(0L, _selector.LockedTargetId, "目标死亡必须清锁");
             Assert.IsNull(_bound, "目标面板必须解绑");
@@ -202,15 +202,15 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         public void Update_Keeps_Lock_Within_Drop_Range_And_Clears_When_Leaving()
         {
             var view = CreateView(2L, new Vector3(0, 0, 3f));
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(2L, _selector.LockedTargetId);
 
             view.Position = new Vector3(0, 0, NetworkTargetSelector.DropRange - 1f);
-            _selector.Update();
+            _selector.Tick();
             Assert.AreEqual(2L, _selector.LockedTargetId, "在保持半径内不得抖掉锁定");
 
             view.Position = new Vector3(0, 0, NetworkTargetSelector.DropRange + 1f);
-            _selector.Update();
+            _selector.Tick();
             Assert.AreEqual(0L, _selector.LockedTargetId, "超出保持半径必须清锁");
             Assert.AreEqual(1, _clearCalls);
         }
@@ -219,11 +219,11 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         public void Update_Clears_Lock_When_Target_Leaves_Aoi()
         {
             CreateView(2L, new Vector3(0, 0, 3f));
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(2L, _selector.LockedTargetId);
 
             _registry.Remove(2L);   // AOI 出界/离线：视图移除
-            _selector.Update();
+            _selector.Tick();
 
             Assert.AreEqual(0L, _selector.LockedTargetId, "目标出 AOI 必须清锁");
             Assert.AreEqual(1, _clearCalls);
@@ -233,14 +233,14 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         public void SetOwnerAlive_False_Clears_Lock_And_Blocks_Cycle_Until_Revived()
         {
             CreateView(2L, new Vector3(0, 0, 3f));
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(2L, _selector.LockedTargetId);
 
             _selector.SetOwnerAlive(false);
             Assert.AreEqual(0L, _selector.LockedTargetId, "本地玩家死亡立即清锁");
             Assert.AreEqual(1, _clearCalls);
 
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(0L, _selector.LockedTargetId, "死亡期间切换输入必须被禁用");
 
             _selector.EnsureTargetFor(
@@ -248,7 +248,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(0L, _selector.LockedTargetId, "死亡期间施法不得重新锁定目标");
 
             _selector.SetOwnerAlive(true);
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(2L, _selector.LockedTargetId, "复活后恢复切换");
         }
 
@@ -256,7 +256,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         public void RefreshTargetPanel_Rebinds_The_Locked_Target()
         {
             CreateView(2L, new Vector3(0, 0, 3f));
-            PressSwitchAndUpdate();
+            PressSwitchAndTick();
             Assert.AreEqual(1, _bindCalls);
 
             _registry.UpdatePlayerName(2L, "Alice");   // 名册晚到
@@ -273,7 +273,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             _selector.Initialize(_registry, _owner.transform, null, null, null, null, null);
             CreateView(2L, new Vector3(0, 0, 1.5f));
 
-            Assert.DoesNotThrow(() => _selector.Update());
+            Assert.DoesNotThrow(() => _selector.Tick());
             Assert.DoesNotThrow(() => _selector.EnsureTargetFor(
                 UnityEditor.AssetDatabase.LoadAssetAtPath<ComboSkillData>(ComboSkillPath)));
             Assert.AreEqual(2L, _selector.LockedTargetId);
@@ -300,17 +300,70 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
-        public void EnsureTargetFor_Keeps_An_Existing_Valid_Lock()
+        public void EnsureTargetFor_Keeps_An_Existing_Lock_Within_Skill_Shape()
         {
-            CreateView(2L, new Vector3(0, 0, 3f));
-            PressSwitchAndUpdate();
+            CreateView(2L, new Vector3(0, 0, 1.5f));   // BA_Combo1 射程 2m、半角 60°：在形状内
+            PressSwitchAndTick();
             Assert.AreEqual(2L, _selector.LockedTargetId);
 
             CreateView(3L, new Vector3(0, 0, 0.5f));   // 更近的候选晚到，但已有锁定不应被抢走
             _selector.EnsureTargetFor(
                 UnityEditor.AssetDatabase.LoadAssetAtPath<ComboSkillData>(ComboSkillPath));
 
-            Assert.AreEqual(2L, _selector.LockedTargetId, "有效锁定在施法时保留");
+            Assert.AreEqual(2L, _selector.LockedTargetId, "技能形状内的有效锁定在施法时保留");
+        }
+
+        [Test]
+        public void EnsureTargetFor_Clears_Lock_Outside_Skill_Range()
+        {
+            CreateView(2L, new Vector3(0, 0, 3f));     // 锁定合法（AcquireRange 15m），但 BA_Combo1 射程 2m
+            PressSwitchAndTick();
+            Assert.AreEqual(2L, _selector.LockedTargetId);
+
+            _selector.EnsureTargetFor(
+                UnityEditor.AssetDatabase.LoadAssetAtPath<ComboSkillData>(ComboSkillPath));
+
+            Assert.AreEqual(0L, _selector.LockedTargetId,
+                "施法瞬间锁定目标出技能射程：清锁回退 0（不得带显式目标去必空）");
+            Assert.AreEqual(1, _clearCalls);
+            Assert.IsNull(_bound);
+        }
+
+        [Test]
+        public void EnsureTargetFor_Clears_Lock_Outside_Skill_Cone()
+        {
+            // 约 70° 偏角：T 的 ±90° 可以锁定，但 BA_Combo1 的半角是 60°
+            float radians = 70f * Mathf.Deg2Rad;
+            CreateView(2L, new Vector3(Mathf.Sin(radians) * 1.5f, 0f, Mathf.Cos(radians) * 1.5f));
+            PressSwitchAndTick();
+            Assert.AreEqual(2L, _selector.LockedTargetId);
+
+            _selector.EnsureTargetFor(
+                UnityEditor.AssetDatabase.LoadAssetAtPath<ComboSkillData>(ComboSkillPath));
+
+            Assert.AreEqual(0L, _selector.LockedTargetId, "施法瞬间锁定目标出技能锥：清锁回退 0");
+            Assert.AreEqual(1, _clearCalls);
+        }
+
+        [Test]
+        public void EnsureTargetFor_Aoe_Uses_AreaRadius_Not_Range()
+        {
+            var spin = UnityEditor.AssetDatabase.LoadAssetAtPath<SpinSkillData>(
+                "Assets/PreRes/SkillsCfg/Spin_SkillR.asset");
+            Assert.NotNull(spin, "Spin_SkillR.asset 未找到");
+            // Shape: AOE_Circle, Range=2, AreaRadius=2.5 ⇒ 2.2m 应保留（按 AreaRadius，而不是 Range）
+            var view = CreateView(2L, new Vector3(0, 0, 2.2f));
+            PressSwitchAndTick();
+            Assert.AreEqual(2L, _selector.LockedTargetId);
+
+            _selector.EnsureTargetFor(spin);
+            Assert.AreEqual(2L, _selector.LockedTargetId,
+                "AOE 圆按 AreaRadius 复核（2.2m ≤ 2.5m），不按 Range=2m");
+
+            view.Position = new Vector3(0, 0, 3f);   // 超出 AreaRadius 2.5m
+            _selector.EnsureTargetFor(spin);
+            Assert.AreEqual(0L, _selector.LockedTargetId, "AOE 半径外必须清锁回退 0");
+            Assert.AreEqual(1, _clearCalls);
         }
 
         [Test]

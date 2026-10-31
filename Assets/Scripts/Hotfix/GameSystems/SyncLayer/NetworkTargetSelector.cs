@@ -15,9 +15,9 @@ namespace Hotfix.GameSystems.SyncLayer
     /// <see cref="LockedTargetId"/> 随 `CastRequest.TargetPlayerId` 上线（服务端显式目标裁决）。
     ///
     /// 由 `ClientNetworkHost` 在联网装配本地角色时 `AddComponent` 并 `Initialize`（单机不创建）；
-    /// 宿主每帧显式调用 <see cref="Update"/>（任务简报接线要求）。**Unity 也会把 Update 当消息
-    /// 再调一次**——切换输入是一次性消费、校验/清锁幂等，重复调用不会二次切换或重复清锁。
-    /// 断线/角色重建由宿主调 <see cref="Shutdown"/>，之后 Update 在 `_registry == null` 处早退。
+    /// 宿主每帧显式调用 <see cref="Tick"/>——**刻意不叫 Update**：MonoBehaviour 的 Update 消息会被
+    /// Unity 自动调用，与宿主显式驱动叠加会在输入锁存重置的边界顺序下把一次 T 切成两次目标。
+    /// 断线/角色重建由宿主调 <see cref="Shutdown"/>，之后 Tick 在 `_registry == null` 处早退。
     /// </summary>
     public sealed class NetworkTargetSelector : MonoBehaviour
     {
@@ -93,7 +93,8 @@ namespace Hotfix.GameSystems.SyncLayer
             if (!alive) ClearLock();
         }
 
-        public void Update()
+        /// <summary>宿主每帧驱动（见类注释：不是 Unity 的 Update 消息）</summary>
+        public void Tick()
         {
             if (_registry == null || _owner == null) return;
             if (_ownerAlive && _input != null && _input.IsTargetSwitchPressed()) Cycle();
@@ -101,8 +102,11 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// 施法前调用：已有**有效**锁定则保留；否则按技能形状（`HitShapeConverter.GetShape`；
-        /// 无形状 = `AcquireRange` / ±90°）选最近候选。形状内无候选 → 清锁，回退服务端自动目标。
+        /// 施法前调用（spec §8.6）：
+        ///  - 已有锁定 → 用**当前技能的形状/射程**复核（水平距离 ≤ 射程且在前向半角锥内；
+        ///    `AOE_Circle` 按 `AreaRadius` 做圆判定，无锥）。不满足 → `ClearLock()` 并**直接返回**，
+        ///    `LockedTargetId = 0` 回退服务端自动目标，避免显式目标必空；
+        ///  - 无锁定 → 按同一形状选最近候选并绑定（无形状 = `AcquireRange` / ±90°；形状内无候选保持无锁）。
         /// </summary>
         public void EnsureTargetFor(SkillData? data)
         {
@@ -112,18 +116,32 @@ namespace Hotfix.GameSystems.SyncLayer
                 ClearLock();   // 本地已阵亡：不锁定任何目标（施法应已被状态机拦截）
                 return;
             }
-            if (IsLockStillValid(out _)) return;
 
             var shape = data != null ? HitShapeConverter.GetShape(data) : null;
-            float range = shape != null && shape.Range > 0f ? shape.Range : AcquireRange;
+            bool isAoeCircle = shape != null && shape.TargetType == TargetType.AOE_Circle;
+            float range = isAoeCircle
+                ? shape!.AreaRadius
+                : (shape != null && shape.Range > 0f ? shape.Range : AcquireRange);
             float halfAngle = shape != null && shape.Angle > 0f ? shape.Angle * 0.5f : 90f;
 
-            var filtered = FilterCandidates(_owner.position, _owner.forward, BuildCandidates(), range, halfAngle);
-            if (filtered.Count == 0)
+            if (_lockedId != 0)
             {
+                bool stillInShape = IsLockStillValid(out var lockedView)
+                                    && IsWithinSkillShape(lockedView!, range, halfAngle, isAoeCircle);
+                if (stillInShape) return;
+
+                // 目标在施法瞬间已出当前技能射程/锥：清锁回退 0，不再落到重新选目标
                 ClearLock();
                 return;
             }
+
+            // AOE 圆用 AreaRadius；半径缺失（0）时该技能没有可用的锁定形状，保持无锁而不是
+            // 回退 AcquireRange 去绑定与本次施法无关的目标
+            if (isAoeCircle && range <= 0f) return;
+
+            var filtered = FilterCandidates(_owner.position, _owner.forward, BuildCandidates(),
+                range, isAoeCircle ? 180f : halfAngle);
+            if (filtered.Count == 0) return;
             Bind(filtered[0].EntityId);
         }
 
@@ -215,6 +233,29 @@ namespace Hotfix.GameSystems.SyncLayer
                 candidates.Add(new Candidate(id, view.Position, view.Kind, view.Dead));
             }
             return candidates;
+        }
+
+        /// <summary>
+        /// 当前锁定目标是否落在本次技能的判定形状内（与 <see cref="FilterCandidates"/> 同口径：XZ 平面）。
+        /// `omnidirectional` = AOE 圆：只查半径不查前向锥（`AreaRadius` 由调用方传入）。
+        /// </summary>
+        private bool IsWithinSkillShape(RemoteEntityView view, float range, float halfAngleDeg,
+            bool omnidirectional)
+        {
+            if (range <= 0f || _owner == null) return false;
+
+            Vector3 delta = view.Position - _owner.position;
+            delta.y = 0f;
+            float distanceSqr = delta.sqrMagnitude;
+            if (distanceSqr > range * range) return false;
+            if (omnidirectional || distanceSqr <= 0.0001f) return true;
+
+            Vector3 forward = _owner.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+            forward.Normalize();
+            float halfCos = Mathf.Cos(Mathf.Clamp(halfAngleDeg, 0f, 180f) * Mathf.Deg2Rad);
+            return Vector3.Dot(forward, delta / Mathf.Sqrt(distanceSqr)) >= halfCos;
         }
 
         private bool IsLockStillValid(out RemoteEntityView? view)
