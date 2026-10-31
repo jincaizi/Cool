@@ -1,3 +1,4 @@
+using Hotfix.GameSystems.Sys3C.Animation.StateBehaviours;
 using Hotfix.GameSystems.Sys3C.Core;
 using Hotfix.GameSystems.Sys3C.FSM;
 using NUnit.Framework;
@@ -14,22 +15,26 @@ namespace GameSys.EditorTests
     public class FSMManagerHitFeedbackTests
     {
         private GameObject _host;
+        private Animator _animator;
         private FSMManager _fsm;
 
         [SetUp]
         public void SetUp()
         {
             _host = new GameObject("FSMTestHost");
-            var animator = _host.AddComponent<Animator>();
+            _animator = _host.AddComponent<Animator>();
             var unityController = _host.AddComponent<UnityEngine.CharacterController>();
             var characterController = new Hotfix.GameSystems.Sys3C.Character.CharacterController(
                 _host.transform, unityController, 0);
-            _fsm = new FSMManager(characterController, animator);
+            _fsm = new FSMManager(characterController, _animator);
         }
 
         [TearDown]
         public void TearDown()
         {
+            // FSMManager 构造会把回调注册到按 Animator 实例键控的全局注册表；
+            // 不注销会残留以已销毁 Animator 实例 ID 为键的条目（ID 可能被复用）。
+            AnimationCallbackRegistry.Unregister(_animator);
             Object.DestroyImmediate(_host);
         }
 
