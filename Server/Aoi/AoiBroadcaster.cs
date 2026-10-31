@@ -55,14 +55,16 @@ namespace KcpServer
 
                 if (_scheduler.ShouldSend(observer.PlayerId, entity.PlayerId, distance, tick,
                     entity.Position.X, entity.Position.Z, entity.Rotation,
-                    entity.ActionState, !entity.IsAlive))
+                    entity.ActionState, !entity.IsAlive,
+                    entity.Hp, entity.MaxHp, entity.IsDefending))
                 {
                     var snap = new EntitySnapshot
                     {
                         PlayerId = entity.PlayerId,
                         FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed
                             | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId
-                            | EntityFieldMask.Dead),      // D-N2：每次快照都置位（存活是状态不是事件）
+                            | EntityFieldMask.Dead                 // D-N2：每次快照都置位（存活是状态不是事件）
+                            | EntityFieldMask.Health | EntityFieldMask.Defending), // T3：血量/防御随每次快照下发
                         X = entity.Position.X,
                         Y = entity.Position.Y,
                         Z = entity.Position.Z,
@@ -72,6 +74,9 @@ namespace KcpServer
                         TemplateId = entity.TemplateId,
                         ActionState = entity.ActionState,
                         Dead = !entity.IsAlive,
+                        Hp = entity.Hp,
+                        MaxHp = entity.MaxHp,
+                        IsDefending = entity.IsDefending,
                         Tick = tick
                     };
                     result.Add(snap);

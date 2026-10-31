@@ -7,9 +7,9 @@ namespace KcpServer
     /// 移动实体（坐标/旋转自上次发送变化）按带频广播；静止实体统一 4 tick 保活
     /// （近带静止 15Hz 全字段是带宽回归——终审 I5 修正；4 tick ≈ 267ms ≪ 客户端 1.2s 缺席超时）。
     /// 每个 (observer, entity) 记录最近发送 tick、距离带与上次坐标。
-    /// 带变化/重见即重置（立即发一帧）；**状态翻转（actionState/dead）立即发**，
+    /// 带变化/重见即重置（立即发一帧）；**状态翻转（actionState/dead/hp/maxHp/defending）立即发**，
     /// 否则静止怪物的翻转只能等 4 tick 保活，而保活相位按 (observer, entity) 各记一份，
-    /// 同一翻转会落在不同观察者的不同 tick 上（客户端动画跨端不一致）。主循环独占线程，无锁。
+    /// 同一翻转会落在不同观察者的不同 tick 上（客户端动画与血量跨端不一致）。主循环独占线程，无锁。
     /// tick 差值用相减（uint wrap 安全：15Hz 下 ~9.1 年才 wrap）。
     /// </summary>
     public sealed class AoiBandScheduler
@@ -27,6 +27,9 @@ namespace KcpServer
             public float RotY;
             public byte ActionState;   // 2026-10-12：状态翻转也是变化信号
             public bool Dead;
+            public float Hp;           // T3：血量是权威状态，变化立即下发
+            public float MaxHp;
+            public bool IsDefending;
             public bool HasSent;
         }
 
@@ -34,10 +37,11 @@ namespace KcpServer
             new Dictionary<long, Dictionary<long, Slot>>();
 
         /// <summary>distance 米、tick 当前服务器 tick、x/z/rotY 实体当前坐标、
-        /// actionState/dead 实体当前动作状态（翻转立即发）。
+        /// actionState/dead/hp/maxHp/defending 实体当前状态（翻转立即发）。
         /// 返回 true = 本 tick 应给该观察者发该实体</summary>
         public bool ShouldSend(long observerId, long entityId, float distance, uint tick,
-            float x, float z, float rotY, byte actionState, bool dead)
+            float x, float z, float rotY, byte actionState, bool dead,
+            float hp, float maxHp, bool defending)
         {
             int band = BandOf(distance);
             uint interval = IntervalOf(band);
@@ -50,25 +54,30 @@ namespace KcpServer
 
             if (!entities.TryGetValue(entityId, out var slot) || !slot.HasSent)
             {
-                entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, HasSent = true };
+                entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, Hp = hp, MaxHp = maxHp, IsDefending = defending, HasSent = true };
                 return true; // 首帧（或带变化/重见后）立即发
             }
 
             if (slot.Band != band)
             {
-                entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, HasSent = true };
+                entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, Hp = hp, MaxHp = maxHp, IsDefending = defending, HasSent = true };
                 return true; // 带变化：重置节拍
             }
 
-            // 状态翻转 → 立即发（跨客户端动画一致性依赖此语义：静止怪物的状态翻转若等保活，
-            // 不同观察者的保活相位不同，同一翻转会落在不同 tick，客户端最多差 4 tick ≈267ms）。
+            // 状态翻转 → 立即发（跨客户端一致性与即时反馈依赖此语义：静止实体（怪物或玩家）的
+            // 状态/血量/防御翻转若等保活，不同观察者的保活相位不同，同一翻转会落在不同 tick，
+            // 客户端最多差 4 tick ≈267ms）。
             // 注意**不重置 LastSentTick** —— 重置会把位置更新推迟最多一个带间隔（近带 1 / 远带 4 tick）。
             // 坐标锚点一并写回：本 tick 若同时有位移，锚点不跟上的话下一 tick 会因 moved 再补发一帧
             // （同一次的翻转 + 位移被拆成两帧——近带里就是重复帧）。
-            if (slot.ActionState != actionState || slot.Dead != dead)
+            if (slot.ActionState != actionState || slot.Dead != dead
+                || slot.Hp != hp || slot.MaxHp != maxHp || slot.IsDefending != defending)
             {
                 slot.ActionState = actionState;
                 slot.Dead = dead;
+                slot.Hp = hp;
+                slot.MaxHp = maxHp;
+                slot.IsDefending = defending;
                 slot.X = x;
                 slot.Z = z;
                 slot.RotY = rotY;
@@ -82,7 +91,7 @@ namespace KcpServer
 
             if (due)
             {
-                entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, HasSent = true };
+                entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, Hp = hp, MaxHp = maxHp, IsDefending = defending, HasSent = true };
                 return true;
             }
             return false;

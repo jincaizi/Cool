@@ -79,6 +79,8 @@ public class AoiBroadcasterTests
         var mover = store.AddPlayer(2, "M");
         observer.UpdatePosition(new Vector3(0, 0, 0), 0f, 0f, 1L, 0U);
         mover.UpdatePosition(new Vector3(10, 0, 0), 90f, 4f, 1L, 1U);
+        mover.ApplyDamage(10f); // 权威扣血后组帧：快照必须携带当前 HP，不是满血常量
+        Assert.Equal(90f, mover.Hp, 4);
 
         var broadcaster = new AoiBroadcaster();
         EntitySnapshot? captured = null;
@@ -92,9 +94,13 @@ public class AoiBroadcasterTests
         Assert.Equal(1U, captured.Tick);
         // P5：掩码高位追加 ActionState/Kind/TemplateId（只加不删——旧客户端忽略未知位）
         // D-N2：本任务再追加 Dead（存活是状态不是事件，每次快照都置位）
+        // T3：再追加 Health/Defending（HP/MaxHP/IsDefending 随每次快照下发）
         Assert.Equal((ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed
             | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId
-            | EntityFieldMask.Dead), captured.FieldMask);
+            | EntityFieldMask.Dead | EntityFieldMask.Health | EntityFieldMask.Defending), captured.FieldMask);
+        Assert.Equal(100f, captured.MaxHp, 4);
+        Assert.Equal(mover.Hp, captured.Hp, 4);
+        Assert.False(captured.IsDefending);
     }
 
     [Fact]
