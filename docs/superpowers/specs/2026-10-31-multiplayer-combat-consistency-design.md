@@ -119,7 +119,7 @@
   RemoteEntityAnimator（表现仲裁器，仅玩家类视图）
       ├─ 快照：Dead / IsDefending
       └─ 事件：PlayAttack / PlayHit / Tick 计时
-      优先级：Dead > Hit > Attack > Defend > Locomotion
+      优先级：Falling/Down > Hit > Attack > GettingUp > Defend > Locomotion
 
   NpcEntityAnimator（怪物，现有路径不变）
       └─ 快照：ActionState / Dead
@@ -296,6 +296,7 @@ public static class AnimationCallbackRegistry
 - `RemoteEntityAnimator.Awake` 防御性调用 `Unregister(animator)`（远程从未注册也应是无害的）。
 - 三个 behaviour 删除静态回调/静态标志；`OnStateEnter/Update/Exit` 首行 `if (!AnimationCallbackRegistry.TryGet(animator, out var e)) return;`；`HitStateBehaviour` 的触发标志与 normalizedTime 存在 `Entry` 上。
 - 远程 Animator 无条目 → 不触发任何游戏逻辑；Animator 本身照常播放。
+- `Register` 对同一 Animator 覆盖旧条目并重置 `HasTriggeredHitComplete/LastNormalizedTime`；`Unregister` 幂等。
 
 #### 测试
 
@@ -344,38 +345,49 @@ internal void ResetLayerWeights();        // 保留现有语义
 internal void InvalidateDedup();
 ```
 
-**仲裁优先级**：`Dead > Hit > Attack > Defend > Locomotion`。
+**仲裁优先级**：`Falling/Down > Hit > Attack > GettingUp > Defend > Locomotion`（Death/Down 有霸体；GetUp 可被打断，与本地 `HitFSM.HasSuperArmor` 的 Death/Down 口径一致）。层参数使用控制器 `HitState` 值（Death=7 / Down=5 / GetUp=6 / DefendHit=8）；线上 `NpcAnimationState` 顺序不同，禁止直接透传。
 
 - `RefreshLayers()` 统一写：
-  - Dead：Hit 层权重 1、`HitState=Death`；Attack/Defend 权重 0。
+  - Falling：Hit 层权重 1、`HitState=Death`；Attack/Defend 权重 0。
+  - Down：Hit 层权重 1、`HitState=Down`；Attack/Defend 0。
+  - GettingUp（无 Hit/Attack 意图时）：Hit 层权重 1、`HitState=GetUp`；Hit/Attack 意图优先并清掉 GetUp 阶段。
   - Hit：Hit 层权重 1、`HitState = blocked ? DefendHit : Hit`；Attack/Defend 0。
   - Attack：Attack 层权重 1、`AttackState=Attacking`、设置 trigger；Hit/Defend 0。
   - 否则：Hit/Attack 0、`AttackState=Idle`、Defend = `_defending ? 1 : 0`、`IsDefending` bool 同值。
 - `PlayAttack`：先清旧 trigger，再设层权重，最后 `SetTrigger`（权重 0 时 trigger 会被丢）。
 - `Tick`：递减攻击/受击计时；到期清意图、`ResetTrigger`；`RefreshLayers`。
 - `ApplySnapshotState(bool dead)`：
-  - `dead=true`：清空瞬时计时；进入 Death。
-  - `dead=false` 且此前死亡：清 Hit；`Reapply` 恢复 `IsDefending`。
+  - `dead=true`：清空瞬时计时；启动死亡序列（Death→Down）。
+  - `dead=false` 且此前死亡：启动 GetUp；完成后清 Hit、恢复 `_defending`。
   - 玩家快照没有 `ActionState` 语义，调用方不要传；旧 `Apply(actionState, dead)` 只保留 `dead` 语义，既有测试若断言 `ActionState=Hit` 需改为 `PlayHit`/`ApplySnapshotState`。
+- **死亡序列（远程玩家）**：
+  - 只在 `dead` 翻转时启动/结束；重复的 `dead=true` 快照不得重置计时。
+  - `false → true`：`HitState.Death`（倒下）；读取 Death 状态 clip 长度（拿不到用 0.7s）；到期切 `HitState.Down`（躺卧），保持到复活。
+  - `true → false`：`HitState.GetUp`（起身）；读取 GetUp clip 长度（拿不到用 0.5s）；到期清 `HitState=0`、Hit 层权重 0，恢复 `_defending`。
+  - Death/Down 期间忽略 `PlayHit`/`PlayAttack`/`SetDefending` 的打断（对应本地 `HitFSM` 的死亡霸体）；GetUp 不具霸体，可被 `PlayHit`/`PlayAttack` 打断并清掉 `_deathPhase`。
+  - 升档/`OnEnable` 的 `Reapply`：死亡/躺卧时按 `_deathPhase` 重放 Death 或 Down；不重播进行中的 GetUp。
+  - 状态切换后的下一帧用 `animator.GetCurrentAnimatorStateInfo(HitLayerIndex).length` 校准计时；拿不到用保守常量。
+  - 迟到观察者没有“已死多久”字段，会从倒下开始播；demo 接受（需要精确躺卧时长时再加协议字段）。
 - `Reapply`：重放 `_dead` + `_defending`；清攻击/受击计时（升档时不重播进行中的剪辑）。
 - `Awake`/`ResolveAnimator`：`animator.applyRootMotion = false`；缓存 `layerCount` 与参数哈希集合；缺 `AttackState`/`HitState`/`IsDefending`/trigger/层时安全降级并只告警一次（照抄 `NpcEntityAnimator.HasDriverParameters` 的范式）。
 - `OnDisable/OnEnable`：清瞬时计时；`OnEnable` 调 `Reapply`。
 - 保留 `LastHitState` / `LastBaseState` / `LastBlend` / `LastLocomotionSpeed` 观察面，既有测试不回归。
 
-**计时来源**：`PlayAttack` 的 duration 由 `SkillPresentationCatalog` 的 `SkillData.CastClip/ReleaseClip.length` 提供；缺失时用 0.8s 保守值。`PlayHit` 用 0.5s 保守值，后续可按 Hit 层当前 clip 长度微调。
+**计时来源**：`PlayAttack` 的 duration 由 catalog 的 `SkillData` 提供——可蓄力技能（20004）用 `ReleaseClip.length`，其余用 `CastClip.length`；缺失时用 0.8s。`PlayHit` 第一版用 0.5s，后续按 Hit 层当前 clip 长度校准。
 
 #### 测试
 
 - EditMode（`Tick` 直接推进）：
   - 优先级：死亡中受击/攻击不出现；受击覆盖攻击；攻击覆盖格挡；恢复后格挡姿态回来。
+  - 死亡序列：Death→Down（重复 `dead=true` 快照不重置计时）→ 复活 GetUp→Idle；Down 期间受击不打断。
   - 计时到期后层权重/参数复位；trigger 被 reset。
   - 缺参数/缺层安全降级；`applyRootMotion == false`。
-  - 升档 `Reapply` 恢复死亡/格挡。
-- PlayMode：远程玩家被击中后跨 2 个快照周期仍有受击表现（D6 回归）。
+  - 升档 `Reapply` 恢复死亡/躺卧/格挡。
+- PlayMode：远程玩家被击中后跨 2 个快照周期仍有受击表现（D6 回归）；被击杀后观察者看到倒下→躺卧→起身。
 
 ### 8.3 技能表现目录
 
-文件：新增 `Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillPresentationCatalog.cs` + 资产
+文件：新增 `Assets/Scripts/Hotfix/GameSystems/Skills/Data/SkillPresentationCatalog.cs` + 资产 `Assets/PreRes/SkillsCfg/SkillPresentationCatalog.asset`（由 `ClientNetworkHost` 场景字段引用）
 
 - ScriptableObject，序列化 `SkillData[]`，只收录 `CombatRules` 的 **7 个玩家技能**（括号内为资产现有 `AnimatorTrigger`）：
   - 10001 `BA_Combo1`（`Attack`）
@@ -420,6 +432,7 @@ internal void InvalidateDedup();
   - 20003 火球：`FireballSpawner.Spawn(...)` 改为返回 `FireballProjectile`；用视图当前位置/朝向。
   - 20004 蓄力火球：`CastVFX` 在施法者处；释放/爆炸表现放在 `ImpactX/Y/Z`，不跟踪飞行体。
   - 30001 陨石：用 `SkillData.Meteor` 调 `MeteorSpawner.Spawn(...)`，落点取 `ImpactX/Y/Z`；预警/落地由 Meteor 自身负责。
+  - 投射物 Spawner 需要 `DamageBlock`：用 `SkillData.Damage?.Clone()` 传入（online 态 Spawner 已短路伤害）；为 null 时跳过并告警一次。
 - 收到 `DamageResult`：
   - 火球（20003）：若 `Hits.Count > 0`，取第一个 `HitEntry.HitX/HitZ`，调用 `FireballProjectile.ExplodeAt(point)`；若没有命中（空放/落地），让视觉自行落地/超时。
   - 剑气（10002）：若 `ProjectileStopped`，用 `StopX/StopZ` 调用 `SwordQiProjectile.StopAtPoint(point)`；未格挡则照常穿过（线形技能本就应该穿过）。
@@ -428,6 +441,7 @@ internal void InvalidateDedup();
 - 幂等：`FireballProjectile.ExplodeAt` 入口检查 `_released`；`SwordQiProjectile.StopAtPoint` 已幂等。
 - 跟踪表在视图移除/断线时清空；每帧/每次结果后清理 `IsActive == false` 的项。
 - 匹配规则：同 `(casterId, skillId)` 有多个在飞视觉时，选**最早生成且仍活跃**的一项（服务器按施法顺序下发结果）。
+- 读取 `IsActive` 前先做 Unity 空判断（`projectile == null`），场景/池销毁后跳过。
 - 20003 的 `HitDelaySeconds=0`：旁观者可能看到火球生成后几乎立刻在命中点爆炸，这是服务端无飞行延迟的直接结果，登记为已知表现。
 - 测试缝：`IRemoteProjectileVisual { bool IsActive; void ExplodeAt(Vector3); void StopAtPoint(Vector3); }`；真实实现包装 `FireballProjectile`/`SwordQiProjectile`，EditMode 注入假实现。
 
@@ -435,7 +449,7 @@ internal void InvalidateDedup();
 
 - `SwordQiSpawner.Spawn` 返回 `SwordQiProjectile`（现有调用方忽略返回值即可）。
 - `FireballSpawner.Spawn` 返回 `FireballProjectile`。
-- `FireballProjectile` 增加 `public bool IsActive => !_released;` 与 `public void ExplodeAt(Vector3 point)`（内部 `Explode(null, point)`，入口 `if (_released) return;`）。
+- `FireballProjectile` 增加 `public bool IsActive => !_released;` 与 `public void ExplodeAt(Vector3 point)`：入口 `if (_released) return;`，先把 `transform.position = point`，再 `Explode(null, point)`（幂等；online 伤害短路）。
 - `SwordQiProjectile.IsActive` / `StopAtPoint` 已存在，不改。
 - `CastVFX` 按现有 `ReleaseVFX` 的做法一次性 `Instantiate` + `Destroy(vfx, 1.5f)`；不在本批引入新池。若 WebGL 压测出现 GC 抖动，后续再池化（性能风险登记）。
 
@@ -476,7 +490,7 @@ public NetworkTargetable Targetable { get; }
 - `view.Targetable.SetVitals(Hp, MaxHp, Dead)`；HP 变化即时更新目标面板。
 - `view.Animator?.ApplySnapshotState(snapshot.Dead)`（仅玩家类视图；`view.Animator` 为 null 的怪物视图走既有 `NpcEntityAnimator` 快照路径，不变）。
 - Full 档时 `view.Animator?.SetDefending(snapshot.IsDefending)`。
-- 标签：`_labelSink?.UpdateHp(viewId, percent)`；死亡时 0，复活时满。
+- 标签：先写 `view.Hp/MaxHp` 再注册/更新 `_labelSink`（视图创建首帧直接用快照 HP，不显示 0）；`_labelSink?.UpdateHp(viewId, percent)`，死亡时 0，复活时满。
 - `SetTier` 升 Full：调用 `view.Animator.Reapply()` 与 `SetDefending(view.IsDefending)`。
 - `Remove/Clear`：`_labelSink?.Unregister(viewId)`、`view.Targetable.MarkRemoved()`、清 presenter 跟踪（由宿主/registry 协调）。
 
@@ -506,7 +520,7 @@ public NetworkTargetable Targetable { get; }
   - Root：`VerticalLayoutGroup`（childAlignment=MiddleCenter，spacing=2，childControlWidth/Height=false）+ `ContentSizeFitter`；pivot (0.5, 1)，从头顶向下展开。
   - NameRow：沿用现有 `HorizontalLayoutGroup`（ClassIcon + NameText）。
   - HPBar：固定尺寸（如 60×6）；背景 `Image`（深色）+ 填充 `Image`（红色/绿色）。
-- 填充：使用 **1×1 白色 sprite + `Image.fillAmount`**（有 sprite 时 `Filled` 可靠，且不触发布局重建）；1×1 sprite 在 `NameplateRenderer` 初始化时用 `Texture2D(1,1)` + `Sprite.Create` 创建一次并复用，不新增美术资产，`Cleanup` 时销毁；`Return` 时复位 `fillAmount=1`、颜色、RectTransform。
+- 填充：使用 **1×1 白色 sprite + `Image.fillAmount`**（`Image.type=Filled`、`fillMethod=Horizontal`、`fillOrigin=Left`；有 sprite 时 `Filled` 可靠，且不触发布局重建）；1×1 sprite 在 `NameplateRenderer` 初始化时用 `Texture2D(1,1)` + `Sprite.Create` 创建一次并复用，不新增美术资产，`Cleanup` 时销毁；`Return` 时复位 `fillAmount=1`、颜色、RectTransform。
 - `EntityDisplayManager` 增加 `RegisterWithHealth` / `UpdateHealth`；通过可选 `INetworkLabelSink` 注入，生产实现由 `ClientNetworkHost` 提供；测试传 null 不注册。
 - 接口：
 
@@ -613,6 +627,7 @@ RemoteEntityRegistry(Transform root,
   3. `_remoteCastPresenter.Update(dt)`（清理失效投射物视觉）。
   4. `_targetSelector.Update()`（输入/有效性/UI 绑定）。
 - 断线/离开世界：清 `RemoteCastPresenter`、`NetworkTargetSelector`、`PlayerNameRegistry`、registry 标签；摘除事件订阅。
+- 本地角色重建（选人确认/复活重装配）时同样清空 selector/presenter 的旧绑定后重新初始化。
 - 单机模式：不创建 selector/presenter；标签 sink 为空。
 
 ---
@@ -691,6 +706,7 @@ RemoteEntityRegistry(Transform root,
 - 既有套件全绿（TwoClientWorldTests、CombatSyncTests、MonsterWorldTests、AoiWorldTests、RemoteRenderBranchTests、PlayerDeathRespawnTests、BlockMitigationE2ETests 等）。
 - 新增三客户端 `ThreeClientCombatSyncTests`：
   - A 打 B：A/B/C 收到同一 `DamageResult`；C 的快照 HP 与 B 的 `TargetRemainingHp` 一致；C 的 `NetworkTargetable` HP 一致。
+  - B 死亡：C 看到倒下→躺卧→8 秒后起身的完整序列（远程玩家死亡序列）。
   - A 打怪物：C 看到怪物血条下降、受击表现计数增加；怪物死亡/重生在 C 端可见。
   - 远程攻击不打断本地施法（P0-1/D7 回归）。
 - `RemoteEntityAnimator` 接受 `Tick` 的 PlayMode 用例：远程受击跨 2 个快照周期仍可见（D6 回归）。
@@ -701,6 +717,7 @@ RemoteEntityRegistry(Transform root,
 - 两个浏览器客户端 + 一个旁观者（或 A/B 双方 + 截图）：
   - 彼此可见真角色；名字/血条在头顶。
   - A 攻击 B：两端与旁观端都看到攻击动作、受击/格挡动作、伤害数字/火花；B 的 HP 条一致下降。
+  - B 被击杀：两端与旁观端都看到倒下→躺卧→8 秒后起身；目标面板/选中环在死亡时收起。
   - A/B 打同一只怪：两端 + 旁观端怪物血条一致；怪物攻击/受击/死亡/重生一致。
   - 火球在服务端命中点爆炸；被格挡的剑气在停点停下。
   - 目标环/目标面板在锁定/切换/死亡/出视野时正确显示/隐藏。
@@ -731,6 +748,7 @@ RemoteEntityRegistry(Transform root,
 | R8 | 远程名字名册晚到 | 回退名 + `OnNameChanged` 更新；不阻塞视图创建 |
 | R9 | 怪物仇恨仍是最近玩家 | 本批不改；在 README/演示话术登记为已知限制 |
 | R10 | `CastVFX` 一次性 `Instantiate/Destroy` 在 WebGL 造成 GC 抖动 | 低频技能；本批沿用现有 `ReleaseVFX` 的 1.5s 自动销毁模式，若压测抖动明显再加按 prefab 的小池 |
+| R11 | 投射物池复用与跟踪表项短暂重叠 | 每帧 prune + 取最早活跃；同一 `(caster,skill)` 极快连发时可能停错一发视觉；demo 接受，必要时给视觉加代际号 |
 
 ---
 
