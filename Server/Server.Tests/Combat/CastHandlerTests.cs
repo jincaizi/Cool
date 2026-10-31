@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Cool.Protocol;
 using Cool.SyncCore;
@@ -275,5 +276,25 @@ public class CastHandlerTests
         Assert.Equal(9876L, result.ServerTimestamp);
         Assert.Same(resolution.Hits, result.Hits);
         Assert.Single(result.Hits);
+    }
+
+    [Fact]
+    public void Damage_Recipients_Include_Caster_Targets_And_Both_Observer_Sets()
+    {
+        var visible = new Dictionary<long, long[]>
+        {
+            [1] = new long[] { 5L, 6L },  // 施法者 1 的观察者
+            [2] = new long[] { 6L, 7L }   // 受击者 2 的观察者
+        };
+        var recipients = CastHandler.CollectDamageRecipients(
+            hitTargets: new long[] { 2L },
+            casterId: 1L,
+            npcCaster: false,
+            observersOf: id => visible.TryGetValue(id, out var ids) ? ids : System.Array.Empty<long>(),
+            visiblePlayersOf: id => id == 1L
+                ? new[] { new PlayerState(5L), new PlayerState(6L) }
+                : System.Array.Empty<PlayerState>());
+
+        Assert.Equal(new long[] { 1L, 2L, 5L, 6L, 7L }, recipients.OrderBy(id => id).ToArray());
     }
 }

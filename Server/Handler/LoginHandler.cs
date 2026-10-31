@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -79,6 +80,14 @@ namespace KcpServer
 
             var room = _roomManager.GetPlayerRoom(playerId);
 
+            // 名字名册：把房间内已有玩家以 PlayerEnterRoom 发给新玩家（客户端据此显示远程名字；
+            // 位置字段客户端忽略，以 WorldSnapshot 为准）。原有"通知其他人"保留。
+            if (room != null)
+            {
+                foreach (var existing in BuildRoster(room.GetAllPlayerStates(), playerId, zoneId))
+                    await _server.SendToSessionAsync(session, MessageId.PlayerEnterRoom, existing);
+            }
+
             // 通知其他玩家
             if (room != null)
             {
@@ -101,6 +110,26 @@ namespace KcpServer
             }
 
             _logger.LogInformation($"Player {playerId} ({request.Username}) logged in to zone {zoneId}");
+        }
+
+        /// <summary>登录名字名册：房间内已有玩家（排除新玩家本人）→ PlayerEnterRoom 列表。
+        /// 位置/朝向不填（客户端忽略，服务端权威位置走 WorldSnapshot）。</summary>
+        public static List<PlayerEnterRoom> BuildRoster(
+            IReadOnlyDictionary<long, PlayerState> players, long excludePlayerId, string zoneId)
+        {
+            var list = new List<PlayerEnterRoom>();
+            foreach (var pair in players)
+            {
+                if (pair.Key == excludePlayerId) continue;
+                list.Add(new PlayerEnterRoom
+                {
+                    PlayerId = pair.Key,
+                    PlayerName = pair.Value.PlayerName,
+                    ZoneId = zoneId,
+                    ServerTimestamp = DateTime.UtcNow.Ticks
+                });
+            }
+            return list;
         }
 
         public async Task HandleDisconnectAsync(IServerSession session)

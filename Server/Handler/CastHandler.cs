@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Cool.Protocol;
 using Cool.SyncCore;
@@ -129,7 +130,11 @@ namespace KcpServer
                 CasterZ = caster.Position.Z,
                 CasterRotation = caster.Rotation,
                 Shape = request.Shape,
-                ServerTimestamp = ServerClock.NowTicks()
+                ServerTimestamp = ServerClock.NowTicks(),
+                ImpactX = request.ImpactX,
+                ImpactY = request.ImpactY,
+                ImpactZ = request.ImpactZ,
+                ChargeProgress = request.ChargeProgress
             };
             // D-1/D-2：判定帧延迟由服务端表自持——判定发生在 tick + HitDelayTicks
             _pending.Add(new PendingCast(casterId, request, resolution.Broadcast, resolution.IsNpcCaster,
@@ -436,19 +441,48 @@ namespace KcpServer
             }
         }
 
-        /// <summary>判定阶段广播伤害（D-P4-6）。施法者收件人：仅玩家施法时包含（怪物无 session）。</summary>
+        /// <summary>伤害广播收件人（纯函数，便于单测）：施法者（怪物施法无 session，不收）+
+        /// 每个受击者 + 施法者一侧的 AOI 观察者 + 每个受击者的 AOI 观察者，HashSet 去重。
+        /// 玩家施法者的观察者取其对侧可见玩家（GetVisiblePlayers），怪物施法者取 GetObserversOf。</summary>
+        public static HashSet<long> CollectDamageRecipients(
+            IReadOnlyList<long> hitTargets, long casterId, bool npcCaster,
+            Func<long, IEnumerable<long>> observersOf,
+            Func<long, IEnumerable<PlayerState>> visiblePlayersOf)
+        {
+            var recipients = new HashSet<long>();
+            if (!npcCaster) recipients.Add(casterId);
+            foreach (var id in hitTargets) recipients.Add(id);
+
+            IEnumerable<long> casterObservers = npcCaster
+                ? observersOf(casterId)
+                : visiblePlayersOf(casterId).Select(p => p.PlayerId);
+            foreach (var id in casterObservers) recipients.Add(id);
+
+            foreach (var target in hitTargets)
+                foreach (var id in observersOf(target)) recipients.Add(id);
+
+            return recipients;
+        }
+
+        /// <summary>判定阶段广播伤害（D-P4-6）。收件人含施法者、受击者与双方观察者（去重）；
+        /// 怪物施法者无 session，由 GetSession 自然跳过。</summary>
         public async Task BroadcastDamageAsync(CombatResolver.CastResolution resolution)
         {
             if (resolution.Hits.Count == 0 || resolution.Broadcast == null) return;
 
             var result = resolution.ToDamageResult(ServerClock.NowTicks());
 
-            var damageRecipients = new HashSet<long>();
-            if (!resolution.IsNpcCaster) damageRecipients.Add(resolution.Broadcast.CasterPlayerId);
-            foreach (var hit in resolution.Hits)
-                damageRecipients.Add(hit.TargetPlayerId);
+            var hitTargets = new List<long>();
+            foreach (var hit in resolution.Hits) hitTargets.Add(hit.TargetPlayerId);
 
-            foreach (var recipientId in damageRecipients)
+            var recipients = CollectDamageRecipients(
+                hitTargets,
+                resolution.Broadcast.CasterPlayerId,
+                resolution.IsNpcCaster,
+                id => _server.GetObserversOf(id),
+                id => _server.GetVisiblePlayers(id));
+
+            foreach (var recipientId in recipients)
             {
                 var s = _server.GetSession(recipientId);
                 if (s != null)
