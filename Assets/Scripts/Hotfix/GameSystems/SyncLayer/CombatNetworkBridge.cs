@@ -13,9 +13,11 @@ namespace Hotfix.GameSystems.SyncLayer
     /// P4 战斗网络桥（spec §5-P4 客户端侧）：
     ///  - 出站：本地技能激活 → 表内技能发 CastRequest（形状随包上线，服务端校验上限）。
     ///    本地表现即时播放不变（预测反馈）；伤害数字等服务端结果（D-P4-8）。
-    ///  - 入站：CastBroadcast → OnCastBroadcast 事件（P4 表现占位：宿主日志）；
+    ///  - 入站：CastBroadcast → OnCastBroadcast 事件（远程玩家施法表现由 RemoteCastPresenter
+    ///    消费；宿主同时把 NPC 广播路由给 registry 的挥砍排程）；
     ///    DamageResult → 本地玩家走 onDamageToLocalPlayer 注入（宿主接 Sys3CEntry.ApplyServerDamage，
     ///    含格挡标志——宿主据此走格挡受击表现而不是普通受击）；
+    ///    远程视图同步 Targetable 权威余血，远程真人追加受击动画（PlayHit）；
     ///    远程 **Npc** 视图 Emit MonsterTakeDamageEvent（走怪物红字/暴击橙），
     ///    远程 **玩家/bot** 视图 Emit PlayerTakeDamageEvent（走玩家灰字），
     ///    被格挡时改发 BlockSucceededEvent（格挡飘字 + 火花），不再飘伤害数字；
@@ -57,13 +59,13 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 落点（CircleAtPoint 类：20004/30001）与蓄力进度随包上线；服务端校验有限性与距离上限。
         /// </summary>
         public void NotifySkillCast(int skillId, HitShape shape,
-            Vector3? impactPoint = null, float chargeProgress = 0f)
+            Vector3? impactPoint = null, float chargeProgress = 0f, long targetId = 0)
         {
             if (!Cool.SyncCore.CombatRules.IsSynced(skillId)) return;
             var request = new CastRequest
             {
                 SkillId = skillId,
-                TargetPlayerId = 0, // D-P4-2：客户端不锁定远程目标
+                TargetPlayerId = targetId, // 默认 0 = 不锁定远程目标（D-P4-2）
                 Shape = shape,
                 ChargeProgress = chargeProgress
             };
@@ -127,6 +129,13 @@ namespace Hotfix.GameSystems.SyncLayer
 
                 int viewId = view.GameObject.GetInstanceID();
                 Vector3 hitPos = view.Position + Vector3.up * 1.5f;
+
+                // 服务端权威余血 → 远程视图 Targetable（名牌血条/受击飘字共用）。
+                // 本地玩家不走这里（上面已分流到 ApplyServerDamage）。
+                view.Targetable?.SetVitals(hit.TargetRemainingHp, view.MaxHp, hit.TargetRemainingHp <= 0f);
+                // 远程真人的受击表现（格挡走 DefendHit）：此前只有本地玩家有受击动画
+                if (view.Kind == (byte)EntityKind.Player)
+                    view.Animator?.PlayHit(hit.IsBlocked, 0.5f);
 
                 // 玩家/bot 专用；Npc 永不格挡，守卫防未来服务端给 Npc 置 IsBlocked 时吞掉红字
                 if (hit.IsBlocked && view.Kind != (byte)EntityKind.Npc)

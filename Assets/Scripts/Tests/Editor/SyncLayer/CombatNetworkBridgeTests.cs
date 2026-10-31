@@ -233,6 +233,33 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void OnDamageResult_RemoteTarget_Updates_Targetable_Vitals()
+        {
+            // 任务 9：服务端权威余血落到远程视图的 Targetable —— 名牌血条/选中环读的是它
+            var registry = new RemoteEntityRegistry(_root.transform);
+            registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 2,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Health),
+                X = 1f, Y = 0f, Z = 2f,
+                Hp = 100f, MaxHp = 100f
+            }, serverTicks: 1_000_000L);
+            var view = registry.GetView(2);
+            Assert.NotNull(view, "视图未创建——ApplySnapshot Position 位应触发");
+
+            var bridge = new CombatNetworkBridge(_client, () => 1, registry);
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 1, SkillId = 20001,
+                Hits = { new HitEntry { TargetPlayerId = 2, Damage = 57.4f, TargetRemainingHp = 42.6f } }
+            });
+            bridge.Update();
+
+            Assert.AreEqual(0.426f, view!.Targetable.HPPercent, 0.001f,
+                "Targetable 血条数据必须用服务端余血/最大血量");
+        }
+
+        [Test]
         public void OnDamageResult_RemoteBlockedTarget_Emits_BlockSucceededEvent_Not_PlayerTakeDamageEvent()
         {
             // 远程玩家/bot 被格挡：飘字改为「格挡」，不再出减免后的伤害数字

@@ -82,6 +82,11 @@ namespace Hotfix.GameSystems.SyncLayer
                  "注意：树/石头也在 Default —— 掩码只作粗筛，命中体还要校验是地形，否则怪会吸到树冠上")]
         [SerializeField] private LayerMask _npcGroundMask = 1;
 
+        [Header("远程施法表现（技能表现目录；留空 = 不渲染远程施法动画/投射物）")]
+        [Tooltip("Assets/PreRes/SkillsCfg/SkillPresentationCatalog.asset——与本地职业无关，" +
+                 "按 SkillId 提供远程施法的动画触发器与 VFX")]
+        [SerializeField] private SkillPresentationCatalog _skillCatalog;
+
         [Header("调试")]
         [Tooltip("屏幕左下角连接状态浮层（模式/状态/玩家 id/远程实体数）")]
         [SerializeField] private bool _showDebugOverlay = true;
@@ -97,6 +102,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private float _attachRetryTimer;
         private bool _entryLookedUp;
         private CombatNetworkBridge? _combatBridge;
+        private RemoteCastPresenter? _remoteCastPresenter;
 
         /// <summary>远程实体渲染根（Awake 建的 `RemotePlayers`）——本地角色查找要排除它整棵子树，
         /// 见 <see cref="FindLocalEntry"/></summary>
@@ -310,6 +316,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 TryAttachLocalCharacter();
 
             _combatBridge?.Update();
+            // 投射物停点/爆炸已在 OnDamageResult 里对齐；这里只清理已回收的视觉
+            _remoteCastPresenter?.Update(Time.deltaTime);
         }
 
         /// <summary>
@@ -624,12 +632,21 @@ namespace Hotfix.GameSystems.SyncLayer
             _localEntry.SkillCoordinator.OnChargeReleased += OnLocalChargeReleased;
             // T12 乙-3：服务端判死 → 提示 + 回选人（重登即复活）
             _localEntry.OnServerDeath += HandleLocalPlayerDeath;
-            // 施法广播除日志外还要**路由**到怪物排程：广播本身不含"这是哪只怪的哪一刀"之外的
-            // 表现信息，registry 用发布者时间戳排成 renderAt 处的挥砍（本回调已在主线程——
-            // CombatNetworkBridge.Update 消费，见该类线程模型）。
+
+            // 远程施法表现（玩家类）。localPlayerId 取登录后由服务端分配的 id——
+            // presenter 用它跳过本地施法者（本地由 SkillExecutor 播放）。
+            _remoteCastPresenter = new RemoteCastPresenter(
+                _remoteEntities!, _manager!.LocalPlayerId, _skillCatalog);
+            _combatBridge.OnDamageResult += HandleRemoteDamageResult;
+            _remoteEntities!.ViewRemoved += _remoteCastPresenter.ClearForEntity;
+
+            // 施法广播除日志外还要**路由**：NPC 由 registry 按发布者时间戳排成 renderAt 处的挥砍，
+            // 玩家类交给 presenter 立即播攻击/施法表现（本回调已在主线程——CombatNetworkBridge.Update
+            // 消费，见该类线程模型）。两条支路各自按 Kind 过滤，互不干扰。
             _combatBridge.OnCastBroadcast += b =>
             {
                 Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
+                _remoteCastPresenter?.OnCastBroadcast(b);
                 _remoteEntities!.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp);
             };
             _combatBridge.OnLineProjectileStopped += HandleLineProjectileStopped;
@@ -664,6 +681,10 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleLineProjectileStopped(Vector3 point)
             => Hotfix.GameSystems.Skills.Runtime.SwordQi.SwordQiSpawner.StopNearest(point);
 
+        /// <summary>远程 DamageResult → 投射物视觉停点/爆炸（本地施法者由 presenter 自行跳过）</summary>
+        private void HandleRemoteDamageResult(DamageResult result)
+            => _remoteCastPresenter?.OnDamageResult(result);
+
         /// <summary>
         /// 摘除战斗桥订阅（adapter 消息 + 本地技能事件）。Disconnect 与 OnDestroy 共用——
         /// 宿主被销毁而本地 Sys3CEntry 存活时，避免桥对已销毁宿主留下悬空委托。
@@ -674,6 +695,15 @@ namespace Hotfix.GameSystems.SyncLayer
             // 放在早退守卫**之前**，没有战斗桥时同样要解开
             if (_localEntry != null)
                 _localEntry.OnServerDeath -= HandleLocalPlayerDeath;
+
+            // 远程施法表现：断线/本地角色重建都必须退订并清空跟踪表——
+            // 旧 presenter 的 ViewRemoved 委托若留在 registry 上，新会话会调进已丢弃的跟踪表。
+            if (_remoteEntities != null && _remoteCastPresenter != null)
+                _remoteEntities.ViewRemoved -= _remoteCastPresenter.ClearForEntity;
+            if (_combatBridge != null)
+                _combatBridge.OnDamageResult -= HandleRemoteDamageResult;
+            _remoteCastPresenter?.Clear();
+            _remoteCastPresenter = null;
 
             if (_combatBridge == null || _adapter == null) return;
             _adapter.MessageReceived -= _combatBridge.OnMessage;
