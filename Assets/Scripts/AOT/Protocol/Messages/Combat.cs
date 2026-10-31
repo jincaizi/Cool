@@ -56,6 +56,11 @@ namespace Cool.Protocol
         [ProtoMember(7)] public float CasterRotation { get; set; }
         [ProtoMember(8)] public HitShape Shape { get; set; } = new HitShape();
         [ProtoMember(9)] public long ServerTimestamp { get; set; }
+
+        [ProtoMember(10)] public float ImpactX { get; set; }
+        [ProtoMember(11)] public float ImpactY { get; set; }
+        [ProtoMember(12)] public float ImpactZ { get; set; }
+        [ProtoMember(13)] public float ChargeProgress { get; set; }
     }
 
     /// <summary>单次命中结果（D4：战斗骰只有服务器掷——伤害值随消息下发，客户端不重算）。内嵌类型非线上消息，实现标记接口仅为协议层惯例</summary>

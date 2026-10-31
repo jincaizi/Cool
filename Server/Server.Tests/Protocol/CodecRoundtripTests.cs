@@ -163,4 +163,53 @@ public class CodecRoundtripTests
         var (_, decoded) = MessageCodec.Decode(encoded, key);
         Assert.Equal(99L, Assert.IsType<EchoRequest>(decoded).ClientTimestamp);
     }
+
+    [Fact]
+    public void Roundtrip_WorldSnapshot_Preserves_Health_And_Defending()
+    {
+        var source = new WorldSnapshot
+        {
+            Tick = 7u,
+            ServerTimestamp = 123L,
+            Entities =
+            {
+                new EntitySnapshot
+                {
+                    PlayerId = 2L,
+                    FieldMask = (ushort)(EntityFieldMask.Health | EntityFieldMask.Defending),
+                    Hp = 42.5f,
+                    MaxHp = 100f,
+                    IsDefending = true,
+                    Tick = 7u
+                }
+            }
+        };
+
+        var bytes = MessageCodec.EncodeToArray(MessageId.WorldSnapshot, source);
+        var (_, decoded) = MessageCodec.Decode(bytes);
+        var snapshot = Assert.IsType<WorldSnapshot>(decoded);
+        var entity = Assert.Single(snapshot.Entities);
+        Assert.Equal(42.5f, entity.Hp, 4);
+        Assert.Equal(100f, entity.MaxHp, 4);
+        Assert.True(entity.IsDefending);
+    }
+
+    [Fact]
+    public void Roundtrip_CastBroadcast_Preserves_Impact_And_Charge()
+    {
+        var source = new CastBroadcast
+        {
+            SkillId = 20004, CasterPlayerId = 3L,
+            ImpactX = 1f, ImpactY = 0f, ImpactZ = 9f,
+            ChargeProgress = 0.75f,
+            Shape = new HitShape { ShapeType = 1, AreaRadius = 2f }
+        };
+
+        var bytes = MessageCodec.EncodeToArray(MessageId.CastBroadcast, source);
+        var (_, decoded) = MessageCodec.Decode(bytes);
+        var cast = Assert.IsType<CastBroadcast>(decoded);
+        Assert.Equal(1f, cast.ImpactX, 4);
+        Assert.Equal(9f, cast.ImpactZ, 4);
+        Assert.Equal(0.75f, cast.ChargeProgress, 4);
+    }
 }

@@ -201,6 +201,39 @@ namespace Cool.Protocol.Tests
                 "SourceKind 必须挂在 tag 8（1..7 是已发布的 wire 契约）");
         }
 
+        [Test]
+        public void EntitySnapshot_Carries_Health_And_Defending_With_Mask_Bits()
+        {
+            var hp = typeof(Cool.Protocol.EntitySnapshot).GetProperty("Hp");
+            var maxHp = typeof(Cool.Protocol.EntitySnapshot).GetProperty("MaxHp");
+            var def = typeof(Cool.Protocol.EntitySnapshot).GetProperty("IsDefending");
+            Assert.IsNotNull(hp); Assert.IsNotNull(maxHp); Assert.IsNotNull(def);
+            Assert.AreEqual(typeof(float), hp!.PropertyType);
+            Assert.AreEqual(typeof(float), maxHp!.PropertyType);
+            Assert.AreEqual(typeof(bool), def!.PropertyType);
+            Assert.AreEqual(13, GetProtoMemberTag(hp));
+            Assert.AreEqual(14, GetProtoMemberTag(maxHp));
+            Assert.AreEqual(15, GetProtoMemberTag(def));
+            Assert.IsTrue(System.Enum.IsDefined(typeof(Cool.Protocol.EntityFieldMask), (ushort)(1 << 7)),
+                "Health 必须占 1 << 7");
+            Assert.IsTrue(System.Enum.IsDefined(typeof(Cool.Protocol.EntityFieldMask), (ushort)(1 << 8)),
+                "Defending 必须占 1 << 8");
+        }
+
+        [Test]
+        public void CastBroadcast_Carries_Impact_And_Charge()
+        {
+            var x = typeof(Cool.Protocol.CastBroadcast).GetProperty("ImpactX");
+            var y = typeof(Cool.Protocol.CastBroadcast).GetProperty("ImpactY");
+            var z = typeof(Cool.Protocol.CastBroadcast).GetProperty("ImpactZ");
+            var c = typeof(Cool.Protocol.CastBroadcast).GetProperty("ChargeProgress");
+            Assert.IsNotNull(x); Assert.IsNotNull(y); Assert.IsNotNull(z); Assert.IsNotNull(c);
+            Assert.AreEqual(10, GetProtoMemberTag(x!));
+            Assert.AreEqual(11, GetProtoMemberTag(y!));
+            Assert.AreEqual(12, GetProtoMemberTag(z!));
+            Assert.AreEqual(13, GetProtoMemberTag(c!));
+        }
+
         /// <summary>
         /// 按名字认 [ProtoMember]：本测试程序集引用不到 protobuf-net 插件（Unity 不给它自动引用
         /// 预编译 DLL，GameSys.EditorTests.csproj 里没有该 Reference），所以不能写 ProtoBuf.ProtoMemberAttribute。

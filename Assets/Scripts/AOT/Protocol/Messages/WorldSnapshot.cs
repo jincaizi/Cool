@@ -24,7 +24,11 @@ namespace Cool.Protocol
         /// 实体是否已死（D-N1：用 Dead 而非 Alive——protobuf 零默认让"活着"不占字节）。
         /// 每次快照都置位（D-N2）：存活是**状态**不是事件，新观察者首帧就要知道。
         /// </summary>
-        Dead = 1 << 6
+        Dead = 1 << 6,
+        /// <summary>Hp / MaxHp 有效（只加不删：新字段追加高位）</summary>
+        Health = 1 << 7,
+        /// <summary>IsDefending 有效</summary>
+        Defending = 1 << 8
     }
 
     /// <summary>
@@ -86,6 +90,13 @@ namespace Cool.Protocol
         /// <summary>实体是否已死（服务器权威；仅在 FieldMask 的 Dead 位被置位时有效）</summary>
         [ProtoMember(12)]
         public bool Dead { get; set; }
+
+        /// <summary>服务端权威血量（FieldMask.Health 置位时有效）</summary>
+        [ProtoMember(13)] public float Hp { get; set; }
+        /// <summary>服务端权威最大血量（FieldMask.Health 置位时有效）</summary>
+        [ProtoMember(14)] public float MaxHp { get; set; }
+        /// <summary>是否防御中（FieldMask.Defending 置位时有效）</summary>
+        [ProtoMember(15)] public bool IsDefending { get; set; }
     }
 
     /// <summary>
