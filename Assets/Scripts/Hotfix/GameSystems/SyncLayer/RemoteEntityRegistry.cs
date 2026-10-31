@@ -45,6 +45,12 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly IReadOnlyList<AppearanceEntry>? _appearances;
         /// <summary>怪物模型目录（templateId → prefab，宿主接线）——null 或未命中时怪物退化为球体占位，见 CreateView</summary>
         private readonly IReadOnlyDictionary<int, GameObject>? _npcPrefabs;
+        /// <summary>怪物显示名（templateId → 名字）——未配置时退回 "怪物 {templateId}"</summary>
+        private readonly IReadOnlyDictionary<int, string>? _npcDisplayNames;
+        /// <summary>名牌/血条注入点（任务 7 接线）——null = 不建名牌（测试宿主默认走这条）</summary>
+        private readonly INetworkLabelSink? _labelSink;
+        /// <summary>玩家名解析（名册未命中返回 null ⇒ 视图退回 "玩家 {id}"）</summary>
+        private readonly System.Func<long, string?>? _playerNameResolver;
         private readonly NpcAttackSchedule _attacks = new NpcAttackSchedule();
         /// <summary>本帧到点的挥砍（Drain 的契约是**只追加**、不清空调用方列表，所以每帧复用它、先 Clear）</summary>
         private readonly List<NpcAttackSchedule.DueAttack> _dueAttacks = new List<NpcAttackSchedule.DueAttack>();
@@ -95,6 +101,11 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>当前视图实体 ID 集合（T7 AOI 验收统计用）</summary>
         public IEnumerable<long> PlayerIds => _views.Keys;
 
+        /// <summary>新视图建立（**已进注册表**——订阅者可直接 GetView）</summary>
+        public event System.Action<long>? ViewCreated;
+        /// <summary>视图移除（名牌已注销、Targetable 已标死亡）——表现系统据此清理，不靠轮询</summary>
+        public event System.Action<long>? ViewRemoved;
+
         /// <param name="appearances">
         /// 玩家类实体（真人与 bot）的外观目录。**省略 = 全部退化为胶囊占位**
         /// （未接线的测试宿主与场景走这条，与怪物分支同款"缺配置即降级"）。
@@ -103,13 +114,22 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 怪物模型目录：templateId → 预制体（宿主从 `ClientNetworkHost._npcPrefabs` 建表传入）。
         /// 省略/未命中 = 球体占位（未接线的测试宿主与场景走这条）——与玩家类分支同款"缺配置即降级"。
         /// </param>
+        /// <param name="npcDisplayNames">怪物显示名（templateId → 名字）；省略/未命中 = "怪物 {templateId}"。</param>
+        /// <param name="labelSink">名牌/血条注入点；省略 = 不建名牌（测试宿主与任务 7 之前的生产接线）。</param>
+        /// <param name="playerNameResolver">玩家名解析（名册）；省略 = "玩家 {id}"。</param>
         public RemoteEntityRegistry(Transform root,
             IReadOnlyList<AppearanceEntry>? appearances = null,
-            IReadOnlyDictionary<int, GameObject>? npcPrefabs = null)
+            IReadOnlyDictionary<int, GameObject>? npcPrefabs = null,
+            IReadOnlyDictionary<int, string>? npcDisplayNames = null,
+            INetworkLabelSink? labelSink = null,
+            System.Func<long, string?>? playerNameResolver = null)
         {
             _root = root;
             _appearances = appearances;
             _npcPrefabs = npcPrefabs;
+            _npcDisplayNames = npcDisplayNames;
+            _labelSink = labelSink;
+            _playerNameResolver = playerNameResolver;
         }
 
         /// <summary>
@@ -118,10 +138,12 @@ namespace Hotfix.GameSystems.SyncLayer
         /// </summary>
         public void ApplySnapshot(EntitySnapshot snapshot, long serverTicks)
         {
+            bool created = false;
             if (!_views.TryGetValue(snapshot.PlayerId, out var view))
             {
                 view = CreateView(snapshot.PlayerId, snapshot);
                 _views[snapshot.PlayerId] = view;
+                created = true;
             }
 
             // P5：Npc 动作状态（占位期仅存储供测试/上层观察——动画表现随真实模型 backlog）。
@@ -133,9 +155,28 @@ namespace Hotfix.GameSystems.SyncLayer
             // 已在视野内的观察者最多要等 4 tick（≈264ms）的静止保活窗口才看到它翻位，
             // 所以这里每次都推给动画驱动，由驱动自行幂等去重（"读状态"而不是"读变化"）。
             view.Dead = snapshot.Dead;
-            // 只在 Full 档驱动：降档后写参数是白费（且 Animator 已随 FullRoot 禁用）
+
+            // T6：权威 vitals 落到视图与只读 Targetable（只按 FieldMask 取新值，未置位沿用 last-known）
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Health) != 0)
+            {
+                view.Hp = snapshot.Hp;
+                view.MaxHp = snapshot.MaxHp;
+            }
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Defending) != 0)
+                view.IsDefending = snapshot.IsDefending;
+
+            view.Targetable.SetVitals(view.Hp, view.MaxHp, snapshot.Dead);
+            if (view.Kind != (byte)EntityKind.PlayerBot)
+                _labelSink?.UpdateHp(snapshot.PlayerId, view.Targetable.HPPercent);
+
+            // 玩家视图只认 Dead/Defending：ActionState 是 Npc 的语言（服务端对玩家恒 0，
+            // 写它会清掉事件驱动的受击/攻击表现）。死亡状态**无条件**同步给驱动（含 Proxy 档）：
+            // 驱动对象降档时仍存活，升档 Reapply 读的正是它锁存的 _dead。
+            view.Animator?.ApplySnapshotState(snapshot.Dead);
             if (view.Tier == RemoteTier.Full)
-                view.Animator?.Apply(snapshot.ActionState, snapshot.Dead);
+                view.Animator?.SetDefending(view.IsDefending);
+
+            if (created) ViewCreated?.Invoke(snapshot.PlayerId);
 
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Position) != 0)
             {
@@ -207,6 +248,9 @@ namespace Hotfix.GameSystems.SyncLayer
                         kv.Value.Position = snapped;
                     }
                 }
+
+                // T6：选中环/血条读的是**渲染位置**（含 Npc 落地吸附后的 y），每帧同步
+                kv.Value.Targetable.SetPosition(kv.Value.Position);
 
                 if (kv.Value.NpcAnimator != null
                     && TrySampleNpcState(kv.Key, renderAt, out var sampled, out var sampledDead))
@@ -324,7 +368,11 @@ namespace Hotfix.GameSystems.SyncLayer
                 // 只"失效"的话重写要等下一条快照——静止实体保活 4 tick（≈264ms），而
                 // `m_KeepAnimatorStateOnDisable=0` 会把 Animator 重置 ⇒ 死亡/受击中的实体
                 // 从 Proxy 升 Full 时会先站直最多 264ms。游标刚被 InvalidateDedup 置 -1，必定写下去。
-                view.Animator.Apply(view.ActionState, view.Dead);
+                // 新驱动的 `_dead` 初始为 false（Proxy 档期间 `view.Animator` 尚不存在，没收到快照），
+                // 必须先播种视图锁存的权威状态，Reapply 才能把死亡阶段重放出来。
+                view.Animator.ApplySnapshotState(view.Dead);
+                view.Animator.Reapply();
+                view.Animator.SetDefending(view.IsDefending);
             }
             else
             {
@@ -370,8 +418,12 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             if (_views.TryGetValue(playerId, out var view))
             {
-                DestroyView(view.GameObject);
                 _views.Remove(playerId);
+                if (view.Kind != (byte)EntityKind.PlayerBot)
+                    _labelSink?.Unregister(playerId);   // 与注册同口径：bot 从未注册
+                view.Targetable.MarkRemoved();
+                ViewRemoved?.Invoke(playerId);
+                DestroyView(view.GameObject);
                 _interpolator.Remove(playerId); // 插值缓冲同步清理（防重连同 ID 残留旧样本）
                 _attacks.Clear(playerId); // 待播挥砍同步清理（视图没了，没人可驱动）
                 _lastKnownYaw.Remove(playerId);
@@ -384,8 +436,18 @@ namespace Hotfix.GameSystems.SyncLayer
 
         public void Clear()
         {
-            foreach (var view in _views.Values)
+            // 先取 id 快照：ViewRemoved 的订阅者可能回调 Remove，直接 foreach 会撞集合修改
+            var ids = new List<long>(_views.Keys);
+            foreach (var id in ids)
+            {
+                if (!_views.TryGetValue(id, out var view)) continue;
+                _views.Remove(id);
+                if (view.Kind != (byte)EntityKind.PlayerBot)
+                    _labelSink?.Unregister(id);
+                view.Targetable.MarkRemoved();
+                ViewRemoved?.Invoke(id);
                 DestroyView(view.GameObject);
+            }
             _views.Clear();
             _interpolator.Clear();
             _attacks.ClearAll(); // 与视图同生共死：宿主销毁/退出世界后不得再播任何挥砍
@@ -397,6 +459,19 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>读远程实体视图（T6 验收断言用；无视图返回 null）</summary>
         public RemoteEntityView? GetView(long playerId)
             => _views.TryGetValue(playerId, out var view) ? view : null;
+
+        /// <summary>
+        /// 名册更新（主线程）→ 已存在的视图与名牌。视图尚未建立时是无操作——
+        /// 建立时会经 `playerNameResolver` 取到当时的名册值。
+        /// </summary>
+        public void UpdatePlayerName(long playerId, string displayName)
+        {
+            if (!_views.TryGetValue(playerId, out var view)) return;
+            view.DisplayName = displayName;
+            view.Targetable.SetDisplayName(displayName);
+            if (view.Kind != (byte)EntityKind.PlayerBot)
+                _labelSink?.UpdateName(playerId, displayName);
+        }
 
         /// <summary>
         /// 视图销毁（双态：运行时延迟 Destroy；EditMode 测试无播放上下文——
@@ -505,7 +580,51 @@ namespace Hotfix.GameSystems.SyncLayer
             return t == TerrainRoot || t.IsChildOf(TerrainRoot);
         }
 
+        /// <summary>
+        /// 建视图并初始化 T6 表现数据（vitals / 只读 Targetable / 名牌）。
+        /// 名字：Npc 用宿主配置的名字表（未配置 = "怪物 {templateId}"）；玩家类用名册解析
+        /// （未命中 = "玩家 {id}"）——都不能等视图建好才有名字，任务 7 的名牌在创建当帧就要摆对。
+        /// </summary>
         private RemoteEntityView CreateView(long playerId, EntitySnapshot snapshot)
+        {
+            var view = BuildView(playerId, snapshot);
+
+            string displayName;
+            if (snapshot.Kind == (byte)EntityKind.Npc)
+            {
+                displayName = _npcDisplayNames != null
+                    && _npcDisplayNames.TryGetValue(snapshot.TemplateId, out var npcName)
+                    ? npcName
+                    : "怪物 " + snapshot.TemplateId;
+            }
+            else
+            {
+                displayName = _playerNameResolver?.Invoke(playerId) ?? "玩家 " + playerId;
+            }
+
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Health) != 0)
+            {
+                view.Hp = snapshot.Hp;
+                view.MaxHp = snapshot.MaxHp;
+            }
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Defending) != 0)
+                view.IsDefending = snapshot.IsDefending;
+
+            var targetable = new NetworkTargetable(playerId, displayName);
+            targetable.SetVitals(view.Hp, view.MaxHp, snapshot.Dead);
+            view.Targetable = targetable;
+            view.DisplayName = displayName;
+
+            if (snapshot.Kind != (byte)EntityKind.PlayerBot)
+            {
+                _labelSink?.Register(playerId, view.GameObject.transform, displayName);
+                _labelSink?.UpdateHp(playerId, targetable.HPPercent); // 首帧直接用快照 HP，不显示 0
+            }
+
+            return view;
+        }
+
+        private RemoteEntityView BuildView(long playerId, EntitySnapshot snapshot)
         {
             // 怪物：宿主接线的目录命中 → 真模型 + 动画驱动；未命中/未接线 → 球体降级
             // （与真人分支同款"缺配置即降级"，名字都携带实体身份与模板 id）。
@@ -633,6 +752,16 @@ namespace Hotfix.GameSystems.SyncLayer
         public byte ActionState { get; set; }
         /// <summary>服务端权威存活状态（D-N1：命名 Dead——protobuf 零默认让"活着"不占字节）</summary>
         public bool Dead { get; set; }
+        /// <summary>服务端权威当前血量（最近一次带 Health 位的快照）</summary>
+        public float Hp { get; set; }
+        /// <summary>服务端权威最大血量</summary>
+        public float MaxHp { get; set; }
+        /// <summary>服务端权威防御状态（最近一次带 Defending 位的快照）</summary>
+        public bool IsDefending { get; set; }
+        /// <summary>显示名（Npc = 宿主配置/模板 id；玩家类 = 名册解析/玩家 id）</summary>
+        public string DisplayName { get; set; } = string.Empty;
+        /// <summary>只读选中适配器（不实现 IDamageable——本地伤害链够不到远程视图）</summary>
+        public NetworkTargetable Targetable { get; set; } = null!;
         /// <summary>当前档位（null = 表现尚未建立：无 Full 资产的纯降级占位视图）。
         /// **注意**：这种视图被 SetTier 碰过之后会落到 `Proxy`（没有 Full 资产时升档分支
         /// 如实退回 Proxy，见 SetTier）——所以 `Tier == null` 只说明"从未参与过换档"，

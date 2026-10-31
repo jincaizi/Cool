@@ -70,6 +70,8 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             public int TemplateId;
             public GameObject Prefab;
+            /// <summary>名牌显示名；留空 = registry 退回 "怪物 {templateId}"</summary>
+            public string DisplayName;
         }
 
         [Header("怪物模型（templateId → prefab；留空则该 template 退化为球体占位）")]
@@ -138,11 +140,20 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (entry != null && entry.Prefab != null)
                     catalog[entry.TemplateId] = entry.Prefab;
 
+            // 怪物显示名：只收配置了名字的条目；空表 = registry 退回 "怪物 {templateId}"
+            var npcDisplayNames = new Dictionary<int, string>();
+            foreach (var entry in _npcPrefabs)
+                if (entry != null && !string.IsNullOrEmpty(entry.DisplayName))
+                    npcDisplayNames[entry.TemplateId] = entry.DisplayName;
+
             _remoteEntities = new RemoteEntityRegistry(root.transform,
                 _appearances.Length > 0
                     ? _appearances
                     : new[] { new AppearanceEntry { Id = 0, Full = _playerAvatarPrefab } },
-                catalog.Count > 0 ? catalog : null);
+                catalog.Count > 0 ? catalog : null,
+                npcDisplayNames.Count > 0 ? npcDisplayNames : null,
+                labelSink: null,                       // 任务 7 接线
+                playerNameResolver: ResolvePlayerName);
 
             // Npc 视图落地吸附的采样掩码（服务端布局 y≡0 ⇒ 客户端贴地形，见 RemoteEntityRegistry.GroundY）
             _remoteEntities.GroundMask = _npcGroundMask;
@@ -337,6 +348,8 @@ namespace Hotfix.GameSystems.SyncLayer
             _manager = new ClientNetworkManager(_adapter, _remoteEntities, resolvedUser);
             _manager.OnEnterWorld += HandleEnterWorld;
             _manager.OnDisconnected += HandleDisconnected;
+            // 名字名册（主线程落库）→ 已存在的远程视图/名牌；晚到的视图由 resolver 自查名册
+            _manager.Names.OnNameChanged += HandlePlayerNameChanged;
             // 连接失败/登录被拒必须留日志——否则"无异常"会被误读为"已连上"（验收假阳性）
             _manager.OnError += HandleError;
             // N5：服务端复活——被复活者本人唯一的"你活了"信号（本地玩家不在自己的 AOI 快照里）
@@ -457,8 +470,12 @@ namespace Hotfix.GameSystems.SyncLayer
         public void Disconnect()
         {
             ResetAttachment();
-            _manager?.Dispose();
-            _manager = null;
+            if (_manager != null)
+            {
+                _manager.Names.OnNameChanged -= HandlePlayerNameChanged;
+                _manager.Dispose();
+                _manager = null;
+            }
             _adapter = null;
             _connectRequested = false;
             _inWorld = false;
@@ -525,6 +542,18 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             _inWorld = true;
             OnEnterWorld?.Invoke();
+        }
+
+        /// <summary>名册变化（主线程，`ClientNetworkManager.Update` 落库后触发）</summary>
+        private void HandlePlayerNameChanged(long playerId, string displayName)
+            => _remoteEntities?.UpdatePlayerName(playerId, displayName);
+
+        /// <summary>建视图时查名册——名册可能先于快照到达（登录名册就是这种顺序）</summary>
+        private string? ResolvePlayerName(long playerId)
+        {
+            if (_manager != null && _manager.Names.TryGetName(playerId, out var name))
+                return name;
+            return null;
         }
 
         /// <summary>
@@ -662,6 +691,7 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 _manager.OnEnterWorld -= HandleEnterWorld;
                 _manager.OnServerRespawn -= HandleServerRespawn;
+                _manager.Names.OnNameChanged -= HandlePlayerNameChanged;
                 _manager.Dispose();
                 _manager = null;
             }

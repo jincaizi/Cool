@@ -396,17 +396,6 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// 兼容垫片：registry 在任务 6 接线前仍走旧入口。玩家快照的 `ActionState` 恒 0，
-        /// 这里只认 `Dead`（受击/攻击由事件驱动）。**任务 6 改接 `ApplySnapshotState` 后删除。**
-        /// 刷新是无条件的：升档重新启用 Animator 后，必须当场回放锁存的死亡/格挡状态。
-        /// </summary>
-        internal void Apply(byte actionState, bool dead)
-        {
-            ApplySnapshotState(dead);
-            RefreshLayers();
-        }
-
-        /// <summary>
         /// 行走动画（design §4 行走动画映射；速度由 registry 从渲染位移反推后传入）。
         ///
         /// 三个参数的分工照抄本地契约（`FSMManager.UpdateBlendParameter` / `CharacterController`）：

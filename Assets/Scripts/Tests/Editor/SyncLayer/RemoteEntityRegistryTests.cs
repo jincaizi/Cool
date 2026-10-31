@@ -283,6 +283,148 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.IsFalse(dead);
         }
 
+        [Test]
+        public void Snapshot_Vitals_Update_View_And_Targetable()
+        {
+            var root = new GameObject("VitalsRoot");
+            var registry = new RemoteEntityRegistry(root.transform);
+            try
+            {
+                var snap = new EntitySnapshot
+                {
+                    PlayerId = 9L,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Health | EntityFieldMask.Defending),
+                    X = 0, Z = 0,
+                    Hp = 35f, MaxHp = 100f, IsDefending = true
+                };
+                registry.ApplySnapshot(snap, serverTicks: 1_000L);
+                var view = registry.GetView(9L);
+                Assert.IsNotNull(view);
+                Assert.AreEqual(35f, view!.Hp, 0.001f);
+                Assert.AreEqual(100f, view.MaxHp, 0.001f);
+                Assert.IsTrue(view.IsDefending);
+                Assert.AreEqual(35, view.Targetable.CurrentHP);
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        /// <summary>
+        /// 名牌注入点（`INetworkLabelSink`）只给**玩家与 Npc**建名牌：bot 走玩家伤害路径，
+        /// 但没有名字名册（服务端不发 bot 的 PlayerEnterRoom），所以注册与注销都跳过它。
+        /// 视图销毁必须注销名牌并发 ViewRemoved——表现系统靠这两个事件清理，不能靠轮询。
+        /// </summary>
+        [Test]
+        public void Label_Sink_Covers_Players_And_Npcs_But_Skips_Bots_And_Cleans_Up()
+        {
+            var prefab = new GameObject("LabelAvatar");
+            prefab.AddComponent<Animator>();
+            var root = new GameObject("LabelRoot");
+            var sink = new RecordingLabelSink();
+            var registry = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = prefab } },
+                npcPrefabs: null, npcDisplayNames: null, labelSink: sink);
+            var created = new List<long>();
+            var removed = new List<long>();
+            registry.ViewCreated += id => created.Add(id);
+            registry.ViewRemoved += id => removed.Add(id);
+            try
+            {
+                registry.ApplySnapshot(Snap(10, 0, 0), serverTicks: 1_000L);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 11,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                    Kind = (byte)EntityKind.PlayerBot
+                }, serverTicks: 1_000L);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 12,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind
+                        | EntityFieldMask.TemplateId),
+                    Kind = (byte)EntityKind.Npc, TemplateId = 2
+                }, serverTicks: 1_000L);
+
+                CollectionAssert.AreEquivalent(new long[] { 10, 11, 12 }, created,
+                    "每个新视图都发 ViewCreated");
+                CollectionAssert.AreEquivalent(new long[] { 10, 12 }, sink.Registered,
+                    "名牌只给玩家与 Npc；bot 跳过");
+                Assert.AreEqual("玩家 10", sink.Names[10], "无名册时按 id 退化");
+                Assert.AreEqual("怪物 2", sink.Names[12], "未配置名字表时 Npc 按模板 id 退化");
+
+                registry.Remove(12);
+                CollectionAssert.Contains(removed, 12L, "Remove 要发 ViewRemoved");
+                CollectionAssert.Contains(sink.Unregistered, 12L, "Remove 要注销名牌");
+
+                registry.Clear();
+                CollectionAssert.AreEquivalent(new long[] { 10, 12 }, sink.Unregistered,
+                    "已注册的名牌都必须注销（bot 从未注册，不该被注销）");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
+            }
+        }
+
+        [Test]
+        public void UpdatePlayerName_Reaches_View_Targetable_And_Label_Sink()
+        {
+            var prefab = new GameObject("NameAvatar");
+            prefab.AddComponent<Animator>();
+            var root = new GameObject("NameRoot");
+            var sink = new RecordingLabelSink();
+            var registry = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = prefab } },
+                npcPrefabs: null, npcDisplayNames: null, labelSink: sink,
+                playerNameResolver: id => id == 20L ? "Alice" : null);
+            try
+            {
+                registry.ApplySnapshot(Snap(20, 0, 0), serverTicks: 1_000L);
+                var view = registry.GetView(20)!;
+                Assert.AreEqual("Alice", view.DisplayName, "创建视图时用名册解析");
+                Assert.AreEqual("Alice", view.Targetable.DisplayName);
+                Assert.AreEqual("Alice", sink.Names[20]);
+
+                registry.UpdatePlayerName(20, "Bob");
+                Assert.AreEqual("Bob", view.DisplayName);
+                Assert.AreEqual("Bob", view.Targetable.DisplayName);
+                Assert.AreEqual("Bob", sink.Names[20]);
+
+                Assert.DoesNotThrow(() => registry.UpdatePlayerName(999, "Ghost"),
+                    "名册可能先于视图到达——未知 id 必须是无操作");
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
+            }
+        }
+
+        private sealed class RecordingLabelSink : INetworkLabelSink
+        {
+            public readonly List<long> Registered = new List<long>();
+            public readonly List<long> Unregistered = new List<long>();
+            public readonly Dictionary<long, string> Names = new Dictionary<long, string>();
+
+            public void Register(long entityId, Transform owner, string displayName)
+            {
+                Registered.Add(entityId);
+                Names[entityId] = displayName;
+            }
+
+            public void UpdateName(long entityId, string displayName) => Names[entityId] = displayName;
+
+            public void UpdateHp(long entityId, float percent) { }
+
+            public void Unregister(long entityId) => Unregistered.Add(entityId);
+        }
+
         /// <summary>
         /// ORCA 半径真值源（design 任务 8；2026-10-13 **人类裁定改锚**）：服务端 `BotRunner.BotRadius`
         /// 必须等于**客户端角色预制体根上的 `CharacterController.radius`**——那是项目对"角色身体半径"

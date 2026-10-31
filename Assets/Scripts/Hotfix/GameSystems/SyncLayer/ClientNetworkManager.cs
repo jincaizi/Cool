@@ -25,6 +25,9 @@ namespace Hotfix.GameSystems.SyncLayer
             new System.Collections.Concurrent.ConcurrentQueue<WorldSnapshot>();
         private readonly System.Collections.Concurrent.ConcurrentQueue<long> _pendingLeaves =
             new System.Collections.Concurrent.ConcurrentQueue<long>();
+        private readonly PlayerNameRegistry _names = new PlayerNameRegistry();
+        private readonly System.Collections.Concurrent.ConcurrentQueue<(long id, string name)> _pendingNames =
+            new System.Collections.Concurrent.ConcurrentQueue<(long id, string name)>();
         private readonly System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse> _pendingResponses =
             new System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse>();
         private MovementReporter? _reporter;
@@ -41,6 +44,9 @@ namespace Hotfix.GameSystems.SyncLayer
         public long ClockSmoothedOffsetTicks => _clockSync.SmoothedOffsetTicks;
         public Vector3 SpawnPosition { get; private set; }
         public MovementReporter? Reporter => _reporter;
+
+        /// <summary>玩家名册（主线程数据源——`PlayerEnterRoom` 在网络线程只入队）</summary>
+        public PlayerNameRegistry Names => _names;
 
         public event Action? OnEnterWorld;
         public event Action<string>? OnDisconnected;
@@ -69,6 +75,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _dispatcher.Subscribe(MessageId.LoginResponse, OnLoginResponse);
             _dispatcher.Subscribe(MessageId.ClockSyncResponse, OnClockSyncResponse);
             _dispatcher.Subscribe(MessageId.WorldSnapshot, OnWorldSnapshot);
+            _dispatcher.Subscribe(MessageId.PlayerEnterRoom, OnPlayerEnter);
             _dispatcher.Subscribe(MessageId.PlayerLeaveRoom, OnPlayerLeave);
             _dispatcher.Subscribe(MessageId.RespawnNotice, OnRespawnNotice);
 
@@ -161,9 +168,14 @@ namespace Hotfix.GameSystems.SyncLayer
                 }
             }
 
+            // 主线程消费名册（网络线程只入队：名册被名牌/选中系统跨线程读）
+            while (_pendingNames.TryDequeue(out var pending))
+                _names.Set(pending.id, pending.name);
+
             // 主线程消费离场通知（Object.Destroy 必须主线程，同快照封送机制）
             while (_pendingLeaves.TryDequeue(out var playerId))
             {
+                _names.Remove(playerId);
                 _remoteEntities.Remove(playerId);
             }
 
@@ -244,6 +256,13 @@ namespace Hotfix.GameSystems.SyncLayer
             }
         }
 
+        private void OnPlayerEnter(IMessage message)
+        {
+            // 回调线程（网络驱动）只入队；名册写入留主线程 Update
+            var enter = (PlayerEnterRoom)message;
+            _pendingNames.Enqueue((enter.PlayerId, enter.PlayerName));
+        }
+
         private void OnPlayerLeave(IMessage message)
         {
             // 回调线程（网络驱动）只入队；Unity API 消费留主线程 Update
@@ -271,6 +290,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _client.Disconnected -= OnSocketDisconnected;
             _client.Error -= OnTransportError;
             _remoteEntities.Clear();
+            _names.Clear();
             _client.Dispose();
         }
     }
