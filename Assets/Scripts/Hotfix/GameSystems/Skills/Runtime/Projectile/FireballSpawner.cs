@@ -21,12 +21,13 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
         private static Transform _container;
         private static bool _ownsContainer;
 
-        public static void Spawn(ProjectileSkillData data, DamageBlock damage, Vector3 origin, Vector3 direction)
+        public static FireballProjectile Spawn(ProjectileSkillData data, DamageBlock damage,
+            Vector3 origin, Vector3 direction)
         {
             if (data == null || data.ProjectilePrefab == null)
             {
                 Debug.LogWarning("[FireballSpawner] data or prefab is null, skip spawn");
-                return;
+                return null;
             }
 
             if (_root == null || _pool == null)
@@ -35,7 +36,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
                 if (prefabComp == null)
                 {
                     Debug.LogWarning("[FireballSpawner] prefab missing FireballProjectile component, skip spawn");
-                    return;
+                    return null;
                 }
 
                 if (_container == null)
@@ -56,6 +57,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
 
             var fb = _pool.Get();
             fb.OnSpawn(data, damage, origin, direction, _pool);
+            return fb;
         }
 
         /// <summary>测试专用：清空静态池状态（避免 EditMode 测试间串扰）</summary>

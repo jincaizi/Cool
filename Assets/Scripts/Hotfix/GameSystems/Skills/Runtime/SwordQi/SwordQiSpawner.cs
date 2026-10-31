@@ -24,12 +24,12 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
         private static bool _ownsContainer;
         private static readonly List<SwordQiProjectile> _active = new List<SwordQiProjectile>();
 
-        public static void Spawn(SwordQiConfig config, DamageBlock damage, Vector3 origin, Vector3 direction)
+        public static SwordQiProjectile Spawn(SwordQiConfig config, DamageBlock damage, Vector3 origin, Vector3 direction)
         {
             if (config == null || config.Prefab == null)
             {
                 Debug.LogWarning("[SwordQiSpawner] config or prefab is null, skip spawn");
-                return;
+                return null;
             }
 
             if (_root == null || _pool == null)
@@ -38,7 +38,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
                 if (prefabComp == null)
                 {
                     Debug.LogWarning("[SwordQiSpawner] prefab missing SwordQiProjectile component, skip spawn");
-                    return;
+                    return null;
                 }
 
                 if (_container == null)
@@ -61,6 +61,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
             qi.OnSpawn(config, damage, origin, direction, _pool);
             PruneActive();
             _active.Add(qi);
+            return qi;
         }
 
         private static void PruneActive()

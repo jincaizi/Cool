@@ -28,6 +28,8 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
         private bool _released;
         private ComponentPool<FireballProjectile> _pool;
 
+        public bool IsActive => !_released;
+
         public void OnSpawn(ProjectileSkillData data, DamageBlock damage, Vector3 origin, Vector3 direction,
                             ComponentPool<FireballProjectile> pool)
         {
@@ -103,9 +105,19 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
             Explode(nearest, nearest.Transform.position);
         }
 
+        /// <summary>远程表现对齐：把视觉移到服务端命中点后引爆；幂等。</summary>
+        public void ExplodeAt(Vector3 point)
+        {
+            if (_released) return;
+            transform.position = point;
+            if (_data == null) { Release(); return; } // EditMode 测试与降级视觉没有数据源
+            Explode(null, point);
+        }
+
         /// <summary>爆炸：直接目标（可为空 = 落地爆炸）必结算一次；爆炸半径 > 0 时波及周围目标</summary>
         private void Explode(IDamageable directTarget, Vector3 hitPos)
         {
+            if (_released) return;
             if (directTarget != null)
                 ApplyDamage(directTarget);
 
