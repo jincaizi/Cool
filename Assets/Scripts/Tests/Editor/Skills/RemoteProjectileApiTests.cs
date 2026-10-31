@@ -20,10 +20,13 @@ namespace GameSys.EditorTests
         {
             _go = new GameObject("FireballTest");
             var projectile = _go.AddComponent<FireballProjectile>();
+            Assert.IsTrue(projectile.IsActive);
             projectile.ExplodeAt(new Vector3(3f, 0f, 4f));
             Assert.AreEqual(new Vector3(3f, 0f, 4f), _go.transform.position);
             Assert.IsFalse(projectile.IsActive);
             Assert.DoesNotThrow(() => projectile.ExplodeAt(Vector3.zero));
+            Assert.AreEqual(new Vector3(3f, 0f, 4f), _go.transform.position,
+                "二次 ExplodeAt 应被 _released 早退拦截，位置不得回到 (0,0,0)");
         }
     }
 }
