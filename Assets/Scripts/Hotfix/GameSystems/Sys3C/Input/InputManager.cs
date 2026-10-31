@@ -50,6 +50,11 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private bool _skillChargeBlastConsumed;
         private bool _skillMeteorConsumed;
 
+        // 切换目标一次性事件（T 键 / 移动端按钮）—— UI 标志只在消费时清除，
+        // Update 只重置消费锁存，避免 LateUpdate 汇入的按下被下一帧 Update 提前丢掉。
+        private bool _targetSwitchPressedFromUI;
+        private bool _targetSwitchConsumed;
+
         // Attack button hold tracking
         private bool _attackHeld;
         private float _attackHoldStart = -1f;
@@ -79,6 +84,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skillFireballConsumed = false;
             _skillChargeBlastConsumed = false;
             _skillMeteorConsumed = false;
+            _targetSwitchConsumed = false;
             _lastReleaseDuration = -1f;
             _attackJustPressed = false;
             _sprintHeldFromKeyboard = UnityInput.GetKey(KeyCode.LeftShift);
@@ -171,6 +177,29 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// 切换目标按下（一次性事件）— T 键或移动端 UI 按钮。消费一次即返回 false；
+        /// 键盘边沿由 `Update` 每帧重置的去重锁存保证不重复。
+        /// </summary>
+        public bool IsTargetSwitchPressed()
+        {
+            bool pressed = _targetSwitchPressedFromUI || UnityInput.GetKeyDown(KeyCode.T);
+            if (!pressed || _targetSwitchConsumed) return false;
+            _targetSwitchConsumed = true;
+            _targetSwitchPressedFromUI = false;
+            return true;
+        }
+
+        /// <summary>由移动端 UI 按钮调用，置位切换目标的一次性按下（消费后自动清除）。</summary>
+        public void SetTargetSwitchPressedFromUI(bool pressed)
+        {
+            if (pressed)
+            {
+                _targetSwitchPressedFromUI = true;
+                _targetSwitchConsumed = false;
+            }
         }
 
         /// <summary>

@@ -137,6 +137,12 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _inputManager.SetDefendHeld(_buttons.DefendHeld);
             _inputManager.SetJumpPressed(_buttons.JumpPressed);
             _buttons.ConsumeJump();
+
+            if (_buttons.TargetSwitchPressed)
+            {
+                _inputManager.SetTargetSwitchPressedFromUI(true);
+                _buttons.ConsumeTargetSwitch();
+            }
         }
 
         /// <summary>
