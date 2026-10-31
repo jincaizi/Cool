@@ -22,13 +22,18 @@ public class BandwidthBudgetTests
                 {
                     PlayerId = 123, X = 100.5f, Y = 2f, Z = -50.25f,
                     Rotation = 90f, Speed = 8f, ActionState = 0, Tick = 1,
-                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed)
+                    Hp = 100f, MaxHp = 100f, IsDefending = false,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
+                        | EntityFieldMask.Speed | EntityFieldMask.Dead
+                        | EntityFieldMask.Health | EntityFieldMask.Defending)
                 }
             }
         };
         var bytes = MessageCodec.EncodeToArray(MessageId.WorldSnapshot, snapshot, MessageFlags.Reliable);
-        // 头 5B + protobuf 负载——记录实测值供预算常量校准（断言仅为下限防回归膨胀）
-        Assert.InRange(bytes.Length, 20, 120);
+        // 头 5B + protobuf 负载——记录实测值供预算常量校准（断言仅为上下限防回归膨胀/收缩）
+        // T12：新增 Hp/MaxHp/IsDefending 三字段（tag 13–15 + Health/Defending 掩码位）约 +12B，
+        // 上限从 120 抬到 140 作裕量；下限仍为 20（防止字段被误删后测试静默变绿）。
+        Assert.InRange(bytes.Length, 20, 140);
     }
 
     [Fact]

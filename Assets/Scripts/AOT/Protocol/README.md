@@ -31,6 +31,26 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 5     n     protobuf 序列化负载
 ```
 
+## 追加字段记录（只加不删，`ProtocolVersion` 保持 1）
+
+多人战斗一致性（任务 2–12）在既有消息上追加了以下字段，全部是 protobuf 高位 tag /
+位掩码高位，老客户端/老服务端缺字段时读默认零，因此**未升协议版本**：
+
+| 消息 | 追加内容 | tag / 位 | 语义 |
+|---|---|---|---|
+| `EntitySnapshot` | `Hp` / `MaxHp` | tag 13 / 14 | 服务端权威当前/最大血量（负数合法——`ApplyDamage` 不钳制） |
+| `EntitySnapshot` | `IsDefending` | tag 15 | 服务端权威防御姿态 |
+| `EntityFieldMask` | `Health` | `1 << 7` | Hp/MaxHp 有效 |
+| `EntityFieldMask` | `Defending` | `1 << 8` | IsDefending 有效 |
+
+> 快照消费方必须**按掩码位**取值：未置位的字段沿用 last-known，不能用 protobuf 默认值覆盖
+>（beacon 只带位置位时的 `Rotation=0` 就是同一类陷阱，见 `RemoteEntityRegistry.ApplySnapshot`）。
+
+| 消息 | 追加内容 | tag | 语义 |
+|---|---|---|---|
+| `CastBroadcast` | `ImpactX` / `ImpactY` / `ImpactZ` | 10 / 11 / 12 | 服务端裁决的落点（火球爆炸、陨石落点） |
+| `CastBroadcast` | `ChargeProgress` | 13 | 蓄力进度 [0,1]（20004 半径/伤害缩放、20003 表现） |
+
 ## 双端一致性校验（人工/CI 各跑一次）
 
 ```bash
