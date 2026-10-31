@@ -108,12 +108,23 @@ PlayMode：`RemoteRenderBranchTests`、`RemoteHitSnapshotPersistenceTests`（D6�
   （受害者复活时传送回出生点、与其他玩家重叠）；状态映射仍由
   `RemoteEntityAnimatorContractTests` 在真实控制器上覆盖。
 - **390px 竖屏**：移动 UA + 390×844 视口下「切换目标」按钮与技能键不重叠。
+- **远程施法不打断本地技能**：B 的火球（20003）在收到 A 的 Q `CastBroadcast` 期间完成，
+  并命中 A（20 伤害）；服务端与客户端都看到同一帧结果。该轮还修掉了火球的
+  `shape-tampered`——`ProjectileSkillData` 无 `ShapeBlock`，旧代码回退到 `new ShapeBlock()`
+  的默认值（Range 2/Angle 120），被 20003 表项（maxRange=0/maxAngle=0）全部拒掉；
+  已由 `e5db046` 修复，回归测试 `HitShapeConverter_Projectile_Sends_Zero_Shape`。
+- **火球落点**：服务端 `DamageResult.HitX/HitZ` = 受害者位置（与快照一致），施法者与受击者
+  收到同一帧；投射物 VFX 在客户端可见。
+- **格挡**：B 举盾时 A 的普攻 `IsBlocked=true`，伤害 50→15（暴击 75→22.5）。
 
-仍未执行：
+仍未执行 / 已知限制：
 
-- E2E 第 2 条（远程施法不打断本地技能）与第 4 条（火球在服务端命中点爆炸 / 被格挡的剑气
-  在停点停下）未做视觉验证；
-- A 打怪 → C 观察怪物血条 / 受击 / 死亡的验收未执行；
+- **被格挡剑气的停点帧未抓到**：无头 CDP 模拟的右键按住约 4 秒后会被浏览器清掉，第二轮
+  重击时服务端已看到 `IsDefending=false`；停点逻辑由
+  `CombatResolverSwordQiBlockTests`（`ProjectileStopped`/`StopPosition`）与
+  `OnDamageResult_ProjectileStopped_*` 覆盖。
+- A 打怪 → C 观察怪物血条 / 受击 / 死亡的验收**未完成**：本轮 A 走到怪前被四只怪连续命中，
+  攻击输入被受击状态吃掉；观察者侧已确认能收到怪物 → 玩家的 `DamageResult` 扩播。
 - 浏览器 E2E 清单其余条目见
   [`task-12-report.md`](../../../../../.superpowers/sdd/2026-10-31-multiplayer-combat-consistency/task-12-report.md)
   第 5 节。
