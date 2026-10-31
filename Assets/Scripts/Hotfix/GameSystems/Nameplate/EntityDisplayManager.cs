@@ -107,6 +107,16 @@ namespace Hotfix.GameSystems.Nameplate
             _nameplate.Register(entityId, owner, config);
         }
 
+        public void RegisterWithHealth(int entityId, Transform owner, NameplateConfig config)
+        {
+            _nameplate.RegisterWithHealth(entityId, owner, config);
+        }
+
+        public void UpdateHealth(int entityId, float percent)
+        {
+            _nameplate.UpdateHealth(entityId, percent);
+        }
+
         public void Unregister(int entityId)
         {
             _nameplate.Unregister(entityId);

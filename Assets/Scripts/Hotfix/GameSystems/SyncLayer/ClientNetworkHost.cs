@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cool.Protocol;
 using Cool.SyncCore;
 using Cysharp.Threading.Tasks;
+using Hotfix.GameSystems.Nameplate;
 using Hotfix.GameSystems.UI;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
@@ -152,7 +153,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     : new[] { new AppearanceEntry { Id = 0, Full = _playerAvatarPrefab } },
                 catalog.Count > 0 ? catalog : null,
                 npcDisplayNames.Count > 0 ? npcDisplayNames : null,
-                labelSink: null,                       // 任务 7 接线
+                labelSink: new NameplateLabelSink(),
                 playerNameResolver: ResolvePlayerName);
 
             // Npc 视图落地吸附的采样掩码（服务端布局 y≡0 ⇒ 客户端贴地形，见 RemoteEntityRegistry.GroundY）
@@ -683,6 +684,29 @@ namespace Hotfix.GameSystems.SyncLayer
             }
             _combatBridge.OnLineProjectileStopped -= HandleLineProjectileStopped;
             _combatBridge = null;
+        }
+
+        /// <summary>
+        /// `INetworkLabelSink` 的生产实现：把 registry 的注册/更名/血量/注销转到场景的单例
+        /// `EntityDisplayManager`。单例不存在（未进世界/测试宿主）时全部静默跳过——注册只发生在
+        /// `RemoteEntityRegistry` 建出真人玩家视图时，bot 在 registry 侧就已被跳过。
+        /// </summary>
+        private sealed class NameplateLabelSink : INetworkLabelSink
+        {
+            public void Register(long entityId, Transform owner, string displayName)
+            {
+                var mgr = EntityDisplayManager.Instance;
+                mgr?.RegisterWithHealth((int)entityId, owner, new NameplateConfig(displayName, showHPBar: true));
+            }
+
+            public void UpdateName(long entityId, string displayName)
+                => EntityDisplayManager.Instance?.UpdateName((int)entityId, displayName);
+
+            public void UpdateHp(long entityId, float percent)
+                => EntityDisplayManager.Instance?.UpdateHealth((int)entityId, percent);
+
+            public void Unregister(long entityId)
+                => EntityDisplayManager.Instance?.Unregister((int)entityId);
         }
 
         private void OnDestroy()

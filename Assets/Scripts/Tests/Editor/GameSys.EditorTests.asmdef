@@ -9,7 +9,8 @@
         "Cool.Protocol",
         "KcpNet",
         "SyncCore",
-        "WebSocketNet"
+        "WebSocketNet",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"
