@@ -109,7 +109,7 @@ Server/Config/
 
 | 期 | 内容 | 验收 |
 |---|---|---|
-| P1 | 导航导出 + 图/A*/漏斗 + 路点跟随 + 巡逻/追击/回巢接入 | 怪物绕岩石/湖岸追击，不穿模、不卡死；无导航时旧测试全绿 |
+| P1 | 导航导出 + 图/A*/漏斗 + 路点跟随 + 巡逻/追击/回巢接入 + 最小目标保持（P2 由 ThreatTable 替换） | 怪物绕岩石/湖岸追击，不穿模、不卡死；无导航时旧测试全绿 |
 | P2 | 顶层模式机 + 仇恨表 + 多技能 + 脱战回巢 | 目标切换、技能选择、脱战重置可单测/可观察 |
 | P3（拆分 3a/3b/3c） | 玩家→怪物的控制/击退/状态 + 快照状态位 + 客户端表现 | 冰冻/眩晕/灼烧/击退服务端裁决、客户端可见 |
 | P3a | Stun/Freeze/Slow + 快照状态位 | 最小控制闭环 |
@@ -158,15 +158,15 @@ header:
   tileCount u16
   areaCount u8
   areaCosts f32[areaCount]
+  vertexCount u32
+  vertices: f32 x,y,z ×vertexCount   // 全局顶点表；y 保留给未来多层地形/投影 tie-break
 
 tile:
   tileX i16
   tileZ i16
-  vertexCount u32
   triangleCount u32
-  vertices:  f32 x,y,z        // y 保留给未来多层地形/投影 tie-break
-  indices:   u32 ×3
-  areas:     u8 ×triangleCount
+  indices: u32 ×3 ×triangleCount     // 全局顶点索引
+  areas:   u8 ×triangleCount
 ```
 
 - 瓦片按 64m XZ 划分；三角面按质心归属；**顶点索引全局唯一**，跨瓦片共享边在运行时自然连通。
