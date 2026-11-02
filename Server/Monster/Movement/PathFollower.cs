@@ -36,7 +36,8 @@ namespace KcpServer.Monster
             return _navigation != null && _navigation.TryProject(point, 2f, out projected, out _);
         }
 
-        public bool HasPath => _path != null && _path.Success;
+        // 状态观察口（Task 7 状态机接入前暂无调用者；HasPath 供卡死/重寻测试观察）。
+        public bool HasPath => _path != null;
         public int WaypointIndex => _index;
 
         public void Tick(MonsterState monster, Vector3 goal, SimpleMoveSystem mover, float deltaTime, uint tick)
@@ -49,7 +50,7 @@ namespace KcpServer.Monster
 
             bool goalMoved = DistanceXZ(goal, _goal) > TargetMoveThreshold;
             bool due = tick >= _nextRepathTick;
-            bool noPath = _path == null || !_path.Success;
+            bool noPath = _path == null;
             if ((noPath || due || goalMoved) && tick >= _nextAttemptTick)
             {
                 var query = new NavQuery(_navigation.MapId, monster.Position, goal, monster.Config.bodyRadius);
@@ -58,8 +59,14 @@ namespace KcpServer.Monster
                     _path = path;
                     _goal = goal;
                     _index = 0;
-                    _nextRepathTick = tick + RepathIntervalTicks;
-                    _nextAttemptTick = tick + RepathIntervalTicks;
+                    // 相位错峰：200 只怪按 npcId 分散首次周期重寻，避免预算被同步波压垮。
+                    // 不推进 _nextAttemptTick——否则 goalMoved 会被 15 tick 间隔闸门挡成死代码；
+                    // goalMoved 自身有 2m 阈值，成功后 _goal 更新即复位，不会每 tick 重寻。
+                    uint phase = (uint)(monster.NpcId % RepathIntervalTicks);
+                    _nextRepathTick = tick + RepathIntervalTicks + phase;
+                    _stuckCheckPosition = monster.Position;
+                    _stuckCheckTick = tick;
+                    _stuckWindows = 0;
                     SkipPassedWaypoints(monster);
                 }
                 else
@@ -69,7 +76,7 @@ namespace KcpServer.Monster
                 }
             }
 
-            if (_path == null || !_path.Success)
+            if (_path == null)
             {
                 mover.MoveTo(monster, goal, deltaTime);
                 return;
@@ -83,8 +90,9 @@ namespace KcpServer.Monster
             }
 
             Vector3 waypoint = _path.Waypoints[_index];
-            Vector3 previous = _index > 0 ? _path.Waypoints[_index - 1] : _path.Waypoints[0];
-            if (DistancePointSegment(monster.Position, previous, waypoint) > 1.5f)
+            // index 0 没有“上一路点”（Waypoints[0] 就是投影起点），线段退化成点：
+            // 起点在 navmesh 外 1.5–2m 时会每 tick 重寻。此时跳过偏离判定，先走向投影起点。
+            if (_index > 0 && DistancePointSegment(monster.Position, _path.Waypoints[_index - 1], waypoint) > 1.5f)
             {
                 _path = null;
                 _nextRepathTick = tick;
