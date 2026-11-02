@@ -18,8 +18,8 @@ namespace KcpServer.Movement
     ///
     /// 2. **速度单位 = 每 tick 位移（米/tick）**，不是 m/s。这样"期望速度 v_pref"就是各移动系统
     ///    原本要走的位移，解算器无邻居时**逐字**返回它 ⇒ 接线后既有行为逐位不变（护栏，见测试
-    ///    <c>No_Neighbors_...</c>）。τ 也是 tick 单位。实体上报的 m/s 经
-    ///    <see cref="_secondsPerTick"/> 换算进来（只影响"邻居被当成多快"，不影响自己的积分）。
+    ///    <c>No_Neighbors_...</c>）。τ 也是 tick 单位。邻居速度取**上一 tick 的实际位移**
+    ///    （米/tick，不再经上报的 m/s 换算）。
     ///
     /// 3. **责任权重 α**：怪物/机器人互相 0.5（两边都在服务端跑同一套解算，各让一半）；
     ///    真人玩家 1.0（服务端改不了客户端权威的速度 ⇒ 智能体全责绕开），且玩家**按零速度障碍**处理
@@ -74,6 +74,8 @@ namespace KcpServer.Movement
         private readonly OrcaSolver _solver;
         private readonly List<SnapshotAgent> _agents = new List<SnapshotAgent>();
         private readonly OrcaNeighbor[] _neighborBuffer = new OrcaNeighbor[MaxNeighbors];
+        private readonly Dictionary<long, (float X, float Z)> _lastPositions = new();
+        private readonly List<long> _stalePositions = new();
 
         private uint _snapshotTick;
         private bool _hasSnapshot;
@@ -95,7 +97,8 @@ namespace KcpServer.Movement
 
         /// <param name="store">世界实体表（唯一真相源：玩家/机器人/怪物都在里面）</param>
         /// <param name="npcRadiusOf">模板 id → 身体半径（怪物侧注入 <c>MonsterModule.RadiusOfTemplate</c>）</param>
-        /// <param name="secondsPerTick">主循环 tick 秒数（0.066）——上报速度 m/s → 米/tick 的换算</param>
+        /// <param name="secondsPerTick">保留参数（历史：上报速度 m/s → 米/tick 的换算；2026-11-02 起
+        /// 邻居速度改用上一 tick 的实际位移，本参数不再参与计算）</param>
         /// <param name="timeHorizonTicks">τ（tick 单位）。解算器 Δt 固定 1 tick（重叠时"一个 tick 内推开"）</param>
         public AvoidanceSystem(EntityStore store, Func<int, float> npcRadiusOf,
             float secondsPerTick = 0.066f, float timeHorizonTicks = 20f)
@@ -126,8 +129,8 @@ namespace KcpServer.Movement
                 // 压测 bot **不算**登录态（D-P5-3），所以上面那条只筛真人 —— 这里按 kind 判参与者
                 bool participates = kind != (byte)EntityKind.Player;
 
-                // 速度：**真人玩家一律按零速度障碍**（规格要求），怪物/机器人取上一 tick flush 的
-                // Speed × 朝向。为什么玩家不用上报速度（2026-10-13 审查裁定，曾在接线时用上报值推过）：
+                // 速度：**真人玩家一律按零速度障碍**（规格要求），怪物/机器人取上一 tick 的实际位移。
+                // 为什么玩家不用上报速度（2026-10-13 审查裁定，曾在接线时用上报值推过）：
                 //   1. `PlayerState.Rotation` 是**角色朝向**，不是移动方向——侧移/后退/转身时两者不同，
                 //      按朝向推速度会把玩家当成"沿面朝方向飞出去"的障碍，约束算错方向；
                 //   2. 上报速度是**客户端可控输入**：报一个大速度朝反方向，就能让智能体"认为 τ 内
@@ -135,12 +138,19 @@ namespace KcpServer.Movement
                 // 代价落在保守侧：玩家真在跑时智能体按"他没动"来让——躲得笨一点，不会穿模
                 //（何况客户端那条 NpcBodyCollider 本来就挡着本地玩家）。
                 float vx = 0f, vz = 0f, speedPerTick = 0f;
-                if (participates)   // 怪物 / 压测机器人：服务端自己写的 Speed + 朝向（朝向 = 移动方向）
+                if (participates)
                 {
-                    float yawRad = e.Rotation * (float)(Math.PI / 180.0);
-                    speedPerTick = e.Speed * _secondsPerTick;
-                    vx = (float)Math.Sin(yawRad) * speedPerTick;
-                    vz = (float)Math.Cos(yawRad) * speedPerTick;
+                    if (_lastPositions.TryGetValue(e.PlayerId, out var last))
+                    {
+                        vx = e.Position.X - last.X;
+                        vz = e.Position.Z - last.Z;
+                        speedPerTick = MathF.Sqrt(vx * vx + vz * vz);
+                    }
+                    _lastPositions[e.PlayerId] = (e.Position.X, e.Position.Z);
+                }
+                else
+                {
+                    _lastPositions.Remove(e.PlayerId);
                 }
                 _agents.Add(new SnapshotAgent
                 {
@@ -157,6 +167,24 @@ namespace KcpServer.Movement
 
             // 按 id 排序：约束顺序只由**世界状态**决定，与字典遍历顺序/历史插入删除无关（确定性）
             _agents.Sort(static (a, b) => a.Id.CompareTo(b.Id));
+
+            if (_snapshotTick % 300 == 0)
+            {
+                _stalePositions.Clear();
+                foreach (var kv in _lastPositions)
+                    if (_store.GetPlayer(kv.Key) == null)
+                        _stalePositions.Add(kv.Key);
+                foreach (long id in _stalePositions) _lastPositions.Remove(id);
+            }
+        }
+
+        /// <summary>测试访问器：快照里某个 id 的速度（米/tick）；不在快照里返回零。</summary>
+        internal (float VX, float VZ) SnapshotVelocityOf(long id)
+        {
+            for (int i = 0; i < _agents.Count; i++)
+                if (_agents[i].Id == id)
+                    return (_agents[i].VX, _agents[i].VZ);
+            return (0f, 0f);
         }
 
         /// <summary>实体身体半径（米；诊断探针也走这里，保证两处口径一致）</summary>

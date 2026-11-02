@@ -5,7 +5,7 @@ namespace KcpServer.Monster
 {
     /// <summary>简单平面移动（旧 Server/AI 移植——Quaternion 数学与 Server/Util 同源）。
     /// 2026-10-13：接上 ORCA 避让——期望位移 → 解算 → 积分。**没有邻居时解算器逐字返回期望位移**，
-    /// 于是本方法的积分结果与接线前逐位相同（顺序/结合都不能动，见 <see cref="MoveTo"/> 注释）。</summary>
+    /// 于是本方法的积分结果与接线前逐位相同（顺序/结合都不能动，见 <see cref="MoveTowards"/> 注释）。</summary>
     public sealed class SimpleMoveSystem
     {
         private const float RotationSpeed = 180f; // 度/秒
@@ -20,7 +20,13 @@ namespace KcpServer.Monster
         {
             Vector3 direction = targetPosition - m.Position;
             direction.Y = 0;
+            MoveTowards(m, direction, deltaTime);
+        }
 
+        /// <summary>按方向前进（导航/路径跟随的入口；方向无需归一化）。</summary>
+        public void MoveTowards(MonsterState m, Vector3 direction, float deltaTime)
+        {
+            direction.Y = 0;
             if (direction.X * direction.X + direction.Z * direction.Z < 0.001f)
             {
                 // 到点了（本 tick 不动）：把"当前速度"清零，否则停住再起步那一 tick，ORCA 的半平面
