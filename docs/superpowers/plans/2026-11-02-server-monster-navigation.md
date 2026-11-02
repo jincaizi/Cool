@@ -3388,6 +3388,16 @@ git commit -m "feat(nav): export DemoDay navmesh to server data"
 **文件：**
 - 创建：`Server/Server.Tests/Navigation/DemoDayNavBinTests.cs`
 
+> **执行偏差（2026-11-03）**：本任务实际落为 3 个提交（`2bfbe52` 服务端 `--map` 加载、
+> `8963d47` Unity 导出器 + 覆盖 / 新鲜度测试 + navbin、`1aec910` 验收修正）。
+> 前者分属计划 Task 8 / Task 9，Task 10 单独提交为 `1aec910`（6 文件）：
+> `Server/Server.Tests/Navigation/DemoDayNavBinTests.cs`（新增）、`Server/Monster/MonsterModule.cs`
+> （SpiderBoss 槽位 (25,20) → (18.333,18.389)，原槽位 clearance 1.50 < bodyRadius 1.74）、
+> `Assets/Scripts/Tests/Editor/Navigation/DemoDayNavBinCoverageTests.cs`（同步槽位）、
+> `docs/superpowers/guides/p5-monster-server.md`、`docs/superpowers/guides/network-playtest.md`、
+> 本计划（Task 9/10 代码块修正）。跨岛路径 `[0] -> [5]` 因 x≈0 河谷分断返回 `blocked`
+> （Unity `CalculatePath` 亦 `PathPartial`），验收改为同岛 `[3] -> [5]`（34.977m）。
+
 - [ ] **步骤 1：写测试**
 
 ```csharp
@@ -3469,8 +3479,11 @@ bash tools/test-server.sh
 - [ ] **步骤 4：Commit**
 
 ```bash
-git add Server/Server.Tests/Navigation/DemoDayNavBinTests.cs
-git commit -m "test(nav): load shipped DemoDay navmesh and cover spawns"
+git add Server/Server.Tests/Navigation/DemoDayNavBinTests.cs Server/Monster/MonsterModule.cs \
+  Assets/Scripts/Tests/Editor/Navigation/DemoDayNavBinCoverageTests.cs \
+  docs/superpowers/guides/p5-monster-server.md docs/superpowers/guides/network-playtest.md \
+  docs/superpowers/plans/2026-11-02-server-monster-navigation.md
+git commit -m "fix(nav): relocate SpiderBoss spawn for navmesh clearance"
 ```
 
 ---

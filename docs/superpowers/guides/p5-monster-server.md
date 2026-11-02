@@ -5,12 +5,18 @@
 ## 启动怪物模式
 
 ```bash
-# 先构建（--monsters 需在 StartAsync 前注册；R2 主循环独占）
+# 先构建（--monsters / --map 需在 StartAsync 前注册；R2 主循环独占）
 dotnet build E:/CodeForJob/Cool/Server/Server3C.csproj
-dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
+dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 ```
 
+> 用 `dotnet <dll>` 而不是 `dotnet run`：本机 `dotnet run` 的 apphost 会让
+> `HttpListener.Start` 抛「句柄无效」。官方 README 的 `dotnet run --project ...` 等价。
+
 - `--monsters N`：以固定布局生成 N 只怪物（N 超过布局长度时循环复用槽位）
+- `--map demoday`：加载 `Server/Config/nav/demoday.navbin`（`Server/Config/maps.json` 解析），
+  服务端导航只对怪物生效；`--map` 必须配合 `--monsters`，单独给会打印未启动提示
+- `--no-nav`：负对照 / 回退——保留怪物与行为树，但退回 P5 的直线移动（不走 navmesh）
 - 配置 `Server/Config/monster_config.json` 随构建复制到输出目录（csproj `CopyToOutputDirectory`），运行时按 `AppContext.BaseDirectory/Config` 解析——`dotnet run`/`dotnet test` 的 CWD 不可靠，勿用相对路径
 - 省略 `--monsters` = 纯玩家世界（P1-P4 行为不变）
 
@@ -39,6 +45,29 @@ dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
 > 挡在半路（活服失败的原因，不是布局）——证据见 `production/verify/layout-and-spawn-move.md` §7/§8。
 > 守备测试：`MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn`（全六槽位，几何）与
 > `Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster`（3 分钟挂机零施法，行为）。
+
+## 服务端导航（P1）
+
+- **数据来源**：Unity 菜单 `Tools/Navigation/Export Server NavMesh` 把 DemoDay 的烘焙 navmesh
+  导出为 `Server/Config/nav/demoday.navbin`（41103 B / 1701 三角面）；`Server/Config/maps.json`
+  把 `demoday` 映射到该文件。场景几何改动后需重跑导出器（`NavMeshExportFreshnessTests` 会红）。
+- **寻路**：`Server/Navigation/` 三角面图 A* + 漏斗，按 `bodyRadius` 做 clearance 校验；
+  `NavigationService` 每 tick 最多 16 次查询（预算拒绝下 tick 立刻重试），并提供目标投影与 LOS。
+- **跟随**：`PathFollower` 每 15 tick 或目标移动 >2m 重寻；路点推进阈值 `bodyRadius * 0.5`；
+  卡死窗口与失败退避（30 tick）。无导航 / `--no-nav` 时退回 `SimpleMoveSystem.MoveTo` 直线移动。
+- **接入点**：出生点投影容差 0.5m（失败 fail fast）、巡逻点投影且 clearance ≥ `bodyRadius`、
+  Chase 隔墙不停步、Attack 隔墙落回 Chase、Return 沿路径回巢。
+- **目标保持**：目标存活且在 `detectionRadius + patrolRadius + 10m` 内就保持（绕墙不丢），
+  前摇期保持旧视野锥语义。
+- **跨河限制**：DemoDay navmesh 被 x≈0 河谷分成两个大连通分量，跨岛寻路返回 `blocked`
+  （Unity `CalculatePath` 同样 `PathPartial`）；同岛 `[3] -> [5]` 34.977m 可通。跨岛路径**不作验收**。
+- **其他限制**：只有这一张地图；无动态障碍；bot 不走 navmesh（只影响怪物）。
+  原点观察者 + 6 怪 e2e 未验收（SpiderBoss 巡逻圈可能进原点观察者感知圈）。
+- **玩家站位限制**：LOS 按 navmesh 逐点判定；玩家所在点不在网格上（0.25m 内无三角面，如岩石上）
+  或 clearance < 怪物 `bodyRadius` 时，怪物会追到玩家位置但永远挥不出手（casts=0）。P1 未处理；
+  `MonsterWorldTests` 的观察者因此从 (5,-7.5)（网格外 1.17m）改站 (7,-8)（网格上，clearance ≥ 0.5）。
+- **测试**：`bash tools/test-server.sh --filter "FullyQualifiedName~Navigation"`；
+  Unity EditMode `DemoDayNavBinCoverageTests`（六槽位覆盖）与 `NavMeshExportFreshnessTests`（navbin 是否过期）。
 
 ## 怪物生命周期
 
@@ -75,8 +104,9 @@ dotnet run --project Server/Server3C.csproj -- 8000 --monsters 4
 ## 验收方式
 
 ```bash
-# 起服（怪物模式）
-dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --monsters 4
+# 起服（怪物模式 + DemoDay 导航）
+dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
+# 负对照：--no-nav（直线移动）
 # PlayMode（需先起服）MonsterWorldTests 2 用例：服务端驱动巡逻/追击/攻击 + 重连世界持久
 unity-mcp-cli run-tool tests-run --input '{"testMode":"PlayMode","testClass":"MonsterWorldTests"}' --timeout 300000
 # 审计日志：怪物施法零拒绝——真实拒绝行 = "[Combat] cast rejected: caster={id} skill={id} reason={...}"；

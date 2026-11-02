@@ -46,6 +46,7 @@ Unity 2022 LTS MMO 客户端（服务端集成中），发布目标为移动平�
 | [服务端](Server/README.md) | `Server/` | 主循环、AOI、房间、会话、怪物 |
 | [服务端移动](Server/Movement/README.md) | `Server/Movement/` | ORCA 避让 |
 | [服务端怪物](Server/Monster/README.md) | `Server/Monster/` | 行为树驱动的权威怪物逻辑 |
+| 服务端导航 | `Server/Navigation/` | 三角面 A* + 漏斗、地图加载 |
 
 ## 全局护栏（改动前确认）
 
