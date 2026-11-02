@@ -84,6 +84,15 @@ namespace KcpServer
             _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed),
                 avoidance: _avoidance, navigation: navigation);
             _monsterModule.SpawnDefaultLayout(count);
+
+            // 判定帧 LOS（spec §4.5）：怪物起手后玩家躲墙 → 这一刀不结算。
+            // 半径取施法怪物模板（Boss 1.74 的 LOS 采样范围更大）；无导航宿主保持 null（旧语义）。
+            if (navigation != null)
+            {
+                MonsterModule module = _monsterModule;
+                _castHandler.SetNpcLineOfSight((npcId, from, to) =>
+                    navigation.HasLineOfSight(from, to, module.BodyRadiusOf(npcId)));
+            }
         }
 
         /// <summary>ORCA 避让负对照（CLI <c>--no-avoid</c>）：关掉后智能体按愿望位移直行。

@@ -23,6 +23,11 @@ namespace KcpServer
             _rng = rng ?? new Random();
         }
 
+        /// <summary>NPC 施法的判定帧 LOS 回调（参数：casterId, from, to）。由 Server3C 在
+        /// EnableMonsters 后接线到 NavigationService.HasLineOfSight；null = 不做 LOS（无导航宿主）。
+        /// **只对 NPC caster 生效**——玩家施法的静态遮挡不在本期（spec §4.5/§9.1-8）。</summary>
+        public Func<long, Vector3, Vector3, bool>? NpcLineOfSight { get; set; }
+
         /// <summary>施放裁决结果（输出载体）——决策阶段只填 Accepted/RejectReason/Broadcast/IsNpcCaster，
         /// 判定阶段（DrainResolved）才填 Hits</summary>
         public sealed class CastResolution
@@ -216,6 +221,15 @@ namespace KcpServer
                 };
             }
 
+            // 判定帧 LOS（spec §4.5）：怪物起手后玩家躲到墙后时这一刀不能命中。
+            // 只过滤 NPC caster；玩家施法保持原语义。逐目标过滤（AoE 被墙隔开的部分不结算）。
+            if (pending.IsNpcCaster && NpcLineOfSight != null && hitIds.Count > 0)
+            {
+                hitIds = FilterVisibleTargets(pending.CasterId, caster.Position, hitIds);
+                if (swingHitIds != null)
+                    swingHitIds = FilterVisibleTargets(pending.CasterId, caster.Position, swingHitIds);
+            }
+
             var resolution = new CastResolution
             {
                 Accepted = true, IsNpcCaster = pending.IsNpcCaster, Broadcast = pending.Broadcast
@@ -257,6 +271,20 @@ namespace KcpServer
             if (spec != null && spec.Kind == ProjectileKind.LineNearestSplash && hitIds.Count > 0)
                 pending.Spent = true;
             return resolution;
+        }
+
+        /// <summary>按判定帧位置过滤 LOS 被墙挡住的命中目标（NPC 施法专用）。目标已移除时保留，
+        /// 由 ApplyHit 的 null 守卫丢弃——不要在这里改变既有拒绝语义。</summary>
+        private List<long> FilterVisibleTargets(long casterId, Vector3 from, List<long> targets)
+        {
+            var visible = new List<long>(targets.Count);
+            foreach (long targetId in targets)
+            {
+                var target = _store.GetPlayer(targetId);
+                if (target != null && !NpcLineOfSight!(casterId, from, target.Position)) continue;
+                visible.Add(targetId);
+            }
+            return visible;
         }
 
         private int CompareAlong(PendingCast pending, long a, long b)
@@ -397,6 +425,10 @@ namespace KcpServer
             _logger = logger;
             _resolver = resolver;
         }
+
+        /// <summary>接线 NPC 判定帧 LOS（Server3C 在 EnableMonsters 后调用；null = 关闭检查）。</summary>
+        public void SetNpcLineOfSight(Func<long, Vector3, Vector3, bool>? lineOfSight)
+            => _resolver.NpcLineOfSight = lineOfSight;
 
         /// <summary>裁决入口（怪物：tick 内决策 → 校验 + 冷却 + 入队）</summary>
         public CombatResolver.CastResolution Decide(long casterId, CastRequest request, uint tick)
