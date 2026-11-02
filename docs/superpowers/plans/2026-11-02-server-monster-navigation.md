@@ -3452,7 +3452,8 @@ public class DemoDayNavBinTests
         NavData data = NavDataFormat.Read(path);
         var finder = new NavMeshPathfinder(NavMeshGraph.FromData(data));
 
-        // 同岛：Spawns[0] 与 Spawns[5] 被 x≈0 河谷分断（Unity CalculatePath 也是 PathPartial）。
+        // 跨岛：Spawns[0] 与 Spawns[5] 被 x≈0 河谷分断（Unity CalculatePath 也是 PathPartial）；
+        // 同岛：[3] -> [5] 可通。
         NavPath path1 = finder.FindPath(Spawns[3], Spawns[5], 0.5f);
         Assert.True(path1.Success, path1.FailReason);
         Assert.True(path1.Length > 0f);
@@ -3496,6 +3497,12 @@ git commit -m "fix(nav): relocate SpiderBoss spawn for navmesh clearance"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/README.md`
 - 修改：`CLAUDE.md`
 - 修改：`docs/superpowers/guides/p5-monster-server.md`
+
+> **执行偏差（2026-11-03）**：Task 11 实际还包含一个 test-only 提交
+> `8bf459d fix(test): place MonsterWorldTests observer on navmesh`。PlayMode 首轮失败：
+> 旧夹具 (5,-7.5) 在 navmesh 外 1.17m，服务端 `HasLineOfSight` 终点不在网格 ⇒ 狼贴脸也
+> casts=0；夹具改 (7,-8)（网格上、clearance ≥ 0.5、7.6m / 约 10.6°）后 2/2 PASS。
+> 只改测试夹具，未改断言与生产代码；文档提交为 `3c2b987`。
 
 - [ ] **步骤 1：更新文档**
 

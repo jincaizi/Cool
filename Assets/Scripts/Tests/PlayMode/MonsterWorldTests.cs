@@ -18,7 +18,7 @@ namespace KcpNet.PlayModeTests
     /// Wolf(10,0,-15)，一律面向原点）。**2026-10-17 第三次搬迁后原点观察者的夹具语义已变**：
     /// 旧 [0] Wolf 在 (12,0,0) 开局即感知原点观察者；新 [0] 距原点 30m（> 检测 15m）不再感知，
     /// 原点也不在 [3] Wolf 巡逻时的视锥可达范围内（实测活服 60s casts=0）⇒ 观察者站位改到
-    /// (5,-7.5)（见 ObserverPosition），"谁打的"断言按**实际发起伤害的那只**算
+    /// (7,-8)（2026-11-03 导航 LOS 修正；见 ObserverPosition），"谁打的"断言按**实际发起伤害的那只**算
     /// （Wolf 视图 + 出手时在自己的检测半径内），不再取"最先看到的 Wolf"（按视图枚举序取会在
     /// 两只 Wolf 同屏时必然假红）。起服实跑记录见 production/verify/layout-and-spawn-move.md。
     /// 统计口径（非时序脆弱断言——同 AoiWorldTests 惯例）。
@@ -138,7 +138,8 @@ namespace KcpNet.PlayModeTests
             // —— 观察 60s（统计口径）——
             // ① Wolf 感知：追击 → 攻击 → 观察者收到 DamageResult（dmg 15 恒值，
             //    SourcePlayerId = 怪物 id）——"打玩家触发 HitFSM 同步"链路的协议侧证据
-            //（2026-10-17 布局收紧：观察者站在 [3] Wolf (10,0,-15) 的出生朝向正前方 9m 处，见 ObserverPosition）
+            //（2026-10-17 布局收紧后由导航 LOS 修正：观察者站在 [3] Wolf (10,0,-15) 的出生朝向
+            //  正前方 7.6m / 约 10.6° 处，见 ObserverPosition）
             // ② Slime 巡逻：视图位置漂移 ≥ 1m（样本间隔采样）
             var monsterIds = new HashSet<long>();
             long? wolfId = null;

@@ -40,9 +40,11 @@ dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4
 > **2026-10-17 第三次搬迁**：出生点 → `(-15,0.3,-30)`（地面实测 y≈0.256），布局同批收紧收进陆地
 >（旧 [3] (0,0,40) 在湖底 −9.08、旧 [1][2] 贴 ±40 图边）——六槽位仍全部满足该约束、挂机安全不变；
 > 但**对原点观察者的行为变了**（[0] 不再开局感知；原点也不在巡逻狼的视锥可达范围 ⇒ 60s 零施法）——
-> `MonsterWorldTests` 的观察者已随之改站 `(5,-7.5)`（[3] Wolf 出生朝向正前方 9m），断言按"实际发起
-> 伤害的那只 Wolf"归属，并已实跑：**无 bots 服务端（--monsters 4）通过**；`--bots 40` 的人墙会把狼
-> 挡在半路（活服失败的原因，不是布局）——证据见 `production/verify/layout-and-spawn-move.md` §7/§8。
+> `MonsterWorldTests` 的观察者随之改站；**2026-11-03 P1 导航又把它从 `(5,-7.5)`（网格外 1.17m）
+> 迁到 `(7,-8)`（网格上，[3] Wolf 出生朝向正前方 7.6m / 约 10.6°，见下方「玩家站位限制」）**，
+> 断言按"实际发起伤害的那只 Wolf"归属，并已实跑：**无 bots 服务端（--monsters 4）通过**；
+> `--bots 40` 的人墙会把狼挡在半路（活服失败的原因，不是布局）——证据见
+> `production/verify/layout-and-spawn-move.md` §7/§8。
 > 守备测试：`MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn`（全六槽位，几何）与
 > `Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster`（3 分钟挂机零施法，行为）。
 
@@ -108,6 +110,8 @@ dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4
 dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 # 负对照：--no-nav（直线移动）
 # PlayMode（需先起服）MonsterWorldTests 2 用例：服务端驱动巡逻/追击/攻击 + 重连世界持久
+# 注：本机 Unity 活动目标为 WebGL 时，KcpNet.PlayModeTests 的 !UNITY_WEBGL 约束使其不参与编译
+#（tests-run 报 No tests found）；需先切 StandaloneWindows64/Android 等目标，跑完再切回 WebGL。
 unity-mcp-cli run-tool tests-run --input '{"testMode":"PlayMode","testClass":"MonsterWorldTests"}' --timeout 300000
 # 审计日志：怪物施法零拒绝——真实拒绝行 = "[Combat] cast rejected: caster={id} skill={id} reason={...}"；
 # 怪物 id ≥ MonsterModule.NpcIdSeed = 2,000,000、玩家 id 远小于它 ⇒ "2 开头的 7 位 id" 只统计怪物路径

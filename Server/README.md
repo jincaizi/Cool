@@ -3,9 +3,13 @@
 ## 运行
 
 ```bash
-dotnet run --project Server/Server3C.csproj -- 8000
+dotnet build Server/Server3C.csproj
+dotnet Server/bin/Debug/net8.0/Server3C.dll 8000
 bash tools/test-server.sh
 ```
+
+> 用 `dotnet <dll>` 而不是 `dotnet run`：本机 `dotnet run` 的 apphost 会让
+> `HttpListener.Start` 抛「句柄无效」；普通环境两者等价。
 
 `Program.cs` 解析端口与压测参数：`--bots N`、`--no-avoid`、`--probe`、
 `--monsters N`、`--map <id>`、`--no-nav`。
@@ -18,7 +22,7 @@ bash tools/test-server.sh
 - `Handler/`：登录、位置同步、施法、时钟同步、echo。
 - `Monster/`：服务端权威怪物（行为树）。
 - `Movement/`：ORCA 避让。
-- `Navigation/`：三角面 navmesh（A* + 漏斗）、navbin 加载、每 tick 查询预算。
+- [Navigation](Navigation/README.md)：三角面 navmesh（A* + 漏斗）、navbin 加载、每 tick 查询预算。
 - `Config/`：`monster_config.json` 等。
 - `Message/`、`Util/`：消息与数学工具。
 - 共享规则：`Assets/Scripts/Hotfix/GameSystems/SyncCore/`；共享协议：`Assets/Scripts/AOT/Protocol/`。
