@@ -49,10 +49,15 @@ namespace KcpServer.Monster
             if (m.AttackResolveTick.HasValue) return BtStatus.Success;
 
             Vector3 target = m.LastKnownTargetPosition ?? m.Position;
-            // 停步判定用 navmesh 投影点；实际命中裁决仍用玩家真实位置
+            // 停步判定用 navmesh 投影点；实际命中裁决仍用玩家真实位置。
+            // 距离内但隔墙（无 LOS）不能停步：继续 Follower.Tick 绕行，否则会冻结在墙角
+            // 且上一 tick 的 Run/速度继续广播（客户端“跑动但不动”）。
             Vector3 stopTarget = target;
             if (m.Follower != null) m.Follower.TryProject(target, out stopTarget);
-            if (ctx.Mover.HasReached(m, stopTarget, m.Config.attackRange)) return BtStatus.Success;
+            bool inRange = ctx.Mover.HasReached(m, stopTarget, m.Config.attackRange);
+            if (inRange && (m.Follower == null
+                || m.Follower.HasLineOfSight(m.Position, target, m.Config.bodyRadius)))
+                return BtStatus.Success;
 
             if (m.Follower != null) m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick);
             else ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
@@ -85,7 +90,12 @@ namespace KcpServer.Monster
             if (dx * dx + dz * dz > m.Config.attackRange * m.Config.attackRange) return BtStatus.Failure;
 
             if (m.Follower != null && !m.Follower.HasLineOfSight(m.Position, target, m.Config.bodyRadius))
+            {
+                // 隔墙不能出手；同时落回 Idle/零速，避免沿用上一 tick 的 Run 广播
+                m.Moving = false;
+                ctx.Entity.ActionState = (byte)NpcAnimationState.Idle;
                 return BtStatus.Failure;
+            }
 
             m.Moving = false;
 

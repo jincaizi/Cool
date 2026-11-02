@@ -141,7 +141,7 @@ namespace KcpServer.Monster
             }
 
             long npcId = _nextNpcId();
-            var entity = _store.AddNpc(npcId, $"{config.name}#{npcId}", templateId, config.hp, position);
+            var entity = _store.AddNpc(npcId, $"{config.name}#{npcId}", templateId, config.hp, spawn);
             entity.Rotation = YawTowardOrigin(position);
 
             // 半径**就地归一**：`RadiusOfTemplate` 的兜底（表里没有 / 值非法 → 0.5）必须落到配置对象上，

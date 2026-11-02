@@ -2257,6 +2257,8 @@ namespace KcpServer.Monster
         // 是 0.875m，会在墙角路点前约 0.86m 提前跳点、直线切过墙格（MonsterNavigationTests 的
         // 绕墙追击用例在 t=48 进墙）。改为只看 bodyRadius*0.5。若将来要恢复 moveSpeed 项，
         // 必须证明/实现额外的墙角保护（例如推进前校验当前点到下一路点的 LOS）。
+        // 不变量：moveSpeed*dt < bodyRadius（Wolf 3.5*0.066=0.231 < 0.5），否则单 tick 位移
+        // 可能跨过推进半径、终点路点绕圈。
         private void AdvanceWaypoints(MonsterState monster)
         {
             float radius = monster.Config.bodyRadius * 0.5f;
@@ -2598,7 +2600,9 @@ private bool TryFindPatrolPoint(Vector3 candidate, float bodyRadius, out Vector3
 private void DetectTarget(MonsterState m, PlayerState entity)
 {
     // P1 最小目标保持：绕墙追击时目标离开视野锥不能立刻丢；P2 由 ThreatTable 替换。
-    if (m.TargetId.HasValue)
+    // 前摇期挂起保持（D-10 前摇 = 承诺）：沿用旧视野锥语义，保住 MonsterAcceptanceTests A2
+    // 的「丢目标 ≠ 打不中」；否则怪会追着视野外的目标转向，65° 空挥变命中。
+    if (m.TargetId.HasValue && !m.AttackResolveTick.HasValue)
     {
         PlayerState? current = _store.GetPlayer(m.TargetId.Value);
         if (current != null && current.IsAlive && current.IsLoggedIn
@@ -2629,6 +2633,10 @@ private void DetectTarget(MonsterState m, PlayerState entity)
         m.AlertLevel = AlertLevel.HOSTILE;
         m.LastKnownTargetPosition = closestPos;
     }
+    else if (m.TargetId.HasValue)
+    {
+        m.TargetId = null; // 前摇期按旧语义丢失目标（保持「丢目标 ≠ 打不中」的判定锥验收）
+    }
 }
 
 private static float DropAggroRadius(MonsterData config)
@@ -2640,6 +2648,12 @@ private static float DistanceXZ(Vector3 a, Vector3 b)
     return MathF.Sqrt(dx * dx + dz * dz);
 }
 ```
+
+> **执行偏差（Task 7 修复轮 1/5）**：原步骤为**无条件** drop-radius 保持。集成发现它会让
+> 前摇期（`AttackResolveTick`）的怪追着视野外目标转向，破坏 `MonsterAcceptanceTests.A2`
+> （「丢目标 ≠ 打不中」：65° 从空挥变命中、55° 的 `TargetId` 断言失败）。现改为：windup 期
+> **挂起** drop-radius 保持、沿用旧视野锥语义（扫描失败即清目标），非 windup 期按 P1 保持；
+> P2 由 ThreatTable 替换。计划代码已同步加上该条件与扫描失败清目标。
 
 - [ ] **步骤 5：修改 MonsterBtActions**
 
@@ -2675,10 +2689,15 @@ return BtStatus.Running;
 if (m.AttackResolveTick.HasValue) return BtStatus.Success;
 
 Vector3 target = m.LastKnownTargetPosition ?? m.Position;
-// 停步判定用 navmesh 投影点；实际命中裁决仍用玩家真实位置
+// 停步判定用 navmesh 投影点；实际命中裁决仍用玩家真实位置。
+// 距离内但隔墙（无 LOS）不能停步：继续 Follower.Tick 绕行，否则会冻结在墙角
+// 且上一 tick 的 Run/速度继续广播（客户端“跑动但不动”）。
 Vector3 stopTarget = target;
 if (m.Follower != null) m.Follower.TryProject(target, out stopTarget);
-if (ctx.Mover.HasReached(m, stopTarget, m.Config.attackRange)) return BtStatus.Success;
+bool inRange = ctx.Mover.HasReached(m, stopTarget, m.Config.attackRange);
+if (inRange && (m.Follower == null
+    || m.Follower.HasLineOfSight(m.Position, target, m.Config.bodyRadius)))
+    return BtStatus.Success;
 
 if (m.Follower != null) m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick);
 else ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
@@ -2706,12 +2725,24 @@ ctx.Entity.ActionState = (byte)NpcAnimationState.Run;
 return BtStatus.Running;
 ```
 
-`Attack` 在原有的距离检查之后、`m.Moving = false` 之前加 LOS 检查：
+`Attack` 在原有的距离检查之后、`m.Moving = false` 之前加 LOS 检查（失败时同时落回 Idle，
+避免沿用上一 tick 的 Run 广播）：
 
 ```csharp
 if (m.Follower != null && !m.Follower.HasLineOfSight(m.Position, target, m.Config.bodyRadius))
+{
+    m.Moving = false;
+    ctx.Entity.ActionState = (byte)NpcAnimationState.Idle;
     return BtStatus.Failure;
+}
 ```
+
+> **执行偏差（Task 7 修复轮 1/5，计划缺口）**：原 Chase 只按投影距离停步、Attack 的 LOS 失败
+> 直接 `return Failure`。结果是「攻击距离内但隔墙」时 Chase 每 tick 返回 Success、不再寻路，
+> Attack 又因 LOS 失败返回，怪冻结在墙角，而上一 tick 的 Run/速度继续广播。现改为：
+> Chase 的成功条件同时要求 LOS，范围内无 LOS 时继续 `Follower.Tick` 绕行；Attack LOS 失败
+> 时置 `Moving=false` + Idle 再返回。验收见扩展后的
+> `Monster_Does_Not_Attack_Through_Wall`（60 tick 无施法且相对起点移动 > 1m）。
 
 - [ ] **步骤 6：运行新测试与既有怪物测试**
 

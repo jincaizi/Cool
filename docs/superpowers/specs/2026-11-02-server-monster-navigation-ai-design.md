@@ -211,7 +211,7 @@ tile:
 
 - 保存 `NavPath`、当前路点索引、最终目标、上次重寻 tick。
 - 期望方向 = 当前路点 − 当前位置（XZ 归一化）。
-- 推进条件：进入半径 **或** 已越过路点平面（`dot(pos - wp, next - wp) > 0`）；半径 `bodyRadius*0.5`。**执行偏差（Task 7）**：原定 `max(bodyRadius*0.5, moveSpeed*0.25)` 在 Wolf（3.5 m/s）上是 0.875m，会在墙角路点前提前跳点、直线切过墙格（绕墙追击验收 t=48 进墙）；已改为 `bodyRadius*0.5`。若将来要恢复 moveSpeed 项，必须证明/实现额外的墙角保护（例如推进前校验下一段 LOS）。
+- 推进条件：进入半径 **或** 已越过路点平面（`dot(pos - wp, next - wp) > 0`）；半径 `bodyRadius*0.5`。**执行偏差（Task 7）**：原定 `max(bodyRadius*0.5, moveSpeed*0.25)` 在 Wolf（3.5 m/s）上是 0.875m，会在墙角路点前提前跳点、直线切过墙格（绕墙追击验收 t=48 进墙）；已改为 `bodyRadius*0.5`。若将来要恢复 moveSpeed 项，必须证明/实现额外的墙角保护（例如推进前校验下一段 LOS）。不变量：`moveSpeed * dt < bodyRadius`（Wolf 3.5×0.066=0.231 < 0.5）；否则单 tick 位移可能跨过推进半径，终点路点会绕圈。
 - 重寻：每 15 tick（按 `npcId % 15` 错峰）、目标偏离路径终点 > 2m、当前路点不可达、ORCA 后实际位移偏离路径 > 1.5m。
 - 卡死：每 10 tick 检查，连续 3 个窗口（约 2s）位移 < 0.2m 且不在攻击距离内 → 强制重寻；连续 2 次仍卡 → 进入 Evade/Return。
 
@@ -230,7 +230,7 @@ tile:
 - 攻击距离用“怪物 → 投影点”判定，避免玩家站在岩石上时永远差一点。
 - 巡逻点不用“投影兜底”：在巡逻圆环内做确定性采样（种子 = npcId），找 0.5m 内、`clearance ≥ bodyRadius` 的可行点；采样 N 次失败再缩半径。生成点存入 `MonsterState`。
 - 固定布局出生点在启动时投影校验；超出 `SpawnProjectionTolerance = 0.5m` 直接报错。`SpawnPosition` 使用投影后的点，回巢 `HasReached` 才有效。
-- **攻击 LOS**：`Attack` 决策前查 `HasLineOfSight`；`CombatResolver` 判定帧对 NPC caster 再查一次，防止起手后玩家躲到墙后仍被命中。
+- **攻击 LOS**：`Attack` 决策前查 `HasLineOfSight`；`CombatResolver` 判定帧对 NPC caster 再查一次，防止起手后玩家躲到墙后仍被命中。**计划缺口修正（Task 7）**：Chase 的停步也要求 LOS——投影距离 ≤ `attackRange` 但无 LOS 时不停步，继续 `Follower.Tick` 绕行；Attack LOS 失败时置 `Moving=false` + Idle 再返回 Failure，避免冻结在墙角且上一 tick 的 Run/速度继续广播。
 
 ### 4.6 回巢与位置不连续
 
@@ -291,7 +291,7 @@ E2E：
 - 眩晕/冰冻不是模式，由 `IsControlLocked` 门控：不决策、不移动、不施法，保留当前模式；解除后行为树重新评估。
 - 受击硬直保留 `HitDisplayTicks`，只打断前摇，不切模式。
 - 前摇锁目标：`AttackResolveTick` 期间不切换目标；威胁照记，判定后再切换。
-- 目标丢失 = 死亡/离线/超出 `dropAggroRadius`；不因离开视野锥丢目标（绕墙追击会断）。
+- 目标丢失 = 死亡/离线/超出 `dropAggroRadius`；不因离开视野锥丢目标（绕墙追击会断）。**执行偏差（Task 7 修复轮）**：前摇（`AttackResolveTick`）期间**挂起** drop-radius 保持、沿用旧视野锥语义（扫描失败即清目标），保住 `MonsterAcceptanceTests.A2` 的「丢目标 ≠ 打不中」；否则怪会追着视野外的目标转向（65° 空挥变命中）。P2 由 ThreatTable 替换。
 - 感知获取只在 Patrol 做；Combat 中新目标只靠伤害/嘲讽，避免路过就拉一群。
 - 每 tick 顺序：状态 tick → 死亡检查 → 控制锁 → 仇恨/目标有效性 → 模式转移 → 模式行为 → 位置/动作 flush → 施法 drain → 判定 drain（伤害回调）→ 快照。
 

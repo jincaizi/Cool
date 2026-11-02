@@ -79,11 +79,19 @@ public class MonsterNavigationTests
         player.IsLoggedIn = true;
         player.UpdatePosition(new Vector3(1f, 0f, 6.4f), 0f, 0f, 1L, 0U);
 
+        Vector3 start = wolf.Position;
         for (uint t = 0; t < 60; t++)
         {
             module.Tick(t);
             Assert.Empty(module.DrainPendingCasts());
         }
+
+        // 攻击距离内但隔墙：不能停步冻结（旧实现停在起点、却继续广播上一 tick 的 Run）——
+        // 必须继续寻路绕行。绕路约 20m，60 tick（约 14m）到不了，故不会误命中。
+        float dx = wolf.Position.X - start.X;
+        float dz = wolf.Position.Z - start.Z;
+        Assert.True(dx * dx + dz * dz > 1f,
+            $"wolf should path around the wall, moved=({wolf.Position.X:F2},{wolf.Position.Z:F2})");
     }
 
     [Fact]
