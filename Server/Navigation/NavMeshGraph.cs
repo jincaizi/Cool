@@ -63,10 +63,12 @@ namespace KcpServer.Navigation
             if (areas == null || areas.Length != indices.Length / 3)
                 throw new ArgumentException("areas mismatch", nameof(areas));
 
-            _vertices = vertices;
-            _indices = indices;
-            _areas = areas;
-            _areaCosts = areaCosts ?? new[] { 1f };
+            // 图拥有自己的数组：winding 归一化会原地改写索引，
+            // 且构造中途抛异常时不应把部分改写留给调用方。
+            _vertices = (Vector3[])vertices.Clone();
+            _indices = (int[])indices.Clone();
+            _areas = (byte[])areas.Clone();
+            _areaCosts = areaCosts == null ? new[] { 1f } : (float[])areaCosts.Clone();
 
             int triangleCount = indices.Length / 3;
             var triangles = new Triangle[triangleCount];
@@ -80,7 +82,7 @@ namespace KcpServer.Navigation
             float minX = float.MaxValue, minZ = float.MaxValue, maxX = float.MinValue, maxZ = float.MinValue;
             for (int i = 0; i < triangleCount; i++)
             {
-                int a = indices[i * 3], b = indices[i * 3 + 1], c = indices[i * 3 + 2];
+                int a = _indices[i * 3], b = _indices[i * 3 + 1], c = _indices[i * 3 + 2];
                 if (a < 0 || b < 0 || c < 0 || a >= vertices.Length || b >= vertices.Length || c >= vertices.Length)
                     throw new ArgumentException("index out of range");
 
@@ -89,8 +91,8 @@ namespace KcpServer.Navigation
                 {
                     (b, c) = (c, b);
                     vb = vertices[b]; vc = vertices[c];
-                    indices[i * 3 + 1] = b;
-                    indices[i * 3 + 2] = c;
+                    _indices[i * 3 + 1] = b;
+                    _indices[i * 3 + 2] = c;
                 }
 
                 float triMinX = MathF.Min(va.X, MathF.Min(vb.X, vc.X));
