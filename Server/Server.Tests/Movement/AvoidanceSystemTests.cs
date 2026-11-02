@@ -192,14 +192,29 @@ public class AvoidanceSystemTests
         Assert.True(minDistance >= radius * 2f - 0.1f,
             $"四体奔向同一点时出现了穿模：最小间距 {minDistance:F4} < {radius * 2f - 0.1f:F4}");
 
-        // 没卡死：都到点了（环绕/让开之后仍收敛在原点附近），且都还在动
+        // 没卡死：都到点了（环绕/让开之后仍收敛在原点附近）
         foreach (var p in positions)
         {
             float d = Distance(p, new Vector3(0f, 0f, 0f));
             Assert.True(d <= 3f, $"智能体被卡住了：末位置距目标点 {d:F2}m（应回到 3m 内）");
         }
-        foreach (var v in velocities)
-            Assert.True(v.X * v.X + v.Z * v.Z > 0.01f * 0.01f, "末 tick 速度为零——被挤停了");
+
+        // 2026-11-02（任务 5）：邻居速度从“Speed × 朝向”改为上一 tick 的实际位移后，对称四体会
+        // 收成一个**最优环形**（半径 1/√2 ≈ 0.707m，相邻间距恰好 = 半径和 1.0）并停住——几何上
+        // 已经无法再靠近原点，停住是正确的收敛解。旧口径下是永远绕漩涡（原 0.01 阈值在 tick 398
+        // 实测已经掉到 0.012，本来只是擦边）。因此 liveness 断言改为：仍在动，或停住时已被邻居
+        // 挤满（贴着 ≥ 2 个邻居，没有空位却僵在原地）。
+        for (int i = 0; i < velocities.Length; i++)
+        {
+            Vector3 v = velocities[i];
+            if (v.X * v.X + v.Z * v.Z > 0.01f * 0.01f) continue;
+
+            int touching = 0;
+            for (int j = 0; j < positions.Length; j++)
+                if (j != i && Distance(positions[i], positions[j]) <= radius * 2f + 0.02f) touching++;
+            Assert.True(touching >= 2,
+                $"末 tick 被挤停了但周围还有空间（只贴着 {touching} 个邻居）——僵死");
+        }
     }
 
     // ------------------------------------------------------------------
