@@ -7,11 +7,12 @@ namespace KcpServer.Navigation
     public sealed class NavMeshPathfinder
     {
         private const float DefaultProjectionRadius = 2f;
-        private const float ValidationStep = 0.5f;
+        private const float ValidationStep = 0.1f;
         private const float ClearanceHardFactor = 0.9f;
         private const float ClearanceSoftFactor = 1.1f;
         private const float ClearancePenalty = 2f;
         private const float StartProbeDistance = 0.05f;
+        private const float EndpointEpsilon = 1e-4f;
 
         private readonly NavMeshGraph _graph;
 
@@ -45,7 +46,8 @@ namespace KcpServer.Navigation
             if (startTri == goalTri)
             {
                 var direct = new[] { projectedStart, projectedGoal };
-                if (IsValidSegment(projectedStart, projectedGoal, bodyRadius)) return NavPath.Create(direct);
+                if (IsValidSegment(projectedStart, projectedGoal, bodyRadius, projectedStart, projectedGoal))
+                    return NavPath.Create(direct);
             }
 
             int n = _graph.TriangleCount;
@@ -72,12 +74,13 @@ namespace KcpServer.Navigation
                     int next = _graph.GetNeighbor(current, k);
                     if (closed[next]) continue;
                     // 三角面 clearance 取质心/边中点最小值，贴墙三角面恒为 0，
-                    // 按面做硬过滤会封死合法通道；改为按两三角面之间的门（portal）中点判定。
+                    // 按面做硬过滤会封死合法通道。改为对门采样，取门内最大可通行 clearance。
+                    float portalClearance = PortalClearance(current, next, bodyRadius * ClearanceSoftFactor, out _);
                     bool exempt = next == goalTri || current == startTri;
-                    if (!exempt && !PortalFitsBody(current, next, bodyRadius * ClearanceHardFactor)) continue;
+                    if (!exempt && portalClearance < bodyRadius * ClearanceHardFactor) continue;
 
                     float step = DistanceXZ(current, next) * _graph.AreaCost(next);
-                    step += ClearancePenalty * MathF.Max(0f, bodyRadius * ClearanceSoftFactor - _graph.GetClearance(next));
+                    step += ClearancePenalty * MathF.Max(0f, bodyRadius * ClearanceSoftFactor - portalClearance);
                     float tentative = gScore[current] + step;
                     if (tentative + 1e-5f >= gScore[next]) continue;
 
@@ -99,19 +102,29 @@ namespace KcpServer.Navigation
             if (triPath.Count == 0 || triPath[0] != startTri) return NavPath.Fail("blocked");
 
             var points = new List<Vector3>(triPath.Count * 2 + 2) { projectedStart };
+            var rawPortals = new List<(Vector3 Left, Vector3 Right)>(triPath.Count);
             for (int i = 0; i + 1 < triPath.Count; i++)
             {
                 if (!_graph.GetPortal(triPath[i], triPath[i + 1], out Vector3 left, out Vector3 right))
                     return NavPath.Fail("portal-missing");
+                rawPortals.Add((left, right));
                 // GetPortal 的 left/right 与漏斗 TriArea2 的左右约定相反：
                 // 按 GetPortal 顺序直接喂入会让漏斗贴着阶梯外侧走。这里交换。
-                // 同时按 bodyRadius 收缩门，保证漏斗路径与墙保持身体半径。
-                points.Add(ShrinkPortalEndpoint(right, left, bodyRadius));
-                points.Add(ShrinkPortalEndpoint(left, right, bodyRadius));
+                // 两端各向门内 clearance 最大的点收缩到 bodyRadius 可通行处；
+                // 斜门沿门边收缩会低估法向距离，用 IsPointNavigable 采样兜底。
+                PortalClearance(triPath[i], triPath[i + 1], bodyRadius, out Vector3 portalBestPoint);
+                points.Add(ShrinkPortalEndpointTo(right, portalBestPoint, bodyRadius));
+                points.Add(ShrinkPortalEndpointTo(left, portalBestPoint, bodyRadius));
             }
             points.Add(projectedGoal);
 
             List<Vector3> waypoints = Funnel(points);
+            if (!ValidatePath(waypoints, bodyRadius))
+            {
+                // 漏斗在凸墙角会切角；退化为“门内最大 clearance 点/墙角偏移点 + 可见性捷径”重排。
+                List<Vector3> candidates = BuildClearanceCandidates(rawPortals, projectedStart, projectedGoal, bodyRadius);
+                waypoints = ShortcutPath(candidates, bodyRadius);
+            }
             if (!ValidatePath(waypoints, bodyRadius))
             {
                 if (attempt == 0)
@@ -124,31 +137,67 @@ namespace KcpServer.Navigation
         public bool HasLineOfSight(Vector3 a, Vector3 b, float bodyRadius)
             => _graph.HasLineOfSight(a, b, bodyRadius);
 
-        private static Vector3 ShrinkPortalEndpoint(Vector3 point, Vector3 other, float bodyRadius)
+        private Vector3 ShrinkPortalEndpointTo(Vector3 from, Vector3 target, float bodyRadius)
         {
-            float dx = other.X - point.X, dz = other.Z - point.Z;
+            float dx = target.X - from.X, dz = target.Z - from.Z;
             float length = MathF.Sqrt(dx * dx + dz * dz);
-            if (length <= 1e-5f) return point;
-            float amount = MathF.Min(bodyRadius, length * 0.5f);
-            return new Vector3(point.X + dx / length * amount, point.Y, point.Z + dz / length * amount);
+            if (length <= 1e-5f) return from;
+            float step = MathF.Max(0.05f, bodyRadius * 0.25f);
+            int steps = Math.Max(1, (int)MathF.Ceiling(length / step));
+            for (int i = 0; i <= steps; i++)
+            {
+                float t = i / (float)steps;
+                var p = new Vector3(from.X + dx * t, from.Y, from.Z + dz * t);
+                if (_graph.IsPointNavigable(p, bodyRadius)) return p;
+            }
+            return target;
         }
 
-        private bool PortalFitsBody(int fromTriangle, int toTriangle, float clearance)
+        private float PortalClearance(int fromTriangle, int toTriangle, float maxClearance, out Vector3 bestPoint)
         {
-            if (!_graph.GetPortal(fromTriangle, toTriangle, out Vector3 left, out Vector3 right))
-                return true;
-            var midpoint = new Vector3((left.X + right.X) * 0.5f, left.Y, (left.Z + right.Z) * 0.5f);
-            return _graph.IsPointNavigable(midpoint, clearance);
+            bestPoint = default;
+            if (!_graph.GetPortal(fromTriangle, toTriangle, out Vector3 left, out Vector3 right)) return 0f;
+            return PortalClearance(left, right, maxClearance, out bestPoint);
+        }
+
+        private float PortalClearance(Vector3 left, Vector3 right, float maxClearance, out Vector3 bestPoint)
+        {
+            bestPoint = left;
+            if (maxClearance <= 0f) return 0f;
+            float best = 0f;
+            for (int s = 0; s <= 4; s++)
+            {
+                float t = s * 0.25f;
+                var p = new Vector3(left.X + (right.X - left.X) * t, left.Y, left.Z + (right.Z - left.Z) * t);
+                float clearance = ClearanceAtPoint(p, maxClearance);
+                if (clearance > best) { best = clearance; bestPoint = p; }
+                if (best >= maxClearance) break;
+            }
+            return best;
+        }
+
+        private float ClearanceAtPoint(Vector3 point, float maxClearance)
+        {
+            if (!_graph.IsPointNavigable(point, 0f)) return 0f;
+            if (_graph.IsPointNavigable(point, maxClearance)) return maxClearance;
+            float lo = 0f, hi = maxClearance;
+            for (int i = 0; i < 5; i++)
+            {
+                float mid = (lo + hi) * 0.5f;
+                if (_graph.IsPointNavigable(point, mid)) lo = mid; else hi = mid;
+            }
+            return lo;
         }
 
         private bool ValidatePath(List<Vector3> points, float bodyRadius)
         {
             for (int i = 1; i < points.Count; i++)
-                if (!IsValidSegment(points[i - 1], points[i], bodyRadius)) return false;
+                if (!IsValidSegment(points[i - 1], points[i], bodyRadius, points[0], points[^1]))
+                    return false;
             return true;
         }
 
-        private bool IsValidSegment(Vector3 a, Vector3 b, float bodyRadius)
+        private bool IsValidSegment(Vector3 a, Vector3 b, float bodyRadius, Vector3 pathStart, Vector3 pathGoal)
         {
             float dx = b.X - a.X, dz = b.Z - a.Z;
             float length = MathF.Sqrt(dx * dx + dz * dz);
@@ -156,13 +205,107 @@ namespace KcpServer.Navigation
             for (int i = 0; i <= steps; i++)
             {
                 float t = i / (float)steps;
-                // 起终点 1m 内放宽：怪可能贴着墙/岩石出生，甚至投影点就在网格边界上
-                float along = t * length;
-                float radius = (along < 1f || length - along < 1f) ? 0f : bodyRadius;
                 var p = new Vector3(a.X + dx * t, a.Y, a.Z + dz * t);
+                // 放宽按整条路径的首尾计算，而不是每段局部距离：
+                // 1m 内最多按半身半径；距端点不足 0.5m 时线性收紧到 0
+                // （起点投影可能恰在网格边界上，采样点不可能立刻达到半身半径）。
+                float pathEndpointDistance = MathF.Min(DistanceXZ(p, pathStart), DistanceXZ(p, pathGoal));
+                float radius;
+                if (pathEndpointDistance <= EndpointEpsilon) radius = 0f;
+                else if (pathEndpointDistance < 1f) radius = bodyRadius * MathF.Min(0.5f, pathEndpointDistance);
+                else radius = bodyRadius;
                 if (!_graph.IsPointNavigable(p, radius)) return false;
             }
             return true;
+        }
+
+        private List<Vector3> BuildClearanceCandidates(List<(Vector3 Left, Vector3 Right)> portals,
+            Vector3 pathStart, Vector3 pathGoal, float bodyRadius)
+        {
+            var candidates = new List<Vector3>(portals.Count * 2 + 2) { pathStart };
+            for (int i = 0; i < portals.Count; i++)
+            {
+                PortalClearance(portals[i].Left, portals[i].Right, bodyRadius, out Vector3 bestPoint);
+                candidates.Add(bestPoint);
+
+                // 相邻两门的共享顶点就是走廊墙角；贴墙时加一个沿角平分线外推的偏移点，
+                // 因为“门内收缩点”之间的直线仍会从墙角内侧切过去。
+                if (i + 1 < portals.Count &&
+                    TryFindSharedCorner(portals[i], portals[i + 1], out Vector3 corner, out Vector3 otherA, out Vector3 otherB) &&
+                    !_graph.IsPointNavigable(corner, bodyRadius) &&
+                    TryCornerOffsetPoint(corner, otherA, otherB, bodyRadius, out Vector3 offset))
+                {
+                    candidates.Add(offset);
+                }
+            }
+            candidates.Add(pathGoal);
+            return candidates;
+        }
+
+        private static bool TryFindSharedCorner((Vector3 Left, Vector3 Right) a, (Vector3 Left, Vector3 Right) b,
+            out Vector3 corner, out Vector3 otherA, out Vector3 otherB)
+        {
+            corner = otherA = otherB = default;
+            if (SameXZ(a.Left, b.Left)) { corner = a.Left; otherA = a.Right; otherB = b.Right; return true; }
+            if (SameXZ(a.Left, b.Right)) { corner = a.Left; otherA = a.Right; otherB = b.Left; return true; }
+            if (SameXZ(a.Right, b.Left)) { corner = a.Right; otherA = a.Left; otherB = b.Right; return true; }
+            if (SameXZ(a.Right, b.Right)) { corner = a.Right; otherA = a.Left; otherB = b.Left; return true; }
+            return false;
+        }
+
+        private bool TryCornerOffsetPoint(Vector3 corner, Vector3 otherA, Vector3 otherB, float bodyRadius, out Vector3 offset)
+        {
+            offset = default;
+            float ax = otherA.X - corner.X, az = otherA.Z - corner.Z;
+            float bx = otherB.X - corner.X, bz = otherB.Z - corner.Z;
+            float lengthA = MathF.Sqrt(ax * ax + az * az);
+            float lengthB = MathF.Sqrt(bx * bx + bz * bz);
+            if (lengthA <= 1e-5f || lengthB <= 1e-5f) return false;
+
+            float dx = ax / lengthA + bx / lengthB;
+            float dz = az / lengthA + bz / lengthB;
+            float length = MathF.Sqrt(dx * dx + dz * dz);
+            if (length <= 1e-5f) return false;
+            dx /= length;
+            dz /= length;
+
+            for (float factor = 1.25f; factor <= 2f + 1e-4f; factor += 0.25f)
+            {
+                var p = new Vector3(corner.X + dx * bodyRadius * factor, corner.Y,
+                    corner.Z + dz * bodyRadius * factor);
+                if (_graph.IsPointNavigable(p, bodyRadius)) { offset = p; return true; }
+            }
+            return false;
+        }
+
+        private static bool SameXZ(Vector3 a, Vector3 b)
+            => MathF.Abs(a.X - b.X) <= 1e-3f && MathF.Abs(a.Z - b.Z) <= 1e-3f;
+
+        private List<Vector3> ShortcutPath(List<Vector3> candidates, float bodyRadius)
+        {
+            Vector3 pathStart = candidates[0], pathGoal = candidates[^1];
+            var result = new List<Vector3> { pathStart };
+            int anchor = 0;
+            while (anchor < candidates.Count - 1)
+            {
+                int next = anchor + 1;
+                for (int i = candidates.Count - 1; i > anchor + 1; i--)
+                {
+                    if (!IsValidSegment(candidates[anchor], candidates[i], bodyRadius, pathStart, pathGoal))
+                        continue;
+                    next = i;
+                    break;
+                }
+                result.Add(candidates[next]);
+                anchor = next;
+            }
+            return result;
+        }
+
+        private static float DistanceXZ(Vector3 a, Vector3 b)
+        {
+            float dx = a.X - b.X, dz = a.Z - b.Z;
+            return MathF.Sqrt(dx * dx + dz * dz);
         }
 
         private float Heuristic(int from, int goal)

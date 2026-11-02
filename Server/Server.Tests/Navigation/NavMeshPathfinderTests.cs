@@ -69,6 +69,73 @@ public class NavMeshPathfinderTests
     }
 
     [Fact]
+    public void Wall_Path_Keeps_Body_Radius_Outside_Endpoint_Zones()
+    {
+        NavMeshGraph graph = WallGraph();
+        var finder = new NavMeshPathfinder(graph);
+        NavPath path = finder.FindPath(new Vector3(1f, 0f, 1f), new Vector3(1f, 0f, 9f), 0.4f);
+        Assert.True(path.Success, path.FailReason);
+
+        float pathLength = 0f;
+        for (int i = 1; i < path.Waypoints.Length; i++)
+            pathLength += DistanceXZ(path.Waypoints[i - 1], path.Waypoints[i]);
+
+        float along = 0f;
+        int sampled = 0;
+        for (int i = 1; i < path.Waypoints.Length; i++)
+        {
+            Vector3 a = path.Waypoints[i - 1], b = path.Waypoints[i];
+            float length = DistanceXZ(a, b);
+            int steps = Math.Max(1, (int)MathF.Ceiling(length / 0.1f));
+            for (int s = 0; s <= steps; s++)
+            {
+                float t = s / (float)steps;
+                float distance = along + t * length;
+                if (distance < 1f || pathLength - distance < 1f) continue;
+                var p = new Vector3(a.X + (b.X - a.X) * t, a.Y, a.Z + (b.Z - a.Z) * t);
+                Assert.True(graph.IsPointNavigable(p, 0.4f),
+                    $"point {p} at {distance:F2}m lacks clearance for r=0.4");
+                sampled++;
+            }
+            along += length;
+        }
+        Assert.True(sampled > 0);
+    }
+
+    [Fact]
+    public void Diagonal_Corner_Waypoints_Keep_Body_Radius()
+    {
+        // L 形区域：3x1 横臂 + (0,1) 竖臂；凹角在 (1,1)，路径必须绕角。
+        Vector3[] vertices =
+        {
+            new Vector3(0f, 0f, 0f), new Vector3(1f, 0f, 0f), new Vector3(2f, 0f, 0f), new Vector3(3f, 0f, 0f),
+            new Vector3(0f, 0f, 1f), new Vector3(1f, 0f, 1f), new Vector3(2f, 0f, 1f), new Vector3(3f, 0f, 1f),
+            new Vector3(0f, 0f, 2f), new Vector3(1f, 0f, 2f),
+        };
+        int[] indices =
+        {
+            0, 1, 5, 0, 5, 4, // cell (0,0)
+            1, 2, 6, 1, 6, 5, // cell (1,0)
+            2, 3, 7, 2, 7, 6, // cell (2,0)
+            4, 5, 9, 4, 9, 8, // cell (0,1)
+        };
+        NavMeshGraph graph = NavMeshGraph.FromTriangles(vertices, indices, new byte[8], new[] { 1f });
+        var finder = new NavMeshPathfinder(graph);
+        NavPath path = finder.FindPath(new Vector3(2.6f, 0f, 0.3f), new Vector3(0.3f, 0f, 1.7f), 0.3f);
+        Assert.True(path.Success, path.FailReason);
+        Assert.True(path.Waypoints.Length >= 3, "path should bend around the corner");
+        for (int i = 1; i < path.Waypoints.Length - 1; i++)
+            Assert.True(graph.IsPointNavigable(path.Waypoints[i], 0.3f),
+                $"waypoint {path.Waypoints[i]} lacks clearance for r=0.3");
+    }
+
+    private static float DistanceXZ(Vector3 a, Vector3 b)
+    {
+        float dx = a.X - b.X, dz = a.Z - b.Z;
+        return MathF.Sqrt(dx * dx + dz * dz);
+    }
+
+    [Fact]
     public void Path_Is_Deterministic()
     {
         NavMeshGraph graph = WallGraph();
