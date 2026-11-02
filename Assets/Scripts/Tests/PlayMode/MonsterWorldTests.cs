@@ -41,12 +41,14 @@ namespace KcpNet.PlayModeTests
         /// （40 bots 活服 60s）casts=0、最近狼 14.01m；离线无 bots 探针里同一位置狼会绕到 1.84m 并在 18.5s 施法
         /// ⇒ 差距是人群把狼推离巡逻线，原点不宜再当夹具。
         /// 夹具改为把观察者经**真实移动上报链**（MovementReporter，同 CombatSyncTests/BlockMitigation
-        /// 惯例）站到 (5,-7.5)：在 [3] Wolf (10,-15) 的**出生朝向**（面向原点）正前方 9.0m —— 15m 检测 +
-        /// 90° 视锥（半角 45°）内；它离狼巡逻方阵的西北边（p3(0,-15)→p0(10,-5)）2.5m，狼沿那条边走向 p0
-        /// 时正对着它（离线探针含 40s 预跑相位：0.6s 内被感知、狼进到 1.82m；巡逻一圈 ~20s ⇒ 60s 覆盖多圈）。
-        /// 离两只 Slime 的巡逻圈最近点分别 8.46m / 22.95m（&gt; 8m 检测）⇒ 不会抢伤害来源；[0] Wolf 远在 26m 外。
-        /// 10m 以内的"首报瞬移"不会被 MovementValidator 纠偏（瞬移门槛 = 50m）。</summary>
-        private static readonly Vector3 ObserverPosition = new Vector3(5f, 0f, -7.5f);
+        /// 惯例）站到 (7,-8)：在 [3] Wolf (10,-15) 的**出生朝向**（面向原点）正前方 7.6m —— 15m 检测 +
+        /// 90° 视锥（半角 45°）内；离两只 Slime 的巡逻圈（8m 检测）足够远 ⇒ 不会抢伤害来源。
+        /// **2026-11-03 P1 导航 E2E 修正**：旧点 (5,-7.5) 在烘焙 navmesh 外 1.17m——服务端
+        /// `PathFollower.HasLineOfSight` 按 navmesh 逐点判 LOS，终点不在网格上 ⇒ 狼追到观察者身上
+        /// 仍 casts=0、永不挥砍（不是追击/等待 tick 问题）。新点 (7,-8) 在 navmesh 上且点 clearance ≥ 0.5
+        /// （Wolf bodyRadius）；狼的路径 7.55m/7 路点（出生点附近窄口），约 3m 外开始有 LOS 后进入攻击距离。
+        /// 首报位移 10.6m 远低于 MovementValidator 的 50m 瞬移门槛。</summary>
+        private static readonly Vector3 ObserverPosition = new Vector3(7f, 0f, -8f);
 
         private sealed class Ctx
         {
