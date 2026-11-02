@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using KcpServer.Monster; // P5：怪物模块（EnableMonsters/tick 接线）
 using KcpServer.Movement; // 2026-10-13：ORCA 避让（AvoidanceSystem / AvoidanceProbe）
+using KcpServer.Navigation; // 2026-11-02：地图导航（可选注入 MonsterModule）
 
 namespace KcpServer
 {
@@ -78,10 +79,10 @@ namespace KcpServer
         }
 
         /// <summary>怪物模式：注册 N 个怪物（固定布局——T5 e2e 依赖）。必须在 StartAsync 之前调用</summary>
-        public void EnableMonsters(int count)
+        public void EnableMonsters(int count, NavigationService? navigation = null)
         {
             _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed),
-                avoidance: _avoidance);
+                avoidance: _avoidance, navigation: navigation);
             _monsterModule.SpawnDefaultLayout(count);
         }
 

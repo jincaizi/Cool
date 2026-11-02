@@ -55,6 +55,23 @@ namespace KcpServer
                 }
             }
 
+            // 2026-11-02 地图导航：--map <id> 按 maps.json 加载 navbin；--no-nav 强制无导航（对照/回退）
+            string? mapId = null;
+            for (int i = 1; i < args.Length - 1; i++)
+            {
+                if (args[i] == "--map" && args[i + 1].Length > 0)
+                {
+                    mapId = args[i + 1];
+                    break;
+                }
+            }
+
+            bool noNav = false;
+            for (int i = 1; i < args.Length; i++)
+            {
+                if (args[i] == "--no-nav") { noNav = true; break; }
+            }
+
             // --ws-echo：只回吐字节的 WS 端点，用于单独验证 WebGL 的 jslib 通道
             bool wsEcho = false;
             for (int i = 1; i < args.Length; i++)
@@ -104,9 +121,23 @@ namespace KcpServer
                     Console.WriteLine($"Dense bot mode: radius ±{botsRadius.Value}m");
             }
 
+            // 导航地图：baseDirectory 用 AppContext.BaseDirectory（csproj 把 Config 复制到输出目录，
+            // CWD 在 dotnet run/test 下不可靠）；显式 --map 且加载失败 = 配置错误，fail fast
+            KcpServer.Navigation.NavigationService? navigation = null;
+            if (monsterCount > 0 && !noNav && mapId != null)
+            {
+                string mapsPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Config", "maps.json");
+                navigation = KcpServer.Navigation.NavigationService.LoadFromConfig(mapsPath, mapId, AppContext.BaseDirectory);
+                Console.WriteLine($"Navigation: map={mapId}");
+            }
+            else if (mapId != null && monsterCount == 0)
+            {
+                Console.WriteLine("Navigation: --map 需要配合 --monsters（未启动导航）");
+            }
+
             if (monsterCount > 0)
             {
-                _server.EnableMonsters(monsterCount);
+                _server.EnableMonsters(monsterCount, navigation);
                 Console.WriteLine($"Monster mode: {monsterCount} monsters spawned");
             }
 

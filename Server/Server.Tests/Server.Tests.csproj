@@ -39,4 +39,10 @@
     <None Include="..\Config\monster_config.json" Link="Config\monster_config.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- 2026-11-02 地图导航：maps.json 与 navmesh 数据随构建复制（路径相对 Server.Tests；demoday.navbin 由 Task 9 生成） -->
+  <ItemGroup>
+    <None Include="..\Config\maps.json" Link="Config\maps.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\Config\nav\*.navbin" Link="Config\nav\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
