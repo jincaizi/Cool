@@ -39,11 +39,14 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 ```
 
 - `Server/Navigation/`：三角面图 A* + 漏斗，按 `bodyRadius` 校验路径（硬 / 软 clearance）；
-  `NavigationService` 每 tick 最多 `MaxQueriesPerTick = 16` 次查询（预算拒绝下 tick 立刻重试，
-  不计为寻路失败），另提供投影与 LOS。
-- `PathFollower`：每 15 tick 或目标移动 >2m 重寻；路点推进阈值 `bodyRadius * 0.5`；
-  10 tick 窗口位移 <0.2m 计为卡住，连续 3 个窗口触发重寻；真正失败退避 30 tick。
-  无导航时逐 tick 调 `SimpleMoveSystem.MoveTo`（旧直线行为）。
+  `NavigationService` 每 tick 16 次 + 25ms 双预算（单条查询内部也带 deadline），预算拒绝下
+  tick 立刻重试、不计为寻路失败；另提供投影与 LOS。
+- `PathFollower`：每 15–29 tick（相位错峰）或目标移动 >2m 重寻；`goalMoved` 有独立 5 tick
+  最小间隔；路点推进阈值 `bodyRadius * 0.5`；10 tick 窗口位移 <0.2m 计为卡住，连续 3 个窗口
+  触发重寻；真正失败退避 30 tick。**只有无导航时才调 `SimpleMoveSystem.MoveTo` 直线回退；
+  有导航但失败/预算拒绝时停住**（C2）。`Tick` 返回实际是否移动，BT 据此写 `Moving`/Run-Idle。
+- **判定帧 LOS**：`CombatResolver` 对 NPC caster 在 `DrainResolved` 再查一次
+  `NavigationService.HasLineOfSight`；起手后玩家躲墙不命中（玩家施法不变）。
 - 接入：出生点投影容差 0.5m，失败即抛（fail fast）；巡逻点 9 方向投影并要求
   clearance ≥ `bodyRadius`；Chase 停步用目标投影点且必须 LOS（隔墙不停、继续绕行）；
   Attack 隔墙返回失败落回 Chase；Return 沿路径回 `SpawnPosition`。
@@ -61,11 +64,13 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 `Server/Server.Tests/Monster/`（`MonsterModuleTests`、`MonsterAcceptanceTests`、`MonsterCombatIntegrationTests`、
 `MonsterBodyRadiusTests`、`MonsterWindupTests`、`MonsterNavigationTests`）；
 `Server/Server.Tests/Navigation/`（`NavDataFormatTests`、`NavMeshGraphTests`、`NavMeshPathfinderTests`、
-`NavigationServiceTests`、`PathFollowerTests`、`DemoDayNavBinTests`）；PlayMode `MonsterWorldTests`、`AoiWorldTests`。
+`NavigationServiceTests`、`PathFollowerTests`、`DemoDayNavBinTests`、`NavMeshBenchmarkTests`）；
+PlayMode `MonsterWorldTests`、`AoiWorldTests`。
 
 ```bash
-bash tools/test-server.sh --filter "FullyQualifiedName~Monster"
-bash tools/test-server.sh --filter "FullyQualifiedName~Navigation"
+# 官方 testhost 在本机 Win32Exception(5)；用 in-process runner（见 Server/README.md）
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Monster"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Navigation"
 bash tools/unity-tests.sh PlayMode MonsterWorldTests
 # Unity EditMode（需 Editor；新鲜度测试会临时打开 DemoDay）
 bash tools/unity-tests.sh EditMode DemoDayNavBinCoverageTests

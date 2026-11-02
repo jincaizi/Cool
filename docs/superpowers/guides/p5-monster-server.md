@@ -11,7 +11,8 @@ dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4
 ```
 
 > 用 `dotnet <dll>` 而不是 `dotnet run`：本机 `dotnet run` 的 apphost 会让
-> `HttpListener.Start` 抛「句柄无效」。官方 README 的 `dotnet run --project ...` 等价。
+> `HttpListener.Start` 抛「句柄无效」。官方 README 的 `dotnet run --project ...`
+> **不等价**——需要先 `dotnet build`，再 `dotnet <dll>` 启动。
 
 - `--monsters N`：以固定布局生成 N 只怪物（N 超过布局长度时循环复用槽位）
 - `--map demoday`：加载 `Server/Config/nav/demoday.navbin`（`Server/Config/maps.json` 解析），
@@ -54,9 +55,12 @@ dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4
   导出为 `Server/Config/nav/demoday.navbin`（41103 B / 1701 三角面）；`Server/Config/maps.json`
   把 `demoday` 映射到该文件。场景几何改动后需重跑导出器（`NavMeshExportFreshnessTests` 会红）。
 - **寻路**：`Server/Navigation/` 三角面图 A* + 漏斗，按 `bodyRadius` 做 clearance 校验；
-  `NavigationService` 每 tick 最多 16 次查询（预算拒绝下 tick 立刻重试），并提供目标投影与 LOS。
-- **跟随**：`PathFollower` 每 15 tick 或目标移动 >2m 重寻；路点推进阈值 `bodyRadius * 0.5`；
-  卡死窗口与失败退避（30 tick）。无导航 / `--no-nav` 时退回 `SimpleMoveSystem.MoveTo` 直线移动。
+  `NavigationService` 每 tick 16 次 + 25ms 双预算（单查询内部 deadline；预算拒绝下 tick 重试），
+  并提供目标投影与 LOS。
+- **跟随**：`PathFollower` 每 15–29 tick（相位错峰）或目标移动 >2m 重寻（goalMoved 独立 5 tick
+  间隔）；路点推进阈值 `bodyRadius * 0.5`；卡死窗口与失败退避（30 tick）。**只有无导航 /
+  `--no-nav` 才退回 `SimpleMoveSystem.MoveTo` 直线移动；有导航但失败/预算拒绝时停住**。
+  判定帧 LOS 由 `CombatResolver` 对 NPC caster 再查一次（起手后躲墙不命中）。
 - **接入点**：出生点投影容差 0.5m（失败 fail fast）、巡逻点投影且 clearance ≥ `bodyRadius`、
   Chase 隔墙不停步、Attack 隔墙落回 Chase、Return 沿路径回巢。
 - **目标保持**：目标存活且在 `detectionRadius + patrolRadius + 10m` 内就保持（绕墙不丢），
@@ -68,7 +72,8 @@ dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4
 - **玩家站位限制**：LOS 按 navmesh 逐点判定；玩家所在点不在网格上（0.25m 内无三角面，如岩石上）
   或 clearance < 怪物 `bodyRadius` 时，怪物会追到玩家位置但永远挥不出手（casts=0）。P1 未处理；
   `MonsterWorldTests` 的观察者因此从 (5,-7.5)（网格外 1.17m）改站 (7,-8)（网格上，clearance ≥ 0.5）。
-- **测试**：`bash tools/test-server.sh --filter "FullyQualifiedName~Navigation"`；
+- **测试**：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Navigation"`
+  （官方 testhost 在本机 `Win32Exception(5)`，见 `Server/README.md`）；
   Unity EditMode `DemoDayNavBinCoverageTests`（六槽位覆盖）与 `NavMeshExportFreshnessTests`（navbin 是否过期）。
 
 ## 怪物生命周期

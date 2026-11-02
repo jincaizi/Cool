@@ -20,7 +20,8 @@ Unity 2022 LTS MMO 客户端（服务端集成中），发布目标为移动平�
 
 - Unity Editor：`start Unity.exe -projectPath E:\CodeForJob\Cool`；构建用 `Ctrl+Shift+B`
 - Git：`git add <files>` 后 `git commit -m "<message>"`；**未启用 LFS**，二进制裸存
-- 服务端测试：`bash tools/test-server.sh`（minimal logger；可追加 `--filter "FullyQualifiedName~X"`）
+- 服务端测试：`bash tools/test-server.sh`（minimal logger；可追加 `--filter "FullyQualifiedName~X"`）；
+  本机 testhost 抛 `Win32Exception(5)` 时改用 `bash tools/test-server-inprocess.sh`（同参数）
 - Unity 测试：`bash tools/unity-tests.sh EditMode [Class]` / `bash tools/unity-tests.sh PlayMode Class`
   （封装了 `--input` JSON 与 300s 超时；原始命令见脚本）
 

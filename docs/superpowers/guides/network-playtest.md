@@ -8,14 +8,17 @@
 # 编译（一次）
 dotnet build E:/CodeForJob/Cool/Server/Server3C.csproj
 
+# 注意：用 dotnet <dll> 而不是 `dotnet run --project`——本机 apphost 会让
+# HttpListener.Start 抛「句柄无效」（见 Server/README.md）；下面的 dll 路径按上面的 build 输出。
+
 # 联网 + 服务器怪物（推荐联调用）
-dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --monsters 4
+dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 
 # 纯联网（无服务器怪物，怪物走本地 MonsterSpawner）
-dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000
+dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000
 
 # 压测模式（100 个游走 bot——用于验证远程玩家渲染）
-dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --bots 100
+dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --bots 100
 ```
 
 日志出现 `Server3C is running on port 8000` 即就绪。停止：Ctrl+C，或按端口找 PID 后 `taskkill //F //PID <pid>`。

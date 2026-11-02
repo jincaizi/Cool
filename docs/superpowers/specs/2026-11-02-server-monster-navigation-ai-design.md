@@ -1,7 +1,7 @@
 # 服务端怪物寻路与 AI 行为重构设计
 
-日期：2026-11-02
-状态：已评审，待实现
+日期：2026-11-02（P1 最终修复轮：2026-11-03）
+状态：**P1 已实现**（P2–P4 未开始）；执行偏差、实测性能与验证债见 §11
 关联模块：`Server/Monster`、`Server/Navigation`、`Server/Movement`、`SyncLayer`、`SyncCore`、`Protocol`
 
 ## 1. 背景与现状
@@ -202,8 +202,15 @@ tile:
 
 - 200 只怪、每只 1s 重寻 = 200 q/s；15Hz 下约 **13.3 q/tick**。
 - `MaxQueriesPerTick = 16`（240 q/s，留余量）；超出预算的怪物沿用旧路径，下 tick 再算。
+- **P1 修复轮追加时间预算**：`MaxMillisecondsPerTick = 25`，`BeginTick` 重置；单条查询内部
+  也带同一截止时间（A* 每次扩展 / 每 16 个校验采样检查），超限返回 `budget`。
+  次数与时间任一超限都拒绝。实测 tick 超调 <2ms；200 怪刷新率见 §11。
 - 请求超过 8 tick（约 0.5s）未处理就丢弃；寻路失败后 30 tick（2s）退避。
-- 基准测试验证 A* 平均耗时；单次 > 0.5ms 时降低重寻频率或加路径缓存（backlog）。
+  当前实现不排队（同步查询），因此没有请求过期，只有失败退避。
+- `goalMoved` 重寻有独立的 5 tick 最小间隔，周期重寻仍按 `15 + npcId%15` 错峰。
+- 路径校验采样从 0.5m 设计值落到 **0.25m**（P1 修复轮；0.1m 太慢），clearance 用点级
+  封顶 2.5m、portal clearance 跨查询缓存、连通分量前置剪枝。
+- 基准测试见 `Server.Tests/Navigation/NavMeshBenchmarkTests`；**0.5ms/query 未达成，列 P2 性能债**。
 
 ### 4.4 路点跟随与移动接线
 
@@ -251,7 +258,9 @@ tile:
 - 未来流式加载实现 `EnsureTiles(bounds)`；A* 在未加载瓦片边界返回 `tile-not-loaded`，由上层请求加载。
 - 文件格式与接口保留 mapId、瓦片坐标、边界，不提前做分层导航。
 
-**回退**：`NavigationService` 为 null 或地图未加载时，`PathFollower` 退回当前直线移动。既有服务端单测、`--no-avoid` 对照组、未配置导航的宿主都不红。新增 `--no-nav` 负对照。
+**回退**：只有 `NavigationService == null`（未配置导航的宿主 / `--no-nav` / 地图未加载）时，
+`PathFollower` 才退回直线移动。**有导航但查询失败/退避/预算拒绝时停住，不直线穿地形**
+（P1 修复轮 C2）；既有服务端单测、`--no-avoid` 对照组都不红。新增 `--no-nav` 负对照。
 
 ### 4.8 导航测试
 
@@ -574,3 +583,51 @@ public ushort ToMask();
 - 战斗接线：`Server/Handler/CastHandler.cs`。
 - 客户端：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/NpcEntityAnimator.cs`、`NpcAttackSchedule.cs`、`RemoteCastPresenter.cs`、`CombatNetworkBridge.cs`、`RemoteEntityRegistry.cs`。
 - 协议：`Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs`、`Combat.cs`。
+
+## 11. P1 执行偏差与验证债（2026-11-03 最终修复轮）
+
+### 11.1 已实现的偏差修正
+
+| 项 | 设计原稿 | 实际实现 | 原因 |
+|---|---|---|---|
+| portal 左右约定 | 直接按 `GetPortal` 喂漏斗 | `GetPortal` 返回的 left/right **交换**后喂入 | 原约定与漏斗 `TriArea2` 相反，路径贴阶梯外侧 |
+| 门 clearance | 三角面级硬过滤 | 门内采样最大可通行 clearance + 硬/软系数 | 三角面 clearance 在贴墙三角面恒 0，会封死合法通道 |
+| 起点三角面 | 直接用投影三角面 | 朝目标前探 0.05m 选前方三角面 | 起点落在顶点/边上时漏斗可能从背后起头 |
+| 路径端点放宽 | 每段局部 1m | 按**整条路径**首尾距离放宽（1m 内 ≤半身半径，0.5m 内线性收紧） | 每段局部判定会让中间路点也获得端点豁免 |
+| 校验采样 | 0.5m（后尝试 0.1m） | **0.25m** | 0.1m 太慢；0.25m 仍 < 最小 bodyRadius 的一半 |
+| hash 混合 | 仅 `Mix(int)` | 追加 `Mix(byte)`（exporter 与 `NavDataFormat` 同步） | 原实现 byte 走 int 混合，canonical hash 跨端不一致 |
+| 新鲜度测试 | 场景不匹配时 `Assert.Ignore` | 临时切到 DemoDay 场景执行，结束恢复 | 避免检查永远被跳过 |
+| 前摇目标门 | drop-radius 保持无条件生效 | 前摇（`AttackResolveTick`）期间挂起 drop-radius、沿用旧视野锥语义 | 保 `MonsterAcceptanceTests.A2`「丢目标 ≠ 打不中」；见 §5.1 |
+| PathFollower 推进半径 | `max(bodyRadius*0.5, moveSpeed*0.25)` | **`bodyRadius*0.5`** | Wolf 0.875m 会提前跳点、直线切过墙格 |
+| SpiderBoss 槽位 | 原坐标离 navmesh 太近 | `(18.333, 18.389)` | 1.74m clearance 投影 |
+| PlayMode 观察者 | 原点 | `(7, -8)`（见 `MonsterWorldTests`） | 避开 Wolf 巡逻感知圈 |
+| 查询预算 | 仅 16 次/tick | 16 次 + 25ms 时间预算 + 单查询 deadline | 单次 2–8ms 时次数上限保证不了 tick 不超时 |
+| 寻路失败回退 | 全部退回直线 `MoveTo` | 仅 `_navigation == null` 回退；其余停住 | C2：跨河/off-navmesh/Boss 1.74 会直线穿地形 |
+| 巡逻点全失败 | legacy 未投影圆环 | 已投影的 `PatrolCenter` 单点 | 禁止未校验点 |
+| Moving/速度 | 按行为树意图 | 按 ORCA 后**实际位移** > ε | I5：客户端不播假 Run |
+| 判定帧 LOS | 仅决策前查 | `CombatResolver` 对 NPC caster 在 `DrainResolved` 再查 | I1：起手后躲墙不命中 |
+
+### 11.2 实测性能（Release / Debug，200 次查询）
+
+| 档位 | Release 平均 | Release 最大 | Debug 平均 |
+|---|---|---|---|
+| 5m | 0.49–0.64ms | 3.8–6.1ms | 0.65ms |
+| 10m | 0.80–1.08ms | 5.6–9.6ms | 1.07ms |
+| 20m | 2.09–2.58ms | 13.7–28.8ms | 2.97ms |
+| 35m | 3.38–4.83ms | 19–74ms（冷缓存 blocked/Boss） | 5.10ms |
+
+- 200 次总体：Release 平均 1.8–2.3ms、p95 9.8–11.9ms。
+- 预算 soak（25ms/tick，每 tick 32 次尝试）：实测 `maxTick < 27ms`，每 tick 放行 12–16 次，其余下 tick 重试。
+- **200 怪刷新率约 0.9–1.2Hz**（12–16 q/tick × 15Hz / 200）；大半径/跨岛 blocked 更低。
+- **0.5ms/query 是 P2 性能债**：5m 档仍高于 0.5ms。时间预算保证 tick 不超时，
+  但单次查询成本需靠路径缓存/预计算 clearance 场/分层导航继续优化（§9.2 backlog 已有）。
+
+### 11.3 验证债（tracked）
+
+- **视觉抽帧未做**：Wolf 绕岩石/湖岸、SpiderBoss 不穿模只有服务端几何断言
+  （`DemoDayNavBinTests` 逐点 `IsPointNavigable`）；需在 DemoDay Play Mode 人工抽帧。
+- 导出器三角面排序 tie-break（min/max/area 全相同时）未加中间顶点：改导出器必须重导 navbin
+  并同步 hash/几何断言，本轮不重导，**P2**。
+- `--no-nav` / `--no-avoid` 负对照的手工 E2E 未在本轮重跑（单测覆盖了无导航回退）。
+- 服务端测试官方 testhost 本机不可用；以 `tools/test-server-inprocess.sh`（in-process xunit runner）
+  为准，干净克隆可复现 348/348（修复轮后）。官方 `dotnet test` 的 workaround 见 `Server/README.md`。

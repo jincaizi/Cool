@@ -55,7 +55,9 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 
 ```bash
 # 服务器侧测试（xUnit）：codec 回环 + registry 完备性 + 守卫（21 项）
+# 官方 testhost 在本机 Win32Exception(5) 时用 in-process runner（见 Server/README.md）
 dotnet test Server/Server.Tests/Server.Tests.csproj
+bash tools/test-server-inprocess.sh
 
 # Unity 侧（NUnit EditMode）：同样断言跑于编辑器环境
 #   via unity-mcp tests-run(EditMode, class=ProtocolRoundtripTests)
@@ -69,7 +71,10 @@ grep 'protobuf-net' Server/Server3C.csproj
 
 ```bash
 # 终端 1：启动服务器（默认参数即 8000）
-dotnet run --project Server/Server3C.csproj -- 8000
+# 先 dotnet build；用 dotnet <dll> 而不是 dotnet run —— 本机 apphost 会让
+# HttpListener.Start 抛「句柄无效」。
+dotnet build Server/Server3C.csproj
+dotnet Server/bin/Debug/net8.0/Server3C.dll 8000
 # 终端 2（Unity 内）：unity-mcp tests-run(PlayMode, class=EchoSmokeTests)
 ```
 

@@ -10,6 +10,11 @@
 
 **规格：** `docs/superpowers/specs/2026-11-02-server-monster-navigation-ai-design.md`
 
+> **执行说明（2026-11-03 最终修复轮）：** 本计划正文是任务拆分时的原稿；实际实现与它存在
+> 偏差（portal 交换、门 clearance、0.1→0.25m 校验、时间预算、C2 失败停住、判定帧 LOS 等）。
+> **唯一权威的偏差/性能/验证债记录见文末「P1 执行偏差与验证债」**；正文中已过时的数值
+> （0.5m 校验、`MaxQueriesPerTick` 只有次数上限、失败回退直线）以文末为准。
+
 ---
 
 ## 文件结构
@@ -3572,3 +3577,56 @@ git commit -m "docs(nav): document server monster navigation"
 - **既有测试因 0.5m 到达阈值变化**：检查是巡逻点投影还是阈值；修实现，不放宽断言。
 - **导出文件与加载器 hash 不一致**：对比 exporter 与 `NavDataFormat` 的写入顺序/字段类型；以 `NavDataFormat.Read` 的异常信息定位。
 - **E2E 因 bot 人墙失败**：用 `--bots 0`（默认）或低 bot 数；bot 不在本期 navmesh 约束内。
+
+---
+
+## P1 执行偏差与验证债（2026-11-03 最终修复轮）
+
+> 本节是 P1 分支最终审查（结论“修完再收尾”）的唯一修复记录。此前偏差只记在
+> gitignored 的 `.superpowers/` 账本里；本段迁到 tracked 计划，之后以本段为准。
+> 同一份内容在规格 §11 与 `Server/Navigation/README.md` 有面向实现的版本。
+
+### 与计划正文不一致、已实现的项
+
+1. **portal 左右约定**：`GetPortal` 的 left/right 与漏斗 `TriArea2` 相反，喂入前交换。
+2. **门 clearance**：不再用三角面级硬过滤；对门采样取最大可通行 clearance，0.9/1.1 硬/软系数与惩罚。
+3. **起点前探**：起点朝目标探 0.05m 选前方三角面，避免漏斗从背后起头。
+4. **端点放宽按整条路径首尾**：1m 内最多半身半径、0.5m 内线性收紧；不是每段局部。
+5. **路径校验采样 0.25m**（计划曾写 0.5m，实现先试 0.1m）；仍小于最小 `bodyRadius` 的一半。
+6. **`Mix(byte)`**：exporter 与 `NavDataFormat` 同步加入 byte 混合，否则 canonical hash 跨端不一致。
+7. **新鲜度测试**：`NavMeshExportFreshnessTests` 临时切到 DemoDay 场景执行，不再 `Assert.Ignore`。
+8. **前摇目标门**：`AttackResolveTick` 期间挂起 drop-radius 保持，沿用旧视野锥语义
+   （保 `MonsterAcceptanceTests.A2`）；见 `MonsterModule.DetectTarget` 注释。
+9. **PathFollower 推进半径**：改为 `bodyRadius*0.5`（原 `max(bodyRadius*0.5, moveSpeed*0.25)`
+   对 Wolf 是 0.875m，会切墙）。
+10. **SpiderBoss 槽位** `(18.333, 18.389)`；PlayMode 观察者 `(7, -8)`；见 `MonsterModule` 注释与
+    `MonsterWorldTests`。
+11. **查询预算**：`MaxQueriesPerTick=16` + `MaxMillisecondsPerTick=25` + 单条查询 deadline；
+    `BeginTick` 同 tick 幂等。`goalMoved` 有独立 5 tick 最小间隔。见 `NavigationService` / `PathFollower`。
+12. **C2 失败停住**：只有 `_navigation == null` 才回退直线；查询失败/退避/预算拒绝无旧路径时停住；
+    路径走完不再朝网格外真实目标继续走。巡逻全失败回退已投影中心（单点）。
+13. **I5 实际位移**：`SimpleMoveSystem.MoveTo/MoveTowards` 返回实际位移；`PathFollower.Tick` 返回
+    是否实际移动；`MonsterBtActions` 按返回值写 `Moving`/`ActionState`；`MonsterModule` flush 用 `Moving`。
+14. **I1 判定帧 LOS**：`CombatResolver.NpcLineOfSight` 由 `Server3C.EnableMonsters` 接线；NPC 施法在
+    `DrainResolved` 逐目标复查，玩家施法不变。
+15. **I2 验收测试**：`DemoDayNavBinTests` 增加已知绕障路径（直线 24m / 实际 49.8m）逐点校验、
+    Boss 1.74 可达/不可达、出生点点级 `IsPointNavigable`；`NavMeshBenchmarkTests` 记录 200 查询与预算 soak。
+16. **I4 可复现测试**：`tools/ServerTestRunner` + `tools/test-server-inprocess.sh`（in-process xunit）；
+    官方 testhost 本机 `Win32Exception(5)` 的 workaround 写进 `Server/README.md` / P5 指南。
+
+### 选定 Minor 的处理
+
+- 已修：DemoDay 注释、p5/Protocol/network-playtest 的 `dotnet run` caveat、PathFollower 半径不变量注释
+  + 配置级断言、`TryProject` 点级 clearance、`startTri==goalTri` 从邻居继续扩展（含回归测试）、
+  `NavDataFormat` 写前校验 + temp+move、`--map` 边界/空值报错、`maps:null` 合并、`BeginTick` 幂等。
+- 仍延后（记录不阻塞）：导出器三角面 tie-break（改则必须重导 navbin）→ **P2**；
+  `AvoidanceSystem._secondsPerTick`（保留构造参数）、`NavMeshGraph.Triangle` AABB 字段、
+  `MonsterBtActions` 重复 LOS、`PathFollower.WaypointIndex` 无调用者 → 记录，不清理。
+
+### 性能与验证债
+
+- **0.5ms/query 未达成**：Release 200 次平均 1.8–2.3ms；5m 档 0.49–0.64ms（最好一次擦线）。时间预算保证 tick
+  不超时（实测 maxTick < 27ms @25ms 预算），200 怪刷新率约 **0.9–1.2Hz**；0.5ms/query 为 **P2 性能债**。
+- **视觉抽帧未做**：绕障/不穿模目前只有服务端几何断言；DemoDay Play Mode 人工抽帧仍待做。
+- `--no-nav` / `--no-avoid` 手工 E2E 未在本轮重跑（单测覆盖无导航回退）。
+- 官方 `dotnet test` 本机不可用；全量以 `bash tools/test-server-inprocess.sh` 为准（修复轮后 348/348）。

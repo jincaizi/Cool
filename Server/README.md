@@ -50,6 +50,20 @@ bash tools/test-server.sh
 `Server/Server.Tests/`（xUnit）：AOI、战斗裁决、怪物、移动、协议、会话等。
 
 ```bash
+# 官方 testhost（会拉起 VSTest testhost 子进程）
 bash tools/test-server.sh
 bash tools/test-server.sh --filter "FullyQualifiedName~Orca"
+
+# 本机 workaround：testhost 以 Win32Exception(5) Access denied 退出时用 in-process runner
+bash tools/test-server-inprocess.sh
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Navigation"
+CONFIG=Release bash tools/test-server-inprocess.sh   # benchmark 数字用 Release
 ```
+
+**为什么有第二个脚本**：本机（Windows 10 / .NET SDK 10）`dotnet test` 的 testhost 在
+`Process.EnableRaisingEvents` 上抛 `Win32Exception(5): 拒绝访问`，测试一个都不跑。
+`tools/ServerTestRunner` 用 xunit 自带的 `AssemblyRunner` 在**同一进程**里发现/执行
+`Server.Tests.dll`（不经过 VSTest），输出与 `dotnet test` 等价的 PASS/FAIL 摘要。
+它引用 `Server.Tests.csproj`，所以 `dotnet build` + runner 会复制全部依赖；
+干净克隆可直接复现 321/321（修复轮后 348/348）。脚本把 `TEMP` 指到仓库内
+`.tmp/server-tests`，避免受限环境阻止测试写 `Path.GetTempPath()`。
