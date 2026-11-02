@@ -222,7 +222,7 @@ tile:
 - `m.Moving` 按实际位移 > epsilon 判定，避免 ORCA 把位移清零后客户端还在播 Run。
 - 慢速状态通过 `moveSpeed` 乘子影响期望位移。
 
-**ORCA 邻居速度修正**：`AvoidanceSystem.EnsureSnapshot` 现在用 `Speed × 朝向` 近似邻居速度；路径跟随在拐角处朝向滞后于位移方向，会喂错速度。改为 NPC/bot 使用**上一 tick 的实际位移**（当前 `Position` − 上次快照 `Position`），玩家保持零速度（不可信输入）。实体死亡/移除/重生时清历史；新 id 首 tick 速度为 0。
+**ORCA 邻居速度修正**：`AvoidanceSystem.EnsureSnapshot` 现在用 `Speed × 朝向` 近似邻居速度；路径跟随在拐角处朝向滞后于位移方向，会喂错速度。改为 NPC/bot 使用**上一 tick 的实际位移**（当前 `Position` − 上次快照 `Position`），玩家保持零速度（不可信输入）。实体死亡/移除/重生时清历史；新 id 首 tick 速度为 0。对称四体收敛场景因此从旧口径下的永久漩涡（最小间距 0.9497、约 5% 交叠）变为稳定最优环形（半径 1/√2 ≈ 0.707m，相邻间距 = 半径和 1.0，零交叠）；既有 `AvoidanceSystemTests` 的 liveness 断言按新语义更新——停住是几何上无法再靠近的正确收敛解。
 
 ### 4.5 目标/巡逻/出生点投影
 

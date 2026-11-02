@@ -48,6 +48,7 @@
 | `Server/Monster/MonsterBtActions.cs` | Patrol/Chase/Return 改走 `PathFollower` |
 | `Server/Monster/SimpleMoveSystem.cs` | 新增 `MoveTowards`；`MoveTo` 变薄包装 |
 | `Server/Movement/AvoidanceSystem.cs` | 邻居速度改为上一 tick 实际位移 |
+| `Server/Server.Tests/Movement/AvoidanceSystemTests.cs` | 对称收敛用例的 liveness 断言按实际位移语义更新（旧断言依赖 `Speed × 朝向` 的永久漩涡） |
 | `Server/Server3C.cs` | `EnableMonsters(count, NavigationService?)` |
 | `Server/Program.cs` | `--map <id>`、`--no-nav` |
 | `Server/Server3C.csproj` | 复制 `Config/maps.json`、`Config/nav/*.navbin` |
@@ -1720,6 +1721,8 @@ git commit -m "feat(nav): add navigation service and map config"
 **文件：**
 - 修改：`Server/Monster/SimpleMoveSystem.cs`
 - 修改：`Server/Movement/AvoidanceSystem.cs`
+- 修改：`Server/Server.Tests/Movement/AvoidanceSystemTests.cs`（旧 liveness 断言依赖旧 `Speed × 朝向`
+  口径下“对称四体永远绕漩涡”；新语义下四体停在最优环形，停住才是正确收敛解，断言按新语义更新）
 - 测试：`Server/Server.Tests/Movement/AvoidanceVelocityTests.cs`
 
 - [ ] **步骤 1：写失败的 ORCA 速度测试**
