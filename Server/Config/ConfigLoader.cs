@@ -43,7 +43,11 @@ namespace KcpServer.Config
             if (!File.Exists(path)) throw new FileNotFoundException("maps config not found", path);
             string json = File.ReadAllText(path);
             var config = JsonSerializer.Deserialize<MapsConfig>(json, JsonOptions);
-            return config ?? new MapsConfig();
+            if (config == null) return new MapsConfig();
+            // `{"maps": null}` 会把属性显式覆盖成 null；合并成空表，让上层得到
+            // "没有地图" 的确定性错误而不是 NullReferenceException。
+            config.maps ??= new System.Collections.Generic.List<MapEntry>();
+            return config;
         }
 
         public static Dictionary<int, MonsterData> LoadMonsterTemplates(string configPath)

@@ -3,21 +3,24 @@ using KcpServer.Navigation;
 
 namespace KcpServer.Monster
 {
-    // P1 用同步预算（NavigationService.TryFindPath 按 tick 计数），请求不排队，
+    // P1 用同步预算（NavigationService.TryFindPath 按 tick 计数 + 时间预算），请求不排队，
     // 因此没有“过期请求”需要丢弃；失败后按 FailureBackoffTicks=30 退避。
     public sealed class PathFollower
     {
         private const uint RepathIntervalTicks = 15;
         private const uint FailureBackoffTicks = 30;
         private const float TargetMoveThreshold = 2f;
+        private const uint GoalMoveRepathIntervalTicks = 5; // goalMoved 的独立最小间隔（C1：不许每 tick 绕过周期闸门）
         private const float StuckWindowTicks = 10;
         private const int StuckWindowLimit = 3;
+        private const float MovementEpsilon = 0.001f;
 
         private readonly NavigationService? _navigation;
         private NavPath? _path;
         private int _index;
         private Vector3 _goal;
         private uint _nextRepathTick;
+        private uint _nextGoalRepathTick;
         private uint _nextAttemptTick;
         private Vector3 _stuckCheckPosition;
         private uint _stuckCheckTick;
@@ -40,15 +43,16 @@ namespace KcpServer.Monster
         public bool HasPath => _path != null;
         public int WaypointIndex => _index;
 
-        public void Tick(MonsterState monster, Vector3 goal, SimpleMoveSystem mover, float deltaTime, uint tick)
+        /// <summary>推进路点跟随。返回本 tick 是否**实际**移动（ORCA 清零/无路可走/预算拒绝 → false）。
+        /// 有导航但查询失败/退避/预算拒绝时**停住**，绝不回退直线穿地形；只有 `_navigation == null`
+        /// 才保留旧的直线 MoveTo（未配置导航的宿主/`--no-nav` 负对照）。</summary>
+        public bool Tick(MonsterState monster, Vector3 goal, SimpleMoveSystem mover, float deltaTime, uint tick)
         {
             if (_navigation == null)
-            {
-                mover.MoveTo(monster, goal, deltaTime);
-                return;
-            }
+                return mover.MoveTo(monster, goal, deltaTime) > MovementEpsilon;
 
             bool goalMoved = DistanceXZ(goal, _goal) > TargetMoveThreshold;
+            if (goalMoved && tick < _nextGoalRepathTick) goalMoved = false; // 独立降频，错开 tick
             bool due = tick >= _nextRepathTick;
             bool noPath = _path == null;
             if ((noPath || due || goalMoved) && tick >= _nextAttemptTick)
@@ -60,10 +64,10 @@ namespace KcpServer.Monster
                     _goal = goal;
                     _index = 0;
                     // 相位错峰：200 只怪按 npcId 分散首次周期重寻，避免预算被同步波压垮。
-                    // 不推进 _nextAttemptTick——否则 goalMoved 会被 15 tick 间隔闸门挡成死代码；
-                    // goalMoved 自身有 2m 阈值，成功后 _goal 更新即复位，不会每 tick 重寻。
+                    // 每轮都加相位（15..29 tick），实际周期比 15 略长——这是刻意的降载，不是 bug。
                     uint phase = (uint)(monster.NpcId % RepathIntervalTicks);
                     _nextRepathTick = tick + RepathIntervalTicks + phase;
+                    _nextGoalRepathTick = tick + GoalMoveRepathIntervalTicks;
                     _stuckCheckPosition = monster.Position;
                     _stuckCheckTick = tick;
                     _stuckWindows = 0;
@@ -76,17 +80,16 @@ namespace KcpServer.Monster
                 }
             }
 
-            if (_path == null)
-            {
-                mover.MoveTo(monster, goal, deltaTime);
-                return;
-            }
+            // 有导航但当前没有可用路径（首次失败/退避中/预算拒绝）：原地停住。
+            // 由行为树转入 Idle/Return；绝不朝 blocked/off-navmesh 目标直线移动。
+            if (_path == null) return Stop(monster, mover, deltaTime);
 
             AdvanceWaypoints(monster);
             if (_index >= _path.Waypoints.Length)
             {
-                mover.MoveTo(monster, goal, deltaTime);
-                return;
+                // 路径已走完：终点是投影点，剩余的“真实目标”可能离网格最多 2m（玩家站岩石上）。
+                // 再 MoveTo 真实目标会直线穿出 navmesh；停住等 BT 攻击判定或下一次重寻。
+                return Stop(monster, mover, deltaTime);
             }
 
             Vector3 waypoint = _path.Waypoints[_index];
@@ -97,20 +100,31 @@ namespace KcpServer.Monster
                 _path = null;
                 _nextRepathTick = tick;
                 _nextAttemptTick = tick;
-                mover.MoveTo(monster, goal, deltaTime);
-                return;
+                return Stop(monster, mover, deltaTime);
             }
 
             Vector3 direction = waypoint - monster.Position;
             direction.Y = 0f;
-            mover.MoveTowards(monster, direction, deltaTime);
+            float moved = mover.MoveTowards(monster, direction, deltaTime);
 
             CheckStuck(monster, goal, tick);
+            return moved > MovementEpsilon;
+        }
+
+        /// <summary>原地停住：零方向 MoveTowards 会清零 CurrentVelocity（ORCA 锚点不留旧速度）。</summary>
+        private static bool Stop(MonsterState monster, SimpleMoveSystem mover, float deltaTime)
+        {
+            mover.MoveTowards(monster, default, deltaTime);
+            return false;
         }
 
         // 执行偏差（Task 7 集成暴露）：原定 max(bodyRadius*0.5, moveSpeed*0.25) 对 Wolf（3.5 m/s）
         // 是 0.875m，会在墙角路点前 0.86m 提前跳点、直线切过墙格。改为只看 bodyRadius*0.5。
         // 若将来要恢复 moveSpeed 项，必须证明/实现额外的墙角保护（例如推进前校验下一段 LOS）。
+        //
+        // 不变量：单 tick 位移 moveSpeed*dt 必须 < 推进半径 bodyRadius*0.5，否则一 tick 会跨过
+        // 路点、终点附近绕圈。发布配置实测：Wolf 3.5*0.066=0.231 < 0.25；Boss 3.2*0.066=0.211
+        // < 0.87。MonsterMovementStateTests 有配置级断言。
         private void AdvanceWaypoints(MonsterState monster)
         {
             float radius = monster.Config.bodyRadius * 0.5f;

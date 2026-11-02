@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using KcpServer.Config;
@@ -27,11 +28,27 @@ namespace KcpServer.Navigation
     {
         private readonly NavMeshGraph _graph;
         private readonly NavMeshPathfinder _pathfinder;
+        private readonly Stopwatch _tickClock = new Stopwatch();
         private int _queriesThisTick;
+        private uint? _lastTick;
+        private double _lastTickMilliseconds;
+        private long _budgetRejections;
 
         public string MapId { get; }
         public int MaxQueriesPerTick { get; set; } = 16;
+
+        /// <summary>每 tick 寻路的时间预算（毫秒）。次数上限之外再加一道时间闸门：
+        /// 单次查询 2–8ms 时 16 次能吃掉 100ms+，只数次数保证不了 tick 不超时。
+        /// 超限的查询返回 <c>FailReason="budget"</c>，由 PathFollower 下 tick 重试。</summary>
+        public int MaxMillisecondsPerTick { get; set; } = 25;
+
         public int QueryCount { get; private set; }
+
+        /// <summary>因次数/时间预算被拒绝的查询数（benchmark/诊断口径）。</summary>
+        public long BudgetRejections => _budgetRejections;
+
+        /// <summary>上一个已完成 tick 的寻路耗时（毫秒）；BeginTick 换 tick 时结算。</summary>
+        public double LastTickMilliseconds => _lastTickMilliseconds;
 
         public NavigationService(NavMeshGraph graph, string mapId)
         {
@@ -58,7 +75,16 @@ namespace KcpServer.Navigation
             return new NavigationService(data);
         }
 
-        public void BeginTick(uint tick) => _queriesThisTick = 0;
+        /// <summary>开始新 tick：结算上一 tick 耗时、清零次数与计时。**同一 tick 重复调用幂等**——
+        /// 否则调用方多叫一次就会白送一份预算（MonsterModule 与测试宿主可能都会叫）。</summary>
+        public void BeginTick(uint tick)
+        {
+            if (_lastTick == tick) return;
+            if (_lastTick.HasValue) _lastTickMilliseconds = _tickClock.Elapsed.TotalMilliseconds;
+            _lastTick = tick;
+            _queriesThisTick = 0;
+            _tickClock.Restart();
+        }
 
         public bool TryFindPath(NavQuery query, out NavPath path)
         {
@@ -67,15 +93,21 @@ namespace KcpServer.Navigation
                 path = NavPath.Fail("wrong-map");
                 return false;
             }
-            if (_queriesThisTick >= MaxQueriesPerTick)
+            if (_queriesThisTick >= MaxQueriesPerTick
+                || _tickClock.Elapsed.TotalMilliseconds >= MaxMillisecondsPerTick)
             {
+                _budgetRejections++;
                 path = NavPath.Fail("budget");
                 return false;
             }
 
             _queriesThisTick++;
             QueryCount++;
-            path = _pathfinder.FindPath(query.Start, query.Goal, query.BodyRadius, query.MaxExpandedNodes);
+            // 把本 tick 剩余预算传进单次查询：长距离/Boss 大半径查询可以在半途以 "budget"
+            // 退出（下 tick 重试，portal 缓存已积累），保证单条查询不会把 tick 拖过 66ms。
+            double remainingMs = MaxMillisecondsPerTick - _tickClock.Elapsed.TotalMilliseconds;
+            path = _pathfinder.FindPath(query.Start, query.Goal, query.BodyRadius, query.MaxExpandedNodes, remainingMs);
+            if (!path.Success && path.FailReason == "budget") _budgetRejections++;
             return path.Success;
         }
 
@@ -83,9 +115,11 @@ namespace KcpServer.Navigation
         {
             projected = point;
             clearance = 0f;
-            if (!_graph.FindNearestPoint(point, maxDistance, out projected, out _, out int triangle))
+            if (!_graph.FindNearestPoint(point, maxDistance, out projected, out _, out _))
                 return false;
-            clearance = _graph.GetClearance(triangle);
+            // 点级 clearance（到最近边界边的精确距离）。三角面级取质心/边中点最小值，
+            // 在尖角处会低估、在狭长三角形里会高估巡逻点的实际可站立空间。
+            clearance = _graph.GetPointClearance(projected);
             return true;
         }
 

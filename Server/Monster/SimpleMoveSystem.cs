@@ -16,15 +16,18 @@ namespace KcpServer.Monster
         /// （等价于全局 --no-avoid；测试里用来跑"接线前"的对照组）</param>
         public SimpleMoveSystem(AvoidanceSystem? avoidance = null) => _avoidance = avoidance;
 
-        public void MoveTo(MonsterState m, Vector3 targetPosition, float deltaTime)
+        /// <summary>朝目标位置直线移动；返回本 tick **实际位移长度**（米，ORCA 后）。
+        /// 行为树用它写 <see cref="MonsterState.Moving"/>，避免"意图移动"驱动客户端 Run/速度。</summary>
+        public float MoveTo(MonsterState m, Vector3 targetPosition, float deltaTime)
         {
             Vector3 direction = targetPosition - m.Position;
             direction.Y = 0;
-            MoveTowards(m, direction, deltaTime);
+            return MoveTowards(m, direction, deltaTime);
         }
 
-        /// <summary>按方向前进（导航/路径跟随的入口；方向无需归一化）。</summary>
-        public void MoveTowards(MonsterState m, Vector3 direction, float deltaTime)
+        /// <summary>按方向前进（导航/路径跟随的入口；方向无需归一化）。
+        /// 返回本 tick **实际位移长度**（米，ORCA 后；方向退化时为 0）。</summary>
+        public float MoveTowards(MonsterState m, Vector3 direction, float deltaTime)
         {
             direction.Y = 0;
             if (direction.X * direction.X + direction.Z * direction.Z < 0.001f)
@@ -32,7 +35,7 @@ namespace KcpServer.Monster
                 // 到点了（本 tick 不动）：把"当前速度"清零，否则停住再起步那一 tick，ORCA 的半平面
                 // 锚点会用上"上一段行程的位移"——一个已经不存在的速度（审查指出）。
                 m.CurrentVelocity = default;
-                return;
+                return 0f;
             }
 
             direction = direction.Normalize();
@@ -55,6 +58,7 @@ namespace KcpServer.Monster
 
             m.CurrentVelocity = movement;
             m.Position = m.Position + movement;
+            return (float)Math.Sqrt(movement.X * movement.X + movement.Z * movement.Z);
         }
 
         public bool HasReached(MonsterState m, Vector3 target, float threshold = 0.1f)

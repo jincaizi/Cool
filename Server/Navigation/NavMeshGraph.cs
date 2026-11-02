@@ -6,6 +6,9 @@ namespace KcpServer.Navigation
     public sealed class NavMeshGraph
     {
         private const float ClearanceCap = 8f;
+        // 运行时点级 clearance 只需覆盖最大 bodyRadius（SpiderBoss 1.74）× 软系数 1.1 ≈ 1.91。
+        // 更高的值只会让边界网格多扫一圈（8m → 5×5 格，2.5m → 3×3 格），对寻路没有影响。
+        private const float PointClearanceCap = 2.5f;
         private const float CellSize = 4f;
 
         private readonly Vector3[] _vertices;
@@ -17,6 +20,7 @@ namespace KcpServer.Navigation
         private readonly List<(Vector3 A, Vector3 B)> _boundaryEdges;
         private readonly Dictionary<long, List<int>> _triangleGrid;
         private readonly Dictionary<long, List<int>> _boundaryGrid;
+        private readonly int[] _components;
 
         public int TriangleCount => _triangles.Length;
         public int VertexCount => _vertices.Length;
@@ -132,6 +136,30 @@ namespace KcpServer.Navigation
             _neighbors = new int[triangleCount][];
             for (int i = 0; i < triangleCount; i++) _neighbors[i] = neighborLists[i].ToArray();
 
+            // 连通分量：跨岛（被河谷/断崖分断）的查询在 A* 之前就能判定 blocked，
+            // 不必展开整个起始分量。clearance 造成的 blocked 不在分量语义里，仍由 A* 判定。
+            _components = new int[triangleCount];
+            for (int i = 0; i < triangleCount; i++) _components[i] = -1;
+            var stack = new Stack<int>();
+            int component = 0;
+            for (int i = 0; i < triangleCount; i++)
+            {
+                if (_components[i] >= 0) continue;
+                _components[i] = component;
+                stack.Push(i);
+                while (stack.Count > 0)
+                {
+                    int current = stack.Pop();
+                    foreach (int next in _neighbors[current])
+                    {
+                        if (_components[next] >= 0) continue;
+                        _components[next] = component;
+                        stack.Push(next);
+                    }
+                }
+                component++;
+            }
+
             for (int i = 0; i < _boundaryEdges.Count; i++)
             {
                 var (a, b) = _boundaryEdges[i];
@@ -158,6 +186,15 @@ namespace KcpServer.Navigation
         public byte[] CopyAreas() => (byte[])_areas.Clone();
         public Vector3[] CopyVertices() => (Vector3[])_vertices.Clone();
         public float GetClearance(int triangle) => _triangles[triangle].Clearance;
+
+        /// <summary>点级 clearance：该点到最近边界边的精确 XZ 距离（封顶 2.5m，覆盖 Boss 1.74×软系数）。
+        /// 三角面级 clearance（<see cref="GetClearance"/>）取质心与边中点最小值，只作保守下界；
+        /// 巡逻点/投影点判断可站立空间时要用点级值。</summary>
+        public float GetPointClearance(Vector3 point)
+            => ClearanceAt(point.X, point.Z, PointClearanceCap);
+
+        /// <summary>三角面所属连通分量（A* 前置剪枝：不同分量必然不可达）。</summary>
+        public int GetComponent(int triangle) => _components[triangle];
         public int GetTriangleCount() => _triangles.Length;
         public int GetNeighborCount(int triangle) => _neighbors[triangle].Length;
         public int GetNeighbor(int triangle, int index) => _neighbors[triangle][index];
@@ -273,8 +310,8 @@ namespace KcpServer.Navigation
 
         public bool IsPointNavigable(Vector3 point, float bodyRadius)
         {
-            if (!FindNearestTriangle(point, 0.25f, out int triangle, out float distance)) return false;
-            return distance <= 0.25f && ClearanceAt(point.X, point.Z) >= bodyRadius;
+            if (!FindNearestTriangle(point, 0.25f, out _, out float distance)) return false;
+            return distance <= 0.25f && ClearanceAt(point.X, point.Z, PointClearanceCap) >= bodyRadius;
         }
 
         public bool GetPortal(int fromTriangle, int toTriangle, out Vector3 left, out Vector3 right)
@@ -333,11 +370,11 @@ namespace KcpServer.Navigation
             return MathF.Min(d0, MathF.Min(d1, d2));
         }
 
-        private float ClearanceAt(float x, float z)
+        private float ClearanceAt(float x, float z, float cap = ClearanceCap)
         {
             int cellX = CellOf(x), cellZ = CellOf(z);
-            int radius = (int)MathF.Ceiling(ClearanceCap / CellSize);
-            float best = ClearanceCap;
+            int radius = (int)MathF.Ceiling(cap / CellSize);
+            float best = cap;
             for (int dz = -radius; dz <= radius; dz++)
             for (int dx = -radius; dx <= radius; dx++)
             {

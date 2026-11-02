@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace KcpServer.Navigation
@@ -7,7 +8,10 @@ namespace KcpServer.Navigation
     public sealed class NavMeshPathfinder
     {
         private const float DefaultProjectionRadius = 2f;
-        private const float ValidationStep = 0.1f;
+        // 0.1m → 0.25m（C1 性能修复）：路径校验每 0.1m 一次 IsPointNavigable（每次含
+        // FindNearestTriangle + 25 格边界边扫描），是单次查询的主要开销。0.25m 仍小于最小
+        // bodyRadius（0.5m）的一半，窄通道/墙角用例（NavMeshPathfinderTests）全部保留。
+        private const float ValidationStep = 0.25f;
         private const float ClearanceHardFactor = 0.9f;
         private const float ClearanceSoftFactor = 1.1f;
         private const float ClearancePenalty = 2f;
@@ -15,14 +19,57 @@ namespace KcpServer.Navigation
         private const float EndpointEpsilon = 1e-4f;
 
         private readonly NavMeshGraph _graph;
+        // portal clearance 与 bodyRadius 无关的部分是静态的：同一对三角面的门在整张地图生命周期内不变。
+        // 缓存 (门端点, 量化后的 maxClearance) → (max clearance 点, 值)，跨查询复用（200 怪反复寻路）。
+        private readonly Dictionary<(float, float, float, float, int), (float Clearance, Vector3 BestPoint)> _portalCache = new();
+        private const int PortalCacheLimit = 65_536;
+
+        // 单次查询的软截止时间（绝对 Stopwatch 时间戳；0 = 不限）。NavigationService 传入
+        // 本 tick 剩余预算，避免一条跨长距离/Boss 大半径查询把 tick 拖过 66ms。
+        // 非线程安全：NavMeshPathfinder 是每个 NavigationService 私有的，主循环单线程（R2）。
+        private long _deadlineTimestamp;
+        private bool _budgetExceeded;
 
         public NavMeshPathfinder(NavMeshGraph graph) => _graph = graph ?? throw new ArgumentNullException(nameof(graph));
 
         public NavPath FindPath(Vector3 start, Vector3 goal, float bodyRadius, int maxExpandedNodes = 50000)
-            => FindPathInternal(start, goal, bodyRadius, maxExpandedNodes, 0);
+        {
+            _budgetExceeded = false; // 上一次带 deadline 的查询可能留下 true
+            return FindPathInternal(start, goal, bodyRadius, maxExpandedNodes, 0);
+        }
+
+        /// <summary>带单次查询时间上限的重载（毫秒）。超限返回 <c>FailReason="budget"</c>，
+        /// 由调用方下 tick 重试；已完成的 portal clearance 仍在缓存里，重试通常更快。</summary>
+        public NavPath FindPath(Vector3 start, Vector3 goal, float bodyRadius, int maxExpandedNodes, double maxMilliseconds)
+        {
+            if (maxMilliseconds >= double.MaxValue)
+                return FindPathInternal(start, goal, bodyRadius, maxExpandedNodes, 0);
+            if (maxMilliseconds <= 0) return NavPath.Fail("budget");
+
+            long previous = _deadlineTimestamp;
+            _deadlineTimestamp = Stopwatch.GetTimestamp()
+                + (long)(maxMilliseconds / 1000.0 * Stopwatch.Frequency);
+            _budgetExceeded = false;
+            try
+            {
+                return FindPathInternal(start, goal, bodyRadius, maxExpandedNodes, 0);
+            }
+            finally
+            {
+                _deadlineTimestamp = previous;
+            }
+        }
+
+        private bool BudgetExceeded()
+        {
+            if (_deadlineTimestamp == 0 || Stopwatch.GetTimestamp() < _deadlineTimestamp) return false;
+            _budgetExceeded = true;
+            return true;
+        }
 
         private NavPath FindPathInternal(Vector3 start, Vector3 goal, float bodyRadius, int maxExpandedNodes, int attempt)
         {
+            if (BudgetExceeded()) return NavPath.Fail("budget");
             if (!_graph.FindNearestPoint(start, DefaultProjectionRadius, out Vector3 projectedStart, out _, out int startTri))
                 return NavPath.Fail("start-off-navmesh");
             if (!_graph.FindNearestPoint(goal, DefaultProjectionRadius, out Vector3 projectedGoal, out _, out int goalTri))
@@ -43,6 +90,10 @@ namespace KcpServer.Navigation
                     startTri = probeTri;
             }
 
+            // 不同连通分量：A* 无论怎么展开都不通，直接 blocked（跨河/孤岛查询的主要开销在这里）。
+            if (_graph.GetComponent(startTri) != _graph.GetComponent(goalTri))
+                return NavPath.Fail("blocked");
+
             if (startTri == goalTri)
             {
                 var direct = new[] { projectedStart, projectedGoal };
@@ -57,8 +108,28 @@ namespace KcpServer.Navigation
             for (int i = 0; i < n; i++) { gScore[i] = float.PositiveInfinity; cameFrom[i] = -1; }
 
             var open = new PriorityQueue<int, (float F, int Index)>();
-            gScore[startTri] = 0f;
-            open.Enqueue(startTri, (Heuristic(startTri, goalTri), startTri));
+            bool sameTriangle = startTri == goalTri;
+            if (sameTriangle)
+            {
+                // 直连校验失败但起终点在同一三角面：不要立刻 blocked。从 start 的邻居继续扩展，
+                // 允许路径绕开贴近边界的采样点再回到目标（Minor：startTri==goalTri 扩展）。
+                int neighborCount = _graph.GetNeighborCount(startTri);
+                for (int k = 0; k < neighborCount; k++)
+                {
+                    int next = _graph.GetNeighbor(startTri, k);
+                    float portalClearance = PortalClearance(startTri, next, bodyRadius * ClearanceSoftFactor, out _);
+                    float step = DistanceXZ(startTri, next) * _graph.AreaCost(next);
+                    step += ClearancePenalty * MathF.Max(0f, bodyRadius * ClearanceSoftFactor - portalClearance);
+                    gScore[next] = step;
+                    cameFrom[next] = startTri;
+                    open.Enqueue(next, (step + Heuristic(next, goalTri), next));
+                }
+            }
+            else
+            {
+                gScore[startTri] = 0f;
+                open.Enqueue(startTri, (Heuristic(startTri, goalTri), startTri));
+            }
 
             int expanded = 0;
             while (open.TryDequeue(out int current, out _))
@@ -67,6 +138,7 @@ namespace KcpServer.Navigation
                 closed[current] = true;
                 if (current == goalTri) break;
                 if (++expanded > maxExpandedNodes) return NavPath.Fail("too-complex");
+                if (BudgetExceeded()) return NavPath.Fail("budget");
 
                 int count = _graph.GetNeighborCount(current);
                 for (int k = 0; k < count; k++)
@@ -93,10 +165,12 @@ namespace KcpServer.Navigation
             if (cameFrom[goalTri] < 0 && startTri != goalTri) return NavPath.Fail("blocked");
 
             var triPath = new List<int>();
-            for (int tri = goalTri; tri >= 0; tri = cameFrom[tri])
+            for (int tri = goalTri; tri >= 0 && triPath.Count <= n; tri = cameFrom[tri])
             {
                 triPath.Add(tri);
-                if (tri == startTri) break;
+                // goalTri == startTri 时第一项就相等——必须至少走一步 cameFrom，
+                // 否则“从邻居绕回来”的路径会被截成单三角面（Minor 修复）。
+                if (tri == startTri && triPath.Count > 1) break;
             }
             triPath.Reverse();
             if (triPath.Count == 0 || triPath[0] != startTri) return NavPath.Fail("blocked");
@@ -121,12 +195,14 @@ namespace KcpServer.Navigation
             List<Vector3> waypoints = Funnel(points);
             if (!ValidatePath(waypoints, bodyRadius))
             {
+                if (_budgetExceeded) return NavPath.Fail("budget");
                 // 漏斗在凸墙角会切角；退化为“门内最大 clearance 点/墙角偏移点 + 可见性捷径”重排。
                 List<Vector3> candidates = BuildClearanceCandidates(rawPortals, projectedStart, projectedGoal, bodyRadius);
                 waypoints = ShortcutPath(candidates, bodyRadius);
             }
             if (!ValidatePath(waypoints, bodyRadius))
             {
+                if (_budgetExceeded) return NavPath.Fail("budget");
                 if (attempt == 0)
                     return FindPathInternal(start, goal, bodyRadius * 1.15f, maxExpandedNodes, 1);
                 return NavPath.Fail("blocked");
@@ -164,6 +240,14 @@ namespace KcpServer.Navigation
         {
             bestPoint = left;
             if (maxClearance <= 0f) return 0f;
+
+            var key = (left.X, left.Z, right.X, right.Z, (int)MathF.Round(maxClearance * 1000f));
+            if (_portalCache.TryGetValue(key, out var cached))
+            {
+                bestPoint = cached.BestPoint;
+                return cached.Clearance;
+            }
+
             float best = 0f;
             for (int s = 0; s <= 4; s++)
             {
@@ -173,6 +257,9 @@ namespace KcpServer.Navigation
                 if (clearance > best) { best = clearance; bestPoint = p; }
                 if (best >= maxClearance) break;
             }
+
+            if (_portalCache.Count >= PortalCacheLimit) _portalCache.Clear(); // 防 bodyRadius 连续变化时无界增长
+            _portalCache[key] = (best, bestPoint);
             return best;
         }
 
@@ -204,6 +291,7 @@ namespace KcpServer.Navigation
             int steps = Math.Max(1, (int)MathF.Ceiling(length / ValidationStep));
             for (int i = 0; i <= steps; i++)
             {
+                if ((i & 15) == 0 && BudgetExceeded()) return false;
                 float t = i / (float)steps;
                 var p = new Vector3(a.X + dx * t, a.Y, a.Z + dz * t);
                 // 放宽按整条路径的首尾计算，而不是每段局部距离：

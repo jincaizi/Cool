@@ -13,18 +13,35 @@ namespace KcpServer.Navigation
         public static void Write(string path, NavData data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
+            Validate(data); // 先校验：任何一行抛错都不应该留下半截文件
             data.CanonicalHash = ComputeCanonicalHash(data.Vertices, data.Tiles);
 
             string? dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
-            using FileStream stream = File.Create(path);
-            using var w = new BinaryWriter(stream);
+            // temp + move：崩溃/磁盘满不会把已提交的 navbin 覆盖成半文件。
+            string tempPath = path + ".tmp";
+            try
+            {
+                using (FileStream stream = File.Create(tempPath))
+                using (var w = new BinaryWriter(stream))
+                {
+                    WriteContent(w, data);
+                }
+                File.Move(tempPath, path, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(tempPath)) File.Delete(tempPath);
+            }
+        }
+
+        private static void WriteContent(BinaryWriter w, NavData data)
+        {
             w.Write(Magic);
             w.Write(Version);
 
             byte[] map = Encoding.UTF8.GetBytes(data.MapId ?? string.Empty);
-            if (map.Length > ushort.MaxValue) throw new InvalidDataException("mapId too long");
             w.Write((ushort)map.Length);
             w.Write(map);
             w.Write(data.SourceHash);
@@ -32,8 +49,6 @@ namespace KcpServer.Navigation
             w.Write(data.MinX); w.Write(data.MinZ); w.Write(data.MaxX); w.Write(data.MaxZ);
             w.Write(data.TileSize);
             w.Write((ushort)data.Tiles.Length);
-
-            if (data.AreaCosts.Length > byte.MaxValue) throw new InvalidDataException("areaCosts too many");
             w.Write((byte)data.AreaCosts.Length);
             foreach (float cost in data.AreaCosts) w.Write(cost);
 
@@ -45,13 +60,35 @@ namespace KcpServer.Navigation
 
             foreach (NavTileData tile in data.Tiles)
             {
-                if (tile.Indices.Length % 3 != 0) throw new InvalidDataException("indices not multiple of 3");
-                if (tile.Areas.Length != tile.Indices.Length / 3) throw new InvalidDataException("areas mismatch");
                 w.Write(tile.TileX);
                 w.Write(tile.TileZ);
                 w.Write((uint)(tile.Indices.Length / 3));
                 foreach (int index in tile.Indices) w.Write((uint)index);
                 foreach (byte area in tile.Areas) w.Write(area);
+            }
+        }
+
+        /// <summary>写入前的完整校验（索引范围/计数上限/数组形状）。</summary>
+        private static void Validate(NavData data)
+        {
+            if (data.Vertices == null) throw new InvalidDataException("vertices null");
+            if (data.Tiles == null) throw new InvalidDataException("tiles null");
+            if (data.AreaCosts == null) throw new InvalidDataException("areaCosts null");
+            if (Encoding.UTF8.GetByteCount(data.MapId ?? string.Empty) > ushort.MaxValue)
+                throw new InvalidDataException("mapId too long");
+            if (data.Tiles.Length > ushort.MaxValue) throw new InvalidDataException("too many tiles");
+            if (data.AreaCosts.Length > byte.MaxValue) throw new InvalidDataException("areaCosts too many");
+
+            int vertexCount = data.Vertices.Length;
+            foreach (NavTileData tile in data.Tiles)
+            {
+                if (tile.Indices == null || tile.Areas == null) throw new InvalidDataException("tile arrays null");
+                if (tile.Indices.Length % 3 != 0) throw new InvalidDataException("indices not multiple of 3");
+                if (tile.Areas.Length != tile.Indices.Length / 3) throw new InvalidDataException("areas mismatch");
+                foreach (int index in tile.Indices)
+                {
+                    if (index < 0 || index >= vertexCount) throw new InvalidDataException("index out of range");
+                }
             }
         }
 

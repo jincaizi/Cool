@@ -56,14 +56,21 @@ namespace KcpServer
             }
 
             // 2026-11-02 地图导航：--map <id> 按 maps.json 加载 navbin；--no-nav 强制无导航（对照/回退）
+            // 边界：--map 必须是最后一个参数或后面跟另一个开关（如 `--map --no-nav`）时直接报错，
+            // 不能把 "--no-nav" 当成 map id（否则会去加载名为 "--no-nav" 的地图，报一个误导性的
+            // "map not found" 或更糟：静默按默认值启动）。
             string? mapId = null;
-            for (int i = 1; i < args.Length - 1; i++)
+            for (int i = 1; i < args.Length; i++)
             {
-                if (args[i] == "--map" && args[i + 1].Length > 0)
+                if (args[i] != "--map") continue;
+                if (i + 1 >= args.Length || args[i + 1].Length == 0 || args[i + 1].StartsWith("--"))
                 {
-                    mapId = args[i + 1];
-                    break;
+                    Console.Error.WriteLine("--map 需要一个地图 id（例如 --map demoday），且不能把开关当成 id");
+                    Environment.ExitCode = 2;
+                    return;
                 }
+                mapId = args[i + 1];
+                break;
             }
 
             bool noNav = false;

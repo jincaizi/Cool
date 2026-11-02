@@ -152,13 +152,16 @@ namespace KcpServer.Monster
             // 反序列化出来的私有副本，不会串到别的模块）。改的是同一个引用，两条路径从此同值。
             config.bodyRadius = RadiusOfTemplate(templateId);
 
+            // 有导航时巡逻中心必须是**已投影**的出生点：巡逻点全部采不到时回退到这个单点，
+            // 不能回退 legacy 未投影圆环（会把怪引到 navmesh 外直线穿地形）。
+            Vector3 patrolCenterResolved = _navigation != null ? spawn : patrolCenter;
             var state = new MonsterState(npcId, templateId, config, attackSkillId)
             {
                 Position = spawn,
                 Rotation = Quaternion.LookRotation(ForwardOf(entity.Rotation)),
                 SpawnPosition = spawn,
-                PatrolCenter = patrolCenter,
-                PatrolPoints = GeneratePatrolPoints(patrolCenter, config.patrolRadius, config.bodyRadius),
+                PatrolCenter = patrolCenterResolved,
+                PatrolPoints = GeneratePatrolPoints(patrolCenterResolved, config.patrolRadius, config.bodyRadius),
                 LastHp = config.hp,
                 Follower = new PathFollower(_navigation)
             };
@@ -169,6 +172,10 @@ namespace KcpServer.Monster
 
         /// <summary>测试/调试：读怪物 AI 状态</summary>
         public MonsterState? GetState(long npcId) => _monsters.TryGetValue(npcId, out var s) ? s : null;
+
+        /// <summary>怪物模板身体半径（战斗判定帧 LOS 用；查询不到时退回默认半径）。</summary>
+        public float BodyRadiusOf(long npcId)
+            => _monsters.TryGetValue(npcId, out var s) ? s.Config.bodyRadius : AvoidanceSystem.DefaultMonsterRadius;
 
         /// <summary>推进一 tick（服务器主循环每 tick 调用——先于施法裁决 drain 与快照广播）</summary>
         public void Tick(uint tick)
@@ -376,7 +383,8 @@ namespace KcpServer.Monster
                     points.Add(point);
             }
 
-            return points.Count > 0 ? points.ToArray() : GeneratePatrolPointsLegacy(center, radius);
+            // 全部采样失败：只用已投影的巡逻中心（单点），不再生成未校验的 legacy 圆环。
+            return points.Count > 0 ? points.ToArray() : new[] { center };
         }
 
         private bool TryFindPatrolPoint(Vector3 candidate, float bodyRadius, out Vector3 point)

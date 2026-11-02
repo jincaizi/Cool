@@ -14,27 +14,33 @@ namespace KcpServer.Monster
         /// 把冲刺绕圈的半径门槛从 1.2m 放宽到 1.75m，绕背才是可执行的操作。</summary>
         public const float WindupTurnSpeedDegPerSecond = 90f;
 
+        /// <summary>实际位移小于该值（米）视为未移动（ORCA 清零/无路径/到点）。</summary>
+        private const float MovementEpsilon = 0.001f;
+
         public static BtStatus Patrol(MonsterTickContext ctx)
         {
             var m = ctx.State;
-            if (m.PatrolPoints.Length == 0) return BtStatus.Success;
+            if (m.PatrolPoints.Length == 0)
+            {
+                SetMovementState(ctx, moved: false);
+                return BtStatus.Success;
+            }
 
             int idx = m.CurrentPatrolIndex % m.PatrolPoints.Length;
             Vector3 target = m.PatrolPoints[idx];
 
-            if (m.Follower != null) m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick);
-            else ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
+            float moved = m.Follower != null
+                ? (m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick) ? 1f : 0f)
+                : ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
 
             if (ctx.Mover.HasReached(m, target, 0.5f))
             {
                 m.CurrentPatrolIndex++;
-                m.Moving = false;
-                ctx.Entity.ActionState = (byte)NpcAnimationState.Idle;
+                SetMovementState(ctx, moved: false);
             }
             else
             {
-                m.Moving = true;
-                ctx.Entity.ActionState = (byte)NpcAnimationState.Run;
+                SetMovementState(ctx, moved: moved > MovementEpsilon);
             }
             return BtStatus.Running;
         }
@@ -59,10 +65,10 @@ namespace KcpServer.Monster
                 || m.Follower.HasLineOfSight(m.Position, target, m.Config.bodyRadius)))
                 return BtStatus.Success;
 
-            if (m.Follower != null) m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick);
-            else ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
-            m.Moving = true;
-            ctx.Entity.ActionState = (byte)NpcAnimationState.Run;
+            float moved = m.Follower != null
+                ? (m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick) ? 1f : 0f)
+                : ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
+            SetMovementState(ctx, moved: moved > MovementEpsilon);
             return BtStatus.Running;
         }
 
@@ -124,19 +130,26 @@ namespace KcpServer.Monster
         public static BtStatus Return(MonsterTickContext ctx)
         {
             var m = ctx.State;
-            if (m.Follower != null) m.Follower.Tick(m, m.SpawnPosition, ctx.Mover, ctx.DeltaTime, ctx.Tick);
-            else ctx.Mover.MoveTo(m, m.SpawnPosition, ctx.DeltaTime);
+            float moved = m.Follower != null
+                ? (m.Follower.Tick(m, m.SpawnPosition, ctx.Mover, ctx.DeltaTime, ctx.Tick) ? 1f : 0f)
+                : ctx.Mover.MoveTo(m, m.SpawnPosition, ctx.DeltaTime);
 
             if (ctx.Mover.HasReached(m, m.SpawnPosition, 0.5f))
             {
                 m.AlertLevel = AlertLevel.PEACE;
-                m.Moving = false;
-                ctx.Entity.ActionState = (byte)NpcAnimationState.Idle;
+                SetMovementState(ctx, moved: false);
                 return BtStatus.Success;
             }
-            m.Moving = true;
-            ctx.Entity.ActionState = (byte)NpcAnimationState.Run;
+            SetMovementState(ctx, moved: moved > MovementEpsilon);
             return BtStatus.Running;
+        }
+
+        /// <summary>按**实际位移**写 Moving/ActionState（spec §4.4）。查询失败/预算拒绝/ORCA 清零时
+        /// 不能再写 Run——否则客户端播跑步动画而速度是 0。</summary>
+        private static void SetMovementState(MonsterTickContext ctx, bool moved)
+        {
+            ctx.State.Moving = moved;
+            ctx.Entity.ActionState = (byte)(moved ? NpcAnimationState.Run : NpcAnimationState.Idle);
         }
     }
 }
