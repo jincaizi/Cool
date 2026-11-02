@@ -211,7 +211,7 @@ tile:
 
 - 保存 `NavPath`、当前路点索引、最终目标、上次重寻 tick。
 - 期望方向 = 当前路点 − 当前位置（XZ 归一化）。
-- 推进条件：进入半径 **或** 已越过路点平面（`dot(pos - wp, next - wp) > 0`）；半径 `max(bodyRadius*0.5, moveSpeed*0.25)`。
+- 推进条件：进入半径 **或** 已越过路点平面（`dot(pos - wp, next - wp) > 0`）；半径 `bodyRadius*0.5`。**执行偏差（Task 7）**：原定 `max(bodyRadius*0.5, moveSpeed*0.25)` 在 Wolf（3.5 m/s）上是 0.875m，会在墙角路点前提前跳点、直线切过墙格（绕墙追击验收 t=48 进墙）；已改为 `bodyRadius*0.5`。若将来要恢复 moveSpeed 项，必须证明/实现额外的墙角保护（例如推进前校验下一段 LOS）。
 - 重寻：每 15 tick（按 `npcId % 15` 错峰）、目标偏离路径终点 > 2m、当前路点不可达、ORCA 后实际位移偏离路径 > 1.5m。
 - 卡死：每 10 tick 检查，连续 3 个窗口（约 2s）位移 < 0.2m 且不在攻击距离内 → 强制重寻；连续 2 次仍卡 → 进入 Evade/Return。
 

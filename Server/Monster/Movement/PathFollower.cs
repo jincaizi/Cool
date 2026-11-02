@@ -108,9 +108,12 @@ namespace KcpServer.Monster
             CheckStuck(monster, goal, tick);
         }
 
+        // 执行偏差（Task 7 集成暴露）：原定 max(bodyRadius*0.5, moveSpeed*0.25) 对 Wolf（3.5 m/s）
+        // 是 0.875m，会在墙角路点前 0.86m 提前跳点、直线切过墙格。改为只看 bodyRadius*0.5。
+        // 若将来要恢复 moveSpeed 项，必须证明/实现额外的墙角保护（例如推进前校验下一段 LOS）。
         private void AdvanceWaypoints(MonsterState monster)
         {
-            float radius = MathF.Max(monster.Config.bodyRadius * 0.5f, monster.Config.moveSpeed * 0.25f);
+            float radius = monster.Config.bodyRadius * 0.5f;
             int guard = 0;
             while (_index < _path!.Waypoints.Length && guard++ < _path.Waypoints.Length + 1)
             {
@@ -135,7 +138,7 @@ namespace KcpServer.Monster
 
         private void SkipPassedWaypoints(MonsterState monster)
         {
-            float radius = MathF.Max(monster.Config.bodyRadius * 0.5f, monster.Config.moveSpeed * 0.25f);
+            float radius = monster.Config.bodyRadius * 0.5f;
             while (_index < _path!.Waypoints.Length && DistanceXZ(monster.Position, _path.Waypoints[_index]) <= radius)
                 _index++;
         }

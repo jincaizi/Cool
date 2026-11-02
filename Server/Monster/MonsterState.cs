@@ -23,6 +23,9 @@ namespace KcpServer.Monster
         public int CurrentPatrolIndex { get; set; }
         public Vector3? LastKnownTargetPosition { get; set; }
 
+        /// <summary>P1：路点跟随器（无导航时为 null 回退直线移动）</summary>
+        public PathFollower? Follower { get; set; }
+
         // tick 内暂存位置/朝向（BT/移动系统写，模块 tick 末尾 flush 到 PlayerState）
         public Vector3 Position;
         public Quaternion Rotation;

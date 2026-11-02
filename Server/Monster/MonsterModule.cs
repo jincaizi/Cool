@@ -4,6 +4,7 @@ using Cool.Protocol;
 using Cool.SyncCore;
 using KcpServer.Config;
 using KcpServer.Movement;
+using KcpServer.Navigation;
 
 namespace KcpServer.Monster
 {
@@ -30,6 +31,7 @@ namespace KcpServer.Monster
         private readonly Dictionary<long, MonsterState> _monsters = new();
         private readonly SimpleMoveSystem _mover;
         private readonly AvoidanceSystem _avoidance;
+        private readonly NavigationService? _navigation;
         private readonly List<(long NpcId, CastRequest Request)> _pendingCasts = new();
         private readonly List<long> _removedNpcs = new();
         private readonly List<(int TemplateId, Vector3 Center, uint DueTick)> _respawns = new();
@@ -50,11 +52,13 @@ namespace KcpServer.Monster
 
         /// <param name="avoidance">ORCA 避让系统（Server3C 注入以与 BotRunner 共用一份世界快照）。
         /// null = 本模块自建一个只看得见自己的（单测/独立宿主就是这条路径）。</param>
+        /// <param name="navigation">navmesh 寻路服务；null = 无导航（巡逻/追击/返回走直线，行为与旧版一致）。</param>
         public MonsterModule(EntityStore store, Func<long> nextNpcId, string? configPath = null,
-            AvoidanceSystem? avoidance = null)
+            AvoidanceSystem? avoidance = null, NavigationService? navigation = null)
         {
             _store = store;
             _nextNpcId = nextNpcId;
+            _navigation = navigation;
             // 配置路径按程序集基准目录解析（CWD 相对路径在 dotnet run/test 不同 CWD 下静默落默认值——
             // csproj CopyToOutputDirectory 保证 json 在输出目录；找不到仍落 ConfigLoader 默认值）
             var path = configPath ?? System.IO.Path.Combine(AppContext.BaseDirectory, "Config", "monster_config.json");
@@ -127,6 +131,15 @@ namespace KcpServer.Monster
             if (!CombatRules.TryGet(attackSkillId, out _))
                 throw new ArgumentException($"Monster skill {attackSkillId} (template {templateId}) missing from CombatRules table");
 
+            Vector3 spawn = position;
+            if (_navigation != null)
+            {
+                const float spawnProjectionTolerance = 0.5f;
+                if (!_navigation.TryProject(position, spawnProjectionTolerance, out Vector3 projected, out _))
+                    throw new ArgumentException($"Spawn position {position} is not on the navmesh");
+                spawn = projected;
+            }
+
             long npcId = _nextNpcId();
             var entity = _store.AddNpc(npcId, $"{config.name}#{npcId}", templateId, config.hp, position);
             entity.Rotation = YawTowardOrigin(position);
@@ -139,12 +152,13 @@ namespace KcpServer.Monster
 
             var state = new MonsterState(npcId, templateId, config, attackSkillId)
             {
-                Position = position,
+                Position = spawn,
                 Rotation = Quaternion.LookRotation(ForwardOf(entity.Rotation)),
-                SpawnPosition = position,
+                SpawnPosition = spawn,
                 PatrolCenter = patrolCenter,
-                PatrolPoints = GeneratePatrolPoints(patrolCenter, config.patrolRadius),
-                LastHp = config.hp
+                PatrolPoints = GeneratePatrolPoints(patrolCenter, config.patrolRadius, config.bodyRadius),
+                LastHp = config.hp,
+                Follower = new PathFollower(_navigation)
             };
             state.BehaviorTree = BuildBehaviorTree();
             _monsters[npcId] = state;
@@ -157,6 +171,8 @@ namespace KcpServer.Monster
         /// <summary>推进一 tick（服务器主循环每 tick 调用——先于施法裁决 drain 与快照广播）</summary>
         public void Tick(uint tick)
         {
+            _navigation?.BeginTick(tick);
+
             // ORCA 快照（Jacobi）：Server3C 在主循环 tick 起始处已调过一次（同一 tick 是 no-op）——
             // 这里再叫一次是为了"没有 Server3C 的宿主"（单测/独立运行）也能有快照
             _avoidance.EnsureSnapshot(tick);
@@ -252,10 +268,24 @@ namespace KcpServer.Monster
         /// <summary>感知：视野锥内最近的存活已登录玩家（D-P5-9——目标丢失才切换；AggroTable 仇恨排名留 backlog）</summary>
         private void DetectTarget(MonsterState m, PlayerState entity)
         {
+            // P1 最小目标保持：绕墙追击时目标离开视野锥不能立刻丢；P2 由 ThreatTable 替换。
+            // 前摇期除外（D-10 前摇 = 承诺）：windup 沿用旧语义（仅视野锥），否则怪会追着
+            // 视野外的目标转向，破坏「丢目标 ≠ 打不中」的判定锥验收（MonsterAcceptanceTests）。
+            if (m.TargetId.HasValue && !m.AttackResolveTick.HasValue)
+            {
+                PlayerState? current = _store.GetPlayer(m.TargetId.Value);
+                if (current != null && current.IsAlive && current.IsLoggedIn
+                    && DistanceXZ(current.Position, m.Position) <= DropAggroRadius(m.Config))
+                {
+                    m.LastKnownTargetPosition = current.Position;
+                    return;
+                }
+                m.TargetId = null;
+            }
+
             long? closestId = null;
             Vector3? closestPos = null;
             float closestDistSqr = float.MaxValue;
-
             foreach (var p in _store.All)
             {
                 if (p.Kind != (byte)EntityKind.Player || !p.IsAlive || !p.IsLoggedIn) continue;
@@ -268,17 +298,23 @@ namespace KcpServer.Monster
 
             if (closestId.HasValue)
             {
-                if (m.TargetId != closestId)
-                {
-                    m.TargetId = closestId;
-                    m.AlertLevel = AlertLevel.HOSTILE; // 获取目标即敌意（旧语义）
-                }
+                m.TargetId = closestId;
+                m.AlertLevel = AlertLevel.HOSTILE;
                 m.LastKnownTargetPosition = closestPos;
             }
             else if (m.TargetId.HasValue)
             {
-                m.TargetId = null; // 目标丢失（离视野/死亡/离线）——树落 Return 分支
+                m.TargetId = null; // 前摇期按旧语义丢失目标（保持「丢目标 ≠ 打不中」的判定锥验收）
             }
+        }
+
+        private static float DropAggroRadius(MonsterData config)
+            => config.detectionRadius + config.patrolRadius + 10f;
+
+        private static float DistanceXZ(Vector3 a, Vector3 b)
+        {
+            float dx = a.X - b.X, dz = a.Z - b.Z;
+            return MathF.Sqrt(dx * dx + dz * dz);
         }
 
         /// <summary>入队攻击施法（BT Attack 动作调用；Server3C 每 tick drain 后裁决+广播——T3）</summary>
@@ -321,7 +357,48 @@ namespace KcpServer.Monster
             );
         }
 
-        private static Vector3[] GeneratePatrolPoints(Vector3 center, float radius)
+        private Vector3[] GeneratePatrolPoints(Vector3 center, float radius, float bodyRadius)
+        {
+            if (_navigation == null) return GeneratePatrolPointsLegacy(center, radius);
+
+            var points = new List<Vector3>(4);
+            for (int i = 0; i < 4; i++)
+            {
+                float rad = i * (360f / 4) * (float)(Math.PI / 180.0);
+                var candidate = new Vector3(
+                    center.X + (float)Math.Cos(rad) * radius,
+                    center.Y,
+                    center.Z + (float)Math.Sin(rad) * radius);
+
+                if (TryFindPatrolPoint(candidate, bodyRadius, out Vector3 point))
+                    points.Add(point);
+            }
+
+            return points.Count > 0 ? points.ToArray() : GeneratePatrolPointsLegacy(center, radius);
+        }
+
+        private bool TryFindPatrolPoint(Vector3 candidate, float bodyRadius, out Vector3 point)
+        {
+            point = candidate;
+            const float step = 0.5f;
+            for (int i = 0; i < 9; i++)
+            {
+                float angle = i * 45f * (float)(Math.PI / 180.0);
+                Vector3 probe = i == 0
+                    ? candidate
+                    : new Vector3(candidate.X + (float)Math.Cos(angle) * step, candidate.Y,
+                        candidate.Z + (float)Math.Sin(angle) * step);
+                if (_navigation!.TryProject(probe, 0.5f, out Vector3 projected, out float clearance)
+                    && clearance >= bodyRadius)
+                {
+                    point = projected;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static Vector3[] GeneratePatrolPointsLegacy(Vector3 center, float radius)
         {
             const int count = 4;
             var points = new Vector3[count];

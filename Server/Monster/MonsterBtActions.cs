@@ -22,8 +22,10 @@ namespace KcpServer.Monster
             int idx = m.CurrentPatrolIndex % m.PatrolPoints.Length;
             Vector3 target = m.PatrolPoints[idx];
 
-            ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
-            if (ctx.Mover.HasReached(m, target))
+            if (m.Follower != null) m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick);
+            else ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
+
+            if (ctx.Mover.HasReached(m, target, 0.5f))
             {
                 m.CurrentPatrolIndex++;
                 m.Moving = false;
@@ -47,11 +49,13 @@ namespace KcpServer.Monster
             if (m.AttackResolveTick.HasValue) return BtStatus.Success;
 
             Vector3 target = m.LastKnownTargetPosition ?? m.Position;
+            // 停步判定用 navmesh 投影点；实际命中裁决仍用玩家真实位置
+            Vector3 stopTarget = target;
+            if (m.Follower != null) m.Follower.TryProject(target, out stopTarget);
+            if (ctx.Mover.HasReached(m, stopTarget, m.Config.attackRange)) return BtStatus.Success;
 
-            // 进入攻击距离即成功（P5 修正）——让序列前进到 Attack
-            if (ctx.Mover.HasReached(m, target, m.Config.attackRange)) return BtStatus.Success;
-
-            ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
+            if (m.Follower != null) m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick);
+            else ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
             m.Moving = true;
             ctx.Entity.ActionState = (byte)NpcAnimationState.Run;
             return BtStatus.Running;
@@ -80,6 +84,9 @@ namespace KcpServer.Monster
             float dx = m.Position.X - target.X, dz = m.Position.Z - target.Z;
             if (dx * dx + dz * dz > m.Config.attackRange * m.Config.attackRange) return BtStatus.Failure;
 
+            if (m.Follower != null && !m.Follower.HasLineOfSight(m.Position, target, m.Config.bodyRadius))
+                return BtStatus.Failure;
+
             m.Moving = false;
 
             // 冷却门（tick 基准——与 P4 玩家同机制；冷却在**决策**时记录，D-3）
@@ -107,8 +114,10 @@ namespace KcpServer.Monster
         public static BtStatus Return(MonsterTickContext ctx)
         {
             var m = ctx.State;
-            ctx.Mover.MoveTo(m, m.SpawnPosition, ctx.DeltaTime);
-            if (ctx.Mover.HasReached(m, m.SpawnPosition))
+            if (m.Follower != null) m.Follower.Tick(m, m.SpawnPosition, ctx.Mover, ctx.DeltaTime, ctx.Tick);
+            else ctx.Mover.MoveTo(m, m.SpawnPosition, ctx.DeltaTime);
+
+            if (ctx.Mover.HasReached(m, m.SpawnPosition, 0.5f))
             {
                 m.AlertLevel = AlertLevel.PEACE;
                 m.Moving = false;
