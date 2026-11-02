@@ -618,7 +618,7 @@ public ushort ToMask();
 
 - 200 次总体：Release 平均 1.8–2.3ms、p95 9.8–11.9ms。
 - 预算 soak（25ms/tick，每 tick 32 次尝试）：实测 `maxTick < 27ms`，每 tick 放行 12–16 次，其余下 tick 重试。
-- **200 怪刷新率约 0.9–1.2Hz**（12–16 q/tick × 15Hz / 200）；大半径/跨岛 blocked 更低。
+- **200 怪刷新率约 0.9–1.2Hz（保守按低于 1Hz 记录）**（12–16 q/tick × 15Hz / 200）；大半径/跨岛 blocked 更低。
 - **0.5ms/query 是 P2 性能债**：5m 档仍高于 0.5ms。时间预算保证 tick 不超时，
   但单次查询成本需靠路径缓存/预计算 clearance 场/分层导航继续优化（§9.2 backlog 已有）。
 

@@ -3626,7 +3626,7 @@ git commit -m "docs(nav): document server monster navigation"
 ### 性能与验证债
 
 - **0.5ms/query 未达成**：Release 200 次平均 1.8–2.3ms；5m 档 0.49–0.64ms（最好一次擦线）。时间预算保证 tick
-  不超时（实测 maxTick < 27ms @25ms 预算），200 怪刷新率约 **0.9–1.2Hz**；0.5ms/query 为 **P2 性能债**。
+  不超时（实测 maxTick < 27ms @25ms 预算），200 怪刷新率约 0.9–1.2Hz（保守按 **低于 1Hz** 验收）；0.5ms/query 为 **P2 性能债**。
 - **视觉抽帧未做**：绕障/不穿模目前只有服务端几何断言；DemoDay Play Mode 人工抽帧仍待做。
 - `--no-nav` / `--no-avoid` 手工 E2E 未在本轮重跑（单测覆盖无导航回退）。
 - 官方 `dotnet test` 本机不可用；全量以 `bash tools/test-server-inprocess.sh` 为准（修复轮后 348/348）。
