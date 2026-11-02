@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- 借用 xunit.runner.visualstudio 包内自带的 runner utility（官方 testhost 在本机会因
+       Win32Exception(5) 起不来，见 Server/README.md）。GeneratePathProperty 让我们能按包缓存
+       位置引用 build/ 下的 net6.0 utility，避免额外下载新的 runner 包。 -->
+  <ItemGroup>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" GeneratePathProperty="true" />
+    <Reference Include="xunit.runner.utility">
+      <HintPath>$(Pkgxunit_runner_visualstudio)/build/net6.0/xunit.runner.utility.netcoreapp10.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!-- 引用测试工程即可把 Server.Tests.dll 及其全部依赖复制到本工程输出目录。 -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\Server\Server.Tests\Server.Tests.csproj" />
+  </ItemGroup>
+
+</Project>

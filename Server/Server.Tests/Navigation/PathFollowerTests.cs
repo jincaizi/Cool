@@ -37,7 +37,7 @@ public class PathFollowerTests
     {
         var (monster, follower) = Setup(null);
         var mover = new SimpleMoveSystem();
-        follower.Tick(monster, new Vector3(5f, 0f, 1f), mover, 0.066f, 0);
+        Assert.True(follower.Tick(monster, new Vector3(5f, 0f, 1f), mover, 0.066f, 0));
         Assert.True(monster.Position.X > 1f);
     }
 
@@ -188,6 +188,119 @@ public class PathFollowerTests
         nav.BeginTick(30);
         follower.Tick(monster, goal, mover, 0.066f, 30);
         Assert.Equal(2, nav.QueryCount);
+    }
+
+    private static float DistanceXZ(Vector3 a, Vector3 b)
+    {
+        float dx = a.X - b.X, dz = a.Z - b.Z;
+        return (float)System.Math.Sqrt(dx * dx + dz * dz);
+    }
+
+    [Fact]
+    public void Blocked_Path_Stops_Instead_Of_Falling_Back_To_Direct_Move()
+    {
+        // x == 6 整列不可走：左右分量断开。有导航时失败必须停住，不能朝目标直线穿墙。
+        NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (x, _) => x != 6), "test");
+        var (monster, follower) = Setup(nav);
+        var mover = new SimpleMoveSystem();
+        Vector3 start = monster.Position;
+
+        for (uint t = 0; t < 60; t++)
+        {
+            nav.BeginTick(t);
+            Assert.False(follower.Tick(monster, new Vector3(8f, 0f, 8f), mover, 0.066f, t));
+        }
+        Assert.True(DistanceXZ(monster.Position, start) < 0.01f,
+            $"blocked monster must stay put, moved to ({monster.Position.X:F2},{monster.Position.Z:F2})");
+    }
+
+    [Fact]
+    public void Budget_Rejection_With_No_Path_Stops_Instead_Of_Moving()
+    {
+        NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (_, _) => true), "test")
+        {
+            MaxQueriesPerTick = 0
+        };
+        var (monster, follower) = Setup(nav);
+        var mover = new SimpleMoveSystem();
+        Vector3 start = monster.Position;
+        for (uint t = 0; t < 30; t++)
+        {
+            nav.BeginTick(t);
+            Assert.False(follower.Tick(monster, new Vector3(8f, 0f, 8f), mover, 0.066f, t));
+        }
+        Assert.True(DistanceXZ(monster.Position, start) < 0.01f, "budget-rejected monster must not move");
+    }
+
+    [Fact]
+    public void Off_Navmesh_Goal_Stops_Instead_Of_Moving()
+    {
+        NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (_, _) => true), "test");
+        var (monster, follower) = Setup(nav);
+        var mover = new SimpleMoveSystem();
+        Vector3 start = monster.Position;
+        for (uint t = 0; t < 30; t++)
+        {
+            nav.BeginTick(t);
+            Assert.False(follower.Tick(monster, new Vector3(-10f, 0f, 6f), mover, 0.066f, t));
+        }
+        Assert.True(DistanceXZ(monster.Position, start) < 0.01f, "off-navmesh goal must not produce straight-line movement");
+    }
+
+    [Fact]
+    public void Completed_Path_Does_Not_Continue_To_Off_Mesh_Goal()
+    {
+        // 目标在网格外 1m（投影半径 2m 内）：路径终点是投影点，走完后不得再直线走向真实目标。
+        NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (_, _) => true), "test");
+        var (monster, follower) = Setup(nav);
+        var mover = new SimpleMoveSystem();
+        var goal = new Vector3(-1f, 0f, 6f);
+        for (uint t = 0; t < 200; t++)
+        {
+            nav.BeginTick(t);
+            follower.Tick(monster, goal, mover, 0.066f, t);
+            Assert.True(monster.Position.X >= -0.05f,
+                $"t={t} monster left navmesh toward off-mesh goal at x={monster.Position.X:F2}");
+        }
+    }
+
+    [Fact]
+    public void Goal_Move_Repath_Is_Throttled_By_Its_Own_Interval()
+    {
+        NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (_, _) => true), "test");
+        var (monster, follower) = Setup(nav); // npcId 15 → 相位 0
+        var mover = new SimpleMoveSystem();
+        nav.BeginTick(0);
+        follower.Tick(monster, new Vector3(8f, 0f, 8f), mover, 0.066f, 0);
+        int afterInitial = nav.QueryCount;
+
+        // 初始成功把 goalMoved 的最小间隔设到 tick 5。tick 1..4 目标反复跳 6m 也不许查。
+        for (uint t = 1; t <= 4; t++)
+        {
+            nav.BeginTick(t);
+            follower.Tick(monster, new Vector3(8f, 0f, 1f), mover, 0.066f, t);
+        }
+        Assert.Equal(afterInitial, nav.QueryCount);
+
+        // tick 5：间隔已过，允许一次 goalMoved 重寻（目标 (8,9) 已接受）。
+        nav.BeginTick(5);
+        follower.Tick(monster, new Vector3(8f, 0f, 1f), mover, 0.066f, 5);
+        Assert.Equal(afterInitial + 1, nav.QueryCount);
+
+        // tick 6..9：目标继续跳，但下一次 goalMoved 窗口要到 tick 10。
+        nav.BeginTick(6);
+        follower.Tick(monster, new Vector3(8f, 0f, 9f), mover, 0.066f, 6);
+        nav.BeginTick(7);
+        follower.Tick(monster, new Vector3(8f, 0f, 1f), mover, 0.066f, 7);
+        nav.BeginTick(8);
+        follower.Tick(monster, new Vector3(8f, 0f, 9f), mover, 0.066f, 8);
+        nav.BeginTick(9);
+        follower.Tick(monster, new Vector3(8f, 0f, 1f), mover, 0.066f, 9);
+        Assert.Equal(afterInitial + 1, nav.QueryCount);
+
+        nav.BeginTick(10);
+        follower.Tick(monster, new Vector3(8f, 0f, 9f), mover, 0.066f, 10);
+        Assert.Equal(afterInitial + 2, nav.QueryCount); // 间隔已过，允许再次 goalMoved 重寻
     }
 
     [Fact]

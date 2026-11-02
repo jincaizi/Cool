@@ -136,6 +136,34 @@ public class NavMeshPathfinderTests
     }
 
     [Fact]
+    public void Same_Triangle_Endpoints_Route_Through_Neighbors_When_Direct_Is_Too_Close_To_Edge()
+    {
+        // 浅帐篷形 A 沿底部边界（y=0），起终点都在 A 内、离边界 0.2m：直连不满足 0.5m clearance。
+        // A 的两条内边分别接 B/C，B-D-C 绕到上方再回到 A —— 必须允许 startTri==goalTri 时继续扩展。
+        Vector3[] vertices =
+        {
+            new Vector3(0f, 0f, 0f), new Vector3(30f, 0f, 0f), new Vector3(15f, 0f, 6f),
+            new Vector3(0f, 0f, 12f), new Vector3(30f, 0f, 12f)
+        };
+        int[] indices =
+        {
+            0, 1, 2,        // A
+            0, 2, 3,        // B
+            1, 4, 2,        // C
+            2, 4, 3         // D
+        };
+        NavMeshGraph graph = NavMeshGraph.FromTriangles(vertices, indices, new byte[4], new[] { 1f });
+        var finder = new NavMeshPathfinder(graph);
+
+        var start = new Vector3(2f, 0f, 0.3f);
+        var goal = new Vector3(28f, 0f, 0.3f);
+        NavPath path = finder.FindPath(start, goal, 0.5f);
+        Assert.True(path.Success, path.FailReason);
+        Assert.True(path.Waypoints.Length >= 3, "path should detour through the upper triangles");
+        Assert.True(path.Length > 26.2f, $"detour should exceed straight-line 26m, got {path.Length:F2}");
+    }
+
+    [Fact]
     public void Path_Is_Deterministic()
     {
         NavMeshGraph graph = WallGraph();

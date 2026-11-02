@@ -89,6 +89,8 @@ production/verify/
 !Server/Server3C.csproj
 # Server.Tests.csproj is hand-authored (not Unity-generated)
 !Server/Server.Tests/Server.Tests.csproj
+# In-process xunit runner (tools/test-server-inprocess.sh) is hand-authored
+!tools/ServerTestRunner/Runner.csproj
 
 # T9 部署套件的发布产物（145 MB：站点副本 + 自包含服务端）——由 publish-server.sh 生成，不入库
 production/deploy/webgl-demo/dist/
@@ -96,3 +98,8 @@ production/deploy/webgl-demo/dist/
 production/deploy/webgl-demo/StaticServer/bin/
 # StaticServer 是手写工程，不是 Unity 生成的
 !production/deploy/webgl-demo/StaticServer/StaticServer.csproj
+
+# In-process test runner temp (tools/test-server-inprocess.sh)
+.tmp/
+# In-process test runner build output
+tools/ServerTestRunner/bin/

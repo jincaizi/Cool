@@ -63,6 +63,48 @@ public class NavDataFormatTests
     }
 
     [Fact]
+    public void Write_Validates_Before_Creating_File()
+    {
+        string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".navbin");
+        NavData data = Sample();
+        data.Tiles[0].Indices[0] = data.Vertices.Length; // 越界索引
+        try
+        {
+            Assert.Throws<InvalidDataException>(() => NavDataFormat.Write(path, data));
+            Assert.False(File.Exists(path), "invalid data must not create a partial navbin");
+            Assert.False(File.Exists(path + ".tmp"), "temp file must be cleaned up");
+        }
+        finally
+        {
+            if (File.Exists(path)) File.Delete(path);
+            if (File.Exists(path + ".tmp")) File.Delete(path + ".tmp");
+        }
+    }
+
+    [Fact]
+    public void Write_Overwrites_Existing_File()
+    {
+        string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".navbin");
+        try
+        {
+            NavData first = Sample();
+            NavDataFormat.Write(path, first);
+
+            NavData second = Sample();
+            second.SourceHash = 43UL;
+            NavDataFormat.Write(path, second);
+
+            NavData read = NavDataFormat.Read(path);
+            Assert.Equal(43UL, read.SourceHash);
+            Assert.Equal(NavDataFormat.ComputeCanonicalHash(second.Vertices, second.Tiles), read.CanonicalHash);
+        }
+        finally
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+    }
+
+    [Fact]
     public void Read_Truncated_File_Throws()
     {
         string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".navbin");

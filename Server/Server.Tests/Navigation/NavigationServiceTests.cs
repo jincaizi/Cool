@@ -30,12 +30,69 @@ public class NavigationServiceTests
     }
 
     [Fact]
+    public void Time_Budget_Rejects_Queries_And_Resets_Next_Tick()
+    {
+        NavigationService service = MakeService(maxQueries: 100_000);
+        service.MaxMillisecondsPerTick = 1;
+        var query = new NavQuery("test", new Vector3(1f, 0f, 1f), new Vector3(8f, 0f, 8f), 0.4f);
+        service.BeginTick(0);
+
+        NavPath? budgetPath = null;
+        for (int i = 0; i < 5000; i++)
+        {
+            if (service.TryFindPath(query, out NavPath path)) continue;
+            budgetPath = path;
+            break;
+        }
+        Assert.NotNull(budgetPath);
+        Assert.Equal("budget", budgetPath!.FailReason);
+        Assert.True(service.BudgetRejections > 0);
+
+        service.MaxMillisecondsPerTick = 10_000;
+        service.BeginTick(1);
+        Assert.True(service.TryFindPath(query, out NavPath afterReset), afterReset.FailReason);
+    }
+
+    [Fact]
+    public void BeginTick_Is_Idempotent_For_Same_Tick()
+    {
+        NavigationService service = MakeService(maxQueries: 1);
+        var query = new NavQuery("test", new Vector3(1f, 0f, 1f), new Vector3(8f, 0f, 8f), 0.4f);
+        service.BeginTick(0);
+        Assert.True(service.TryFindPath(query, out _));
+        Assert.False(service.TryFindPath(query, out _));
+
+        service.BeginTick(0); // 同一 tick 重复调用不应白送预算
+        Assert.False(service.TryFindPath(query, out _));
+
+        service.BeginTick(1);
+        Assert.True(service.TryFindPath(query, out _));
+    }
+
+    [Fact]
     public void TryProject_Clamps_To_Mesh_And_Reports_Clearance()
     {
         NavigationService service = MakeService();
         Assert.True(service.TryProject(new Vector3(0.5f, 0f, 5.5f), 0.5f, out var projected, out float clearance));
         Assert.InRange(clearance, 0.4f, 1.0f);
         Assert.InRange(projected.X, 0.0f, 1.0f);
+    }
+
+    [Fact]
+    public void LoadMaps_With_Null_Array_Returns_Empty_List()
+    {
+        string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            File.WriteAllText(path, "{\"maps\":null}");
+            MapsConfig config = ConfigLoader.LoadMaps(path);
+            Assert.NotNull(config.maps);
+            Assert.Empty(config.maps);
+        }
+        finally
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
     }
 
     [Fact]
