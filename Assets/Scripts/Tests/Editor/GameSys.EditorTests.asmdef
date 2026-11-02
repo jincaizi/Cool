@@ -10,7 +10,8 @@
         "KcpNet",
         "SyncCore",
         "WebSocketNet",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "GameSys.EditorNavigation"
     ],
     "includePlatforms": [
         "Editor"
