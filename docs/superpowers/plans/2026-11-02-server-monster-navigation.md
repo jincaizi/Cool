@@ -3264,7 +3264,7 @@ namespace Hotfix.GameSystems.Tests.Navigation
     {
         private static readonly (float X, float Z)[] Spawns =
         {
-            (-30f, 0f), (0f, -20f), (0f, -35f), (10f, -15f), (10f, 15f), (25f, 20f)
+            (-30f, 0f), (0f, -20f), (0f, -35f), (10f, -15f), (10f, 15f), (18.333f, 18.389f)
         };
 
         [Test]
@@ -3407,7 +3407,7 @@ public class DemoDayNavBinTests
         new(0f, 0f, -35f),
         new(10f, 0f, -15f),
         new(10f, 0f, 15f),
-        new(25f, 0f, 20f)
+        new(18.333f, 0f, 18.389f)
     };
 
     [Fact]
@@ -3421,7 +3421,7 @@ public class DemoDayNavBinTests
         Assert.True(data.Vertices.Length > 100);
         Assert.NotEmpty(data.Tiles);
 
-        var graph = new NavMeshGraph(data);
+        var graph = NavMeshGraph.FromData(data);
         foreach (Vector3 spawn in Spawns)
         {
             Assert.True(graph.FindNearestTriangle(spawn, 1f, out int triangle, out float distance),
@@ -3440,9 +3440,10 @@ public class DemoDayNavBinTests
     {
         string path = Path.Combine(System.AppContext.BaseDirectory, "Config", "nav", "demoday.navbin");
         NavData data = NavDataFormat.Read(path);
-        var finder = new NavMeshPathfinder(new NavMeshGraph(data));
+        var finder = new NavMeshPathfinder(NavMeshGraph.FromData(data));
 
-        NavPath path1 = finder.FindPath(Spawns[0], Spawns[5], 0.5f);
+        // 同岛：Spawns[0] 与 Spawns[5] 被 x≈0 河谷分断（Unity CalculatePath 也是 PathPartial）。
+        NavPath path1 = finder.FindPath(Spawns[3], Spawns[5], 0.5f);
         Assert.True(path1.Success, path1.FailReason);
         Assert.True(path1.Length > 0f);
     }

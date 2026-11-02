@@ -89,7 +89,7 @@ namespace KcpServer.Monster
         ///   [2] Slime(t1)      (0,0,-35)    15.8m（> 8+5 = 13）
         ///   [3] Wolf(t2)       (10,0,-15)   29.2m（> 15+10 = 25）
         ///   [4] DogKnight(t3)  (10,0,15)    51.5m（> 18+6 = 24）
-        ///   [5] SpiderBoss(t4) (25,0,20)    64.0m（> 25+12 = 37）
+        ///   [5] SpiderBoss(t4) (18.333,0,18.389) 58.8m（> 25+12 = 37）
         /// 守备：MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn（全六槽位，几何）
         /// 与 Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster（挂机 3 分钟零施法，行为）。
         ///（实测教训：DogKnight 初版 (0,0,-20) 距旧出生点仅 11.0m < 感知 18m → 12 分钟内 8/8 次进世界
@@ -97,6 +97,8 @@ namespace KcpServer.Monster
         /// **e2e 夹具（观察者在原点）语义已变，别照旧表读**：旧 [0] Wolf (12,0,0) 距原点 12m ≤ 15m
         /// 开局即感知；新 [0] (-30,0,0) 距原点 30m（巡逻圈最近 20m > 15m）不再感知。新表里距原点最近的是
         /// [3] Wolf (10,0,-15)：18.0m，巡逻圈有点到原点 11.2m——巡逻中可能进它的感知圈（受 90° 视锥约束）。
+        /// [5] SpiderBoss 2026-11-03 为 navmesh clearance 迁到 (18.333,0,18.389)：距原点 26.0m，巡逻圈最近
+        /// 14.0m < 检测 25m——原点观察者也可能进它的感知圈（e2e MonsterWorldTests 用 --monsters 4，不含 [5]）。
         /// 原 e2e 断言（MonsterWorldTests：观察者原点收 Wolf 伤害）需起服复核，见 2026-10-17 搬迁报告。
         /// count 超过布局长度时循环复用；朝向一律面向原点（感知确定性）。
         /// </summary>
@@ -109,7 +111,7 @@ namespace KcpServer.Monster
                 (1, new Vector3(0f, 0f, -35f)),     // Slime：15.8m（>13）
                 (2, new Vector3(10f, 0f, -15f)),    // Wolf：29.2m（>25）
                 (3, new Vector3(10f, 0f, 15f)),     // DogKnight：51.5m（>24）
-                (4, new Vector3(25f, 0f, 20f)),     // SpiderBoss：64.0m（>37）
+                (4, new Vector3(18.333f, 0f, 18.389f)), // SpiderBoss：58.8m（>37）
             };
             for (int i = 0; i < count; i++)
             {

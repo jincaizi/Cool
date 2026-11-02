@@ -9,7 +9,7 @@ namespace Hotfix.GameSystems.Tests.Navigation
     {
         private static readonly (float X, float Z)[] Spawns =
         {
-            (-30f, 0f), (0f, -20f), (0f, -35f), (10f, -15f), (10f, 15f), (25f, 20f)
+            (-30f, 0f), (0f, -20f), (0f, -35f), (10f, -15f), (10f, 15f), (18.333f, 18.389f)
         };
 
         [Test]
