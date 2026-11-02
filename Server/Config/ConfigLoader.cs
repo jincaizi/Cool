@@ -38,6 +38,14 @@ namespace KcpServer.Config
             }
         }
 
+        public static MapsConfig LoadMaps(string path)
+        {
+            if (!File.Exists(path)) throw new FileNotFoundException("maps config not found", path);
+            string json = File.ReadAllText(path);
+            var config = JsonSerializer.Deserialize<MapsConfig>(json, JsonOptions);
+            return config ?? new MapsConfig();
+        }
+
         public static Dictionary<int, MonsterData> LoadMonsterTemplates(string configPath)
         {
             var config = LoadMonsterConfig(configPath);
