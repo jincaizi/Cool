@@ -557,7 +557,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         // ------------------------------------------------------------------------------------
         // 怪物挥砍的端到端链（spec §8 第 4 条）：CastBroadcast → ScheduleAttack → Drain →
         // PlayAttack → Animator。宿主接线是 ClientNetworkHost 里那一行
-        // `_combatBridge.OnCastBroadcast += b => _remoteEntities.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp);`
+        // `_combatBridge.OnCastBroadcast += b => _remoteEntities.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp, b.SkillId);`
         // —— 下面两个用例把这条链整条穿起来（此前无任何自动化用例，失效完全静默）。
         // ------------------------------------------------------------------------------------
 
@@ -675,11 +675,11 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 Assert.IsNull(registry.GetView(playerId)!.NpcAnimator, "玩家视图不该有怪物驱动");
 
                 var bridge = new CombatNetworkBridge(_client, () => playerId, registry);
-                bridge.OnCastBroadcast += b => registry.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp);
+                bridge.OnCastBroadcast += b => registry.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp, b.SkillId);
 
                 // ① caster 是 npc → 排程 → 越过时间戳 → 真动画播起来
                 long npcCastTicks = baseTicks + 2L * NpcAttackSchedule.VariantBucketTicks;
-                int npcVariant = NpcAttackSchedule.VariantOf(npcCastTicks);
+                int npcVariant = NpcAttackSchedule.VariantOf(npcCastTicks, 50004);
                 string played = npcVariant == 0 ? "Attack01" : "Attack02";
                 bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
                 {
@@ -692,9 +692,10 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     $"npc 的 CastBroadcast 没排到真动画上（期望 {played}）");
 
                 // ② caster 是玩家 → 不排程：同一只怪不得因它再播一刀。
-                //    玩家那条广播取**相邻桶**（推另一段），所以"错排到怪物身上"会让状态换成另一段——可判。
-                long playerCastTicks = baseTicks + 3L * NpcAttackSchedule.VariantBucketTicks;
-                Assert.AreNotEqual(npcVariant, NpcAttackSchedule.VariantOf(playerCastTicks),
+                //    玩家技能 20001 未登记 → 回退时间戳变体；+4 桶不改变桶奇偶（base 为偶 → 变体 0），
+                //    与 NPC 的固定映射 50004 → 1 不同，所以"错排到怪物身上"会让状态换成另一段——可判。
+                long playerCastTicks = baseTicks + 4L * NpcAttackSchedule.VariantBucketTicks;
+                Assert.AreNotEqual(npcVariant, NpcAttackSchedule.VariantOf(playerCastTicks, 20001),
                     "本用例的前提：两条广播推出不同变体（否则错排看不出来）");
                 bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
                 {

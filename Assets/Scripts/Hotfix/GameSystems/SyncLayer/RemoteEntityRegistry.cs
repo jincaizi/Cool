@@ -395,15 +395,15 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>
         /// 服务端裁定的一次挥砍（CastBroadcast）——排到该时间戳对应的渲染时刻再播
-        /// （变体由时间戳推出，见 NpcAttackSchedule）。
+        /// （变体由 skillId 固定映射，未登记技能回退时间戳，见 NpcAttackSchedule）。
         /// 只对**已存在且带驱动**的怪物排程：球体降级没有可驱动的东西，排了也只能空转；
         /// 而视图还不存在（广播先于快照到达）时同样丢弃——这里不建视图，视图的生命周期由快照流独占。
         /// </summary>
-        public void ScheduleAttack(long casterId, long serverTimestamp)
+        public void ScheduleAttack(long casterId, long serverTimestamp, int skillId = 0)
         {
             if (!_views.TryGetValue(casterId, out var view) || view.Kind != (byte)EntityKind.Npc) return;
             if (view.NpcAnimator == null) return;   // 球体降级：没有可驱动的东西
-            _attacks.Schedule(casterId, serverTimestamp);
+            _attacks.Schedule(casterId, serverTimestamp, skillId);
         }
 
         /// <summary>采出某视图在 renderAt 处的状态（阶梯）。供 UpdateRender 与测试使用。</summary>

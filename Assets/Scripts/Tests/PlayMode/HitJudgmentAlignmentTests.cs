@@ -177,8 +177,9 @@ namespace KcpNet.PlayModeTests
 
                 var result = new List<(long, long)>();
                 if (_attacksField!.GetValue(Registry) is NpcAttackSchedule schedule
-                    && _pendingField!.GetValue(schedule) is List<(long EntityId, long ServerTicks)> pending)
-                    result.AddRange(pending);
+                    && _pendingField!.GetValue(schedule) is List<(long EntityId, long ServerTicks, int SkillId)> pending)
+                    foreach (var p in pending)
+                        result.Add((p.EntityId, p.ServerTicks));
                 return result;
             }
 

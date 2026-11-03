@@ -4,8 +4,8 @@ namespace Hotfix.GameSystems.SyncLayer
 {
     /// <summary>
     /// 怪物攻击的**呈现排程**（spec §6.2）。每个客户端都收到**同一个** CastBroadcast 对象
-    /// （服务端构造一次、发给全部观察者），所以「第几刀用哪段攻击」必须由时间戳推出，
-    /// 而不是客户端自增计数 —— 在 AOI 边缘进出过的客户端计数器会错位，同一刀播不同动画。
+    /// （服务端构造一次、发给全部观察者），所以「第几刀用哪段攻击」必须由**广播内容**（skillId）
+    /// 或时间戳推出，而不是客户端自增计数 —— 在 AOI 边缘进出过的客户端计数器会错位，同一刀播不同动画。
     ///
     /// 排程项在渲染时钟越过它时触发，与位置插值共用同一根服务器时间轴。
     /// </summary>
@@ -28,15 +28,31 @@ namespace Hotfix.GameSystems.SyncLayer
             }
         }
 
-        private readonly List<(long EntityId, long ServerTicks)> _pending = new List<(long, long)>();
+        /// <summary>已知怪物技能的动画变体（v1 只映射现有 Attack01/02 两段）。
+        /// 未登记技能回退时间戳变体，保证旧服务端/未来技能仍能播放。</summary>
+        private static readonly Dictionary<int, int> SkillVariants = new Dictionary<int, int>
+        {
+            { 50001, 0 }, { 50002, 1 }, { 50003, 0 },
+            { 50004, 1 }, { 50005, 0 }, { 50006, 1 },
+        };
+
+        private readonly List<(long EntityId, long ServerTicks, int SkillId)> _pending = new List<(long, long, int)>();
 
         private static readonly Comparer<DueAttack> ByServerTicks =
             Comparer<DueAttack>.Create((a, b) => a.ServerTicks.CompareTo(b.ServerTicks));
 
         /// <summary>服务器裁定的第几段攻击（0 → Attack01，1 → Attack02）</summary>
-        public static int VariantOf(long serverTicks) => (int)((serverTicks / VariantBucketTicks) % 2);
+        public static int VariantOf(long serverTicks) => TimestampVariant(serverTicks);
 
-        public void Schedule(long entityId, long serverTicks) => _pending.Add((entityId, serverTicks));
+        /// <summary>已知技能用固定变体（所有客户端同结论）；未登记技能回退时间戳变体。</summary>
+        public static int VariantOf(long serverTicks, int skillId)
+            => SkillVariants.TryGetValue(skillId, out int variant) ? variant : TimestampVariant(serverTicks);
+
+        private static int TimestampVariant(long serverTicks)
+            => (int)((serverTicks / VariantBucketTicks) % 2);
+
+        public void Schedule(long entityId, long serverTicks, int skillId = 0)
+            => _pending.Add((entityId, serverTicks, skillId));
 
         /// <summary>
         /// 取出所有到点的项（timestamp &lt;= renderAt）并出队。迟到的立即触发，不丢弃。
@@ -49,7 +65,8 @@ namespace Hotfix.GameSystems.SyncLayer
             for (int i = _pending.Count - 1; i >= 0; i--)
             {
                 if (_pending[i].ServerTicks > renderAt) continue;
-                into.Add(new DueAttack(_pending[i].EntityId, VariantOf(_pending[i].ServerTicks), _pending[i].ServerTicks));
+                into.Add(new DueAttack(_pending[i].EntityId,
+                    VariantOf(_pending[i].ServerTicks, _pending[i].SkillId), _pending[i].ServerTicks));
                 _pending.RemoveAt(i);
             }
             // 同帧多项时按时间戳升序，保证变体顺序稳定（只排本次追加的区间）

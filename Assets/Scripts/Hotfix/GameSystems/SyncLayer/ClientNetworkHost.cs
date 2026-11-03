@@ -669,14 +669,14 @@ namespace Hotfix.GameSystems.SyncLayer
             _combatBridge.OnDamageResult += HandleRemoteDamageResult;
             _remoteEntities!.ViewRemoved += _remoteCastPresenter.ClearForEntity;
 
-            // 施法广播除日志外还要**路由**：NPC 由 registry 按发布者时间戳排成 renderAt 处的挥砍，
+            // 施法广播除日志外还要**路由**：NPC 由 registry 按发布者时间戳 + skillId 排成 renderAt 处的挥砍，
             // 玩家类交给 presenter 立即播攻击/施法表现（本回调已在主线程——CombatNetworkBridge.Update
             // 消费，见该类线程模型）。两条支路各自按 Kind 过滤，互不干扰。
             _combatBridge.OnCastBroadcast += b =>
             {
                 Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
                 _remoteCastPresenter?.OnCastBroadcast(b);
-                _remoteEntities!.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp);
+                _remoteEntities!.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp, b.SkillId);
             };
             _combatBridge.OnLineProjectileStopped += HandleLineProjectileStopped;
 

@@ -97,5 +97,42 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(99, into[0].EntityId, "Drain 只追加：不得重排（也不得清空）调用方列表的既有项");
             Assert.AreEqual(7, into[1].EntityId);
         }
+
+        [Test]
+        public void Known_Monster_Skill_Maps_To_A_Fixed_Variant()
+        {
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(0L, 50001));
+            Assert.AreEqual(1, NpcAttackSchedule.VariantOf(0L, 50002));
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(0L, 50003));
+            Assert.AreEqual(1, NpcAttackSchedule.VariantOf(0L, 50004));
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(0L, 50005));
+            Assert.AreEqual(1, NpcAttackSchedule.VariantOf(0L, 50006));
+
+            // 与时间戳无关（所有客户端必须同结论）
+            long t = 638_000_000_000_000_000L;
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(t, 50001));
+            Assert.AreEqual(1, NpcAttackSchedule.VariantOf(t, 50002));
+        }
+
+        [Test]
+        public void Unknown_Skill_Falls_Back_To_Timestamp_Variant()
+        {
+            long t = NpcAttackSchedule.VariantBucketTicks;
+            Assert.AreEqual(1, NpcAttackSchedule.VariantOf(t, 99999));
+            Assert.AreEqual(NpcAttackSchedule.VariantOf(t), NpcAttackSchedule.VariantOf(t, 99999));
+        }
+
+        [Test]
+        public void Scheduled_Attack_Uses_Skill_Variant()
+        {
+            var schedule = new NpcAttackSchedule();
+            schedule.Schedule(entityId: 7, serverTicks: 1_000L, skillId: 50002);
+            var due = new List<NpcAttackSchedule.DueAttack>();
+
+            schedule.Drain(renderAt: 1_000L, due);
+
+            Assert.AreEqual(1, due.Count);
+            Assert.AreEqual(1, due[0].Variant); // 50002 → Attack02
+        }
     }
 }
