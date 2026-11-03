@@ -36,14 +36,22 @@ public class MonsterSkillCombatTests
         Login(store, 1, new Vector3(0f, 0f, 1f)); // 距出生点 4m，在 -Z 视野锥内
 
         var casts = new List<CastRequest>();
+        float firstMidRangeDistance = -1f;
         for (uint t = 0; t < 30; t++)
         {
             module.Tick(t);
-            foreach (var (_, request) in module.DrainPendingCasts()) casts.Add(request);
+            foreach (var (_, request) in module.DrainPendingCasts())
+            {
+                if (request.SkillId == 50005 && firstMidRangeDistance < 0f)
+                    firstMidRangeDistance = Vector3.Distance(state.Position, store.GetPlayer(1)!.Position);
+                casts.Add(request);
+            }
         }
 
         Assert.Contains(casts, r => r.SkillId == 50005);
-        Assert.DoesNotContain(casts, r => r.SkillId == 50003); // 4m 超出 50003
+        Assert.DoesNotContain(casts, r => r.SkillId == 50003);
+        Assert.True(firstMidRangeDistance > 2.2f + 0.01f,
+            $"50005 应在 50003 射程外决策，实测首次距离 {firstMidRangeDistance:F2}m");
     }
 
     [Fact]
@@ -52,11 +60,24 @@ public class MonsterSkillCombatTests
         var (store, module, state) = Make(3);
         Login(store, 1, new Vector3(0f, 0f, 1f)); // 距出生点 4m
 
-        for (uint t = 0; t < 120; t++) module.Tick(t);
-        var casts = module.DrainPendingCasts();
+        var casts = new List<CastRequest>();
+        float firstMeleeDistance = -1f;
+        for (uint t = 0; t < 120; t++)
+        {
+            module.Tick(t);
+            foreach (var (_, request) in module.DrainPendingCasts())
+            {
+                if (request.SkillId == 50003 && firstMeleeDistance < 0f)
+                    firstMeleeDistance = Vector3.Distance(state.Position, store.GetPlayer(1)!.Position);
+                casts.Add(request);
+            }
+        }
 
-        Assert.Contains(casts, c => c.Request.SkillId == 50003);
-        Assert.DoesNotContain(casts, c => c.Request.SkillId == 50005);
+        Assert.Contains(casts, c => c.SkillId == 50003);
+        Assert.DoesNotContain(casts, c => c.SkillId == 50005);
+        Assert.True(firstMeleeDistance <= state.Config.attackRange + 0.05f,
+            $"50003 应在近战距离决策，实测首次距离 {firstMeleeDistance:F2}m"
+            + $"（attackRange {state.Config.attackRange}）");
     }
 
     [Fact]
