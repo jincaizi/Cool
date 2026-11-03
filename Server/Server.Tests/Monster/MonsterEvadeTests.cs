@@ -34,16 +34,19 @@ public class MonsterEvadeTests
         var entity = store.GetPlayer(id)!;
         entity.ApplyDamage(50f); // 100 -> 50
         state.Position = new Vector3(0f, 0f, 25f); // > Slime leash 23
+        state.CurrentPatrolIndex = 2; // 到家必须归零，否则空钉子
 
         uint t = 0;
         while (t < 600 && state.Mode != MonsterMode.Patrol) { module.Tick(t); t++; }
+        uint arrivalTick = t - 1;
 
         Assert.Equal(MonsterMode.Patrol, state.Mode);
         Assert.Equal(entity.MaxHp, entity.Hp, 3);
         Assert.Empty(state.Threats.PlayerIds);
         Assert.Null(state.TargetId);
         Assert.Equal(0, state.CurrentPatrolIndex);
-        Assert.True(state.PostEvadeGraceUntilTick > t - 1);
+        Assert.Equal(30u, MonsterBrain.PostEvadeGraceTicks);
+        Assert.Equal(arrivalTick + 30u, state.PostEvadeGraceUntilTick);
     }
 
     [Fact]
@@ -73,10 +76,20 @@ public class MonsterEvadeTests
         module.Taunt(id, 1, durationTicks: 30, tick: 0);
         Assert.Equal(MonsterMode.Evade, state.Mode);
         Assert.Empty(state.Threats.PlayerIds);
+        Assert.Null(state.TargetId);
+        Assert.Equal(0u, state.TauntUntilTick);
 
         state.Mode = MonsterMode.Dead;
         module.Taunt(id, 1, durationTicks: 30, tick: 0);
         Assert.Equal(MonsterMode.Dead, state.Mode);
+        Assert.Empty(state.Threats.PlayerIds);
+        Assert.Null(state.TargetId);
+        Assert.Equal(0u, state.TauntUntilTick);
+
+        module.OnDamageTaken(id, 1, 25f, MonsterDamageKind.Direct);
+        Assert.Equal(MonsterMode.Dead, state.Mode);
+        Assert.Empty(state.Threats.PlayerIds);
+        Assert.Null(state.TargetId);
     }
 
     [Fact]
@@ -101,17 +114,32 @@ public class MonsterEvadeTests
         state.EvadeStartTick = 0;
         state.SpawnPosition = new Vector3(0f, 0f, 1000f); // 回不到家
 
-        for (uint t = 0; t <= MonsterBrain.ReturnTimeoutTicks; t++) module.Tick(t);
+        Assert.Equal(300u, MonsterBrain.ReturnTimeoutTicks);
+        Assert.Equal(30u, MonsterModule.EvadeRespawnDelayTicks);
+
+        for (uint t = 0; t < 300; t++) module.Tick(t); // t=0..299
+        Assert.NotNull(store.GetPlayer(id)); // t=299 尚未超时
+
+        module.Tick(300);
         Assert.Null(store.GetPlayer(id)); // t=300 超时移除
         Assert.Contains(id, module.DrainRemovedNpcs());
 
-        for (uint t = MonsterBrain.ReturnTimeoutTicks + 1;
-             t < MonsterBrain.ReturnTimeoutTicks + MonsterModule.EvadeRespawnDelayTicks; t++)
+        for (uint t = 301; t < 330; t++)
+        {
             module.Tick(t);
-        module.Tick(MonsterBrain.ReturnTimeoutTicks + MonsterModule.EvadeRespawnDelayTicks);
+            Assert.Equal(0, module.Count); // 30 tick 延迟内不得提前重生
+        }
 
-        Assert.Equal(1, module.Count); // 新 id 重生
+        module.Tick(330);
+        Assert.Equal(1, module.Count);
         Assert.DoesNotContain(store.All, p => p.PlayerId == id);
+
+        // 重生位置必须是 PatrolCenter（0,0,0）
+        foreach (var npc in store.All)
+        {
+            Assert.Equal(0f, npc.Position.X, 1);
+            Assert.Equal(0f, npc.Position.Z, 1);
+        }
     }
 
     [Fact]
