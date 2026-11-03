@@ -176,7 +176,7 @@ namespace Hotfix.GameSystems.Tests.SyncCore
         [Test]
         public void Monster_HitDelay_Never_Exceeds_Its_Cooldown()
         {
-            foreach (var skillId in new[] { 50001, 50002, 50003, 50004 })
+            foreach (var skillId in new[] { 50001, 50002, 50003, 50004, 50005, 50006 })
             {
                 Assert.IsTrue(CombatRules.TryGet(skillId, out var entry), $"缺 {skillId} 表项");
                 Assert.LessOrEqual(entry.HitDelaySeconds, entry.CooldownSeconds + 0.0001f,

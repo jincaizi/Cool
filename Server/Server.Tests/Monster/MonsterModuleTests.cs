@@ -284,22 +284,28 @@ public class MonsterModuleTests
         Assert.Equal(templateId, npc!.TemplateId);
     }
 
-    /// <summary>防「静默冻结」：怪物施法形状范围取 Config.attackRange（MonsterBtActions），
-    /// 超过表上限会被 CombatRules.ValidateShape 拒收，而拒收只写审计日志——怪物在攻击距离上零表现。</summary>
+    /// <summary>防「静默冻结」：模板技能的距离上限超过 CombatRules 表上限时，形状会被
+    /// ValidateShape 拒收，而拒收只写审计日志——怪物在攻击距离上零表现。P2 起逐条遍历 skills。</summary>
     [Theory]
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
     [InlineData(4)]
-    public void Template_AttackRange_Fits_Its_Combat_Rule(int templateId)
+    public void Template_Skills_Fit_Their_Combat_Rules(int templateId)
     {
         var path = System.IO.Path.Combine(System.AppContext.BaseDirectory, "Config", "monster_config.json");
         var config = ConfigLoader.LoadMonsterTemplates(path)[templateId];
-        var skillId = MonsterModule.SkillIdOf(templateId);
 
-        Assert.True(CombatRules.TryGet(skillId, out var rule), $"template {templateId} 缺 {skillId} 表项");
-        Assert.True(config.attackRange <= rule!.MaxRange + 0.01f,
-            $"template {templateId} attackRange={config.attackRange} > skill {skillId} maxRange={rule.MaxRange}");
+        Assert.NotEmpty(config.skills);
+        foreach (var skill in config.skills)
+        {
+            Assert.True(CombatRules.TryGet(skill.skillId, out var rule),
+                $"template {templateId} 缺 {skill.skillId} 表项");
+            float maxRange = skill.MaxRangeOf(rule!);
+            if (rule.ShapeType == 0)
+                Assert.True(maxRange <= rule.MaxRange + 0.01f,
+                    $"template {templateId} skill {skill.skillId} maxRange={maxRange} > {rule.MaxRange}");
+        }
     }
 
     /// <summary>DemoDay 玩家出生点——客户端 `PlayerSpawner._spawnPoint` 实测

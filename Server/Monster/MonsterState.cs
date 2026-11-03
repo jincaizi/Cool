@@ -62,6 +62,13 @@ namespace KcpServer.Monster
             Config = config;
             AttackSkillId = attackSkillId;
         }
+
+        /// <summary>P2 兼容重载（任务 3 临时）：首个模板技能充当主攻击；任务 5 接线多技能后取代。</summary>
+        public MonsterState(long npcId, int templateId, MonsterData config)
+            : this(npcId, templateId, config,
+                   config.skills.Count > 0 ? config.skills[0].skillId : 0)
+        {
+        }
     }
 
     /// <summary>警报等级（旧 Server/AI 移植；HOSTILE 只在获取目标时置位，Return 完成回 PEACE）</summary>

@@ -182,7 +182,7 @@ public class CombatRulesTests
     {
         // 约束只对怪物成立：前摇结束时若冷却已过，怪物会立刻挥第二刀（第一刀的剪辑被截断）。
         // 玩家普攻 10001 冷却为 0 且判定帧 0.30s——玩家侧由动画/连击链把关，不适用本约束。
-        foreach (var skillId in new[] { 50001, 50002, 50003, 50004 })
+        foreach (var skillId in new[] { 50001, 50002, 50003, 50004, 50005, 50006 })
         {
             Assert.True(CombatRules.TryGet(skillId, out var entry), $"缺 {skillId} 表项");
             Assert.True(entry!.HitDelaySeconds <= entry.CooldownSeconds + 0.0001f,
