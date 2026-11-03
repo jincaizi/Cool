@@ -33,9 +33,34 @@ public class SkillSelectorTests
     public void Selects_Higher_Priority_Skill_When_Both_In_Range()
     {
         var (state, self) = Make(hp: 40f); // 低于 50%
-        var selected = SkillSelector.Select(state, self, distance: 3f, tick: 0);
+        // distance=2.1 落在 50003 [0,2.2] 与 50005 [2,6] 的重叠区：两者都在射程内，
+        // 才能证明选择器按 priority 降序，而不是让距离过滤只剩唯一候选（3m 会只留下 50005）。
+        var selected = SkillSelector.Select(state, self, distance: 2.1f, tick: 0);
         Assert.NotNull(selected);
         Assert.Equal(50005, selected!.Value.Entry.SkillId);
+    }
+
+    [Fact]
+    public void Ties_Break_By_Smaller_Skill_Id()
+    {
+        var config = new MonsterData
+        {
+            templateId = 10, name = "Tie", hp = 100f, moveSpeed = 2f, bodyRadius = 0.5f,
+            detectionRadius = 10f, visionAngle = 120f, attackRange = 2f, patrolRadius = 2f,
+            skills = new List<MonsterSkillConfig>
+            {
+                new MonsterSkillConfig { skillId = 50003, priority = 0, maxRange = 2.2f },
+                new MonsterSkillConfig { skillId = 50002, priority = 0, maxRange = 2.0f }
+            }
+        };
+        var store = new EntityStore();
+        var self = store.AddNpc(1, "self", 10, 100f, new Vector3(0f, 0f, 0f));
+        var state = new MonsterState(1, 10, config);
+
+        var selected = SkillSelector.Select(state, self, distance: 1.5f, tick: 0);
+
+        Assert.NotNull(selected);
+        Assert.Equal(50002, selected!.Value.Entry.SkillId); // 同为 priority 0，较小 skillId 胜出
     }
 
     [Fact]
