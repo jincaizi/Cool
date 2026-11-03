@@ -10,7 +10,10 @@
       "visionAngle": 120,
       "attackRange": 1.5,
       "patrolRadius": 5,
-      "skills": ["Attack"]
+      "leashRadius": 23,
+      "skills": [
+        { "skillId": 50001, "priority": 0, "minRange": 0, "maxRange": 1.5 }
+      ]
     },
     {
       "templateId": 2,
@@ -22,7 +25,10 @@
       "visionAngle": 90,
       "attackRange": 2.0,
       "patrolRadius": 10,
-      "skills": ["Attack"]
+      "leashRadius": 35,
+      "skills": [
+        { "skillId": 50002, "priority": 0, "minRange": 0, "maxRange": 2.0 }
+      ]
     },
     {
       "templateId": 3,
@@ -34,7 +40,11 @@
       "visionAngle": 120,
       "attackRange": 2.2,
       "patrolRadius": 6,
-      "skills": ["Attack"]
+      "leashRadius": 34,
+      "skills": [
+        { "skillId": 50003, "priority": 0, "minRange": 0, "maxRange": 2.2 },
+        { "skillId": 50005, "priority": 10, "minRange": 2, "maxRange": 6.0, "hpBelow": 0.5 }
+      ]
     },
     {
       "templateId": 4,
@@ -46,7 +56,11 @@
       "visionAngle": 140,
       "attackRange": 2.5,
       "patrolRadius": 12,
-      "skills": ["Attack"]
+      "leashRadius": 47,
+      "skills": [
+        { "skillId": 50004, "priority": 0, "minRange": 0, "maxRange": 2.5 },
+        { "skillId": 50006, "priority": 10, "minRange": 0, "maxRange": 4.0, "hpBelow": 0.5 }
+      ]
     }
   ]
 }

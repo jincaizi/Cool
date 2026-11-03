@@ -80,7 +80,11 @@ namespace KcpServer.Config
                         visionAngle = 120,
                         attackRange = 1.5f,
                         patrolRadius = 5,
-                        skills = new List<string> { "Attack" }
+                        leashRadius = 23f, // 8 + 5 + 10
+                        skills = new List<MonsterSkillConfig>
+                        {
+                            new MonsterSkillConfig { skillId = 50001, priority = 0, minRange = 0f, maxRange = 1.5f }
+                        }
                     },
                     new MonsterData
                     {
@@ -93,7 +97,11 @@ namespace KcpServer.Config
                         visionAngle = 90,
                         attackRange = 2.0f,
                         patrolRadius = 10,
-                        skills = new List<string> { "Attack" }
+                        leashRadius = 35f, // 15 + 10 + 10
+                        skills = new List<MonsterSkillConfig>
+                        {
+                            new MonsterSkillConfig { skillId = 50002, priority = 0, minRange = 0f, maxRange = 2.0f }
+                        }
                     },
                     new MonsterData
                     {
@@ -106,7 +114,12 @@ namespace KcpServer.Config
                         visionAngle = 120,
                         attackRange = 2.2f,
                         patrolRadius = 6,
-                        skills = new List<string> { "Attack" }
+                        leashRadius = 34f, // 18 + 6 + 10
+                        skills = new List<MonsterSkillConfig>
+                        {
+                            new MonsterSkillConfig { skillId = 50003, priority = 0, minRange = 0f, maxRange = 2.2f },
+                            new MonsterSkillConfig { skillId = 50005, priority = 10, minRange = 2f, maxRange = 6f, hpBelow = 0.5f }
+                        }
                     },
                     new MonsterData
                     {
@@ -119,7 +132,12 @@ namespace KcpServer.Config
                         visionAngle = 140,
                         attackRange = 2.5f,
                         patrolRadius = 12,
-                        skills = new List<string> { "Attack" }
+                        leashRadius = 47f, // 25 + 12 + 10
+                        skills = new List<MonsterSkillConfig>
+                        {
+                            new MonsterSkillConfig { skillId = 50004, priority = 0, minRange = 0f, maxRange = 2.5f },
+                            new MonsterSkillConfig { skillId = 50006, priority = 10, minRange = 0f, maxRange = 4f, hpBelow = 0.5f }
+                        }
                     }
                 }
             };

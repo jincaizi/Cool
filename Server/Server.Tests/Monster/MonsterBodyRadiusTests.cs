@@ -108,7 +108,8 @@ public class MonsterBodyRadiusTests
         string path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"monsters_bad_{System.Guid.NewGuid():N}.json");
         System.IO.File.WriteAllText(path,
             "{\"monsters\":[{\"templateId\":3,\"name\":\"NoRadius\",\"hp\":10,\"moveSpeed\":1.0," +
-            "\"detectionRadius\":5,\"visionAngle\":90,\"attackRange\":1.0,\"patrolRadius\":2,\"skills\":[\"Attack\"]}]}");
+            "\"detectionRadius\":5,\"visionAngle\":90,\"attackRange\":1.0,\"patrolRadius\":2," +
+            "\"skills\":[{\"skillId\":50003,\"priority\":0,\"maxRange\":1.0}]}]}");
         try
         {
             var store = new EntityStore();

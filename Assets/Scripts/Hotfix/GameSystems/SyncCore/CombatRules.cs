@@ -149,6 +149,11 @@ namespace Cool.SyncCore
             //（MonsterModuleTests.Template_AttackRange_Fits_Its_Combat_Rule 守这条）。
             [50003] = new SkillEntry(skillId: 50003, shapeType: 0, maxRange: 2.2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1.5f, baseDamage: 30f, criticalRate: 0f, hitDelaySeconds: 0.35f),
             [50004] = new SkillEntry(skillId: 50004, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 2f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0.35f),
+            // P2 怪物多技能（2026-11-03）：DogKnight 突进斩 / SpiderBoss 范围技（血量 50% 以下启用）
+            [50005] = new SkillEntry(50005, shapeType: 0, maxRange: 6f, maxAreaRadius: 0f, maxAngle: 60f,
+                cooldownSeconds: 4f, baseDamage: 25f, criticalRate: 0f, hitDelaySeconds: 0.35f),
+            [50006] = new SkillEntry(50006, shapeType: 1, maxRange: 0f, maxAreaRadius: 4f, maxAngle: 0f,
+                cooldownSeconds: 5f, baseDamage: 40f, criticalRate: 0f, hitDelaySeconds: 0.35f),
         };
 
         public static bool IsSynced(int skillId) => Table.ContainsKey(skillId);

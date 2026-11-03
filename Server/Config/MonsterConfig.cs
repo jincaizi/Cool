@@ -1,10 +1,31 @@
+using System;
 using System.Collections.Generic;
+using Cool.SyncCore;
 
 namespace KcpServer.Config
 {
     public class MonsterConfig
     {
         public List<MonsterData> monsters { get; set; } = new();
+    }
+
+    /// <summary>模板技能条目（P2）。缺省值：minRange=0、maxRange=0（取 CombatRules 表值）、
+    /// hpBelow=1、hpAbove=0、priority=0。</summary>
+    public class MonsterSkillConfig
+    {
+        public int skillId;
+        public int priority;
+        public float minRange;
+        public float maxRange;      // 0 = 用 CombatRules 表值（Circle/投射物取 engagement 距离）
+        public float hpBelow = 1f;  // 自身血量比例 <= 此值才可用
+        public float hpAbove;       // 自身血量比例 >= 此值才可用
+
+        /// <summary>技能可用距离上限。Single 默认取表 MaxRange；Circle/投射物默认取
+        /// max(MaxRange, MaxAreaRadius)，避免 Circle 表 MaxRange=0 时永远不可用。</summary>
+        public float MaxRangeOf(SkillEntry entry)
+            => maxRange > 0f
+                ? maxRange
+                : (entry.ShapeType == 0 ? entry.MaxRange : Math.Max(entry.MaxRange, entry.MaxAreaRadius));
     }
 
     public class MonsterData
@@ -31,6 +52,15 @@ namespace KcpServer.Config
         public float visionAngle;
         public float attackRange;
         public float patrolRadius;
-        public List<string> skills;
+
+        public float leashRadius;       // 0 = detectionRadius + patrolRadius + 10
+        public float dropAggroRadius;   // 0 = LeashRadiusOf
+        public List<MonsterSkillConfig> skills = new();
+
+        public float LeashRadiusOf
+            => leashRadius > 0f ? leashRadius : detectionRadius + patrolRadius + 10f;
+
+        public float DropAggroRadiusOf
+            => dropAggroRadius > 0f ? dropAggroRadius : LeashRadiusOf;
     }
 }
