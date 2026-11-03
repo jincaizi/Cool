@@ -2654,6 +2654,29 @@ public class MonsterP2AcceptanceTests
         Assert.Equal(2L, state.TargetId); // 杀死当前目标后切到另一个
         Assert.Equal(MonsterMode.Combat, state.Mode);
     }
+
+    /// <summary>§7.2 ③ 的另一半：唯一威胁死亡、没有其他有效目标时，
+    /// 必须先熬过 45 tick grace 才 Evade，而不是立即脱战。</summary>
+    [Fact]
+    public void Sole_Target_Death_Enters_Evade_After_Grace()
+    {
+        var (store, module, id) = Make();
+        var state = module.GetState(id)!;
+        var player = Login(store, 1, new Vector3(0f, 0f, 2f)); // 距出生点 3m
+        state.Mode = MonsterMode.Combat;
+        state.TargetId = 1L;
+        state.Threats.AddDamage(1, 10f);
+        player.ApplyDamage(999f);
+
+        for (uint t = 0; t <= MonsterBrain.TargetLostGraceTicks; t++)
+        {
+            module.Tick(t);
+            if (t < MonsterBrain.TargetLostGraceTicks)
+                Assert.Equal(MonsterMode.Combat, state.Mode);
+            else
+                Assert.Equal(MonsterMode.Evade, state.Mode);
+        }
+    }
 }
 ```
 
