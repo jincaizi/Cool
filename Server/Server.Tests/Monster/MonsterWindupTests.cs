@@ -77,8 +77,9 @@ public class MonsterWindupTests
         var state = module.GetState(wolfId)!;
         float before = wolf.Rotation;          // 决策那一 tick 的朝向（面向原点 = 180°）
 
-        // 目标移到怪物前方偏轴 ~30° 处——**必须留在 Wolf 的 90° 感知锥（半角 45°）内**，否则目标丢失、
-        // 前摇分支只能朝陈旧的 LastKnownTargetPosition 转（那才是本用例要排除的干扰）。
+        // 目标移到怪物前方偏轴 ~30° 处——P2 起 ThreatTable 保留目标，只有超出 drop 半径 / 死亡 /
+        // 离线才丢，偏出视野锥不会丢；本用例仍把目标留在 Wolf 的 90° 感知锥（半角 45°）内，
+        // 让"LastKnownTargetPosition 刷新 → 90°/s 慢转"成为唯一变量（不引入出锥这个无关维度）。
         // 留 15° 余量：偏轴 45° 恰好落在 dot == halfCos 上，靠 float32 舍入的 0 ulp 平局才判"锥内"。
         // 从 (0,0,1.5) 朝 -Z 偏 30°、距离 1.5m：(-0.75, -1.3) ≈ (-0.75, 0, 0.2)
         store.GetPlayer(1)!.UpdatePosition(new Vector3(-0.75f, 0f, 0.2f), 0f, 0f, 1L, 0U);
@@ -128,8 +129,9 @@ public class MonsterWindupTests
 
     /// <summary>前摇期目标**直线后退**（仍在视野锥内）——"前摇 = 承诺"最常规的躲避路径：
     /// 距离一变化 Chase 不得抢先追击，也不得把 ActionState 改写成 Run（会当场截断挥砍）。
-    /// 与用例 1 的区别：那里目标跑到正后方出了锥 ⇒ 目标丢失 ⇒ Chase 恰好无路可走，
-    /// "站定"断言只是几何巧合绿；本用例把目标留在正前方 3.0m（>攻击距离，锥内）直击同一缺口。</summary>
+    /// 与用例 1 的区别：那里目标跑到正后方——P2 起它仍留在 ThreatTable（只有 drop 半径 / 死亡 /
+    /// 离线才丢），前摇期 Chase 同样被 Attack 分支挡住；本用例把目标留在正前方 3.0m
+    ///（>攻击距离）直击"距离变化不得抢跑"同一缺口。</summary>
     [Fact]
     public void Windup_Holds_While_The_Target_Backs_Off_But_Stays_Visible()
     {
@@ -150,8 +152,8 @@ public class MonsterWindupTests
         Assert.True(state.AttackResolveTick.HasValue);                    // 前置：前摇中
         var positionAtDecision = wolf.Position;
 
-        // 玩家直线后退到正前方 3.0m（> 攻击距离 2.0m）——仍在 Wolf 的 90° 锥内（正前方）、
-        // detectionRadius 15 内 ⇒ LastKnownTargetPosition 刷新、目标不丢（这才是发现 1 的场景）
+        // 玩家直线后退到正前方 3.0m（> 攻击距离 2.0m）——P2 起目标不因离开视野锥丢失，
+        // 且仍在 detectionRadius 15 内：LastKnownTargetPosition 每 tick 刷新（这才是发现 1 的场景）
         store.GetPlayer(1)!.UpdatePosition(new Vector3(0f, 0f, -1.5f), 0f, 0f, 1L, 0U);
         for (uint t = decideTick + 1; t <= decideTick + 3; t++)
         {

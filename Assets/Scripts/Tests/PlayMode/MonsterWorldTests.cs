@@ -25,7 +25,7 @@ namespace KcpNet.PlayModeTests
     /// 注：登录须显式 ConnectAndLogin（ClientNetworkManager.Update 非 InWorld 时早退，
     /// 不会自行建连）——计划文本漏写，按 AoiWorldTests/CombatSyncTests 惯例补上（偏差记录）。
     /// 回归保护：本测试是服务器登录接线（RegisterEntity 在 EntityStore 实例上置 IsLoggedIn）的
-    /// 端到端锁定——该接线缺失时怪物感知（MonsterModule.DetectTarget 的 `!p.IsLoggedIn` 过滤）
+    /// 端到端锁定——该接线缺失时怪物感知（MonsterBrain.TryAcquireBySight 的 `!p.IsLoggedIn` 过滤）
     /// 会静默失效：怪物只巡逻不感知（观察 60s：wolf ActionState 恒 Run、casts=0、dmg=0，
     /// 而 wolf 巡逻路径距观察者最近 ~2m 且朝向在锥内）。P5 T5 验收发现并以修复落地。
     /// </summary>

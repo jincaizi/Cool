@@ -1,7 +1,7 @@
 # 服务端怪物寻路与 AI 行为重构设计
 
-日期：2026-11-02（P1 最终修复轮：2026-11-03）
-状态：**P1 已实现**（P2–P4 未开始）；执行偏差、实测性能与验证债见 §11
+日期：2026-11-02（P1 最终修复轮 / P2 实现：2026-11-03）
+状态：**P1、P2 已实现**（P3–P4 未开始）；执行偏差、实测性能与验证债见 §11
 关联模块：`Server/Monster`、`Server/Navigation`、`Server/Movement`、`SyncLayer`、`SyncCore`、`Protocol`
 
 ## 1. 背景与现状
@@ -627,7 +627,20 @@ public ushort ToMask();
 - **视觉抽帧未做**：Wolf 绕岩石/湖岸、SpiderBoss 不穿模只有服务端几何断言
   （`DemoDayNavBinTests` 逐点 `IsPointNavigable`）；需在 DemoDay Play Mode 人工抽帧。
 - 导出器三角面排序 tie-break（min/max/area 全相同时）未加中间顶点：改导出器必须重导 navbin
-  并同步 hash/几何断言，本轮不重导，**P2**。
+  并同步 hash/几何断言；P1 记入 P2 偿还，**P2 未偿还**（见 §11.4）。
 - `--no-nav` / `--no-avoid` 负对照的手工 E2E 未在本轮重跑（单测覆盖了无导航回退）。
 - 服务端测试官方 testhost 本机不可用；以 `tools/test-server-inprocess.sh`（in-process xunit runner）
-  为准，干净克隆可复现 348/348（修复轮后）。官方 `dotnet test` 的 workaround 见 `Server/README.md`。
+  为准，干净克隆可复现 348/348（P1 修复轮后）、**391/391（P2 后）**。官方 `dotnet test` 的
+  workaround 见 `Server/README.md`。
+
+### 11.4 P2 执行偏差（2026-11-03）
+
+| 项 | 设计原稿 | 实际实现 | 原因 |
+|---|---|---|---|
+| A2 语义 | 前摇期沿用视野锥、扫描失败即清目标（P1 临时口径） | `ThreatTable` 保留目标，只有 drop 半径 / 死亡 / 离线才丢；`MonsterAcceptanceTests` 角度改 **55°/110°** 并断言 `TargetId` 保持；前摇期 `LastKnownTargetPosition` 每 tick 刷新 | 规格 §5.1「不因离开视野锥丢目标」；旧 65° 在 90°/s 前摇转向后会被判定锥命中，不再空挥 |
+| `Reposition` | 「目标太近且技能有 minRange → Reposition」 | 距离区间只统计**当前血量条件满足**的技能；后撤距离取所有“太近”技能 `minRange` 的最大值；冷却不影响停步/后撤 | 避免低血专属技能在满血时把怪物推远；目标在射程内但技能冷却时站定等待而不是继续贴近 |
+| 50005/50006 表现 | `skillId → variant` 映射 + VFX catalog 登记、HitDelay 按动画判定帧实测 | 固定映射到现有 **Attack01/02**，无专属 VFX；`HitDelaySeconds` 仍为 **0.35s 占位** | 客户端新资产不在 P2 范围；未知技能回退时间戳变体，旧服务端/未来技能仍可播 |
+| 文件布局 | §3.1 单列 `MonsterMode.cs` / `TargetSelector.cs` / `LeashController.cs` / `Combat/MonsterCastBuilder.cs` | `MonsterMode` 并入 `MonsterState.cs`；`TargetSelector` 并入 `ThreatTable.cs`；无 `LeashController`（逻辑在 `MonsterBrain`）；`MonsterCastBuilder` 在 `Monster/` 根 | 减少单类型文件；行为与对外接口不变 |
+| 脱战触发 | 目标超出 `dropAggroRadius` 且无其他有效目标（立即）；无有效目标超过 45 tick | 与规格一致：当前目标超距**立即** Evade，不等 grace；45 tick grace 只覆盖死亡 / 离线等“目标消失” | 实现按 §5.1 模式表逐条落地 |
+| P1 nav 债 | P2 偿还 0.5ms/query、导出器 tie-break | **未偿还**（用户 2026-11-03 确认不混入本轮）；仍记录在 §11.2/§11.3 | 避免行为重构与导航性能优化同轮叠加风险 |
+| 控制锁 | 每 tick 顺序含「控制锁」 | P2 未实现，仅保留 tick 顺序位置（P3 预留） | `MonsterStatusController` 属 P3 |

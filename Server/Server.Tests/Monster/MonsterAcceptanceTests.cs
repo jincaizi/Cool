@@ -166,7 +166,7 @@ public class MonsterAcceptanceTests
             + $"（期望 100），怪物 DeathTick={state.DeathTick}，判定帧命中数=0");
     }
 
-    // ---------- A2：丢目标 ≠ 打不中（静态角度） ----------
+    // ---------- A2：偏出视野锥 ≠ 丢目标（静态角度） ----------
 
     /// <summary>
     /// 两个静态角度钉死"判定帧夹角 ≠ 判定锥"（Wolf：visionAngle **90** → 视野半角 45°；

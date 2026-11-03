@@ -253,7 +253,7 @@ namespace KcpServer
         public void RegisterEntity(long playerId, string playerName)
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
-            // P5：登录标志置在 store 实例上——怪物感知（MonsterModule.DetectTarget）与
+            // P5：登录标志置在 store 实例上——怪物感知（MonsterBrain.TryAcquireBySight）与
             // 怪物施法候选（CastHandler）过滤读的是本实例；LoginHandler 自建实例只进 RoomManager。
             // BotRunner 不经此路径（直接 AddPlayer）——压测 bot 保持非登录态（D-P5-3 语义）
             player.IsLoggedIn = true;
