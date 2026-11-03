@@ -28,6 +28,10 @@ namespace KcpServer
         /// **只对 NPC caster 生效**——玩家施法的静态遮挡不在本期（spec §4.5/§9.1-8）。</summary>
         public Func<long, Vector3, Vector3, bool>? NpcLineOfSight { get; set; }
 
+        /// <summary>NPC 受玩家伤害回调（参数：npcId, attackerId, 实际伤害）。
+        /// 在 ApplyHit 扣血后调用；格挡分支传减伤后的伤害。null = 不归属（测试/无怪物宿主）。</summary>
+        public Action<long, long, float>? NpcDamaged { get; set; }
+
         /// <summary>施放裁决结果（输出载体）——决策阶段只填 Accepted/RejectReason/Broadcast/IsNpcCaster，
         /// 判定阶段（DrainResolved）才填 Hits</summary>
         public sealed class CastResolution
@@ -341,6 +345,8 @@ namespace KcpServer
                 damage *= CombatRules.BlockDamageScale;
 
             target.ApplyDamage(damage);
+            if (target.Kind == (byte)EntityKind.Npc)
+                NpcDamaged?.Invoke(target.PlayerId, pending.CasterId, damage);
             resolution.Hits.Add(new HitEntry
             {
                 TargetPlayerId = targetId,
@@ -429,6 +435,10 @@ namespace KcpServer
         /// <summary>接线 NPC 判定帧 LOS（Server3C 在 EnableMonsters 后调用；null = 关闭检查）。</summary>
         public void SetNpcLineOfSight(Func<long, Vector3, Vector3, bool>? lineOfSight)
             => _resolver.NpcLineOfSight = lineOfSight;
+
+        /// <summary>接线 NPC 受击归属（Server3C 在 EnableMonsters 后调用；null = 关闭）。</summary>
+        public void SetNpcDamageObserver(Action<long, long, float>? observer)
+            => _resolver.NpcDamaged = observer;
 
         /// <summary>裁决入口（怪物：tick 内决策 → 校验 + 冷却 + 入队）</summary>
         public CombatResolver.CastResolution Decide(long casterId, CastRequest request, uint tick)
