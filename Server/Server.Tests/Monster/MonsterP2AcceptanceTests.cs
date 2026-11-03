@@ -11,8 +11,8 @@ namespace KcpServer.Tests.Monster;
 /// 规格 §7.2 P2 行为验收（场景级，走真实模块 tick 与裁决链）：
 /// ① 两名玩家抢仇恨——超过 20% 切换阈值才换目标，前摇期间锁目标；
 /// ② 多技能——距离 / 血量门槛 / 冷却（50005 间隔 ≥ 60 tick）；
-/// ③ 脱战——目标死亡后优先切到另一仇恨目标；超 leash 立即 Evade、回家满血/清仇恨、
-///    post-evade grace 内不感知。
+/// ③ 脱战——目标死亡后优先切到另一仇恨目标；唯一目标死亡则 45 tick grace 后 Evade；
+///    超 leash 立即 Evade、回家满血/清仇恨、post-evade grace 内不感知。
 /// </summary>
 public class MonsterP2AcceptanceTests
 {
@@ -174,5 +174,26 @@ public class MonsterP2AcceptanceTests
         // grace 内玩家就在视野锥里也不感知
         module.Tick(arrivalTick + 1);
         Assert.Equal(MonsterMode.Patrol, state.Mode);
+    }
+
+    [Fact]
+    public void Sole_Target_Death_Enters_Evade_After_Grace()
+    {
+        var (store, module, id) = Make();
+        var state = module.GetState(id)!;
+        var player = Login(store, 1, new Vector3(0f, 0f, 2f)); // 距出生点 3m
+        state.Mode = MonsterMode.Combat;
+        state.TargetId = 1L;
+        state.Threats.AddDamage(1, 10f);
+        player.ApplyDamage(999f);
+
+        for (uint t = 0; t <= MonsterBrain.TargetLostGraceTicks; t++)
+        {
+            module.Tick(t);
+            if (t < MonsterBrain.TargetLostGraceTicks)
+                Assert.Equal(MonsterMode.Combat, state.Mode);
+            else
+                Assert.Equal(MonsterMode.Evade, state.Mode);
+        }
     }
 }

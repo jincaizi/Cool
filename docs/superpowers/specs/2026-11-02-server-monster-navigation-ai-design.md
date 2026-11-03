@@ -641,6 +641,6 @@ public ushort ToMask();
 | `Reposition` | 「目标太近且技能有 minRange → Reposition」 | 距离区间只统计**当前血量条件满足**的技能；后撤距离取所有“太近”技能 `minRange` 的最大值；冷却不影响停步/后撤 | 避免低血专属技能在满血时把怪物推远；目标在射程内但技能冷却时站定等待而不是继续贴近 |
 | 50005/50006 表现 | `skillId → variant` 映射 + VFX catalog 登记、HitDelay 按动画判定帧实测 | 固定映射到现有 **Attack01/02**，无专属 VFX；`HitDelaySeconds` 仍为 **0.35s 占位** | 客户端新资产不在 P2 范围；未知技能回退时间戳变体，旧服务端/未来技能仍可播 |
 | 文件布局 | §3.1 单列 `MonsterMode.cs` / `TargetSelector.cs` / `LeashController.cs` / `Combat/MonsterCastBuilder.cs` | `MonsterMode` 并入 `MonsterState.cs`；`TargetSelector` 并入 `ThreatTable.cs`；无 `LeashController`（逻辑在 `MonsterBrain`）；`MonsterCastBuilder` 在 `Monster/` 根 | 减少单类型文件；行为与对外接口不变 |
-| 脱战触发 | 目标超出 `dropAggroRadius` 且无其他有效目标（立即）；无有效目标超过 45 tick | 与规格一致：当前目标超距**立即** Evade，不等 grace；45 tick grace 只覆盖死亡 / 离线等“目标消失” | 实现按 §5.1 模式表逐条落地 |
+| 脱战触发 | 目标超出 `dropAggroRadius` 且无其他有效目标（立即）；无有效目标超过 45 tick | 与规格一致：当前目标超距**且无其他有效仇恨目标**时立即 Evade，不等 grace；45 tick grace 只覆盖死亡 / 离线等“目标消失” | 实现按 §5.1 模式表逐条落地 |
 | P1 nav 债 | P2 偿还 0.5ms/query、导出器 tie-break | **未偿还**（用户 2026-11-03 确认不混入本轮）；仍记录在 §11.2/§11.3 | 避免行为重构与导航性能优化同轮叠加风险 |
 | 控制锁 | 每 tick 顺序含「控制锁」 | P2 未实现，仅保留 tick 顺序位置（P3 预留） | `MonsterStatusController` 属 P3 |
