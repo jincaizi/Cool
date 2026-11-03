@@ -630,7 +630,7 @@ public ushort ToMask();
   并同步 hash/几何断言；P1 记入 P2 偿还，**P2 未偿还**（见 §11.4）。
 - `--no-nav` / `--no-avoid` 负对照的手工 E2E 未在本轮重跑（单测覆盖了无导航回退）。
 - 服务端测试官方 testhost 本机不可用；以 `tools/test-server-inprocess.sh`（in-process xunit runner）
-  为准，干净克隆可复现 348/348（P1 修复轮后）、**391/391（P2 后）**。官方 `dotnet test` 的
+  为准，干净克隆可复现 348/348（P1 修复轮后）、**395/395（P2 终审修复轮后）**。官方 `dotnet test` 的
   workaround 见 `Server/README.md`。
 
 ### 11.4 P2 执行偏差（2026-11-03）

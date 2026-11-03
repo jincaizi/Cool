@@ -1747,7 +1747,16 @@ public static BtStatus Chase(MonsterTickContext ctx)
 
     if (m.AttackResolveTick.HasValue) return BtStatus.Success;
 
-    Vector3 target = m.LastKnownTargetPosition ?? m.Position;
+    // 目标丢失（死亡/离线/出 drop 半径）后 brain 会清 LastKnown；此时 Chase 必须
+    // 显式写 Idle/0 速再返回，否则会保留上一 tick 的 Run/Attack 与 moveSpeed 广播，
+    // 一路假跑到进入 Evade（最长 45 tick）。
+    if (!m.LastKnownTargetPosition.HasValue)
+    {
+        SetMovementState(ctx, moved: false);
+        return BtStatus.Success;
+    }
+
+    Vector3 target = m.LastKnownTargetPosition.Value;
     float targetDistance = DistanceXZ(m.Position, target);
     bool inRange = SkillSelector.IsWithinAnySkillRange(m, ctx.Entity, targetDistance);
     if (inRange && (m.Follower == null
@@ -2424,6 +2433,11 @@ public void Known_Monster_Skill_Maps_To_A_Fixed_Variant()
     long t = 638_000_000_000_000_000L;
     Assert.AreEqual(0, NpcAttackSchedule.VariantOf(t, 50001));
     Assert.AreEqual(1, NpcAttackSchedule.VariantOf(t, 50002));
+
+    // 奇桶的时间戳回退是 1；0 映射必须仍返回 0，否则「固定 0」与「漏登记走回退」不可区分。
+    Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50001));
+    Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50003));
+    Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50005));
 }
 
 [Test]
@@ -2631,6 +2645,8 @@ public class MonsterP2AcceptanceTests
         var midRangeTicks = new List<uint>();
         foreach (var cast in casts)
             if (cast.SkillId == 50005) midRangeTicks.Add(cast.Tick);
+        Assert.True(midRangeTicks.Count >= 2,
+            $"需要至少两次 50005 才能验证冷却间隔，实际 {midRangeTicks.Count} 次");
         for (int i = 1; i < midRangeTicks.Count; i++)
             Assert.True(midRangeTicks[i] - midRangeTicks[i - 1] >= 60,
                 $"50005 冷却不足：间隔 {midRangeTicks[i] - midRangeTicks[i - 1]} tick");

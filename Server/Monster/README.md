@@ -52,7 +52,8 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 - **判定帧 LOS**：`CombatResolver` 对 NPC caster 在 `DrainResolved` 再查一次
   `NavigationService.HasLineOfSight`；起手后玩家躲墙不命中（玩家施法不变）。
 - 接入：出生点投影容差 0.5m，失败即抛（fail fast）；巡逻点 9 方向投影并要求
-  clearance ≥ `bodyRadius`；Chase 停步用目标投影点且必须 LOS（隔墙不停、继续绕行）；
+  clearance ≥ `bodyRadius`；Chase 停步用 `SkillSelector.IsWithinAnySkillRange`（目标距离）+ LOS
+  （隔墙不停、继续绕行）；无最后已知目标时写 Idle/0 速（防假跑广播）；
   Attack 隔墙返回失败落回 Chase；Evade 沿路径回 `SpawnPosition`。
 - **目标保持（P2 起由 `ThreatTable` 接管）**：目标只在死亡 / 离线 / 超出 `dropAggroRadius`
   时移除；**偏出视野锥不会丢目标**（绕墙追击不会断）。感知获取只在 `Patrol` 做，战斗中新目标

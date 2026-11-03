@@ -122,6 +122,8 @@ public class MonsterP2AcceptanceTests
         var midRangeTicks = new List<uint>();
         foreach (var cast in casts)
             if (cast.SkillId == midRangeSkill) midRangeTicks.Add(cast.Tick);
+        Assert.True(midRangeTicks.Count >= 2,
+            $"需要至少两次 50005 才能验证冷却间隔，实际 {midRangeTicks.Count} 次");
         for (int i = 1; i < midRangeTicks.Count; i++)
             Assert.True(midRangeTicks[i] - midRangeTicks[i - 1] >= 60,
                 $"50005 冷却不足：间隔 {midRangeTicks[i] - midRangeTicks[i - 1]} tick");

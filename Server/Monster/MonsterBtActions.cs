@@ -53,7 +53,16 @@ namespace KcpServer.Monster
 
             if (m.AttackResolveTick.HasValue) return BtStatus.Success;
 
-            Vector3 target = m.LastKnownTargetPosition ?? m.Position;
+            // 目标丢失（死亡/离线/出 drop 半径）后 brain 会清 LastKnown；此时 Chase 必须
+            // 显式写 Idle/0 速再返回，否则会保留上一 tick 的 Run/Attack 与 moveSpeed 广播，
+            // 一路假跑到进入 Evade（最长 45 tick）。
+            if (!m.LastKnownTargetPosition.HasValue)
+            {
+                SetMovementState(ctx, moved: false);
+                return BtStatus.Success;
+            }
+
+            Vector3 target = m.LastKnownTargetPosition.Value;
             float targetDistance = DistanceXZ(m.Position, target);
             bool inRange = SkillSelector.IsWithinAnySkillRange(m, ctx.Entity, targetDistance);
             if (inRange && (m.Follower == null

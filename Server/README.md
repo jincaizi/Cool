@@ -65,5 +65,5 @@ CONFIG=Release bash tools/test-server-inprocess.sh   # benchmark 数字用 Relea
 `tools/ServerTestRunner` 用 xunit 自带的 `AssemblyRunner` 在**同一进程**里发现/执行
 `Server.Tests.dll`（不经过 VSTest），输出与 `dotnet test` 等价的 PASS/FAIL 摘要。
 它引用 `Server.Tests.csproj`，所以 `dotnet build` + runner 会复制全部依赖；
-干净克隆可直接复现 321/321（修复轮后 348/348）。脚本把 `TEMP` 指到仓库内
+干净克隆可直接复现 321/321（修复轮后 348/348；P2 后 395/395）。脚本把 `TEMP` 指到仓库内
 `.tmp/server-tests`，避免受限环境阻止测试写 `Path.GetTempPath()`。

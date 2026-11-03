@@ -127,4 +127,33 @@ public class MonsterSkillCombatTests
         module.Tick(decideTick + 1);
         Assert.Equal(1L, state.TargetId);
     }
+
+    /// <summary>I1 回归：目标消失（离场/死亡/出 drop 半径）后 brain 清空
+    /// <c>LastKnownTargetPosition</c>，Chase 不得用自身位置冒充目标——距离 0 落进近战技能区间
+    /// 会 `return Success` 且不写移动态，上一 tick 的 Run 与 moveSpeed 继续广播到 Evade（最长 45 tick）。
+    /// Wolf 生成在 (0,0,5)（非原点，朝向稳定），玩家在 (0,0,1)（4m，-Z 视野锥内）。</summary>
+    [Fact]
+    public void Chase_Without_LastKnown_Target_Writes_Idle_And_Zero_Speed()
+    {
+        var (store, module, state) = Make(2);
+        var wolf = store.GetPlayer(state.NpcId)!;
+        Login(store, 1, new Vector3(0f, 0f, 1f)); // 距出生点 4m（Wolf 攻击距离 2m）
+
+        // 前置：Wolf 确实在追击（Moving 且位置变化）——否则下一 tick 的 Idle 可能只是"本来就没跑"
+        var start = wolf.Position;
+        bool chasing = false;
+        for (uint t = 0; t < 5 && !chasing; t++)
+        {
+            module.Tick(t);
+            chasing = state.Moving && Vector3.Distance(start, wolf.Position) > 0.01f;
+        }
+        Assert.True(chasing, "前置：Wolf 应在追击中");
+
+        store.RemovePlayer(1); // 目标消失：brain 下一 tick 清 LastKnownTargetPosition
+        module.Tick(5);
+
+        Assert.False(state.Moving);
+        Assert.Equal(0f, wolf.Speed);
+        Assert.Equal((byte)NpcAnimationState.Idle, wolf.ActionState);
+    }
 }

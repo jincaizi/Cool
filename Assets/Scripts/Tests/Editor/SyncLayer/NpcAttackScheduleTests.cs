@@ -112,6 +112,11 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             long t = 638_000_000_000_000_000L;
             Assert.AreEqual(0, NpcAttackSchedule.VariantOf(t, 50001));
             Assert.AreEqual(1, NpcAttackSchedule.VariantOf(t, 50002));
+
+            // 奇桶的时间戳回退是 1；0 映射必须仍返回 0，否则「固定 0」与「漏登记走回退」不可区分。
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50001));
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50003));
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50005));
         }
 
         [Test]
