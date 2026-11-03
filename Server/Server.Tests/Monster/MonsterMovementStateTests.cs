@@ -88,6 +88,7 @@ public class MonsterMovementStateTests
 
         Assert.Equal(BtStatus.Running, status); // 冷却门：原地等
         Assert.False(state.Moving);
+        Assert.Empty(module.DrainPendingCasts()); // 冷却边界：不得入队施法
     }
 
     [Fact]
