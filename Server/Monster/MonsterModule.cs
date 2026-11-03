@@ -10,9 +10,9 @@ namespace KcpServer.Monster
 {
     /// <summary>
     /// P5 怪物模块（spec §5-P5 完整版）——主循环线程独占（R2），无锁。
-    /// 每 tick：受击/死亡转移检测 → 感知（视野锥内最近存活已登录玩家）→ 行为树
-    /// （巡逻/追击/攻击/返回）→ 位置 flush（UpdatePosition）→ 待施法队列
-    /// （Server3C drain 后经 CombatResolver 裁决，T3）。
+    /// 每 tick：受击/死亡转移检测 → 模式机（<see cref="MonsterBrain"/>：有效性清理/目标选择/
+    /// Patrol|Combat|Evade 转移）→ 行为树（巡逻/追击/攻击/后撤/脱战回巢）→ 位置 flush
+    /// （UpdatePosition）→ 待施法队列（Server3C drain 后经 CombatResolver 裁决，T3）。
     /// 死亡：Death 态展示 DeathDisplayTicks → 移除实体（Server3C 清 AOI）→
     /// RespawnTicks 后新 id 满血重生在巡逻中心。
     /// 断线持续运转：状态全在 EntityStore + 本模块，零 per-session 依赖（spec 验收）。
@@ -23,10 +23,12 @@ namespace KcpServer.Monster
         public const uint DeathDisplayTicks = 30; // 死亡展示 30 tick ≈ 2s（客户端播完死亡态过期销毁）
         public const uint RespawnTicks = 450;     // 重生 30s（15Hz × 30；与客户端 MonsterSpawner.RespawnDelay 同值）
         public const uint HitDisplayTicks = 5;    // 受击硬直 5 tick
+        public const uint EvadeRespawnDelayTicks = 30; // 回巢超时 despawn 后 2s 重生（不 teleport）
         public const float TickDeltaSeconds = 0.066f; // 主循环 66ms
 
         private readonly EntityStore _store;
         private readonly Func<long> _nextNpcId;
+        private readonly MonsterBrain _brain;
         private readonly Dictionary<int, MonsterData> _templates = new();
         private readonly Dictionary<long, MonsterState> _monsters = new();
         private readonly SimpleMoveSystem _mover;
@@ -39,20 +41,9 @@ namespace KcpServer.Monster
         /// <summary>活跃怪物数（测试/统计口径）</summary>
         public int Count => _monsters.Count;
 
-        /// <summary>模板 → 战斗技能 id。**public 自 2026-10-12**：测试要断言
-        /// 「配置 attackRange ≤ 表上限」（防静默冻结），需要拿到映射。</summary>
-        public static int SkillIdOf(int templateId) => templateId switch
-        {
-            1 => 50001,
-            2 => 50002,
-            3 => 50003,   // DogKnight 精英
-            4 => 50004,   // SpiderBoss
-            _ => throw new ArgumentException($"No combat skill mapped for monster template {templateId}")
-        };
-
         /// <param name="avoidance">ORCA 避让系统（Server3C 注入以与 BotRunner 共用一份世界快照）。
         /// null = 本模块自建一个只看得见自己的（单测/独立宿主就是这条路径）。</param>
-        /// <param name="navigation">navmesh 寻路服务；null = 无导航（巡逻/追击/返回走直线，行为与旧版一致）。</param>
+        /// <param name="navigation">navmesh 寻路服务；null = 无导航（巡逻/追击/回巢走直线，行为与旧版一致）。</param>
         public MonsterModule(EntityStore store, Func<long> nextNpcId, string? configPath = null,
             AvoidanceSystem? avoidance = null, NavigationService? navigation = null)
         {
@@ -67,6 +58,7 @@ namespace KcpServer.Monster
 
             _avoidance = avoidance ?? new AvoidanceSystem(store, RadiusOfTemplate, TickDeltaSeconds);
             _mover = new SimpleMoveSystem(_avoidance);
+            _brain = new MonsterBrain(store);
         }
 
         /// <summary>模板 id → 身体半径（米；ORCA 用）。表里没有/值非法则兜底 <see cref="AvoidanceSystem.DefaultMonsterRadius"/>——
@@ -126,12 +118,9 @@ namespace KcpServer.Monster
             if (!_templates.TryGetValue(templateId, out var config))
                 throw new ArgumentException($"Unknown monster template: {templateId}");
 
-            // 攻击技能 fail fast（终审 follow-up）：SkillIdOf 未映射模板已抛，这里再校验技能在
-            // CombatRules 表内——若拖到 BT Attack 才 TryGet 失败，怪物会在攻击距离静默冻结
-            //（零日志零计数，"npc cast rejected = 0" 的验收口径看不出这类死重）
-            int attackSkillId = SkillIdOf(templateId);
-            if (!CombatRules.TryGet(attackSkillId, out _))
-                throw new ArgumentException($"Monster skill {attackSkillId} (template {templateId}) missing from CombatRules table");
+            // 技能 fail fast（终审 follow-up）：若拖到 BT Attack 才 TryGet 失败，怪物会在攻击距离
+            // 静默冻结（零日志零计数，"npc cast rejected = 0" 的验收口径看不出这类死重）
+            ValidateSkills(config);
 
             Vector3 spawn = position;
             if (_navigation != null)
@@ -155,7 +144,7 @@ namespace KcpServer.Monster
             // 有导航时巡逻中心必须是**已投影**的出生点：巡逻点全部采不到时回退到这个单点，
             // 不能回退 legacy 未投影圆环（会把怪引到 navmesh 外直线穿地形）。
             Vector3 patrolCenterResolved = _navigation != null ? spawn : patrolCenter;
-            var state = new MonsterState(npcId, templateId, config, attackSkillId)
+            var state = new MonsterState(npcId, templateId, config)
             {
                 Position = spawn,
                 Rotation = Quaternion.LookRotation(ForwardOf(entity.Rotation)),
@@ -172,6 +161,28 @@ namespace KcpServer.Monster
 
         /// <summary>测试/调试：读怪物 AI 状态</summary>
         public MonsterState? GetState(long npcId) => _monsters.TryGetValue(npcId, out var s) ? s : null;
+
+        /// <summary>技能表校验（Spawn 时 fail fast）：至少一条技能；逐条在 CombatRules 内且范围合法。</summary>
+        private static void ValidateSkills(MonsterData config)
+        {
+            if (config.skills == null || config.skills.Count == 0)
+                throw new ArgumentException($"Monster template {config.templateId} has no skills");
+
+            foreach (var skill in config.skills)
+            {
+                if (!CombatRules.TryGet(skill.skillId, out var entry))
+                    throw new ArgumentException(
+                        $"Monster skill {skill.skillId} (template {config.templateId}) missing from CombatRules table");
+
+                float maxRange = skill.MaxRangeOf(entry);
+                if (skill.minRange > maxRange + 0.01f)
+                    throw new ArgumentException(
+                        $"Monster skill {skill.skillId} minRange={skill.minRange} > maxRange={maxRange}");
+                if (entry.ShapeType == 0 && maxRange > entry.MaxRange + 0.01f)
+                    throw new ArgumentException(
+                        $"Monster skill {skill.skillId} maxRange={maxRange} exceeds table {entry.MaxRange}");
+            }
+        }
 
         /// <summary>怪物模板身体半径（战斗判定帧 LOS 用；查询不到时退回默认半径）。</summary>
         public float BodyRadiusOf(long npcId)
@@ -207,17 +218,40 @@ namespace KcpServer.Monster
 
                 DetectHitOrDeath(m, entity, tick);
 
-                bool deadNow = m.DeathTick.HasValue;
-                bool inHitWindow = m.HitStartTick.HasValue && tick - m.HitStartTick.Value < HitDisplayTicks;
-                if (!deadNow && !inHitWindow)
+                if (!m.DeathTick.HasValue)
                 {
-                    DetectTarget(m, entity);
-                    var ctx = new MonsterTickContext(m, entity, this, _mover, TickDeltaSeconds, tick);
-                    m.BehaviorTree?.Tick(ctx);
+                    bool inHitWindow = m.HitStartTick.HasValue
+                        && tick - m.HitStartTick.Value < HitDisplayTicks;
+
+                    // 模式机先于行为树：有效性清理 → 目标选择 → Patrol/Combat/Evade 转移。
+                    // 受击硬直只挂起 Evade 转移（spec §5.1：受击/眩晕期间不能触发 Evade），
+                    // 目标有效性照常维护（硬直结束即可继续）。
+                    _brain.Update(m, entity, tick, allowEvadeTransition: !inHitWindow);
+
+                    // 回巢超时（300 tick ≈ 20s）：despawn + 短延迟重生，不 teleport。
+                    if (m.Mode == MonsterMode.Evade && m.EvadeStartTick.HasValue
+                        && tick - m.EvadeStartTick.Value >= MonsterBrain.ReturnTimeoutTicks)
+                    {
+                        _store.RemovePlayer(m.NpcId);
+                        _removedNpcs.Add(m.NpcId);
+                        _respawns.Add((m.TemplateId, m.PatrolCenter, tick + EvadeRespawnDelayTicks));
+                        done.Add(m.NpcId);
+                        continue;
+                    }
+
+                    if (!inHitWindow)
+                    {
+                        var ctx = new MonsterTickContext(m, entity, this, _mover, TickDeltaSeconds, tick);
+                        m.BehaviorTree?.Tick(ctx);
+                    }
+                    else
+                    {
+                        m.Moving = false; // 受击硬直：跳过行为树（ActionState 保持 Hit 不被 BT 覆盖）
+                    }
                 }
                 else
                 {
-                    m.Moving = false; // 本 tick 死亡/受击硬直：跳过行为树（ActionState 保持 Death/Hit 不被 BT 覆盖）
+                    m.Moving = false; // 本 tick 死亡：跳过行为树（ActionState 保持 Death 不被 BT 覆盖）
                 }
 
                 // 前摇到期 → 解锁（D-10：到期即恢复行为树；本 tick 的判定由 Server3C 的
@@ -263,6 +297,10 @@ namespace KcpServer.Monster
                 if (!entity.IsAlive)
                 {
                     m.DeathTick = tick;
+                    m.Mode = MonsterMode.Dead;
+                    m.Threats.Clear();
+                    m.TargetId = null;
+                    m.LastKnownTargetPosition = null;
                     m.Moving = false;
                     entity.ActionState = (byte)NpcAnimationState.Death;
                 }
@@ -274,56 +312,20 @@ namespace KcpServer.Monster
             }
         }
 
-        /// <summary>感知：视野锥内最近的存活已登录玩家（D-P5-9——目标丢失才切换；AggroTable 仇恨排名留 backlog）</summary>
-        private void DetectTarget(MonsterState m, PlayerState entity)
+        /// <summary>伤害归属（Server3C 经 CombatResolver.NpcDamaged 接线；测试可直接调）。
+        /// **无异常轻量记账**：CombatResolver 在 ApplyHit 的 Hits.Add 之前同步调用，抛异常会中断
+        /// 该次裁决剩余命中——这里只做字典查表 + 状态写入。</summary>
+        public void OnDamageTaken(long npcId, long attackerId, float damage, MonsterDamageKind kind)
         {
-            // P1 最小目标保持：绕墙追击时目标离开视野锥不能立刻丢；P2 由 ThreatTable 替换。
-            // 前摇期除外（D-10 前摇 = 承诺）：windup 沿用旧语义（仅视野锥），否则怪会追着
-            // 视野外的目标转向，破坏「丢目标 ≠ 打不中」的判定锥验收（MonsterAcceptanceTests）。
-            if (m.TargetId.HasValue && !m.AttackResolveTick.HasValue)
-            {
-                PlayerState? current = _store.GetPlayer(m.TargetId.Value);
-                if (current != null && current.IsAlive && current.IsLoggedIn
-                    && DistanceXZ(current.Position, m.Position) <= DropAggroRadius(m.Config))
-                {
-                    m.LastKnownTargetPosition = current.Position;
-                    return;
-                }
-                m.TargetId = null;
-            }
-
-            long? closestId = null;
-            Vector3? closestPos = null;
-            float closestDistSqr = float.MaxValue;
-            foreach (var p in _store.All)
-            {
-                if (p.Kind != (byte)EntityKind.Player || !p.IsAlive || !p.IsLoggedIn) continue;
-                if (!TargetDetector.CanDetect(entity.Rotation, m.Position, p.Position,
-                        m.Config.detectionRadius, m.Config.visionAngle)) continue;
-                float dx = p.Position.X - m.Position.X, dz = p.Position.Z - m.Position.Z;
-                float distSqr = dx * dx + dz * dz;
-                if (distSqr < closestDistSqr) { closestDistSqr = distSqr; closestId = p.PlayerId; closestPos = p.Position; }
-            }
-
-            if (closestId.HasValue)
-            {
-                m.TargetId = closestId;
-                m.AlertLevel = AlertLevel.HOSTILE;
-                m.LastKnownTargetPosition = closestPos;
-            }
-            else if (m.TargetId.HasValue)
-            {
-                m.TargetId = null; // 前摇期按旧语义丢失目标（保持「丢目标 ≠ 打不中」的判定锥验收）
-            }
+            if (_monsters.TryGetValue(npcId, out var state))
+                _brain.OnDamageTaken(state, attackerId, damage, kind);
         }
 
-        private static float DropAggroRadius(MonsterData config)
-            => config.detectionRadius + config.patrolRadius + 10f;
-
-        private static float DistanceXZ(Vector3 a, Vector3 b)
+        /// <summary>嘲讽 API（v1 无玩家技能，仅单测）。</summary>
+        public void Taunt(long npcId, long playerId, uint durationTicks, uint tick)
         {
-            float dx = a.X - b.X, dz = a.Z - b.Z;
-            return MathF.Sqrt(dx * dx + dz * dz);
+            if (_monsters.TryGetValue(npcId, out var state))
+                _brain.Taunt(state, playerId, durationTicks, tick);
         }
 
         /// <summary>入队攻击施法（BT Attack 动作调用；Server3C 每 tick drain 后裁决+广播——T3）</summary>
@@ -349,19 +351,23 @@ namespace KcpServer.Monster
         {
             return new BtSelector(
                 new BtSequence(
-                    new BtCondition(m => m.AlertLevel == AlertLevel.PEACE && !m.TargetId.HasValue),
+                    new BtCondition(m => m.Mode == MonsterMode.Patrol),
                     new BtAction(MonsterBtActions.Patrol)
                 ),
                 new BtSequence(
-                    // 前摇期允许目标丢失（F12）：否则"目标跑出感知半径"会让怪挥到一半改走回家
-                    new BtCondition(m => m.AlertLevel == AlertLevel.HOSTILE
-                                         && (m.TargetId.HasValue || m.AttackResolveTick.HasValue)),
-                    new BtAction(MonsterBtActions.Chase),
-                    new BtAction(MonsterBtActions.Attack)
+                    new BtCondition(m => m.Mode == MonsterMode.Combat),
+                    new BtSelector(
+                        new BtSequence(new BtAction(MonsterBtActions.Attack)),
+                        new BtSequence(
+                            new BtCondition(m => m.NeedsReposition),
+                            new BtAction(MonsterBtActions.Reposition)
+                        ),
+                        new BtAction(MonsterBtActions.Chase)
+                    )
                 ),
                 new BtSequence(
-                    new BtCondition(m => !m.TargetId.HasValue && m.AlertLevel != AlertLevel.PEACE),
-                    new BtAction(MonsterBtActions.Return)
+                    new BtCondition(m => m.Mode == MonsterMode.Evade),
+                    new BtAction(MonsterBtActions.Evade)
                 )
             );
         }

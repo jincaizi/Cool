@@ -43,6 +43,20 @@ namespace KcpServer.Monster
         public bool HasPath => _path != null;
         public int WaypointIndex => _index;
 
+        /// <summary>清空跟随状态（进入 Evade / 到家重置时用，强制下一 tick 重寻）。</summary>
+        public void Reset()
+        {
+            _path = null;
+            _index = 0;
+            _goal = default;
+            _nextRepathTick = 0;
+            _nextGoalRepathTick = 0;
+            _nextAttemptTick = 0;
+            _stuckCheckPosition = default;
+            _stuckCheckTick = 0;
+            _stuckWindows = 0;
+        }
+
         /// <summary>推进路点跟随。返回本 tick 是否**实际**移动（ORCA 清零/无路可走/预算拒绝 → false）。
         /// 有导航但查询失败/退避/预算拒绝时**停住**，绝不回退直线穿地形；只有 `_navigation == null`
         /// 才保留旧的直线 MoveTo（未配置导航的宿主/`--no-nav` 负对照）。</summary>

@@ -23,7 +23,7 @@ public class PathFollowerTests
             attackRange = 1.5f,
             patrolRadius = 5f
         };
-        var monster = new MonsterState(npcId, 1, config, 50001)
+        var monster = new MonsterState(npcId, 1, config)
         {
             Position = new Vector3(1f, 0f, 1f),
             SpawnPosition = new Vector3(1f, 0f, 1f),

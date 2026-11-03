@@ -145,7 +145,7 @@ public class DemoDayNavBinTests
             attackRange = 2.5f,
             patrolRadius = 12f
         };
-        var monster = new MonsterState(15, 4, config, 50004)
+        var monster = new MonsterState(15, 4, config)
         {
             Position = Spawns[5],
             SpawnPosition = Spawns[5],

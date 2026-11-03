@@ -2,11 +2,24 @@ using KcpServer.Config;
 
 namespace KcpServer.Monster
 {
+    public enum MonsterMode
+    {
+        Patrol = 0,
+        Combat = 1,
+        Evade = 2,
+        Dead = 3
+    }
+
+    public enum MonsterDamageKind
+    {
+        Direct = 0,
+        Dot = 1
+    }
+
     /// <summary>
-    /// P5 怪物运行时 AI 状态（主循环线程独占，R2）——与 EntityStore.PlayerState 配对：
-    /// 位置/HP/冷却权威在 PlayerState；AI 决策状态（黑板/巡逻/仇恨/生死计时）在此。
-    /// 移植自旧 Server/AI（AiBlackboard + AiComponent 合并；删线程/网络/技能层——
-    /// 攻击冷却走 PlayerState.IsCastReady，技能数据走 CombatRules）。
+    /// 怪物运行时 AI 状态（主循环线程独占，R2）——与 EntityStore.PlayerState 配对：
+    /// 位置/HP/冷却权威在 PlayerState；AI 决策状态（模式/巡逻/仇恨/生死计时）在此。
+    /// P2：模式 = Patrol | Combat | Evade | Dead（替换旧 AlertLevel）。
     /// </summary>
     public sealed class MonsterState
     {
@@ -14,8 +27,9 @@ namespace KcpServer.Monster
         public int TemplateId { get; }
         public MonsterData Config { get; }
 
-        // 黑板（旧 AiBlackboard 语义）
-        public AlertLevel AlertLevel { get; set; } = AlertLevel.PEACE;
+        public MonsterMode Mode { get; set; } = MonsterMode.Patrol;
+        public ThreatTable Threats { get; } = new ThreatTable();
+
         public long? TargetId { get; set; }
         public Vector3 SpawnPosition { get; set; }
         public Vector3 PatrolCenter { get; set; }
@@ -23,7 +37,22 @@ namespace KcpServer.Monster
         public int CurrentPatrolIndex { get; set; }
         public Vector3? LastKnownTargetPosition { get; set; }
 
-        /// <summary>P1：路点跟随器（恒非 null；无导航时内部回退直线 MoveTo）</summary>
+        // 目标丢失/脱战计时（P2 模式机）
+        public uint? NoValidTargetSinceTick { get; set; }
+        public uint? EvadeStartTick { get; set; }
+        public uint PostEvadeGraceUntilTick { get; set; }
+        public long? TauntTargetId { get; set; }
+        public uint TauntUntilTick { get; set; }
+        public bool NeedsReposition { get; set; }
+
+        public bool IsTauntActive(uint tick)
+            => TauntTargetId.HasValue && tick < TauntUntilTick;
+
+        /// <summary>配置里第一条技能（测试/兼容用；生产选择走 SkillSelector）。</summary>
+        public int PrimarySkillId
+            => Config.skills.Count > 0 ? Config.skills[0].skillId : 0;
+
+        /// <summary>路点跟随器（恒非 null；无导航时内部回退直线 MoveTo）</summary>
         public PathFollower? Follower { get; set; }
 
         // tick 内暂存位置/朝向（BT/移动系统写，模块 tick 末尾 flush 到 PlayerState）
@@ -35,9 +64,6 @@ namespace KcpServer.Monster
         /// 单位是**每 tick 位移**不是 m/s：解算器与各移动系统统一在这个单位里工作，
         /// 好处是无邻居时解出的期望位移可以原样积分（逐位不变）。</summary>
         public Vector3 CurrentVelocity;
-
-        // 攻击技能 id（模板映射：1→50001，2→50002；D-P5-2）
-        public int AttackSkillId { get; }
 
         /// <summary>前摇到期 tick（决策 tick + CombatRules.HitDelayTicks）——HasValue 表示
         /// **前摇中**：站定、朝目标转向、锁住行为树（D-10 前摇 = 承诺）。由模块在到期 tick 自清理。</summary>
@@ -55,26 +81,11 @@ namespace KcpServer.Monster
         /// <summary>行为树根（Spawn 时装配）</summary>
         public BtNode? BehaviorTree { get; set; }
 
-        public MonsterState(long npcId, int templateId, MonsterData config, int attackSkillId)
+        public MonsterState(long npcId, int templateId, MonsterData config)
         {
             NpcId = npcId;
             TemplateId = templateId;
             Config = config;
-            AttackSkillId = attackSkillId;
         }
-
-        /// <summary>P2 兼容重载（任务 3 临时）：首个模板技能充当主攻击；任务 5 接线多技能后取代。</summary>
-        public MonsterState(long npcId, int templateId, MonsterData config)
-            : this(npcId, templateId, config,
-                   config.skills.Count > 0 ? config.skills[0].skillId : 0)
-        {
-        }
-    }
-
-    /// <summary>警报等级（旧 Server/AI 移植；HOSTILE 只在获取目标时置位，Return 完成回 PEACE）</summary>
-    public enum AlertLevel
-    {
-        PEACE = 0,
-        HOSTILE = 1
     }
 }

@@ -85,6 +85,12 @@ namespace KcpServer
                 avoidance: _avoidance, navigation: navigation);
             _monsterModule.SpawnDefaultLayout(count);
 
+            // P2 伤害归属（spec §5.2）：玩家命中 NPC 时把实际伤害记进该怪物的仇恨表。
+            // 无条件接线（与 LOS 无关）——CombatResolver 已在 ApplyHit 里只对 NPC 目标触发。
+            MonsterModule damageModule = _monsterModule;
+            _castHandler.SetNpcDamageObserver((npcId, attackerId, damage) =>
+                damageModule.OnDamageTaken(npcId, attackerId, damage, MonsterDamageKind.Direct));
+
             // 判定帧 LOS（spec §4.5）：怪物起手后玩家躲墙 → 这一刀不结算。
             // 半径取施法怪物模板（Boss 1.74 的 LOS 采样范围更大）；无导航宿主保持 null（旧语义）。
             if (navigation != null)

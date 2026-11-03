@@ -14,8 +14,8 @@ namespace KcpServer.Tests;
 /// 「判定时刻 = 动画判定帧」（2026-10-16 改造）的**自动化验收**——把原先只能靠肉眼估算的
 /// 角度/距离/时间变成断言里的数字。三条：
 ///   ① 前摇期致死 → 这一刀作废（判定帧复查施法者存活，CombatResolver 的 D-4）；
-///   ② 丢目标 ≠ 打不中：怪物视野半角 45° 与判定半角 60° 之间那条带子里，TargetId 已被清空、
-///      这一刀照样落地（**这是本轮的设计真相**，用两个静态角度钉死）；
+///   ② 判定帧夹角 ≠ 判定锥：P2 起目标不再因离开视野锥丢失（威胁表持续跟踪），
+///      命中与否只由判定帧夹角与判定锥决定，用两个静态角度钉死；
 ///   ③ 贴脸绕圈空挥 / 拉开一点绕圈命中：判定帧上"玩家相对怪物转过的角度"与 60° 判定半角的分界
 ///      （头号功能的可验证形式）。
 ///
@@ -169,19 +169,21 @@ public class MonsterAcceptanceTests
     // ---------- A2：丢目标 ≠ 打不中（静态角度） ----------
 
     /// <summary>
-    /// 两个静态角度钉死"视野锥 ≠ 判定锥"这条带子（Wolf：visionAngle **90** → 视野半角 45°；
-    /// 挥击判定锥恒 120 → 判定半角 60°）：
-    ///   · 偏轴 55°：出视野锥（目标丢失、TargetId 清空）但仍在判定锥内 ⇒ **这一刀照样落地**；
-    ///   · 偏轴 65°：出判定锥 ⇒ 纯空挥。
+    /// 两个静态角度钉死"判定帧夹角 ≠ 判定锥"（Wolf：visionAngle **90** → 视野半角 45°；
+    /// 挥击判定锥恒 120 → 判定半角 60°）。P2 起目标离开视野锥**不再丢失**：威胁表持续跟踪，
+    /// 前摇期 LastKnownTargetPosition 每 tick 从目标实体刷新，Wolf 以 90°/s 转向 6 tick ≈ 35.6°：
+    ///   · 偏轴 55°：转向后夹角只剩 ~19°（< 60°）⇒ **命中**；
+    ///   · 偏轴 110°：转向后仍剩 ~74°（> 60°）⇒ 纯空挥。
+    /// **别把 110° 改回 65°**：65° 在 P2 转向 35.6° 后只剩 ~29°，会被判定锥命中，不再是空挥
+    ///（P1 的目标丢失语义下令怪朝向冻结，65° 才落在锥外）。
     /// 玩家**只在决策之后搬一次**（决策必须发生在原点——怪要先拿到目标才会有前摇），此后不再动，
-    /// 让前摇期"朝最后已知目标位置 90°/s 转向"成为唯一变量（本例中该转向恰好是零：最后已知位置
-    /// 就在怪的正前方，故怪的朝向冻结在决策那一刻）。
+    /// 让前摇期"朝最后已知目标位置 90°/s 转向"成为唯一变量。
     /// 距离恒 1.5m ≤ attackRange 2.0 ⇒ 差异只能来自锥角，不可能来自射程。
     /// </summary>
     [Theory]
-    [InlineData(55f, true)]   // 视野半角 45 < 55 < 判定半角 60：目标丢失，但这一刀落地（设计真相）
-    [InlineData(65f, false)]  // > 判定半角 60：空挥
-    public void Lost_Target_Still_Hits_When_Inside_The_Judgment_Cone(float offAxisDegrees, bool expectHit)
+    [InlineData(55f, true)]   // 转向后 ~19° < 判定半角 60°：命中
+    [InlineData(110f, false)] // 转向后 ~74° > 判定半角 60°：空挥（65° 会被转向拉进锥内，勿改）
+    public void OffAxis_Target_Is_Not_Lost_But_Attack_Still_Uses_Judgment_Cone(float offAxisDegrees, bool expectHit)
     {
         var (store, module) = Create();
         long wolfId = module.SpawnMonster(2, new Vector3(0f, 0f, 1.5f), new Vector3(0f, 0f, 1.5f));
@@ -222,8 +224,9 @@ public class MonsterAcceptanceTests
         Assert.True(expectHit == (hit != null),
             $"{numbers}——期望{(expectHit ? "命中" : "空挥")}，实得{(hit != null ? $"命中 {hit.Damage}" : "空挥")}");
         Assert.True(expectHit == (finalAngle <= halfAngle), $"{numbers}——夹角与判定半角的关系与结果不一致");
-        // ② 与此同时目标已被清空：55° 那一格正是"怪丢了目标，这一刀照样落地"
-        Assert.Null(state.TargetId);
+        // ② 目标仍在威胁表内并持续跟踪——命中与否只由判定帧夹角与判定锥决定，
+        //    不再依赖"离开视野锥就清 TargetId"的旧语义。
+        Assert.Equal(1L, state.TargetId);
         // 距离落在射程内 ⇒ 空挥只可能来自锥角（排除"跑出射程"这个错误原因）
         Assert.True(finalDistance <= config.attackRange + 0.01f,
             $"{numbers}——距离必须在 attackRange 内，否则空挥的成因是射程而不是锥角");

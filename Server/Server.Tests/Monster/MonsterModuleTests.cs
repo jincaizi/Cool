@@ -112,7 +112,7 @@ public class MonsterModuleTests
     }
 
     [Fact]
-    public void Target_Lost_Triggers_Return_To_Spawn_And_Peace_Reset()
+    public void Target_Lost_After_Grace_Returns_To_Spawn_And_Resets_To_Patrol()
     {
         var (store, module) = Create();
         // Wolf[0] (-30,0,0) 面向原点——玩家在其前方 10m（检测 15m ≥ 10m）：开局即仇恨
@@ -121,22 +121,28 @@ public class MonsterModuleTests
         var wolf = store.GetPlayer(wolfId)!;
 
         for (uint t = 0; t < 200; t++) module.Tick(t);
-        Assert.Equal(AlertLevel.HOSTILE, module.GetState(wolfId)!.AlertLevel); // 前置：已获取仇恨
+        Assert.Equal(MonsterMode.Combat, module.GetState(wolfId)!.Mode); // 前置：已获取仇恨
         Assert.True(Vector3.Distance(wolf.Position, new Vector3(-20f, 0f, 0f)) <= 2.5f,
             "前置：狼应已追至攻击距离");
 
-        store.RemovePlayer(1); // 目标消失（离场/死亡移除——DetectTarget 目标丢失路径）
+        store.RemovePlayer(1); // 目标消失（离场/死亡移除——ThreatTable 清理 + 丢失 grace）
 
-        bool returnedToPeace = false;
-        for (uint t = 200; t < 400 && !returnedToPeace; t++)
+        bool returnedToPatrol = false;
+        // P2：45 tick 目标丢失 grace + 回程（8m @3.5m/s ≈ 35 tick）——上限 600 留足余量
+        for (uint t = 200; t < 600 && !returnedToPatrol; t++)
         {
             module.Tick(t);
-            returnedToPeace = module.GetState(wolfId)!.AlertLevel == AlertLevel.PEACE;
+            returnedToPatrol = module.GetState(wolfId)!.Mode == MonsterMode.Patrol;
         }
 
-        Assert.True(returnedToPeace, "wolf should walk back to spawn and reset to PEACE after target loss");
+        Assert.True(returnedToPatrol, "wolf should walk back to spawn and reset to Patrol after target loss");
+        // 到家判定在 tick 开头的模式机（≤0.5m）；同一 tick 行为树已切到 Patrol，可能朝第一个巡逻点
+        // 再走一步——阈值放宽一个 tick 的行程（P1 的 Return 在到点 tick 不移动，P2 Patrol 立即起步）。
+        var config = ConfigLoader.LoadMonsterTemplates(
+            System.IO.Path.Combine(System.AppContext.BaseDirectory, "Config", "monster_config.json"))[2];
         float distToSpawn = Vector3.Distance(wolf.Position, new Vector3(-30f, 0f, 0f));
-        Assert.True(distToSpawn <= 0.5f, $"wolf should be back at spawn, dist={distToSpawn}");
+        Assert.True(distToSpawn <= 0.5f + config.moveSpeed * MonsterModule.TickDeltaSeconds,
+            $"wolf should be back at spawn, dist={distToSpawn}");
     }
 
     [Fact]

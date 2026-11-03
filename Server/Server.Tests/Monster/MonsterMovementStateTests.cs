@@ -24,9 +24,10 @@ public class MonsterMovementStateTests
             detectionRadius = 8f,
             visionAngle = 120f,
             attackRange = 1.5f,
-            patrolRadius = 5f
+            patrolRadius = 5f,
+            skills = { new MonsterSkillConfig { skillId = 50001, maxRange = 1.5f } }
         };
-        return new MonsterState(1, 1, config, 50001) { Position = position, SpawnPosition = position };
+        return new MonsterState(1, 1, config) { Position = position, SpawnPosition = position };
     }
 
     [Fact]
@@ -80,7 +81,7 @@ public class MonsterMovementStateTests
         state.TargetId = 1L;
         state.LastKnownTargetPosition = state.Position + new Vector3(0f, 0f, 1f);
         state.Moving = true;
-        entity.RecordCast(state.AttackSkillId, 100); // 冷却中
+        entity.RecordCast(state.PrimarySkillId, 100); // 冷却中
 
         var ctx = new MonsterTickContext(state, entity, module, new SimpleMoveSystem(), 0.066f, 100);
         BtStatus status = MonsterBtActions.Attack(ctx);
@@ -106,7 +107,7 @@ public class MonsterMovementStateTests
         player.UpdatePosition(new Vector3(1f, 0f, 2.5f), 0f, 0f, 1L, 0U); // 攻击距离内
 
         // 预置冷却：Attack 决策走"冷却门"，本 tick 原地等；模块 flush 必须写 Speed=0。
-        entity.RecordCast(module.GetState(id)!.AttackSkillId, 0);
+        entity.RecordCast(module.GetState(id)!.PrimarySkillId, 0);
         module.Tick(0);
 
         Assert.False(module.GetState(id)!.Moving);
