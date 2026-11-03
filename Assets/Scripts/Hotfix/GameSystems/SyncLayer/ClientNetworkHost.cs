@@ -361,8 +361,10 @@ namespace Hotfix.GameSystems.SyncLayer
             _resolvedHost = resolvedHost;
             _resolvedPort = resolvedPort;
 
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             // WebGL 无 System.Net.Sockets —— 走浏览器 WebSocket
+            // Editor 即使在 WebGL target 下也不走浏览器 jslib（__Internal 在 Editor 不存在），
+            // 否则 Play Mode 会 EntryPointNotFoundException；见下方 #else。
             _adapter = new WebSocketNet.WebSocketClientAdapter(
                 new WebSocketNet.WebGLWebSocketChannel());
 #else
