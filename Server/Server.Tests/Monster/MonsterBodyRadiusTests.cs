@@ -97,6 +97,27 @@ public class MonsterBodyRadiusTests
     }
 
     /// <summary>
+    /// 生产接线回归：`SpawnMonster` 必须把归一后的 `config.bodyRadius` 真正**传给 `AddNpc`**
+    /// （`EntityStore` 上的实体半径是战斗裁决 `BuildCandidates` 的唯一来源）。
+    /// 只钉 `GetState`/`RadiusOfTemplate` 抓不住这处——删掉 `AddNpc(..., config.bodyRadius)`
+    /// 的实参后它们仍全绿，而线上实体半径静默回退 0、大体型命中失效。
+    /// </summary>
+    [Theory]
+    [InlineData(1, 0.5f)]
+    [InlineData(2, 0.5f)]
+    [InlineData(3, 0.88f)]
+    [InlineData(4, 1.74f)]
+    public void Spawned_Monster_Entity_Carries_Body_Radius(int templateId, float expected)
+    {
+        var store = new EntityStore();
+        long seed = MonsterModule.NpcIdSeed;
+        var module = new MonsterModule(store, () => ++seed);
+        long npcId = module.SpawnMonster(templateId, new Vector3(5f, 0f, 5f), new Vector3(5f, 0f, 5f));
+
+        Assert.Equal(expected, store.GetPlayer(npcId)!.BodyRadius, 0.001f);
+    }
+
+    /// <summary>
     /// 兜底必须**落到配置对象上**（装配时归一）：非法值（0）时自身半径与邻居侧查表都要是 0.5。
     /// 只覆盖"合法值"是钉不住归一的——两条路径本来就同值；这里用一份临时的坏 json
     /// （bodyRadius 缺失 ⇒ 反序列化落 0）把"自身 0 / 邻居 0.5"的不对称逼出来
