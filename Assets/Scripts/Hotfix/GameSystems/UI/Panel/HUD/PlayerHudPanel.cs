@@ -20,6 +20,7 @@ namespace Hotfix.GameSystems.UI
         [SerializeField] private TMP_Text _mpOverlay;
         [SerializeField] private Transform _buffContainer;
         [SerializeField] private GameObject _buffIconPrefab;
+        [SerializeField] private TMP_Text _netStatsText;
 
         private IPlayerStatsProvider _provider;
         private readonly List<GameObject> _activeBuffIcons = new();
@@ -52,6 +53,18 @@ namespace Hotfix.GameSystems.UI
                 _provider = null;
             }
             ClearBuffIcons();
+        }
+
+        /// <summary>联网读数（FPS + RTT）；null/空串 = 隐藏。与 Bind 的玩家属性数据源无关。</summary>
+        public void SetNetStats(string? text)
+        {
+            if (_netStatsText == null) return;
+
+            bool show = !string.IsNullOrEmpty(text);
+            if (_netStatsText.gameObject.activeSelf != show)
+                _netStatsText.gameObject.SetActive(show);
+            if (show)
+                _netStatsText.text = text;
         }
 
         private void UpdateHP(float percent, int current, int max)
