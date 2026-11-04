@@ -13,6 +13,7 @@
 | 文件 | 作用 |
 |---|---|
 | `ClientNetworkHost.cs` | 唯一接线入口；联网时禁用本地 `MonsterSpawner` |
+| `LatencyProbe.cs` | 应用层 RTT 探针（Heartbeat 1Hz 往返 + EMA；3 秒无回包显示 `--`） |
 | `ClientNetworkManager.cs` | 连接 / 登录 / 进世界 / 断线重连 |
 | `MessageDispatcher.cs` | 协议消息分发 |
 | `ClockSyncDriver.cs` | 时钟同步驱动（算法在 `SyncCore`） |
@@ -32,6 +33,15 @@
 | `NpcBodyCollider.cs` | 客户端玩家 vs 怪物阻挡 |
 | `NpcAttackSchedule.cs` | NPC 攻击节奏 |
 | `NetworkModeService.cs` / `ServerAddressQuery.cs` | 网络模式与服务器地址 |
+
+## 联网 HUD 读数（FPS + 延迟）
+
+- 仅联网进世界后显示；`ClientNetworkHost` 每 0.5 秒把 `FPS xx  延迟 xxms` 推给
+  `PlayerHudPanel.SetNetStats`，断线 / 回选人时置空隐藏。单机默认不显示。
+- 延迟 = `LatencyProbe` 的平滑 RTT：每 1 秒发一条 `Heartbeat`（服务端原样回显），
+  按 `Sequence` 匹配；回包到达时刻在回调线程用 `Stopwatch` 采样，避免把等待下一帧算进 RTT。
+  3 秒无匹配回包显示 `延迟 --`。
+- 左下角调试浮层保留原有 `FPS=` 与分档读数（任务 10 实测口径不变）。
 
 ## 远端实体表现
 
