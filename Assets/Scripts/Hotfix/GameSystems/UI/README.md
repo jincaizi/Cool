@@ -33,7 +33,7 @@ HUD 联网读数：`PlayerHudPanel` 在 HP/MP 与 buff 行下方预留 `NetStats
 
 Editor：`UIManagerRegistrationTests`、`UIManagerLayerCanvasTests`、`UIPanelLifecycleTests`、`UIPanelContractTests`、
 `UIPanelRegistryTests`、`UILayerTableTests`、`UISceneContentTests`、`ReadinessGateTests`。
-PlayMode：`UIBootstrapTests`、`HudLifecycleTests`、`CharacterSelectPanelReopenTests`、`PlayerHudBindingTests`。
+PlayMode：`UIBootstrapTests`、`HudLifecycleTests`、`CharacterSelectPanelReopenTests`、`PlayerHudBindingTests`、`PlayerHudNetStatsTests`。
 
 ```bash
 bash tools/unity-tests.sh EditMode UIManagerRegistrationTests

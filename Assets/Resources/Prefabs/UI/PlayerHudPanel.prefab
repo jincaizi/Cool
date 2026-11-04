@@ -820,7 +820,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: FPS 60  PING 23ms
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c240252520313ba48a1e082bbb79faa0, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 66e5411aa32ef2c48ad43455ad285142, type: 2}

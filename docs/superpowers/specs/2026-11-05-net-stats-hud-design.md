@@ -111,9 +111,9 @@ public int? RttMs => _latencyProbe.RttMs;
 
 - 维护 0.5 秒窗口：`_fpsWindowSeconds += Time.unscaledDeltaTime`、`_fpsFrames++`；窗口 ≥ 0.5s 时 `fps = Mathf.RoundToInt(_fpsFrames / _fpsWindowSeconds)`，然后清零。
 - 每 0.5 秒推送一次文本（TMP 每帧赋值会触发网格重建，2Hz 足够）。进入世界后第一次推送发生在第一个 0.5 秒窗口完成时，因此读数在进世界后约 0.5 秒出现。
-- 仅在 `_manager != null && _inWorld` 时显示；否则调用一次 `HideNetStats()`。
+- 仅在 `_manager != null && _inWorld && !_pendingReturnToMenu`（`ShouldShowNetStats`）时显示；否则调用一次 `HideNetStats()`。
 - HUD 面板懒获取并缓存：`UIManager.Instance?.GetPanel<PlayerHudPanel>()`；未就绪时静默跳过（与 `TargetPanel` 的现有用法一致）。
-- 断线 / 回选人 / 宿主销毁：`HideNetStats()`（`HandleDisconnected`、`Disconnect`、`OnDestroy`）。
+- 断线 / 回选人 / 宿主销毁：`Disconnect()`、`OnDestroy()` 直接隐藏；`HandleDisconnected` 只置 `_pendingReturnToMenu`，由下一次 Update 的 `ShouldShowNetStats` 早退隐藏（最多一帧）。
 - 重新进入世界时重新开始统计窗口，不沿用上次会话的 FPS。
 
 格式化抽成纯函数，供 EditMode 测试钉住：
@@ -164,9 +164,9 @@ public void SetNetStats(string? text)
 | 回包丢失 | 下一条继续探测；3 秒无匹配回包后显示 `延迟 --` |
 | 迟到/重复回包 | `Sequence` 不匹配，丢弃 |
 | 断线 / 连接失败 | 管理器回到 Disconnected，宿主隐藏文本并走既有返回选人流程 |
-| HUD 面板尚未加载 | 静默跳过，下一帧重试 |
+| HUD 面板尚未加载 | 静默跳过，下一推送周期（0.5s）重试 |
 | `Time.timeScale = 0`（打击停顿） | 探针使用 `Stopwatch`，节拍与 RTT 都不受影响 |
-| 服务端本地回环 | 应用层 RTT 含服务端约 66ms tick，常见约 60–130ms，属正常（不是纯网络 RTT） |
+| 服务端本地回环 | 应用层 RTT 含服务端约 66ms tick，实测约 0–130ms，属正常（不是纯网络 RTT） |
 
 ## 5. 测试
 
@@ -200,6 +200,7 @@ public void SetNetStats(string? text)
 13. `test_player_hud_set_net_stats_null_hides_text` —— `SetNetStats(null)` 后对象 inactive。
 14. `test_player_hud_net_stats_text_is_wired` —— 反射取 `_netStatsText` 断言非 null，预制体改坏时当场报红。
 15. `test_player_hud_net_stats_uses_tmp_underlay_shadow` —— 断言 `_netStatsText.fontSharedMaterial.IsKeywordEnabled("UNDERLAY_ON")`；这个 bug 曾因关键字未启用而让 underlay 属性全部失效，必须有能抓住它的回归测试。
+16. `test_net_stats_visibility_guard_covers_each_condition` —— 纯函数 `ShouldShowNetStats`：联网进世界且不在回菜单途中才显示；缺 `_pendingReturnToMenu` 判定时该测试会红。
 
 ## 6. 验收
 

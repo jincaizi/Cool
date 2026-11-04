@@ -20,5 +20,19 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         {
             Assert.AreEqual("FPS 60  延迟 --", ClientNetworkHost.FormatNetStats(60, null));
         }
+
+        [Test]
+        public void test_net_stats_visibility_guard_covers_each_condition()
+        {
+            Assert.IsTrue(ClientNetworkHost.ShouldShowNetStats(true, true, false),
+                "联网进世界、且不在回菜单途中时必须显示");
+
+            Assert.IsFalse(ClientNetworkHost.ShouldShowNetStats(true, true, true),
+                "断线回菜单途中不得显示——c5e2d04 修的就是这个分支");
+            Assert.IsFalse(ClientNetworkHost.ShouldShowNetStats(false, true, false),
+                "单机（无 manager）不显示");
+            Assert.IsFalse(ClientNetworkHost.ShouldShowNetStats(true, false, false),
+                "未进世界不显示");
+        }
     }
 }

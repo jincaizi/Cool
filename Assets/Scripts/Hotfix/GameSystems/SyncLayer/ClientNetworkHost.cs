@@ -425,7 +425,6 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             Debug.LogWarning("[NetHost] 断线: " + reason);
             OnDisconnected?.Invoke(reason);
-            HideNetStats();
             ShowStatus("与服务器断开：" + reason + "，即将返回主界面");
             _pendingReturnToMenu = true;
         }
@@ -585,13 +584,17 @@ namespace Hotfix.GameSystems.SyncLayer
             return tiers + $"Q={qualityLevel}  FPS={fps:F0}";
         }
 
+        /// <summary>联网 HUD 读数的显示条件。抽成纯函数供单测钉住回菜单/单机/未进世界三个早退。</summary>
+        internal static bool ShouldShowNetStats(bool hasManager, bool inWorld, bool pendingReturnToMenu)
+            => hasManager && inWorld && !pendingReturnToMenu;
+
         /// <summary>
         /// 联网 HUD 读数：0.5 秒窗口算 FPS，每 0.5 秒推一次文本（TMP 每帧赋值会触发网格重建）。
         /// 未进世界/单机/回菜单途中一律隐藏。HUD 面板懒获取并缓存，UIManager 未就绪时静默跳过。
         /// </summary>
         private void UpdateNetStats(float unscaledDeltaSeconds)
         {
-            if (_manager == null || !_inWorld || _pendingReturnToMenu)
+            if (!ShouldShowNetStats(_manager != null, _inWorld, _pendingReturnToMenu))
             {
                 HideNetStats();
                 return;

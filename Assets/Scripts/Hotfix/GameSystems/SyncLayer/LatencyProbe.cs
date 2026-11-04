@@ -15,6 +15,7 @@ namespace Hotfix.GameSystems.SyncLayer
     ///
     /// 时钟：默认 Stopwatch（单调、线程安全、不受 Time.timeScale 影响——打击停顿会把 timeScale 设为 0）。
     /// 测试注入假时钟。
+    /// 依赖传输层把 Heartbeat 上抛到 INetworkClient.MessageReceived；KCP 客户端在内部消费 Heartbeat，接 KCP 时 RttMs 恒为 null。
     /// </summary>
     internal sealed class LatencyProbe
     {
