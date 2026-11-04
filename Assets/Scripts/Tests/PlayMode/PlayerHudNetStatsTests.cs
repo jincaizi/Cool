@@ -60,6 +60,15 @@ namespace GameSys.PlayModeTests
             Assert.IsFalse(text.gameObject.activeSelf, "null 必须隐藏读数（断线/回选人路径）");
         }
 
+        [Test]
+        public void test_player_hud_net_stats_uses_tmp_underlay_shadow()
+        {
+            var text = GetNetStatsText();
+            Assert.IsNotNull(text.fontSharedMaterial, "NetStatsText 必须有独立材质");
+            Assert.IsTrue(text.fontSharedMaterial.IsKeywordEnabled("UNDERLAY_ON"),
+                "underlay 阴影依赖 UNDERLAY_ON 关键字；未启用时 shader 的 underlay 分支被编译掉");
+        }
+
         private TMP_Text GetNetStatsText()
         {
             var field = typeof(PlayerHudPanel).GetField(
