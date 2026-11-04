@@ -223,4 +223,32 @@ public class MonsterNavigationTests
         for (uint t = 0; t < 60; t++) module.Tick(t);
         Assert.NotEqual(start, entity.Position);
     }
+
+    [Fact]
+    public void Big_Boss_Attacks_At_Point_Blank_When_Body_Clearance_Is_Too_Small()
+    {
+        // 2×2 空洞；玩家站在东边缘外 1m（clearance≈1.0），蜘蛛在 2.4m 外。
+        NavMeshGraph graph = NavMeshFixture.Grid(20, 20,
+            (x, z) => !(x >= 8 && x < 10 && z >= 8 && z < 10));
+        var nav = new NavigationService(graph, "test");
+        var store = new EntityStore();
+        long seed = MonsterModule.NpcIdSeed;
+        var module = new MonsterModule(store, () => ++seed, navigation: nav);
+        long bossId = module.SpawnMonster(4, new Vector3(13.4f, 0f, 9f), new Vector3(13.4f, 0f, 9f));
+
+        var player = store.AddPlayer(1, "P1");
+        player.IsLoggedIn = true;
+        player.UpdatePosition(new Vector3(11f, 0f, 9f), 0f, 0f, 1L, 0U);
+
+        bool sawBossAttack = false;
+        for (uint t = 0; t < 10; t++)
+        {
+            module.Tick(t);
+            foreach (var (_, request) in module.DrainPendingCasts())
+                if (request.SkillId == 50004) sawBossAttack = true;
+        }
+
+        Assert.True(sawBossAttack,
+            "贴脸低 clearance 时蜘蛛应起手 50004（旧 1.74m LOS 会退化成 Chase 推人）");
+    }
 }

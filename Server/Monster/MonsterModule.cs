@@ -184,10 +184,6 @@ namespace KcpServer.Monster
             }
         }
 
-        /// <summary>怪物模板身体半径（战斗判定帧 LOS 用；查询不到时退回默认半径）。</summary>
-        public float BodyRadiusOf(long npcId)
-            => _monsters.TryGetValue(npcId, out var s) ? s.Config.bodyRadius : AvoidanceSystem.DefaultMonsterRadius;
-
         /// <summary>推进一 tick（服务器主循环每 tick 调用——先于施法裁决 drain 与快照广播）</summary>
         public void Tick(uint tick)
         {

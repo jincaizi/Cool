@@ -92,12 +92,11 @@ namespace KcpServer
                 damageModule.OnDamageTaken(npcId, attackerId, damage, MonsterDamageKind.Direct));
 
             // 判定帧 LOS（spec §4.5）：怪物起手后玩家躲墙 → 这一刀不结算。
-            // 半径取施法怪物模板（Boss 1.74 的 LOS 采样范围更大）；无导航宿主保持 null（旧语义）。
+            // 2026-11-04：攻击视线与身体体型解耦，统一用 0.25m 武器探针；无导航宿主保持 null（旧语义）。
             if (navigation != null)
             {
-                MonsterModule module = _monsterModule;
                 _castHandler.SetNpcLineOfSight((npcId, from, to) =>
-                    navigation.HasLineOfSight(from, to, module.BodyRadiusOf(npcId)));
+                    AttackLineOfSight.HasLineOfSight(navigation, from, to));
             }
         }
 

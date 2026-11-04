@@ -66,7 +66,7 @@ namespace KcpServer.Monster
             float targetDistance = DistanceXZ(m.Position, target);
             bool inRange = SkillSelector.IsWithinAnySkillRange(m, ctx.Entity, targetDistance);
             if (inRange && (m.Follower == null
-                || m.Follower.HasLineOfSight(m.Position, target, m.Config.bodyRadius)))
+                || m.Follower.HasAttackLineOfSight(m.Position, target)))
                 return BtStatus.Success;
 
             float moved = m.Follower != null
@@ -96,7 +96,7 @@ namespace KcpServer.Monster
             float distance = DistanceXZ(m.Position, target);
             if (!SkillSelector.IsWithinAnySkillRange(m, entity, distance)) return BtStatus.Failure;
 
-            if (m.Follower != null && !m.Follower.HasLineOfSight(m.Position, target, m.Config.bodyRadius))
+            if (m.Follower != null && !m.Follower.HasAttackLineOfSight(m.Position, target))
             {
                 m.Moving = false;
                 entity.ActionState = (byte)NpcAnimationState.Idle;

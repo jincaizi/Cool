@@ -32,6 +32,10 @@ namespace KcpServer.Monster
         public bool HasLineOfSight(Vector3 from, Vector3 to, float bodyRadius)
             => _navigation == null || _navigation.HasLineOfSight(from, to, bodyRadius);
 
+        /// <summary>攻击视线：0.25m 探针；无导航恒 true。</summary>
+        public bool HasAttackLineOfSight(Vector3 from, Vector3 to)
+            => _navigation == null || AttackLineOfSight.HasLineOfSight(_navigation, from, to);
+
         /// <summary>停步判定用 navmesh 投影点；无导航时原样返回。</summary>
         public bool TryProject(Vector3 point, out Vector3 projected)
         {
