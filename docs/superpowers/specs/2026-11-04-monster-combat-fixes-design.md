@@ -126,7 +126,10 @@ public static class AttackLineOfSight
 **语义**
 
 - 攻击视线表达“武器到目标之间没有 navmesh 空洞”，用 0.25m 探测半径，不再要求整条线容得下 1.74m 的身体。
-- 目标点先投影到 navmesh（2m 容差），解决玩家站在网格外永远“挥不到”的已知限制。
+- 0.25m 小于 navmesh 烘焙的 0.5m agent 半径：它只回答“武器线有没有洞”，不保证身体能站在线上；
+  身体位置仍由寻路保证。
+- 目标点先投影到 navmesh（2m 容差），解决玩家站在网格外永远“挥不到”的已知限制；
+  这是启发式，目标离网格 >2m 时退回原点判定（仍可能失败，不新增物理 LOS）。
 - 墙 / 岩石仍会在 navmesh 空洞采样处被拦住；`Monster_Does_Not_Attack_Through_Wall` 保持绿。
 
 **验收**
@@ -146,6 +149,10 @@ public static class AttackLineOfSight
   - `entity == null || !entity.IsAlive` → 丢弃；
   - 与自身的平方距离 > `leaveRange²` → 丢弃。
   丢弃后清空两个字段并重新走 `PhysicsRegistry.FindNearby` 索敌。
+- **Unity 伪 null 顺序**：`target == null` 必须最先判断。`IDamageable` 是接口引用，不参与
+  UnityEngine.Object 的伪 null 重载；对象销毁后接口引用仍非 null，先解引用 `entity.IsAlive`
+  有 `MissingReferenceException` 风险。`ShouldDropTarget` 内部顺序固定为：Transform 销毁检查
+  → 实体存活检查 → 距离检查。
 - `MonsterAttackState.ResolveDamage` 在 `TakeDamage` 前跳过 `!IsAlive` 的目标。
 
 **说明**
@@ -155,8 +162,12 @@ public static class AttackLineOfSight
 
 **验收**
 
-EditMode 单元测试覆盖 `ShouldDropTarget` 的真值表：存活且近 → 保留；死亡 → 丢弃；超距 → 丢弃；
-Transform 为 null → 丢弃。PlayMode 可选补一条“目标死亡后本地怪转 Idle”。
+- EditMode 单元测试覆盖 `ShouldDropTarget` 的真值表：存活且近 → 保留；死亡 → 丢弃；超距 → 丢弃；
+  Transform 为 null → 丢弃；销毁对象（Transform 已 null、接口引用非 null）→ 丢弃且不抛异常。
+- EditMode 接线测试：把 `AIBrain.TryFindTarget` 改为 `internal`，测试直接构造 `AIContext`
+  （真实 `Self`/`Target` GameObject + 假 `IDamageable`），调用 `TryFindTarget`，断言死亡目标被清空、
+  存活目标被保留。该用例覆盖 `TryFindTarget → 清目标 → 下一帧重新索敌` 的接线，不只测纯函数
+  （`GameSys.EditorTests` 已有 `InternalsVisibleTo`）。
 
 ### 4.4 服务端：命中判定计入目标体型
 
@@ -183,6 +194,13 @@ Transform 为 null → 丢弃。PlayMode 可选补一条“目标死亡后本地
 蜘蛛（半径 1.74）在中心距 2.24m 时，普攻有效距离为 0.5m ≤ 2.0m，命中。
 PvP 玩家半径 0，行为与现状逐值一致。
 
+**近似与残余**
+
+- 客户端 `NpcBodyCollider` 是盒体（世界半宽约 1.66 / 1.74），服务端用半径 1.74 的圆近似；
+  X 向最多多算约 8cm，不影响可玩性。
+- 锥形方向仍按目标中心方向判定；玩家贴侧身、朝向与中心方向夹角超过半锥角时仍可能不中
+  （圆的最接近点在中心方向上，这一近似在体面收益与锥形语义之间取了简单值）。
+
 **验收**
 
 - `HitResolverTests`（双端两份）：半径 1.74 的目标在中心距 3.0m 被 2.0m 射程命中；
@@ -204,6 +222,8 @@ PvP 玩家半径 0，行为与现状逐值一致。
 
 - 映射仍由 skillId 固定推出，所有客户端一致，不引入客户端计数器。
 - 未登记技能继续回退时间戳变体。
+- `NpcAnimator_*` 的 Attack 状态自带 exit-time → Idle 转移；变体只决定进入哪段剪辑，
+  不改状态机结构。两段剪辑的语义需要在手工 E2E 里目视确认（Attack02 对第二技能是否合适）。
 - 攻击动画剪辑长度与服务端 0.35s 判定帧仍不匹配，属既有已知限制，本轮不处理。
 
 **验收**
@@ -242,8 +262,8 @@ bash tools/unity-tests.sh EditMode HitResolverTests
   `Big_Boss_Attacks_At_Point_Blank_With_Low_Clearance_Target`、
   `Player_Melee_Hits_Large_Npc_By_Surface_Distance`、
   `Line_Hit_Expands_By_Target_Radius`。
-- Unity EditMode：`ShouldDropTarget` 真值表、`Known_Monster_Skill_Maps_To_A_Fixed_Variant` 更新、
-  `CombatNetworkBridgeTests` NPC 侧改 50006。
+- Unity EditMode：`ShouldDropTarget` 真值表、`AIBrain.TryFindTarget` 接线用例、
+  `Known_Monster_Skill_Maps_To_A_Fixed_Variant` 更新、`CombatNetworkBridgeTests` NPC 侧改 50006。
 
 **手工 E2E（联网）**
 
@@ -265,6 +285,9 @@ bash tools/unity-tests.sh EditMode HitResolverTests
 - **动画映射测试**：两处写死旧映射的断言必须同步更新，否则改表即红。
 - **尸体问题残余窗口**：同一 tick 内“怪物先决策、伤害后结算”时，已广播的那一刀仍会播完；
   无伤害、无后续施法，属可接受残余。
+- **客户端 `NpcEntityAnimator._awaitingConfirm` 无超时（backlog）**：若确认快照整段落在渲染时钟之后，
+  驱动会忽略后续 Walk/Run 写入，表现为怪物滑行；与本轮四个问题无关，不在本轮修改。
+- **盒体/圆近似与锥形中心判定**：见 §4.4“近似与残余”，不阻塞验收。
 
 ## 8. 决策记录
 
@@ -282,3 +305,15 @@ bash tools/unity-tests.sh EditMode HitResolverTests
 - [ ] 客户端：本地 AI 死亡/超距清目标单元测试通过。
 - [ ] 客户端：技能 → 动画变体映射测试更新并通过。
 - [ ] 手工 E2E 五项全部通过。
+
+## 10. 文档同步
+
+按 `CLAUDE.md` 的“改动模块行为时同步更新 README”：
+
+- `Server/Monster/README.md`：攻击 LOS 探针（0.25m + 目标投影）、命中计入目标半径、
+  目标死亡取消前摇；更新“已知限制”里 `HasLineOfSight` 对网格外目标永远失败的那条（攻击路径已投影）。
+- `Server/Navigation/README.md`：注明 `HasLineOfSight` 原始语义不变；攻击链路经
+  `AttackLineOfSight` 做投影 + 小探针。
+- `Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md`：更新 50003/50005/50004/50006 的
+  动画变体映射（原“50001/50003/50005 → 0，其余 → 1”）。
+- `Assets/Scripts/Hotfix/GameSystems/Monster/README.md`：本地 AI 目标有效性（死亡 / 超距 / 销毁）。
