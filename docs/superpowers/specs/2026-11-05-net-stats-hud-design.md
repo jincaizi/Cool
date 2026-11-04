@@ -166,7 +166,7 @@ public void SetNetStats(string? text)
 | 断线 / 连接失败 | 管理器回到 Disconnected，宿主隐藏文本并走既有返回选人流程 |
 | HUD 面板尚未加载 | 静默跳过，下一帧重试 |
 | `Time.timeScale = 0`（打击停顿） | 探针使用 `Stopwatch`，节拍与 RTT 都不受影响 |
-| 服务端本地回环 | RTT 可能显示 0ms，属正常 |
+| 服务端本地回环 | 应用层 RTT 含服务端约 66ms tick，常见约 60–130ms，属正常（不是纯网络 RTT） |
 
 ## 5. 测试
 
