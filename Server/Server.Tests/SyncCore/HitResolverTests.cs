@@ -26,6 +26,11 @@ public class HitResolverTests
         ShapeType = 0, Range = 2f, Angle = 120f
     };
 
+    private static readonly HitShape Single25 = new HitShape
+    {
+        ShapeType = 0, Range = 2.5f, Angle = 120f
+    };
+
     [Fact]
     public void Single_Explicit_Target_In_Range_Hits()
     {
@@ -92,6 +97,20 @@ public class HitResolverTests
         var candidates = new List<CombatCandidate> { C(2, 0f, 3f), C(3, 0f, 1f) };
         var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single35, candidates);
         Assert.Equal(new long[] { 3 }, hits); // 最近者
+    }
+
+    [Fact]
+    public void Single_AutoTarget_Picks_Nearest_By_Surface_Distance()
+    {
+        // spec §4.4：自动目标按表面距离取最近——A 表面 3.0−1.5=1.5 < B 表面 2.0，即使 B 中心更近
+        var candidates = new List<CombatCandidate> { C(2, 0f, 3f, radius: 1.5f), C(3, 0f, 2f) };
+        var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single25, candidates);
+        Assert.Equal(new long[] { 2 }, hits);
+
+        // 负对照：A 无半径时中心距 3.0 > Range 2.5 被拒，B 中心距 2.0 命中
+        var noRadius = new List<CombatCandidate> { C(2, 0f, 3f), C(3, 0f, 2f) };
+        Assert.Equal(new long[] { 3 },
+            HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single25, noRadius));
     }
 
     [Fact]

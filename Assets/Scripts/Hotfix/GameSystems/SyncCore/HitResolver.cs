@@ -26,11 +26,13 @@ namespace Cool.SyncCore
     /// <summary>
     /// 服务端权威命中裁决（spec §5-P4：判定几何两端同源）——纯几何，零 UnityEngine 依赖。
     /// 语义与客户端 AttackShape 对齐（XZ 平面；Angle 全角，半角余弦比较）：
-    ///  - Single（显式 targetId）：距离 ≤ Range **且**位于前方 ±Angle/2 锥内（显式目标同样过锥，D-6）；
-    ///  - Single（targetId=0，P4 客户端恒 0）：Range 内 + 施法者前方 ±Angle/2 锥内最近实体；
+    /// 距离一律为**表面距离** = max(0, 中心距 − 目标半径)；玩家半径为 0 时退化为中心距。
+    ///  - Single（显式 targetId）：表面距离 ≤ Range **且**位于前方 ±Angle/2 锥内（显式目标同样过锥，D-6）；
+    ///  - Single（targetId=0，P4 客户端恒 0）：表面距离 ≤ Range + 施法者前方 ±Angle/2 锥内最近实体
+    ///    （按表面距离取最近，spec §4.4）；
     ///    零距离退化（dist≈0）视为锥内命中——客户端 normalized 对零向量返回零向量（dot=0
     ///    &lt; halfCos 漏判），服务端修正（D-P4-2a）；
-    ///  - AOE_Circle：水平距离 ≤ AreaRadius。
+    ///  - AOE_Circle：表面距离 ≤ AreaRadius。
     /// ShapeType 非 1 一律按 Single 处理，调用方须先经 CombatRules.ValidateShape 校验形状合法性。
     /// AOE 命中顺序 = 候选遍历顺序（非距离排序）。只返回 Alive 候选；caster 由调用方排除（不传入自身）。
     /// yaw 为周期角（sin/cos 展开，天然 wrap 安全）。Math.Sin/Cos 在 .NET 8 与 Mono/IL2CPP 间

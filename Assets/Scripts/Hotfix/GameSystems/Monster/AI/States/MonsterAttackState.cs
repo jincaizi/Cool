@@ -73,6 +73,7 @@ namespace Hotfix.GameSystems.Monster
             _hitBuffer.Clear();
             shape.ResolveNonAlloc(ctx.Self.position, ctx.Self.forward, mask, _hitBuffer);
 
+            // 命中缓冲由同帧 PhysicsRegistry.FindNearby 填充且已过滤死亡目标；这里是防御性守卫，缓冲来源变化时仍安全。
             foreach (var t in _hitBuffer)
             {
                 if (t == null || !t.IsAlive) continue;

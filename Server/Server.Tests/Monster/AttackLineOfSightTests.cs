@@ -34,6 +34,6 @@ public class AttackLineOfSightTests
             NavMeshFixture.Grid(12, 12, (x, z) => !(z == 5 && x < 10)), "test");
 
         Assert.False(AttackLineOfSight.HasLineOfSight(nav,
-            new Vector3(5f, 0f, 3.4f), new Vector3(5f, 0f, 5.6f)));
+            new Vector3(5f, 0f, 3.4f), new Vector3(5f, 0f, 6.4f)));
     }
 }

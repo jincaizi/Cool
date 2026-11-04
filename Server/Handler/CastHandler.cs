@@ -24,7 +24,7 @@ namespace KcpServer
         }
 
         /// <summary>NPC 施法的判定帧 LOS 回调（参数：casterId, from, to）。由 Server3C 在
-        /// EnableMonsters 后接线到 NavigationService.HasLineOfSight；null = 不做 LOS（无导航宿主）。
+        /// EnableMonsters 后接线到 AttackLineOfSight.HasLineOfSight（0.25m 探针）；null = 不做 LOS（无导航宿主）。
         /// **只对 NPC caster 生效**——玩家施法的静态遮挡不在本期（spec §4.5/§9.1-8）。</summary>
         public Func<long, Vector3, Vector3, bool>? NpcLineOfSight { get; set; }
 

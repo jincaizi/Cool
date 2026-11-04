@@ -28,7 +28,8 @@ namespace KcpServer.Monster
 
         public PathFollower(NavigationService? navigation) => _navigation = navigation;
 
-        /// <summary>无导航时保持旧行为（不阻断攻击）。</summary>
+        /// <summary>身体 clearance LOS（移动/停步与测试用）；攻击链路走 HasAttackLineOfSight（0.25m 探针），
+        /// 不要把它用回攻击判定。无导航时保持旧行为（不阻断）。</summary>
         public bool HasLineOfSight(Vector3 from, Vector3 to, float bodyRadius)
             => _navigation == null || _navigation.HasLineOfSight(from, to, bodyRadius);
 
