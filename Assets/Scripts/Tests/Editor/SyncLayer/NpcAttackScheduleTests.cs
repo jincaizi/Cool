@@ -104,19 +104,18 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(0, NpcAttackSchedule.VariantOf(0L, 50001));
             Assert.AreEqual(1, NpcAttackSchedule.VariantOf(0L, 50002));
             Assert.AreEqual(0, NpcAttackSchedule.VariantOf(0L, 50003));
-            Assert.AreEqual(1, NpcAttackSchedule.VariantOf(0L, 50004));
-            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(0L, 50005));
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(0L, 50004));
+            Assert.AreEqual(1, NpcAttackSchedule.VariantOf(0L, 50005));
             Assert.AreEqual(1, NpcAttackSchedule.VariantOf(0L, 50006));
 
-            // 与时间戳无关（所有客户端必须同结论）
             long t = 638_000_000_000_000_000L;
             Assert.AreEqual(0, NpcAttackSchedule.VariantOf(t, 50001));
             Assert.AreEqual(1, NpcAttackSchedule.VariantOf(t, 50002));
 
-            // 奇桶的时间戳回退是 1；0 映射必须仍返回 0，否则「固定 0」与「漏登记走回退」不可区分。
+            // 奇桶回退是 1；固定 0 必须仍返回 0。
             Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50001));
             Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50003));
-            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50005));
+            Assert.AreEqual(0, NpcAttackSchedule.VariantOf(NpcAttackSchedule.VariantBucketTicks, 50004));
         }
 
         [Test]

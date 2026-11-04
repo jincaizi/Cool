@@ -679,11 +679,11 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
                 // ① caster 是 npc → 排程 → 越过时间戳 → 真动画播起来
                 long npcCastTicks = baseTicks + 2L * NpcAttackSchedule.VariantBucketTicks;
-                int npcVariant = NpcAttackSchedule.VariantOf(npcCastTicks, 50004);
+                int npcVariant = NpcAttackSchedule.VariantOf(npcCastTicks, 50006);
                 string played = npcVariant == 0 ? "Attack01" : "Attack02";
                 bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
                 {
-                    SkillId = 50004, CasterPlayerId = npcId, ServerTimestamp = npcCastTicks
+                    SkillId = 50006, CasterPlayerId = npcId, ServerTimestamp = npcCastTicks
                 });
                 bridge.Update();
                 registry.UpdateRender(nowServerTicks: npcCastTicks + 1L, renderDelayTicks: 0L);
@@ -693,7 +693,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
                 // ② caster 是玩家 → 不排程：同一只怪不得因它再播一刀。
                 //    玩家技能 20001 未登记 → 回退时间戳变体；+4 桶不改变桶奇偶（base 为偶 → 变体 0），
-                //    与 NPC 的固定映射 50004 → 1 不同，所以"错排到怪物身上"会让状态换成另一段——可判。
+                //    与 NPC 的固定映射 50006 → 1 不同，所以"错排到怪物身上"会让状态换成另一段——可判。
                 long playerCastTicks = baseTicks + 4L * NpcAttackSchedule.VariantBucketTicks;
                 Assert.AreNotEqual(npcVariant, NpcAttackSchedule.VariantOf(playerCastTicks, 20001),
                     "本用例的前提：两条广播推出不同变体（否则错排看不出来）");

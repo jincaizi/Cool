@@ -33,7 +33,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private static readonly Dictionary<int, int> SkillVariants = new Dictionary<int, int>
         {
             { 50001, 0 }, { 50002, 1 }, { 50003, 0 },
-            { 50004, 1 }, { 50005, 0 }, { 50006, 1 },
+            { 50005, 1 }, { 50004, 0 }, { 50006, 1 },
         };
 
         private readonly List<(long EntityId, long ServerTicks, int SkillId)> _pending = new List<(long, long, int)>();
