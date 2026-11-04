@@ -47,11 +47,24 @@ namespace KcpServer.Monster
 
             // 前摇锁目标（spec §5.1）：只锁 TargetId，不换目标；LastKnownTargetPosition 仍按
             // spec §5.2 每 tick 从目标实体更新（怪物在前摇期会以 90°/s 朝目标转向）。
-            long? selected = m.AttackResolveTick.HasValue
-                ? m.TargetId
-                : TargetSelector.Select(m.Threats, m.TargetId,
+            long? selected;
+            if (m.AttackResolveTick.HasValue)
+            {
+                selected = m.TargetId;
+                if (selected.HasValue && !IsValidTarget(m, selected.Value))
+                {
+                    // 前摇锁目标不能让死亡 / 离线 / 出圈目标继续占用窗口。
+                    // 已广播的挥砍仍会播完，但 CombatResolver 的 Alive 过滤保证零伤害。
+                    m.AttackResolveTick = null;
+                    selected = null;
+                }
+            }
+            else
+            {
+                selected = TargetSelector.Select(m.Threats, m.TargetId,
                     id => IsValidTarget(m, id),
                     m.IsTauntActive(tick) ? m.TauntTargetId : null);
+            }
 
             if (selected.HasValue)
             {

@@ -198,4 +198,24 @@ public class MonsterP2AcceptanceTests
                 Assert.Equal(MonsterMode.Evade, state.Mode);
         }
     }
+
+    [Fact]
+    public void Player_Death_During_Windup_Cancels_And_Stops_Casts()
+    {
+        var (store, module, id) = Make();
+        var state = module.GetState(id)!;
+        var player = Login(store, 1, new Vector3(0f, 0f, 2f)); // 距出生点 3m
+        state.Mode = MonsterMode.Combat;
+        state.TargetId = 1L;
+        state.Threats.AddDamage(1, 10f);
+        state.AttackResolveTick = 3;      // 前摇中（本 tick 尚未到期）
+        player.ApplyDamage(999f);          // 目标死亡
+
+        module.Tick(0);
+
+        Assert.Null(state.AttackResolveTick);       // 前摇当 tick 取消
+        Assert.Null(state.TargetId);                // 目标立即清空
+        Assert.Empty(module.DrainPendingCasts());   // 不再产生新施法
+        Assert.Equal((byte)NpcAnimationState.Idle, store.GetPlayer(id)!.ActionState);
+    }
 }
