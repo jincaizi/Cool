@@ -372,7 +372,7 @@ namespace KcpServer
                 if (p.PlayerId == pending.CasterId) continue;
                 if (pending.IsNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
                 candidates.Add(new CombatCandidate(p.PlayerId,
-                    new Vec3(p.Position.X, p.Position.Y, p.Position.Z), p.IsAlive));
+                    new Vec3(p.Position.X, p.Position.Y, p.Position.Z), p.IsAlive, p.BodyRadius));
             }
             return candidates;
         }

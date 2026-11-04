@@ -28,13 +28,15 @@ namespace KcpServer
         public void MarkDirty(PlayerState state) => state.IsDirty = true;
 
         /// <summary>P5：注册怪物实体（Kind=Npc + 模板 + 服务器权威满血）——AOI/快照链与玩家同池</summary>
-        public PlayerState AddNpc(long npcId, string name, int templateId, float hp, Vector3 position)
+        public PlayerState AddNpc(long npcId, string name, int templateId, float hp, Vector3 position,
+            float bodyRadius = 0f)
         {
             var state = new PlayerState(npcId)
             {
                 PlayerName = name,
                 Kind = (byte)EntityKind.Npc,
-                TemplateId = templateId
+                TemplateId = templateId,
+                BodyRadius = bodyRadius
             };
             state.MaxHp = hp;
             state.Hp = hp;

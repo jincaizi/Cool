@@ -77,6 +77,9 @@ namespace KcpServer
         /// <summary>Npc 模板 ID（Kind=Npc 时有效；玩家恒 0）</summary>
         public int TemplateId { get; internal set; }
 
+        /// <summary>NPC 身体半径（米；玩家恒 0）。命中判定按表面距离使用。</summary>
+        public float BodyRadius { get; internal set; }
+
         /// <summary>动作/战斗状态（Npc=NpcAnimationState；玩家恒 0——D-P5-5 只做怪物侧）</summary>
         public byte ActionState { get; internal set; }
 

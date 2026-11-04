@@ -12,7 +12,7 @@ public class CombatResolverNpcTests
     private static readonly Random SeededRng = new Random(42);
 
     private static (EntityStore Store, CombatResolver Resolver, long Player, long Npc) World(
-        float npcZ, int templateId = 1)
+        float npcZ, int templateId = 1, float npcRadius = 0f)
     {
         var store = new EntityStore();
         long player = 1;
@@ -20,7 +20,7 @@ public class CombatResolverNpcTests
         store.AddPlayer(player, "P");
         store.GetPlayer(player)!.IsLoggedIn = true;
         // 怪物在玩家正前方 +Z（yaw=0 锥内——自动目标用例依赖方向语义；显式目标用例方向无关）
-        store.AddNpc(npc, $"Slime#{npc}", templateId, 100f, new Vector3(0f, 0f, npcZ));
+        store.AddNpc(npc, $"Slime#{npc}", templateId, 100f, new Vector3(0f, 0f, npcZ), npcRadius);
         // AddNpc 朝向硬编码 0（+Z）——怪物自动目标需面向原点玩家（yaw=180 锥内；显式目标用例方向无关）
         store.GetPlayer(npc)!.Rotation = 180f;
         var resolver = new CombatResolver(store, SeededRng);
@@ -132,6 +132,29 @@ public class CombatResolverNpcTests
         var hit = Assert.Single(result.Hits);
         Assert.Equal(player, hit.TargetPlayerId); // bot 不可被怪物命中（候选集过滤——本用例是策略变更的失败驱动）
         Assert.Equal(100f, bot.Hp);
+    }
+
+    [Fact]
+    public void Player_Melee_Hits_Large_Npc_By_Surface_Distance()
+    {
+        var (store, resolver, player, npc) = World(3.2f, templateId: 4, npcRadius: 1.74f);
+
+        var result = Resolve(resolver, player, PlayerSwing(npc), 10);
+
+        Assert.True(result.Accepted);
+        var hit = Assert.Single(result.Hits);
+        Assert.Equal(npc, hit.TargetPlayerId); // 3.2 - 1.74 = 1.46 <= 2.0
+    }
+
+    [Fact]
+    public void Player_Melee_Misses_Same_Distance_Without_Radius()
+    {
+        var (store, resolver, player, npc) = World(3.2f, templateId: 4); // 半径 0
+
+        var result = Resolve(resolver, player, PlayerSwing(npc), 10);
+
+        Assert.True(result.Accepted);
+        Assert.Empty(result.Hits);
     }
 
     [Fact]

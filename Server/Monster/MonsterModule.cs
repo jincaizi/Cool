@@ -131,15 +131,16 @@ namespace KcpServer.Monster
                 spawn = projected;
             }
 
-            long npcId = _nextNpcId();
-            var entity = _store.AddNpc(npcId, $"{config.name}#{npcId}", templateId, config.hp, spawn);
-            entity.Rotation = YawTowardOrigin(position);
-
             // 半径**就地归一**：`RadiusOfTemplate` 的兜底（表里没有 / 值非法 → 0.5）必须落到配置对象上，
             // 否则自身半径走 `config.bodyRadius`（漏填就是 0）、邻居眼里走 `RadiusOfTemplate`（0.5）——
             // 合并半径减半，避让形同虚设。模板对象在表里唯一，归一一次全模板生效（本表是每模块
             // 反序列化出来的私有副本，不会串到别的模块）。改的是同一个引用，两条路径从此同值。
             config.bodyRadius = RadiusOfTemplate(templateId);
+
+            long npcId = _nextNpcId();
+            var entity = _store.AddNpc(npcId, $"{config.name}#{npcId}", templateId, config.hp, spawn,
+                config.bodyRadius);
+            entity.Rotation = YawTowardOrigin(position);
 
             // 有导航时巡逻中心必须是**已投影**的出生点：巡逻点全部采不到时回退到这个单点，
             // 不能回退 legacy 未投影圆环（会把怪引到 navmesh 外直线穿地形）。
