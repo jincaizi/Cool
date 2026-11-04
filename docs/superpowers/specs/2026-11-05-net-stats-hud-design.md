@@ -147,6 +147,7 @@ public void SetNetStats(string? text)
 - 字号 **20** 参照像素（HUD 现有文本为 9–13，读数略大以便桌面看清）。
 - 字体：`Assets/PreRes/Font/ZhunYuan SDF.asset`（与 HUD 名字文本同一动态字体，中文可运行时补字形）。
 - 颜色白色；用 **TMP 材质 underlay 阴影**保证亮背景可读：`_UnderlayColor` 黑色 50%、`_UnderlayOffsetX/Y` 约 0.5/-0.5、`_UnderlaySoftness` 约 0.1。材质变体存为 `Assets/PreRes/Font/ZhunYuan SDF - NetStats Underlay.mat`，赋给文本的 `fontSharedMaterial`。
+  **必须在材质上启用 `UNDERLAY_ON` 关键字**（等价于 TMP 材质 Inspector 的 Underlay Type = Normal）。未启用时 `TMP_SDF.shader` 的 underlay 分支会被编译掉，所有 `_Underlay*` 属性都不生效。
   **不要用 uGUI `Shadow`**——TMP 走自己的 mesh 生成路径、不处理 `IMeshModifier`，该组件对 TMP 文本完全无效。`Raycast Target = false`。
 - 单机模式该子物体保持 inactive，不需要任何代码路径去打开它。
 
@@ -198,6 +199,7 @@ public void SetNetStats(string? text)
 12. `test_player_hud_set_net_stats_shows_text` —— 实例化预制体，`SetNetStats("FPS 60  延迟 23ms")` 后 TMP 文本正确且对象 active；预制体默认 inactive。
 13. `test_player_hud_set_net_stats_null_hides_text` —— `SetNetStats(null)` 后对象 inactive。
 14. `test_player_hud_net_stats_text_is_wired` —— 反射取 `_netStatsText` 断言非 null，预制体改坏时当场报红。
+15. `test_player_hud_net_stats_uses_tmp_underlay_shadow` —— 断言 `_netStatsText.fontSharedMaterial.IsKeywordEnabled("UNDERLAY_ON")`；这个 bug 曾因关键字未启用而让 underlay 属性全部失效，必须有能抓住它的回归测试。
 
 ## 6. 验收
 
