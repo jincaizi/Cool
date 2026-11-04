@@ -587,11 +587,11 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>
         /// 联网 HUD 读数：0.5 秒窗口算 FPS，每 0.5 秒推一次文本（TMP 每帧赋值会触发网格重建）。
-        /// 未进世界/单机一律隐藏。HUD 面板懒获取并缓存，UIManager 未就绪时静默跳过。
+        /// 未进世界/单机/回菜单途中一律隐藏。HUD 面板懒获取并缓存，UIManager 未就绪时静默跳过。
         /// </summary>
         private void UpdateNetStats(float unscaledDeltaSeconds)
         {
-            if (_manager == null || !_inWorld)
+            if (_manager == null || !_inWorld || _pendingReturnToMenu)
             {
                 HideNetStats();
                 return;
