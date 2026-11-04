@@ -75,6 +75,7 @@ namespace Hotfix.GameSystems.Monster
 
             foreach (var t in _hitBuffer)
             {
+                if (t == null || !t.IsAlive) continue;
                 Vector3 dir = (t.Transform.position - ctx.Self.position).normalized;
                 t.TakeDamage(damage, dir);
             }

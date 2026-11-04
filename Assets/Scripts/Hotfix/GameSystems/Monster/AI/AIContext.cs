@@ -1,4 +1,5 @@
 using UnityEngine;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -36,6 +37,8 @@ namespace Hotfix.GameSystems.Monster
 
         // ── AIBrain-owned ──
         public Transform Target;
+        /// <summary>与 Target 同步赋值；IDamageable 是接口引用，销毁后不参与 Unity 伪 null。</summary>
+        public IDamageable TargetEntity;
         public float DeltaTime;
         public float AttackCooldown;
 

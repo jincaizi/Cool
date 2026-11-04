@@ -58,14 +58,35 @@ namespace Hotfix.GameSystems.Monster
             _fsm.ExecuteState(_ctx);
         }
 
-        private void TryFindTarget()
+        internal void TryFindTarget()
         {
-            if (_ctx.Target != null) return;
+            // 外层必须同时看 TargetEntity：Unity 对象销毁后 Target 为伪 null，
+            // 只看 Target 会跳过清理，接口引用会一直挂着。
+            if (_ctx.Target != null || _ctx.TargetEntity != null)
+            {
+                if (!ShouldDropTarget(_ctx.Target, _ctx.TargetEntity, _ctx.Self.position, _config.LeaveRange))
+                    return;
+
+                _ctx.Target = null;
+                _ctx.TargetEntity = null;
+            }
 
             var players = PhysicsRegistry.Instance.FindNearby(
                 _ctx.Self.position, _config.DetectRange, EntityType.Player);
             if (players.Count > 0)
+            {
+                _ctx.TargetEntity = players[0];
                 _ctx.Target = players[0].Transform;
+            }
+        }
+
+        /// <summary>目标是否应被丢弃（§4.3）。target == null 必须最先判断：接口引用不参与 Unity 伪 null。</summary>
+        internal static bool ShouldDropTarget(Transform target, IDamageable entity, Vector3 selfPosition,
+            float leaveRange)
+        {
+            if (target == null) return true;
+            if (entity == null || !entity.IsAlive) return true;
+            return (selfPosition - target.position).sqrMagnitude > leaveRange * leaveRange;
         }
 
         // Called by MonsterEntity when a damage result is available from the pipeline.
