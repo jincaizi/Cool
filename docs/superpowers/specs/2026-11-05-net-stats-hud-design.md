@@ -43,11 +43,12 @@ ClientNetworkHost.Update（主线程）
   → 每 0.5s：hud.SetNetStats(FormatNetStats(fps, manager.RttMs))
 
 网络回调线程
-  Heartbeat 回包 → LatencyProbe.OnResponse(hb) → ConcurrentQueue.Enqueue（仅此）
+  Heartbeat 回包 → 读一次 Stopwatch 时间戳 → (hb, receivedAt) 入队
 ```
 
 - 延迟 = **往返时间 RTT**（毫秒），不是单向延迟。
-- 所有时间戳读取、RTT 计算、EMA 平滑都在主线程；回调线程只入队。这与现有快照/名册封送纪律一致。
+- 发送时刻与回包到达时刻都用 `Stopwatch`（线程安全、单调、不受 `Time.timeScale` 影响）。回包时间戳在回调线程读一次、随回包入队；序列匹配、RTT 计算、EMA、超时判定在主线程完成。
+- **不能等主线程 `Update` 再读回包时间**：那会把“等下一帧”的 0–1 帧延迟算进 RTT，60fps 下凭空多出约 16ms，读数会随帧率变化。其余状态（待回包序列、EMA、超时）只在主线程读写。
 
 ### 3.2 `LatencyProbe`
 
@@ -59,7 +60,7 @@ ClientNetworkHost.Update（主线程）
 internal LatencyProbe(Action<Heartbeat> send, Func<double>? clock = null)
 ```
 
-- `clock` 默认 `() => Time.realtimeSinceStartupAsDouble`。使用 Unity 单调时钟而非 `deltaSeconds` 累加：`HitStopManager` 会把 `Time.timeScale` 设为 0，基于 `deltaTime` 的节拍会一起停；`realtimeSinceStartup` 不受影响，且在 WebGL 可用。
+- `clock` 默认 `() => Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency`（秒）。`Stopwatch` 单调、线程安全、不受 `Time.timeScale` 影响（`HitStopManager` 会把 timeScale 设为 0），WebGL 可用。
 - 测试注入假时钟，不依赖真实时间。
 
 **节拍与发包**
@@ -73,9 +74,9 @@ internal LatencyProbe(Action<Heartbeat> send, Func<double>? clock = null)
 
 **回包与 RTT**
 
-- `OnResponse(Heartbeat hb)` 只做 `_responses.Enqueue(hb)`（`ConcurrentQueue<Heartbeat>`），可从任意线程调用。
+- `OnResponse(Heartbeat hb)` 在回调线程读 `receivedAt = clock()`，把 `(hb, receivedAt)` 入队（`ConcurrentQueue<(Heartbeat, double)>`）；默认时钟 `Stopwatch` 线程安全。
 - `Tick()` 在主线程排空队列：仅当 `hb.Sequence == _pendingSequence` 且存在待回包时才接受。
-- `rttMs = (clock() - _pendingSendTime) * 1000.0`；允许 0ms，负数丢弃。
+- `rttMs = (receivedAt - _pendingSendTime) * 1000.0`；允许 0ms，负数丢弃。
 - EMA：首个样本直接采纳；之后 `smoothed = smoothed * 0.7 + rttMs * 0.3`。
 
 **超时**
@@ -162,7 +163,7 @@ public void SetNetStats(string? text)
 | 迟到/重复回包 | `Sequence` 不匹配，丢弃 |
 | 断线 / 连接失败 | 管理器回到 Disconnected，宿主隐藏文本并走既有返回选人流程 |
 | HUD 面板尚未加载 | 静默跳过，下一帧重试 |
-| `Time.timeScale = 0`（打击停顿） | 探针使用 `realtimeSinceStartup`，节拍不受影响 |
+| `Time.timeScale = 0`（打击停顿） | 探针使用 `Stopwatch`，节拍与 RTT 都不受影响 |
 | 服务端本地回环 | RTT 可能显示 0ms，属正常 |
 
 ## 5. 测试
