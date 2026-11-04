@@ -106,6 +106,14 @@ namespace Hotfix.GameSystems.SyncLayer
         private RemoteCastPresenter? _remoteCastPresenter;
         private NetworkTargetSelector? _networkTargetSelector;
 
+        // 联网 HUD 读数（FPS + RTT）：HUD 面板缓存与 0.5 秒统计窗口
+        private PlayerHudPanel? _hudPanel;
+        private float _fpsWindowSeconds;
+        private int _fpsFrames;
+        private int _displayedFps;
+        private float _netStatsPushTimer;
+        private bool _netStatsVisible;
+
         /// <summary>远程实体渲染根（Awake 建的 `RemotePlayers`）——本地角色查找要排除它整棵子树，
         /// 见 <see cref="FindLocalEntry"/></summary>
         private Transform? _remoteRoot;
@@ -320,6 +328,8 @@ namespace Hotfix.GameSystems.SyncLayer
             // 每帧驱动：时钟采样/快照封送/纠偏响应/上报节流/插值渲染（manager 内部编排）
             _manager.Update(Time.deltaTime);
 
+            UpdateNetStats(Time.unscaledDeltaTime);
+
             // 进世界后装配本地角色（角色可能 Addressable 异步生成——就绪前每帧重试）
             if (_inWorld && !_attachFailed)
                 TryAttachLocalCharacter();
@@ -415,6 +425,7 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             Debug.LogWarning("[NetHost] 断线: " + reason);
             OnDisconnected?.Invoke(reason);
+            HideNetStats();
             ShowStatus("与服务器断开：" + reason + "，即将返回主界面");
             _pendingReturnToMenu = true;
         }
@@ -504,6 +515,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
         public void Disconnect()
         {
+            HideNetStats();
             ResetAttachment();
             if (_manager != null)
             {
@@ -572,6 +584,67 @@ namespace Hotfix.GameSystems.SyncLayer
                 : string.Empty;
             return tiers + $"Q={qualityLevel}  FPS={fps:F0}";
         }
+
+        /// <summary>
+        /// 联网 HUD 读数：0.5 秒窗口算 FPS，每 0.5 秒推一次文本（TMP 每帧赋值会触发网格重建）。
+        /// 未进世界/单机一律隐藏。HUD 面板懒获取并缓存，UIManager 未就绪时静默跳过。
+        /// </summary>
+        private void UpdateNetStats(float unscaledDeltaSeconds)
+        {
+            if (_manager == null || !_inWorld)
+            {
+                HideNetStats();
+                return;
+            }
+
+            _fpsWindowSeconds += unscaledDeltaSeconds;
+            _fpsFrames++;
+            _netStatsPushTimer += unscaledDeltaSeconds;
+
+            if (_fpsWindowSeconds >= 0.5f)
+            {
+                _displayedFps = Mathf.RoundToInt(_fpsFrames / _fpsWindowSeconds);
+                _fpsWindowSeconds = 0f;
+                _fpsFrames = 0;
+            }
+
+            if (_netStatsPushTimer < 0.5f) return;
+            _netStatsPushTimer = 0f;
+
+            var hud = EnsureHudPanel();
+            if (hud == null) return;
+
+            hud.SetNetStats(FormatNetStats(_displayedFps, _manager.RttMs));
+            _netStatsVisible = true;
+        }
+
+        private PlayerHudPanel? EnsureHudPanel()
+        {
+            if (_hudPanel != null) return _hudPanel;
+
+            var ui = UIManager.Instance;
+            if (ui == null) return null;
+
+            _hudPanel = ui.GetPanel<PlayerHudPanel>();
+            return _hudPanel;
+        }
+
+        /// <summary>隐藏读数并清空统计窗口（幂等；单机/断线/销毁共用）。</summary>
+        private void HideNetStats()
+        {
+            _fpsWindowSeconds = 0f;
+            _fpsFrames = 0;
+            _netStatsPushTimer = 0f;
+            _displayedFps = 0;
+
+            if (!_netStatsVisible) return;
+            _netStatsVisible = false;
+            _hudPanel?.SetNetStats(null);
+        }
+
+        /// <summary>HUD 读数文本。抽成纯函数供单测钉住格式。</summary>
+        internal static string FormatNetStats(int fps, int? rttMs)
+            => "FPS " + fps + "  延迟 " + (rttMs.HasValue ? rttMs.Value + "ms" : "--");
 
         private void HandleEnterWorld()
         {
@@ -848,6 +921,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void OnDestroy()
         {
+            HideNetStats();
             // 先摘订阅、再 Dispose（与 Disconnect → ResetAttachment 同序）：
             // manager.Dispose 里的 registry.Clear 会发 ViewRemoved，此时 selector 若仍在订阅
             // 会去动 UI/选中环（销毁过程中的 Unity 对象操作）。
