@@ -103,14 +103,9 @@
 public static class AttackLineOfSight
 {
     public const float ProbeRadius = 0.25f;
-    public const float TargetProjectTolerance = 2f;
 
     public static bool HasLineOfSight(NavigationService navigation, Vector3 from, Vector3 to)
-    {
-        if (navigation.TryProject(to, TargetProjectTolerance, out var projected, out _))
-            to = projected;
-        return navigation.HasLineOfSight(from, to, ProbeRadius);
-    }
+        => navigation.HasLineOfSight(from, to, ProbeRadius);
 }
 ```
 
@@ -128,15 +123,15 @@ public static class AttackLineOfSight
 - 攻击视线表达“武器到目标之间没有 navmesh 空洞”，用 0.25m 探测半径，不再要求整条线容得下 1.74m 的身体。
 - 0.25m 小于 navmesh 烘焙的 0.5m agent 半径：它只回答“武器线有没有洞”，不保证身体能站在线上；
   身体位置仍由寻路保证。
-- 目标点先投影到 navmesh（2m 容差），解决玩家站在网格外永远“挥不到”的已知限制；
-  这是启发式，目标离网格 >2m 时退回原点判定（仍可能失败，不新增物理 LOS）。
+- 不做目标点投影：`TryProject` 返回的点在 navmesh 边界上、clearance 为 0，0.25m 探针仍会失败，
+  投影是无效代码。玩家站在网格外“挥不到”的既有已知限制继续保留（本轮不做物理 LOS）。
 - 墙 / 岩石仍会在 navmesh 空洞采样处被拦住；`Monster_Does_Not_Attack_Through_Wall` 保持绿。
 
 **验收**
 
 合成 navmesh（大网格 + 2×2 空洞）：蜘蛛在距玩家 2.4m、玩家点 clearance 约 1.0m
 （旧 1.74 半径失败、新 0.25 半径通过）时，`DrainPendingCasts()` 必须出现 50004。
-同一用例断言隔墙时仍不产生施法。
+另测隔墙时 `AttackLineOfSight.HasLineOfSight` 返回 false（`AttackLineOfSightTests`）。
 
 ### 4.3 客户端：本地 AI 目标有效性
 
@@ -153,6 +148,9 @@ public static class AttackLineOfSight
   UnityEngine.Object 的伪 null 重载；对象销毁后接口引用仍非 null，先解引用 `entity.IsAlive`
   有 `MissingReferenceException` 风险。`ShouldDropTarget` 内部顺序固定为：Transform 销毁检查
   → 实体存活检查 → 距离检查。
+- **外层判断**：`TryFindTarget` 的入口条件必须是 `Target != null || TargetEntity != null`。
+  Unity 对象被销毁后 `Target == null` 为真，若只用 `Target != null` 就永远不会走到清理分支，
+  接口引用会一直挂着。测试用例必须覆盖“Transform 已销毁、接口引用仍非 null”这一分支。
 - `MonsterAttackState.ResolveDamage` 在 `TakeDamage` 前跳过 `!IsAlive` 的目标。
 
 **说明**
@@ -166,8 +164,10 @@ public static class AttackLineOfSight
   Transform 为 null → 丢弃；销毁对象（Transform 已 null、接口引用非 null）→ 丢弃且不抛异常。
 - EditMode 接线测试：把 `AIBrain.TryFindTarget` 改为 `internal`，测试直接构造 `AIContext`
   （真实 `Self`/`Target` GameObject + 假 `IDamageable`），调用 `TryFindTarget`，断言死亡目标被清空、
-  存活目标被保留。该用例覆盖 `TryFindTarget → 清目标 → 下一帧重新索敌` 的接线，不只测纯函数
+  存活目标被保留、销毁对象不抛异常。该用例覆盖 `TryFindTarget → 清目标` 的接线，不只测纯函数
   （`GameSys.EditorTests` 已有 `InternalsVisibleTo`）。
+- 断言 Unity 对象的伪 null 时用 `Assert.IsTrue(obj == null)`（静态类型走 Unity 重载）；
+  不要用 `Assert.IsNull`——它按 `object` 比较，销毁对象不是引用 null。
 
 ### 4.4 服务端：命中判定计入目标体型
 
@@ -239,7 +239,7 @@ PvP 玩家半径 0，行为与现状逐值一致。
 1. 玩家普攻 → `SkillCastReporter` → `CastRequest`（形状 + 锁定目标）→ 服务端 `ValidateShape`
    → `BuildCandidates`（带 NPC 半径）→ `HitResolver` 表面距离判定 → `ApplyHit`
    → `DamageResult` → 客户端 `MonsterTakeDamageEvent`（红字）。
-2. 蜘蛛 AI → `Attack` 用 0.25m 探测半径 + 目标投影判断 LOS → `QueueCast`
+2. 蜘蛛 AI → `Attack` 用 0.25m 探测半径判断 LOS → `QueueCast`
    → 同上判定链；判定帧 `NpcLineOfSight` 使用同一 helper。
 3. 本地 AI → 每帧 `ShouldDropTarget` 校验 → 清目标后重新索敌。
 
@@ -291,8 +291,8 @@ bash tools/unity-tests.sh EditMode HitResolverTests
 
 ## 8. 决策记录
 
-- 攻击 LOS 选择“小探测半径 + 目标投影”，不选“贴脸跳过 LOS”（会隔墙命中）或“调小蜘蛛 bodyRadius”
-  （破坏寻路与避让）。
+- 攻击 LOS 选择“小探测半径”，不选“贴脸跳过 LOS”（会隔墙命中）或“调小蜘蛛 bodyRadius”
+  （破坏寻路与避让）；目标点投影经验证无效（投影点在网格边界、clearance 为 0），不采用。
 - 命中判定选择“目标半径参与表面距离”，不选“提高近战射程”（全局平衡 + 角落仍失配）或
   “缩小客户端碰撞体”（视觉穿模且服务端仍按中心距）。
 - 动画变体选择“按技能固定映射”，不选“同一技能按时间戳轮换”（本轮需求明确为不同技能不同动作）。
@@ -310,10 +310,10 @@ bash tools/unity-tests.sh EditMode HitResolverTests
 
 按 `CLAUDE.md` 的“改动模块行为时同步更新 README”：
 
-- `Server/Monster/README.md`：攻击 LOS 探针（0.25m + 目标投影）、命中计入目标半径、
-  目标死亡取消前摇；更新“已知限制”里 `HasLineOfSight` 对网格外目标永远失败的那条（攻击路径已投影）。
+- `Server/Monster/README.md`：攻击 LOS 探针（0.25m）、命中计入目标半径、
+  目标死亡取消前摇；注明网格外目标仍可能挥不到（本轮不做物理 LOS）。
 - `Server/Navigation/README.md`：注明 `HasLineOfSight` 原始语义不变；攻击链路经
-  `AttackLineOfSight` 做投影 + 小探针。
+  `AttackLineOfSight` 用小探针，不做投影。
 - `Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md`：更新 50003/50005/50004/50006 的
   动画变体映射（原“50001/50003/50005 → 0，其余 → 1”）。
 - `Assets/Scripts/Hotfix/GameSystems/Monster/README.md`：本地 AI 目标有效性（死亡 / 超距 / 销毁）。
