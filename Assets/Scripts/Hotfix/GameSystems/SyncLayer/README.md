@@ -67,7 +67,7 @@
   `_hitTriggerApplied` 去重，离开 Hit / 进入攻击 / 回 Locomotion 时 `ResetTrigger`。
   `Death` / `Down` / `GetUp` / `DefendHit` 仍走整数 AnyState 转移。
 - **怪物攻击变体**：`CastBroadcast.SkillId` 为已知怪物技能时固定映射到 Attack01/02
-  （50001/50003/50005 → 0，50002/50004/50006 → 1）；未登记技能回退
+  （50001/50003/50004 → Attack01，50002/50005/50006 → Attack02）；未登记技能回退
   `NpcAttackSchedule.VariantOf(serverTicks)` 的时间戳桶变体，保证旧服务端/未来技能仍能播放。
 - **投射物对齐**：`RemoteCastPresenter` 在 `CastBroadcast` 到达即播攻击动画与施放 VFX
   （不等 `DamageResult`，否则零命中延迟技能会先看到受击）；火球在 `DamageResult.HitX/HitZ`

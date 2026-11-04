@@ -62,9 +62,10 @@
 
 ## I1：判定帧 LOS
 
-`CombatResolver.NpcLineOfSight` 由 `Server3C.EnableMonsters` 接线到
-`NavigationService.HasLineOfSight`（半径取施法怪物模板）；`DrainResolved` 对 NPC caster
+`CombatResolver.NpcLineOfSight` 由 `Server3C.EnableMonsters` 接线到 `AttackLineOfSight`
+（攻击链路：0.25m 探针，不要求身体 clearance，也不做目标点投影）；`DrainResolved` 对 NPC caster
 逐目标复查 LOS，起手后躲到墙后的目标不结算。玩家施法不经过这个回调。
+`NavigationService.HasLineOfSight` 的原始语义不变（要求点在图内且 clearance ≥ 传入半径）。
 
 ## 性能与预算（2026-11-03 最终修复轮实测）
 
@@ -105,7 +106,8 @@ bash tools/unity-tests.sh EditMode NavMeshExportFreshnessTests
   同样 `PathPartial`）；同岛 `[3] -> [5]` 34.977m 可通。跨岛路径不作验收。
 - 无动态障碍；场景几何改动后需重跑导出器（`NavMeshExportFreshnessTests` 会红）。
 - bot 不走 navmesh（仍走 ORCA 愿望位移）。
-- 玩家所在点不在网格上或 clearance < 怪物 `bodyRadius` 时 LOS 恒 false，怪物无法攻击
+- 玩家所在点不在网格上时，攻击 LOS（`AttackLineOfSight`，0.25m 探针）仍恒 false，怪物挥不到；
+  原始 `NavigationService.HasLineOfSight` 另要求 clearance ≥ 传入半径。两者都不做目标点投影
   （P1 已知限制；见 [服务端怪物](../Monster/README.md)）。
 - **视觉抽帧未做**：Wolf 绕岩石/湖岸、SpiderBoss 不穿模仍只有服务端几何断言
   （`DemoDayNavBinTests` 的逐点 `IsPointNavigable`），需在 DemoDay Play Mode 人工抽帧确认。

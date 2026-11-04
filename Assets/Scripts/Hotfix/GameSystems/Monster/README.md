@@ -31,10 +31,14 @@
 - NPC 视图上不得挂 `IDamageable`（`NpcViewGameplayStripTests` 锁死）；本地技能不能命中断线上的 NPC 视图。
 - 联网模式下客户端 `MonsterSpawner` 必须保持禁用。
 - 怪物配置数值有编辑期断言（`MonsterConfigNumbersTests`）。
+- 本地 AI 每帧校验目标（`AIBrain.TryFindTarget` → `ShouldDropTarget`）：Transform 销毁 /
+  `IDamageable` 死亡 / 超出 `LeaveRange` 立即清空 `Target` 与 `TargetEntity`；攻击结算跳过
+  已死亡目标（`MonsterAttackState.ResolveDamage`），不得对尸体继续攻击。
 
 ## 测试
 
-Editor：`MonsterConfigNumbersTests`、`MonsterEntityDotDamageTests`、`SpawnLedgerTests`、`StatusEffectWiringTests`。
+Editor：`MonsterConfigNumbersTests`、`MonsterEntityDotDamageTests`、`SpawnLedgerTests`、`StatusEffectWiringTests`、
+`AIBrainTargetValidityTests`。
 PlayMode：`MonsterWorldTests`、`AoiWorldTests`、`CombatSyncTests`。
 
 ```bash

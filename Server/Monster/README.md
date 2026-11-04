@@ -27,6 +27,9 @@
 - 死亡展示 `DeathDisplayTicks = 30`（约 2s）后移除；`RespawnTicks = 450`（约 30s）后以新 id 满血重生。
 - NPC id 段从 `NpcIdSeed = 2_000_000` 开始。
 - 断线持续运转：状态全在 `EntityStore` 与本模块，零 per-session 依赖。
+- **命中按目标表面距离**：玩家施法命中 NPC 时 `CombatCandidate.Radius` 取 `PlayerState.BodyRadius`，
+  `HitResolver` 用 `max(0, 中心距 - 半径)` 比较射程 / 面积，并按表面距离取最近；玩家与 bot
+  半径为 0，PvP 行为不变。
 
 ## 导航（P1）
 
@@ -50,10 +53,10 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
   触发重寻；真正失败退避 30 tick。**只有无导航时才调 `SimpleMoveSystem.MoveTo` 直线回退；
   有导航但失败/预算拒绝时停住**（C2）。`Tick` 返回实际是否移动，BT 据此写 `Moving`/Run-Idle。
 - **判定帧 LOS**：`CombatResolver` 对 NPC caster 在 `DrainResolved` 再查一次
-  `NavigationService.HasLineOfSight`；起手后玩家躲墙不命中（玩家施法不变）。
+  `AttackLineOfSight`（0.25m 探针，与起手判定同源）；起手后玩家躲墙不命中（玩家施法不变）。
 - 接入：出生点投影容差 0.5m，失败即抛（fail fast）；巡逻点 9 方向投影并要求
-  clearance ≥ `bodyRadius`；Chase 停步用 `SkillSelector.IsWithinAnySkillRange`（目标距离）+ LOS
-  （隔墙不停、继续绕行）；无最后已知目标时写 Idle/0 速（防假跑广播）；
+  clearance ≥ `bodyRadius`；Chase 停步用 `SkillSelector.IsWithinAnySkillRange`（目标距离）+ 攻击
+  LOS（0.25m 探针，隔墙不停、继续绕行）；无最后已知目标时写 Idle/0 速（防假跑广播）；
   Attack 隔墙返回失败落回 Chase；Evade 沿路径回 `SpawnPosition`。
 - **目标保持（P2 起由 `ThreatTable` 接管）**：目标只在死亡 / 离线 / 超出 `dropAggroRadius`
   时移除；**偏出视野锥不会丢目标**（绕墙追击不会断）。感知获取只在 `Patrol` 做，战斗中新目标
@@ -69,6 +72,9 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
   同分按较小 `playerId` 升序，与字典遍历顺序无关（跨进程确定性）。
 - 前摇（`AttackResolveTick`）期间锁 `TargetId`，威胁照记，判定后再切换；前摇期
   `LastKnownTargetPosition` 仍每 tick 刷新，怪物以 90°/s 朝目标转向。
+- 前摇期目标失效（死亡 / 离线 / 超出 `dropAggroRadius`）当 tick 取消前摇：清
+  `AttackResolveTick` / `TargetId` / `LastKnownTargetPosition`，不再产生新施法；已广播的那一刀
+  仍会播完，但目标死亡时 `HitResolver` 的 Alive 过滤保证零伤害。
 - 嘲讽 API `MonsterModule.Taunt`：有效期内覆盖仇恨选择；`Evade` / `Dead` 忽略。
 
 ### 多技能
@@ -79,7 +85,7 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
   `priority` 降序 → `skillId` 升序；无技能可用时，目标太近走 `Reposition`，否则 `Chase`。
 - `50005` DogKnight 中距离（2–6m，priority 10，血量 ≤50%）；`50006` SpiderBoss 低血 AoE
   （shapeType 1，半径 4，血量 ≤50%）。客户端按 `skillId` 固定映射到 Attack01/02 变体：
-  `50001/50003/50005 → 0`，其余已知技能 `→ 1`，未知技能回退时间戳变体。
+  `50001/50003/50004 → Attack01`，`50002/50005/50006 → Attack02`，未知技能回退时间戳变体。
 - 后端启动校验：每个模板至少一条技能，`skillId` 必须在 `CombatRules` 内且范围合法
   （`MonsterModule.SpawnMonster` fail fast）。
 
@@ -98,7 +104,8 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 
 ## 配置
 
-`Server/Config/monster_config.json`；`bodyRadius` 是 ORCA 与导航 clearance 的半径真值。
+`Server/Config/monster_config.json`；`bodyRadius` 是 ORCA、寻路与巡逻点 clearance 的半径真值，
+不参与攻击 LOS（攻击链路统一用 0.25m 探针，见 `AttackLineOfSight`），也不做目标点投影。
 模板字段：`hp`、`moveSpeed`、`detectionRadius`、`visionAngle`、`attackRange`、`patrolRadius`、
 `leashRadius`、`dropAggroRadius`、`skills[]`。导航地图表 `Server/Config/maps.json`
 （当前仅 `demoday → Config/nav/demoday.navbin`）。
@@ -106,7 +113,8 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 ## 测试
 
 `Server/Server.Tests/Monster/`（`MonsterModuleTests`、`MonsterAcceptanceTests`、`MonsterCombatIntegrationTests`、
-`MonsterBodyRadiusTests`、`MonsterWindupTests`、`MonsterNavigationTests`、`ThreatTableTests`、
+`MonsterBodyRadiusTests`（含 `SpawnMonster → AddNpc` 的 `BodyRadius` 接线）、`AttackLineOfSightTests`、
+`MonsterWindupTests`、`MonsterNavigationTests`、`ThreatTableTests`、
 `SkillSelectorTests`、`MonsterCastBuilderTests`、`BrainTests`、`MonsterEvadeTests`、
 `MonsterSkillCombatTests`、`P2ConfigTests`、`MonsterP2AcceptanceTests`）；
 `Server/Server.Tests/Navigation/`（`NavDataFormatTests`、`NavMeshGraphTests`、`NavMeshPathfinderTests`、
@@ -138,8 +146,10 @@ bash tools/unity-tests.sh PlayMode MonsterWorldTests
 - **A2 语义已变**：目标偏出视野锥 **不等于** 丢目标；命中与否只由判定帧夹角与判定锥决定
   （`MonsterAcceptanceTests` 用 55°/110° 静态角度钉住）。旧的“离开视野锥即丢目标”语义已删除。
 - P1 导航债未在本轮偿还：单张地图（DemoDay）；x≈0 河谷把 navmesh 分成两个连通分量，
-  跨岛路径返回 `blocked`；无动态障碍；`HasLineOfSight` 对玩家点不在 navmesh 上时仍会
-  永远失败（岩石上挥不到）；0.5ms/query 性能目标未达成（P1 §11 记录）。
+  跨岛路径返回 `blocked`；无动态障碍；攻击链路改用 `AttackLineOfSight`（0.25m 探针、不做目标点
+  投影），`bodyRadius` 只用于寻路 / ORCA / 巡逻 clearance；但玩家点不在 navmesh 上时探针仍会
+  失败（岩石上挥不到）。原始 `HasLineOfSight` 语义不变（要求 clearance ≥ 传入半径）；
+  0.5ms/query 性能目标未达成（P1 §11 记录）。
 - bot 不走 navmesh（`--bots` 仍走 ORCA 愿望位移），只影响怪物。
 - 原点观察者 + 6 怪 e2e 未验收：SpiderBoss 巡逻圈最近 14.0m < 检测 25m，
   可能主动感知原点观察者；`MonsterWorldTests` 用 `--monsters 4`（不含 SpiderBoss）。
