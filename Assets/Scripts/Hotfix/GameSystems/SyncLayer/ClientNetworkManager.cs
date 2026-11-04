@@ -19,6 +19,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly INetworkClient _client;
         private readonly MessageDispatcher _dispatcher = new MessageDispatcher();
         private readonly ClockSyncDriver _clockSync;
+        private readonly LatencyProbe _latencyProbe;
         private readonly RemoteEntityRegistry _remoteEntities;
         private readonly string _username;
         private readonly System.Collections.Concurrent.ConcurrentQueue<WorldSnapshot> _pendingSnapshots =
@@ -42,6 +43,8 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 两者数值不同步，勿混淆。
         /// </summary>
         public long ClockSmoothedOffsetTicks => _clockSync.SmoothedOffsetTicks;
+        /// <summary>应用层心跳探测的平滑 RTT（毫秒）；无样本或超时后为 null。</summary>
+        public int? RttMs => _latencyProbe.RttMs;
         public Vector3 SpawnPosition { get; private set; }
         public MovementReporter? Reporter => _reporter;
 
@@ -71,6 +74,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
             _clockSync = new ClockSyncDriver(
                 req => _client.Send(MessageId.ClockSyncRequest, req));
+            _latencyProbe = new LatencyProbe(hb => _client.Send(MessageId.Heartbeat, hb));
 
             _dispatcher.Subscribe(MessageId.LoginResponse, OnLoginResponse);
             _dispatcher.Subscribe(MessageId.ClockSyncResponse, OnClockSyncResponse);
@@ -78,6 +82,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _dispatcher.Subscribe(MessageId.PlayerEnterRoom, OnPlayerEnter);
             _dispatcher.Subscribe(MessageId.PlayerLeaveRoom, OnPlayerLeave);
             _dispatcher.Subscribe(MessageId.RespawnNotice, OnRespawnNotice);
+            _dispatcher.Subscribe(MessageId.Heartbeat, OnHeartbeatResponse);
 
             _client.MessageReceived += _dispatcher.Dispatch;
             _client.Disconnected += OnSocketDisconnected;
@@ -157,6 +162,7 @@ namespace Hotfix.GameSystems.SyncLayer
             if (CurrentState != State.InWorld) return;
 
             _clockSync.Tick(deltaSeconds);
+            _latencyProbe.Tick();
 
             // 主线程消费快照（RemoteEntityRegistry 的 Unity API 必须主线程）
             while (_pendingSnapshots.TryDequeue(out var snapshot))
@@ -225,6 +231,11 @@ namespace Hotfix.GameSystems.SyncLayer
         private void OnClockSyncResponse(IMessage message)
         {
             _clockSync.OnResponse((ClockSyncResponse)message);
+        }
+
+        private void OnHeartbeatResponse(IMessage message)
+        {
+            _latencyProbe.OnResponse((Heartbeat)message);
         }
 
         private void OnWorldSnapshot(IMessage message)
