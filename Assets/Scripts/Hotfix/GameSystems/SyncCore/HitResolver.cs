@@ -11,12 +11,15 @@ namespace Cool.SyncCore
         public readonly long Id;
         public readonly Vec3 Position;
         public readonly bool Alive;
+        /// <summary>目标身体半径（米）；玩家恒 0，NPC 用 bodyRadius。命中按表面距离。</summary>
+        public readonly float Radius;
 
-        public CombatCandidate(long id, Vec3 position, bool alive)
+        public CombatCandidate(long id, Vec3 position, bool alive, float radius = 0f)
         {
             Id = id;
             Position = position;
             Alive = alive;
+            Radius = radius;
         }
     }
 
@@ -46,7 +49,7 @@ namespace Cool.SyncCore
                 foreach (var c in candidates)
                 {
                     if (!c.Alive) continue;
-                    if (DistXZ(casterPos, c.Position) <= shape.AreaRadius)
+                    if (SurfaceDistance(casterPos, c.Position, c.Radius) <= shape.AreaRadius)
                         hits.Add(c.Id);
                 }
                 return hits;
@@ -63,7 +66,7 @@ namespace Cool.SyncCore
                 foreach (var c in candidates)
                 {
                     if (c.Id != targetId || !c.Alive) continue;
-                    if (DistXZ(casterPos, c.Position) > shape.Range) continue;
+                    if (SurfaceDistance(casterPos, c.Position, c.Radius) > shape.Range) continue;
                     if (!InCone(casterPos, forwardX, forwardZ, halfCos, c.Position)) continue;
                     hits.Add(c.Id);
                     break;
@@ -77,7 +80,7 @@ namespace Cool.SyncCore
             foreach (var c in candidates)
             {
                 if (!c.Alive) continue;
-                float dist = DistXZ(casterPos, c.Position);
+                float dist = SurfaceDistance(casterPos, c.Position, c.Radius);
                 if (dist > shape.Range) continue;
                 if (!InCone(casterPos, forwardX, forwardZ, halfCos, c.Position)) continue;
                 if (dist < bestDist) { best = c.Id; bestDist = dist; }
@@ -95,6 +98,9 @@ namespace Cool.SyncCore
             if (dist < 0.0001f) return true;
             return (forwardX * dx + forwardZ * dz) / dist >= halfCos;
         }
+
+        private static float SurfaceDistance(Vec3 a, Vec3 b, float radius)
+            => Math.Max(0f, DistXZ(a, b) - radius);
 
         private static float DistXZ(Vec3 a, Vec3 b)
         {
@@ -119,9 +125,9 @@ namespace Cool.SyncCore
                 float dx = c.Position.X - origin.X;
                 float dz = c.Position.Z - origin.Z;
                 float along = dx * fx + dz * fz;
-                if (along < startDistance || along > startDistance + length) continue;
+                if (along + c.Radius < startDistance || along - c.Radius > startDistance + length) continue;
                 float lateral = Math.Abs(dx * fz - dz * fx);   // 2D 叉积的模 = 横向距离
-                if (lateral > halfWidth) continue;
+                if (lateral > halfWidth + c.Radius) continue;
                 hits.Add(c.Id);
             }
             return hits;
@@ -145,8 +151,8 @@ namespace Cool.SyncCore
                 float dx = c.Position.X - origin.X;
                 float dz = c.Position.Z - origin.Z;
                 float along = dx * fx + dz * fz;
-                if (along < startDistance || along > startDistance + length) continue;
-                if (Math.Abs(dx * fz - dz * fx) > halfWidth) continue;
+                if (along + c.Radius < startDistance || along - c.Radius > startDistance + length) continue;
+                if (Math.Abs(dx * fz - dz * fx) > halfWidth + c.Radius) continue;
                 if (along < bestAlong) { best = c.Id; bestAlong = along; hitPosition = c.Position; }
             }
             return best;
@@ -160,7 +166,7 @@ namespace Cool.SyncCore
             foreach (var c in candidates)
             {
                 if (!c.Alive) continue;
-                if (DistXZ(center, c.Position) <= radius) hits.Add(c.Id);
+                if (SurfaceDistance(center, c.Position, c.Radius) <= radius) hits.Add(c.Id);
             }
             return hits;
         }

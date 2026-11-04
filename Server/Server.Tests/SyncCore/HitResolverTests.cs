@@ -7,8 +7,8 @@ namespace Cool.SyncCore.Tests;
 
 public class HitResolverTests
 {
-    private static CombatCandidate C(long id, float x, float z, bool alive = true)
-        => new CombatCandidate(id, new Vec3(x, 0f, z), alive);
+    private static CombatCandidate C(long id, float x, float z, bool alive = true, float radius = 0f)
+        => new CombatCandidate(id, new Vec3(x, 0f, z), alive, radius);
 
     // Single 形状：SkillQ range 3.5 / angle 120（全角 → 半角 60°）
     private static readonly HitShape Single35 = new HitShape
@@ -19,6 +19,11 @@ public class HitResolverTests
     private static readonly HitShape Circle25 = new HitShape
     {
         ShapeType = 1, AreaRadius = 2.5f
+    };
+
+    private static readonly HitShape Single20 = new HitShape
+    {
+        ShapeType = 0, Range = 2f, Angle = 120f
     };
 
     [Fact]
@@ -140,5 +145,39 @@ public class HitResolverTests
         var candidates = new List<CombatCandidate> { C(2, 1f, 0f), C(3, 0f, 2f, alive: false) };
         var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Circle25, candidates);
         Assert.Equal(new long[] { 2 }, hits);
+    }
+
+    [Fact]
+    public void Single_Explicit_Target_With_Radius_Hits_By_Surface_Distance()
+    {
+        var withRadius = new List<CombatCandidate> { C(2, 0f, 3f, radius: 1.74f) };
+        var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single20, withRadius);
+        Assert.Equal(new long[] { 2 }, hits);
+
+        var noRadius = new List<CombatCandidate> { C(2, 0f, 3f) };
+        Assert.Empty(HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single20, noRadius));
+    }
+
+    [Fact]
+    public void Line_Hit_Expands_By_Target_Radius()
+    {
+        var withRadius = new List<CombatCandidate> { C(2, 2.5f, 5f, radius: 1.74f) };
+        Assert.Equal(new long[] { 2 }, HitResolver.ResolveLineAll(
+            new Vec3(0, 0, 0), 0f, 0f, 10f, 1f, null, withRadius));
+
+        var noRadius = new List<CombatCandidate> { C(2, 2.5f, 5f) };
+        Assert.Empty(HitResolver.ResolveLineAll(
+            new Vec3(0, 0, 0), 0f, 0f, 10f, 1f, null, noRadius));
+    }
+
+    [Fact]
+    public void Circle_Hit_Expands_By_Target_Radius()
+    {
+        var withRadius = new List<CombatCandidate> { C(2, 0f, 3f, radius: 1.74f) };
+        Assert.Equal(new long[] { 2 },
+            HitResolver.ResolveCircle(new Vec3(0, 0, 0), 2f, withRadius));
+
+        var noRadius = new List<CombatCandidate> { C(2, 0f, 3f) };
+        Assert.Empty(HitResolver.ResolveCircle(new Vec3(0, 0, 0), 2f, noRadius));
     }
 }
