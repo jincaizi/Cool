@@ -57,26 +57,27 @@
 // 现有：只比较中心方向
 return (forwardX * dx + forwardZ * dz) / dist >= halfCos;
 
-// 新：半径 <= 0 时保持上面的快路径；半径 > 0 时按目标圆的角半径扩展
-if (!(radius > 0f)) return (forwardX * dx + forwardZ * dz) / dist >= halfCos;
-if (dist <= radius) return true;                       // 施法者已在目标身体内
+// 新：目标半径 <= 0 时保持上面的快路径；> 0 时按目标圆的角半径扩展
+if (!(targetRadius > 0f)) return (forwardX * dx + forwardZ * dz) / dist >= halfCos;
+if (dist <= targetRadius) return true;                 // 施法者已在目标身体内
 float angle = (float)Math.Atan2(
     Math.Abs(forwardX * dz - forwardZ * dx),
     forwardX * dx + forwardZ * dz);                    // [0, π]
-float alpha = (float)Math.Asin(Math.Min(1f, radius / dist));
+float alpha = (float)Math.Asin(Math.Min(1f, targetRadius / dist));
 return angle <= halfAngleRad + alpha;
 ```
 
 要点：
 
-- `halfAngleRad = shape.Angle * 0.5 * π / 180`；`shape.Angle` 是全角，与现有语义一致。
-- 半径 0 走原快路径，避免 `Atan2/Asin` 的浮点差异改变既有边界用例（PvP 逐值不变）。
-- `radius` 为 NaN 或负数时 `radius > 0` 为 false，同样落回快路径，不会放大判定。
+- `InCone` 新增 `halfAngleRad` 与 `targetRadius` 两个参数；`Resolve` 在现有 `halfCos`
+  之外再计算一次 `halfAngleRad`（`shape.Angle * 0.5 * π / 180`，`shape.Angle` 是全角）。
+- 目标半径 0 走原快路径，避免 `Atan2/Asin` 的浮点差异改变既有边界用例（PvP 逐值不变）。
+- `targetRadius` 为 NaN 或负数时 `targetRadius > 0` 为 false，同样落回快路径，不会放大判定。
 - `dist < 0.0001` 的零距离退化保持现有 `return true`。
 - 直接用 `Atan2(|cross|, dot)` 而不是 `Acos(dot/dist)`：在 0 和 π 附近更稳定。
 - 射程判定保持 `max(0, dist - radius) <= shape.Range`。本次只改角度，不改距离语义。
   当身体侧对时，扇形内实际相交点可能比最近表面点更远，但以当前近战数值
-  （蜘蛛半径 1.74、射程 2.0、中心距约 2.16）相交点约 0.51m，远小于射程；
+  （蜘蛛半径 1.74、射程 2.0、中心距约 2.16–2.24）相交点约 0.51m，远小于射程；
   这是既有「表面距离」语义的有界近似，不阻塞本次修复。
 - 显式目标（`targetId > 0`）与自动目标共用同一个 `InCone`，两条路径都传 `c.Radius`。
 
@@ -98,8 +99,7 @@ return angle <= halfAngleRad + alpha;
    BodyRadius = Mathf.Max(world.size.x, world.size.z) * 0.5f;
    ```
 
-   蜘蛛约 1.66m（服务端配置 1.74 略大；锁定用的半径略小，但玩家被身体碰撞体挡在
-   中心距约 2.16m，差异落在不可达区间内，不影响可玩性）。无 SMR 时保持 0。
+   蜘蛛约 1.74m（由模型包围盒推导，与服务端配置 1.74 基本一致）。无 SMR 时保持 0。
 
 2. `RemoteEntityView` 增加 `public NpcBodyCollider? BodyCollider { get; internal set; }`
    与 `public float BodyRadius => BodyCollider != null ? BodyCollider.BodyRadius : 0f;`。
@@ -112,7 +112,8 @@ return angle <= halfAngleRad + alpha;
    - `BuildCandidates` 用 `view.BodyRadius` 填充。
    - `FilterCandidates`：
      - 射程：`surface = Mathf.Max(0, centerDist - Radius)`，`surface > acquireRange` 才排除；
-     - 锥角：`effectiveHalf = Mathf.Min(180, halfAngleDeg + Asin(clamp(Radius/centerDist)) * Rad2Deg)`；
+     - 锥角：`centerDist <= Radius` 或 `centerDist ≈ 0` 视为已在身体内/零距离，直接入选；
+       否则 `effectiveHalf = Mathf.Min(180, halfAngleDeg + Asin(clamp(Radius/centerDist)) * Rad2Deg)`；
      - 排序：按**表面距离**升序，与服务器自动目标「按表面距离取最近」同口径。
    - `IsWithinSkillShape`：射程同样用表面距离；`omnidirectional`（AOE 圆）只查半径；
      非全向时用同一 `effectiveHalf` 公式。
@@ -149,7 +150,9 @@ return angle <= halfAngleRad + alpha;
 
 - `Side_Target_With_Radius_Is_Hit_By_Angular_Reach`：原点、yaw 0（+Z）、
   `Single range 2.0 / angle 120`；目标中心 `(2.16, 0)`、半径 1.74 → 命中。
-- `Side_Target_Without_Radius_Is_Missed`：同一位置、半径 0 → 不中。
+- `Side_Target_Without_Radius_Is_Missed`：同一位置、半径 0 → 不中（射程与锥角都不满足）。
+- `Side_Target_In_Range_Without_Radius_Is_Missed`：目标 `(1.5, 0)`、半径 0
+  （表面距 1.5 ≤ 射程 2.0，仅锥角 90° > 60°）→ 不中，单独隔离角判定。
 - `Target_Directly_Behind_Is_Missed_Even_With_Radius`：目标 `(0, -2.16)`、半径 1.74 → 不中。
 - `Explicit_Target_Uses_Angular_Reach`：`targetId` 指向侧面大目标 → 命中；半径 0 → 不中。
 - 既有半径 0 用例全部保持绿色（回归）。
@@ -159,7 +162,10 @@ return angle <= halfAngleRad + alpha;
 `Server/Server.Tests/Combat/CombatResolverNpcTests.cs`：
 
 - `Player_Melee_Hits_Large_Npc_From_Side`：大半径 NPC 位于施法者侧面 90°、
-  中心距 2.16m，10001 命中并扣血；同一位置换成半径 0 的候选不扣血。
+  中心距 2.16m，10001 命中并扣血；同位置半径 0 不扣血（射程也不足）。
+- `Player_Melee_Misses_Side_Npc_Without_Radius_In_Range`：NPC 在 `(1.5, 0)`、半径 0，
+  表面距 1.5 ≤ 2.0，仅锥角不满足 → 不扣血，隔离角判定。
+- `World` 助手只把 NPC 放在 +Z；侧面用例直接在测试内用 `AddNpc` 构造位置。
   覆盖 `BuildCandidates` 的半径携带与 `ResolveStage` 的完整链路。
 
 ### 6.3 客户端
@@ -169,6 +175,10 @@ return angle <= halfAngleRad + alpha;
 - `FilterCandidates` 保留半径 1.74、中心距 2.2、射程 2.0 的候选；半径 0 时排除。
 - 侧面 90°、半径 1.74、半角 60 的候选保留；半径 0 时排除。
 - 排序按表面距离：较远中心距的大目标可以排在较近中心距的小目标之前。
+- `EnsureTargetFor_Keeps_Lock_On_Large_Npc_At_Melee_Range`：给 NPC 视图挂半径 1.74 的
+  `NpcBodyCollider`（真蜘蛛预制体或假 SMR），中心距 2.2、侧面 90°，
+  `EnsureTargetFor(BA_Combo1)` 后 `LockedTargetId` 仍为该 NPC；半径 0 的对照不锁定。
+  测试程序集已有 `InternalsVisibleTo`（与 `NpcBodyColliderTests` 调 `BuildCollider` 同源）。
 - 既有半径默认 0 的用例保持绿色。
 
 `Assets/Scripts/Tests/Editor/SyncLayer/NpcBodyColliderTests.cs`：
@@ -198,12 +208,14 @@ bash tools/unity-tests.sh EditMode NpcBodyColliderTests
 ## 7. 风险与兼容
 
 - **侧身命中更宽松**：目标半径越大，允许的中心角越大（60° 半锥 + 最大 90°）。
-  对 3.5m 宽 Boss 贴脸的情形，身体确实环绕到玩家侧后方，判定符合「剑碰到身体」；
+  对 3.5m 宽 Boss 贴脸的情形（中心距 2.2m 时角扩展约 52°，总约 112°），
+  身体确实环绕到玩家侧后方，判定符合「剑碰到身体」；
   若实战手感过宽，可再讨论给角扩展加封顶，但本轮按精确圆-锥相交实现。
 - **自动目标可能选中侧面大怪**：排序仍按表面距离，与既有「表面距离取最近」一致；
   大怪表面更近时会优先被选中，属预期。
-- **客户端半径略小于服务端**：`NpcBodyCollider` 用实际网格半宽 1.66，服务端配置 1.74。
-  由于玩家被挡在中心距约 2.16m，差异落在不可达区间；只影响锁定筛选的极窄边界。
+- **客户端半径来自模型而不是配置**：`NpcBodyCollider` 用实际网格 XZ 半宽（蜘蛛约 1.74），
+  服务端用配置 `bodyRadius = 1.74`。两者同源但可能随后续美术缩放/配置调整漂移；
+  当前一致，后续改模型或配置时需同步核对。
 - **部署副本配置**：`dist/server/Config/monster_config.json` 缺 `bodyRadius`，本次不修。
   若用旧 DLL/旧配置部署，服务端仍可能按中心距判定；发布前必须重新生成或同步该目录。
 - **仍未验证的变量**：如果修复后仍有随站位变化的漏判，下一步在判定帧打印
@@ -231,6 +243,8 @@ bash tools/unity-tests.sh EditMode NpcBodyColliderTests
 
 按 `CLAUDE.md`「改动模块行为时同步更新 README」：
 
+- `Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs` 类注释：锥形语义补
+  「目标半径参与角度判定；半径 0 保持中心点快路径」。
 - `Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md`：命中裁决说明补
   「锥形判定计入目标半径（圆-锥相交）；半径 0 行为不变」。
 - `Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md`：目标锁定改用
