@@ -27,6 +27,8 @@ namespace Cool.SyncCore
     /// 服务端权威命中裁决（spec §5-P4：判定几何两端同源）——纯几何，零 UnityEngine 依赖。
     /// 语义与客户端 AttackShape 对齐（XZ 平面；Angle 全角，半角余弦比较）：
     /// 距离一律为**表面距离** = max(0, 中心距 − 目标半径)；玩家半径为 0 时退化为中心距。
+    /// 锥形：目标半径 > 0 时按圆 vs 锥精确相交（中心角 ≤ 半锥角 + asin(半径/中心距)）；
+    /// 半径 0 / NaN 走中心点快路径，PvP 逐值不变。
     ///  - Single（显式 targetId）：表面距离 ≤ Range **且**位于前方 ±Angle/2 锥内（显式目标同样过锥，D-6）；
     ///  - Single（targetId=0，P4 客户端恒 0）：表面距离 ≤ Range + 施法者前方 ±Angle/2 锥内最近实体
     ///    （按表面距离取最近，spec §4.4）；
@@ -61,6 +63,7 @@ namespace Cool.SyncCore
             float forwardX = (float)Math.Sin(casterYawDeg * Math.PI / 180.0);
             float forwardZ = (float)Math.Cos(casterYawDeg * Math.PI / 180.0);
             float halfCos = (float)Math.Cos(shape.Angle * 0.5f * Math.PI / 180.0);
+            float halfAngleRad = (float)(shape.Angle * 0.5 * Math.PI / 180.0);
 
             // Single
             if (targetId > 0)
@@ -69,7 +72,8 @@ namespace Cool.SyncCore
                 {
                     if (c.Id != targetId || !c.Alive) continue;
                     if (SurfaceDistance(casterPos, c.Position, c.Radius) > shape.Range) continue;
-                    if (!InCone(casterPos, forwardX, forwardZ, halfCos, c.Position)) continue;
+                    if (!InCone(casterPos, forwardX, forwardZ, halfCos, halfAngleRad,
+                            c.Position, c.Radius)) continue;
                     hits.Add(c.Id);
                     break;
                 }
@@ -84,21 +88,33 @@ namespace Cool.SyncCore
                 if (!c.Alive) continue;
                 float dist = SurfaceDistance(casterPos, c.Position, c.Radius);
                 if (dist > shape.Range) continue;
-                if (!InCone(casterPos, forwardX, forwardZ, halfCos, c.Position)) continue;
+                if (!InCone(casterPos, forwardX, forwardZ, halfCos, halfAngleRad,
+                        c.Position, c.Radius)) continue;
                 if (dist < bestDist) { best = c.Id; bestDist = dist; }
             }
             if (best != 0) hits.Add(best);
             return hits;
         }
 
-        /// <summary>前方 ±Angle/2 锥内（含边界）；零距离退化视为锥内（D-P4-2a——双端同出生点）。</summary>
-        private static bool InCone(Vec3 casterPos, float forwardX, float forwardZ, float halfCos, Vec3 target)
+        /// <summary>前方 ±Angle/2 锥内（含边界）；零距离退化视为锥内（D-P4-2a——双端同出生点）。
+        /// 目标半径 > 0 时按圆 vs 锥精确相交扩展角：中心角 ≤ 半锥角 + asin(半径/中心距)；
+        /// 半径 ≤ 0 / NaN 时保持中心点快路径（PvP 逐值不变）；
+        /// 施法者已在目标圆内（中心距 ≤ 半径）视为命中。</summary>
+        private static bool InCone(Vec3 casterPos, float forwardX, float forwardZ,
+            float halfCos, float halfAngleRad, Vec3 target, float targetRadius)
         {
             float dx = target.X - casterPos.X;
             float dz = target.Z - casterPos.Z;
             float dist = (float)Math.Sqrt(dx * dx + dz * dz);
             if (dist < 0.0001f) return true;
-            return (forwardX * dx + forwardZ * dz) / dist >= halfCos;
+
+            float dot = forwardX * dx + forwardZ * dz;
+            if (!(targetRadius > 0f)) return dot / dist >= halfCos;
+            if (dist <= targetRadius) return true;
+
+            float angle = (float)Math.Atan2(Math.Abs(forwardX * dz - forwardZ * dx), dot);
+            float alpha = (float)Math.Asin(Math.Min(1f, targetRadius / dist));
+            return angle <= halfAngleRad + alpha;
         }
 
         private static float SurfaceDistance(Vec3 a, Vec3 b, float radius)

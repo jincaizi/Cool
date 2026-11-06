@@ -158,6 +158,46 @@ public class CombatResolverNpcTests
     }
 
     [Fact]
+    public void Player_Melee_Hits_Large_Npc_From_Side()
+    {
+        var store = new EntityStore();
+        long player = 1;
+        long npc = MonsterModule.NpcIdSeed + 1;
+        store.AddPlayer(player, "P");
+        store.GetPlayer(player)!.IsLoggedIn = true;
+        // 玩家在原点朝 +Z；NPC 在 +X 侧 90°、中心距 2.16，半径 1.74
+        store.AddNpc(npc, $"Spider#{npc}", 4, 1500f, new Vector3(2.16f, 0f, 0f), 1.74f);
+        store.GetPlayer(npc)!.Rotation = 180f;
+        var resolver = new CombatResolver(store, new Random(42));
+
+        var result = Resolve(resolver, player, PlayerSwing(npc), 10);
+
+        Assert.True(result.Accepted);
+        var hit = Assert.Single(result.Hits);
+        Assert.Equal(npc, hit.TargetPlayerId);
+        Assert.Equal(1500f - hit.Damage, store.GetPlayer(npc)!.Hp);
+    }
+
+    [Fact]
+    public void Player_Melee_Misses_Side_Npc_Without_Radius_In_Range()
+    {
+        var store = new EntityStore();
+        long player = 1;
+        long npc = MonsterModule.NpcIdSeed + 1;
+        store.AddPlayer(player, "P");
+        store.GetPlayer(player)!.IsLoggedIn = true;
+        // 表面距 1.5 ≤ 2.0，但半径 0、中心角 90° > 60° → 仅角判定拒绝
+        store.AddNpc(npc, $"Side#{npc}", 4, 100f, new Vector3(1.5f, 0f, 0f));
+        var resolver = new CombatResolver(store, new Random(42));
+
+        var result = Resolve(resolver, player, PlayerSwing(npc), 10);
+
+        Assert.True(result.Accepted);
+        Assert.Empty(result.Hits);
+        Assert.Equal(100f, store.GetPlayer(npc)!.Hp);
+    }
+
+    [Fact]
     public void Dead_Npc_Cannot_Cast_And_Cannot_Be_Hit()
     {
         var (store, resolver, player, npc) = World(1.5f);

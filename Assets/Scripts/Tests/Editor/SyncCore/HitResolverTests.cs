@@ -238,5 +238,63 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             var noRadius = new List<CombatCandidate> { C(2, 0f, 3f) };
             Assert.That(HitResolver.ResolveCircle(new Vec3(0, 0, 0), 2f, noRadius), Is.Empty);
         }
+
+        [Test]
+        public void Side_Target_With_Radius_Is_Hit_By_Angular_Reach()
+        {
+            // 中心距 2.16、半径 1.74 → 表面 0.42 ≤ 2.0；
+            // 中心方向 90°，半锥 60° + asin(1.74/2.16) ≈ 53.7° → 命中
+            var candidates = new List<CombatCandidate> { C(2, 2.16f, 0f, radius: 1.74f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single20, candidates);
+            Assert.That(hits, Is.EqualTo(new long[] { 2 }));
+        }
+
+        [Test]
+        public void Side_Target_Without_Radius_Is_Missed()
+        {
+            // 同一中心距、半径 0：射程与锥角都不满足
+            var candidates = new List<CombatCandidate> { C(2, 2.16f, 0f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single20, candidates);
+            Assert.That(hits, Is.Empty);
+        }
+
+        [Test]
+        public void Side_Target_In_Range_Without_Radius_Is_Missed()
+        {
+            // 表面距 1.5 ≤ 2.0，仅中心角 90° > 60° 被拒——隔离角判定
+            var candidates = new List<CombatCandidate> { C(2, 1.5f, 0f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single20, candidates);
+            Assert.That(hits, Is.Empty);
+        }
+
+        [Test]
+        public void Target_Directly_Behind_Is_Missed_Even_With_Radius()
+        {
+            // 正后方 180°：角扩展上限（60° + asin(1.74/2.16) ≈ 113.7°）仍不足以命中
+            var candidates = new List<CombatCandidate> { C(2, 0f, -2.16f, radius: 1.74f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single20, candidates);
+            Assert.That(hits, Is.Empty);
+        }
+
+        [Test]
+        public void Caster_Inside_Target_Body_Hits()
+        {
+            // 中心距 1.0 < 半径 1.74，且中心在侧面 90°：施法者已在身体内，角度无定义时取命中
+            var candidates = new List<CombatCandidate> { C(2, 1f, 0f, radius: 1.74f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single20, candidates);
+            Assert.That(hits, Is.EqualTo(new long[] { 2 }));
+        }
+
+        [Test]
+        public void Explicit_Target_Uses_Angular_Reach()
+        {
+            var withRadius = new List<CombatCandidate> { C(2, 2.16f, 0f, radius: 1.74f) };
+            Assert.That(HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single20, withRadius),
+                Is.EqualTo(new long[] { 2 }));
+
+            var noRadius = new List<CombatCandidate> { C(2, 1.5f, 0f) };
+            Assert.That(HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single20, noRadius),
+                Is.Empty);
+        }
     }
 }
