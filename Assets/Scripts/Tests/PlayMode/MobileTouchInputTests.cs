@@ -522,9 +522,15 @@ namespace KcpNet.PlayModeTests
                 }
                 Assert.IsTrue(charging, "按住火球应进入蓄力（HoldToAim）");
 
-                SendPointerDrag(aim, new Vector2(60f, 0f));
+                // 屏幕像素必须按 Canvas 缩放换算：摇杆按 Canvas 单位归一（_aimRadius=90），
+                // 固定 60px 在 1280×720（scaleFactor≈0.667）会放大成 90 单位 = 满幅 ⇒ 落点 15m。
+                var canvas = aim.GetComponentInParent<Canvas>();
+                Assert.IsNotNull(canvas, "火球按钮应在 Canvas 下");
+                const float dragCanvasUnits = 60f;
+                float dragPixels = dragCanvasUnits * canvas.scaleFactor;
+                SendPointerDrag(aim, new Vector2(dragPixels, 0f));
                 yield return null; // 帧末写入 InputManager，下一帧 Sys3CEntry 采纳落点
-                SendPointerUp(aim, new Vector2(60f, 0f));
+                SendPointerUp(aim, new Vector2(dragPixels, 0f));
 
                 // 落点必须来自拖拽，而不是被松手帧 PC 兜底覆盖成最大射程。
                 // 冷却在释放（ReportChargeReleased）时起算；循环到冷却出现为止，
@@ -549,7 +555,13 @@ namespace KcpNet.PlayModeTests
 
                 Vector3 playerPos = _aimBinder.BoundEntry.transform.position;
                 float aimDistance = new Vector2(impact.x - playerPos.x, impact.z - playerPos.z).magnitude;
+                // 幅度 60/90 ⇒ 期望距离 = Lerp(MinAimDistance 2, ProjectileRange 15, 2/3) ≈ 10.667。
+                // 上界守住“不得被覆盖成 15m 兜底”，下界/近似值守住“确实是按拖拽幅度映射”。
+                float expected = Mathf.Lerp(2f, 15f, dragCanvasUnits / 90f);
                 Assert.Less(aimDistance, 14.5f, "拖拽落点不得被覆盖成最大射程（15m）");
+                Assert.Greater(aimDistance, 2f, "拖拽落点必须大于最小瞄准距离");
+                Assert.AreEqual(expected, aimDistance, 0.75f,
+                    "拖拽落点应接近按幅度映射的距离，实际 " + aimDistance);
 
                 yield return UnloadDemoDay();
             }
@@ -592,14 +604,135 @@ namespace KcpNet.PlayModeTests
                 }
                 Assert.IsTrue(activated, "按住火球应激活 20003");
 
-                SendPointerDrag(aim, new Vector2(0f, 400f)); // 远大于 1.4 × 90，兼容 Canvas 缩放
+                // 400 Canvas 单位 > 1.4 × 90 的取消阈值；按 Canvas 缩放换算成屏幕像素。
+                var canvas = aim.GetComponentInParent<Canvas>();
+                Assert.IsNotNull(canvas, "火球按钮应在 Canvas 下");
+                float farPixels = 400f * canvas.scaleFactor;
+                SendPointerDrag(aim, new Vector2(0f, farPixels));
                 yield return null; // 让取消锁存跨帧被 Sys3CEntry 消费
-                SendPointerUp(aim, new Vector2(0f, 400f));
+                SendPointerUp(aim, new Vector2(0f, farPixels));
 
                 for (int i = 0; i < 30; i++) yield return null;
 
                 Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown,
                     "拉远取消不得进入冷却");
+
+                yield return UnloadDemoDay();
+            }
+            finally
+            {
+                if (_aimBinder != null) _aimBinder.TouchOverride = TouchOverride.Auto;
+                LogAssert.ignoreFailingMessages = prevIgnore;
+            }
+        }
+
+        /// <summary>
+        /// 失焦取消：蓄力中切后台（WebGL 浏览器失焦 / 移动端切走）必须取消火球、
+        /// 复位摇杆手势、不进入冷却；之后补发的抬指不得把技能“补射”出去。
+        /// 走 `MobileInputBinder.OnApplicationFocus` 这条真实路径（与 Unity 引擎回调同名同签名）。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator test_fireball_aim_focus_loss_cancels_without_cooldown()
+        {
+            bool prevIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                yield return LoadDemoDayAndBind();
+                var aim = Object.FindObjectOfType<MobileSkillAimJoystick>();
+                Assert.IsNotNull(aim, "火球按钮应挂瞄准摇杆");
+                aim.Interactable = true;
+
+                var coordinator = _aimBinder.BoundEntry.SkillCoordinator;
+                Assert.IsNotNull(coordinator, "本地角色应有技能协调器");
+
+                SendPointerDown(aim, Vector2.zero);
+                bool charging = false;
+                for (int i = 0; i < 180; i++)
+                {
+                    if (coordinator.CurrentSkill != null && coordinator.CurrentSkill.SkillId == 20003
+                        && coordinator.CurrentSubState == SkillSubState.Charging)
+                    {
+                        charging = true;
+                        break;
+                    }
+                    yield return null;
+                }
+                Assert.IsTrue(charging, "按住火球应进入蓄力（HoldToAim）");
+
+                _aimBinder.SendMessage("OnApplicationFocus", false);
+                for (int i = 0; i < 30; i++) yield return null;
+
+                Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown,
+                    "失焦取消不得进入冷却");
+                Assert.AreNotEqual(SkillSubState.Charging, coordinator.CurrentSubState,
+                    "失焦后技能不得仍在蓄力");
+                Assert.IsFalse(aim.IsGestureActive, "失焦后摇杆手势必须复位");
+
+                // 手势已复位，补发的抬指不得合成释放（防“回前台自动补射”）。
+                SendPointerUp(aim, Vector2.zero);
+                for (int i = 0; i < 10; i++) yield return null;
+                Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown,
+                    "复位后的抬指不得补发火球");
+
+                yield return UnloadDemoDay();
+            }
+            finally
+            {
+                if (_aimBinder != null) _aimBinder.TouchOverride = TouchOverride.Auto;
+                LogAssert.ignoreFailingMessages = prevIgnore;
+            }
+        }
+
+        /// <summary>
+        /// 精力耗尽取消：蓄力中把精力一次抽干，下一帧 `StaminaExhausted` 必须取消火球、
+        /// 复位摇杆手势（`MobileSkillBarPresenter` 的离开 Charging 边沿）且不进入冷却。
+        /// 同帧扣除不会立刻取消——取消发生在 `SkillCoordinator.UpdateSustainedStamina`。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator test_fireball_aim_stamina_depleted_cancels_without_cooldown()
+        {
+            bool prevIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                yield return LoadDemoDayAndBind();
+                var aim = Object.FindObjectOfType<MobileSkillAimJoystick>();
+                Assert.IsNotNull(aim, "火球按钮应挂瞄准摇杆");
+                aim.Interactable = true;
+
+                var coordinator = _aimBinder.BoundEntry.SkillCoordinator;
+                Assert.IsNotNull(coordinator, "本地角色应有技能协调器");
+                var stamina = _aimBinder.BoundEntry.Stamina;
+                Assert.IsNotNull(stamina, "本地角色应有精力系统");
+
+                SendPointerDown(aim, Vector2.zero);
+                bool charging = false;
+                for (int i = 0; i < 180; i++)
+                {
+                    if (coordinator.CurrentSkill != null && coordinator.CurrentSkill.SkillId == 20003
+                        && coordinator.CurrentSubState == SkillSubState.Charging)
+                    {
+                        charging = true;
+                        break;
+                    }
+                    yield return null;
+                }
+                Assert.IsTrue(charging, "按住火球应进入蓄力（HoldToAim）");
+
+                Assert.IsFalse(stamina.TryConsume(100f), "一次性抽干精力应直接力竭");
+                for (int i = 0; i < 30; i++) yield return null;
+
+                Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown,
+                    "精力耗尽取消不得进入冷却");
+                Assert.AreNotEqual(SkillSubState.Charging, coordinator.CurrentSubState,
+                    "精力耗尽后技能不得仍在蓄力");
+                Assert.IsFalse(aim.IsGestureActive, "精力耗尽后摇杆手势必须复位");
+
+                SendPointerUp(aim, Vector2.zero);
+                for (int i = 0; i < 10; i++) yield return null;
+                Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown,
+                    "复位后的抬指不得补发火球");
 
                 yield return UnloadDemoDay();
             }
