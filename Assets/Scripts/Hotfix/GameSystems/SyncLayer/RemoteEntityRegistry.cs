@@ -644,8 +644,10 @@ namespace Hotfix.GameSystems.SyncLayer
                     var driver = model.AddComponent<NpcEntityAnimator>();
                     // 纯客户端身体碰撞体（2026-10-13）：让本地玩家撞不过去（Boss 不再能穿过）。
                     // 只挡本地玩家——层矩阵/查询排查见 NpcBodyCollider 的类注释与验收报告。
-                    model.AddComponent<NpcBodyCollider>();
-                    return new RemoteEntityView(model, snapshot.Kind, snapshot.TemplateId, npcAnimator: driver);
+                    var body = model.AddComponent<NpcBodyCollider>();
+                    var npcView = new RemoteEntityView(model, snapshot.Kind, snapshot.TemplateId, npcAnimator: driver);
+                    npcView.BodyCollider = body;
+                    return npcView;
                 }
 
                 var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);   // 降级占位（目录未命中/未接线）
@@ -781,6 +783,10 @@ namespace Hotfix.GameSystems.SyncLayer
         public GameObject? ProxyRoot { get; internal set; }
         /// <summary>怪物动画驱动（Kind=Npc 且预制体带组件时非空；球体占位为 null）</summary>
         public NpcEntityAnimator? NpcAnimator { get; }
+        /// <summary>怪物视图的运行时身体碰撞体（玩家/球体占位为 null）</summary>
+        public NpcBodyCollider? BodyCollider { get; internal set; }
+        /// <summary>目标选择用的 XZ 身体半径（米；玩家/占位为 0）</summary>
+        public float BodyRadius => BodyCollider != null ? BodyCollider.BodyRadius : 0f;
 
         public Vector3 Position
         {

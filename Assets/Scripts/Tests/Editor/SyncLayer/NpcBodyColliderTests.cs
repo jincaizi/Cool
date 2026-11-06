@@ -84,6 +84,13 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
                 // 造出来的子物体在视图根之下 —— 随插值定位一起移动
                 Assert.AreSame(view.GameObject.transform, body.transform.parent);
+
+                Assert.AreEqual(1f, bodyCollider.BodyRadius, 1e-4f,
+                    "目标选择半径 = max(2,1)/2 = 1");
+                Assert.AreEqual(1f, view.BodyRadius, 1e-4f,
+                    "RemoteEntityView 应暴露同一半径");
+                Assert.AreSame(bodyCollider, view.BodyCollider,
+                    "RemoteEntityView 应回填运行时身体碰撞体");
             }
             finally
             {
@@ -126,6 +133,10 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     Assert.AreEqual(localSize.z, box.size.z, 1e-2f, path + "：Z 跨度应随模型");
                     Assert.Greater(box.size.x, 0.2f, path + "：尺寸不该是退化值");
                     Assert.Greater(box.size.y, 0.2f, path + "：尺寸不该是退化值");
+
+                    var expectedRadius = Mathf.Max(world.size.x, world.size.z) * 0.5f;
+                    Assert.AreEqual(expectedRadius, bodyCollider.BodyRadius, 1e-2f,
+                        path + "：目标选择半径 = SMR 世界包围盒 XZ 较大半宽");
                 }
                 finally
                 {

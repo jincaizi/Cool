@@ -38,6 +38,10 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>建出来的身体碰撞体（未建成 / 模型无渲染器时为 null）</summary>
         public BoxCollider? Collider { get; private set; }
 
+        /// <summary>建出来的身体碰撞体的 XZ 半径（米；未建成/无渲染器时为 0）——目标选择用。
+        /// 取盒体长边的半长（世界空间），与服务端 `bodyRadius` 同口径。</summary>
+        public float BodyRadius { get; private set; }
+
         private void Awake() => BuildCollider();
 
         /// <summary>
@@ -67,6 +71,9 @@ namespace Hotfix.GameSystems.SyncLayer
                 world.size.y / Mathf.Max(Mathf.Abs(scale.y), 1e-4f),
                 world.size.z / Mathf.Max(Mathf.Abs(scale.z), 1e-4f));
             if (localSize.x < 0.01f && localSize.y < 0.01f && localSize.z < 0.01f) return; // 未蒙皮的退化 bounds
+
+            // 目标选择半径：盒体 XZ 长边的半长（world 是合并后的世界包围盒）
+            BodyRadius = Mathf.Max(world.size.x, world.size.z) * 0.5f;
 
             // **竖直棱柱（BoxCollider）而不是胶囊**：圆柱/胶囊的顶是**穹顶**，CharacterController 的
             // 滑动解算会顺着穹顶爬上去（2026-10-13 实测：玩家真的站到了 Boss 头顶，中心距 0）——
