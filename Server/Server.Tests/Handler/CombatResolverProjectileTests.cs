@@ -90,18 +90,76 @@ public class CombatResolverProjectileTests
     }
 
     [Fact]
-    public void Fireball_Explodes_At_First_Target_And_Stops()
+    public void Fireball_Circle_At_Impact_Hits_Targets_In_Radius()
     {
-        // 首目标 (0,4)；第二目标 (0,9) 在首目标后方 5m；
-        // 第三目标 (0,4.5) 距爆点 0.5m < 1.5 溅射半径 ⇒ 应被溅射命中
+        // 落点 (0,0,4)；目标 2 在落点中心、4 距 0.5m（半径 1.5 内）、3 在 9m 外。
         var resolver = new CombatResolver(
             MakeStore(targetAt: (0f, 4f), secondAt: (0f, 9f), thirdAt: (0f, 4.5f)), new Random(1));
-        Assert.True(resolver.Decide(1, new CastRequest { SkillId = 20003 }, tick: 0).Accepted);
+        var request = new CastRequest { SkillId = 20003, ImpactX = 0f, ImpactY = 0f, ImpactZ = 4f };
+        Assert.True(resolver.Decide(1, request, tick: 0).Accepted);
 
         var hitIds = Drain(resolver, 40).SelectMany(r => r.Hits).Select(h => h.TargetPlayerId).ToList();
-        Assert.Contains(2L, hitIds);        // 首中
-        Assert.Contains(4L, hitIds);        // 爆点 1.5m 内的溅射目标
-        Assert.DoesNotContain(3L, hitIds);  // 首中即停：后方 9m 的目标不该被同一次施法命中
+        Assert.Contains(2L, hitIds);
+        Assert.Contains(4L, hitIds);
+        Assert.DoesNotContain(3L, hitIds);
+    }
+
+    [Fact]
+    public void Fireball_Does_Not_Hit_Along_Path_Outside_Impact_Circle()
+    {
+        // 目标在 4m，落点在 10m：4m 处不在 1.5m 圆内，线形旧行为不得残留。
+        var resolver = new CombatResolver(MakeStore(targetAt: (0f, 4f)), new Random(1));
+        var request = new CastRequest { SkillId = 20003, ImpactX = 0f, ImpactY = 0f, ImpactZ = 10f };
+        Assert.True(resolver.Decide(1, request, tick: 0).Accepted);
+
+        var hitIds = Drain(resolver, 40).SelectMany(r => r.Hits).Select(h => h.TargetPlayerId).ToList();
+        Assert.DoesNotContain(2L, hitIds);
+    }
+
+    [Fact]
+    public void Fireball_Impact_Too_Far_Is_Rejected()
+    {
+        var resolver = new CombatResolver(MakeStore(targetAt: (0f, 10f)), new Random(1));
+        var far = new CastRequest { SkillId = 20003, ImpactX = 0f, ImpactY = 0f, ImpactZ = 15.5f };
+        var decision = resolver.Decide(1, far, tick: 0);
+        Assert.False(decision.Accepted);
+        Assert.Equal("impact-too-far", decision.RejectReason);
+    }
+
+    [Fact]
+    public void Fireball_Travel_Delay_Defers_First_Hit()
+    {
+        // 10m / 18 m/s × 15Hz = 8.33 → ceil = 9；tick 8 不得结算，tick 9 结算。
+        var resolver = new CombatResolver(MakeStore(targetAt: (0f, 10f)), new Random(1));
+        var request = new CastRequest { SkillId = 20003, ImpactX = 0f, ImpactY = 0f, ImpactZ = 10f };
+        Assert.True(resolver.Decide(1, request, tick: 0).Accepted);
+
+        Assert.Empty(resolver.DrainResolved(8).SelectMany(r => r.Hits));
+        Assert.NotEmpty(resolver.DrainResolved(9).SelectMany(r => r.Hits));
+    }
+
+    [Fact]
+    public void Fireball_Charge_Progress_Does_Not_Scale_Damage()
+    {
+        var resolver = new CombatResolver(MakeStore(targetAt: (0f, 10f)), new Random(1));
+        var request = new CastRequest
+        {
+            SkillId = 20003, ImpactX = 0f, ImpactY = 0f, ImpactZ = 10f, ChargeProgress = 1f
+        };
+        Assert.True(resolver.Decide(1, request, tick: 0).Accepted);
+
+        var hit = Drain(resolver, 40).SelectMany(r => r.Hits).First(h => h.TargetPlayerId == 2L);
+        Assert.Equal(20f, hit.Damage, 0.001f);
+    }
+
+    [Fact]
+    public void Projectile_Travel_Ticks_Clamps_NonFinite_And_Zero_Distance()
+    {
+        Assert.True(CombatRules.TryGet(20003, out var entry));
+        Assert.Equal(9u, CombatRules.ProjectileTravelTicks(entry.Projectile, 0f, 0f, 0f, 10f));
+        Assert.Equal(0u, CombatRules.ProjectileTravelTicks(entry.Projectile, 0f, 0f, float.NaN, 0f));
+        Assert.Equal(0u, CombatRules.ProjectileTravelTicks(entry.Projectile, 0f, 0f, 0f, 0f));
+        Assert.Equal(0u, CombatRules.ProjectileTravelTicks(null, 0f, 0f, 0f, 10f));
     }
 
     [Fact]

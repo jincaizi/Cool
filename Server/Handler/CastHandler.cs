@@ -122,7 +122,9 @@ namespace KcpServer
                 caster.Position.X, caster.Position.Z);
             if (projectileError != null) return Reject(resolution, projectileError);
             var charge = CombatRules.ClampChargeProgress(request.ChargeProgress);
-            var firstTick = tick + CombatRules.HitDelayTicks(entry);
+            var firstTick = tick + CombatRules.HitDelayTicks(entry)
+                + CombatRules.ProjectileTravelTicks(entry.Projectile,
+                    caster.Position.X, caster.Position.Z, request.ImpactX, request.ImpactZ);
 
             // D-3：冷却记录在决策（空挥也冷却，D-P4-5）
             caster.RecordCast(request.SkillId, tick);

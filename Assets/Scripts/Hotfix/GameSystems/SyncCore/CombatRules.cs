@@ -31,17 +31,20 @@ namespace Cool.SyncCore
         /// 近身目标只会吃一半伤害。20003/20004/30001 单机无挥击 ⇒ 保持 false（否则多算）。</summary>
         public bool KeepsSwing { get; }
 
+        /// <summary>飞行速度（m/s）；仅 CircleAtPoint 用于换算飞行延迟。0 = 无飞行延迟。</summary>
+        public float Speed { get; }
+
         public ProjectileSpec(ProjectileKind kind, float length = 0f, float halfWidth = 0f, float radius = 0f,
             int stages = 1, float totalFlightSeconds = 0f,
             float maxImpactDistance = 0f, bool chargeScales = false,
             float chargeAreaMaxScale = 1f, float chargeDamageMaxScale = 1f,
-            bool keepsSwing = false)
+            bool keepsSwing = false, float speed = 0f)
         {
             Kind = kind; Length = length; HalfWidth = halfWidth; Radius = radius;
             Stages = stages; TotalFlightSeconds = totalFlightSeconds;
             MaxImpactDistance = maxImpactDistance; ChargeScales = chargeScales;
             ChargeAreaMaxScale = chargeAreaMaxScale; ChargeDamageMaxScale = chargeDamageMaxScale;
-            KeepsSwing = keepsSwing;
+            KeepsSwing = keepsSwing; Speed = speed;
         }
     }
 
@@ -124,9 +127,8 @@ namespace Cool.SyncCore
             // 2026-10-18：投射物/蓄力进表（翻转 D-P4-1）。形状上限必须容纳客户端真实形状。
             [20003] = new SkillEntry(20003, shapeType: 0, maxRange: 0f, maxAreaRadius: 0f, maxAngle: 0f,
                 cooldownSeconds: 3f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0f,
-                projectile: new ProjectileSpec(ProjectileKind.LineNearestSplash,
-                    length: 15f, halfWidth: 0.6f, radius: 1.5f, stages: 3,
-                    totalFlightSeconds: 15f / 18f)),
+                projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint,
+                    radius: 1.5f, maxImpactDistance: 15f, speed: 18f)),
             [20004] = new SkillEntry(20004, shapeType: 1, maxRange: 2f, maxAreaRadius: 2f, maxAngle: 120f,
                 cooldownSeconds: 6f, baseDamage: 40f, criticalRate: 0f, hitDelaySeconds: 0f,
                 projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint, radius: 2f,
@@ -206,6 +208,23 @@ namespace Cool.SyncCore
         /// <summary>判定延迟换算为 tick 数（15Hz 基准，向上取整，与 CooldownTicks 同惯例）</summary>
         public static uint HitDelayTicks(SkillEntry entry) =>
             (uint)Math.Ceiling(entry.HitDelaySeconds * TickRateHz);
+
+        /// <summary>CircleAtPoint 投射物的飞行 tick 数（距离 / 速度 × 15Hz，向上取整）。</summary>
+        public static uint ProjectileTravelTicks(ProjectileSpec? spec,
+            float casterX, float casterZ, float impactX, float impactZ)
+        {
+            if (spec == null || spec.Kind != ProjectileKind.CircleAtPoint || spec.Speed <= 0f) return 0u;
+            if (!float.IsFinite(casterX) || !float.IsFinite(casterZ)
+                || !float.IsFinite(impactX) || !float.IsFinite(impactZ)) return 0u;
+
+            float dx = impactX - casterX;
+            float dz = impactZ - casterZ;
+            float distance = (float)Math.Sqrt(dx * dx + dz * dz);
+            if (!(distance > 0f) || !float.IsFinite(distance)) return 0u;
+
+            double ticks = Math.Ceiling(distance / spec.Speed * TickRateHz);
+            return ticks >= uint.MaxValue ? uint.MaxValue : (uint)ticks;
+        }
 
         /// <summary>
         /// 格挡几何（纯 XZ 平面，零 UnityEngine 依赖）：受击者朝向（yaw 语义与 HitResolver 一致：
