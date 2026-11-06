@@ -16,6 +16,7 @@ using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Skills.Runtime;
+using Hotfix.GameSystems.Skills.Runtime.Projectile;
 using Hotfix.GameSystems.Monster;
 using Hotfix.GameSystems.Stamina;
 using Hotfix.GameSystems.Nameplate;
@@ -113,13 +114,23 @@ namespace Hotfix.GameSystems.Sys3C
         public void ClearHeavyReady() => _canFireHeavy = false;
 
         /// <summary>teardown 用：取消正在瞄准的火球，不发射、不冷却、不上报。
-        /// 占位实现供 binder 接线编译；实际取消逻辑由任务 9 补全。</summary>
-        public bool CancelAimingSkill() => false;
+        /// EditMode 旧用例会在未执行 Start 的 entry 上经 binder teardown 调用 ⇒ 必须判空。</summary>
+        public bool CancelAimingSkill()
+        {
+            int fireballId = GetSkillFireballId();
+            return _skillCoordinator != null && fireballId > 0
+                && _skillCoordinator.CancelCharge(fireballId);
+        }
 
-        /// <summary>选中目标位置提供者（联网时由 ClientNetworkHost 注入 selector 查询）；任务 9 消费。</summary>
+        /// <summary>选中目标位置提供者（联网时由 ClientNetworkHost 注入 selector 查询）。</summary>
         private System.Func<Vector3?> _selectedTargetPositionProvider;
 
-        /// <summary>注入/清空选中目标位置提供者（null = 无提供者）。任务 9 的瞄准逻辑会消费。</summary>
+        [SerializeField, Tooltip("地面落点吸附的射线层，默认排除 NpcBody（层 10）")]
+        private LayerMask _aimGroundMask = ~(1 << 10);
+        private GroundAimIndicator _aimIndicator;
+        private bool _fireballCancelRequested;
+
+        /// <summary>注入/清空选中目标位置提供者（null = 无提供者）。</summary>
         public void SetSelectedTargetPositionProvider(System.Func<Vector3?> provider)
             => _selectedTargetPositionProvider = provider;
 
@@ -273,8 +284,10 @@ namespace Hotfix.GameSystems.Sys3C
 
             _movementPolicy.Update(command);
 
-            // 蓄力中无移动输入时，角色朝向跟随相机（拖动鼠标调整抛投方向）
-            if (_skillCoordinator.CurrentSubState == Skills.Definition.SkillSubState.Charging
+            // 蓄力中无移动输入时，角色朝向跟随相机（拖动鼠标调整抛投方向）。
+            // 移动端瞄准由 UpdateFireballAim 按摇杆方向转向，这里不抢朝向。
+            if (!IsMobileAimActive()
+                && _skillCoordinator.CurrentSubState == Skills.Definition.SkillSubState.Charging
                 && _skillCoordinator.CanRotate()
                 && !_inputManager.IsMoving())
             {
@@ -331,16 +344,30 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void HandleInput()
         {
+            // EditMode 测试可能没有 _skillCoordinator/_inputManager（Awake/Start 未执行）——
+            // 必须先判空，否则死亡用例会在早退之前 NRE。
+            // 瞄准点必须在下面的释放判定之前刷新——否则激活帧的默认 5m 落点会被真发射出去。
+            bool aimCharging = _skillCoordinator != null && IsHoldToAimCharging();
+            bool mobileAim = aimCharging && _inputManager != null
+                && _inputManager.IsSkillFireballAimActive();
+            UpdateFireballAim(aimCharging, mobileAim);
+
             // 死亡或防御期间不接受技能输入，同时清掉剑气就绪：
             // 避免金边残留，也避免解除防御/复活后补放一次重击。
             if (_isDead || _inputManager.IsDefendHeld())
+            {
                 _canFireHeavy = false;
+                // 不可行动期间未消费的释放锁存必须清掉——否则解除防御/复活后
+                // 旧的 Cancel 会误取消下一次键盘蓄力。
+                if (_inputManager != null) _inputManager.ClearSkillFireballReleaseFromUI();
+                _fireballCancelRequested = false;
+            }
 
             // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）
             if (_isDead) return;
 
-            // 防御处理（按住右键举盾，松开放下）
-            if (_inputManager.IsDefendHeld())
+            // 防御处理（按住右键举盾，松开放下）；瞄准蓄力期间禁止举盾
+            if (!aimCharging && _inputManager.IsDefendHeld())
             {
                 if (!_defendStaminaLatch && _stamina.CanStartConsuming
                     && _fsmManager.CanDefend && _cc.TryEnterDefend())
@@ -362,7 +389,8 @@ namespace Hotfix.GameSystems.Sys3C
                 }
             }
 
-            if (_inputManager.IsJumpPressed())
+            // 瞄准蓄力期间禁止跳跃（松手前的蓄力不能被打断）
+            if (!aimCharging && _inputManager.IsJumpPressed())
             {
                 _cc.RequestJump();
             }
@@ -406,6 +434,8 @@ namespace Hotfix.GameSystems.Sys3C
 
                 if (_inputManager.IsSkillFireballPressed())
                 {
+                    // 新按下清掉旧的取消锁存（上一次手势的 Cancel 不能取消这一次）
+                    _fireballCancelRequested = false;
                     int fireballId = GetSkillFireballId();
                     if (fireballId > 0)
                     {
@@ -415,10 +445,22 @@ namespace Hotfix.GameSystems.Sys3C
                     }
                 }
 
-                // 1键松开 → 蓄力抛投（火球）
+                // 1键松开 → 蓄力抛投（火球）；瞄准摇杆取消则不发
                 if (!_inputManager.IsSkillFireballHeld())
                 {
-                    _skillCoordinator.TryReleaseCharge(GetSkillFireballId());
+                    if (_inputManager.ConsumeSkillFireballRelease(out bool canceled))
+                        _fireballCancelRequested = canceled;
+
+                    if (_fireballCancelRequested)
+                    {
+                        if (CancelAimingSkill()) _fireballCancelRequested = false;
+                        else if (_skillCoordinator == null || _skillCoordinator.CurrentSkill == null)
+                            _fireballCancelRequested = false;
+                    }
+                    else
+                    {
+                        _skillCoordinator.TryReleaseCharge(GetSkillFireballId());
+                    }
                 }
 
                 // 2键按住蓄力，松开释放（蓄力炎爆）
@@ -449,6 +491,127 @@ namespace Hotfix.GameSystems.Sys3C
                 }
             }
 
+        }
+
+        /// <summary>HoldToAim 投射物是否正在蓄力（只有 Charging 才算瞄准中）。</summary>
+        private bool IsHoldToAimCharging()
+            => _skillCoordinator.CurrentSubState == Skills.Definition.SkillSubState.Charging
+               && _skillCoordinator.CurrentSkill != null
+               && _skillCoordinator.CurrentSkill.Data is ProjectileSkillData p
+               && p.HoldToAim;
+
+        /// <summary>移动端地面瞄准：HoldToAim 蓄力中且摇杆手势激活。</summary>
+        private bool IsMobileAimActive()
+            => IsHoldToAimCharging() && _inputManager != null
+               && _inputManager.IsSkillFireballAimActive();
+
+        /// <summary>
+        /// 每帧刷新火球落点（必须在释放判定之前调用）：移动端走摇杆方向/距离，
+        /// 键鼠走角色前方最大射程；落点吸附地面后写进技能执行器。
+        /// </summary>
+        private void UpdateFireballAim(bool aimCharging, bool mobileAim)
+        {
+            if (!aimCharging)
+            {
+                if (_aimIndicator != null) _aimIndicator.Hide();
+                return;
+            }
+
+            var data = _skillCoordinator.CurrentSkill.Data as ProjectileSkillData;
+            if (data == null) return;
+
+            Vector3 target;
+            if (mobileAim)
+            {
+                Vector2 aim = _inputManager.SkillFireballAim;
+                if (aim.sqrMagnitude > 0f)
+                {
+                    Vector3 cameraForward = _camera != null ? _camera.transform.forward : Vector3.forward;
+                    Vector3 dir = SkillAimMath.CameraRelativeDirection(aim, cameraForward);
+                    float distance = SkillAimMath.DistanceFromMagnitude(
+                        aim.magnitude, data.MinAimDistance, data.ProjectileRange);
+                    target = transform.position + dir * distance;
+                }
+                else
+                {
+                    target = ResolveDefaultTarget(data);
+                }
+            }
+            else
+            {
+                Vector3 forward = transform.forward;
+                forward.y = 0f;
+                if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+                target = transform.position + forward.normalized * data.ProjectileRange;
+            }
+
+            target = SnapToGround(target);
+            _skillCoordinator.UpdateAimTarget(target);
+
+            if (mobileAim)
+            {
+                Vector3 flat = target - transform.position;
+                flat.y = 0f;
+                if (flat.sqrMagnitude > 0.0001f)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation,
+                        Quaternion.LookRotation(flat.normalized), 10f * Time.deltaTime);
+                }
+            }
+
+            if (mobileAim)
+            {
+                EnsureAimIndicator(data);
+                if (_aimIndicator != null)
+                {
+                    _aimIndicator.Show(target, data.ExplosionRadius,
+                        _inputManager.IsSkillFireballCancelArmed());
+                }
+            }
+            else if (_aimIndicator != null)
+            {
+                _aimIndicator.Hide();
+            }
+        }
+
+        /// <summary>摇杆未拖动时的默认落点：选中目标（钳到射程内），否则正前方最大射程。</summary>
+        private Vector3 ResolveDefaultTarget(ProjectileSkillData data)
+        {
+            Vector3? selected = _selectedTargetPositionProvider?.Invoke();
+            if (!selected.HasValue && _attackHandler != null && _attackHandler.CurrentTarget != null)
+                selected = _attackHandler.CurrentTarget.WorldPosition;
+
+            if (selected.HasValue)
+                return SkillAimMath.ClampToRange(transform.position, selected.Value, data.ProjectileRange);
+
+            Vector3 forward = transform.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+            return transform.position + forward.normalized * data.ProjectileRange;
+        }
+
+        /// <summary>从上方垂直射线吸附到地面；无地面时保留原落点。</summary>
+        private Vector3 SnapToGround(Vector3 point)
+        {
+            Vector3 origin = point + Vector3.up * 20f;
+            if (Physics.Raycast(origin, Vector3.down, out var hit, 50f,
+                    _aimGroundMask, QueryTriggerInteraction.Ignore))
+                return hit.point;
+            return point;
+        }
+
+        /// <summary>首次瞄准时惰性实例化地面圈（prefab 根节点默认激活 ⇒ 实例化后立刻隐藏）。</summary>
+        private void EnsureAimIndicator(ProjectileSkillData data)
+        {
+            if (_aimIndicator != null || data.AimIndicatorPrefab == null) return;
+            var instance = Instantiate(data.AimIndicatorPrefab, transform);
+            _aimIndicator = instance.GetComponent<GroundAimIndicator>();
+            if (_aimIndicator == null)
+            {
+                Destroy(instance);
+                return;
+            }
+            _aimIndicator.Hide();
         }
 
         private void TryBindStaminaUi()
