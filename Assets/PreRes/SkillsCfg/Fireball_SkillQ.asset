@@ -57,11 +57,11 @@ MonoBehaviour:
   _explosionRadius: 1.5
   _maxChargeTime: 2
   _canMoveWhileCharging: 0
-  _holdToAim: 1
-  _minAimDistance: 2
-  _aimIndicatorPrefab: {fileID: 0}
   _canRotateWhileCharging: 1
   _projectileGravity: 9.8
+  _holdToAim: 1
+  _minAimDistance: 2
+  _aimIndicatorPrefab: {fileID: 5646096064911321473, guid: 0c844b2737904d0468adc7b468068c9d, type: 3}
   _effect:
     _applyEffects: []
     _knockbackForce: 0
@@ -77,3 +77,6 @@ MonoBehaviour:
     _hitStopDuration: 0
     _showCastingBar: 1
     _castingBarColor: {r: 0, g: 0, b: 1, a: 1}
+  references:
+    version: 2
+    RefIds: []
