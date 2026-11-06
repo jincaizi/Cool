@@ -76,7 +76,10 @@ namespace KcpServer.Monster
             bool noPath = _path == null;
             if ((noPath || due || goalMoved) && tick >= _nextAttemptTick)
             {
-                var query = new NavQuery(_navigation.MapId, monster.Position, goal, monster.Config.bodyRadius);
+                // 寻路用 navRadius（导航网格已按 bake agentRadius 侵蚀，见 MonsterData.navRadius）；
+                // ORCA/客户端碰撞仍用 bodyRadius。大体型 Boss 用 1.74 时会被树林整片拒绝并原地停住。
+                var query = new NavQuery(_navigation.MapId, monster.Position, goal,
+                    monster.Config.NavigationRadiusOf);
                 if (_navigation.TryFindPath(query, out NavPath path))
                 {
                     _path = path;

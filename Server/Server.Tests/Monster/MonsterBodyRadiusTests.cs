@@ -46,6 +46,25 @@ public class MonsterBodyRadiusTests
     }
 
     /// <summary>
+    /// SpiderBoss 的**寻路 clearance** 与身体半径分离：导航网格按 bake agentRadius 0.5 侵蚀，
+    /// 1.74 的 bodyRadius 直接拿来寻路会在树林里整片无路可走（2026-11-07 实测 45% 可达），
+    /// PathFollower 原地停住 = 玩家看到的“Boss 卡在树/石头上”。其余模板没填 navRadius，
+    /// `NavigationRadiusOf` 必须逐值回退 bodyRadius（既有行为不变）。
+    /// </summary>
+    [Fact]
+    public void Shipped_Json_Carries_SpiderBoss_Navigation_Radius()
+    {
+        var templates = ConfigLoader.LoadMonsterTemplates(ShippedConfigPath());
+
+        Assert.Equal(1.0f, templates[4].navRadius, 0.001f);
+        Assert.Equal(1.0f, templates[4].NavigationRadiusOf, 0.001f);
+        Assert.Equal(1.74f, templates[4].bodyRadius, 0.001f);
+
+        for (int id = 1; id <= 3; id++)
+            Assert.Equal(templates[id].bodyRadius, templates[id].NavigationRadiusOf, 0.001f);
+    }
+
+    /// <summary>
     /// **将来新增模板**的守卫（复审指出：上面那条按模板号写死，只覆盖 1~4）。漏填 `bodyRadius`
     /// 反序列化得到 0，这里遍历整表必然抓到——不钉模板号，所以新模板自动纳入。
     /// 断言条数 ≥ 4：模板可以增、不该减（减了多半是 json 被截断/合并事故）。

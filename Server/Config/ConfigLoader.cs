@@ -128,6 +128,7 @@ namespace KcpServer.Config
                         hp = 1500,
                         moveSpeed = 3.2f,
                         bodyRadius = 1.74f,
+                        navRadius = 1.0f,    // 寻路 clearance：树林里 1.74 无路可走（见 MonsterData.navRadius）
                         detectionRadius = 25,
                         visionAngle = 140,
                         attackRange = 2.5f,

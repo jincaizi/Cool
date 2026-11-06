@@ -151,7 +151,8 @@ namespace KcpServer.Monster
                 Rotation = Quaternion.LookRotation(ForwardOf(entity.Rotation)),
                 SpawnPosition = spawn,
                 PatrolCenter = patrolCenterResolved,
-                PatrolPoints = GeneratePatrolPoints(patrolCenterResolved, config.patrolRadius, config.bodyRadius),
+                PatrolPoints = GeneratePatrolPoints(patrolCenterResolved, config.patrolRadius,
+                    config.NavigationRadiusOf),
                 LastHp = config.hp,
                 Follower = new PathFollower(_navigation)
             };
@@ -369,7 +370,9 @@ namespace KcpServer.Monster
             );
         }
 
-        private Vector3[] GeneratePatrolPoints(Vector3 center, float radius, float bodyRadius)
+        /// <param name="clearanceRadius">寻路 clearance（<see cref="MonsterData.NavigationRadiusOf"/>；
+        /// 不是 ORCA 的 bodyRadius——导航网格已按 bake agentRadius 侵蚀）。</param>
+        private Vector3[] GeneratePatrolPoints(Vector3 center, float radius, float clearanceRadius)
         {
             if (_navigation == null) return GeneratePatrolPointsLegacy(center, radius);
 
@@ -382,7 +385,7 @@ namespace KcpServer.Monster
                     center.Y,
                     center.Z + (float)Math.Sin(rad) * radius);
 
-                if (TryFindPatrolPoint(candidate, bodyRadius, out Vector3 point))
+                if (TryFindPatrolPoint(candidate, clearanceRadius, out Vector3 point))
                     points.Add(point);
             }
 
@@ -390,7 +393,7 @@ namespace KcpServer.Monster
             return points.Count > 0 ? points.ToArray() : new[] { center };
         }
 
-        private bool TryFindPatrolPoint(Vector3 candidate, float bodyRadius, out Vector3 point)
+        private bool TryFindPatrolPoint(Vector3 candidate, float clearanceRadius, out Vector3 point)
         {
             point = candidate;
             const float step = 0.5f;
@@ -402,7 +405,7 @@ namespace KcpServer.Monster
                     : new Vector3(candidate.X + (float)Math.Cos(angle) * step, candidate.Y,
                         candidate.Z + (float)Math.Sin(angle) * step);
                 if (_navigation!.TryProject(probe, 0.5f, out Vector3 projected, out float clearance)
-                    && clearance >= bodyRadius)
+                    && clearance >= clearanceRadius)
                 {
                     point = projected;
                     return true;

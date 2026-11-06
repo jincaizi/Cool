@@ -128,6 +128,71 @@ public class DemoDayNavBinTests
     }
 
     [Fact]
+    public void Shipped_NavBin_SpiderBoss_NavRadius_Keeps_Forest_Routes_Open()
+    {
+        NavData data = NavDataFormat.Read(NavBinPath);
+        var graph = NavMeshGraph.FromData(data);
+        var finder = new NavMeshPathfinder(graph);
+        MonsterData boss = ConfigLoader.LoadMonsterTemplates(
+            Path.Combine(AppContext.BaseDirectory, "Config", "monster_config.json"))[4];
+
+        Assert.Equal(1.74f, boss.bodyRadius, 0.001f);
+        Assert.Equal(1.0f, boss.NavigationRadiusOf, 0.001f);
+
+        // 2026-11-07 实测的“卡住现场”：Boss 出生点到这些点的直线都穿过 navmesh 空洞
+        // （树/石头），bodyRadius 1.74 时整片区域无路可走，PathFollower 会原地停住。
+        var goals = new[]
+        {
+            new Vector3(23.17f, 0f, 12.50f),
+            new Vector3(25.17f, 0f, 6.50f),
+            new Vector3(30.17f, 0f, 11.50f),
+        };
+        foreach (Vector3 goal in goals)
+        {
+            NavPath blocked = finder.FindPath(Spawns[5], goal, boss.bodyRadius);
+            Assert.False(blocked.Success,
+                $"bodyRadius={boss.bodyRadius} 在 ({goal.X:F1},{goal.Z:F1}) 应无路可走（bug 现场已变，需重新取样）");
+
+            NavPath path = finder.FindPath(Spawns[5], goal, boss.NavigationRadiusOf);
+            Assert.True(path.Success,
+                $"navRadius={boss.NavigationRadiusOf} 应能绕行到 ({goal.X:F1},{goal.Z:F1})：{path.FailReason}");
+            Assert.True(path.Length > DistanceXZ(Spawns[5], goal),
+                "绕行路径应长于直线距离");
+        }
+    }
+
+    [Fact]
+    public void SpiderBoss_Chases_Player_Into_Tree_Cluster_Instead_Of_Freezing()
+    {
+        NavData data = NavDataFormat.Read(NavBinPath);
+        var graph = NavMeshGraph.FromData(data);
+        var nav = new NavigationService(graph, "demoday");
+        var store = new EntityStore();
+        long seed = MonsterModule.NpcIdSeed;
+        var module = new MonsterModule(store, () => ++seed, navigation: nav);
+        long bossId = module.SpawnMonster(4, Spawns[5], Spawns[5]);
+
+        var player = store.AddPlayer(1, "P1");
+        player.IsLoggedIn = true;
+        var goal = new Vector3(23.17f, 0f, 12.50f);
+        player.UpdatePosition(goal, 0f, 0f, 1L, 0U);
+        module.Taunt(bossId, 1, durationTicks: 2000, tick: 0);
+
+        var boss = store.GetPlayer(bossId)!;
+        bool reached = false;
+        for (uint t = 0; t < 900; t++)
+        {
+            nav.BeginTick(t);
+            module.Tick(t);
+            if (DistanceXZ(boss.Position, goal) <= 2.6f) { reached = true; break; }
+        }
+
+        Assert.True(reached,
+            $"Boss 应绕行到攻击距离而不是原地卡住，最终位置 " +
+            $"({boss.Position.X:F2},{boss.Position.Z:F2})，距目标 {DistanceXZ(boss.Position, goal):F2}");
+    }
+
+    [Fact]
     public void SpiderBoss_Blocked_Path_Stops_And_Stays_On_NavMesh()
     {
         NavData data = NavDataFormat.Read(NavBinPath);

@@ -48,6 +48,14 @@ namespace KcpServer.Config
         /// （防 `IncludeFields` 被关掉 / json 键改名 / 新模板漏填时的静默落 0 → 半径退化）。
         /// </summary>
         public float bodyRadius;
+
+        /// <summary>寻路 / 巡逻点用的 clearance（米；0 = 沿用 <see cref="bodyRadius"/>）。
+        /// 导航网格按 bake `agentRadius = 0.5` 侵蚀过，因此这里填的是**侵蚀后剩余**的 clearance：
+        /// 距障碍表面 ≈ navRadius + 0.5。SpiderBoss 1.74 在 DemoDay 树林里几乎无路可走
+        /// （2026-11-07 实测出生点附近仅 45% 目标可达，r=1.0 时 92%），卡住时 `PathFollower` 会原地停下。
+        /// 用 1.0 保持移动，代价是极限窄缝里腿尖最多穿插障碍表面约 0.24m。
+        /// ORCA 避让与客户端身体碰撞仍用 <see cref="bodyRadius"/>。</summary>
+        public float navRadius;
         public float detectionRadius;
         public float visionAngle;
         public float attackRange;
@@ -56,6 +64,10 @@ namespace KcpServer.Config
         public float leashRadius;       // 0 = detectionRadius + patrolRadius + 10
         public float dropAggroRadius;   // 0 = LeashRadiusOf
         public List<MonsterSkillConfig> skills = new();
+
+        /// <summary>寻路 clearance：显式 navRadius，未填时沿用身体半径（既有模板行为不变）。</summary>
+        public float NavigationRadiusOf
+            => navRadius > 0f ? navRadius : bodyRadius;
 
         public float LeashRadiusOf
             => leashRadius > 0f ? leashRadius : detectionRadius + patrolRadius + 10f;
