@@ -194,7 +194,7 @@ HoldToAim ? (_hasTargetPosition ? _targetPosition
 - `OnSpawn` 必须重置新增状态（`_hasTarget` / `_targetPoint` / `_flightTime` / `_released`），防池复用串味。
 - 有落点：水平距离反解飞行时间 `t = distance / speed`，`vy0 = (target.y − origin.y) / t + 0.5·g·t`，落点 = `target`。
 - `HoldToAim` 时不做飞行途中的 `DetectAndExplode`（不撞怪提前爆），只在地面点爆炸。
-- 落地判定：`_velocity.y < 0 && _flightTime > 0.05f && position.y <= _groundY`（防上坡/高台一生成就爆）。
+- 到达判定：目标点路径在「越过落点平面」时爆炸——`Vector3.Dot(position - target, _direction) >= 0`；水平速度恒定 ⇒ 到达时间 = 反解 `t`。保留下降段 + 最小飞行时间作为安全网（防出生帧误判，兼容下坡）。
 - 目标距离 < 0.1m 时不生成投射物。
 
 ### 打断枚举
@@ -230,10 +230,10 @@ HoldToAim ? (_hasTargetPosition ? _targetPosition
 ### MobileSkillAimJoystick
 
 - 纯逻辑抽成 `AimGestureState`（仿 `SprintGestureState`）：按下点原点、半径归一、死区、取消回滞、释放类型。可 EditMode 直接断言。
-- 指针：`OnPointerDown` 记按下点；`OnDrag` 算 delta、移动 Icon、更新 `AimValue`；`OnPointerUp` 写释放类型（`CancelArmed ? Cancel : Fire`）。
-- `OnDisable` / `ResetGesture()`：释放类型记为 `Cancel`；`OnEnable` 清干净，防重入残留。
+- 指针：`OnPointerDown` 记按下点；`OnDrag` 算 delta、移动 Icon、更新 `Aim`；`OnPointerUp` 写释放类型（`CancelArmed ? Cancel : Fire`）。
+- `OnDisable` 把释放类型记为 `Cancel`；`ResetGesture()` 只复位手势（不合成释放）；`OnEnable` 清干净，防重入残留。
 - `ConsumeReleaseKind()` 一次性消费；图标回中、颜色复原。
-- `SetInteractable(bool)`：冷却/精力不足时按钮由 `MobileSkillBarPresenter` 置为不可交互，图标不动。
+- `Interactable` 属性：冷却/精力不足时按钮由 `MobileSkillBarPresenter` 置为不可交互，图标不动。
 
 ### 地面落点圈
 
@@ -274,7 +274,7 @@ HoldToAim ? (_hasTargetPosition ? _targetPosition
 | 目标死亡 / 清锁 / 出 AOI | 回退前方最远 |
 | 按住期间目标移出 15m | 锁定保持到 20m，落点沿方向钳到 15m（客户端 14.95m 留余量） |
 | 地面 raycast 失败 | 回退角色/目标 Y |
-| 上坡 / 下坡落点 | 下降段 + 最小飞行时间后才判落地 |
+| 上坡 / 下坡落点 | 越过落点平面即爆；下降段 + 最小飞行时间作安全网（上坡不会原地爆） |
 | 目标距离 < 0.1m | 不生成投射物 |
 | 多指 | 火球按钮只认自己的 pointerId；观察区另一指可同时转相机 |
 | 远程视图不存在 | provider 返回 false，回退前方最远 |
@@ -335,3 +335,4 @@ teardown 机制：
 - 20003 从 `LineNearestSplash` 改为 `CircleAtPoint`：不再有飞行途中命中，地面圈即真实爆炸中心；本地与服务端同源。
 - `EnsureTargetFor` 按角色当前朝向筛选（±90°、15m）；敌人在背后时施法瞬间不会自动锁定，玩家可手动切换或拖动瞄准。
 - 点按目标超过 15m 时会被 `EnsureTargetFor` 清锁并回退前方最远；「钳到 15m」只覆盖按住期间目标移出与大体型（表面距离 ≤15m、中心 >15m）两类。
+- 拖动死区 0.1 使实际最近落点约 3.3m（配置下限 2m 仅在默认落点/目标钳制时可达）。
