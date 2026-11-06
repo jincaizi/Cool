@@ -465,6 +465,20 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void Fireball_With_Impact_Explodes_At_Tracked_Impact_Not_First_Hit()
+        {
+            var visual = new FakeVisual();
+            var presenter = NewPresenter(localPlayerId: 1L, visual);
+            presenter.TrackForTest(casterId: 2L, skillId: 20003, visual,
+                impact: new Vector3(3f, 0f, 4f));
+
+            presenter.ApplyDamageForTest(FireballResult(2L, hitX: 9f, hitZ: 9f));
+
+            Assert.AreEqual(1, visual.Explosions);
+            Assert.AreEqual(new Vector3(3f, 0f, 4f), visual.LastPoint);
+        }
+
+        [Test]
         public void OnCastBroadcast_Ignores_Local_Caster_And_Npc()
         {
             var root = new GameObject("RemoteCastPresenterFilterRoot");

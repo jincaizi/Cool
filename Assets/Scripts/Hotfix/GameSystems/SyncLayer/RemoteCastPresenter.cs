@@ -46,7 +46,8 @@ namespace Hotfix.GameSystems.SyncLayer
     /// 远程玩家的施法表现（spec §5-P4 客户端侧）：
     ///  - CastBroadcast 到达即播攻击动画（不能等 DamageResult：零命中延迟技能会先看到受击再看到挥砍），
     ///    在渲染位姿生成 CastVFX，并按 (casterId, skillId) 跟踪 10002 剑气 / 20003 火球视觉；
-    ///  - 远程 DamageResult 是停点的唯一来源：火球在 HitX/HitZ 爆炸，被格挡的剑气在 StopX/StopZ 停住；
+    ///  - 远程 DamageResult 触发停点：HoldToAim 火球在 CastBroadcast 上报的落点爆炸（其余火球用
+    ///    HitX/HitZ），被格挡的剑气在 StopX/StopZ 停住；
     ///  - 20004（蓄力爆发）与 30001（陨石）没有飞行体，直接在服务端落点生成释放/陨石表现。
     /// 本地施法者（由本地 SkillExecutor 负责）与 NPC（由 ScheduleAttack 负责）一律跳过。
     /// 线程：全部经 CombatNetworkBridge.Update 在主线程调用。
@@ -61,12 +62,17 @@ namespace Hotfix.GameSystems.SyncLayer
             public readonly long CasterId;
             public readonly int SkillId;
             public readonly IRemoteProjectileVisual Visual;
+            public readonly bool HasImpact;
+            public readonly Vector3 Impact;
 
-            public Tracked(long casterId, int skillId, IRemoteProjectileVisual visual)
+            public Tracked(long casterId, int skillId, IRemoteProjectileVisual visual,
+                bool hasImpact = false, Vector3 impact = default)
             {
                 CasterId = casterId;
                 SkillId = skillId;
                 Visual = visual;
+                HasImpact = hasImpact;
+                Impact = impact;
             }
         }
 
@@ -125,12 +131,18 @@ namespace Hotfix.GameSystems.SyncLayer
             // （火球缺了它会把地面算低 1.2m，剑气会整段在脚踝高度）。
             Vector3 forward = view.Rotation * Vector3.forward;
             Vector3 origin = ComputeProjectileOrigin(data, view.Position, forward);
-            var visual = (_projectileFactory ?? DefaultFactory)(data, origin, forward);
+            Vector3 impact = new Vector3(broadcast.ImpactX, broadcast.ImpactY, broadcast.ImpactZ);
+            IRemoteProjectileVisual? visual;
+            bool hasImpact = data is ProjectileSkillData projectileData && projectileData.HoldToAim;
+            if (_projectileFactory != null)
+                visual = _projectileFactory(data, origin, forward);
+            else
+                visual = DefaultFactory(data, origin, forward, hasImpact ? impact : (Vector3?)null);
             if (visual != null)
-                _tracked.Add(new Tracked(broadcast.CasterPlayerId, broadcast.SkillId, visual));
+                _tracked.Add(new Tracked(broadcast.CasterPlayerId, broadcast.SkillId, visual,
+                    hasImpact, impact));
 
             // 落点类技能没有飞行体：在服务端给定的落点直接生成表现
-            var impact = new Vector3(broadcast.ImpactX, broadcast.ImpactY, broadcast.ImpactZ);
             if (data is ChargedSkillData && presentation?.ReleaseVFX != null)
                 (_releaseVfxSpawner ?? DefaultVfxSpawner)(
                     presentation.ReleaseVFX, impact, Quaternion.identity);
@@ -152,7 +164,10 @@ namespace Hotfix.GameSystems.SyncLayer
                 && result.Hits != null && result.Hits.Count > 0)
             {
                 var hit = result.Hits[0];
-                tracked.Visual.ExplodeAt(new Vector3(hit.HitX, 0f, hit.HitZ));
+                Vector3 point = tracked.HasImpact
+                    ? tracked.Impact
+                    : new Vector3(hit.HitX, 0f, hit.HitZ);
+                tracked.Visual.ExplodeAt(point);
                 _tracked.Remove(tracked);
             }
             else if (result.SkillId == (int)SkillID.HeavyAttack && result.ProjectileStopped)
@@ -184,8 +199,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>断开/重建：清空全部跟踪项。</summary>
         public void Clear() => _tracked.Clear();
 
-        internal void TrackForTest(long casterId, int skillId, IRemoteProjectileVisual visual)
-            => _tracked.Add(new Tracked(casterId, skillId, visual));
+        internal void TrackForTest(long casterId, int skillId, IRemoteProjectileVisual visual,
+            Vector3? impact = null)
+            => _tracked.Add(new Tracked(casterId, skillId, visual, impact.HasValue, impact ?? default));
 
         internal void ApplyDamageForTest(DamageResult result) => OnDamageResult(result);
 
@@ -233,7 +249,8 @@ namespace Hotfix.GameSystems.SyncLayer
                ?? (data as ChanneledSkillData)?.Presentation
                ?? (data as SpinSkillData)?.Presentation;
 
-        private static IRemoteProjectileVisual? DefaultFactory(SkillData data, Vector3 origin, Vector3 forward)
+        private static IRemoteProjectileVisual? DefaultFactory(SkillData data, Vector3 origin,
+            Vector3 forward, Vector3? targetPoint = null)
         {
             if (data.SwordQi != null)
             {
@@ -242,7 +259,8 @@ namespace Hotfix.GameSystems.SyncLayer
             }
             if (data is ProjectileSkillData projectile)
             {
-                var fireball = FireballSpawner.Spawn(projectile, data.Damage?.Clone(), origin, forward);
+                var fireball = FireballSpawner.Spawn(projectile, data.Damage?.Clone(), origin, forward,
+                    targetPoint);
                 return fireball != null ? new FireballVisual(fireball) : null;
             }
             return null;
