@@ -107,6 +107,14 @@ namespace Hotfix.GameSystems.Sys3C
 
         /// <summary>技能协调器（P4 网络宿主装配战斗桥接入点）</summary>
         public SkillCoordinator SkillCoordinator => _skillCoordinator;
+        public bool CanFireHeavy => _canFireHeavy;
+
+        /// <summary>清除剑气就绪表现（失焦、关闭触控、释放绑定等无输入上下文的场景）。</summary>
+        public void ClearHeavyReady() => _canFireHeavy = false;
+
+        /// <summary>teardown 用：取消正在瞄准的火球，不发射、不冷却、不上报。
+        /// 占位实现供 binder 接线编译；实际取消逻辑由任务 9 补全。</summary>
+        public bool CancelAimingSkill() => false;
 
         /// <summary>移动策略注入面（网络宿主可替换为 NetMovementPolicy）</summary>
         public IMovementPolicy MovementPolicy { get => _movementPolicy; set => _movementPolicy = value; }
@@ -316,6 +324,11 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void HandleInput()
         {
+            // 死亡或防御期间不接受技能输入，同时清掉剑气就绪：
+            // 避免金边残留，也避免解除防御/复活后补放一次重击。
+            if (_isDead || _inputManager.IsDefendHeld())
+                _canFireHeavy = false;
+
             // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）
             if (_isDead) return;
 

@@ -21,6 +21,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         [SerializeField] private VirtualJoystick _joystick;
         [SerializeField] private TouchLookArea _lookArea;
         [SerializeField] private MobileActionButtons _buttons;
+        [SerializeField] private MobileSkillAimJoystick _fireballAim;
         [SerializeField] private GameObject _mobileUiRoot;
 
         /// <summary>
@@ -40,6 +41,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private TouchOverride _resolvedOverride;
         private bool _touch;
         private bool _resolved;
+        private Sys3CEntry _boundEntry;
+
+        public Sys3CEntry BoundEntry => _boundEntry;
 
         /// <summary>
         /// 每帧重新裁决 + 重新发现玩家。**不能一次性 latch**：玩家会被 PlayerSpawner
@@ -66,16 +70,21 @@ namespace Hotfix.GameSystems.Sys3C.Input
             {
                 // 回退：切到"无触控"必须把适配器还原成键鼠 —— 否则只是把 UI 藏了，
                 // Joystick 适配器还挂在玩家身上，而 LateUpdate 也还在喂它。
-                if (_inputManager != null)
-                {
-                    _inputManager.SetSprintHeld(false);
-                    _inputManager.SetAdapter(new KeyboardInputAdapter());
-                    _inputManager = null;
-                }
+                // 捕获旧引用后再释放绑定：ReleaseBinding 会清掉触摸状态并把两者置空。
+                var previousInput = _inputManager;
+                ReleaseBinding();
+                if (previousInput != null) previousInput.SetAdapter(new KeyboardInputAdapter());
                 return;
             }
 
-            if (_inputManager != null) return;   // 已绑定且仍存活（Unity 的 == 对已销毁对象为 true）
+            // 已绑定且两个引用都存活（Unity 的 == 对已销毁对象为 true）。
+            // 只检查其中一个是缺陷：OnDisable 曾只清 _boundEntry 而留下 _inputManager，
+            // 再启用后会永久早退，HUD 永远拿不到 BoundEntry。
+            if (_inputManager != null && _boundEntry != null) return;
+
+            // 角色销毁重建 / 绑定切换：必须先把旧按钮状态与旧 InputManager 清干净，
+            // 否则重建时仍按住的普攻/火球/炎爆会被 LateUpdate 直接写进新角色。
+            ReleaseBinding();
 
             var entry = PickLocalEntry(FindObjectsOfType<Sys3CEntry>());
             if (entry == null) return;
@@ -88,6 +97,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 () => _lookArea != null ? _lookArea.Delta : Vector2.zero,
                 new KeyboardInputAdapter()));
             _inputManager = inputManager;
+            _boundEntry = entry;
         }
 
         /// <summary>
@@ -138,20 +148,97 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _inputManager.SetJumpPressed(_buttons.JumpPressed);
             _buttons.ConsumeJump();
 
+            // 一次性按下必须**无条件**写入（包括 false）。Unity 保证本帧所有 Update
+            // 先于 LateUpdate，消费者有完整的下一帧 Update 窗口读取 pressed；若死亡/
+            // 防御分支整块跳过读取，下一帧这里的 false 会把未消费的锁存丢弃，避免
+            // 解除防御或复活后补放一次玩家当时没有请求的技能。
+            _inputManager.SetSkillQPressedFromUI(_buttons.SkillQPressed);
+            _inputManager.SetSkillRPressedFromUI(_buttons.SkillRPressed);
+            _inputManager.SetSkillFireballPressedFromUI(_buttons.FireballPressed);
+            _inputManager.SetSkillChargeBlastPressedFromUI(_buttons.ChargeBlastPressed);
+            _inputManager.SetSkillMeteorPressedFromUI(_buttons.MeteorPressed);
+            _inputManager.SetSkillFireballHeldFromUI(_buttons.FireballHeld);
+            _inputManager.SetSkillChargeBlastHeldFromUI(_buttons.ChargeBlastHeld);
+            _buttons.ConsumeSkillPresses();
+
             if (_buttons.TargetSwitchPressed)
             {
                 _inputManager.SetTargetSwitchPressedFromUI(true);
                 _buttons.ConsumeTargetSwitch();
             }
+
+            // 瞄准状态必须最后写：`SetSkillFireballPressedFromUI(true)` 会清掉旧的释放
+            // 锁存，同一帧「按下即松开」时若先写 release 就会被 pressed 清掉，
+            // 下一帧 level-based 释放会把技能打出去。
+            if (_fireballAim != null)
+            {
+                _inputManager.SetSkillFireballAimFromUI(
+                    _fireballAim.IsGestureActive, _fireballAim.Aim, _fireballAim.CancelArmed);
+                var kind = _fireballAim.ConsumeReleaseKind();
+                if (kind != AimReleaseKind.None)
+                    _inputManager.SetSkillFireballReleaseFromUI(kind == AimReleaseKind.Cancel);
+            }
+            else
+            {
+                _inputManager.SetSkillFireballAimFromUI(false, Vector2.zero, false);
+            }
         }
 
         /// <summary>
-        /// 停用/失焦时清掉 UI 冲刺 —— 否则 InputManager 会保留最后一次 true，
-        /// 切回键鼠或场景卸载后角色仍在冲刺。
+        /// 停用/失焦时清掉 UI 冲刺与全部触摸状态，并**同时**释放两个绑定引用。
+        /// 只清 `_boundEntry` 会让再启用后的 `Update` 因 `_inputManager != null` 永久早退，
+        /// HUD 再也拿不到 `BoundEntry`（技能栏会一直复位）。
         /// </summary>
         private void OnDisable()
         {
-            if (_inputManager != null) _inputManager.SetSprintHeld(false);
+            ReleaseBinding();
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus) return;
+            // 顺序：先取消正在瞄准的技能，再清 UI 状态 —— 否则清掉的释放锁存
+            // 会让蓄力中的火球在失焦后被 level-based 释放打出去。
+            if (_boundEntry != null) _boundEntry.CancelAimingSkill();
+            if (_fireballAim != null) _fireballAim.ResetGesture();
+            if (_buttons != null) _buttons.ClearCombatInput();
+            ClearCombatUiInput(_inputManager);
+            if (_boundEntry != null) _boundEntry.ClearHeavyReady();
+        }
+
+        /// <summary>
+        /// 释放当前绑定：清掉 UI 与旧 InputManager 的 held/pressed，并把两个引用一起置空。
+        /// 角色销毁重建、切换绑定、关闭触控与 Binder 停用都走这里，保证状态不会漏给新角色。
+        /// </summary>
+        private void ReleaseBinding()
+        {
+            // 先取消瞄准（不发射、不冷却），再清 UI 状态。
+            if (_boundEntry != null) _boundEntry.CancelAimingSkill();
+            if (_fireballAim != null) _fireballAim.ResetGesture();
+            if (_boundEntry != null) _boundEntry.ClearHeavyReady();
+            if (_buttons != null) _buttons.ClearCombatInput();
+            ClearCombatUiInput(_inputManager);
+            _inputManager = null;
+            _boundEntry = null;
+        }
+
+        internal static void ClearCombatUiInput(InputManager inputManager)
+        {
+            if (inputManager == null) return;
+            inputManager.SetSprintHeld(false);
+            inputManager.SetAttackHeld(false);
+            inputManager.CancelAttackHold();
+            inputManager.SetDefendHeld(false);
+            inputManager.SetJumpPressed(false);
+            inputManager.SetSkillQPressedFromUI(false);
+            inputManager.SetSkillRPressedFromUI(false);
+            inputManager.SetSkillFireballPressedFromUI(false);
+            inputManager.SetSkillFireballHeldFromUI(false);
+            inputManager.SetSkillFireballAimFromUI(false, Vector2.zero, false);
+            inputManager.ClearSkillFireballReleaseFromUI();
+            inputManager.SetSkillChargeBlastPressedFromUI(false);
+            inputManager.SetSkillChargeBlastHeldFromUI(false);
+            inputManager.SetSkillMeteorPressedFromUI(false);
         }
     }
 }

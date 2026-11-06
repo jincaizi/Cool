@@ -49,6 +49,21 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private bool _skillFireballConsumed;
         private bool _skillChargeBlastConsumed;
         private bool _skillMeteorConsumed;
+        private bool _skillQPressedFromUI;
+        private bool _skillRPressedFromUI;
+        private bool _skillFireballPressedFromUI;
+        private bool _skillFireballHeldFromUI;
+        private bool _skillChargeBlastPressedFromUI;
+        private bool _skillChargeBlastHeldFromUI;
+        private bool _skillMeteorPressedFromUI;
+
+        // 火球地面瞄准（移动端摇杆）—— 由 MobileInputBinder 帧末汇入。
+        private bool _skillFireballAimActiveFromUI;
+        private Vector2 _skillFireballAimFromUI;
+        private bool _skillFireballCancelArmedFromUI;
+        private bool _skillFireballReleaseFromUI;
+        private bool _skillFireballReleaseCanceledFromUI;
+        private bool _skillFireballReleaseConsumed = true;
 
         // 切换目标一次性事件（T 键 / 移动端按钮）—— UI 标志只在消费时清除，
         // Update 只重置消费锁存，避免 LateUpdate 汇入的按下被下一帧 Update 提前丢掉。
@@ -84,6 +99,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skillFireballConsumed = false;
             _skillChargeBlastConsumed = false;
             _skillMeteorConsumed = false;
+            _skillFireballReleaseConsumed = false;
             _targetSwitchConsumed = false;
             _lastReleaseDuration = -1f;
             _attackJustPressed = false;
@@ -262,6 +278,19 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _attackHeldFromUI = held;
         }
 
+        /// <summary>
+        /// 无释放事件地取消攻击按住追踪（失焦、关闭触控、释放绑定）。
+        /// 与 `SetAttackHeld(false)` 不同：不会让 `Update` 合成一次释放时长，
+        /// 否则 Sys3CEntry 的“松开 = 重击”分支会在浏览器失焦后补放一次重击。
+        /// </summary>
+        public void CancelAttackHold()
+        {
+            _attackHeld = false;
+            _attackHoldStart = -1f;
+            _lastReleaseDuration = -1f;
+            _attackJustPressed = false;
+        }
+
         // UI 按钮设置的跳跃按下锁存（手游平台使用）—— 消费掉一次性按下是 UI 侧的责任
         private bool _jumpPressedFromUI;
 
@@ -269,6 +298,46 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public void SetJumpPressed(bool pressed)
         {
             _jumpPressedFromUI = pressed;
+        }
+
+        public void SetSkillQPressedFromUI(bool pressed)
+        {
+            _skillQPressedFromUI = pressed;
+            if (pressed) _skill2Consumed = false;
+        }
+
+        public void SetSkillRPressedFromUI(bool pressed)
+        {
+            _skillRPressedFromUI = pressed;
+            if (pressed) _skill3Consumed = false;
+        }
+
+        public void SetSkillFireballPressedFromUI(bool pressed)
+        {
+            _skillFireballPressedFromUI = pressed;
+            if (pressed)
+            {
+                _skillFireballConsumed = false;
+                // 新的按下属于新一次技能输入：旧释放锁存不得再被消费。
+                _skillFireballReleaseFromUI = false;
+                _skillFireballReleaseConsumed = true;
+            }
+        }
+
+        public void SetSkillFireballHeldFromUI(bool held) => _skillFireballHeldFromUI = held;
+
+        public void SetSkillChargeBlastPressedFromUI(bool pressed)
+        {
+            _skillChargeBlastPressedFromUI = pressed;
+            if (pressed) _skillChargeBlastConsumed = false;
+        }
+
+        public void SetSkillChargeBlastHeldFromUI(bool held) => _skillChargeBlastHeldFromUI = held;
+
+        public void SetSkillMeteorPressedFromUI(bool pressed)
+        {
+            _skillMeteorPressedFromUI = pressed;
+            if (pressed) _skillMeteorConsumed = false;
         }
 
         /// <summary>
@@ -284,10 +353,11 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkill2Pressed()
         {
-            bool pressed = UnityInput.GetKeyDown(KeyCode.Q);
+            bool pressed = _skillQPressedFromUI || UnityInput.GetKeyDown(KeyCode.Q);
             if (pressed && !_skill2Consumed)
             {
                 _skill2Consumed = true;
+                _skillQPressedFromUI = false;
                 return true;
             }
             return false;
@@ -298,10 +368,11 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkill3Pressed()
         {
-            bool pressed = UnityInput.GetKeyDown(KeyCode.R);
+            bool pressed = _skillRPressedFromUI || UnityInput.GetKeyDown(KeyCode.R);
             if (pressed && !_skill3Consumed)
             {
                 _skill3Consumed = true;
+                _skillRPressedFromUI = false;
                 return true;
             }
             return false;
@@ -312,10 +383,11 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillFireballPressed()
         {
-            bool pressed = UnityInput.GetKeyDown(KeyCode.Alpha1);
+            bool pressed = _skillFireballPressedFromUI || UnityInput.GetKeyDown(KeyCode.Alpha1);
             if (pressed && !_skillFireballConsumed)
             {
                 _skillFireballConsumed = true;
+                _skillFireballPressedFromUI = false;
                 return true;
             }
             return false;
@@ -326,7 +398,47 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillFireballHeld()
         {
-            return UnityInput.GetKey(KeyCode.Alpha1);
+            return _skillFireballHeldFromUI || UnityInput.GetKey(KeyCode.Alpha1);
+        }
+
+        /// <summary>
+        /// 火球地面瞄准状态（移动端摇杆）—— 由 MobileInputBinder 在帧末汇入。
+        /// 非瞄准时 aim 归零、取消态清零。
+        /// </summary>
+        public void SetSkillFireballAimFromUI(bool active, Vector2 aim, bool cancelArmed)
+        {
+            _skillFireballAimActiveFromUI = active;
+            _skillFireballAimFromUI = active ? aim : Vector2.zero;
+            _skillFireballCancelArmedFromUI = active && cancelArmed;
+        }
+
+        public bool IsSkillFireballAimActive() => _skillFireballAimActiveFromUI;
+        public Vector2 SkillFireballAim => _skillFireballAimFromUI;
+        public bool IsSkillFireballCancelArmed() => _skillFireballCancelArmedFromUI;
+
+        /// <summary>瞄准摇杆释放：置位一次释放锁存（一次按下最多消费一次）。</summary>
+        public void SetSkillFireballReleaseFromUI(bool canceled)
+        {
+            _skillFireballReleaseFromUI = true;
+            _skillFireballReleaseCanceledFromUI = canceled;
+            _skillFireballReleaseConsumed = false;
+        }
+
+        /// <summary>消费释放锁存；未置位或本帧已消费返回 false。</summary>
+        public bool ConsumeSkillFireballRelease(out bool canceled)
+        {
+            canceled = _skillFireballReleaseCanceledFromUI;
+            if (!_skillFireballReleaseFromUI || _skillFireballReleaseConsumed) return false;
+            _skillFireballReleaseConsumed = true;
+            return true;
+        }
+
+        /// <summary>teardown 清掉未消费的释放锁存（避免复活后补取消）。</summary>
+        public void ClearSkillFireballReleaseFromUI()
+        {
+            _skillFireballReleaseFromUI = false;
+            _skillFireballReleaseCanceledFromUI = false;
+            _skillFireballReleaseConsumed = true;
         }
 
         /// <summary>
@@ -334,10 +446,11 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillChargeBlastPressed()
         {
-            bool pressed = UnityInput.GetKeyDown(KeyCode.Alpha2);
+            bool pressed = _skillChargeBlastPressedFromUI || UnityInput.GetKeyDown(KeyCode.Alpha2);
             if (pressed && !_skillChargeBlastConsumed)
             {
                 _skillChargeBlastConsumed = true;
+                _skillChargeBlastPressedFromUI = false;
                 return true;
             }
             return false;
@@ -348,7 +461,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillChargeBlastHeld()
         {
-            return UnityInput.GetKey(KeyCode.Alpha2);
+            return _skillChargeBlastHeldFromUI || UnityInput.GetKey(KeyCode.Alpha2);
         }
 
         /// <summary>
@@ -356,10 +469,11 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillMeteorPressed()
         {
-            bool pressed = UnityInput.GetKeyDown(KeyCode.Alpha3);
+            bool pressed = _skillMeteorPressedFromUI || UnityInput.GetKeyDown(KeyCode.Alpha3);
             if (pressed && !_skillMeteorConsumed)
             {
                 _skillMeteorConsumed = true;
+                _skillMeteorPressedFromUI = false;
                 return true;
             }
             return false;

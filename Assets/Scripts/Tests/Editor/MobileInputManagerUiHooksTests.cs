@@ -73,5 +73,97 @@ namespace GameSys.EditorTests
             _input.Update();
             Assert.IsFalse(_input.IsJumpPressed(), "锁存落下后不得再有跳跃");
         }
+
+        [Test]
+        public void test_ui_skill_q_r_and_meteor_each_emit_one_press_edge()
+        {
+            _input.SetSkillQPressedFromUI(true);
+            _input.SetSkillRPressedFromUI(true);
+            _input.SetSkillMeteorPressedFromUI(true);
+
+            Assert.IsTrue(_input.IsSkill2Pressed(), "Q 应产生一次按下沿");
+            Assert.IsFalse(_input.IsSkill2Pressed(), "Q 同一按下不得重复触发");
+            Assert.IsTrue(_input.IsSkill3Pressed(), "R 应产生一次按下沿");
+            Assert.IsFalse(_input.IsSkill3Pressed(), "R 同一按下不得重复触发");
+            Assert.IsTrue(_input.IsSkillMeteorPressed(), "陨石应产生一次按下沿");
+            Assert.IsFalse(_input.IsSkillMeteorPressed(), "陨石同一按下不得重复触发");
+        }
+
+        [Test]
+        public void test_ui_fireball_press_hold_release_matches_keyboard_semantics()
+        {
+            _input.SetSkillFireballPressedFromUI(true);
+            _input.SetSkillFireballHeldFromUI(true);
+
+            Assert.IsTrue(_input.IsSkillFireballPressed(), "火球按下应产生一次边沿");
+            Assert.IsFalse(_input.IsSkillFireballPressed(), "火球按下沿不得重复");
+            Assert.IsTrue(_input.IsSkillFireballHeld(), "火球按住期间应保持 held");
+
+            _input.SetSkillFireballHeldFromUI(false);
+            Assert.IsFalse(_input.IsSkillFireballHeld(), "火球松开后必须清除 held");
+        }
+
+        [Test]
+        public void test_ui_charge_blast_press_hold_release_matches_keyboard_semantics()
+        {
+            _input.SetSkillChargeBlastPressedFromUI(true);
+            _input.SetSkillChargeBlastHeldFromUI(true);
+
+            Assert.IsTrue(_input.IsSkillChargeBlastPressed(), "炎爆按下应产生一次边沿");
+            Assert.IsFalse(_input.IsSkillChargeBlastPressed(), "炎爆按下沿不得重复");
+            Assert.IsTrue(_input.IsSkillChargeBlastHeld(), "炎爆按住期间应保持 held");
+
+            _input.SetSkillChargeBlastHeldFromUI(false);
+            Assert.IsFalse(_input.IsSkillChargeBlastHeld(), "炎爆松开后必须清除 held");
+        }
+
+        [Test]
+        public void test_ui_fireball_aim_states_forwarded()
+        {
+            // Arrange & Act（binder 帧末汇入的瞄准状态）
+            _input.SetSkillFireballAimFromUI(true, new Vector2(0.5f, 0f), true);
+
+            // Assert
+            Assert.IsTrue(_input.IsSkillFireballAimActive());
+            Assert.AreEqual(new Vector2(0.5f, 0f), _input.SkillFireballAim);
+            Assert.IsTrue(_input.IsSkillFireballCancelArmed());
+
+            // Act（瞄准结束：状态必须一并复位）
+            _input.SetSkillFireballAimFromUI(false, Vector2.zero, false);
+
+            // Assert
+            Assert.IsFalse(_input.IsSkillFireballAimActive());
+            Assert.AreEqual(Vector2.zero, _input.SkillFireballAim);
+            Assert.IsFalse(_input.IsSkillFireballCancelArmed());
+        }
+
+        [Test]
+        public void test_ui_fireball_release_kind_consumed_once()
+        {
+            // Arrange
+            _input.SetSkillFireballReleaseFromUI(canceled: true);
+
+            // Act & Assert（释放类型只能消费一次）
+            Assert.IsTrue(_input.ConsumeSkillFireballRelease(out bool canceled));
+            Assert.IsTrue(canceled);
+            Assert.IsFalse(_input.ConsumeSkillFireballRelease(out _), "释放类型只能消费一次");
+        }
+
+        [Test]
+        public void test_ui_clear_combat_input_resets_aim_state()
+        {
+            // Arrange
+            _input.SetSkillFireballAimFromUI(true, new Vector2(1f, 0f), true);
+            _input.SetSkillFireballReleaseFromUI(canceled: true);
+
+            // Act
+            MobileInputBinder.ClearCombatUiInput(_input);
+
+            // Assert
+            Assert.IsFalse(_input.IsSkillFireballAimActive());
+            Assert.AreEqual(Vector2.zero, _input.SkillFireballAim);
+            Assert.IsFalse(_input.IsSkillFireballCancelArmed());
+            Assert.IsFalse(_input.ConsumeSkillFireballRelease(out _));
+        }
     }
 }
