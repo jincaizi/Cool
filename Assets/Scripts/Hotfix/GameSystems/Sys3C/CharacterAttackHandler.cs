@@ -15,6 +15,9 @@ namespace Hotfix.GameSystems.Sys3C
         private ITargetable _currentTarget;
         private Action _onTargetDeath;
 
+        /// <summary>当前选中目标（目标面板/选中环显示的那个）；无目标为 null。</summary>
+        public ITargetable CurrentTarget => _currentTarget;
+
         private void Start()
         {
             _currentWeapon = GetComponent<IWeapon>();

@@ -60,6 +60,17 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>当前锁定实体 id；0 = 无锁定（CastRequest 回退服务端自动目标）</summary>
         public long LockedTargetId => _lockedId;
 
+        /// <summary>当前锁定目标的渲染位置；无锁/视图消失/已死亡返回 false。</summary>
+        public bool TryGetLockedPosition(out Vector3 position)
+        {
+            position = default;
+            if (_registry == null || _lockedId == 0) return false;
+            var view = _registry.GetView(_lockedId);
+            if (view == null || view.Dead) return false;
+            position = view.Position;
+            return true;
+        }
+
         public void Initialize(RemoteEntityRegistry registry, Transform owner,
             InputManager? input, SelectionRing? ring,
             Action<NetworkTargetable>? bindPanel, Action? clearPanel, Func<long>? localId)

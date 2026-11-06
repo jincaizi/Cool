@@ -347,6 +347,27 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         // ------------------------------------------------------------------
+        // 锁定位置（点按瞄准的目标来源）
+        // ------------------------------------------------------------------
+
+        [Test]
+        public void TryGetLockedPosition_Returns_View_Position()
+        {
+            CreateView(2L, new Vector3(3f, 0f, 4f), EntityKind.Npc);
+            PressSwitchAndTick();
+            Assert.AreEqual(2L, _selector.LockedTargetId, "前置：应已锁定");
+
+            Assert.IsTrue(_selector.TryGetLockedPosition(out var position));
+            Assert.AreEqual(new Vector3(3f, 0f, 4f), position);
+        }
+
+        [Test]
+        public void TryGetLockedPosition_Returns_False_Without_Lock()
+        {
+            Assert.IsFalse(_selector.TryGetLockedPosition(out _));
+        }
+
+        // ------------------------------------------------------------------
         // 施法前取目标
         // ------------------------------------------------------------------
 

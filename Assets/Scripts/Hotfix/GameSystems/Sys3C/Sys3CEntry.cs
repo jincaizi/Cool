@@ -116,6 +116,13 @@ namespace Hotfix.GameSystems.Sys3C
         /// 占位实现供 binder 接线编译；实际取消逻辑由任务 9 补全。</summary>
         public bool CancelAimingSkill() => false;
 
+        /// <summary>选中目标位置提供者（联网时由 ClientNetworkHost 注入 selector 查询）；任务 9 消费。</summary>
+        private System.Func<Vector3?> _selectedTargetPositionProvider;
+
+        /// <summary>注入/清空选中目标位置提供者（null = 无提供者）。任务 9 的瞄准逻辑会消费。</summary>
+        public void SetSelectedTargetPositionProvider(System.Func<Vector3?> provider)
+            => _selectedTargetPositionProvider = provider;
+
         /// <summary>移动策略注入面（网络宿主可替换为 NetMovementPolicy）</summary>
         public IMovementPolicy MovementPolicy { get => _movementPolicy; set => _movementPolicy = value; }
 

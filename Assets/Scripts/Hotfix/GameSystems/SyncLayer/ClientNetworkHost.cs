@@ -789,6 +789,9 @@ namespace Hotfix.GameSystems.SyncLayer
                 },
                 () => _manager?.LocalPlayerId ?? 0L);
             _networkTargetSelector = selector;
+            // 点按瞄准的目标来源：本地角色瞄准时向 selector 查询当前锁定目标位置
+            _localEntry.SetSelectedTargetPositionProvider(() =>
+                selector != null && selector.TryGetLockedPosition(out var p) ? p : (Vector3?)null);
             // AOI 出界：ViewRemoved 先于视图销毁触发——先清锁（解绑选中环），否则环会随目标一起被销毁
             _remoteEntities!.ViewRemoved += HandleRemoteViewRemoved;
 
@@ -851,6 +854,7 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_networkTargetSelector != null)
             {
                 _networkTargetSelector.Shutdown();
+                _localEntry?.SetSelectedTargetPositionProvider(null);
                 _networkTargetSelector = null;
             }
         }
