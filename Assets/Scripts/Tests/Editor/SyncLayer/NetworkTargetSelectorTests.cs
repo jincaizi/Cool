@@ -14,6 +14,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
     public class NetworkTargetSelectorTests
     {
         private const string ComboSkillPath = "Assets/PreRes/SkillsCfg/BA_Combo1.asset";
+        private const string SpiderPrefab = "Assets/Monstor/fantasySpider/SpiderMonster.prefab";
         private const long LocalId = 1L;
         private const long ServerTicks = 1_000_000L;
 
@@ -157,6 +158,71 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
             Assert.AreEqual(new[] { 3L, 2L, 1L }, result.ConvertAll(c => c.EntityId).ToArray(),
                 "候选按到角色的水平距离升序");
+        }
+
+        [Test]
+        public void Filter_Includes_Large_Npc_By_Surface_Range_And_Angular_Reach()
+        {
+            var candidates = new List<NetworkTargetSelector.Candidate>
+            {
+                new NetworkTargetSelector.Candidate(2L, new Vector3(2.2f, 0f, 0f),
+                    (byte)EntityKind.Npc, dead: false, radius: 1.74f),
+            };
+
+            var result = NetworkTargetSelector.FilterCandidates(
+                Vector3.zero, Vector3.forward, candidates, acquireRange: 2f, halfAngleDeg: 60f);
+
+            Assert.AreEqual(new[] { 2L }, result.ConvertAll(c => c.EntityId).ToArray(),
+                "表面距 0.46 ≤ 2；中心角 90° ≤ 60° + asin(1.74/2.2) ≈ 112°");
+        }
+
+        [Test]
+        public void Filter_Excludes_Small_Target_At_Same_Side_Angle()
+        {
+            var candidates = new List<NetworkTargetSelector.Candidate>
+            {
+                new NetworkTargetSelector.Candidate(2L, new Vector3(1.5f, 0f, 0f),
+                    (byte)EntityKind.Player, dead: false), // 半径 0
+            };
+
+            var result = NetworkTargetSelector.FilterCandidates(
+                Vector3.zero, Vector3.forward, candidates, acquireRange: 2f, halfAngleDeg: 60f);
+
+            Assert.AreEqual(0, result.Count, "半径 0 时中心角 90° > 60°，必须排除");
+        }
+
+        [Test]
+        public void Filter_Includes_Zero_Distance_Candidate()
+        {
+            var candidates = new List<NetworkTargetSelector.Candidate>
+            {
+                new NetworkTargetSelector.Candidate(2L, Vector3.zero,
+                    (byte)EntityKind.Npc, dead: false, radius: 1.74f),
+            };
+
+            var result = NetworkTargetSelector.FilterCandidates(
+                Vector3.zero, Vector3.forward, candidates, acquireRange: 2f, halfAngleDeg: 60f);
+
+            Assert.AreEqual(new[] { 2L }, result.ConvertAll(c => c.EntityId).ToArray(),
+                "零距离退化：角度无意义，直接入选");
+        }
+
+        [Test]
+        public void Filter_Orders_By_Surface_Distance()
+        {
+            var candidates = new List<NetworkTargetSelector.Candidate>
+            {
+                new NetworkTargetSelector.Candidate(1L, new Vector3(0f, 0f, 3f),
+                    (byte)EntityKind.Npc, dead: false, radius: 1.5f),   // 表面 1.5
+                new NetworkTargetSelector.Candidate(2L, new Vector3(0f, 0f, 2f),
+                    (byte)EntityKind.Player, dead: false),              // 表面 2.0
+            };
+
+            var result = NetworkTargetSelector.FilterCandidates(
+                Vector3.zero, Vector3.forward, candidates, acquireRange: 15f, halfAngleDeg: 90f);
+
+            Assert.AreEqual(new[] { 1L, 2L }, result.ConvertAll(c => c.EntityId).ToArray(),
+                "按表面距离升序，而不是中心距");
         }
 
         // ------------------------------------------------------------------
@@ -376,6 +442,69 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
             Assert.AreEqual(0L, _selector.LockedTargetId,
                 "技能形状内无候选时回退 0（服务端自动目标），不得锁定射程外目标");
+        }
+
+        [Test]
+        public void EnsureTargetFor_Keeps_Lock_On_Large_Npc_At_Melee_Range()
+        {
+            var spiderPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(SpiderPrefab);
+            Assert.NotNull(spiderPrefab, SpiderPrefab + " 未找到");
+
+            var root = new GameObject("SpiderSelectorTestRoot");
+            var registry = new RemoteEntityRegistry(root.transform, null,
+                new Dictionary<int, GameObject> { { 4, spiderPrefab } });
+            var owner = new GameObject("SpiderSelectorOwner");
+            NetworkTargetable? bound = null;
+            var selector = owner.AddComponent<NetworkTargetSelector>();
+            selector.Initialize(registry, owner.transform, null, null,
+                target => { bound = target; },
+                () => { bound = null; },
+                () => LocalId);
+            try
+            {
+                const long npcId = 9_000_001L;
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = npcId,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind | EntityFieldMask.TemplateId),
+                    X = 2.2f, Y = 0f, Z = 0f,
+                    Kind = (byte)EntityKind.Npc, TemplateId = 4, Tick = 1
+                }, serverTicks: ServerTicks);
+
+                var view = registry.GetView(npcId);
+                Assert.NotNull(view);
+                view!.Position = new Vector3(2.2f, 0f, 0f);
+                Assert.NotNull(view.BodyCollider, "真模型视图应补上运行时身体碰撞体");
+                view.BodyCollider!.BuildCollider();   // EditMode：AddComponent 不触发生命周期
+                Assert.Greater(view.BodyRadius, 1.5f, "蜘蛛的目标选择半径应接近 1.74");
+
+                var data = UnityEditor.AssetDatabase.LoadAssetAtPath<ComboSkillData>(ComboSkillPath);
+                Assert.NotNull(data, ComboSkillPath + " 未找到");
+                selector.EnsureTargetFor(data);
+
+                Assert.AreEqual(npcId, selector.LockedTargetId,
+                    "侧面 90°、表面距 0.46m 的大体型目标应建立锁定");
+                Assert.IsNotNull(bound);
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(owner);
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void EnsureTargetFor_Does_Not_Lock_Small_Target_At_Side()
+        {
+            CreateView(2L, new Vector3(1.5f, 0f, 0f));   // 玩家视图半径 0
+            var data = UnityEditor.AssetDatabase.LoadAssetAtPath<ComboSkillData>(ComboSkillPath);
+            Assert.NotNull(data, ComboSkillPath + " 未找到");
+
+            _selector.EnsureTargetFor(data);
+
+            Assert.AreEqual(0L, _selector.LockedTargetId,
+                "半径 0、中心角 90° > 60° 半锥：不得锁定");
         }
     }
 }

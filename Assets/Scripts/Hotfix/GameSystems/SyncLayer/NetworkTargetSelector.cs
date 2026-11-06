@@ -34,13 +34,16 @@ namespace Hotfix.GameSystems.SyncLayer
             public readonly Vector3 Position;
             public readonly byte Kind;
             public readonly bool Dead;
+            /// <summary>目标 XZ 身体半径（米；玩家恒 0）——锁定按表面距离与角扩展筛选</summary>
+            public readonly float Radius;
 
-            public Candidate(long entityId, Vector3 position, byte kind, bool dead)
+            public Candidate(long entityId, Vector3 position, byte kind, bool dead, float radius = 0f)
             {
                 EntityId = entityId;
                 Position = position;
                 Kind = kind;
                 Dead = dead;
+                Radius = radius;
             }
         }
 
@@ -103,7 +106,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>
         /// 施法前调用（spec §8.6）：
-        ///  - 已有锁定 → 用**当前技能的形状/射程**复核（水平距离 ≤ 射程且在前向半角锥内；
+        ///  - 已有锁定 → 用**当前技能的形状/射程**复核（表面距离 ≤ 射程且在前向半角锥内；
         ///    `AOE_Circle` 按 `AreaRadius` 做圆判定，无锥）。不满足 → `ClearLock()` 并**直接返回**，
         ///    `LockedTargetId = 0` 回退服务端自动目标，避免显式目标必空；
         ///  - 无锁定 → 按同一形状选最近候选并绑定（无形状 = `AcquireRange` / ±90°；形状内无候选保持无锁）。
@@ -164,8 +167,9 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>
         /// 候选筛选（纯函数）：仅 `Player` / `Npc`（未知 kind fail-closed），排除死亡、超距、
-        /// 前向锥外；按水平距离升序。`halfAngleDeg` 是**半角**（前方 ±halfAngleDeg），
-        /// forward 只取水平分量（零向量退化为世界 +Z）。
+        /// 前向锥外；按**表面距离升序**（中心距 − 目标半径）。`halfAngleDeg` 是**半角**
+        /// （前方 ±halfAngleDeg）；目标半径 &gt; 0 时按 asin(半径/中心距) 扩展半角，
+        /// 与服务水平距离/圆-锥判定同口径。forward 只取水平分量（零向量退化为世界 +Z）。
         /// </summary>
         public static List<Candidate> FilterCandidates(Vector3 origin, Vector3 forward,
             IReadOnlyList<Candidate> candidates, float acquireRange, float halfAngleDeg)
@@ -175,8 +179,7 @@ namespace Hotfix.GameSystems.SyncLayer
             if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
             forward.Normalize();
 
-            float halfCos = Mathf.Cos(Mathf.Clamp(halfAngleDeg, 0f, 180f) * Mathf.Deg2Rad);
-            float rangeSqr = acquireRange * acquireRange;
+            float clampedHalf = Mathf.Clamp(halfAngleDeg, 0f, 180f);
 
             foreach (var candidate in candidates)
             {
@@ -186,22 +189,35 @@ namespace Hotfix.GameSystems.SyncLayer
 
                 Vector3 delta = candidate.Position - origin;
                 delta.y = 0f;   // 水平判定：高度差（怪物落地吸附/角色跳跃）不参与射程与锥角
-                float distanceSqr = delta.sqrMagnitude;
-                if (distanceSqr > rangeSqr) continue;
-                if (distanceSqr > 0.0001f
-                    && Vector3.Dot(forward, delta / Mathf.Sqrt(distanceSqr)) < halfCos) continue;
+                float centerDist = delta.magnitude;
+                float surfaceDist = Mathf.Max(0f, centerDist - candidate.Radius);
+                if (surfaceDist > acquireRange) continue;
+
+                // 已在目标身体内 / 零距离退化：角度无意义，直接入选
+                if (centerDist <= 0.0001f || centerDist <= candidate.Radius)
+                {
+                    result.Add(candidate);
+                    continue;
+                }
+
+                float alphaDeg = Mathf.Asin(Mathf.Clamp(candidate.Radius / centerDist, 0f, 1f))
+                                 * Mathf.Rad2Deg;
+                float effectiveHalf = Mathf.Min(180f, clampedHalf + alphaDeg);
+                float halfCos = Mathf.Cos(effectiveHalf * Mathf.Deg2Rad);
+                if (Vector3.Dot(forward, delta / centerDist) < halfCos) continue;
                 result.Add(candidate);
             }
 
-            result.Sort((a, b) =>
-            {
-                Vector3 da = a.Position - origin;
-                Vector3 db = b.Position - origin;
-                da.y = 0f;
-                db.y = 0f;
-                return da.sqrMagnitude.CompareTo(db.sqrMagnitude);
-            });
+            result.Sort((a, b) => SurfaceDistance(origin, a).CompareTo(SurfaceDistance(origin, b)));
             return result;
+        }
+
+        /// <summary>候选到角色的表面距离（XZ 平面；已在体内时为 0）。</summary>
+        private static float SurfaceDistance(Vector3 origin, Candidate candidate)
+        {
+            Vector3 delta = candidate.Position - origin;
+            delta.y = 0f;
+            return Mathf.Max(0f, delta.magnitude - candidate.Radius);
         }
 
         private void Cycle()
@@ -230,7 +246,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (id == localId) continue;             // 排除自己（防御：本地玩家通常不在 AOI 快照里）
                 var view = _registry.GetView(id);
                 if (view == null) continue;              // 遍历期间被移除
-                candidates.Add(new Candidate(id, view.Position, view.Kind, view.Dead));
+                candidates.Add(new Candidate(id, view.Position, view.Kind, view.Dead, view.BodyRadius));
             }
             return candidates;
         }
@@ -246,16 +262,20 @@ namespace Hotfix.GameSystems.SyncLayer
 
             Vector3 delta = view.Position - _owner.position;
             delta.y = 0f;
-            float distanceSqr = delta.sqrMagnitude;
-            if (distanceSqr > range * range) return false;
-            if (omnidirectional || distanceSqr <= 0.0001f) return true;
+            float centerDist = delta.magnitude;
+            float surfaceDist = Mathf.Max(0f, centerDist - view.BodyRadius);
+            if (surfaceDist > range) return false;
+            if (omnidirectional || centerDist <= 0.0001f || centerDist <= view.BodyRadius) return true;
 
             Vector3 forward = _owner.forward;
             forward.y = 0f;
             if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
             forward.Normalize();
-            float halfCos = Mathf.Cos(Mathf.Clamp(halfAngleDeg, 0f, 180f) * Mathf.Deg2Rad);
-            return Vector3.Dot(forward, delta / Mathf.Sqrt(distanceSqr)) >= halfCos;
+            float alphaDeg = Mathf.Asin(Mathf.Clamp(view.BodyRadius / centerDist, 0f, 1f))
+                             * Mathf.Rad2Deg;
+            float effectiveHalf = Mathf.Min(180f, Mathf.Clamp(halfAngleDeg, 0f, 180f) + alphaDeg);
+            float halfCos = Mathf.Cos(effectiveHalf * Mathf.Deg2Rad);
+            return Vector3.Dot(forward, delta / centerDist) >= halfCos;
         }
 
         private bool IsLockStillValid(out RemoteEntityView? view)
