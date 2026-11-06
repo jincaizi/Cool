@@ -7,6 +7,7 @@ using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Runtime;
 using Hotfix.GameSystems.SyncLayer;
+using Hotfix.GameSystems.Sys3C.Input;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -414,16 +415,54 @@ namespace GameSys.EditorTests
         }
 
         [Test]
-        public void test_hold_to_aim_impact_falls_back_to_forward_range()
+        public void test_hold_to_aim_impact_falls_back_to_forward_range_with_margin()
         {
             var data = CreateChargeableProjectileData(holdToAim: true);
             var (coordinator, client, _) = CreateCoordinatorWithBridge(data);
-            // 不调用 UpdateAimTarget；施法者在原点、朝向 +Z，兜底 = (0,0,15)
+            // 不调用 UpdateAimTarget；施法者在原点、朝向 +Z，兜底 = (0,0,14.95)
 
             Assert.IsTrue(coordinator.TryReleaseCharge(20003));
 
             var cast = (CastRequest)client.Sent[0].msg;
-            Assert.AreEqual(15f, cast.ImpactZ, 0.001f, "未设置落点时必须兜底为前方最大射程");
+            Assert.AreEqual(15f - SkillAimMath.ReportDistanceMargin, cast.ImpactZ, 0.001f,
+                "未设置落点时必须兜底为前方最大射程并留 5cm 网络余量");
+        }
+
+        // ====================================================================================
+        // HoldToAim 移动锁：Casting / Charging 都必须 CanMove=false（真实 SkillExecutor）。
+        // 非 HoldToAim 投射物沿用 ProjectileSkillData.CanMoveWhileCharging（回归）。
+        // ====================================================================================
+
+        [Test]
+        public void test_hold_to_aim_cannot_move_during_casting_and_charging()
+        {
+            // Arrange
+            var data = CreateChargeableProjectileData(holdToAim: true);
+            var (coordinator, _) = ActivateChargeable(data);
+            Assert.AreEqual(SkillSubState.Casting, coordinator.CurrentSubState);
+
+            // Act & Assert（Casting 即锁移动）
+            Assert.IsFalse(coordinator.CanMove(), "HoldToAim Casting 期间不得移动");
+
+            // Act & Assert（Charging 仍锁移动）
+            AdvanceRealSkillToCharging(coordinator);
+            Assert.IsFalse(coordinator.CanMove(), "HoldToAim Charging 期间不得移动");
+        }
+
+        [Test]
+        public void test_non_hold_to_aim_projectile_keeps_move_rules_while_charging()
+        {
+            // Arrange（普通可蓄力投射物：默认 CanMoveWhileCharging=true）
+            var data = CreateChargeableProjectileData(holdToAim: false);
+            var (coordinator, _) = ActivateChargeable(data);
+            Assert.AreEqual(SkillSubState.Casting, coordinator.CurrentSubState);
+
+            // Act & Assert（Casting 不受 HoldToAim 特判影响）
+            Assert.IsTrue(coordinator.CanMove(), "非 HoldToAim Casting 保持可移动");
+
+            // Act & Assert（Charging 沿用 CanMoveWhileCharging）
+            AdvanceRealSkillToCharging(coordinator);
+            Assert.IsTrue(coordinator.CanMove(), "非 HoldToAim Charging 沿用 CanMoveWhileCharging=true");
         }
 
         // ====================================================================================

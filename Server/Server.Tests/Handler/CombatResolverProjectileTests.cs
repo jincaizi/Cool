@@ -127,6 +127,26 @@ public class CombatResolverProjectileTests
     }
 
     [Fact]
+    public void Fireball_Impact_At_Max_Range_Is_Accepted()
+    {
+        // 客户端上报被钳到 14.95m；表上限 15.00m 必须放行（预留余量的端点）
+        var resolver = new CombatResolver(MakeStore(targetAt: (0f, 10f)), new Random(1));
+        var request = new CastRequest { SkillId = 20003, ImpactX = 0f, ImpactY = 0f, ImpactZ = 15f };
+        Assert.True(resolver.Decide(1, request, tick: 0).Accepted);
+    }
+
+    [Fact]
+    public void Fireball_Impact_Just_Beyond_Tolerance_Is_Rejected()
+    {
+        // 15.02m > 15m + 0.01 容差 ⇒ 拒收（位置同步抖动不再吞掉整次施法）
+        var resolver = new CombatResolver(MakeStore(targetAt: (0f, 10f)), new Random(1));
+        var request = new CastRequest { SkillId = 20003, ImpactX = 0f, ImpactY = 0f, ImpactZ = 15.02f };
+        var decision = resolver.Decide(1, request, tick: 0);
+        Assert.False(decision.Accepted);
+        Assert.Equal("impact-too-far", decision.RejectReason);
+    }
+
+    [Fact]
     public void Fireball_Travel_Delay_Defers_First_Hit()
     {
         // 10m / 18 m/s × 15Hz = 8.33 → ceil = 9；tick 8 不得结算，tick 9 结算。

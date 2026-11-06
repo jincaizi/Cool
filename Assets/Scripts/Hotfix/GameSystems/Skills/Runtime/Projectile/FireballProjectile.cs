@@ -97,7 +97,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
             if (!_hasTarget) DetectAndExplode();
             if (_released) return;
 
-            // 落地：到达地面高度即爆（爆炸点 = 当前位置）。
+            // 落地：到达地面高度即爆。
             // 目标点弹道以"越过落点平面"为到达判据：上坡落点可能在仍在上升时恰好到达，
             // 只靠"下降段 + y ≤ 地面"会多飞约 1m；下降段/短暂飞行保护用于避免出生帧误判落地。
             bool reachedTarget = _hasTarget
@@ -109,7 +109,9 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
 
             if (landed)
             {
-                Explode(null, transform.position);
+                // 目标点弹道：爆炸中心取落点本身；越过平面那一帧的当前位置最多超前
+                // 一帧位移（30fps 约 0.6m），会把爆炸圆整体推过落点。
+                Explode(null, _hasTarget ? _targetPoint : transform.position);
                 return;
             }
 

@@ -33,7 +33,7 @@ namespace Cool.Protocol
 
         [ProtoMember(3)] public HitShape Shape { get; set; } = new HitShape();
 
-        /// <summary>落点（仅 CircleAtPoint 类技能使用：20004/30001）。服务端校验有限性与距施法者上限。</summary>
+        /// <summary>落点（仅 CircleAtPoint 类技能使用：20003/20004/30001）。服务端校验有限性与距施法者上限。</summary>
         [ProtoMember(4)] public float ImpactX { get; set; }
         [ProtoMember(5)] public float ImpactY { get; set; }
         [ProtoMember(6)] public float ImpactZ { get; set; }

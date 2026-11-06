@@ -8,8 +8,9 @@ namespace Cool.SyncCore
     public enum ProjectileKind
     {
         LineAll = 0,            // 剑气：沿途全中（每目标一次）
-        LineNearestSplash = 1,  // 火球：段内最近者 → 以其为中心溅射，后续段作废
-        CircleAtPoint = 2,      // 蓄力火球 / 陨石：落点圆判定
+        LineNearestSplash = 1,  // 旧火球线形判定：段内最近者 → 以其为中心溅射，后续段作废。
+                                // 20003 已改 CircleAtPoint，当前表无此项 ⇒ ResolveNearestStage 为死路径（保留兼容）
+        CircleAtPoint = 2,      // 火球 / 蓄力火球 / 陨石：落点圆判定
     }
 
     /// <summary>投射物判定参数（表值来源见各表项注释）。</summary>

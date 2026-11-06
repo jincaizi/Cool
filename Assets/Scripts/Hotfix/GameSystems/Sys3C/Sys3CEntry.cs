@@ -346,12 +346,13 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void HandleInput()
         {
-            // EditMode 测试可能没有 _skillCoordinator/_inputManager（Awake/Start 未执行）——
-            // 必须先判空，否则死亡用例会在早退之前 NRE。
+            // EditMode 测试可能没有 _skillCoordinator/_inputManager（Awake/Start 未执行）。
+            // 无输入管理器时没有任何输入可读，直接早退（下方防御分支会解引用 _inputManager）。
+            if (_inputManager == null) return;
+
             // 瞄准点必须在下面的释放判定之前刷新——否则激活帧的默认 5m 落点会被真发射出去。
             bool aimCharging = _skillCoordinator != null && IsHoldToAimCharging();
-            bool mobileAim = aimCharging && _inputManager != null
-                && _inputManager.IsSkillFireballAimActive();
+            bool mobileAim = aimCharging && _inputManager.IsSkillFireballAimActive();
             UpdateFireballAim(aimCharging, mobileAim);
 
             // 死亡或防御期间不接受技能输入，同时清掉剑气就绪：
@@ -531,6 +532,9 @@ namespace Hotfix.GameSystems.Sys3C
         /// </summary>
         private void UpdateFireballAim(bool aimCharging, bool mobileAim)
         {
+            // 无输入管理器时不可能有移动端瞄准手势，直接跳过（防 EditMode 早于 Start 调用）
+            if (_inputManager == null) return;
+
             if (!aimCharging)
             {
                 // Casting 不是“技能结束”：点按的释放锁存可能在 0.1s Casting 期就被消费，
@@ -646,13 +650,8 @@ namespace Hotfix.GameSystems.Sys3C
             if (!selected.HasValue && _attackHandler != null && _attackHandler.CurrentTarget != null)
                 selected = _attackHandler.CurrentTarget.WorldPosition;
 
-            if (selected.HasValue)
-                return SkillAimMath.ClampToRange(transform.position, selected.Value, data.ProjectileRange);
-
-            Vector3 forward = transform.forward;
-            forward.y = 0f;
-            if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
-            return transform.position + forward.normalized * data.ProjectileRange;
+            return SkillAimMath.ResolveDefaultTarget(
+                transform.position, transform.forward, data.ProjectileRange, selected);
         }
 
         /// <summary>从上方垂直射线吸附到地面；无地面时保留原落点。</summary>

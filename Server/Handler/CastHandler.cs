@@ -147,7 +147,8 @@ namespace KcpServer
                 ImpactZ = request.ImpactZ,
                 ChargeProgress = request.ChargeProgress
             };
-            // D-1/D-2：判定帧延迟由服务端表自持——判定发生在 tick + HitDelayTicks
+            // D-1/D-2：判定帧延迟由服务端表自持——判定发生在
+            // tick + HitDelayTicks + ProjectileTravelTicks（CircleAtPoint 飞行延迟，见上方 firstTick）
             _pending.Add(new PendingCast(casterId, request, resolution.Broadcast, resolution.IsNpcCaster,
                 entry.Projectile, charge, firstTick));
             return resolution;

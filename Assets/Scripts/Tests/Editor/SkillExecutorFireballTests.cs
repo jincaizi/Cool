@@ -5,6 +5,7 @@ using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Events;
 using Hotfix.GameSystems.Skills.Runtime;
 using Hotfix.GameSystems.Skills.Runtime.Projectile;
+using Hotfix.GameSystems.Sys3C.Input;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -168,7 +169,7 @@ namespace GameSys.EditorTests
         }
 
         [Test]
-        public void test_skill_executor_reported_impact_falls_back_to_forward_range()
+        public void test_skill_executor_reported_impact_falls_back_to_forward_range_with_margin()
         {
             var prefab = NewGo("FireballPrefab");
             prefab.AddComponent<FireballProjectile>();
@@ -176,7 +177,11 @@ namespace GameSys.EditorTests
             TestHelpers.SetField(data, "_holdToAim", true);
             var executor = CreateExecutor(data);
 
-            Assert.AreEqual(new Vector3(0f, 0f, 15f), executor.ReportedImpactPoint);
+            Vector3 point = executor.ReportedImpactPoint;
+
+            Assert.AreEqual(15f - SkillAimMath.ReportDistanceMargin, point.z, 0.001f,
+                "兜底落点必须留 5cm 网络余量（15m - 0.05m）");
+            Assert.AreEqual(0f, point.y, 0.001f);
         }
 
         [Test]
@@ -190,6 +195,49 @@ namespace GameSys.EditorTests
             executor.SetTargetPosition(new Vector3(3f, 0f, 4f));
 
             Assert.AreEqual(new Vector3(3f, 0f, 4f), executor.ReportedImpactPoint);
+        }
+
+        [Test]
+        public void test_skill_executor_reported_impact_clamps_far_target_with_margin()
+        {
+            // Arrange（目标 30m 外：客户端视觉圈可到 15m，但上报必须钳到 14.95m 并保留 Y）
+            var prefab = NewGo("FireballPrefab");
+            prefab.AddComponent<FireballProjectile>();
+            var data = CreateFireballData(prefab);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            var executor = CreateExecutor(data);
+            executor.SetTargetPosition(new Vector3(0f, 2f, 30f));
+
+            // Act
+            Vector3 point = executor.ReportedImpactPoint;
+
+            // Assert
+            Vector3 flat = point - Vector3.zero;
+            flat.y = 0f;
+            Assert.AreEqual(15f - SkillAimMath.ReportDistanceMargin, flat.magnitude, 0.001f,
+                "上报距离不得超过 14.95m");
+            Assert.AreEqual(2f, point.y, 0.001f, "钳制保留落点 Y");
+        }
+
+        [Test]
+        public void test_skill_executor_skips_spawn_event_when_projectile_rejected()
+        {
+            // Arrange（落点与发射点水平距离 < 0.1m ⇒ FireballSpawner 拒绝生成）
+            var prefab = NewGo("FireballPrefab");
+            prefab.AddComponent<FireballProjectile>();
+            var data = CreateFireballData(prefab);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            var executor = CreateExecutor(data);
+            executor.SetTargetPosition(new Vector3(0f, 0f, 0.5f)); // 发射点 XZ = (0, 0.5)
+            var before = Object.FindObjectsOfType<FireballProjectile>().Length;
+
+            // Act
+            Assert.IsTrue(executor.TryStart());
+
+            // Assert（不生成、不发假快照）
+            Assert.AreEqual(before, Object.FindObjectsOfType<FireballProjectile>().Length,
+                "近距保护拒绝生成火球");
+            Assert.AreEqual(0, _spawnEventCount, "生成被拒时不得发 FireballSpawnedEvent");
         }
     }
 }

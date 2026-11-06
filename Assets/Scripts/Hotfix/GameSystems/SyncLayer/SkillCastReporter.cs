@@ -40,7 +40,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 impactPoint = point;
             }
 
-            // 10002/20003 不传落点：服务端沿施法者朝向做线形判定。
+            // 激活上报不传落点：10002 由服务端沿施法者朝向做线形判定；
+            // 20003（HoldToAim）是蓄力技能，激活即早退，落点在释放时经 ReportChargeRelease 上报。
             // targetId = 锁定目标（0 = 服务端自动目标，D-P4-2）
             bridge.NotifySkillCast(data.SkillId, HitShapeConverter.FromSkillData(data), impactPoint,
                 targetId: targetId);

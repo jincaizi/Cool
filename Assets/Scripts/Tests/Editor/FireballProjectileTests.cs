@@ -353,6 +353,28 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_fireball_target_point_explodes_at_target_not_overshoot_position()
+        {
+            // Arrange（大步长 0.1s ⇒ 水平每帧 1.8m；目标点 10m，越面帧会到 10.8m。
+            // 超前位置距落点 ≈0.95m，超出 0.5m 爆炸半径 ⇒ 旧实现会漏掉落点目标）
+            var data = CreateData(18f, 15f, 0.5f);
+            var origin = new Vector3(0f, 1.2f, 0f);
+            var landing = new Vector3(0f, 0f, 10f);
+            var target = new FakeDamageable(NewGo("Target").transform);
+            target.Transform.position = landing;
+            Register(target);
+            var fb = CreateProjectile(data, origin, Vector3.forward, landing);
+
+            // Act
+            for (int i = 0; i < 40 && fb.gameObject.activeSelf; i++) fb.Tick(0.1f);
+
+            // Assert（爆炸中心必须是落点本身，而不是越过平面那一帧的当前位置）
+            Assert.IsFalse(fb.gameObject.activeSelf);
+            Assert.AreEqual(1, target.HitCount,
+                "爆炸中心应精确落在 _targetPoint，而不是越过平面那一帧的当前位置");
+        }
+
+        [Test]
         public void test_fireball_pool_respawn_without_target_uses_fixed_range()
         {
             // Arrange（同一实例先按目标点生成：落点 8m 后回池）

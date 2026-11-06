@@ -10,6 +10,7 @@ using Hotfix.GameSystems.Skills.Runtime.Meteor;
 using Hotfix.GameSystems.Skills.Runtime.Projectile;
 using Hotfix.GameSystems.Skills.Runtime.SwordQi;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.Sys3C.Input;
 
 namespace Hotfix.GameSystems.Skills.Runtime
 {
@@ -69,18 +70,25 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _targetCharacter != null ? _targetCharacter.transform.position : _owner.transform.position;
 
         /// <summary>蓄力释放上报的落点。HoldToAim 未设置落点时兜底为前方最大射程，
-        /// 绝不能回退到 owner 位置（否则服务端会把落点算在施法者脚下）。</summary>
+        /// 绝不能回退到 owner 位置（否则服务端会把落点算在施法者脚下）。
+        /// 两条路径都钳到 ProjectileRange − ReportDistanceMargin：服务端只容忍 +1cm，
+        /// 不留余量时位置同步抖动会让整次施法被 impact-too-far 拒收（冷却被吃、无伤害）。</summary>
         public Vector3 ReportedImpactPoint
         {
             get
             {
                 if (_projectileData != null && _projectileData.HoldToAim)
                 {
-                    if (_hasTargetPosition) return _targetPosition;
+                    Vector3 ownerPosition = _owner.transform.position;
+                    float maxDistance = _projectileData.ProjectileRange - SkillAimMath.ReportDistanceMargin;
+                    if (_hasTargetPosition)
+                        return SkillAimMath.ClampToRange(ownerPosition, _targetPosition, maxDistance);
+
                     Vector3 forward = _owner.transform.forward;
                     forward.y = 0f;
                     if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
-                    return _owner.transform.position + forward.normalized * _projectileData.ProjectileRange;
+                    Vector3 fallback = ownerPosition + forward.normalized * _projectileData.ProjectileRange;
+                    return SkillAimMath.ClampToRange(ownerPosition, fallback, maxDistance);
                 }
                 return TargetPositionOrOwner;
             }
@@ -348,7 +356,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : _owner.transform.forward;
             }
 
-            FireballSpawner.Spawn(_projectileData, damage, origin, dir, spawnTarget);
+            // 近距保护（<0.1m）会让 Spawn 返回 null：此时不得发 FireballSpawnedEvent 假快照
+            if (FireballSpawner.Spawn(_projectileData, damage, origin, dir, spawnTarget) == null)
+                return;
 
             EventBus.Emit(new FireballSpawnedEvent
             {
