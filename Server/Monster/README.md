@@ -29,7 +29,7 @@
 - 断线持续运转：状态全在 `EntityStore` 与本模块，零 per-session 依赖。
 - **命中按目标表面距离**：玩家施法命中 NPC 时 `CombatCandidate.Radius` 取 `PlayerState.BodyRadius`，
   `HitResolver` 用 `max(0, 中心距 - 半径)` 比较射程 / 面积，并按表面距离取最近；玩家与 bot
-  半径为 0，PvP 行为不变。
+  半径为 0，PvP 行为不变；锥形方向同样按目标半径扩展（圆-锥相交），半径 0 时逐值不变。
 
 ## 导航（P1）
 
@@ -45,7 +45,7 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 # 启动日志：Navigation: map=demoday / Monster mode: 4 monsters spawned
 ```
 
-- `Server/Navigation/`：三角面图 A* + 漏斗，按 `bodyRadius` 校验路径（硬 / 软 clearance）；
+- `Server/Navigation/`：三角面图 A* + 漏斗，按 `navRadius`（`NavigationRadiusOf`）校验路径（硬 / 软 clearance）；
   `NavigationService` 每 tick 16 次 + 25ms 双预算（单条查询内部也带 deadline），预算拒绝下
   tick 立刻重试、不计为寻路失败；另提供投影与 LOS。
 - `PathFollower`：每 15–29 tick（相位错峰）或目标移动 >2m 重寻；`goalMoved` 有独立 5 tick
@@ -55,7 +55,7 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 - **判定帧 LOS**：`CombatResolver` 对 NPC caster 在 `DrainResolved` 再查一次
   `AttackLineOfSight`（0.25m 探针，与起手判定同源）；起手后玩家躲墙不命中（玩家施法不变）。
 - 接入：出生点投影容差 0.5m，失败即抛（fail fast）；巡逻点 9 方向投影并要求
-  clearance ≥ `bodyRadius`；Chase 停步用 `SkillSelector.IsWithinAnySkillRange`（目标距离）+ 攻击
+  clearance ≥ `navRadius`（`NavigationRadiusOf`）；Chase 停步用 `SkillSelector.IsWithinAnySkillRange`（目标距离）+ 攻击
   LOS（0.25m 探针，隔墙不停、继续绕行）；无最后已知目标时写 Idle/0 速（防假跑广播）；
   Attack 隔墙返回失败落回 Chase；Evade 沿路径回 `SpawnPosition`。
 - **目标保持（P2 起由 `ThreatTable` 接管）**：目标只在死亡 / 离线 / 超出 `dropAggroRadius`
@@ -104,10 +104,14 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 
 ## 配置
 
-`Server/Config/monster_config.json`；`bodyRadius` 是 ORCA、寻路与巡逻点 clearance 的半径真值，
+`Server/Config/monster_config.json`；`bodyRadius` 是 ORCA 与客户端碰撞的半径真值，
 不参与攻击 LOS（攻击链路统一用 0.25m 探针，见 `AttackLineOfSight`），也不做目标点投影。
-模板字段：`hp`、`moveSpeed`、`detectionRadius`、`visionAngle`、`attackRange`、`patrolRadius`、
-`leashRadius`、`dropAggroRadius`、`skills[]`。导航地图表 `Server/Config/maps.json`
+寻路 / 巡逻点另用 `navRadius`（0 = 回退 `bodyRadius`）：navmesh 按 bake `agentRadius = 0.5`
+侵蚀过，SpiderBoss 的 1.74 直接寻路会在树林里整片无路可走，配 1.0 保持移动
+（详见 [服务端导航](../Navigation/README.md)）。
+模板字段：`hp`、`moveSpeed`、`bodyRadius`、`navRadius`、`detectionRadius`、`visionAngle`、
+`attackRange`、`patrolRadius`、`leashRadius`、`dropAggroRadius`、`skills[]`。
+导航地图表 `Server/Config/maps.json`
 （当前仅 `demoday → Config/nav/demoday.navbin`）。
 
 ## 测试
@@ -147,7 +151,7 @@ bash tools/unity-tests.sh PlayMode MonsterWorldTests
   （`MonsterAcceptanceTests` 用 55°/110° 静态角度钉住）。旧的“离开视野锥即丢目标”语义已删除。
 - P1 导航债未在本轮偿还：单张地图（DemoDay）；x≈0 河谷把 navmesh 分成两个连通分量，
   跨岛路径返回 `blocked`；无动态障碍；攻击链路改用 `AttackLineOfSight`（0.25m 探针、不做目标点
-  投影），`bodyRadius` 只用于寻路 / ORCA / 巡逻 clearance；但玩家点不在 navmesh 上时探针仍会
+  投影），`bodyRadius` 只用于 ORCA / 客户端碰撞，寻路与巡逻 clearance 走 `navRadius`；但玩家点不在 navmesh 上时探针仍会
   失败（岩石上挥不到）。原始 `HasLineOfSight` 语义不变（要求 clearance ≥ 传入半径）；
   0.5ms/query 性能目标未达成（P1 §11 记录）。
 - bot 不走 navmesh（`--bots` 仍走 ORCA 愿望位移），只影响怪物。

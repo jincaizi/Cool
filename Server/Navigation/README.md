@@ -12,7 +12,7 @@
 | `NavData.cs` | 内存模型：MapId、AABB、AreaCosts、顶点与分块三角面 |
 | `NavDataFormat.cs` | navbin 二进制读写与 canonical / source hash；写入前校验 + temp+move |
 | `NavMeshGraph.cs` | 三角面图：邻接、连通分量、网格索引、clearance、投影、LOS |
-| `NavMeshPathfinder.cs` | 三角面 A* + 漏斗 + 按 `bodyRadius` 的路径校验 |
+| `NavMeshPathfinder.cs` | 三角面 A* + 漏斗 + 按调用方寻路半径的 clearance 校验 |
 | `NavPath.cs` | 路径结果：`Success` / `FailReason` / `Length` / `Waypoints` |
 | `NavigationService.cs` | 地图加载、tick 预算、投影与 LOS 入口 |
 
@@ -29,8 +29,12 @@
 
 ## 寻路
 
-- 三角面 A* + 漏斗（funnel），起点 / 终点各允许 2m 投影；按 `bodyRadius` 做 clearance
+- 三角面 A* + 漏斗（funnel），起点 / 终点各允许 2m 投影；按传入的寻路半径做 clearance
   硬 / 软校验（0.9 / 1.1 系数）与惩罚；默认最多展开 50000 节点。
+- **寻路半径不是 `bodyRadius`**：navmesh 按 bake `agentRadius = 0.5` 侵蚀过，怪物侧用
+  `MonsterData.NavigationRadiusOf`（未填 `navRadius` 时回退 `bodyRadius`）。SpiderBoss 填 1.0：
+  1.74 在 DemoDay 树林里仅 45% 目标可达（2026-11-07 实测），`PathFollower` 会按 C2 原地停住；
+  1.0 时 92% 可达。代价是极限窄缝里腿尖最多穿插障碍表面约 0.24m（ORCA / 客户端碰撞仍按 1.74）。
 - **连通分量前置剪枝**：图加载时按共享边求连通分量；跨岛查询在 A* 前直接 `blocked`。
 - **portal clearance 缓存**：门内最长可通行 clearance 与最佳点按 `(门端点, 量化 maxClearance)`
   缓存（上限 65536 项），跨查询复用；这是 200 怪反复寻路的主要加速项。
