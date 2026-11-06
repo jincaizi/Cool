@@ -90,6 +90,13 @@
   `CastRequest.TargetPlayerId` 上线，服务端按显式目标裁决（形状/距离校验不变）。
   候选筛选与施法前复核使用**表面距离**（中心距 − 目标半径）和同一角扩展
   （`半角 + asin(半径/中心距)`）；大体型目标贴脸时不丢锁。
+- **点按瞄准的目标来源**：`ClientNetworkHost` 通过 `SetSelectedTargetPositionProvider` 注入
+  `NetworkTargetSelector.TryGetLockedPosition`；HoldToAim 火球点按（未拖动）时落点优先取锁定目标
+  位置（按 15m 射程钳制），无锁定才回落到角色前方最大射程。移动端瞄准拖拽会覆盖该默认落点。
+- **远程火球按广播落点飞行/爆炸**：`RemoteCastPresenter.OnCastBroadcast` 只在
+  `ProjectileSkillData.HoldToAim` 时把 `CastBroadcast.ImpactX/Y/Z` 记为投射物终点；
+  `DamageResult` 到达后用该终点 `ExplodeAt`（不退回受击者位置），与服务端落点圆判定同源。
+  20004 / 30001 等落点类技能直接在广播落点生成释放/陨石表现。
 
 ## 客户端碰撞（玩家 vs 怪物）
 

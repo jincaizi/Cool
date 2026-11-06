@@ -40,6 +40,18 @@ bash tools/test-server.sh
   AOI 分带调度把血量/防御变化视为脏位立即推送；客户端据此更新远程 `Targetable` 与名牌血条。
   `Server.Tests/Aoi/BandwidthBudgetTests` 断言含新字段的全字段快照字节上限。
 
+## 投射物与落点判定（20003 火球）
+
+- 20003 在共享表 `CombatRules` 中是 `ProjectileKind.CircleAtPoint`：`radius=1.5`、
+  `MaxImpactDistance=15`、`speed=18`，与客户端 `Fireball_SkillQ.asset` 逐值一致
+  （EditMode `FireballAssetTableTests` 锁定）。
+- `CastHandler.Decide` 校验落点有限且距施法者 ≤ `MaxImpactDistance`（否则 `impact-not-finite` /
+  `impact-too-far`），冷却在**决策**时记录（空挥也冷却）。
+- 判定 tick = `tick + HitDelayTicks + ProjectileTravelTicks`；`ProjectileTravelTicks` 按
+  `ceil(距离 / speed × 15Hz)` 换算飞行延迟；非 `CircleAtPoint`、速度缺失或落点非有限时为 0。
+- `ResolveStage` 在 `ImpactX/Y/Z` 处以 `HitResolver.ResolveCircle` 结算；落点即客户端松手上报的
+  `ImpactX/Y/Z`，因此联机下客户端落点圈与服务端受击位置一致。
+
 ## 子模块 README
 
 - [Monster](Monster/README.md) —— 行为树与权威怪物

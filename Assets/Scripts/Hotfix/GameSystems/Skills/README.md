@@ -36,6 +36,28 @@ bash tools/unity-tests.sh EditMode SkillExecutorMeteorTests
 
 ## 相关模块
 
+## 移动端显示契约
+
+- 技能冷却 UI 只读取 `SkillCoordinator.GetCooldownInfo(skillId)`；遮罩使用 `Remaining / Total`，不得维护第二套计时器。
+- 火球与炎爆在实际蓄力释放时才开始冷却；取消蓄力不占冷却。
+- 蓄力环只在当前技能处于 `Charging` 时读取 `CurrentSkill.GetChargeProgress()`。
+- R 的再次按下继续进入现有“旋转中同键取消”分支，移动按钮不得绕过 `InputManager` 直接施放。
+
+## 火球地面瞄准（HoldToAim）
+
+- 20003（`Fireball_SkillQ`）的 `ProjectileSkillData`：`HoldToAim=true`、`MinAimDistance=2`、
+  `CanMoveWhileCharging=false`；按住不会自动释放，`Charging` 一直持续到松手。
+- 松手释放走 `SkillCoordinator.TryReleaseCharge`，落点由 `SkillExecutor.ReportedImpactPoint`
+  提供并随 `CastRequest.ImpactX/Y/Z` 上报；**冷却在释放时起算**，取消蓄力不占冷却。
+- `PlayerCancel` 在 `Casting` / `Charging` 均放行（`SkillInterruptionMatrix`）：移动端拖远取消、
+  失焦、关闭触控、角色解绑都走它；取消不发射、不冷却、不上报。
+- 蓄力期间按 `_staminaDrainPerSecond=15` 持续扣精力；精力耗尽由 `StaminaExhausted` 取消，
+  同样不发射、不冷却。
+- 20003 在 `CombatRules` 表里是 `ProjectileKind.CircleAtPoint`（radius 1.5 / MaxImpactDistance 15 /
+  speed 18），服务端按落点圆判定并叠加飞行延迟 `ProjectileTravelTicks`。
+- 资产与表逐值对齐由 EditMode `FireballAssetTableTests` 锁定（HoldToAim / MinAimDistance /
+  CanMoveWhileCharging / 爆炸半径 / 射程 / 速度）。
+
 - [Sys3C](../Sys3C/README.md) —— 攻击层、角色状态与突进
 - [Combat](../Combat/README.md) —— 命中检测与伤害接口
 - [VFX](../VFX/README.md) —— 技能特效

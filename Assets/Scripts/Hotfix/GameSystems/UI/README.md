@@ -42,6 +42,28 @@ bash tools/unity-tests.sh PlayMode UIBootstrapTests
 
 ## 相关模块
 
+## 移动技能 HUD
+
+- `MobileActionButtons → MobileInputBinder → InputManager → Sys3CEntry` 是手机/WebGL 技能输入的唯一通路；UI 不直接调用技能协调器。
+- 普攻为中心按钮；内弧逆时针排列防御、跳跃、Q、R，外弧逆时针排列火球（1）、炎爆（2）、陨石（3）。
+- 五个技能按钮由 `MobileSkillButton` 显示顺时针径向冷却和向上取整的秒数；蓄力技能额外显示径向蓄力环。
+- `MobileSkillBarPresenter` 从当前本地角色读取冷却、蓄力和剑气就绪真值。剑气可释放时普攻图标变暖金色并显示金框。
+- UI 停用、WebGL 失焦、关闭触控模式或角色解绑时必须清除普攻及蓄力 held 状态，并取消攻击按住（不合成释放）、复位剑气金边，避免返回页面后自动施放。
+
+## 火球瞄准摇杆与地面落点圈
+
+- `MobileSkillAimJoystick` 挂在火球按钮上：**按下点为原点**，位移按 `_aimRadius`（90 Canvas 单位）
+  归一；`_cancelEnterScale=1.4` / `_cancelExitScale=1.2` 构成取消回滞，`CancelArmed` 同时用于
+  图标变红提示。组件只产出 `IsGestureActive` / `Aim` / `CancelArmed` 与 `AimReleaseKind`
+  （Fire / Cancel），不直接调用技能协调器。
+- `MobileInputBinder` 在 `LateUpdate` 帧末把瞄准状态与释放类型写进 `InputManager`；
+  释放必须最后写，避免同帧 `pressed` 清掉释放锁存。
+- `GroundAimIndicator` 是纯占位表现：无 `Collider`、不参与判定；由 `Sys3CEntry` 按落点与
+  `ExplosionRadius` 定位缩放，颜色经 MaterialPropertyBlock 的 `_Color` 写入（普通 / 取消两色）。
+- 瞄准期间**不显示蓄力环**：`MobileSkillBarPresenter` 对 `HoldToAim` 技能把蓄力值固定为 0，
+  只保留径向冷却与倒计时。
+- 失焦、关闭触控、角色解绑会复位手势（`ResetGesture`），不合成释放。
+
 - [Sys3C](../Sys3C/README.md) —— HUD 数据源与角色装配
 - [Bag](../Bag/README.md) —— 背包面板
 - [Nameplate](../Nameplate/README.md) —— 世界空间名字与飘字

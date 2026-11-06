@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Core.Events;
@@ -31,6 +32,8 @@ namespace KcpNet.PlayModeTests
     /// </summary>
     public class MobileTouchInputTests
     {
+        private MobileInputBinder _aimBinder;
+
         private static GameObject FindRoot(string name)
         {
             foreach (var go in SceneManager.GetActiveScene().GetRootGameObjects())
@@ -231,13 +234,17 @@ namespace KcpNet.PlayModeTests
                 ExecuteEvents.Execute(joystick.gameObject, up, ExecuteEvents.pointerUpHandler);
                 Assert.AreEqual(Vector2.zero, joystick.Value, "pointerUp 后 Value 必须归零");
 
-                // ⑤ 三按钮：各在屏内，且中心射线命中自身（不被 LookArea 盖住）
-                int buttonsChecked = 0;
-                for (int i = 0; i < mobileRoot.transform.childCount; i++)
+                // ⑤ 核心动作按钮：各在屏内、中心命中自身，且按钮之间不得覆盖。
+                string[] buttonNames =
                 {
-                    var child = mobileRoot.transform.GetChild(i);
-                    if (!child.name.EndsWith("Button")) continue;
-                    buttonsChecked++;
+                    "AttackButton", "DefendButton", "JumpButton", "SkillQButton",
+                    "SkillRButton", "FireballButton", "ChargeBlastButton", "MeteorButton"
+                };
+                var buttonRects = new List<Rect>();
+                foreach (string buttonName in buttonNames)
+                {
+                    var child = mobileRoot.transform.Find(buttonName);
+                    Assert.IsNotNull(child, "缺少移动按钮 " + buttonName);
                     var rect = (RectTransform)child;
                     var cs = new Vector3[4];
                     rect.GetWorldCorners(cs);
@@ -249,8 +256,11 @@ namespace KcpNet.PlayModeTests
                     eventSystem.RaycastAll(new PointerEventData(eventSystem) { position = bc }, bhits);
                     Assert.IsTrue(bhits.Count > 0 && bhits[0].gameObject == child.gameObject,
                         child.name + " 中心射线的首位命中必须是按钮自身（被观察区盖住就是不可点）");
+                    var screenRect = Rect.MinMaxRect(cs[0].x, cs[0].y, cs[2].x, cs[2].y);
+                    foreach (var previous in buttonRects)
+                        Assert.IsFalse(previous.Overlaps(screenRect), child.name + " 不得与其他动作按钮重叠");
+                    buttonRects.Add(screenRect);
                 }
-                Assert.AreEqual(3, buttonsChecked, "应有三个动作按钮（AttackButton/DefendButton/JumpButton）");
 
                 // 收尾：清档位 + 卸载场景（与既有用例同一套清理）
                 binder.TouchOverride = TouchOverride.Auto;
@@ -474,6 +484,132 @@ namespace KcpNet.PlayModeTests
             }
         }
 
+        /// <summary>
+        /// 火球地面瞄准验收：按下 → 拖到近处 → 松手，必须真的发射并进入冷却，
+        /// 且发射落点来自拖动（不是松手帧回退到 PC 的最大射程兜底）。
+        ///
+        /// 与虚拟摇杆用例同一套合成指针事件（直接 ExecuteEvents 派发到按钮 GameObject，
+        /// 同时驱动 `MobileSkillButton` 的按下/抬起与 `MobileSkillAimJoystick` 的手势）。
+        /// 拖动必须**跨帧**：摇杆在帧末才把值写进 `InputManager`，`Sys3CEntry` 下一帧才在
+        /// Charging 里采纳；同帧按-拖-松会让瞄准从未到达执行器（落点会退回 15m 兜底）。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator test_fireball_aim_drag_release_fires()
+        {
+            bool prevIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                yield return LoadDemoDayAndBind();
+                var aim = Object.FindObjectOfType<MobileSkillAimJoystick>();
+                Assert.IsNotNull(aim, "火球按钮应挂瞄准摇杆");
+                aim.Interactable = true;
+
+                SendPointerDown(aim, Vector2.zero);
+
+                var coordinator = _aimBinder.BoundEntry.SkillCoordinator;
+                Assert.IsNotNull(coordinator, "本地角色应有技能协调器");
+                bool charging = false;
+                for (int i = 0; i < 180; i++)
+                {
+                    if (coordinator.CurrentSkill != null && coordinator.CurrentSkill.SkillId == 20003
+                        && coordinator.CurrentSubState == SkillSubState.Charging)
+                    {
+                        charging = true;
+                        break;
+                    }
+                    yield return null;
+                }
+                Assert.IsTrue(charging, "按住火球应进入蓄力（HoldToAim）");
+
+                SendPointerDrag(aim, new Vector2(60f, 0f));
+                yield return null; // 帧末写入 InputManager，下一帧 Sys3CEntry 采纳落点
+                SendPointerUp(aim, new Vector2(60f, 0f));
+
+                // 落点必须来自拖拽，而不是被松手帧 PC 兜底覆盖成最大射程。
+                // 冷却在释放（ReportChargeReleased）时起算；循环到冷却出现为止，
+                // 期间持续读取执行器落点 —— 最后一个非空值就是实际发射用的落点。
+                Vector3 impact = default;
+                bool sawSkill = false;
+                for (int i = 0; i < 180; i++)
+                {
+                    var skill = coordinator.CurrentSkill;
+                    if (skill != null && skill.SkillId == 20003)
+                    {
+                        impact = skill.ReportedImpactPoint;
+                        sawSkill = true;
+                    }
+                    if (coordinator.GetCooldownInfo(20003).IsOnCooldown) break;
+                    yield return null;
+                }
+
+                Assert.IsTrue(sawSkill, "释放后应能读到 20003 的执行器落点");
+                Assert.IsTrue(coordinator.GetCooldownInfo(20003).IsOnCooldown,
+                    "拖动后松手应发射并进入冷却");
+
+                Vector3 playerPos = _aimBinder.BoundEntry.transform.position;
+                float aimDistance = new Vector2(impact.x - playerPos.x, impact.z - playerPos.z).magnitude;
+                Assert.Less(aimDistance, 14.5f, "拖拽落点不得被覆盖成最大射程（15m）");
+
+                yield return UnloadDemoDay();
+            }
+            finally
+            {
+                if (_aimBinder != null) _aimBinder.TouchOverride = TouchOverride.Auto;
+                LogAssert.ignoreFailingMessages = prevIgnore;
+            }
+        }
+
+        /// <summary>
+        /// 火球地面瞄准验收：按下 → 拉远到取消阈值 → 松手，不得发射、不得进入冷却。
+        /// 先断言技能真的激活，否则"没进冷却"可能只是因为技能从未开始（假绿）。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator test_fireball_aim_far_release_cancels_without_cooldown()
+        {
+            bool prevIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                yield return LoadDemoDayAndBind();
+                var aim = Object.FindObjectOfType<MobileSkillAimJoystick>();
+                Assert.IsNotNull(aim, "火球按钮应挂瞄准摇杆");
+                aim.Interactable = true;
+
+                var coordinator = _aimBinder.BoundEntry.SkillCoordinator;
+                Assert.IsNotNull(coordinator, "本地角色应有技能协调器");
+
+                SendPointerDown(aim, Vector2.zero);
+                bool activated = false;
+                for (int i = 0; i < 180; i++)
+                {
+                    if (coordinator.CurrentSkill != null && coordinator.CurrentSkill.SkillId == 20003)
+                    {
+                        activated = true;
+                        break;
+                    }
+                    yield return null;
+                }
+                Assert.IsTrue(activated, "按住火球应激活 20003");
+
+                SendPointerDrag(aim, new Vector2(0f, 400f)); // 远大于 1.4 × 90，兼容 Canvas 缩放
+                yield return null; // 让取消锁存跨帧被 Sys3CEntry 消费
+                SendPointerUp(aim, new Vector2(0f, 400f));
+
+                for (int i = 0; i < 30; i++) yield return null;
+
+                Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown,
+                    "拉远取消不得进入冷却");
+
+                yield return UnloadDemoDay();
+            }
+            finally
+            {
+                if (_aimBinder != null) _aimBinder.TouchOverride = TouchOverride.Auto;
+                LogAssert.ignoreFailingMessages = prevIgnore;
+            }
+        }
+
         /// <summary>合成一次 pointerDown + drag，返回摇杆 Value 的模长；最后合成 pointerUp 复位。</summary>
         private static float DragAndGetMagnitude(VirtualJoystick joystick, Vector2 start, float dx)
         {
@@ -486,6 +622,49 @@ namespace KcpNet.PlayModeTests
             var up = new PointerEventData(es) { position = drag.position };
             ExecuteEvents.Execute(joystick.gameObject, up, ExecuteEvents.pointerUpHandler);
             return magnitude;
+        }
+
+        /// <summary>加载 DemoDay 并把 MobileInputBinder 拨进触屏档，等待本地角色绑定。</summary>
+        private IEnumerator LoadDemoDayAndBind()
+        {
+            SceneManager.LoadScene("DemoDay");
+            yield return null;
+            yield return null;
+
+            var host = FindRoot("MobileInput");
+            Assert.IsNotNull(host, "场景里应有 MobileInput 宿主");
+            _aimBinder = host.GetComponent<MobileInputBinder>();
+            Assert.IsNotNull(_aimBinder);
+            _aimBinder.TouchOverride = TouchOverride.ForceTouch;
+
+            for (int i = 0; i < 600 && _aimBinder.BoundEntry == null; i++) yield return null;
+            Assert.IsNotNull(_aimBinder.BoundEntry, "应绑定本地角色");
+        }
+
+        private IEnumerator UnloadDemoDay()
+        {
+            SceneManager.SetActiveScene(SceneManager.CreateScene("FireballAimCleanup"));
+            var unload = SceneManager.UnloadSceneAsync("DemoDay");
+            while (unload != null && !unload.isDone) yield return null;
+            _aimBinder = null;
+        }
+
+        private static void SendPointerDown(MobileSkillAimJoystick aim, Vector2 position)
+        {
+            var data = new PointerEventData(EventSystem.current) { position = position };
+            ExecuteEvents.Execute(aim.gameObject, data, ExecuteEvents.pointerDownHandler);
+        }
+
+        private static void SendPointerDrag(MobileSkillAimJoystick aim, Vector2 position)
+        {
+            var data = new PointerEventData(EventSystem.current) { position = position };
+            ExecuteEvents.Execute(aim.gameObject, data, ExecuteEvents.dragHandler);
+        }
+
+        private static void SendPointerUp(MobileSkillAimJoystick aim, Vector2 position)
+        {
+            var data = new PointerEventData(EventSystem.current) { position = position };
+            ExecuteEvents.Execute(aim.gameObject, data, ExecuteEvents.pointerUpHandler);
         }
     }
 }

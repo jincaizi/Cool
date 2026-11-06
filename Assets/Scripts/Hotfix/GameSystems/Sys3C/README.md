@@ -53,6 +53,30 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
 
 ## 相关模块
 
+## 移动技能输入
+
+- `InputManager` 合并键鼠与手机技能输入：Q/R/陨石是一次性按下沿，火球/炎爆同时提供 pressed 与 held/release 语义。
+- `MobileInputBinder` 每帧末汇入按钮状态，并通过 `BoundEntry` 让 HUD 与同一个本地角色绑定；角色重建后会重新发现并绑定。
+- Binder 停用、关闭触控、角色销毁重建或切换绑定时会**同时释放** `InputManager` 与 `BoundEntry`，并清空按钮 held/pressed 后再重绑，避免旧角色的普攻/蓄力状态漏给新角色。
+- 失焦/关触控会无释放事件地取消攻击按住（`CancelAttackHold`），不会合成“松开 = 重击”；失焦、死亡或进入防御还会清除 `CanFireHeavy`，避免金边残留或解除状态后补放重击。
+- `Sys3CEntry.CanFireHeavy` 暴露现有 `_canFireHeavy` 真值，仅用于普攻按钮剑气就绪表现；UI 不按固定长按时间推算。
+
+### 火球地面瞄准刷新（移动端）
+
+- `HandleInput` 每帧**先**刷新瞄准、再做释放判定：`UpdateFireballAim` 必须在
+  `TryReleaseCharge` 之前，否则激活帧的默认落点会被真发射出去。
+- 移动端瞄准只认 `Charging` 帧（`IsHoldToAimCharging`）：摇杆 `Aim` 经
+  `SkillAimMath.CameraRelativeDirection` 转成相机相对方向，再用
+  `DistanceFromMagnitude(MinAimDistance, ProjectileRange)` 映射距离，`SnapToGround` 后写入
+  `SkillCoordinator.UpdateAimTarget`；地面圈随落点与 `ExplosionRadius` 更新。
+- 松手帧的 `Aim` 已归零，但释放锁存可能下一帧才被消费：`ShouldKeepLastAim` 保留上一帧拖拽落点；
+  点按（未拖动）才重新解析默认落点（自动锁定在激活后才可见）。真值表由 `FireballAimReleaseTests` 覆盖。
+- 移动端瞄准期间角色朝向由摇杆方向驱动（`UpdateFireballAim` 内 Slerp）；非移动端蓄力仍走原
+  相机朝向跟随分支（`!IsMobileAimActive()` 且 `CanRotate()`）。
+- **移动锁**：`ProjectileSkillData.HoldToAim` 在 `Casting` / `Charging` 都返回 `CanMove=false`
+  （`SkillCoordinator.CanMove`），`Sys3CEntry` 每帧写入 `CharacterController.LockMovement`；
+  资产 `CanMoveWhileCharging=false` 与之一致。
+
 - [Skills](../Skills/README.md) —— 攻击层与技能执行
 - [Combat](../Combat/README.md) —— 命中检测
 - [SyncLayer](../SyncLayer/README.md) —— 联网移动与远端实体
