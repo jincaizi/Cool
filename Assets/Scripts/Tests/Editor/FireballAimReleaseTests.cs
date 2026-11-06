@@ -27,6 +27,50 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_aim_latches_survive_casting_until_skill_ends()
+        {
+            // Casting（技能活跃但还不是 Charging）不得清锁存——0.1s 点按的释放锁存
+            // 正是在 Casting 帧被消费的；清掉就会在首个 Charging 帧退回最大射程。
+            Assert.IsFalse(Sys3CEntry.ShouldResetAimLatches(aimCharging: false, skillActive: true),
+                "Casting 期必须保留锁存");
+            Assert.IsTrue(Sys3CEntry.ShouldResetAimLatches(aimCharging: false, skillActive: false),
+                "技能真正结束（CurrentSkill == null）才清锁存");
+            Assert.IsFalse(Sys3CEntry.ShouldResetAimLatches(aimCharging: true, skillActive: true),
+                "瞄准蓄力中不清锁存");
+            Assert.IsFalse(Sys3CEntry.ShouldResetAimLatches(aimCharging: true, skillActive: false));
+        }
+
+        [Test]
+        public void test_should_re_resolve_default_aim_truth_table()
+        {
+            Assert.IsTrue(Sys3CEntry.ShouldReResolveDefaultAim(keepLastAim: true, wasDragged: false),
+                "点按（未拖动）在松手帧必须重新解析默认落点（激活后才完成自动锁定）");
+            Assert.IsFalse(Sys3CEntry.ShouldReResolveDefaultAim(keepLastAim: true, wasDragged: true),
+                "拖动过的松手帧保留最后拖拽落点");
+            Assert.IsFalse(Sys3CEntry.ShouldReResolveDefaultAim(keepLastAim: false, wasDragged: false));
+            Assert.IsFalse(Sys3CEntry.ShouldReResolveDefaultAim(keepLastAim: false, wasDragged: true));
+        }
+
+        [Test]
+        public void test_tap_release_during_casting_re_resolves_default_on_first_charging_frame()
+        {
+            // 1) 点按在 Casting 帧松手：释放锁存已被消费（latched=true），技能仍活跃
+            bool latched = true;
+            Assert.IsTrue(latched, "前置：释放锁存已消费并锁存");
+            Assert.IsFalse(Sys3CEntry.ShouldResetAimLatches(aimCharging: false, skillActive: true),
+                "Casting 帧不得清锁存");
+
+            // 2) 首个 Charging 帧（gesture 已结束）：必须保留落点路径
+            bool keepLastAim = Sys3CEntry.ShouldKeepLastAim(
+                mobileAim: false, releasePendingOrLatched: latched);
+            Assert.IsTrue(keepLastAim, "锁存跨过 Casting 后，首个 Charging 帧仍须保留落点");
+
+            // 3) 从未拖动 ⇒ 此时自动锁定已完成，重新解析默认落点
+            Assert.IsTrue(Sys3CEntry.ShouldReResolveDefaultAim(keepLastAim, wasDragged: false),
+                "点按必须重新解析默认落点，读取激活后锁定的目标");
+        }
+
+        [Test]
         public void test_release_frame_after_aim_reset_reports_keep_last_aim()
         {
             // Arrange（复现 binder 帧末状态：手势结束 → aim 归零 + 释放锁存同帧写入）

@@ -130,6 +130,7 @@ namespace Hotfix.GameSystems.Sys3C
         private GroundAimIndicator _aimIndicator;
         private bool _fireballCancelRequested;
         private bool _fireballUiReleaseLatched;
+        private bool _fireballAimWasDragged;
 
         /// <summary>注入/清空选中目标位置提供者（null = 无提供者）。</summary>
         public void SetSelectedTargetPositionProvider(System.Func<Vector3?> provider)
@@ -363,6 +364,7 @@ namespace Hotfix.GameSystems.Sys3C
                 if (_inputManager != null) _inputManager.ClearSkillFireballReleaseFromUI();
                 _fireballCancelRequested = false;
                 _fireballUiReleaseLatched = false;
+                _fireballAimWasDragged = false;
             }
 
             // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）
@@ -438,9 +440,10 @@ namespace Hotfix.GameSystems.Sys3C
                 bool fireballPressedFromUI = _inputManager.IsSkillFireballPressedFromUI();
                 if (_inputManager.IsSkillFireballPressed())
                 {
-                    // 新按下清掉旧的取消/松手锁存（上一次手势的 Cancel 不能取消这一次）
+                    // 新按下清掉旧的取消/松手/拖动锁存（上一次手势的 Cancel 不能取消这一次）
                     _fireballCancelRequested = false;
                     _fireballUiReleaseLatched = false;
+                    _fireballAimWasDragged = false;
                     int fireballId = GetSkillFireballId();
                     if (fireballId > 0)
                     {
@@ -530,7 +533,14 @@ namespace Hotfix.GameSystems.Sys3C
         {
             if (!aimCharging)
             {
-                _fireballUiReleaseLatched = false;
+                // Casting 不是“技能结束”：点按的释放锁存可能在 0.1s Casting 期就被消费，
+                // 必须活到首个 Charging 帧，否则会退回 PC 最大射程兜底。
+                bool skillActive = _skillCoordinator != null && _skillCoordinator.CurrentSkill != null;
+                if (ShouldResetAimLatches(aimCharging, skillActive))
+                {
+                    _fireballUiReleaseLatched = false;
+                    _fireballAimWasDragged = false;
+                }
                 if (_aimIndicator != null) _aimIndicator.Hide();
                 return;
             }
@@ -548,6 +558,7 @@ namespace Hotfix.GameSystems.Sys3C
                 Vector2 aim = _inputManager.SkillFireballAim;
                 if (aim.sqrMagnitude > 0f)
                 {
+                    _fireballAimWasDragged = true;
                     Vector3 cameraForward = _camera != null ? _camera.transform.forward : Vector3.forward;
                     Vector3 dir = SkillAimMath.CameraRelativeDirection(aim, cameraForward);
                     float distance = SkillAimMath.DistanceFromMagnitude(
@@ -559,7 +570,15 @@ namespace Hotfix.GameSystems.Sys3C
                     target = ResolveDefaultTarget(data);
                 }
             }
-            else if (!keepLastAim)
+            else if (keepLastAim)
+            {
+                // 点按（未拖动）：重新解析默认落点——激活时的 ResolveDefaultTarget 早于
+                // HandleInput 内的联网自动锁定（OnSkillActivated → EnsureTargetFor），
+                // 到首个 Charging 帧才读得到锁定目标。拖动则保留上一帧拖拽落点。
+                if (ShouldReResolveDefaultAim(keepLastAim, _fireballAimWasDragged))
+                    target = ResolveDefaultTarget(data);
+            }
+            else
             {
                 Vector3 forward = transform.forward;
                 forward.y = 0f;
@@ -609,6 +628,16 @@ namespace Hotfix.GameSystems.Sys3C
         /// 真值表由 EditMode 测试覆盖（FireballAimReleaseTests）。</summary>
         internal static bool ShouldKeepLastAim(bool mobileAim, bool releasePendingOrLatched)
             => !mobileAim && releasePendingOrLatched;
+
+        /// <summary>锁存只在技能真正结束时清；Casting（技能活跃但未 Charging）必须保留——
+        /// 点按的释放锁存正是在 0.1s Casting 期被消费的。</summary>
+        internal static bool ShouldResetAimLatches(bool aimCharging, bool skillActive)
+            => !aimCharging && !skillActive;
+
+        /// <summary>保留落点的松手帧里：未拖动（点按）要重新解析默认落点（激活后才有自动锁定），
+        /// 拖动则保留上一帧拖拽落点。真值表由 EditMode 测试覆盖。</summary>
+        internal static bool ShouldReResolveDefaultAim(bool keepLastAim, bool wasDragged)
+            => keepLastAim && !wasDragged;
 
         /// <summary>摇杆未拖动时的默认落点：选中目标（钳到射程内），否则正前方最大射程。</summary>
         private Vector3 ResolveDefaultTarget(ProjectileSkillData data)
