@@ -150,6 +150,29 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_ui_fireball_release_latch_not_revived_by_update()
+        {
+            // Arrange（一次释放锁存并消费）
+            _input.SetSkillFireballReleaseFromUI(canceled: true);
+            Assert.IsTrue(_input.ConsumeSkillFireballRelease(out bool canceled));
+            Assert.IsTrue(canceled);
+
+            // Act（下一帧 Update 会复位消费锁存——已消费的释放不得复活）
+            _input.Update();
+
+            // Assert
+            Assert.IsFalse(_input.ConsumeSkillFireballRelease(out _),
+                "Update 复位消费锁存后，旧释放不得再次可消费");
+
+            // Act（新的按下同样不得复活旧释放）
+            _input.SetSkillFireballPressedFromUI(true);
+
+            // Assert
+            Assert.IsFalse(_input.ConsumeSkillFireballRelease(out _),
+                "新按下不得让旧释放重新可消费");
+        }
+
+        [Test]
         public void test_ui_clear_combat_input_resets_aim_state()
         {
             // Arrange

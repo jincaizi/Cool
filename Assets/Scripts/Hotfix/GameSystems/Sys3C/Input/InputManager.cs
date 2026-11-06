@@ -424,12 +424,14 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skillFireballReleaseConsumed = false;
         }
 
-        /// <summary>消费释放锁存；未置位或本帧已消费返回 false。</summary>
+        /// <summary>消费释放锁存；未置位或已消费返回 false。消费后清锁存：
+        /// `Update` 每帧复位 `_skillFireballReleaseConsumed`，不清 `FromUI` 会让旧释放反复可消费。</summary>
         public bool ConsumeSkillFireballRelease(out bool canceled)
         {
             canceled = _skillFireballReleaseCanceledFromUI;
             if (!_skillFireballReleaseFromUI || _skillFireballReleaseConsumed) return false;
             _skillFireballReleaseConsumed = true;
+            _skillFireballReleaseFromUI = false;
             return true;
         }
 
