@@ -393,6 +393,10 @@ namespace Hotfix.GameSystems.Sys3C.Input
             return false;
         }
 
+        /// <summary>只读 UI 按下沿（不清锁存）。激活时用来区分移动端手势与 PC 键鼠；
+        /// 必须在 <see cref="IsSkillFireballPressed"/> 之前读取——后者消费时会清零该标志。</summary>
+        public bool IsSkillFireballPressedFromUI() => _skillFireballPressedFromUI;
+
         /// <summary>
         /// 火球术按住（1键，持续状态）— 蓄力瞄准
         /// </summary>
@@ -434,6 +438,11 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skillFireballReleaseFromUI = false;
             return true;
         }
+
+        /// <summary>是否还有未消费的 UI 释放锁存。移动端松手在帧末写入、下一帧才被消费，
+        /// 期间 aim 状态已归零——Sys3CEntry 据此跳过 PC 兜底，保住拖动落点。</summary>
+        public bool HasSkillFireballReleasePending()
+            => _skillFireballReleaseFromUI && !_skillFireballReleaseConsumed;
 
         /// <summary>teardown 清掉未消费的释放锁存（避免复活后补取消）。</summary>
         public void ClearSkillFireballReleaseFromUI()

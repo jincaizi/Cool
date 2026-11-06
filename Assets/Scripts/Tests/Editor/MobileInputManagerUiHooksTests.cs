@@ -138,6 +138,31 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_ui_fireball_pressed_flag_is_readable_without_consuming()
+        {
+            // Arrange（binder 帧末汇入的按下沿）
+            _input.SetSkillFireballPressedFromUI(true);
+
+            // Act & Assert（激活落点需要先判“是否来自 UI”，只读查询不得消费按下沿）
+            Assert.IsTrue(_input.IsSkillFireballPressedFromUI(), "只读查询不得消费按下沿");
+            Assert.IsTrue(_input.IsSkillFireballPressed(), "按下沿仍应可被正常消费");
+            Assert.IsFalse(_input.IsSkillFireballPressedFromUI(), "消费后 UI 按下沿必须清零");
+        }
+
+        [Test]
+        public void test_ui_fireball_release_pending_is_reported_until_consumed()
+        {
+            // Arrange（移动端松手在帧末写入释放锁存）
+            _input.SetSkillFireballReleaseFromUI(canceled: false);
+
+            // Act & Assert（下一帧读取方据此跳过 PC 兜底，保住上一帧落点）
+            Assert.IsTrue(_input.HasSkillFireballReleasePending(), "释放锁存未被消费前应报告 pending");
+            Assert.IsTrue(_input.ConsumeSkillFireballRelease(out bool canceled));
+            Assert.IsFalse(canceled);
+            Assert.IsFalse(_input.HasSkillFireballReleasePending(), "消费后不得再报告 pending");
+        }
+
+        [Test]
         public void test_ui_fireball_release_kind_consumed_once()
         {
             // Arrange

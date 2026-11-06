@@ -129,6 +129,7 @@ namespace Hotfix.GameSystems.Sys3C
         private LayerMask _aimGroundMask = ~(1 << 10);
         private GroundAimIndicator _aimIndicator;
         private bool _fireballCancelRequested;
+        private bool _fireballUiReleaseLatched;
 
         /// <summary>注入/清空选中目标位置提供者（null = 无提供者）。</summary>
         public void SetSelectedTargetPositionProvider(System.Func<Vector3?> provider)
@@ -361,6 +362,7 @@ namespace Hotfix.GameSystems.Sys3C
                 // 旧的 Cancel 会误取消下一次键盘蓄力。
                 if (_inputManager != null) _inputManager.ClearSkillFireballReleaseFromUI();
                 _fireballCancelRequested = false;
+                _fireballUiReleaseLatched = false;
             }
 
             // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）
@@ -432,15 +434,27 @@ namespace Hotfix.GameSystems.Sys3C
                     }
                 }
 
+                // 只读 UI 按下沿：IsSkillFireballPressed 消费时会清零它。
+                bool fireballPressedFromUI = _inputManager.IsSkillFireballPressedFromUI();
                 if (_inputManager.IsSkillFireballPressed())
                 {
-                    // 新按下清掉旧的取消锁存（上一次手势的 Cancel 不能取消这一次）
+                    // 新按下清掉旧的取消/松手锁存（上一次手势的 Cancel 不能取消这一次）
                     _fireballCancelRequested = false;
+                    _fireballUiReleaseLatched = false;
                     int fireballId = GetSkillFireballId();
                     if (fireballId > 0)
                     {
-                        var input = SkillInput.SkillToPosition(fireballId,
-                            transform.position + transform.forward * 5f);
+                        // 移动端按住瞄准首帧就用默认落点，避免一帧的 5m 兜底；
+                        // PC 键鼠保持原有 5m（下一帧由前方最大射程覆盖）。
+                        Vector3 initialTarget = transform.position + transform.forward * 5f;
+                        if (fireballPressedFromUI
+                            && _skillCoordinator.GetSkillData(fireballId) is ProjectileSkillData projectile
+                            && projectile.HoldToAim)
+                        {
+                            initialTarget = SnapToGround(ResolveDefaultTarget(projectile));
+                        }
+
+                        var input = SkillInput.SkillToPosition(fireballId, initialTarget);
                         _skillCoordinator.HandleInput(input);
                     }
                 }
@@ -449,7 +463,10 @@ namespace Hotfix.GameSystems.Sys3C
                 if (!_inputManager.IsSkillFireballHeld())
                 {
                     if (_inputManager.ConsumeSkillFireballRelease(out bool canceled))
+                    {
                         _fireballCancelRequested = canceled;
+                        _fireballUiReleaseLatched = true;
+                    }
 
                     if (_fireballCancelRequested)
                     {
@@ -513,6 +530,7 @@ namespace Hotfix.GameSystems.Sys3C
         {
             if (!aimCharging)
             {
+                _fireballUiReleaseLatched = false;
                 if (_aimIndicator != null) _aimIndicator.Hide();
                 return;
             }
@@ -520,7 +538,11 @@ namespace Hotfix.GameSystems.Sys3C
             var data = _skillCoordinator.CurrentSkill.Data as ProjectileSkillData;
             if (data == null) return;
 
-            Vector3 target;
+            // 移动端松手在帧末写入：aim 状态同帧归零、释放锁存留到下一帧才消费。
+            // 那一帧若走 PC 兜底，会把拖动落点改写成前方最大射程——必须保留上一帧落点。
+            bool keepLastAim = ShouldKeepLastAim(mobileAim, IsUiAimReleasePending());
+
+            Vector3? target = null;
             if (mobileAim)
             {
                 Vector2 aim = _inputManager.SkillFireballAim;
@@ -537,7 +559,7 @@ namespace Hotfix.GameSystems.Sys3C
                     target = ResolveDefaultTarget(data);
                 }
             }
-            else
+            else if (!keepLastAim)
             {
                 Vector3 forward = transform.forward;
                 forward.y = 0f;
@@ -545,26 +567,30 @@ namespace Hotfix.GameSystems.Sys3C
                 target = transform.position + forward.normalized * data.ProjectileRange;
             }
 
-            target = SnapToGround(target);
-            _skillCoordinator.UpdateAimTarget(target);
-
-            if (mobileAim)
+            if (target.HasValue)
             {
-                Vector3 flat = target - transform.position;
-                flat.y = 0f;
-                if (flat.sqrMagnitude > 0.0001f)
+                Vector3 snapped = SnapToGround(target.Value);
+                _skillCoordinator.UpdateAimTarget(snapped);
+                target = snapped;
+
+                if (mobileAim)
                 {
-                    transform.rotation = Quaternion.Slerp(transform.rotation,
-                        Quaternion.LookRotation(flat.normalized), 10f * Time.deltaTime);
+                    Vector3 flat = snapped - transform.position;
+                    flat.y = 0f;
+                    if (flat.sqrMagnitude > 0.0001f)
+                    {
+                        transform.rotation = Quaternion.Slerp(transform.rotation,
+                            Quaternion.LookRotation(flat.normalized), 10f * Time.deltaTime);
+                    }
                 }
             }
 
-            if (mobileAim)
+            if (mobileAim && target.HasValue)
             {
                 EnsureAimIndicator(data);
                 if (_aimIndicator != null)
                 {
-                    _aimIndicator.Show(target, data.ExplosionRadius,
+                    _aimIndicator.Show(target.Value, data.ExplosionRadius,
                         _inputManager.IsSkillFireballCancelArmed());
                 }
             }
@@ -573,6 +599,16 @@ namespace Hotfix.GameSystems.Sys3C
                 _aimIndicator.Hide();
             }
         }
+
+        /// <summary>UI 释放锁存：消费前是 pending，消费后跨帧重试取消/发射期间用 latched 保持。</summary>
+        private bool IsUiAimReleasePending()
+            => _fireballUiReleaseLatched
+               || (_inputManager != null && _inputManager.HasSkillFireballReleasePending());
+
+        /// <summary>松手帧是否要保留上一帧落点：移动端 aim 已归零，但释放锁存还没被消费。
+        /// 真值表由 EditMode 测试覆盖（FireballAimReleaseTests）。</summary>
+        internal static bool ShouldKeepLastAim(bool mobileAim, bool releasePendingOrLatched)
+            => !mobileAim && releasePendingOrLatched;
 
         /// <summary>摇杆未拖动时的默认落点：选中目标（钳到射程内），否则正前方最大射程。</summary>
         private Vector3 ResolveDefaultTarget(ProjectileSkillData data)
