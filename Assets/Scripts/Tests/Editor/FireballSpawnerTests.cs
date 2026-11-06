@@ -87,5 +87,21 @@ namespace GameSys.EditorTests
             Assert.AreEqual(before, Object.FindObjectsOfType<FireballProjectile>().Length,
                 "只应有场景里的模板，不生成新实例");
         }
+
+        [Test]
+        public void test_fireball_spawner_passes_target_point_to_projectile()
+        {
+            var prefab = NewGo("FireballPrefab");
+            prefab.AddComponent<FireballProjectile>();
+            var data = CreateData(prefab);
+
+            var fb = FireballSpawner.Spawn(data, DamageBlock.CreateDefault(10f, 0f),
+                Vector3.zero, Vector3.forward, new Vector3(0f, 0f, 8f));
+
+            Assert.IsNotNull(fb);
+            for (int i = 0; i < 300 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
+            Assert.IsFalse(fb.gameObject.activeSelf, "应在目标点落地爆炸");
+            Assert.AreEqual(8f, fb.transform.position.z, 0.4f, "Spawn 必须把 targetPoint 透传给弹体");
+        }
     }
 }

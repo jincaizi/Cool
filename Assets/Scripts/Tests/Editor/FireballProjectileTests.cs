@@ -104,6 +104,29 @@ namespace GameSys.EditorTests
             return pos;
         }
 
+        /// <summary>
+        /// 按目标点弹道积分（与 OnSpawn 的 t/vy0 反解、Tick 的半隐式欧拉一致），
+        /// 供把假目标精确摆到目标点弹道上。
+        /// </summary>
+        private static Vector3 SimulateTargetFlight(ProjectileSkillData data, Vector3 origin,
+                                                    Vector3 targetPoint, float dt, int steps)
+        {
+            Vector3 flat = targetPoint - origin;
+            flat.y = 0f;
+            float distance = flat.magnitude;
+            Vector3 dir = distance > 0.0001f ? flat / distance : Vector3.forward;
+            float t = Mathf.Max(0.1f, distance / Mathf.Max(0.01f, data.ProjectileSpeed));
+            float vy0 = (targetPoint.y - origin.y) / t + 0.5f * data.ProjectileGravity * t;
+            Vector3 vel = dir * data.ProjectileSpeed + Vector3.up * vy0;
+            Vector3 pos = origin;
+            for (int i = 0; i < steps; i++)
+            {
+                vel.y -= data.ProjectileGravity * dt;
+                pos += vel * dt;
+            }
+            return pos;
+        }
+
         [Test]
         public void test_fireball_arcs_above_launch_height()
         {
@@ -272,14 +295,16 @@ namespace GameSys.EditorTests
         [Test]
         public void test_fireball_hold_to_aim_does_not_explode_on_midflight_target()
         {
-            // Arrange（目标在 6m 地面，落点在 12m；途中不得提前爆）
+            // Arrange（目标精确站在目标点弹道上 z≈5.94 处（0.6m 检测半径内）；落点在 12m）
             var data = CreateData(18f, 15f);
             TestHelpers.SetField(data, "_holdToAim", true);
+            var origin = new Vector3(0f, 1.2f, 0f);
+            var landing = new Vector3(0f, 0f, 12f);
             var mid = new FakeDamageable(NewGo("Mid").transform);
-            mid.Transform.position = new Vector3(0f, 0f, 6f);
+            mid.Transform.position = SimulateTargetFlight(data, origin, landing, 0.005f, 66);
+            Assert.Less((mid.Transform.position - origin).magnitude, 7f, "假目标应在途中而非落点");
             Register(mid);
-            var fb = CreateProjectile(data, new Vector3(0f, 1.2f, 0f), Vector3.forward,
-                new Vector3(0f, 0f, 12f));
+            var fb = CreateProjectile(data, origin, Vector3.forward, landing);
 
             // Act
             for (int i = 0; i < 300 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
@@ -287,6 +312,7 @@ namespace GameSys.EditorTests
             // Assert
             Assert.AreEqual(0, mid.HitCount, "按住瞄准不得撞怪提前爆");
             Assert.IsFalse(fb.gameObject.activeSelf, "应在落点爆炸");
+            Assert.AreEqual(12f, fb.transform.position.z, 0.3f, "应落在指定落点");
         }
 
         [Test]
@@ -307,6 +333,7 @@ namespace GameSys.EditorTests
             for (int i = 0; i < 400 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
             Assert.IsFalse(fb.gameObject.activeSelf);
             Assert.AreEqual(10f, fb.transform.position.z, 0.4f);
+            Assert.AreEqual(3f, fb.transform.position.y, 0.1f, "上坡落点应到达指定高度");
         }
 
         [Test]
@@ -322,6 +349,28 @@ namespace GameSys.EditorTests
             // Assert
             Assert.IsFalse(fb.gameObject.activeSelf);
             Assert.AreEqual(-2f, fb.transform.position.y, 0.3f);
+            Assert.AreEqual(10f, fb.transform.position.z, 0.4f, "下坡落点应在指定水平位置");
+        }
+
+        [Test]
+        public void test_fireball_pool_respawn_without_target_uses_fixed_range()
+        {
+            // Arrange（同一实例先按目标点生成：落点 8m 后回池）
+            var data = CreateData(18f, 15f);
+            var origin = new Vector3(0f, 1.2f, 0f);
+            var fb = CreateProjectile(data, origin, Vector3.forward, new Vector3(0f, 0f, 8f));
+            for (int i = 0; i < 200 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
+            Assert.IsFalse(fb.gameObject.activeSelf, "目标点弹道应先落回池");
+
+            // Act（复用同一实例，不带 targetPoint 再生成）
+            var damage = DamageBlock.CreateDefault(30f, 0f);
+            fb.OnSpawn(data, damage, origin, Vector3.forward, null, null);
+            for (int i = 0; i < 300 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
+
+            // Assert（回到旧固定 15m 射程，且不残留目标点状态）
+            Assert.IsFalse((bool)TestHelpers.GetField(fb, "_hasTarget"), "池复用必须清掉目标点状态");
+            Assert.IsFalse(fb.gameObject.activeSelf);
+            Assert.AreEqual(15f, fb.transform.position.z, 0.4f, "无目标时应走旧固定射程");
         }
     }
 }
