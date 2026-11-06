@@ -7,8 +7,9 @@ using UnityEngine;
 namespace Hotfix.GameSystems.Tests.SyncLayer
 {
     /// <summary>
-    /// 任务 9：远程施法表现 —— 投射物视觉按 (casterId, skillId) 跟踪，服务端
-    /// DamageResult 的 HitX/HitZ、StopX/StopZ 是唯一停点来源；本地施法者与已删除视图不参与。
+    /// 任务 9：远程施法表现 —— 投射物视觉按 (casterId, skillId) 跟踪；停点来源：
+    /// HoldToAim 火球用 CastBroadcast 上报的 Impact，其余火球用 DamageResult 的 HitX/HitZ，
+    /// 被格挡的剑气用 StopX/StopZ；本地施法者与已删除视图不参与。
     /// </summary>
     public class RemoteCastPresenterTests
     {
@@ -260,7 +261,11 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     },
                     castVfxSpawner: null);
 
-                presenter.OnCastBroadcast(new CastBroadcast { CasterPlayerId = 2L, SkillId = 20003 });
+                presenter.OnCastBroadcast(new CastBroadcast
+                {
+                    CasterPlayerId = 2L, SkillId = 20003,
+                    ImpactX = 3f, ImpactY = 0f, ImpactZ = 7f
+                });
 
                 Assert.AreEqual(1, factoryCalls, "远程玩家 CastBroadcast 必须在收到时就生成投射物视觉");
                 Assert.NotNull(capturedData);
@@ -269,8 +274,12 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     "起点 = 渲染位置 + 旋转后的 SpawnOffset（不是脚底，也不是服务端快照原始值）");
                 Assert.AreEqual(Vector3.forward, capturedForward, "前向取渲染朝向");
 
-                presenter.ApplyDamageForTest(FireballResult(2L));
+                presenter.ApplyDamageForTest(FireballResult(2L, hitX: 5f, hitZ: 6f));
                 Assert.AreEqual(1, visual.Explosions, "CastBroadcast 建立的跟踪项要能被 DamageResult 消费");
+                Assert.AreEqual(new Vector3(3f, 0f, 7f), visual.LastPoint,
+                    "HoldToAim 火球按广播上报的落点爆炸（broadcast.Impact → Tracked → explode）");
+                Assert.AreNotEqual(new Vector3(5f, 0f, 6f), visual.LastPoint,
+                    "不能再落到 DamageResult 的首个 Hit 点");
             }
             finally
             {
