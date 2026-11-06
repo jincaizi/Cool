@@ -12,6 +12,8 @@ namespace Hotfix.GameSystems.UI
         [SerializeField] private AttackHeavyReadyView _attackReadyView;
         [SerializeField] private MobileSkillAimJoystick _fireballAim;
 
+        private bool _wasFireballCharging;
+
         private void Update()
         {
             var entry = _inputBinder != null ? _inputBinder.BoundEntry : null;
@@ -48,8 +50,11 @@ namespace Hotfix.GameSystems.UI
                     && coordinator.CurrentSkill.SkillId == (int)SkillID.Fireball
                     && coordinator.CurrentSubState == SkillSubState.Charging;
 
-                if (_fireballAim.IsGestureActive && !fireballCharging)
+                // 只在**离开 Charging 的边沿**复位：按下帧与 Casting 阶段手势必须保留，
+                // 否则拖拽/取消还没进入 Charging 就被清空。
+                if (_wasFireballCharging && !fireballCharging && _fireballAim.IsGestureActive)
                     _fireballAim.ResetGesture();
+                _wasFireballCharging = fireballCharging;
 
                 bool canStart = entry.Stamina != null && entry.Stamina.CanStartConsuming
                     && !coordinator.GetCooldownInfo((int)SkillID.Fireball).IsOnCooldown;
@@ -73,7 +78,12 @@ namespace Hotfix.GameSystems.UI
                 }
             }
             if (_attackReadyView != null) _attackReadyView.SetReady(false);
-            _fireballAim?.ResetGesture();
+            if (_fireballAim != null)
+            {
+                _fireballAim.ResetGesture();
+                _fireballAim.Interactable = false;
+            }
+            _wasFireballCharging = false;
         }
     }
 }

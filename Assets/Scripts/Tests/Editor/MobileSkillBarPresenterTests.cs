@@ -3,12 +3,14 @@ using System.Reflection;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Runtime;
+using Hotfix.GameSystems.Stamina;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.UI;
 using NUnit.Framework;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace GameSys.EditorTests
@@ -25,6 +27,7 @@ namespace GameSys.EditorTests
         };
 
         private readonly List<GameObject> _created = new List<GameObject>();
+        private readonly List<ScriptableObject> _createdAssets = new List<ScriptableObject>();
         private readonly Dictionary<SkillID, MobileSkillButton> _skillButtons = new Dictionary<SkillID, MobileSkillButton>();
         private readonly Dictionary<SkillID, Image> _cooldowns = new Dictionary<SkillID, Image>();
         private readonly Dictionary<SkillID, Image> _charges = new Dictionary<SkillID, Image>();
@@ -86,6 +89,11 @@ namespace GameSys.EditorTests
                 if (_created[i] != null) Object.DestroyImmediate(_created[i]);
             }
             _created.Clear();
+            for (int i = _createdAssets.Count - 1; i >= 0; i--)
+            {
+                if (_createdAssets[i] != null) Object.DestroyImmediate(_createdAssets[i]);
+            }
+            _createdAssets.Clear();
         }
 
         [Test]
@@ -164,7 +172,7 @@ namespace GameSys.EditorTests
         {
             // Arrange（火球 HoldToAim、Charging）
             var entry = CreateEntry("AimEntry");
-            var data = ScriptableObject.CreateInstance<ProjectileSkillData>();
+            var data = CreateAsset<ProjectileSkillData>();
             TestHelpers.SetField(data, "_skillId", (int)SkillID.Fireball);
             TestHelpers.SetField(data, "_maxChargeTime", 2f);
             TestHelpers.SetField(data, "_holdToAim", true);
@@ -193,6 +201,99 @@ namespace GameSys.EditorTests
             // Assert
             Assert.IsFalse(_charges[SkillID.Fireball].gameObject.activeSelf,
                 "按住瞄准期间不得显示蓄力环");
+        }
+
+        [Test]
+        public void test_gesture_survives_casting_then_resets_after_charging_ends()
+        {
+            // Arrange（按下 → Casting，按住瞄准期间逐帧刷新）
+            var entry = CreateEntry("AimLifecycle");
+            TestHelpers.SetField(entry, "_stamina", new StaminaSystem(StaminaConfig.Default));
+            var data = CreateAsset<ProjectileSkillData>();
+            TestHelpers.SetField(data, "_skillId", (int)SkillID.Fireball);
+            TestHelpers.SetField(data, "_maxChargeTime", 2f);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            TestHelpers.SetField(data, "_skillType", SkillType.Projectile);
+
+            var coordinator = new SkillCoordinator(new TestHelpers.FakeTarget(entry.gameObject.transform));
+            coordinator.RegisterSkill(data);
+            var executor = new SkillExecutor(new TestHelpers.FakeTarget(entry.gameObject.transform), data);
+            var machine = new FakeTimeMachine(data);
+            InjectMachine(executor, machine);
+            executor.TryStart();
+            machine.Now = 0.05f; // 仍在 Casting（0.1s 后才进 Charging）
+            executor.Update(0.01f);
+            Assert.AreEqual(SkillSubState.Casting, executor.CurrentSubState, "前置：应仍在 Casting");
+            TestHelpers.SetField(coordinator, "_currentSkill", executor);
+            TestHelpers.SetField(entry, "_skillCoordinator", coordinator);
+            Bind(entry);
+
+            var aim = CreateAimJoystick();
+            TestHelpers.SetField(_presenter, "_fireballAim", aim);
+            aim.OnPointerDown(new PointerEventData(null));
+            Assert.IsTrue(aim.IsGestureActive, "前置：按下后手势必须激活");
+
+            // Act（Casting 阶段逐帧刷新）
+            for (int i = 0; i < 3; i++) Refresh();
+
+            // Assert（按下帧与 Casting 不得复位手势）
+            Assert.IsTrue(aim.IsGestureActive, "按下帧 / Casting 阶段不得复位手势");
+            Assert.IsTrue(aim.Interactable, "无冷却且有精力时应可交互");
+
+            // Act（进入 Charging）
+            machine.Now = 0.15f;
+            executor.Update(0.01f);
+            Refresh();
+
+            // Assert（Charging 期间手势保留）
+            Assert.AreEqual(SkillSubState.Charging, executor.CurrentSubState);
+            Assert.IsTrue(aim.IsGestureActive, "Charging 期间手势必须保留");
+
+            // Act（技能结束）
+            executor.ForceComplete();
+            Assert.AreNotEqual(SkillSubState.Charging, executor.CurrentSubState);
+            Refresh();
+
+            // Assert（离开 Charging 的边沿复位，且不合成 Cancel）
+            Assert.IsFalse(aim.IsGestureActive, "离开 Charging 后必须复位手势");
+            Assert.AreEqual(AimReleaseKind.None, aim.ConsumeReleaseKind(),
+                "复位不得合成 Cancel 释放");
+        }
+
+        [Test]
+        public void test_fireball_aim_interactable_follows_cooldown_stamina_and_reset()
+        {
+            // Arrange
+            var entry = CreateEntry("AimGate");
+            TestHelpers.SetField(entry, "_stamina", new StaminaSystem(StaminaConfig.Default));
+            Bind(entry);
+            var aim = CreateAimJoystick();
+            TestHelpers.SetField(_presenter, "_fireballAim", aim);
+
+            // Act + Assert（无冷却、有精力）
+            Refresh();
+            Assert.IsTrue(aim.Interactable, "无冷却且精力充足时必须可施放");
+
+            // Act + Assert（冷却中）
+            StartCooldown(CoordinatorOf(entry), SkillID.Fireball, 10f);
+            Refresh();
+            Assert.IsFalse(aim.Interactable, "火球冷却中不得施放");
+
+            // Arrange（精力耗尽）
+            var exhausted = CreateEntry("AimGateExhausted");
+            TestHelpers.SetField(exhausted, "_stamina", new StaminaSystem(StaminaConfig.Default));
+            exhausted.Stamina.TryConsume(exhausted.Stamina.Max);
+            Bind(exhausted);
+
+            // Act + Assert（精力不足）
+            Refresh();
+            Assert.IsFalse(aim.Interactable, "精力耗尽时不得施放");
+
+            // Act + Assert（无本地角色时复位为不可施放）
+            TestHelpers.SetField(_binder, "_boundEntry", null);
+            TestHelpers.SetField(_binder, "_inputManager", null);
+            Refresh();
+            Assert.IsFalse(aim.Interactable, "无本地角色时摇杆必须不可交互");
         }
 
         [Test]
@@ -350,6 +451,27 @@ namespace GameSys.EditorTests
         }
 
         private void Refresh() => Invoke(_presenter, "Update");
+
+        private T CreateAsset<T>() where T : ScriptableObject
+        {
+            var asset = ScriptableObject.CreateInstance<T>();
+            _createdAssets.Add(asset);
+            return asset;
+        }
+
+        private MobileSkillAimJoystick CreateAimJoystick()
+        {
+            var go = new GameObject("AimJoystick", typeof(RectTransform));
+            _created.Add(go);
+            var iconGo = new GameObject("Icon", typeof(RectTransform));
+            _created.Add(iconGo);
+            iconGo.transform.SetParent(go.transform, false);
+            var aim = go.AddComponent<MobileSkillAimJoystick>();
+            TestHelpers.SetField(aim, "_buttonRect", (RectTransform)go.transform);
+            TestHelpers.SetField(aim, "_icon", (RectTransform)iconGo.transform);
+            Invoke(aim, "Awake");
+            return aim;
+        }
 
         private T CreateComponent<T>(string name) where T : Component
             => NewGameObject(name).AddComponent<T>();
