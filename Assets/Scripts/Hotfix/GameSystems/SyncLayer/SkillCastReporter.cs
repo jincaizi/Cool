@@ -52,8 +52,10 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             if (bridge == null || data == null || !IsChargeable(data)) return;
 
-            // 只有 ChargedSkillData 按落点做圆判定；20003 是线形判定（沿施法者朝向），不传落点
-            Vector3? impact = data is ChargedSkillData ? impactPoint : (Vector3?)null;
+            // 只有 ChargedSkillData 与 HoldToAim 火球按落点做圆判定；其余不传落点
+            bool sendsImpact = data is ChargedSkillData
+                || (data is ProjectileSkillData projectile && projectile.HoldToAim);
+            Vector3? impact = sendsImpact ? impactPoint : (Vector3?)null;
             bridge.NotifySkillCast(data.SkillId, HitShapeConverter.FromSkillData(data), impact,
                 chargeProgress, targetId);
         }

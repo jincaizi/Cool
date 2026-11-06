@@ -30,6 +30,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         // 目标检测
         private Vector3 _targetPosition;
+        private bool _hasTargetPosition;
         private Vector3 _attackDirection;
         private readonly List<IEffectTarget> _cachedTargets = new List<IEffectTarget>();
         private readonly List<IEffectTarget> _cachedDamagedTargets = new List<IEffectTarget>();
@@ -66,6 +67,24 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// <summary>锁定目标的位置；无锁定目标时回落到施法者位置（蓄力释放上报落点用）</summary>
         public Vector3 TargetPositionOrOwner =>
             _targetCharacter != null ? _targetCharacter.transform.position : _owner.transform.position;
+
+        /// <summary>蓄力释放上报的落点。HoldToAim 未设置落点时兜底为前方最大射程，
+        /// 绝不能回退到 owner 位置（否则服务端会把落点算在施法者脚下）。</summary>
+        public Vector3 ReportedImpactPoint
+        {
+            get
+            {
+                if (_projectileData != null && _projectileData.HoldToAim)
+                {
+                    if (_hasTargetPosition) return _targetPosition;
+                    Vector3 forward = _owner.transform.forward;
+                    forward.y = 0f;
+                    if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+                    return _owner.transform.position + forward.normalized * _projectileData.ProjectileRange;
+                }
+                return TargetPositionOrOwner;
+            }
+        }
 
         public SkillExecutor(
             IEffectTarget owner,
@@ -105,6 +124,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public void SetTargetPosition(Vector3 position)
         {
             _targetPosition = position;
+            _hasTargetPosition = true;
         }
 
         public void SetAttackDirection(Vector3 direction)
@@ -311,11 +331,24 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             Vector3 origin = _owner.transform.position
                              + _owner.transform.TransformDirection(_projectileData.SpawnOffset);
-            Vector3 dir = _owner.transform.forward;
-            dir.y = 0f;
-            dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : _owner.transform.forward;
+            bool useTarget = _projectileData.HoldToAim && _hasTargetPosition;
+            Vector3 dir;
+            Vector3? spawnTarget = null;
+            if (useTarget)
+            {
+                Vector3 flat = _targetPosition - origin;
+                flat.y = 0f;
+                dir = flat.sqrMagnitude > 0.0001f ? flat.normalized : _owner.transform.forward;
+                spawnTarget = _targetPosition;
+            }
+            else
+            {
+                dir = _owner.transform.forward;
+                dir.y = 0f;
+                dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : _owner.transform.forward;
+            }
 
-            FireballSpawner.Spawn(_projectileData, damage, origin, dir);
+            FireballSpawner.Spawn(_projectileData, damage, origin, dir, spawnTarget);
 
             EventBus.Emit(new FireballSpawnedEvent
             {

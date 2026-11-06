@@ -76,6 +76,18 @@ namespace GameSys.EditorTests
             return data;
         }
 
+        private ProjectileSkillData CreateHoldToAimProjectileData()
+        {
+            var data = ScriptableObject.CreateInstance<ProjectileSkillData>();
+            TestHelpers.SetField(data, "_skillId", 20003);
+            TestHelpers.SetField(data, "_maxChargeTime", 2f);
+            TestHelpers.SetField(data, "_projectileRange", 15f);
+            TestHelpers.SetField(data, "_staminaDrainPerSecond", 15f);
+            TestHelpers.SetField(data, "_skillType", SkillType.Projectile);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            return data;
+        }
+
         private (SkillCoordinator, StaminaSystem, SkillExecutor, FakeTimeMachine)
             CreateWithExecutor(SkillData data)
         {
@@ -161,6 +173,26 @@ namespace GameSys.EditorTests
 
             Assert.AreEqual(SkillSubState.Execution, executor.CurrentSubState);
             Assert.AreEqual(1, released, "力竭自动释放也必须上报一次");
+        }
+
+        [Test]
+        public void test_hold_to_aim_stamina_exhausted_cancels_without_release()
+        {
+            var (coordinator, stamina, executor, _) = CreateWithExecutor(CreateHoldToAimProjectileData());
+            // 先进 Charging
+            var machine = (FakeTimeMachine)TestHelpers.GetField(executor, "_stateMachine");
+            machine.Now = 0.15f;
+            executor.Update(0.01f);
+            Assert.AreEqual(SkillSubState.Charging, executor.CurrentSubState);
+
+            stamina.TryConsume(99f); // 剩 1
+            int released = 0;
+            coordinator.OnChargeReleased += (_, _, _) => released++;
+
+            coordinator.Update(0.1f);
+
+            Assert.AreEqual(SkillSubState.Cancelled, executor.CurrentSubState);
+            Assert.AreEqual(0, released, "精力耗尽必须取消，不得自动释放");
         }
 
         [Test]

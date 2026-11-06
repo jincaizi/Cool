@@ -15,18 +15,21 @@ namespace GameSys.EditorTests
         private readonly List<GameObject> _gos = new List<GameObject>();
         private GameObject _ownerGo;
         private int _spawnEventCount;
+        private Vector3 _lastDirection;
 
         [SetUp]
         public void SetUp()
         {
             _spawnEventCount = 0;
             EventBus.Subscribe<FireballSpawnedEvent>(OnFireballSpawned);
+            EventBus.Subscribe<FireballSpawnedEvent>(OnDirection);
         }
 
         [TearDown]
         public void TearDown()
         {
             EventBus.Unsubscribe<FireballSpawnedEvent>(OnFireballSpawned);
+            EventBus.Unsubscribe<FireballSpawnedEvent>(OnDirection);
             if (_ownerGo != null) Object.DestroyImmediate(_ownerGo);
             foreach (var go in _gos) if (go != null) Object.DestroyImmediate(go);
             _gos.Clear();
@@ -35,6 +38,8 @@ namespace GameSys.EditorTests
 
         // 事件订阅必须用字段方法（lambda 两次引用不同，Unsubscribe 无法移除）
         private void OnFireballSpawned(FireballSpawnedEvent e) { _spawnEventCount++; }
+
+        private void OnDirection(FireballSpawnedEvent e) => _lastDirection = e.Direction;
 
         private GameObject NewGo(string name)
         {
@@ -136,6 +141,55 @@ namespace GameSys.EditorTests
             // Assert（缺预制体不生成、不发假快照）
             Assert.AreEqual(0, Object.FindObjectsOfType<FireballProjectile>().Length, "缺预制体不生成火球");
             Assert.AreEqual(0, _spawnEventCount, "缺预制体不发 FireballSpawnedEvent 假快照");
+        }
+
+        // ====================================================================================
+        // 地面瞄准（HoldToAim）：按落点方向发射 / 上报落点兜底
+        // ====================================================================================
+
+        [Test]
+        public void test_skill_executor_hold_to_aim_uses_target_direction()
+        {
+            // Arrange
+            var prefab = NewGo("FireballPrefab");
+            prefab.AddComponent<FireballProjectile>();
+            var data = CreateFireballData(prefab);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            var executor = CreateExecutor(data);
+            // 发射点在 (0, 1.2, 0.5)（SpawnOffset），因此目标 z 取 0.5 才得到纯 +X 方向
+            executor.SetTargetPosition(new Vector3(10f, 0f, 0.5f));
+
+            // Act
+            Assert.IsTrue(executor.TryStart());
+
+            // Assert
+            Assert.AreEqual(1f, _lastDirection.x, 0.001f, "落点在 +X 时火球应朝 +X 发射");
+            Assert.AreEqual(0f, _lastDirection.z, 0.001f);
+        }
+
+        [Test]
+        public void test_skill_executor_reported_impact_falls_back_to_forward_range()
+        {
+            var prefab = NewGo("FireballPrefab");
+            prefab.AddComponent<FireballProjectile>();
+            var data = CreateFireballData(prefab);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            var executor = CreateExecutor(data);
+
+            Assert.AreEqual(new Vector3(0f, 0f, 15f), executor.ReportedImpactPoint);
+        }
+
+        [Test]
+        public void test_skill_executor_reported_impact_uses_last_target()
+        {
+            var prefab = NewGo("FireballPrefab");
+            prefab.AddComponent<FireballProjectile>();
+            var data = CreateFireballData(prefab);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            var executor = CreateExecutor(data);
+            executor.SetTargetPosition(new Vector3(3f, 0f, 4f));
+
+            Assert.AreEqual(new Vector3(3f, 0f, 4f), executor.ReportedImpactPoint);
         }
     }
 }

@@ -84,12 +84,14 @@ namespace GameSys.EditorTests
         }
 
         /// <summary>可蓄力投射物（20003 火球）：MaxChargeTime &gt; 0 ⇒ 状态机同样走 Casting→Charging→Execution</summary>
-        private ProjectileSkillData CreateChargeableProjectileData()
+        private ProjectileSkillData CreateChargeableProjectileData(bool holdToAim = false)
         {
             var data = ScriptableObject.CreateInstance<ProjectileSkillData>();
             TestHelpers.SetField(data, "_skillId", 20003);
             TestHelpers.SetField(data, "_maxChargeTime", 2f);
+            TestHelpers.SetField(data, "_projectileRange", 15f);
             TestHelpers.SetField(data, "_skillType", SkillType.Projectile);
+            TestHelpers.SetField(data, "_holdToAim", holdToAim);
             return data;
         }
 
@@ -360,6 +362,68 @@ namespace GameSys.EditorTests
             Assert.AreEqual(SkillSubState.Cancelled, coordinator.CurrentSubState);
             Assert.AreEqual(0, client.Sent.Count,
                 "取消蓄力不得发送 CastRequest（否则服务端会产生幽灵伤害并进入冷却）");
+        }
+
+        // ====================================================================================
+        // 地面瞄准（HoldToAim）：刷新落点 / 玩家取消 / 落点兜底
+        // ====================================================================================
+
+        [Test]
+        public void test_hold_to_aim_release_sends_cast_request_with_impact()
+        {
+            var data = CreateChargeableProjectileData(holdToAim: true);
+            var (coordinator, client, _) = CreateCoordinatorWithBridge(data);
+            coordinator.UpdateAimTarget(new Vector3(0f, 0f, 10f));
+
+            Assert.IsTrue(coordinator.TryReleaseCharge(20003), "火球松手应释放");
+
+            Assert.AreEqual(1, client.Sent.Count);
+            var cast = (CastRequest)client.Sent[0].msg;
+            Assert.AreEqual(10f, cast.ImpactZ, 0.001f, "按住瞄准必须上报落点");
+        }
+
+        [Test]
+        public void test_hold_to_aim_cancel_sends_no_cast_request_and_starts_no_cooldown()
+        {
+            var data = CreateChargeableProjectileData(holdToAim: true);
+            var (coordinator, client, _) = CreateCoordinatorWithBridge(data);
+
+            Assert.IsTrue(coordinator.CancelCharge(20003));
+            Assert.AreEqual(SkillSubState.Cancelled, coordinator.CurrentSubState);
+            Assert.AreEqual(0, client.Sent.Count, "取消不得上报");
+            Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown, "取消不得起冷却");
+        }
+
+        [Test]
+        public void test_hold_to_aim_cancel_through_real_activation_cleans_up_without_throwing()
+        {
+            // 真实激活路径会把执行器登记进协调器：打断回调同步清理 _currentSkill，
+            // CancelCharge 若在 TryInterrupt 之后仍解引用字段会 NRE（只靠注入式装置测不出来）。
+            var data = CreateChargeableProjectileData(holdToAim: true);
+            TestHelpers.SetField(data, "_cooldown", 3f);
+            var (coordinator, client) = ActivateChargeable(data);
+            AdvanceRealSkillToCharging(coordinator);
+
+            // Act
+            Assert.IsTrue(coordinator.CancelCharge(20003), "取消应成功");
+
+            // Assert（执行器已清理；取消零上报零冷却）
+            Assert.IsNull(coordinator.CurrentSkill, "取消后执行器应被清理");
+            Assert.AreEqual(0, client.Sent.Count, "取消不得上报");
+            Assert.IsFalse(coordinator.GetCooldownInfo(20003).IsOnCooldown, "取消不得起冷却");
+        }
+
+        [Test]
+        public void test_hold_to_aim_impact_falls_back_to_forward_range()
+        {
+            var data = CreateChargeableProjectileData(holdToAim: true);
+            var (coordinator, client, _) = CreateCoordinatorWithBridge(data);
+            // 不调用 UpdateAimTarget；施法者在原点、朝向 +Z，兜底 = (0,0,15)
+
+            Assert.IsTrue(coordinator.TryReleaseCharge(20003));
+
+            var cast = (CastRequest)client.Sent[0].msg;
+            Assert.AreEqual(15f, cast.ImpactZ, 0.001f, "未设置落点时必须兜底为前方最大射程");
         }
 
         // ====================================================================================

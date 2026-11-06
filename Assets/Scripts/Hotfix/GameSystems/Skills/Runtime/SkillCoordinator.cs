@@ -115,6 +115,28 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return false;
         }
 
+        /// <summary>按住瞄准期间刷新落点（仅 HoldToAim 投射物）。</summary>
+        public void UpdateAimTarget(Vector3 point)
+        {
+            if (_currentSkill == null || !_currentSkill.IsActive) return;
+            if (!(_currentSkill.Data is ProjectileSkillData p) || !p.HoldToAim) return;
+            _currentSkill.SetTargetPosition(point);
+        }
+
+        /// <summary>玩家主动取消蓄力：不发射、不冷却、不上报。</summary>
+        public bool CancelCharge(int skillId)
+        {
+            var skill = _currentSkill;
+            if (skill == null || !skill.IsActive || skill.SkillId != skillId)
+                return false;
+            var sub = skill.CurrentSubState;
+            if (sub != SkillSubState.Casting && sub != SkillSubState.Charging) return false;
+            if (!skill.TryInterrupt(InterruptionSource.PlayerCancel)) return false;
+            // TryInterrupt 在矩阵放行但状态机拒绝时仍返回 true——按真实状态判定。
+            // 必须用局部引用：打断回调会同步清理协调器的 _currentSkill（置 null）。
+            return skill.CurrentSubState == SkillSubState.Cancelled;
+        }
+
         /// <summary>上报一次蓄力释放（同一施放只报一次；取消蓄力走 Interrupt，不经过这里）。
         /// **冷却在此起算**：服务端在 CastRequest 到达（=释放）时 RecordCast，客户端必须同源——
         /// 激活侧对可蓄力技能跳过 StartCooldown（否则 20003 cd 3s/满蓄 2s 会本地先就绪、
@@ -125,7 +147,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _chargeReleaseReported = true;
             if (_currentSkill != null && SkillCastReporter.IsChargeable(_currentSkill.Data))
                 _cooldownManager.StartCooldown(_currentSkill.SkillId, _currentSkill.Data.Cooldown);
-            OnChargeReleased?.Invoke(_currentSkill.Data, progress, _currentSkill.TargetPositionOrOwner);
+            OnChargeReleased?.Invoke(_currentSkill.Data, progress, _currentSkill.ReportedImpactPoint);
         }
 
         /// <summary>
@@ -547,9 +569,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void HandleStaminaDepleted(SkillExecutor skill, SkillSubState sub)
         {
+            bool holdToAim = skill.Data is ProjectileSkillData projectile && projectile.HoldToAim;
             bool resolved = sub switch
             {
-                SkillSubState.Charging => TryReleaseCharge(skill.SkillId),
+                SkillSubState.Charging => holdToAim
+                    ? skill.TryInterrupt(InterruptionSource.StaminaExhausted)
+                    : TryReleaseCharge(skill.SkillId),
                 SkillSubState.Channeling or SkillSubState.Spinning
                     => skill.TryInterrupt(InterruptionSource.StaminaExhausted),
                 _ => false
@@ -561,7 +586,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // 必须按真实状态判定——蓄力看 Release 是否成功（成功必然进 Execution），
             // 引导/旋转必须看到状态机真的落到 Cancelled。
             bool applied = sub == SkillSubState.Charging
-                ? resolved
+                ? (holdToAim ? skill.CurrentSubState == SkillSubState.Cancelled : resolved)
                 : skill.CurrentSubState == SkillSubState.Cancelled;
             if (!applied) skill.ForceComplete();
         }
@@ -604,7 +629,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             return _currentSkill.CurrentSubState switch
             {
-                SkillSubState.Casting => true,
+                SkillSubState.Casting => !(_currentSkill.Data is ProjectileSkillData castingProjectile
+                                           && castingProjectile.HoldToAim),
                 SkillSubState.Execution => _currentSkill.Data switch
                 {
                     ComboSkillData combo => combo.EnableMovement,
@@ -620,7 +646,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 SkillSubState.Charging => _currentSkill.Data switch
                 {
                     ChargedSkillData c => c.CanMoveWhileCharging,
-                    ProjectileSkillData p => p.CanMoveWhileCharging,
+                    ProjectileSkillData p => !p.HoldToAim && p.CanMoveWhileCharging,
                     _ => false
                 },
                 SkillSubState.Spinning => true,
