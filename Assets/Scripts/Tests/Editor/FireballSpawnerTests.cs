@@ -71,5 +71,21 @@ namespace GameSys.EditorTests
             // Assert
             Assert.AreEqual(0, Object.FindObjectsOfType<FireballProjectile>().Length, "缺预制体不生成");
         }
+
+        [Test]
+        public void test_fireball_spawner_skips_too_close_target()
+        {
+            var prefab = NewGo("FireballPrefab");
+            prefab.AddComponent<FireballProjectile>();
+            var data = CreateData(prefab);
+
+            var before = Object.FindObjectsOfType<FireballProjectile>().Length;
+            var result = FireballSpawner.Spawn(data, DamageBlock.CreateDefault(10f, 0f),
+                Vector3.zero, Vector3.forward, new Vector3(0f, 0f, 0.05f));
+
+            Assert.IsNull(result, "目标 < 0.1m 不生成投射物");
+            Assert.AreEqual(before, Object.FindObjectsOfType<FireballProjectile>().Length,
+                "只应有场景里的模板，不生成新实例");
+        }
     }
 }

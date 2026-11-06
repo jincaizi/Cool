@@ -22,12 +22,19 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
         private static bool _ownsContainer;
 
         public static FireballProjectile Spawn(ProjectileSkillData data, DamageBlock damage,
-            Vector3 origin, Vector3 direction)
+            Vector3 origin, Vector3 direction, Vector3? targetPoint = null)
         {
             if (data == null || data.ProjectilePrefab == null)
             {
                 Debug.LogWarning("[FireballSpawner] data or prefab is null, skip spawn");
                 return null;
+            }
+
+            if (targetPoint.HasValue)
+            {
+                Vector3 flat = targetPoint.Value - origin;
+                flat.y = 0f;
+                if (flat.magnitude < 0.1f) return null;
             }
 
             if (_root == null || _pool == null)
@@ -56,7 +63,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
             }
 
             var fb = _pool.Get();
-            fb.OnSpawn(data, damage, origin, direction, _pool);
+            fb.OnSpawn(data, damage, origin, direction, _pool, targetPoint);
             return fb;
         }
 

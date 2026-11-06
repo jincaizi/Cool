@@ -74,12 +74,13 @@ namespace GameSys.EditorTests
             return data;
         }
 
-        private FireballProjectile CreateProjectile(ProjectileSkillData data, Vector3 origin, Vector3 dir)
+        private FireballProjectile CreateProjectile(ProjectileSkillData data, Vector3 origin, Vector3 dir,
+            Vector3? targetPoint = null)
         {
             var damage = DamageBlock.CreateDefault(30f, 0f);
             damage.CalculatedDamage = 30f; // 预填充（真实流程由 FillDamageContext 填充）
             var go = NewGo("Fireball").AddComponent<FireballProjectile>();
-            go.OnSpawn(data, damage, origin, dir, null);
+            go.OnSpawn(data, damage, origin, dir, null, targetPoint);
             return go;
         }
 
@@ -250,6 +251,77 @@ namespace GameSys.EditorTests
             // Assert（落地爆炸命中落点目标；回池）
             Assert.AreEqual(1, target.HitCount, "落点目标应被落地爆炸命中一次");
             Assert.IsFalse(fb.gameObject.activeSelf, "落地后应回池");
+        }
+
+        [Test]
+        public void test_fireball_target_point_lands_at_variable_distance()
+        {
+            // Arrange（8m 落点）
+            var fb = CreateProjectile(CreateData(18f, 15f), new Vector3(0f, 1.2f, 0f), Vector3.forward,
+                new Vector3(0f, 0f, 8f));
+
+            // Act
+            for (int i = 0; i < 200 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
+
+            // Assert
+            Assert.IsFalse(fb.gameObject.activeSelf);
+            Assert.AreEqual(8f, fb.transform.position.z, 0.3f);
+            Assert.LessOrEqual(fb.transform.position.y, 0.01f);
+        }
+
+        [Test]
+        public void test_fireball_hold_to_aim_does_not_explode_on_midflight_target()
+        {
+            // Arrange（目标在 6m 地面，落点在 12m；途中不得提前爆）
+            var data = CreateData(18f, 15f);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            var mid = new FakeDamageable(NewGo("Mid").transform);
+            mid.Transform.position = new Vector3(0f, 0f, 6f);
+            Register(mid);
+            var fb = CreateProjectile(data, new Vector3(0f, 1.2f, 0f), Vector3.forward,
+                new Vector3(0f, 0f, 12f));
+
+            // Act
+            for (int i = 0; i < 300 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
+
+            // Assert
+            Assert.AreEqual(0, mid.HitCount, "按住瞄准不得撞怪提前爆");
+            Assert.IsFalse(fb.gameObject.activeSelf, "应在落点爆炸");
+        }
+
+        [Test]
+        public void test_fireball_uphill_target_does_not_explode_at_spawn()
+        {
+            // Arrange（落点高于胸口：目标地面 y=3 > 发射 y=1.2）
+            var data = CreateData(18f, 15f);
+            TestHelpers.SetField(data, "_holdToAim", true);
+            var fb = CreateProjectile(data, new Vector3(0f, 1.2f, 0f), Vector3.forward,
+                new Vector3(0f, 3f, 10f));
+
+            // Act
+            fb.Tick(0.005f);
+
+            // Assert
+            Assert.IsTrue(fb.gameObject.activeSelf, "上坡落点不得在出生点立即爆炸");
+
+            for (int i = 0; i < 400 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
+            Assert.IsFalse(fb.gameObject.activeSelf);
+            Assert.AreEqual(10f, fb.transform.position.z, 0.4f);
+        }
+
+        [Test]
+        public void test_fireball_target_below_launch_ground_lands()
+        {
+            // Arrange（下坡落点 y=-2）
+            var fb = CreateProjectile(CreateData(18f, 15f), new Vector3(0f, 1.2f, 0f), Vector3.forward,
+                new Vector3(0f, -2f, 10f));
+
+            // Act
+            for (int i = 0; i < 400 && fb.gameObject.activeSelf; i++) fb.Tick(0.005f);
+
+            // Assert
+            Assert.IsFalse(fb.gameObject.activeSelf);
+            Assert.AreEqual(-2f, fb.transform.position.y, 0.3f);
         }
     }
 }

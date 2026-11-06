@@ -26,12 +26,14 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
         private float _groundY;
         private float _flightTime;
         private bool _released;
+        private bool _hasTarget;
+        private Vector3 _targetPoint;
         private ComponentPool<FireballProjectile> _pool;
 
         public bool IsActive => !_released;
 
         public void OnSpawn(ProjectileSkillData data, DamageBlock damage, Vector3 origin, Vector3 direction,
-                            ComponentPool<FireballProjectile> pool)
+                            ComponentPool<FireballProjectile> pool, Vector3? targetPoint = null)
         {
             _data = data;
             _damage = damage;
@@ -39,18 +41,40 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
             _pool = pool;
             _released = false;
             _flightTime = 0f;
+            _hasTarget = targetPoint.HasValue;
+            _targetPoint = targetPoint ?? default;
             transform.position = origin;
             transform.rotation = Quaternion.LookRotation(direction);
 
-            // 抛物线初速：水平 = 投射物速度沿（压平）方向；垂直初速按
-            // "飞行时间 t 内从发射高度下落到地面"反解（运动学：dy = vy0·t − ½·g·t² → vy0 = dy/t + ½·g·t）
-            float t = data.ProjectileSpeed > 0.01f
-                ? data.ProjectileRange / data.ProjectileSpeed
-                : 1f;
-            _groundY = origin.y - data.SpawnOffset.y;
-            float dy = _groundY - origin.y;
-            float vy0 = dy / t + 0.5f * data.ProjectileGravity * t;
-            _velocity = direction * data.ProjectileSpeed + Vector3.up * vy0;
+            float t;
+            if (_hasTarget)
+            {
+                // 目标点弹道：水平朝向落点，飞行时间 = 水平距离 / 投射物速度；
+                // 垂直初速按 "t 秒内到达落点高度" 反解（dy = vy0·t − ½·g·t² → vy0 = dy/t + ½·g·t）
+                Vector3 flat = _targetPoint - origin;
+                flat.y = 0f;
+                float distance = flat.magnitude;
+                _direction = distance > 0.0001f ? flat / distance : direction;
+                transform.rotation = Quaternion.LookRotation(_direction);
+                _groundY = _targetPoint.y;
+                t = Mathf.Max(0.1f, distance / Mathf.Max(0.01f, data.ProjectileSpeed));
+                float dy = _targetPoint.y - origin.y;
+                float vy0 = dy / t + 0.5f * data.ProjectileGravity * t;
+                _velocity = _direction * data.ProjectileSpeed + Vector3.up * vy0;
+            }
+            else
+            {
+                // 固定射程弹道：水平 = 投射物速度沿（压平）方向；垂直初速按
+                // "飞行时间 t 内从发射高度下落到地面"反解
+                t = data.ProjectileSpeed > 0.01f
+                    ? data.ProjectileRange / data.ProjectileSpeed
+                    : 1f;
+                _groundY = origin.y - data.SpawnOffset.y;
+                float dy = _groundY - origin.y;
+                float vy0 = dy / t + 0.5f * data.ProjectileGravity * t;
+                _velocity = direction * data.ProjectileSpeed + Vector3.up * vy0;
+            }
+
             gameObject.SetActive(true);
         }
 
@@ -69,11 +93,21 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
             transform.position += _velocity * deltaTime;
             _flightTime += deltaTime;
 
-            DetectAndExplode();
+            // 目标点弹道不撞怪提前爆：落点由玩家指定，途中目标不触发爆炸
+            if (!_hasTarget) DetectAndExplode();
             if (_released) return;
 
-            // 落地：到达地面高度即爆（爆炸点 = 当前位置）
-            if (transform.position.y <= _groundY)
+            // 落地：到达地面高度即爆（爆炸点 = 当前位置）。
+            // 目标点弹道以"越过落点平面"为到达判据：上坡落点可能在仍在上升时恰好到达，
+            // 只靠"下降段 + y ≤ 地面"会多飞约 1m；下降段/短暂飞行保护用于避免出生帧误判落地。
+            bool reachedTarget = _hasTarget
+                && Vector3.Dot(transform.position - _targetPoint, _direction) >= 0f;
+            bool landed = _hasTarget
+                ? reachedTarget
+                  || (_velocity.y < 0f && _flightTime >= 0.05f && transform.position.y <= _groundY)
+                : transform.position.y <= _groundY;
+
+            if (landed)
             {
                 Explode(null, transform.position);
                 return;
