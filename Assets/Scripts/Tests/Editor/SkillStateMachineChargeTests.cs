@@ -25,10 +25,11 @@ namespace GameSys.EditorTests
         }
 
         /// <summary>投射物数据：maxChargeTime > 0 = 可蓄力投射物（火球蓄力抛投）</summary>
-        private static ProjectileSkillData CreateProjectileData(float maxCharge)
+        private static ProjectileSkillData CreateProjectileData(float maxCharge, bool holdToAim = false)
         {
             var data = ScriptableObject.CreateInstance<ProjectileSkillData>();
             TestHelpers.SetField(data, "_maxChargeTime", maxCharge);
+            TestHelpers.SetField(data, "_holdToAim", holdToAim);
             return data;
         }
 
@@ -164,6 +165,51 @@ namespace GameSys.EditorTests
             Assert.IsTrue(machine.TryStart());
             Assert.AreEqual(SkillSubState.Execution, machine.CurrentState);
             Assert.IsFalse(machine.Release(), "非蓄力投射物 Release 无效");
+        }
+
+        [Test]
+        public void test_hold_to_aim_projectile_does_not_auto_release_at_max()
+        {
+            var machine = new FakeTimeMachine(CreateProjectileData(2f, holdToAim: true));
+            AdvanceToCharging(machine);
+            machine.Now = 2.15f;
+            machine.Update(0.01f);
+
+            Assert.AreEqual(SkillSubState.Charging, machine.CurrentState, "按住瞄准不得在满蓄时自动释放");
+            Assert.IsTrue(machine.Release());
+            Assert.AreEqual(SkillSubState.Execution, machine.CurrentState);
+        }
+
+        [Test]
+        public void test_player_cancel_interrupts_charging()
+        {
+            var machine = new FakeTimeMachine(CreateProjectileData(2f, holdToAim: true));
+            AdvanceToCharging(machine);
+
+            Assert.IsTrue(machine.Interrupt(InterruptionSource.PlayerCancel));
+            Assert.AreEqual(SkillSubState.Cancelled, machine.CurrentState);
+        }
+
+        [Test]
+        public void test_player_cancel_interrupts_casting()
+        {
+            var machine = new FakeTimeMachine(CreateProjectileData(2f, holdToAim: true));
+            machine.TryStart();
+            Assert.AreEqual(SkillSubState.Casting, machine.CurrentState);
+
+            Assert.IsTrue(machine.Interrupt(InterruptionSource.PlayerCancel));
+            Assert.AreEqual(SkillSubState.Cancelled, machine.CurrentState);
+        }
+
+        [Test]
+        public void test_player_cancel_rejected_in_execution()
+        {
+            var machine = new FakeTimeMachine(CreateProjectileData(2f, holdToAim: true));
+            AdvanceToCharging(machine);
+            Assert.IsTrue(machine.Release());
+            Assert.AreEqual(SkillSubState.Execution, machine.CurrentState);
+            Assert.IsFalse(machine.Interrupt(InterruptionSource.PlayerCancel));
+            Assert.AreEqual(SkillSubState.Execution, machine.CurrentState);
         }
     }
 }

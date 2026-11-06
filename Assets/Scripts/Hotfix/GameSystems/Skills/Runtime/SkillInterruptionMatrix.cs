@@ -132,6 +132,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (skillData == null) return false;
 
             if (source == InterruptionSource.StaminaExhausted) return true;
+            if (source == InterruptionSource.PlayerCancel) return true;
 
             // 优先检查技能自定义规则
             if (_customRules.TryGetValue(skillData.SkillId, out var customRule))

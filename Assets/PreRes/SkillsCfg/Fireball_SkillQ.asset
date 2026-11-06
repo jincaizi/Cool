@@ -56,7 +56,10 @@ MonoBehaviour:
   _spawnOffset: {x: 0, y: 1.2, z: 0.5}
   _explosionRadius: 1.5
   _maxChargeTime: 2
-  _canMoveWhileCharging: 1
+  _canMoveWhileCharging: 0
+  _holdToAim: 1
+  _minAimDistance: 2
+  _aimIndicatorPrefab: {fileID: 0}
   _canRotateWhileCharging: 1
   _projectileGravity: 9.8
   _effect:

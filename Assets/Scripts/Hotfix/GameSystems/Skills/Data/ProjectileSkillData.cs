@@ -55,6 +55,19 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] private float _projectileGravity = 9.8f;
         public float ProjectileGravity => _projectileGravity;
 
+        [Header("=== Ground Aim ===")]
+        [Tooltip("按住瞄准：不自动释放；精力耗尽取消；释放时上报落点")]
+        [SerializeField] private bool _holdToAim;
+        public bool HoldToAim => _holdToAim;
+
+        [Tooltip("最小落点距离(米)")]
+        [SerializeField] private float _minAimDistance = 2f;
+        public float MinAimDistance => _minAimDistance;
+
+        [Tooltip("地面落点圈占位预制体（仅本地瞄准表现）")]
+        [SerializeField] private GameObject _aimIndicatorPrefab;
+        public GameObject AimIndicatorPrefab => _aimIndicatorPrefab;
+
         [Header("=== Config Blocks ===")]
         [SerializeField] private EffectBlock _effect;
         public EffectBlock Effect => _effect;

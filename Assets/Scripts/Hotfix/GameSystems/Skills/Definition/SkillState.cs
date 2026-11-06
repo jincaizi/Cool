@@ -55,6 +55,7 @@ namespace Hotfix.GameSystems.Skills.Definition
         RollDodge,          // 翻滚
         Parry,              // 招架
         TimeOut,            // 超时
-        StaminaExhausted    // 精力力竭（无视霸体）
+        StaminaExhausted,   // 精力力竭（无视霸体）
+        PlayerCancel        // 玩家主动取消（拖远/teardown）
     }
 }

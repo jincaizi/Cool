@@ -35,5 +35,17 @@ namespace GameSys.EditorTests
             Assert.AreEqual(new Vector3(0f, 1.2f, 0.5f), data.SpawnOffset);
             Assert.AreEqual(15f, data.ProjectileRange, 0.001f);
         }
+
+        [Test]
+        public void test_projectile_skill_data_ground_aim_defaults()
+        {
+            // Arrange
+            var data = ScriptableObject.CreateInstance<ProjectileSkillData>();
+
+            // Assert
+            Assert.IsFalse(data.HoldToAim, "默认不是按住瞄准技能");
+            Assert.AreEqual(2f, data.MinAimDistance, 0.001f);
+            Assert.IsNull(data.AimIndicatorPrefab);
+        }
     }
 }

@@ -29,6 +29,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly ChargedSkillData _chargedData;
         private readonly ChanneledSkillData _channeledData;
         private readonly ProjectileSkillData _projectileData;
+        private readonly bool _holdToAim;
         private readonly bool _isSpin;
         private readonly SpinSkillData _spinData;
         private float _nextTickTime;
@@ -75,6 +76,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _chargedData = data as ChargedSkillData;
             _channeledData = data as ChanneledSkillData;
             _projectileData = data as ProjectileSkillData;
+            _holdToAim = _projectileData != null && _projectileData.HoldToAim;
             _isCharged = _chargedData != null
                          || (_projectileData != null && _projectileData.MaxChargeTime > 0f);
             _isChanneled = _channeledData != null;
@@ -190,7 +192,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 }
             }
 
-            if (chargeTime >= MaxChargeTime)
+            if (!_holdToAim && chargeTime >= MaxChargeTime)
             {
                 ChargeProgressAtRelease = 1f;
                 TransitionTo(SkillSubState.Execution);
@@ -376,6 +378,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 InterruptionSource.StaminaExhausted => true,
                 InterruptionSource.RollDodge => true,
                 InterruptionSource.Parry => true,
+                InterruptionSource.PlayerCancel => _currentState == SkillSubState.Casting
+                                                || _currentState == SkillSubState.Charging,
                 _ => false
             };
         }
