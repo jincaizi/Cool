@@ -1638,6 +1638,8 @@ git commit -m "perf(server): bound spatial movement and navigation work"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/MonsterAttackState.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/MeleeWeapon.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillDamageHelper.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQi/SwordQiProjectile.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Projectile/FireballProjectile.cs`
@@ -1677,6 +1679,7 @@ DamageRequest_Carries_Immutable_Context_Direction_And_Contact();
 Legacy_DamageBlock_Adapter_Matches_DamageRequest_Path();
 No_Production_Caller_Uses_DamageBlock_TakeDamage();
 No_Test_Fake_Uses_DamageBlock_TakeDamage();
+DamageEvent_Is_Derived_From_DamageRequest_And_Not_A_Damage_Input();
 ```
 
 - [ ] **步骤 2：运行测试确认当前资产引用被发现**
@@ -1700,7 +1703,7 @@ git commit -m "refactor(combat): detach legacy hit components"
 
 - [ ] **步骤 4：按迁移矩阵分阶段收敛到唯一 DamageRequest 管线**
 
-唯一运行时伤害模型：`DamageRequest` 只包含不可变 `SkillDamageContext`、命中方向与 `HitContact`；`IDamageable` 只新增 `TakeDamage(in DamageRequest)` 作为唯一入口。`DamageBlock` 降为技能配置，不再承载运行时会话字段。
+唯一运行时伤害模型：`DamageRequest` 只包含不可变 `SkillDamageContext`、命中方向与 `HitContact`；`IDamageable` 只新增 `TakeDamage(in DamageRequest)` 作为唯一伤害输入与结算入口。`DamageBlock` 降为技能配置，不再承载运行时会话字段。`DamageEvent` 仅作为命中后的 EventBus 通知载荷（VFX/飘字消费），由 `DamageRequest` 派生，不得传给 `IDamageable`、不得参与伤害结算；`SkillDamageHelper.FillDamageContext` 删除，`CreateDamageEvent`（若保留）只从 `DamageRequest` 派生事件。
 
 迁移矩阵（生产调用者、实现者、测试 fake 必须逐项迁移，禁止用“相关文件”省略）：
 
@@ -1708,14 +1711,17 @@ git commit -m "refactor(combat): detach legacy hit components"
 |---|---|---|
 | 生产调用者 | `SkillExecutor`、`SwordQiProjectile`、`FireballProjectile`、`MeteorStrike`、`MonsterAttackState`、`MeleeWeapon`、`RemoteCastPresenter`、`MonsterEntity` 自身 DoT 路径 | 构造 `DamageRequest(SkillDamageContext, hitDirection, HitContact)` 后调用唯一入口；删除 `DamageBlock` 运行时会话字段写入 |
 | 实现者 | `Sys3CEntry`、`MonsterEntity`；`MonsterStats.TakeDamage(DamageBlock)` 与 `Monster/Damage/DamageContext` 是内部管线 | 实现 `TakeDamage(in DamageRequest)`；`MonsterEntity` 在边界把 `DamageRequest` 转换一次到内部 `DamageContext`，不得保留第二个跨接口伤害模型或第二套 public 伤害入口 |
-| 兼容桥 | `IDamageable` 的两个 `DamageBlock` overload、`AttackHitbox`、`HitZone`、`PlayerHitZone` | 先保留 `[Obsolete]` 适配 overload（内部走 `DamageRequest.FromLegacy`），所有矩阵条目迁移完成后删除 overload 与三个 legacy 脚本 |
-| 测试 fake | `TestHelpers.FakeTarget`、`CharacterAttackHandlerSpinTests.FakeDeadTarget`、`FireballProjectileTests.FakeDamageable`、`MeteorStrikeTests.FakeDamageable`、`SwordQiProjectileTests.FakeDamageable`、`AIBrainTargetValidityTests.FakeDamageable`、`SkillExecutorChargeTests.FakeHitTarget`、`NetworkModeDamageGuardTests.FakeTarget` | 只实现新入口，并记录收到的 `DamageRequest`（context、方向、`HitContact`）供断言 |
+| 事件载荷 | `Sys3C/Core/Events/DamageEvents.cs` 的 `DamageEvent`、`SkillDamageHelper`、`SkillDamageContext.CreateDamageEvent` | `DamageEvent` 只做命中后 EventBus 通知（VFX/飘字），由 `DamageRequest` 派生；删除 `FillDamageContext`；不得把 `DamageEvent` 传给 `IDamageable` 或作为第二套结算模型 |
+| 兼容桥 | `IDamageable` 的两个 `DamageBlock` overload、`AttackHitbox`、`HitZone`、`PlayerHitZone` | 接口同时声明新入口与两个 `[Obsolete]` overload；旧 overload 由实现者显式实现并转发到 `DamageRequest.FromLegacy`，不使用 default interface method（避免对 Unity 2022/IL2CPP 支持的额外假设）。迁移期允许实现者/fake 同时实现旧 overload；所有矩阵条目迁移完成后删除旧 overload 与三个 legacy 脚本 |
+| 测试 fake | `TestHelpers.FakeTarget`、`CharacterAttackHandlerSpinTests.FakeDeadTarget`、`FireballProjectileTests.FakeDamageable`、`MeteorStrikeTests.FakeDamageable`、`SwordQiProjectileTests.FakeDamageable`、`AIBrainTargetValidityTests.FakeDamageable`、`SkillExecutorChargeTests.FakeHitTarget`、`NetworkModeDamageGuardTests.FakeTarget` | 迁移期可同时实现新入口与两个 `[Obsolete]` overload（旧 overload 只转发到新入口）；记录收到的 `DamageRequest`（context、方向、`HitContact`）供断言；phase 3 删除旧 overload 后只保留新入口 |
 
 每阶段顺序固定：先编译 → 运行目标测试 → 再扫描 Prefab/Scene GUID。任一步失败即停止，不得先删脚本后补编译。
 
-1. `DamageRequest.cs` + `IDamageable` 新入口；两个旧 overload 标记 `[Obsolete]` 并提供 `FromLegacy` 适配；运行 `CombatPipelineConvergenceTests` 与 `Legacy_DamageBlock_Adapter_Matches_DamageRequest_Path`。
-2. 迁移全部实现者、生产调用者与测试 fake；运行受影响 EditMode/PlayMode 目标测试。
-3. 确认 `grep -R "TakeDamage(.*DamageBlock" Assets/Scripts` 与旧接口调用为 0 后删除 `[Obsolete]` overload、三个 legacy 脚本及其 `.meta`；重新编译并运行目标测试。
+`Canonical_Damage_Path_Uses_DamageRequest`、`DamageRequest_Carries_Immutable_Context_Direction_And_Contact`、`Legacy_DamageBlock_Adapter_Matches_DamageRequest_Path` 以及两个 no-caller 用例都位于 `CombatPipelineConvergenceTests.cs`；资产/GUID 扫描位于 `LegacyCombatPrefabReferenceTests.cs`。阶段 1 只运行已可绿的三个用例，no-caller 用例必须等 phase 2 迁移完成后再运行。
+
+1. `DamageRequest.cs` + `IDamageable` 新入口；两个旧 overload 标记 `[Obsolete]` 并提供 `FromLegacy` 适配。本阶段只运行 `Canonical_Damage_Path_Uses_DamageRequest`、`DamageRequest_Carries_Immutable_Context_Direction_And_Contact`、`Legacy_DamageBlock_Adapter_Matches_DamageRequest_Path`；不运行 `CombatPipelineConvergenceTests` 全类。
+2. 迁移全部实现者、生产调用者、测试 fake 与 `DamageEvent` 事件载荷；运行受影响 EditMode/PlayMode 目标测试，并运行 `No_Production_Caller_Uses_DamageBlock_TakeDamage`、`No_Test_Fake_Uses_DamageBlock_TakeDamage` 与 `DamageEvent_Is_Derived_From_DamageRequest_And_Not_A_Damage_Input`。
+3. 确认 `grep -R "TakeDamage(.*DamageBlock" Assets/Scripts` 与旧接口调用为 0 后删除旧 overload、三个 legacy 脚本及其 `.meta`；重新编译并运行整个 `CombatPipelineConvergenceTests` 与 `LegacyCombatPrefabReferenceTests`。
 
 阶段 GUID 扫描（每阶段执行，三个 GUID 分别来自 `AttackHitbox.cs.meta`、`HitZone.cs.meta`、`PlayerHitZone.cs.meta`）：
 
@@ -1737,7 +1743,7 @@ bash tools/unity-tests.sh PlayMode HitJudgmentAlignmentTests
 
 预期：无 Missing Script、无旧 GUID、无旧接口调用；技能 shape → `SkillDamageContext` → `DamageRequest` → `IDamageable.TakeDamage` 是唯一客户端伤害输入。
 
-**执行设计 §4.2 U-P1-01 验收补齐（任务 19）：** 唯一运行时伤害模型 `DamageRequest` 含不可变 `SkillDamageContext`、方向和 `HitContact`；生产调用者、实现者、测试 fake 迁移矩阵逐项完成；`[Obsolete] DamageBlock` 适配 overload 在迁移期间保留、完成后删除；每阶段编译 + 目标测试后才扫描 Prefab GUID；完成后无 Missing Script、无旧 GUID、无旧接口调用。
+**执行设计 §4.2 U-P1-01 验收补齐（任务 19）：** 唯一运行时伤害模型 `DamageRequest` 含不可变 `SkillDamageContext`、方向和 `HitContact`；`DamageEvent` 仅是由 `DamageRequest` 派生的事件载荷，`SkillDamageHelper.FillDamageContext` 删除，不保留第二套运行时伤害模型；生产调用者、实现者、测试 fake 迁移矩阵逐项完成；两个 `[Obsolete] DamageBlock` 适配 overload 在迁移期间由实现者/fake 显式实现并转发，完成后删除（不依赖 default interface method）；每阶段编译 + 目标测试后才扫描 Prefab GUID；完成后无 Missing Script、无旧 GUID、无旧接口调用。
 
 - [ ] **步骤 5：Commit**
 
@@ -1887,7 +1893,8 @@ git commit -m "refactor(sys3c): type state coordination and safe initialization"
 - 创建：`Assets/Scripts/Tests/Editor/Resource/ResourceScopeTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Resource/ResourceGuardrailsTests.cs`
 - 修改：`Assets/Scripts/AOT/Core/Resource/README.md`
-- 修改：`tools/quality-gate.sh`（`--p1` 增加 WebGL Player 编译 lane 与资源层守卫结果）
+- 修改：`tools/quality-gate.ps1`（权威 runner；`--p1` 增加 WebGL Player 编译 lane 与资源层守卫结果）
+- 修改：`tools/quality-gate.sh`（薄包装只转发 `--p1`，不承载 lane 逻辑）
 
 - [ ] **步骤 1：编写失败的生命周期测试**
 
@@ -1967,14 +1974,15 @@ bash tools/unity-tests.sh EditMode
 bash tools/quality-gate.sh --p1
 ```
 
-预期：资源失败/取消/重试全部释放恰好一次，owner 级 lease 归零，EditMode 全量通过；`--p1` 的 WebGL Player 编译 lane 证明资源层在 WebGL 下编译且无同步等待 API。
+预期：资源失败/取消/重试全部释放恰好一次，owner 级 lease 归零，EditMode 全量通过；权威 runner `tools/quality-gate.ps1 --p1` 的 WebGL Player 编译 lane 证明资源层在 WebGL 下编译且无同步等待 API（`tools/quality-gate.sh` 只转发 `--p1`）。
 
 **执行设计 §4.2 U-P1-03/04/11 验收补齐（任务 21）：** `AddressablesResourceBackend` 使用 UniTask Addressables awaiter 或 Completed callback；玩家资源层源码守卫同时禁止 `WaitForCompletion()` 与 `AsyncOperationHandle.Task`；所有 Addressables API 从 Unity 主线程进入，后台线程调用 fail-fast 或 marshal；同步兼容接口只允许 Editor 工具调用并带明确守卫；WebGL Player 编译门禁通过；加载失败、取消和 shutdown 不泄漏 handle。`SceneLease` 保存 `AsyncOperationHandle<SceneInstance>` 并提供幂等 `UniTask UnloadAsync()`；加载取消后等待已开始的底层操作完成再卸载释放；Additive、Single、重复卸载和 ResourceManager shutdown 的所有权规则明确，重复卸载、加载中取消、Single 切换和 shutdown 测试通过，句柄计数归零。`ResourceManager.ShutdownAsync` 与 `ResourceScope.CloseAsync` 分离；每个 lease 登记 owner，scope 关闭后断言该 owner 的 lease 数为 0；全局 Shutdown 只用于应用真正退出、测试套件结束或显式全局重启；`SubsystemRegistration` 只清纯托管静态引用并报告 outstanding handle；`ResetForTests` 在任一 owner 仍有 outstanding handle 时失败；UI 销毁顺序固定为取消加载 → 销毁实例 → 释放 descriptor lease → 清空 Instance；关闭 Domain Reload 的配置下连续两轮 PlayMode 无残留。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Assets/Scripts/AOT/Core/Resource Assets/Scripts/Tests/Editor/Resource tools/quality-gate.sh
+git add Assets/Scripts/AOT/Core/Resource Assets/Scripts/Tests/Editor/Resource \
+  tools/quality-gate.ps1 tools/quality-gate.sh
 git commit -m "feat(resource): add addressable leases and single-flight loading"
 ```
 
@@ -2003,8 +2011,8 @@ git commit -m "feat(resource): add addressable leases and single-flight loading"
 - 创建：`Assets/Scripts/Tests/PlayMode/AddressableUiLifecycleTests.cs`
 - 修改：`Assets/Scripts/Editor/BuildScript.cs`
 - 修改：`Assets/Scripts/Editor/WebGLBuildScript.cs`
-- 修改：`tools/quality-gate.sh`
-- 修改：`tools/tests/quality-gate.ps1`
+- 修改：`tools/quality-gate.ps1`（权威 runner；Addressables content lane 与 Use Existing Build 编排）
+- 修改：`tools/quality-gate.sh`（薄包装只转发 `--p1`，不承载编排逻辑）
 - 修改：`Assets/Scripts/Hotfix/GameSystems/UI/README.md`
 - 修改：`Assets/Scripts/AOT/Core/Resource/README.md`
 
@@ -2055,7 +2063,7 @@ Group/schema 策略：
 
 - [ ] **步骤 4：验证通过与 content build**
 
-快速测试使用 Use Asset Database；生产验证由外层 orchestrator 顺序执行“目标平台进程 → 清理本平台旧 catalog/hash/bundle 输出 → `AddressablesBuildScript.BuildPlayerContent` → 切到 Use Existing Build → 生命周期测试读取同一份 manifest → `finally` 恢复 settings”。恢复设置失败或 lifecycle 测试回退 Use Asset Database 均使 Gate 失败。
+快速测试使用 Use Asset Database；生产验证由权威 runner `tools/quality-gate.ps1` 顺序执行“目标平台进程 → 清理本平台旧 catalog/hash/bundle 输出 → `AddressablesBuildScript.BuildPlayerContent` → 切到 Use Existing Build → 生命周期测试读取同一份 manifest → `finally` 恢复 settings”；`tools/quality-gate.sh` 只是转发 `--p1` 的薄包装，不承载编排逻辑。恢复设置失败或 lifecycle 测试回退 Use Asset Database 均使 Gate 失败。
 
 ```bash
 bash tools/unity-tests.sh EditMode AddressableCatalogContractTests
@@ -2083,7 +2091,7 @@ git add Assets/AddressableAssetsData Assets/Addressables Assets/Resources/Prefab
   Assets/Scripts/Hotfix/GameSystems/UI Assets/Scripts/AOT/DataDefinition/GameConsts.cs \
   Assets/Scripts/Tests/Editor/Resource Assets/Scripts/Tests/Editor/UI \
   Assets/Scripts/Tests/PlayMode/AddressableUiLifecycleTests.cs* \
-  tools/quality-gate.sh tools/tests/quality-gate.ps1 \
+  tools/quality-gate.ps1 tools/quality-gate.sh \
   Assets/Scripts/AOT/Core/Resource/README.md
 git commit -m "feat(ui): load built-in panels through addressables"
 ```
