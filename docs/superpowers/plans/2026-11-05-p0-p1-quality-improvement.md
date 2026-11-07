@@ -1372,6 +1372,7 @@ WorldInstance_Owns_One_Bounded_Mailbox_And_Tick();
 Empty_Instance_Is_Reclaimed_After_Configured_Timeout();
 Destroying_Instance_Rejects_New_Commands_And_Closes_Members();
 Transfer_Attach_Failure_Restores_Source_Instance();
+Two_Instances_Coexist_And_Are_Independently_Reclaimed();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -1405,7 +1406,9 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~WorldInstanceLi
 bash tools/test-server-inprocess.sh
 ```
 
-预期：World 生命周期测试与服务端全量通过，Global 行为无差分。
+预期：World 生命周期测试与服务端全量通过，Global 行为无差分。生产默认仍只开放 `Global`；测试与 P1-A Gate 通过 `WorldRegistry` 显式创建第二个实例，`Global` 适配层不得禁止该路径。
+
+**P1-A 波次 Gate 覆盖要求（任务 15–18 联合验收）：** 波次退出前必须同时运行两个 WorldInstance，证明两个 WorldInstance 隔离与跨实例不可见/不可命中/不可仇恨：同坐标不同世界不产生 AOI 可见性、施法/伤害无跨实例目标、Monster 不获得跨实例仇恨、ORCA 邻居集不含另一实例实体；AOI/ORCA/导航规模测试与 `p1-reference` 基准同轮通过。任务 15 负责可同时创建/销毁两个实例的 registry、lifecycle 测试与两实例 ID/实体数记录；后续任务分别补齐 AOI、ORCA 与导航的规模与隔离证据。任一跨实例断言结果不为 0 时 Gate 为 `FAIL`。
 
 - [ ] **步骤 5：Commit**
 
@@ -1462,6 +1465,8 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~WorldIsolationT
 ```
 
 预期：跨实例结果全为 0，现有单实例测试行为不变。
+
+**P1-A 波次 Gate 覆盖要求（任务 15–18 联合验收）：** 本波次必须证明两个 WorldInstance 隔离、跨实例不可见/不可命中/不可仇恨，并完成 AOI/ORCA/导航规模测试。任务 16 负责跨实例隔离证据：两个 WorldInstance 同时在线时，`Same_Coordinates_Different_Worlds_Are_Not_Aoi_Visible`、`Cast_Cannot_Target_Entity_In_Another_World`、`Monster_Cannot_Acquire_Threat_Across_Worlds`、`Orca_Neighbor_Set_Excludes_Other_World`、`Damage_Broadcast_Has_No_Recipient_From_Other_World` 全部通过且跨实例命中/可见/仇恨计数精确为 0；AOI/ORCA/导航规模测试在双实例下仍满足各自预算。波次报告记录两实例 ID、各系统构造归属和 0 结果证据。
 
 - [ ] **步骤 5：Commit**
 
@@ -1528,6 +1533,8 @@ dotnet run -c Release --project tools/ServerLoadHarness -- --profile aoi-200 --d
 ```
 
 预期：录制输入下 legacy/new 可见性一致；反向查询不再 O(N²)。
+
+**P1-A 波次 Gate 覆盖要求（任务 15–18 联合验收）：** 本波次必须证明两个 WorldInstance 隔离、跨实例不可见/不可命中/不可仇恨，并完成 AOI/ORCA/导航规模测试。任务 17 负责 AOI 规模证据：`aoi-200` profile 连续 600 秒通过且无单调增长，`Index_Never_Returns_Another_World` 在两个 WorldInstance 同时存在时通过；跨实例 AOI 可见性、反向 observer 索引和广播接收者均为 0。规模结果与双实例隔离断言写入波次报告；仅通过单实例单元测试不足以关闭 P1-A Gate。
 
 - [ ] **步骤 5：Commit**
 
@@ -1603,6 +1610,8 @@ dotnet run -c Release --project tools/ServerLoadHarness -- --profile p1-referenc
 
 `p1-reference.json` 固定 Windows、.NET 8、至少 8 个逻辑核心和 16GB 内存；2 分钟预热、10 分钟采样；200 bots、50 monsters、50 simulated clients，每客户端 15Hz 位置与 2Hz 施法。只有名为 `cool-perf` 且通过硬件/运行时校验的专用 runner 能产出正式 Gate 结果；其他环境只能标记 trend/not-verified。正式阈值为 tick p95 < 50ms、p99 < 66ms，且 queue depth、working set 无单调增长。
 
+**P1-A 波次 Gate 覆盖要求（任务 15–18 联合验收）：** 本波次必须证明两个 WorldInstance 隔离、跨实例不可见/不可命中/不可仇恨，并完成 AOI/ORCA/导航规模测试。任务 18 负责 ORCA/导航规模证据：`Five_Hundred_Agents_Meet_Neighbor_Budget`、`Path_Query_Does_Not_Block_World_Tick`、`Workspace_Is_Reused_And_Queue_Is_Bounded` 与 `p1-reference` 的 tick p95/p99 阈值同轮通过；两个 WorldInstance 同时运行时，ORCA 邻居集、导航查询请求与结果不得跨实例，跨实例邻居/路径结果精确为 0。任一规模或隔离断言失败时 P1-A Gate 不得 PASS。
+
 - [ ] **步骤 5：Commit**
 
 ```bash
@@ -1624,15 +1633,38 @@ git commit -m "perf(server): bound spatial movement and navigation work"
 - 修改：`Assets/Monstor/fantasySpider/SpiderCombat.prefab`
 - 修改：`Assets/Monstor/DogKnight/Prefab/DogKnightCombat.prefab`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/MonsterStats.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/Damage/DamageContext.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/AI/States/MonsterAttackState.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/MeleeWeapon.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQi/SwordQiProjectile.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Projectile/FireballProjectile.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/DamageRequest.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IDamageable.cs`
 - 删除：`Assets/Scripts/Hotfix/GameSystems/Combat/AttackHitbox.cs*`
 - 删除：`Assets/Scripts/Hotfix/GameSystems/Combat/HitZone.cs*`
 - 删除：`Assets/Scripts/Hotfix/GameSystems/Combat/PlayerHitZone.cs*`
+- 修改：`Assets/Scripts/Tests/Editor/TestHelpers.cs`
+- 修改：`Assets/Scripts/Tests/Editor/CharacterAttackHandlerSpinTests.cs`
+- 修改：`Assets/Scripts/Tests/Editor/FireballProjectileTests.cs`
+- 修改：`Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs`
+- 修改：`Assets/Scripts/Tests/Editor/SwordQiProjectileTests.cs`
+- 修改：`Assets/Scripts/Tests/Editor/Monster/AIBrainTargetValidityTests.cs`
+- 修改：`Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs`
+- 修改：`Assets/Scripts/Tests/Editor/SyncLayer/NetworkModeDamageGuardTests.cs`
+- 修改：`Assets/Scripts/Tests/Editor/SyncLayer/NpcViewGameplayStripTests.cs`
+- 修改：`Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs`
+- 修改：`Assets/Scripts/Tests/PlayMode/BlockStaminaTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Combat/LegacyCombatPrefabReferenceTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Combat/CombatPipelineConvergenceTests.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Combat/README.md`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/README.md`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/README.md`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md`
 
 - [ ] **步骤 1：先写资产引用与唯一管线测试**
 
@@ -1641,6 +1673,10 @@ Known_Monster_Prefabs_Have_No_Legacy_Combat_Component();
 Project_Assets_Have_No_Legacy_Script_Guid_Reference();
 MonsterEntity_Has_No_Legacy_Combat_Component_Field();
 Canonical_Damage_Path_Uses_DamageRequest();
+DamageRequest_Carries_Immutable_Context_Direction_And_Contact();
+Legacy_DamageBlock_Adapter_Matches_DamageRequest_Path();
+No_Production_Caller_Uses_DamageBlock_TakeDamage();
+No_Test_Fake_Uses_DamageBlock_TakeDamage();
 ```
 
 - [ ] **步骤 2：运行测试确认当前资产引用被发现**
@@ -1662,30 +1698,72 @@ git add Assets/Monstor/DuoPolyart/Prefabs/PBRDefault/TurtleShellPBR.prefab \
 git commit -m "refactor(combat): detach legacy hit components"
 ```
 
-- [ ] **步骤 4：验证通过**
+- [ ] **步骤 4：按迁移矩阵分阶段收敛到唯一 DamageRequest 管线**
 
-把任务 3 的 `SkillDamageContext` 转换为唯一 `DamageRequest` 输入并迁移 `IDamageable` 契约；确认全项目 legacy script GUID 引用为 0 后，删除三个脚本及其 `.meta`，再运行：
+唯一运行时伤害模型：`DamageRequest` 只包含不可变 `SkillDamageContext`、命中方向与 `HitContact`；`IDamageable` 只新增 `TakeDamage(in DamageRequest)` 作为唯一入口。`DamageBlock` 降为技能配置，不再承载运行时会话字段。
+
+迁移矩阵（生产调用者、实现者、测试 fake 必须逐项迁移，禁止用“相关文件”省略）：
+
+| 角色 | 现有符号 | 迁移动作 |
+|---|---|---|
+| 生产调用者 | `SkillExecutor`、`SwordQiProjectile`、`FireballProjectile`、`MeteorStrike`、`MonsterAttackState`、`MeleeWeapon`、`RemoteCastPresenter`、`MonsterEntity` 自身 DoT 路径 | 构造 `DamageRequest(SkillDamageContext, hitDirection, HitContact)` 后调用唯一入口；删除 `DamageBlock` 运行时会话字段写入 |
+| 实现者 | `Sys3CEntry`、`MonsterEntity`；`MonsterStats.TakeDamage(DamageBlock)` 与 `Monster/Damage/DamageContext` 是内部管线 | 实现 `TakeDamage(in DamageRequest)`；`MonsterEntity` 在边界把 `DamageRequest` 转换一次到内部 `DamageContext`，不得保留第二个跨接口伤害模型或第二套 public 伤害入口 |
+| 兼容桥 | `IDamageable` 的两个 `DamageBlock` overload、`AttackHitbox`、`HitZone`、`PlayerHitZone` | 先保留 `[Obsolete]` 适配 overload（内部走 `DamageRequest.FromLegacy`），所有矩阵条目迁移完成后删除 overload 与三个 legacy 脚本 |
+| 测试 fake | `TestHelpers.FakeTarget`、`CharacterAttackHandlerSpinTests.FakeDeadTarget`、`FireballProjectileTests.FakeDamageable`、`MeteorStrikeTests.FakeDamageable`、`SwordQiProjectileTests.FakeDamageable`、`AIBrainTargetValidityTests.FakeDamageable`、`SkillExecutorChargeTests.FakeHitTarget`、`NetworkModeDamageGuardTests.FakeTarget` | 只实现新入口，并记录收到的 `DamageRequest`（context、方向、`HitContact`）供断言 |
+
+每阶段顺序固定：先编译 → 运行目标测试 → 再扫描 Prefab/Scene GUID。任一步失败即停止，不得先删脚本后补编译。
+
+1. `DamageRequest.cs` + `IDamageable` 新入口；两个旧 overload 标记 `[Obsolete]` 并提供 `FromLegacy` 适配；运行 `CombatPipelineConvergenceTests` 与 `Legacy_DamageBlock_Adapter_Matches_DamageRequest_Path`。
+2. 迁移全部实现者、生产调用者与测试 fake；运行受影响 EditMode/PlayMode 目标测试。
+3. 确认 `grep -R "TakeDamage(.*DamageBlock" Assets/Scripts` 与旧接口调用为 0 后删除 `[Obsolete]` overload、三个 legacy 脚本及其 `.meta`；重新编译并运行目标测试。
+
+阶段 GUID 扫描（每阶段执行，三个 GUID 分别来自 `AttackHitbox.cs.meta`、`HitZone.cs.meta`、`PlayerHitZone.cs.meta`）：
+
+```bash
+grep -R -n -E "c86c6f845e47c7d478b400773366218a|cd98010ad7b0a4e4f935cd6baa52bb95|f6f17e0db8a63b444a56ce425ad2b5c4" \
+  Assets --include=*.prefab --include=*.unity --include=*.asset
+```
+
+预期：扫描无输出；`LegacyCombatPrefabReferenceTests` 同时证明无 Missing Script。
+
+最终验证：
 
 ```bash
 bash tools/unity-tests.sh EditMode CombatPipelineConvergenceTests
+bash tools/unity-tests.sh EditMode LegacyCombatPrefabReferenceTests
 bash tools/unity-tests.sh PlayMode MonsterWorldTests
 bash tools/unity-tests.sh PlayMode HitJudgmentAlignmentTests
 ```
 
-预期：无 Missing Script；技能 shape -> DamageRequest -> IDamageable 是唯一客户端伤害输入。
+预期：无 Missing Script、无旧 GUID、无旧接口调用；技能 shape → `SkillDamageContext` → `DamageRequest` → `IDamageable.TakeDamage` 是唯一客户端伤害输入。
+
+**执行设计 §4.2 U-P1-01 验收补齐（任务 19）：** 唯一运行时伤害模型 `DamageRequest` 含不可变 `SkillDamageContext`、方向和 `HitContact`；生产调用者、实现者、测试 fake 迁移矩阵逐项完成；`[Obsolete] DamageBlock` 适配 overload 在迁移期间保留、完成后删除；每阶段编译 + 目标测试后才扫描 Prefab GUID；完成后无 Missing Script、无旧 GUID、无旧接口调用。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/DamageRequest.cs* \
-  Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/IDamageable.cs \
+git add Assets/Scripts/Hotfix/GameSystems/Sys3C \
+  Assets/Scripts/Hotfix/GameSystems/Monster Assets/Scripts/Hotfix/GameSystems/Skills \
+  Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs \
   Assets/Scripts/Hotfix/GameSystems/Combat/AttackHitbox.cs* \
   Assets/Scripts/Hotfix/GameSystems/Combat/HitZone.cs* \
   Assets/Scripts/Hotfix/GameSystems/Combat/PlayerHitZone.cs* \
-  Assets/Scripts/Tests/Editor/Combat/LegacyCombatPrefabReferenceTests.cs* \
-  Assets/Scripts/Tests/Editor/Combat/CombatPipelineConvergenceTests.cs* \
-  Assets/Scripts/Hotfix/GameSystems/Combat/README.md
-git commit -m "refactor(combat): remove legacy hit pipeline"
+  Assets/Scripts/Tests/Editor/Combat Assets/Scripts/Tests/Editor/TestHelpers.cs \
+  Assets/Scripts/Tests/Editor/CharacterAttackHandlerSpinTests.cs \
+  Assets/Scripts/Tests/Editor/FireballProjectileTests.cs \
+  Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs \
+  Assets/Scripts/Tests/Editor/SwordQiProjectileTests.cs \
+  Assets/Scripts/Tests/Editor/Monster/AIBrainTargetValidityTests.cs \
+  Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs \
+  Assets/Scripts/Tests/Editor/SyncLayer/NetworkModeDamageGuardTests.cs \
+  Assets/Scripts/Tests/Editor/SyncLayer/NpcViewGameplayStripTests.cs \
+  Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs \
+  Assets/Scripts/Tests/PlayMode/BlockStaminaTests.cs \
+  Assets/Scripts/Hotfix/GameSystems/Combat/README.md \
+  Assets/Scripts/Hotfix/GameSystems/Monster/README.md \
+  Assets/Scripts/Hotfix/GameSystems/Skills/README.md \
+  Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+git commit -m "refactor(combat): converge on damage request pipeline"
 ```
 
 ---
@@ -1702,13 +1780,23 @@ git commit -m "refactor(combat): remove legacy hit pipeline"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/HitFSM.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntryDependencies.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/Sys3C/SceneCompositionRoot.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/PlayerSpawner.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/PlayerSpawnedEvent.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`
 - 修改：`Assets/Prefabs/Character/FemalePlayer.prefab`
 - 修改：`Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab`
+- 修改：`Assets/SimpleLowPolyNature/Scenes/DemoDay.unity`
 - 创建：`Assets/Scripts/Tests/Editor/Sys3C/StateCoordinatorTypeSafetyTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/Sys3C/Sys3CDependencySourceGuardTests.cs`
 - 创建：`Assets/Scripts/Tests/PlayMode/Sys3CEntryInitializationTests.cs`
+- 修改：`Assets/Scripts/Tests/PlayMode/PlayerSpawnerFeedbackWiringTests.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3C-CurrentDesign.md`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/README.md`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md`
 
 - [ ] **步骤 1：编写失败的类型/初始化测试**
 
@@ -1716,9 +1804,16 @@ git commit -m "refactor(combat): remove legacy hit pipeline"
 StateCoordinator_Contains_No_Object_Reflection_Or_Magic_State_Int();
 HandleDeath_Uses_Typed_Death_State();
 Missing_Dependency_Disables_Entry_Before_Global_Registration();
+Initialization_Failure_Cleans_Half_Registered_State();
 Valid_Dependencies_Register_Exactly_Once();
 Destroy_Before_Hud_Ready_Cancels_Late_Bind();
 Player_Prefabs_Have_All_Required_Serialized_References();
+PlayerSpawnedEvent_Carries_Sys3CEntry();
+Spawner_Uses_Typed_Entry_Root_And_Injects_Before_Start();
+Camera_And_Scene_Dependencies_Are_Injected_Before_Start();
+DemoDay_Entry_Scene_Spawns_Player_With_Injected_Dependencies();
+Male_And_Female_Prefabs_Both_Initialize_Through_Entry();
+Sys3CEntry_Source_Guard_Rejects_GetComponent_For_Runtime_Dependencies();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -1732,25 +1827,41 @@ bash tools/unity-tests.sh PlayMode Sys3CEntryInitializationTests
 
 - [ ] **步骤 3：实现类型接口和初始化顺序**
 
-`StateCoordinator(IBaseFSM baseFsm, IHitFSM hitFsm)`；删除空 `Initialize/Update`，直接使用 BaseState/HitState enum。`Sys3CEntryDependencies.IsValid(out error)` 先验证序列化依赖，再构建、订阅、注册，最后置 Ready；失败时 `enabled=false` 且不留注册。HUD 绑定使用 destroy CancellationToken。文档删除 AttackFSM 现存描述。
+`StateCoordinator(IBaseFSM baseFsm, IHitFSM hitFsm)`；删除空 `Initialize/Update`，直接使用 BaseState/HitState enum。文档删除 AttackFSM 现存描述。
+
+新增不可变 `Sys3CEntryDependencies`：`CharacterController`、`Animator`、`Collider` body、`ThirdPersonCameraController`、`InputManager`、`CharacterAttackHandler`。新增 `SceneCompositionRoot` 持有场景级 Camera 与共享服务引用；`PlayerSpawner` 使用类型化 `Sys3CEntry` Prefab 根，实例化后立即 `entry.Initialize(compositionRoot.BuildDependencies(entry))`，保证 Camera 和其他场景依赖在 `Start` 前注入。
+
+`Sys3CEntry.Start` 顺序固定：`Sys3CEntryDependencies.IsValid(out error)` 一次性验证全部依赖 → 构建子系统 → 订阅 EventBus → `PhysicsRegistry.Register` → Ready。任一校验失败时不得注册 Physics/EventBus、不得留下 HUD 绑定或全局引用，执行与成功路径对称的清理并 `enabled=false`。删除 `FindObjectOfType<ThirdPersonCameraController>` 与用于自身运行依赖的 `GetComponent<InputManager>/<Collider>/<CharacterAttackHandler>`；目标查询（如 `hit.collider.GetComponent<IDamageable>()`）等非自身依赖用法进入带原因的窄 allowlist。HUD 绑定使用 destroy CancellationToken。
+
+`PlayerSpawnedEvent` 直接携带 `Sys3CEntry Entry`；`HitStopManager` 改读 `e.Entry.Animator`，`ClientNetworkHost` 直接使用 `e.Entry`，不得再从 Animator `GetComponent<Sys3CEntry>()`。`DemoDay.unity` 接入场景组合根与两个玩家 Prefab。`Sys3CDependencySourceGuardTests` 扫描 `Sys3CEntry.cs`、`PlayerSpawner.cs` 与 `PlayerSpawnedEvent` 消费方，禁止用 `GetComponent`/`FindObjectOfType` 获取自身/场景运行依赖，每条例外必须带原因。
 
 - [ ] **步骤 4：验证通过**
 
 ```bash
 bash tools/unity-tests.sh EditMode StateCoordinatorTypeSafetyTests
+bash tools/unity-tests.sh EditMode Sys3CDependencySourceGuardTests
 bash tools/unity-tests.sh EditMode Sys3C
 bash tools/unity-tests.sh PlayMode Sys3CEntryInitializationTests
+bash tools/unity-tests.sh PlayMode PlayerSpawnerFeedbackWiringTests
 bash tools/unity-tests.sh PlayMode PlayerDeathRespawnTests
 ```
 
-预期：类型/生命周期测试和死亡复活回归全过。
+预期：类型/生命周期测试、两个玩家 Prefab 与真实入口场景初始化、源码守卫和死亡复活回归全过。
+
+**执行设计 §4.2 U-P1-02 验收补齐（任务 20）：** `PlayerSpawner`、`PlayerSpawnedEvent` 与场景组合根纳入任务；`PlayerSpawner` 使用类型化 Prefab 根，实例化后、`Start` 前由组合根注入 Camera 和其他场景依赖；`PlayerSpawnedEvent` 直接携带 `Sys3CEntry`；`Sys3CEntry` 在注册 Physics/EventBus 前一次性验证全部依赖，失败清理半注册对象；两个玩家 Prefab 和真实入口场景 `DemoDay.unity` 均有 PlayMode 覆盖；源码守卫证明相关 MonoBehaviour 不再用 `GetComponent`/`FindObjectOfType` 获取运行依赖。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Sys3C Assets/Prefabs/Character/FemalePlayer.prefab \
-  Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab Assets/Scripts/Tests/Editor/Sys3C \
-  Assets/Scripts/Tests/PlayMode/Sys3CEntryInitializationTests.cs*
+  Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab Assets/SimpleLowPolyNature/Scenes/DemoDay.unity \
+  Assets/Scripts/Hotfix/GameSystems/VFX/HitStopManager.cs \
+  Assets/Scripts/Hotfix/GameSystems/VFX/README.md \
+  Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs \
+  Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md \
+  Assets/Scripts/Tests/Editor/Sys3C \
+  Assets/Scripts/Tests/PlayMode/Sys3CEntryInitializationTests.cs* \
+  Assets/Scripts/Tests/PlayMode/PlayerSpawnerFeedbackWiringTests.cs
 git commit -m "refactor(sys3c): type state coordination and safe initialization"
 ```
 
@@ -1763,6 +1874,8 @@ git commit -m "refactor(sys3c): type state coordination and safe initialization"
 **文件：**
 - 创建：`Assets/Scripts/AOT/Core/Resource/AssetLease.cs`
 - 创建：`Assets/Scripts/AOT/Core/Resource/SceneLease.cs`
+- 创建：`Assets/Scripts/AOT/Core/Resource/ResourceScopeId.cs`
+- 创建：`Assets/Scripts/AOT/Core/Resource/ResourceScope.cs`
 - 创建：`Assets/Scripts/AOT/Core/Resource/IResourceBackend.cs`
 - 创建：`Assets/Scripts/AOT/Core/Resource/AddressablesResourceBackend.cs`
 - 创建：`Assets/Scripts/AOT/Core/Resource/PendingLoad.cs`
@@ -1771,7 +1884,10 @@ git commit -m "refactor(sys3c): type state coordination and safe initialization"
 - 修改：`Assets/Scripts/AOT/Core/Resource/Res.cs`
 - 修改：`Assets/Scripts/AOT/Core/Resource/ResourceLoadException.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Resource/ResourceManagerTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/Resource/ResourceScopeTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/Resource/ResourceGuardrailsTests.cs`
 - 修改：`Assets/Scripts/AOT/Core/Resource/README.md`
+- 修改：`tools/quality-gate.sh`（`--p1` 增加 WebGL Player 编译 lane 与资源层守卫结果）
 
 - [ ] **步骤 1：编写失败的生命周期测试**
 
@@ -1785,6 +1901,15 @@ Incompatible_Type_Fails_Before_RefIncrement();
 Duplicate_Scene_Request_Does_Not_Start_Second_Load();
 Scene_Failure_And_Cancel_Release_Handle();
 Shutdown_Reports_Leaked_Leases();
+Addressable_Backend_Uses_UniTask_Or_Completed_Callback();
+Resource_Layer_Has_No_WaitForCompletion_Or_AsyncOperationHandle_Task();
+SceneLease_UnloadAsync_Is_Idempotent();
+Cancelled_Scene_Load_Awaits_Started_Handle_Then_Unloads();
+Single_Switch_Releases_Previous_Scene_Handle_Exactly_Once();
+Scope_Close_Zeroes_Only_Its_Own_Owner_Leases();
+Shutdown_Rejects_New_Loads_And_Is_Concurrent_Idempotent();
+ResetForTests_Fails_With_Outstanding_Handles();
+SubsystemRegistration_Reports_Outstanding_Handles_Without_Async_Calls();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -1792,31 +1917,64 @@ Shutdown_Reports_Leaked_Leases();
 运行：`bash tools/unity-tests.sh EditMode ResourceManagerTests`
 预期：FAIL；lease/backend/pending 不存在。
 
-- [ ] **步骤 3：实现主 API**
+- [ ] **步骤 3：实现主 API、owner scope 与异步卸载契约**
 
 ```csharp
 public static UniTask<AssetLease<T>> AcquireAsync<T>(
-    string key, CancellationToken cancellationToken = default) where T : UnityEngine.Object;
+    string key, ResourceScopeId owner, CancellationToken cancellationToken = default) where T : UnityEngine.Object;
 
 public static UniTask<SceneLease> AcquireSceneAsync(
-    string key, LoadSceneMode mode, CancellationToken cancellationToken = default);
+    string key, LoadSceneMode mode, ResourceScopeId owner, CancellationToken cancellationToken = default);
+
+public sealed class ResourceScope
+{
+    public ResourceScopeId Owner { get; }
+    public int OutstandingLeaseCount { get; }
+    public UniTask<AssetLease<T>> AcquireAsync<T>(string key, CancellationToken ct = default);
+    public UniTask<SceneLease> AcquireSceneAsync(string key, LoadSceneMode mode, CancellationToken ct = default);
+    public UniTask CloseAsync();       // 只关闭本 owner，不停止全局服务
+}
+
+public sealed class SceneLease : IDisposable
+{
+    public AsyncOperationHandle<SceneInstance> Handle { get; }
+    public bool IsUnloaded { get; }
+    public UniTask UnloadAsync();      // 幂等；必要时等待已开始的加载完成再 UnloadScene + Release
+    public void Dispose();             // async-dispose 兼容入口
+}
 ```
 
-`AssetLease<T>`/`SceneLease` 使用 sealed class，Dispose 幂等。同 `(key,type)` 共享一个 pending operation，每位成功调用者获得独立 lease；取消等待者不增引用也不取消其他等待者。旧 `Load/Release(key)` 标记 `[Obsolete]`，作为迁移桥保留一轮。
+`AssetLease<T>`/`SceneLease` 使用 sealed class，Dispose 幂等。同 `(key,type)` 共享一个 pending operation，每位成功调用者获得独立 lease；取消等待者不增引用也不取消其他等待者。每个 lease 必须登记稳定 owner ID（`application`/`ui`/`game-session`/`vfx-pool` 等），禁止无 owner 的 acquire。
+
+生命周期契约：
+
+- `ResourceManager.ShutdownAsync` 与 `ResourceScope.CloseAsync` 分离。`ResourceScope.CloseAsync` 只关闭当前 owner：取消该 scope 的 pending loads、释放该 owner 的 asset leases、卸载其 scene leases，并断言该 owner 的 lease 数为 0；不得停止全局服务，也不得释放 application/UI scope 的 CoreUI lease。
+- `ResourceManager.ShutdownAsync` 只用于应用真正退出、测试套件结束或显式全局重启；状态固定为 `Running → ShuttingDown → Stopped`，进入 `ShuttingDown` 后拒绝新的 Acquire/Load，多次/并发调用共享同一个完成任务，所有 scope 关闭后才释放全局 lease。
+- `SceneLease` 保存 `AsyncOperationHandle<SceneInstance>`：加载取消后若底层操作已开始，先等待其完成再卸载和释放；Additive 由 scope 卸载，Single 切换在新场景成功前不释放旧 lease，成功后旧 handle 恰好释放一次；重复卸载直接返回完成任务，不得二次调用 Addressables。
+- `SubsystemRegistration` 只重置纯托管静态引用，不调用任何异步 Addressables API；若发现未释放 handle，在开发/测试构建报告泄漏，而不是静默清表。测试通过受控 `ResetForTests` 清理；任一 owner 仍有 outstanding handle 时 `ResetForTests` 必须失败。
+- `AddressablesResourceBackend` 使用 UniTask Addressables awaiter（`handle.ToUniTask(...)`）或等价 Completed callback；所有 Addressables API 从 Unity 主线程进入，后台线程调用 fail-fast 或 marshal 到明确的主线程调度器。同步兼容接口只允许 Editor 工具调用，并用 `#if UNITY_EDITOR` + 明确守卫隔离；玩家资源层源码守卫同时禁止 `WaitForCompletion()` 与 `AsyncOperationHandle.Task`，WebGL Player 编译 lane 必须通过。
+- UI 销毁顺序固定为：取消加载 → 销毁实例 → 释放 descriptor lease → 清空 `Instance`；该顺序由任务 23 的 `UIManager` 落地，本任务提供 scope/lease 语义与测试基座。关闭 Domain Reload 的配置下连续两轮 PlayMode 不得留下 lease、handle 或静态注册。
+
+旧 `Load/Release(key)` 标记 `[Obsolete]`，作为迁移桥保留一轮；迁移完成后删除需要 `WaitForCompletion()` 的非 Editor 路径。
 
 - [ ] **步骤 4：验证通过**
 
 ```bash
 bash tools/unity-tests.sh EditMode ResourceManagerTests
+bash tools/unity-tests.sh EditMode ResourceScopeTests
+bash tools/unity-tests.sh EditMode ResourceGuardrailsTests
 bash tools/unity-tests.sh EditMode
+bash tools/quality-gate.sh --p1
 ```
 
-预期：资源失败/取消/重试全部释放恰好一次，EditMode 全量通过。
+预期：资源失败/取消/重试全部释放恰好一次，owner 级 lease 归零，EditMode 全量通过；`--p1` 的 WebGL Player 编译 lane 证明资源层在 WebGL 下编译且无同步等待 API。
+
+**执行设计 §4.2 U-P1-03/04/11 验收补齐（任务 21）：** `AddressablesResourceBackend` 使用 UniTask Addressables awaiter 或 Completed callback；玩家资源层源码守卫同时禁止 `WaitForCompletion()` 与 `AsyncOperationHandle.Task`；所有 Addressables API 从 Unity 主线程进入，后台线程调用 fail-fast 或 marshal；同步兼容接口只允许 Editor 工具调用并带明确守卫；WebGL Player 编译门禁通过；加载失败、取消和 shutdown 不泄漏 handle。`SceneLease` 保存 `AsyncOperationHandle<SceneInstance>` 并提供幂等 `UniTask UnloadAsync()`；加载取消后等待已开始的底层操作完成再卸载释放；Additive、Single、重复卸载和 ResourceManager shutdown 的所有权规则明确，重复卸载、加载中取消、Single 切换和 shutdown 测试通过，句柄计数归零。`ResourceManager.ShutdownAsync` 与 `ResourceScope.CloseAsync` 分离；每个 lease 登记 owner，scope 关闭后断言该 owner 的 lease 数为 0；全局 Shutdown 只用于应用真正退出、测试套件结束或显式全局重启；`SubsystemRegistration` 只清纯托管静态引用并报告 outstanding handle；`ResetForTests` 在任一 owner 仍有 outstanding handle 时失败；UI 销毁顺序固定为取消加载 → 销毁实例 → 释放 descriptor lease → 清空 Instance；关闭 Domain Reload 的配置下连续两轮 PlayMode 无残留。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Assets/Scripts/AOT/Core/Resource Assets/Scripts/Tests/Editor/Resource/ResourceManagerTests.cs*
+git add Assets/Scripts/AOT/Core/Resource Assets/Scripts/Tests/Editor/Resource tools/quality-gate.sh
 git commit -m "feat(resource): add addressable leases and single-flight loading"
 ```
 
@@ -1827,7 +1985,8 @@ git commit -m "feat(resource): add addressable leases and single-flight loading"
 **优先级：** P1；依赖任务 21
 
 **文件/资产：**
-- 创建：`Assets/AddressableAssetsData/`
+- 创建：`Assets/AddressableAssetsData/`（含 `AssetGroups/CoreUI.asset`、`AssetGroups/CombatVFX.asset` 与 Addressables settings）
+- 创建：`Assets/Scripts/Editor/AddressablesBuildScript.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Core/UIPanelDescriptor.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Core/IUIPanelLoader.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Core/AddressablePanelLoader.cs`
@@ -1836,10 +1995,16 @@ git commit -m "feat(resource): add addressable leases and single-flight loading"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/UI/Const/UIConst.cs`
 - 修改：`Assets/Scripts/AOT/DataDefinition/GameConsts.cs`
 - 移动并保留 `.meta`：`Assets/Resources/Prefabs/UI/*.prefab` 到 `Assets/Addressables/UI/`
+- 标记为 Addressable：`Assets/Prefabs/VFX/HitSparkBurst.prefab`、`Assets/Prefabs/VFX/HealGreenParticles.prefab`
 - 创建：`Assets/Addressables/UI/Descriptors/*.asset`
 - 创建：`Assets/Scripts/Tests/Editor/Resource/AddressableCatalogContractTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/Resource/AddressablesBuildContractTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/UI/UIManagerLoaderTests.cs`
 - 创建：`Assets/Scripts/Tests/PlayMode/AddressableUiLifecycleTests.cs`
+- 修改：`Assets/Scripts/Editor/BuildScript.cs`
+- 修改：`Assets/Scripts/Editor/WebGLBuildScript.cs`
+- 修改：`tools/quality-gate.sh`
+- 修改：`tools/tests/quality-gate.ps1`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/UI/README.md`
 - 修改：`Assets/Scripts/AOT/Core/Resource/README.md`
 
@@ -1852,6 +2017,13 @@ Load_Cancelled_Or_Failed_Does_Not_Register_Panel();
 UiManager_Holds_Lease_Until_Destroy();
 Repeated_Open_Close_Does_Not_Change_Lease_Count();
 Addressables_Content_Build_Has_No_Duplicate_Address();
+CoreUi_Group_Is_Local_Lz4_PackTogether_Static_With_CoreUi_Label();
+CombatVfx_Group_Contains_Only_Hit_And_Heal_With_CombatVfxCore_Label();
+Fixed_Addresses_Match_Contract();
+No_Address_Is_A_File_Path();
+Analyze_Reports_No_Duplicate_Address_Missing_Dependency_Or_Double_Packing();
+Content_Build_Produces_Catalog_Hash_And_Bundles();
+Player_Build_References_The_Same_Content_Manifest();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -1863,27 +2035,56 @@ bash tools/unity-tests.sh EditMode UIManagerLoaderTests
 
 预期：FAIL；Addressables settings 不存在，UIManager 仍直接 Resources.Load。
 
-- [ ] **步骤 3：用 Unity API 创建设置并迁移**
+- [ ] **步骤 3：用 Unity API 创建设置、固定地址与 group 策略**
 
-固定 addresses：`ui/player-hud`、`ui/target-panel`、`ui/character-select`、`ui/buff-icon`。加载 Addressable 的 `UIPanelDescriptor`，由 descriptor 持有 typed `UIPanel Prefab`；使用 `Object.Instantiate(descriptor.Prefab)`，不在 MonoBehaviour 中 GetComponent。loader 保存 panel->lease 映射，UIManager 销毁时释放。
+固定地址（禁止使用文件路径作为 address）：
+
+- `CoreUI`：`ui/player-hud` → PlayerHudPanel、`ui/target` → TargetPanel、`ui/character-select` → CharacterSelectPanel；失败 Presenter 保持 `CharacterSelect.unity` 的场景直接依赖，不进入 Addressables。
+- `CombatVFX`：`vfx/hit-spark-burst` → `Assets/Prefabs/VFX/HitSparkBurst.prefab`、`vfx/heal-green` → `Assets/Prefabs/VFX/HealGreenParticles.prefab`；当前只包含必预热的 Hit/Heal。
+
+Group/schema 策略：
+
+- `CoreUI` 使用 Local Build Path / Local Load Path、LZ4、Pack Together、Static Content、label `core-ui`；只包含三个内建面板及其直接依赖。
+- `CombatVFX` 使用 Local Build Path / Local Load Path、LZ4、Pack Together、Static Content、label `combat-vfx-core`；不得把可选技能特效放入该组。
+- 未来大量可选技能特效进入独立 `OptionalSkillVFX` group，Pack Separately，且只预热当前角色/场景所需 ID；本轮不创建可选组内容。
+- Android 与 WebGL 分平台构建，bundle 输出目录按平台隔离，禁止共用同一 catalog/hash。
+
+加载 Addressable 的 `UIPanelDescriptor`，由 descriptor 持有 typed `UIPanel Prefab`；使用 `Object.Instantiate(descriptor.Prefab)`，不在 MonoBehaviour 中 GetComponent。loader 保存 panel->lease 映射，UIManager 销毁时释放。
+
+`AddressablesBuildScript.BuildPlayerContent` 提供 batchmode 入口：构建后保存 content manifest/hash，校验 catalog、hash 与 bundle 均存在；`Analyze` 校验重复 address、缺失依赖、重复 bundle dependency、Resources/Addressables 双重打包；`BuildPlayerContent` 返回错误或产物缺失即失败。
 
 - [ ] **步骤 4：验证通过与 content build**
 
+快速测试使用 Use Asset Database；生产验证由外层 orchestrator 顺序执行“目标平台进程 → 清理本平台旧 catalog/hash/bundle 输出 → `AddressablesBuildScript.BuildPlayerContent` → 切到 Use Existing Build → 生命周期测试读取同一份 manifest → `finally` 恢复 settings”。恢复设置失败或 lifecycle 测试回退 Use Asset Database 均使 Gate 失败。
+
 ```bash
 bash tools/unity-tests.sh EditMode AddressableCatalogContractTests
+bash tools/unity-tests.sh EditMode AddressablesBuildContractTests
 bash tools/unity-tests.sh EditMode UIManagerLoaderTests
 bash tools/unity-tests.sh PlayMode AddressableUiLifecycleTests
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
+Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget StandaloneWindows64 \
+  -executeMethod Cool.EditorTools.AddressablesBuildScript.BuildPlayerContent \
+  -logFile "production/quality/artifacts/$RUN_ID/addressables-build.log"
+bash tools/quality-gate.sh --p1
 ```
 
-另执行 Addressables `BuildPlayerContent`；预期无重复 address、缺失依赖或 Resources fallback。
+预期：无重复 address、缺失依赖、重复 bundle dependency 或 Resources/Addressables 双重打包；catalog/hash/bundle 齐全；Player Build 引用同一份 content manifest；失败路径返回非零。
+
+**执行设计 §4.2 U-P1-06 验收补齐（任务 22）：** 增加 `AddressablesBuildScript.BuildPlayerContent` batchmode 入口；快速测试使用 Use Asset Database，生产验证使用外层 orchestrator 顺序执行“目标平台进程 → 清理本平台旧输出 → BuildPlayerContent → Use Existing Build 生命周期测试 → 恢复设置”；`CoreUI` 使用 Local Build/Load Path、LZ4、Pack Together、Static Content、label `core-ui`，地址固定为 `ui/player-hud`、`ui/target`、`ui/character-select`，失败 Presenter 保持场景直接依赖而不进入 Addressables；当前 `CombatVFX` 只包含必预热的 Hit/Heal，使用 Local Build/Load Path、LZ4、Pack Together、Static Content、label `combat-vfx-core`，地址固定为 `vfx/hit-spark-burst`、`vfx/heal-green`；未来可选技能特效进入独立 `OptionalSkillVFX` group，Pack Separately 且仅预热当前角色/场景所需 ID；禁止文件路径 address；Android/WebGL 分平台构建并隔离 bundle 输出；运行 Analyze 并校验重复 address、缺失依赖、重复 bundle dependency、Resources/Addressables 双重打包；保存 content manifest/hash，Player Build 引用同一份 manifest；catalog、hash、bundle 缺失或 BuildPlayerContent 返回错误即失败。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
 git add Assets/AddressableAssetsData Assets/Addressables Assets/Resources/Prefabs/UI \
+  Assets/Prefabs/VFX/HitSparkBurst.prefab* Assets/Prefabs/VFX/HealGreenParticles.prefab* \
+  Assets/Scripts/Editor/AddressablesBuildScript.cs* Assets/Scripts/Editor/BuildScript.cs \
+  Assets/Scripts/Editor/WebGLBuildScript.cs \
   Assets/Scripts/Hotfix/GameSystems/UI Assets/Scripts/AOT/DataDefinition/GameConsts.cs \
   Assets/Scripts/Tests/Editor/Resource Assets/Scripts/Tests/Editor/UI \
-  Assets/Scripts/Tests/PlayMode/AddressableUiLifecycleTests.cs* Assets/Scripts/AOT/Core/Resource/README.md
+  Assets/Scripts/Tests/PlayMode/AddressableUiLifecycleTests.cs* \
+  tools/quality-gate.sh tools/tests/quality-gate.ps1 \
+  Assets/Scripts/AOT/Core/Resource/README.md
 git commit -m "feat(ui): load built-in panels through addressables"
 ```
 
@@ -1901,6 +2102,10 @@ git commit -m "feat(ui): load built-in panels through addressables"
 - 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Core/BuiltinUiLoadFailurePresenter.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Localization/ILocalizationService.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Accessibility/IAccessibilitySettings.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Mobile/IScreenMetrics.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Mobile/UnityScreenMetrics.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Mobile/ILowMemorySignal.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/UI/Mobile/ApplicationLowMemorySignal.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/UI/Core/UIPanel.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/UI/Core/UIManager.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/UI/Core/UIBootstrap.cs`
@@ -1909,8 +2114,11 @@ git commit -m "feat(ui): load built-in panels through addressables"
 - 创建：`Assets/Scripts/Tests/Editor/UI/UIPanelTransitionRaceTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/UI/UIBackStackTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/UI/UIContractTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/UI/UIFailurePresenterRegistrationTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/UI/UIScreenMetricsTests.cs`
 - 创建：`Assets/Scripts/Tests/PlayMode/UISafeAreaTests.cs`
 - 创建：`Assets/Scripts/Tests/PlayMode/UI/UILoadFailureStateTests.cs`
+- 创建：`Assets/Scripts/Tests/PlayMode/UI/UISceneResourceScopeTests.cs`
 - 创建：`Assets/Prefabs/UI/BuiltinUiLoadFailurePresenter.prefab`
 - 修改：`Assets/Scenes/CharacterSelect.unity`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/UI/README.md`
@@ -1931,6 +2139,17 @@ Missing_Addressable_Shows_Retryable_Placeholder_Without_Registering_Panel();
 CharacterSelect_CompositionRoot_Has_Concrete_LoadFailurePresenter();
 Interactive_Controls_Expose_Localization_And_Accessibility_Keys();
 TextScale_And_ReduceMotion_Are_Applied_Through_Settings_Contract();
+FailurePresenter_Awake_Registers_And_OnDestroy_Unregisters_Exactly_Once();
+New_Presenter_Replaces_Old_And_Old_Token_Cannot_Unregister_New();
+SubsystemRegistration_Clears_Managed_Presenter_State_Only();
+CharacterSelect_To_DemoDay_To_CharacterSelect_Binds_Current_Presenter();
+Direct_DemoDay_Without_Presenter_Uses_NonRecursive_Fallback();
+UiManager_Destroy_Order_Cancels_Load_Then_Destroys_Then_Releases_Lease_Then_Clears_Instance();
+CharacterSelect_CoreUi_Lease_Survives_DemoDay_World_Scope_Close();
+Second_PlayMode_Round_Without_Scope_Close_Is_Rejected();
+ScreenMetrics_Reports_SafeArea_Resolution_And_Orientation_Changes();
+LowMemorySignal_Notifies_Subscribers_And_Unsubscribes_On_Destroy();
+Scene_Switch_Cancels_Pending_Addressable_Panel_Load();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -1942,7 +2161,22 @@ TextScale_And_ReduceMotion_Are_Applied_Through_Settings_Contract();
 
 每 panel 维护 desired visibility 与 transition generation；新请求取消旧请求，所有异步绑定 owner token。隐藏同时设 alpha=0、blocksRaycasts=false、interactable=false。SafeAreaAdapter 只在 safe area/分辨率变化时更新，不逐帧重建。
 
-`UIBackStack` 区分普通 panel 与 modal，Android 返回键/键盘 Escape 先关闭最上层 modal，再关闭可返回 panel；空栈行为由显式 platform exit policy 决定。Addressables 加载失败时不注册目标 panel，由 `BuiltinUiLoadFailurePresenter : MonoBehaviour, IUiLoadFailurePresenter` 显示可重试占位。`UIBootstrap` 使用可被 Unity 序列化的具体字段 `BuiltinUiLoadFailurePresenter`，再按接口传给 `UIManager`；`CharacterSelect.unity` 直接引用 `Assets/Prefabs/UI/BuiltinUiLoadFailurePresenter.prefab`，该 prefab 是场景直接依赖，不通过 Addressables/Resources 加载，因此失败页不会递归依赖同一条故障加载链。重试按钮只重新请求原 address，并受 owner cancellation 控制。建立 `ILocalizationService` 与 `IAccessibilitySettings`（text scale、reduce motion、accessibility label）接口及开发默认实现；本轮只加契约/门禁与现有内建 panel 接线，不承诺完成全部翻译或屏幕阅读器适配。
+`UIBackStack` 区分普通 panel 与 modal，Android 返回键/键盘 Escape 先关闭最上层 modal，再关闭可返回 panel；空栈行为由显式 platform exit policy 决定。
+
+Addressables 加载失败时不注册目标 panel，由 `BuiltinUiLoadFailurePresenter : MonoBehaviour, IUiLoadFailurePresenter` 显示可重试占位。采用场景 Presenter 方案，不新增 `UIBootstrapBehaviour`：
+
+- `BuiltinUiLoadFailurePresenter.Awake()` 调用 `UIBootstrap.RegisterFailurePresenter(this)`；注册返回 token，token 同时记录实例身份与 generation。
+- `UIBootstrap` 在 `AfterSceneLoad` 把 `UIManager` 注入当前 Presenter；新 Presenter 注册时立即更新已经存在的持久化 `UIManager`，不能只等待下一次 `AfterSceneLoad`。
+- Presenter 在 `OnDestroy` 只 Dispose 自己的 token；新实例替换旧实例后，旧 token 的 Dispose 不得注销新实例；空值判断必须处理 Unity fake-null。
+- 增加 `SubsystemRegistration` 清理纯托管静态引用（Presenter 引用、token、generation），不调用异步 Addressables API。
+- `CharacterSelect.unity` 直接引用 `Assets/Prefabs/UI/BuiltinUiLoadFailurePresenter.prefab`，该 prefab 是场景直接依赖，不通过 Addressables/Resources 加载，因此失败页不会递归依赖同一条故障加载链；覆盖 `CharacterSelect → DemoDay → CharacterSelect`、Presenter 先销毁和直接进入 `DemoDay`。
+- 没有 Presenter 时提供非递归、非 Addressables 依赖的纯代码降级提示，并输出每帧限频错误；不得重新请求失败 address 或加载任何 Prefab。
+
+重试按钮只重新请求原 address，并受 owner cancellation 控制。`UIManager` 的 UI 销毁顺序固定为：取消加载 → 销毁实例 → 释放 descriptor lease → 清空 `Instance`；panel lease 登记 `ui` owner。`CharacterSelect` 保留 CoreUI lease → 创建并关闭 `DemoDay` world scope → 返回 `CharacterSelect` 后 lease 计数与静态状态不变；未先关闭 scope 直接开始第二轮 PlayMode 必须被拒绝或报告失败。
+
+新增 `IScreenMetrics`（safe area、分辨率、方向与变化通知）和 `ILowMemorySignal`（低内存回调）接口及 Unity 默认实现；`SafeAreaAdapter`、`UIBackStack` 与加载取消通过接口消费信号，保证可在 EditMode/PlayMode 中注入测试信号。移动生命周期 smoke 覆盖：冷启动、热启动、前台/后台恢复、Wi-Fi 与移动网络切换、断网/重连/服务端断开、Safe Area/分辨率/方向变化、Android 返回键与 modal back stack、低内存回调、场景切换期间取消 Addressables 加载。自动或人工证据统一写入 `production/qa/evidence/<run-id>/`，记录 build SHA、设备、系统、分辨率、Quality Level、步骤、期望/实际、超时、logcat/Player.log、截图或录屏、执行人和 `PASS`/`FAIL`/`BLOCKED_NOT_VERIFIED`/`NOT_IN_SCOPE`；泄漏比较使用明确比较点与容差，不写无法有限证明的绝对“永远为 0”。设备执行归任务 29/33，本任务提供接口、自动化断言与 smoke 清单。
+
+建立 `ILocalizationService` 与 `IAccessibilitySettings`（text scale、reduce motion、accessibility label）接口及开发默认实现；本轮只加契约/门禁与现有内建 panel 接线，不承诺完成全部翻译或屏幕阅读器适配。
 
 - [ ] **步骤 4：验证通过**
 
@@ -1950,12 +2184,24 @@ TextScale_And_ReduceMotion_Are_Applied_Through_Settings_Contract();
 bash tools/unity-tests.sh EditMode UIPanelTransitionRaceTests
 bash tools/unity-tests.sh EditMode UIBackStackTests
 bash tools/unity-tests.sh EditMode UIContractTests
+bash tools/unity-tests.sh EditMode UIFailurePresenterRegistrationTests
+bash tools/unity-tests.sh EditMode UIScreenMetricsTests
 bash tools/unity-tests.sh PlayMode UISafeAreaTests
 bash tools/unity-tests.sh PlayMode UILoadFailureStateTests
+bash tools/unity-tests.sh PlayMode UISceneResourceScopeTests
 bash tools/unity-tests.sh PlayMode HudLifecycleTests
 ```
 
-PlayMode 测试从真实 `CharacterSelect` 组合根注入一个不存在的 address，断言具体 Presenter 已接线、错误态可见、重试可触发且目标 panel 未注册。预期：并发显隐、销毁、横竖屏、加载失败与既有 HUD 生命周期全过。
+关闭 Domain Reload 的配置下，在同一 Editor 会话连续执行两轮：
+
+```bash
+bash tools/unity-tests.sh PlayMode UILoadFailureStateTests
+bash tools/unity-tests.sh PlayMode UILoadFailureStateTests
+```
+
+PlayMode 测试从真实 `CharacterSelect` 组合根注入一个不存在的 address，断言具体 Presenter 已接线、错误态可见、重试可触发且目标 panel 未注册；并覆盖 `CharacterSelect → DemoDay → CharacterSelect`、直接进入 `DemoDay` 与 Presenter 先销毁。预期：并发显隐、销毁、横竖屏、加载失败、两轮无残留与既有 HUD 生命周期全过。
+
+**执行设计 §4.2 U-P1-05/11/13 验收补齐（任务 23）：** 采用场景 Presenter 在 `Awake` 调用 `UIBootstrap.RegisterFailurePresenter(this)`、`AfterSceneLoad` 注入 `UIManager` 的方案，不新增 `UIBootstrapBehaviour`；注册返回 token，Presenter 在 `OnDestroy` 精确注销，重复注册采用新实例替换旧实例并处理 Unity fake-null；`SubsystemRegistration` 清理纯托管静态引用；覆盖 `CharacterSelect → DemoDay → CharacterSelect`、Presenter 先销毁和直接进入 `DemoDay`；没有 Presenter 时提供非递归、非 Addressables 依赖的降级行为。UI 销毁顺序固定为取消加载 → 销毁实例 → 释放 descriptor lease → 清空 Instance；`CharacterSelect` CoreUI 保留 → `DemoDay` world scope 创建/关闭 → 返回 `CharacterSelect` 后 owner 级 lease 归零，未先关闭 scope 直接开始第二轮 PlayMode 被拒绝，Domain Reload 关闭连续两轮无残留。移动验收补充冷启动与热启动、前台/后台恢复、Wi-Fi 与移动网络切换、断网/重连/服务端断开、Safe Area/分辨率/方向变化、Android 返回键与 modal back stack、低内存回调、场景切换期间取消 Addressables 加载；通过 `IScreenMetrics`、`ILowMemorySignal` 提供可测试信号；证据写入 `production/qa/evidence/<run-id>/`，记录 build SHA、设备、系统、分辨率、Quality Level、步骤、期望/实际、超时、logcat/Player.log、截图或录屏、执行人和 `PASS`/`FAIL`/`BLOCKED_NOT_VERIFIED`/`NOT_IN_SCOPE`；泄漏使用明确比较点与容差。
 
 - [ ] **步骤 5：Commit**
 
@@ -1963,6 +2209,7 @@ PlayMode 测试从真实 `CharacterSelect` 组合根注入一个不存在的 add
 git add Assets/Scripts/Hotfix/GameSystems/UI Assets/Scripts/Tests/Editor/UI \
   Assets/Scripts/Tests/PlayMode/UISafeAreaTests.cs* \
   Assets/Scripts/Tests/PlayMode/UI/UILoadFailureStateTests.cs* \
+  Assets/Scripts/Tests/PlayMode/UI/UISceneResourceScopeTests.cs* \
   Assets/Prefabs/UI/BuiltinUiLoadFailurePresenter.prefab* \
   Assets/Scenes/CharacterSelect.unity
 git commit -m "fix(ui): serialize panel transitions and safe-area updates"
