@@ -1,0 +1,12 @@
+milestone: p0-p1-quality-2026-11
+blockingPlatforms:
+  - android
+  - webgl
+requiredDeviceLanes:
+  - android-reference
+requiredBrowserLanes:
+  - chromium-desktop
+publicEndpoints: []
+approver: jincaizi
+approvedAt: "2026-11-07"
+sourceGitSha: "da7e3d1ae8d9bf3099f646ebeb6c782ff6d8eaea"
