@@ -129,6 +129,8 @@ bash spikes/kcp-security-poc/run-poc.sh
 bash spikes/kcp-security-poc/run-unity-poc.sh
 ```
 
+Clean-export check (2026-11-07): extracting `git archive HEAD:spikes/kcp-security-poc` into an empty directory and running `bash run-poc.sh` gives 7/7 PASS and `POC RESULT: PASS`; `dotnet build KcpSecurityPoc.sln -c Release` in the same export succeeds with SDK 8.0.419. The committed tree includes `Server/Server.csproj`, `Client/Client.csproj` and `KcpSecurityPoc.sln`.
+
 The committed POC-only key set lives in `spikes/kcp-security-poc/keys/` and is mirrored into `UnityPoc/Assets/Resources/poc_keys.txt`. These are throwaway test keys; they must never be used outside this spike.
 
 ## Residual risks
