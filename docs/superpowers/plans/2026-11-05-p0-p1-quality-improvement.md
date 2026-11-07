@@ -2239,6 +2239,7 @@ git commit -m "fix(ui): serialize panel transitions and safe-area updates"
 - 创建：`Assets/Scripts/Tests/Editor/Nameplate/NameplateMobileBudgetTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Nameplate/FloatTextPoolReuseTests.cs`
 - 创建：`Assets/Scripts/Tests/PlayMode/Performance/NameplateFrameBudgetTests.cs`
+- 修改：`Assets/Scripts/Tests/PlayMode/GameSys.PlayModeTests.asmdef`（引用 `Unity.PerformanceTesting`）
 - 创建：`tools/performance/run-player-perf.sh`
 - 修改：`Packages/manifest.json` 与 `Packages/packages-lock.json`（加入 `com.unity.test-framework.performance`）
 - 修改：`production/qa/device-profiles/android-reference.yaml`（P1-B2 开场填入批准档位；任务 27 复用，禁止每个 run 临时改档）
@@ -2272,7 +2273,7 @@ CullPlanner 使用 caller-owned buffers、`sqrMagnitude` 和可见状态缓存�
 - 纯 C# 热路径用隔离后的 `GC.GetAllocatedBytesForCurrentThread`：同一线程预热后取前后差值，固定迭代次数，测试期间不得有并发测试线程、日志或 Editor 后台分配，断言差值为 0。该断言只证明托管分配，不作为移动端性能结论。
 - Unity 对象和帧性能用 Unity Performance Testing package 在 Standalone Player 或参考设备运行，不得以 Editor 结果替代。
 - 设备/分辨率/Quality Level/`targetFps`/`warmupSeconds`/`sampleSeconds`/`p95Algorithm`/`rawDataFormat` 全部读取 `production/qa/device-profiles/android-reference.yaml`；`configured: false` 或必填项缺失时性能结论为 `BLOCKED_NOT_VERIFIED`。
-- 原始数据固定为逐帧 CSV `frame_index,timestamp_s,frame_ms` 加 `summary.json`（p50/p95/p99、样本数、profile hash），写入 `production/quality/artifacts/<run-id>/perf/nameplate/`；p95 按 nearest-rank 算法计算。已配置档位要求 p95 frame ≤ 33.3ms。
+- 原始数据格式固定为 `rawDataFormat: "csv: frame_index,timestamp_s,frame_ms"`；runner 另生成 `summary.json`（p50/p95/p99、样本数、profile hash），写入 `production/quality/artifacts/<run-id>/perf/nameplate/`；p95 按 nearest-rank 算法计算。填写 `production/qa/device-profiles/android-reference.yaml` 时必须把 `rawDataFormat` 更新为该固定格式。已配置档位要求 p95 frame ≤ 33.3ms。
 - Coverage 固定为任务 31 的同一组参数：`-enableCodeCoverage`、`-coverageResultsPath production/quality/artifacts/<run-id>/coverage`、`-coverageOptions "generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+DataDefinition,+Core,+Cool.Protocol,+SyncCore,+KcpNet,+WebSocketNet,+GameSys,+Hotfix.GameSystems.*,-GameSys.EditorTests,-*PlayModeTests"`；Coverage XML 缺失、损坏或目标程序集未出现即失败。
 
 - [ ] **步骤 4：验证通过**
@@ -2295,6 +2296,7 @@ bash tools/performance/run-player-perf.sh --suite NameplateFrameBudgetTests \
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Nameplate Assets/Scripts/Tests/Editor/Nameplate \
   Assets/Scripts/Tests/PlayMode/Performance/NameplateFrameBudgetTests.cs* \
+  Assets/Scripts/Tests/PlayMode/GameSys.PlayModeTests.asmdef \
   tools/performance/run-player-perf.sh Packages/manifest.json Packages/packages-lock.json \
   production/qa/device-profiles/android-reference.yaml
 git commit -m "perf(nameplate): bound mobile display updates and pooling"
@@ -2472,6 +2474,7 @@ git commit -m "perf(vfx): centralize vfx catalog leases and pooling"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/PhysicsRegistry.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Monster/PerceptionBudgetTests.cs`
 - 创建：`Assets/Scripts/Tests/PlayMode/Performance/MonsterPerceptionFrameBudgetTests.cs`
+- 修改：`Assets/Scripts/Tests/PlayMode/GameSys.PlayModeTests.asmdef`（引用 `Unity.PerformanceTesting`；任务 24 已加入，若独立分支则本任务同样修改）
 - 读取：`production/qa/device-profiles/android-reference.yaml`（复用任务 24 填入的批准档位，本任务不得改档）
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/README.md`
 
@@ -2498,7 +2501,7 @@ Online_Npc_View_Does_Not_Run_Local_Ai();
 
 默认无目标感知 5Hz，每帧最多 8 次空间查询；已有目标只做无分配有效性检查。`ITargetQuery.FindNearbyNonAlloc(position, radius, List<ITargetable> results)` 复用 caller buffer。所有数值来自 `MonsterPerformanceSettings`。
 
-性能测量与任务 24 使用同一固定方法：纯 C# 热路径用隔离后的 `GC.GetAllocatedBytesForCurrentThread`（同线程、预热后、固定迭代、无并发测试分配）；Unity 帧性能用 Unity Performance Testing package 在 Standalone Player/参考设备运行；设备/分辨率/Quality Level/`targetFps`/`warmupSeconds`/`sampleSeconds`/`p95Algorithm`/`rawDataFormat` 读取 `production/qa/device-profiles/android-reference.yaml`，`configured: false` 或必填缺失时性能结论为 `BLOCKED_NOT_VERIFIED`；原始数据为逐帧 `frame_index,timestamp_s,frame_ms` CSV 加 `summary.json`，写入同一 run-id 的 `production/quality/artifacts/<run-id>/perf/monster-perception/`，p95 用 nearest-rank。Coverage 固定为任务 31 的同一组参数（`-enableCodeCoverage`、`-coverageResultsPath production/quality/artifacts/<run-id>/coverage`、`-coverageOptions` 与 assembly filter/排除规则）；Coverage XML 缺失、损坏或目标程序集未出现即失败。
+性能测量与任务 24 使用同一固定方法：纯 C# 热路径用隔离后的 `GC.GetAllocatedBytesForCurrentThread`（同线程、预热后、固定迭代、无并发测试分配）；Unity 帧性能用 Unity Performance Testing package 在 Standalone Player/参考设备运行；设备/分辨率/Quality Level/`targetFps`/`warmupSeconds`/`sampleSeconds`/`p95Algorithm`/`rawDataFormat` 读取 `production/qa/device-profiles/android-reference.yaml`，`configured: false` 或必填缺失时性能结论为 `BLOCKED_NOT_VERIFIED`；原始数据格式固定为 `rawDataFormat: "csv: frame_index,timestamp_s,frame_ms"`；runner 另生成 `summary.json`，写入同一 run-id 的 `production/quality/artifacts/<run-id>/perf/monster-perception/`，p95 用 nearest-rank；填写 `android-reference.yaml` 时必须把 `rawDataFormat` 更新为该固定格式。Coverage 固定为任务 31 的同一组参数（`-enableCodeCoverage`、`-coverageResultsPath production/quality/artifacts/<run-id>/coverage`、`-coverageOptions` 与 assembly filter/排除规则）；Coverage XML 缺失、损坏或目标程序集未出现即失败。
 
 - [ ] **步骤 4：验证通过**
 
@@ -2519,7 +2522,8 @@ bash tools/performance/run-player-perf.sh --suite MonsterPerceptionFrameBudgetTe
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Monster Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/PhysicsRegistry.cs \
   Assets/PreRes/Settings/Monster Assets/Scripts/Tests/Editor/Monster \
-  Assets/Scripts/Tests/PlayMode/Performance/MonsterPerceptionFrameBudgetTests.cs*
+  Assets/Scripts/Tests/PlayMode/Performance/MonsterPerceptionFrameBudgetTests.cs* \
+  Assets/Scripts/Tests/PlayMode/GameSys.PlayModeTests.asmdef
 git commit -m "perf(monster): budget local perception queries"
 ```
 
@@ -2669,32 +2673,28 @@ LinkXml_Covers_Stripped_Il2Cpp_Protocol_Types();
 
 - [ ] **步骤 4：验证构建、产物与 Android smoke**
 
-先在同一 shell 会话生成并导出 run-id，供后续 Unity、校验与 smoke 命令共用：
+本任务所有命令统一在同一 bash 会话执行，使用同一 `RUN_ID`；构建与 smoke 前先创建 artifact/evidence 目录：
 
 ```bash
-export RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
-```
-
-```powershell
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
+mkdir -p "production/quality/artifacts/$RUN_ID" "production/qa/evidence/$RUN_ID"
 # P1 Engineering Gate：Android ARM64 IL2CPP Development Build
 Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget Android \
   -executeMethod Cool.EditorTools.AndroidBuildScript.BuildDevelopment \
-  -logFile "production/quality/artifacts/$env:RUN_ID/android-development-build.log"
+  -logFile "production/quality/artifacts/$RUN_ID/android-development-build.log"
 # Mobile Release Readiness：同 SHA、同 content manifest 的非 Development 候选包
 Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget Android \
   -executeMethod Cool.EditorTools.AndroidBuildScript.BuildReleaseCandidate \
-  -logFile "production/quality/artifacts/$env:RUN_ID/android-release-build.log"
+  -logFile "production/quality/artifacts/$RUN_ID/android-release-build.log"
 # iOS 只在 macOS runner 且有 HAS_IOS_RUNNER 时执行；Windows 仅 ValidateIosConfiguration
 Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget iOS \
   -executeMethod Cool.EditorTools.IosBuildScript.ExportXcode \
-  -logFile "production/quality/artifacts/$env:RUN_ID/ios-export.log"
-```
+  -logFile "production/quality/artifacts/$RUN_ID/ios-export.log"
 
-```bash
 pwsh -File tools/mobile/verify-build-artifacts.ps1 -Platform Android \
   -ArtifactDir Build/Android -RunId "$RUN_ID"
 bash tools/mobile/android-smoke.sh --apk Build/Android/cool-dev.apk \
-  --run-id "$RUN_ID" --device "$ANDROID_SERIAL" --evidence production/qa/evidence/"$RUN_ID"
+  --run-id "$RUN_ID" --device "$ANDROID_SERIAL" --evidence "production/qa/evidence/$RUN_ID"
 ```
 
 预期：Windows runner 生成 Android APK/AAB；iOS 仅在 macOS runner 报完整成功，其他环境写 `ios-status = NOT_IN_SCOPE` 或 `BLOCKED_NOT_VERIFIED`，不写“已验证”。
@@ -2866,7 +2866,8 @@ git commit -m "ci: enforce tests builds architecture and coverage baselines"
 - 修改：`Server/Diagnostics/ServerMetrics.cs`
 - 修改：`Server/Server3C.cs`
 - 修改：`Server/Program.cs`
-- 修改：`Server/Server3C.csproj`
+- 修改：`Server/Server3C.csproj`（`noise.dll` 以 `CopyToOutputDirectory=PreserveNewest` 复制到输出目录）
+- 核对/复制：`spikes/kcp-security-poc/native/win-x64/noise.dll`（已跟踪的 POC 原生库；随服务端发布 artifact 一起打包）
 - 创建：`Server/Security/NoiseSecurityProvider.cs`
 - 创建：`Server/Security/NoiseNative.cs`
 - 创建：`Server/Security/SecurityKeyStore.cs`
@@ -2913,7 +2914,7 @@ Logs_And_Metrics_Contain_No_Secrets();
 
 **可观测性：** 使用 `System.Diagnostics.Metrics` + OpenTelemetry Prometheus exporter；指标至少包含 tick p50/p95/p99、队列深度/丢弃、session/unauth 数、WS/KCP 背压、AOI 可见数、导航 p95、GC/分配。管理端默认 `127.0.0.1`；`/health/live` 只表示进程存活，`/health/ready` 检查最近世界 tick、auth 配置与队列健康。Caddy 示例只向公网暴露 WSS，代理到私网 WS；指标/健康不公开。生产模式对配置、怪物表、地图、协议版本和 security provider 做 fail-fast 校验。
 
-**ADR-0003 安全 provider：** 按 `docs/architecture/adr-0003-kcp-session-security.md` 完成客户端/服务端 `IKcpSecurityProvider` 实现：Noise-C `Noise_XX_25519_ChaChaPoly_BLAKE2s`，Android 通过 `libnoise.so`（arm64-v8a、x86_64），服务端通过 `noise.dll`；每端一份静态 X25519 key pair，peer public key 带外提供并与握手结果比对；identity 是固定静态 key，prologue 绑定原始 `NetworkEndpoint` hostname/port，不绑定 DNS 解析 IP。AEAD 使用隐式 per-direction nonce，解密成功才推进，重放/篡改 fail-closed；按配置的字节/时间阈值在会话层建立新 Noise session 完成 rekey/轮换；协议名固定、无协商降级路径；释放时清理密钥材料，日志/指标只含协议名、库版本、公钥指纹和错误码，不含私钥、票据或明文载荷。非 Development 构建缺 provider 或允许明文 KCP 时拒绝启动/构建；Development/loopback/受控测试网络可显式启用明文。
+**ADR-0003 安全 provider：** 按 `docs/architecture/adr-0003-kcp-session-security.md` 完成客户端/服务端 `IKcpSecurityProvider` 实现：Noise-C `Noise_XX_25519_ChaChaPoly_BLAKE2s`，Android 通过 `libnoise.so`（arm64-v8a、x86_64），服务端通过 `noise.dll`。`noise.dll` 来源为已跟踪的 `spikes/kcp-security-poc/native/win-x64/noise.dll`，由 `Server/Server3C.csproj` 以 `CopyToOutputDirectory=PreserveNewest` 复制到输出目录，并随服务端发布 artifact 一起打包；构建后必须验证输出目录存在该 DLL。每端一份静态 X25519 key pair，peer public key 带外提供并与握手结果比对；identity 是固定静态 key，prologue 绑定原始 `NetworkEndpoint` hostname/port，不绑定 DNS 解析 IP。AEAD 使用隐式 per-direction nonce，解密成功才推进，重放/篡改 fail-closed；按配置的字节/时间阈值在会话层建立新 Noise session 完成 rekey/轮换；协议名固定、无协商降级路径；释放时清理密钥材料，日志/指标只含协议名、库版本、公钥指纹和错误码，不含私钥、票据或明文载荷。非 Development 构建缺 provider 或允许明文 KCP 时拒绝启动/构建；Development/loopback/受控测试网络可显式启用明文。
 
 **优雅停机：** 先停止准入，再排空有界队列、关闭世界与会话，最后关闭 listeners；不声称持久化未存在的数据。密钥轮换演练记录旧 key 到期、新 key 生效、重连与拒绝过期/降级证据。
 
@@ -2921,6 +2922,8 @@ Logs_And_Metrics_Contain_No_Secrets();
 
 ```bash
 export RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
+dotnet build -c Release Server/Server3C.csproj
+test -f "Server/bin/Release/net8.0/noise.dll"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Diagnostics"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Security"
 bash tools/unity-tests.sh EditMode NoiseSecurityProviderTests
@@ -2935,6 +2938,7 @@ dotnet run -c Release --project tools/ServerLoadHarness -- --profile graceful-sh
 - [ ] **步骤 5：Commit**
 
 ```bash
+# spikes/kcp-security-poc/native/win-x64/noise.dll 为已跟踪输入，由 Server3C.csproj 复制到输出目录，无需重复暂存
 git add Server/Diagnostics Server/Security Server/Server3C.cs Server/Program.cs \
   Server/Server3C.csproj Server/Server.Tests/Diagnostics Server/Server.Tests/Security \
   Assets/Scripts/AOT/KcpNet/Security Assets/Plugins/Android/libs \
