@@ -8,11 +8,11 @@
 - Checker log: `production/quality/stage-0-checker.log` (full output and exit code)
 - Technical preferences source marker: `TP-SENTINEL: 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096`
 - Technical preferences reproducibility: `.gitattributes` pins `docs/technical-preferences.md`, both generated entries and the sentinel to `text eol=lf`; `git add --renormalize` applied, so a Windows checkout with `core.autocrlf=true` keeps the LF hash
-- Claude consumer sentinel: **PASS** (opened generated file and reported marker)
-- Codex consumer sentinel: **BLOCKED_NOT_VERIFIED** (no `codex` CLI on this host)
-- Linux consumer/hash: **BLOCKED_NOT_VERIFIED** (no WSL distribution or Linux runner on this host; checker was not re-run under Linux)
+- Claude consumer sentinel: **PASS** (independent consumer session opened `.claude/docs/technical-preferences.md` and reported `source-sha256 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096`)
+- Codex consumer sentinel: **PASS** (`codex-cli 0.167.0`, logged in via ChatGPT; `codex exec` read `.codex/docs/technical-preferences.md` and returned the same `source-sha256 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096`)
+- Linux consumer/hash: **BLOCKED_NOT_VERIFIED** (`wsl.exe` exists but no Linux distribution is installed; checker was not re-run under Linux)
 - Estimate: `production/quality/stage-0-estimate.md` — status **PRESENT** (not a Gate PASS)
-- Activation: **PENDING USER DECISION** — documentation/governance artifacts are ready; §8 still has 2 `BLOCKED_NOT_VERIFIED` items (Codex/Linux consumer sentinel) and 3 execution items deferred to task 13/Gate 0; the execution baseline is not activated and Stage 0 is not declared complete.
+- Activation: **PENDING USER DECISION** — documentation/governance artifacts are ready; §8 still has 1 `BLOCKED_NOT_VERIFIED` item (Linux consumer/hash) and 3 execution items deferred to task 13/Gate 0; the execution baseline is not activated and Stage 0 is not declared complete.
 
 ## Status detail
 
@@ -21,9 +21,9 @@
 | Stage 0 consistency checker | PASS, exit 0 | `production/quality/stage-0-checker.log`; actual output embedded below |
 | Technical preferences sync (Claude/Codex generated entries) | PASS | `.claude/docs/technical-preferences.md`, `.codex/docs/technical-preferences.md` carry source SHA-256 `670a084a...` |
 | Technical preferences hash reproducibility | PASS (Windows) | `.gitattributes` `text eol=lf`; renormalized; a clean `git checkout-index` export produced SHA-256 `670a084a...` with 0 CRLF; Linux re-run BLOCKED_NOT_VERIFIED |
-| Claude consumer sentinel | PASS | `production/quality/technical-preferences-sentinel.md` |
-| Codex consumer sentinel | BLOCKED_NOT_VERIFIED | No `codex` CLI; Codex minimal review not executed |
-| Linux consumer/hash | BLOCKED_NOT_VERIFIED | No WSL distribution or Linux runner; hash/checker not re-run under Linux |
+| Claude consumer sentinel | PASS | Independent consumer session read `.claude/docs/technical-preferences.md` and reported `source-sha256 670a084a...` |
+| Codex consumer sentinel | PASS | `codex-cli 0.167.0` (ChatGPT login); `codex exec` read `.codex/docs/technical-preferences.md` and returned `source-sha256 670a084a...` |
+| Linux consumer/hash | BLOCKED_NOT_VERIFIED | `wsl.exe` exists but no Linux distribution installed; hash/checker not re-run under Linux |
 | ADR-0003 POC (Noise-C provider integration) | PASS (provider only) | `spikes/kcp-security-poc/RESULT.md` |
 | KCP/UDP public path | BLOCKED_NOT_VERIFIED | POC exercised UDP only on .NET loopback; the Unity Android leg used TCP framing via `adb reverse` |
 | ARM64 runtime | BLOCKED_NOT_VERIFIED | APK built for `arm64-v8a`, but only an x86_64 emulator was available; no ARM64 execution |
@@ -51,7 +51,7 @@ Stage 0 artifact/plan text exists; execution evidence is still governed by the n
 | 原 33 任务计划已按 U-P0-01～07、U-P1-01～13 更新文件清单、命令、测试和验收条件 | DELIVERED | Plan blob `5383a413701fe5d1f54336d7e5aa3c2367319f30` at baseline `c739dfbd` |
 | 任务 13 前移为 P0 并成为任务 14 的显式依赖；旧 WSS 默认值已删除；任务 30/32 职责一致 | DELIVERED | Plan task 13 precedes task 14; checker asserts it; ADR-0001 blob `c64457f1...` |
 | 任务 1 包含 Native 测试迁移清单、server profile、`TestServerEndpoint`、runner 职责和 WebGL lane | DELIVERED (plan text) | Plan task 1; execution and WebGL compile contract verification are Gate 0/R0 items |
-| `docs/technical-preferences.md` 权威来源、两个工具链同步、`.codex/` 小写契约、入口及 Windows/Linux consumer sentinel | BLOCKED_NOT_VERIFIED | Claude PASS; Codex `BLOCKED_NOT_VERIFIED`; Linux `BLOCKED_NOT_VERIFIED`; see sentinel record |
+| `docs/technical-preferences.md` 权威来源、两个工具链同步、`.codex/` 小写契约、入口及 Windows/Linux consumer sentinel | BLOCKED_NOT_VERIFIED (Linux only) | Claude PASS; Codex PASS; Linux `BLOCKED_NOT_VERIFIED` (no WSL distribution); see sentinel record |
 | 三个基础 ADR 已创建并通过一致性检查 | DELIVERED | ADR-0001/0002/0003 blobs `c64457f1...`, `8dadf176...`, `c24eeafd...` |
 | ADR-0003 POC 已完成并通过；失败时有回退方案 | DELIVERED (provider-only PASS) | `spikes/kcp-security-poc/RESULT.md`; KCP/UDP/ARM64/NAT64/rekey remain not verified |
 | `KcpNet` WebGL 编译守卫清单（7 个文件）已逐项处理 | DEFERRED to task 13 / Gate 0 | Written into task 13; WebGL compile contract is verified in Gate 0/R0 |
@@ -68,7 +68,7 @@ Stage 0 artifact/plan text exists; execution evidence is still governed by the n
 | 当前工作树已安全备份或隔离，没有未授权丢弃 | DELIVERED | Isolated worktree `.claude/worktrees/quality-stage-0` on branch `codex/quality/stage-0`; main checkout left untouched; no unauthorized discard |
 | 修订后的 Spec 与计划通过文档复核，并记录批准 Git SHA | DELIVERED | Review documents in `docs/superpowers/reviews/`; activation table records approved blob SHAs |
 
-Summary: 2 §8 items are `BLOCKED_NOT_VERIFIED` (Codex consumer sentinel, Linux consumer/hash) and 3 execution
+Summary: 1 §8 item is `BLOCKED_NOT_VERIFIED` (Linux consumer/hash) and 3 execution
 items are `DEFERRED` to task 13/Gate 0 (KCP WebGL guards, `Assets/Packages` ownership, WebGL compile contract).
 All other §8 entries are delivered as documentation, plans or governance records. The execution design status
 therefore remains **pending** and is not changed to “已确认，执行基线”.
@@ -182,8 +182,7 @@ exit=0
 
 ## Unexecuted items
 
-- Codex consumer sentinel (no `codex` CLI on this host).
-- Linux consumer/hash re-run (no WSL distribution or Linux runner on this host).
+- Linux consumer/hash re-run (`wsl.exe` exists but no Linux distribution is installed on this host; Codex consumer sentinel PASS is recorded in the sentinel and report).
 - KCP/UDP runtime on ARM64 hardware; NAT64/IPv6 behavior; session-layer rekey/rotation drills.
 - Mobile KCP public security configuration (fail-closed release guard, identity/prologue provisioning, observability redaction); task 32 required.
 - WebGL public deployment: `publicEndpoints` is empty, so no public domain, certificate, reverse proxy or browser lane was tested.
@@ -209,4 +208,4 @@ exit=0
 
 - Evidence is captured on the clean evidence commit `0425fc4a5637c15f89de0dd1a79f18fb978f3b3b` (`Run ID` `stage0-20261107T062118Z-0425fc4a`); the report itself is committed after evidence capture, so the commit containing this report is newer than the evidence commit.
 - The activation table records approved blob SHAs at baseline `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b`, which is the commit that contains all approved content; the Release scope row is that commit itself because `release-scope.yaml` was introduced there. The YAML `sourceGitSha` uses the same commit, not the parent `da7e3d1a`.
-- The execution design status remains pending: it was not changed to “已确认，执行基线”; the §8 activation checklist remains unsatisfied for the Codex/Linux consumer sentinels, so activation waits for user decision.
+- The execution design status remains pending: it was not changed to “已确认，执行基线”; the §8 activation checklist remains unsatisfied for the Linux consumer/hash, so activation waits for user decision.

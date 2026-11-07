@@ -1,7 +1,7 @@
 # P0/P1 质量改进执行设计
 
 日期：2026-11-07
-状态：文档/治理文档已就绪；§8 仍有 2 项 `BLOCKED_NOT_VERIFIED`（Codex/Linux consumer sentinel），另有 3 项执行类 DEFERRED（KCP WebGL 守卫、Assets/Packages 归属、WebGL compile contract）到 task 13/Gate 0；执行基线激活待裁决
+状态：文档/治理文档已就绪；§8 仍有 1 项 `BLOCKED_NOT_VERIFIED`（Linux consumer/hash），另有 3 项执行类 DEFERRED（KCP WebGL 守卫、Assets/Packages 归属、WebGL compile contract）到 task 13/Gate 0；执行基线激活待裁决
 版本：Revision 2.1（Unity 专家复核闭环版 + 可行性修正）
 适用范围：Unity 客户端、共享同步规则、网络传输、.NET 服务端、构建与质量门禁
 
@@ -450,7 +450,7 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 Spec/计划/ADR 行为基线提交 `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b` 上对应路径的 Git blob SHA（`git rev-parse c739dfbd:<path>`）；该提交包含全部被批准内容。Release scope 行为包含已批准 release scope 内容的提交 SHA（该提交加入 `production/quality/release-scope.yaml`），不是父提交或提交前 `HEAD`，与 `release-scope.yaml` 的 `sourceGitSha` 一致。
 
-激活状态：**待裁决**。文档/治理文档已就绪；§8 仍有 2 项 `BLOCKED_NOT_VERIFIED`（Codex consumer sentinel、Linux consumer/hash），另有 3 项执行类 DEFERRED（KCP WebGL 守卫、Assets/Packages 归属、WebGL compile contract）到 task 13/Gate 0。`production/quality/technical-preferences-sentinel.md` 的 Codex consumer sentinel 与本机 Linux hash 复核均为 `BLOCKED_NOT_VERIFIED`（本机无 `codex` CLI、无 WSL/Linux runner），因此本文状态不改为“已确认，执行基线”，执行基线激活等待用户裁决。
+激活状态：**待裁决**。文档/治理文档已就绪；§8 仍有 1 项 `BLOCKED_NOT_VERIFIED`（Linux consumer/hash），另有 3 项执行类 DEFERRED（KCP WebGL 守卫、Assets/Packages 归属、WebGL compile contract）到 task 13/Gate 0。Codex consumer sentinel 已通过（独立 Codex 会话读取 `.codex/docs/technical-preferences.md` 并回报 `source-sha256 670a084a...`）；`production/quality/technical-preferences-sentinel.md` 的 Linux consumer/hash 仍为 `BLOCKED_NOT_VERIFIED`（本机 `wsl.exe` 存在但未安装 Linux distribution），因此本文状态不改为“已确认，执行基线”，执行基线激活等待用户裁决。
 
 仅当上述清单全部满足后，才将本文状态改为“已确认，执行基线”，然后进入 Gate 0。清单未完成时，只允许修改文档、测试基础设施设计和治理文件，不允许开始任务 2–33 的运行时代码实施。
 

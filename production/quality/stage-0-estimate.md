@@ -24,7 +24,7 @@
 
 | 波次 | 任务 | 低（人天） | 高（人天） | 依据与假设 | 主要风险 / 未覆盖项 |
 |---|---|---:|---:|---|---|
-| 阶段 0 | 文档与治理 | — | — | 文档/治理工作完成；一致性检查 PASS；无运行时代码；不计入剩余估算 | Codex consumer sentinel `BLOCKED_NOT_VERIFIED`；§8 激活清单待裁决 |
+| 阶段 0 | 文档与治理 | — | — | 文档/治理工作完成；一致性检查 PASS；无运行时代码；不计入剩余估算 | Codex consumer sentinel PASS；Linux consumer/hash `BLOCKED_NOT_VERIFIED`；§8 激活清单待裁决 |
 | Gate 0 | 1 | 3 | 5 | runner、test discovery、server profile、XML 与失败传播 | 首次 Unity 批量测试时长未知；WebGL lane 可能需额外 runner |
 | P0-A | 2–4 | 5 | 8 | Bag 数据保真、伤害上下文、EventBus/技能事务 | 存量测试覆盖不足可能扩大改动面 |
 | P0-B | 5–8 | 8 | 13 | 单世界、幂等登录、服务器时间移动校验、格挡与精力 | 服务端权威与客户端预测一致性；票据认证需要新的测试替身 |
