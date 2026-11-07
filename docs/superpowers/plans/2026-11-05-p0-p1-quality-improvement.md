@@ -23,7 +23,7 @@
 - 非内部 MonoBehaviour 禁止新增 `GetComponent/FindObject*`。
 - 当前工作树存在大量无关改动；每次只暂存本任务明确列出的路径，禁止 `git add .` / `git add -A`。
 - **dirty worktree 只产生 `DIAGNOSTIC_ONLY`**：`--infra` / `--baseline` 在 dirty worktree 上只能输出诊断结果并保存 patch hash；`--p0`、`--p1` 与 Release Readiness 要求 clean worktree，dirty 时不得产生 PASS。
-- **任务级证据使用 run-id**：每次执行生成唯一 `run-id = <UTC timestamp>-<short-git-sha>`，XML、日志、报告与产物写入 `production/quality/artifacts/<run-id>/`，报告引用同一 run-id；旧产物与历史日志不得作为本轮证据。
+- **任务级证据使用 run-id**：每次执行生成唯一 `run-id = <UTC timestamp>-<short-git-sha>`，XML、日志与构建产物写入 `production/quality/artifacts/<run-id>/`；门禁报告写入 `production/quality/<gate>-<run-id>.md`。报告引用同一 run-id；旧产物与历史日志不得作为本轮证据。
 - 每个任务先红灯、再最小实现、再目标回归、再提交；不得把多个任务揉成一次大提交。
 - P0 未通过前冻结新增联网玩法；P1 未通过前不标记“公开测试/商店发布准备”。
 
@@ -39,22 +39,22 @@
 
 ## 交付波次
 
-| 波次 | 任务 | 退出条件 |
-|---|---|---|
-| 阶段 0 | 文档修订 | 阶段 0 退出清单全绿 |
-| Gate 0 | 1 | runner/发现/server profile/XML/失败传播可信 |
-| P0-A | 2–4 | Bag、伤害上下文、EventBus/技能事务 |
-| P0-B | 5–8 | 单世界、幂等登录、移动、格挡精力 |
-| P0-C | 9–13 | 有界队列、准入背压、KCP、客户端邮箱 |
-| P0 Gate | 14 | 原 Spec 10.1 + 复核 7.1 |
-| P1-A | 15–18 | WorldInstance/AOI/ORCA/导航 |
-| P1-B1 | 19–23 | 伤害管线、Sys3C 注入、资源、Addressables/UI |
-| P1-B2 | 24–28 | 性能、HitStop、VFX、Monster 池 |
-| P1-C1 | 29–31 | 移动构建、架构守卫、CI/Coverage |
-| P1-C2 | 32 | 可观测性、WSS、KCP 安全、优雅停机 |
-| P1 Engineering Gate | 33 | 工程项 |
-| Mobile Release Readiness | 33 | 设备证据 |
-| WebGL Public Deployment Readiness | 33 | 公网 WSS/浏览器证据 |
+| 波次 | 任务 | 退出条件 | 门禁产物 |
+|---|---|---|---|
+| 阶段 0 | 文档修订 | 复核指出的架构矛盾全部消除；任务文件清单足以实施 | 修订后的 Spec 与计划 |
+| Gate 0 | 1 | runner、测试发现、server profile、XML 与失败传播可信 | `production/quality/gate-0-<run-id>.md` |
+| P0-A | 2–4 | Bag、伤害上下文、EventBus/技能事务全绿 | 波次报告 |
+| P0-B | 5–8 | 单世界、幂等登录、移动、格挡精力全绿 | 波次报告 |
+| P0-C | 9–13 | 有界队列、准入背压、KCP、客户端邮箱全绿 | 波次报告 |
+| P0 Gate | 14 | 原 Spec 10.1 + 复核 7.1 全部满足 | `production/quality/p0-gate-<run-id>.md` |
+| P1-A | 15–18 | WorldInstance、AOI、ORCA、导航规模门禁 | 波次报告 |
+| P1-B1 | 19–23 | 伤害管线、Sys3C 注入、资源、Addressables 与 UI 生命周期收敛 | 波次报告 |
+| P1-B2 | 24–28 | 性能、局部 HitStop、VFX 与 Monster 池收敛 | 波次报告 |
+| P1-C1 | 29–31 | 移动构建、架构守卫、CI 与 Coverage | 波次报告 |
+| P1-C2 | 32 | 可观测性、WSS 部署、移动 KCP 公网安全与优雅停机 | 波次报告 |
+| P1 Engineering Gate | 33 | 原 Spec 10.2 的工程项 + 复核 7.2 的自动化项满足 | `production/quality/p1-engineering-gate-<run-id>.md` |
+| Mobile Release Readiness | 33 | 当前目标平台的设备运行、性能和生命周期证据全部满足 | `production/quality/mobile-release-gate-<run-id>.md` |
+| WebGL Public Deployment Readiness | 33 | WebGL 被列为 blocking platform 时，公开域名/WSS/证书/反向代理与浏览器往返证据全部满足 | `production/quality/webgl-public-gate-<run-id>.md` |
 
 波次之间严格串行，P0-A 与 P0-B 不得跨波次并行；波次内部仅当文件所有权与依赖互不重叠时才允许并行，且每个并行任务必须使用独立 worktree、独立 Unity `Library`、独立端口与独立 artifact 目录。合并回集成分支后必须重新执行该波次完整 Gate。
 
