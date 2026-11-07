@@ -1280,13 +1280,16 @@ git commit -m "fix(kcp): enforce platform transport boundary and bound client li
 **文件：**
 - 创建：`production/quality/p0-gate-<run-id>.md`
 - 创建：`production/quality/artifacts/<run-id>/`（本轮 XML、日志、进程退出码、test manifest、release scope 与产物 hash）
+- 修改：`tools/tests/quality-gate-selftest.ps1`（新增 WebGL compile/build 存在但 runtime smoke 缺失的负向 fixture）
 - 修改：所有触及模块 README 的最终状态段
 
 - [ ] **步骤 1：在 clean worktree 生成 run-id 并运行自动门禁**
 
-`run-id = <UTC timestamp>-<short-git-sha>`。dirty worktree 只能输出 `DIAGNOSTIC_ONLY`，不得生成 P0 Gate 结论。
+`run-id = YYYYMMDDTHHMMSSZ-<shortsha>`（文件系统安全，不含冒号）。dirty worktree 只能输出 `DIAGNOSTIC_ONLY`，不得生成 P0 Gate 结论。
 
 ```bash
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
+mkdir -p "production/quality/artifacts/$RUN_ID"
 pwsh -File tools/tests/quality-gate-selftest.ps1
 bash tools/quality-gate.sh --p0
 dotnet run -c Release --project tools/ServerLoadHarness -- --profile p0-flood --duration 600
@@ -1294,7 +1297,7 @@ dotnet run -c Release --project tools/ServerLoadHarness -- --profile p0-flood --
 
 预期：
 
-- `quality-gate-selftest.ps1` 全部通过，证明 runner 对 server ready 超时、Unity 非零退出、XML 缺失/损坏、manifest 数量下降、stale artifact 与残留子进程不会假绿。
+- `quality-gate-selftest.ps1` 全部通过，证明 runner 对 server ready 超时、Unity 非零退出、XML 缺失/损坏、manifest 数量下降、stale artifact 与残留子进程不会假绿；并包含 fixture：WebGL compile/build 证据存在但 runtime smoke 缺失时，runner 返回非零且 Gate 结论不为 `PASS`/`PASS_WITH_ADVISORIES`。
 - 服务端全量测试通过；Unity EditMode、通用 PlayMode 与每个 Native profile（`native-clean`/`native-bots`/`native-monsters`）各自输出独立 XML，且各自 `discovered > 0`、失败为 0、与 `test-manifest.json` 一致；任一 XML 缺失/不可解析、0 tests 或未知 skip 均失败。
 - Native suite 从清洁环境自行启动并停止服务端：每个 profile 使用动态 TCP/UDP 端口并记录 PID，以 application-ready 日志与对应传输 probe 判定 ready；结束后无残留进程或端口占用。
 - `Pump_Drains_LoginResponse_While_LoggingIn` 与 `Pump_Drains_Error_And_Disconnect_Before_InWorld` 通过，登录响应不被状态判断阻塞；`Injected_Network_Delay_Does_Not_Block_MainThread` 通过，Unity 主线程无测试延迟阻塞。
@@ -1305,25 +1308,39 @@ dotnet run -c Release --project tools/ServerLoadHarness -- --profile p0-flood --
 逐项记录：重复登录、换身份、未知 Zone、倒序/重复/回绕 sequence、伪造 timestamp、NaN/Infinity、异常 Y、永久 defend、WS 永不结束分片、慢发送端、UDP 垃圾包、客户端 10,000 条消息洪泛。
 
 ```bash
+RUN_ID="YYYYMMDDTHHMMSSZ-<shortsha>"  # 复用步骤 1 的同一 run-id
 bash tools/kcp-soak.sh --minutes 30 --platform StandaloneWindows64
+# 若 quality-gate.sh --p0 已包含 WebGL Player Build lane，直接用其日志/产物作为 Player Build 证据；
+# 否则单独出包：
+Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget WebGL \
+  -executeMethod Cool.EditorTools.WebGLBuildScript.BuildWebGL \
+  -logFile "production/quality/artifacts/$RUN_ID/webgl-player-build.log"
+sha256sum Build/WebGL/Build/WebGL.* > "production/quality/artifacts/$RUN_ID/webgl-player-build.sha256"
 bash tools/check-webgl-kcp-artifacts.sh --build-target WebGL
 ```
 
-- KCP 生命周期已修复并有自动化测试：连接、断开、重复释放、接收循环停止均幂等且无未观察异常；若某项无法在 P0 内修复，只能在本轮报告中明确隔离并保持对应 blocking 项为 `BLOCKED_NOT_VERIFIED`，不得静默放过或写“预计可用”。Win64 KCP 30 分钟 soak 无泄漏、无未观察异常；移动真机 soak 归 Mobile Release Readiness，不在 P0 宣称。
+- KCP 生命周期已修复并有自动化测试：连接、断开、重复释放、接收循环停止均幂等且无未观察异常；若某项无法在 P0 内修复，只能在本轮报告中明确隔离并保持对应 blocking 项为 `BLOCKED_NOT_VERIFIED`，不得静默放过或写“预计可用”。`bash tools/kcp-soak.sh --minutes 30 --platform StandaloneWindows64` 的结果必须写入报告（30 分钟、StandaloneWindows64、泄漏/未观察异常、日志与退出码）；soak 失败时 Gate 为 `FAIL`，未执行时为 `BLOCKED_NOT_VERIFIED`，两者均不得为 `PASS`/`PASS_WITH_ADVISORIES`。移动真机 soak 归 Mobile Release Readiness，不在 P0 宣称。
 - 平台传输矩阵按任务 13 的实现逐平台/构建配置验证：Android/iOS 为 KCP、WebGL 为 WebSocket（公网 WSS）、Editor/Windows 测试 lane 显式选择；每个平台/构建配置只启用一个主传输，`NetworkTransportFactory` 之外无具体 transport 构造，缺省或歧义配置 fail-fast。不得把任一平台的选择外推为全局默认值。
-- WebGL compile contract、WebGL Player Build 与 runtime smoke 使用独立结果，互不替代：compile contract 与 Player Build 分别以本轮日志/产物证明，KCP plugin 与 `KcpNetClientAdapter` 不得进入 WebGL Player；未执行 runtime smoke 时报告中只能写 `WebGL compile/build verified`，runtime smoke 保持 `BLOCKED_NOT_VERIFIED`，不得写 runtime verified。
+- WebGL 证据三件套必须独立可执行、互不替代：
+  1. compile contract 与产物排除：`bash tools/check-webgl-kcp-artifacts.sh --build-target WebGL` 证明 `KcpNetClientAdapter`、KCP plugin 与 KCP 玩家类型未进入 WebGL compile contract 和构建产物；
+  2. Player Build：`Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget WebGL -executeMethod Cool.EditorTools.WebGLBuildScript.BuildWebGL -logFile "production/quality/artifacts/$RUN_ID/webgl-player-build.log"`（若 `quality-gate.sh --p0` 已包含该 lane，则以其本轮日志/产物为证据）；产物目录 `Build/WebGL/Build/`，记录 `WebGL.loader.js`/`WebGL.framework.js`/`WebGL.wasm`/`WebGL.data` 的存在性、BuildReport/日志与 sha256；
+  3. runtime smoke：用本地静态服务器（如 `node production/deploy/webgl-demo/static-server.js --root Build/WebGL --port 8080`）托管同一 `Build/WebGL` 产物，在批准浏览器 lane 完成登录与 WebSocket 往返，保存浏览器日志/HAR/主动完成标志。compile/build 成功不证明浏览器运行。
+- **P0 blocking 项（Critical）**：WebGL browser WS 往返是执行设计 §7.1 的 P0 完成项；未执行时 Gate 结论必须为 `BLOCKED_NOT_VERIFIED`，不得为 `PASS` 或 `PASS_WITH_ADVISORIES`；`WebGL compile/build verified` 只是 WebGL 证据状态，不构成 Gate PASS 依据。
+- `release-scope.yaml` 只决定 Mobile/WebGL Release Readiness 的平台范围，不得用它把 WebGL browser WS 往返排除为 `NOT_IN_SCOPE`；该 P0 项没有 `NOT_IN_SCOPE` 状态。
 - P0 结论不得宣称 Android/iOS 真机、移动 KCP 公网安全或 WebGL 公网部署已验证；这些属于后续 Mobile Release Readiness / WebGL Public Deployment Readiness。
 
 - [ ] **步骤 3：汇总本轮证据并发布报告**
 
 报告路径：`production/quality/p0-gate-<run-id>.md`。把本轮 XML、日志、进程退出码、`production/quality/test-manifest.json`、`production/quality/release-scope.yaml` 与产物 hash 复制到 `production/quality/artifacts/<run-id>/`；报告只引用同一 run-id 且与之一致的证据，旧产物与历史日志不得作为本轮证据。
 
-报告必须列出：精确测试发现/通过/失败/跳过数、构建目标、各 profile 服务器 PID/端口与 ready 判据、队列峰值、tick p95/p99、working set、平台矩阵结论、WebGL compile/build 状态、产物 hash、Git SHA、clean worktree 检查、未执行项和证据路径。状态只能取 `PASS`、`PASS_WITH_ADVISORIES`、`FAIL`、`BLOCKED_NOT_VERIFIED`、`NOT_IN_SCOPE` 或 `DIAGNOSTIC_ONLY`；任何 blocking 项未执行或证据不属于本轮时保持 `BLOCKED_NOT_VERIFIED`，Gate 不得为 `PASS`，不能写“预计可用”；只有 `release-scope.yaml` 明确排除的平台或项才能标 `NOT_IN_SCOPE`。
+报告必须列出：精确测试发现/通过/失败/跳过数、构建目标、各 profile 服务器 PID/端口与 ready 判据、队列峰值、tick p95/p99、working set、平台矩阵结论、Win64 KCP soak 结果（30 分钟、StandaloneWindows64、泄漏/未观察异常、日志/退出码）、WebGL compile/build/runtime smoke 状态与证据路径、产物 hash、Git SHA、clean worktree 检查、未执行项和证据路径。状态只能取 `PASS`、`PASS_WITH_ADVISORIES`、`FAIL`、`BLOCKED_NOT_VERIFIED`、`NOT_IN_SCOPE` 或 `DIAGNOSTIC_ONLY`；`PASS_WITH_ADVISORIES` 只在所有 blocking 项 PASS 且仅存在已记录的非 blocking 建议时允许；任何 blocking 项失败时 Gate 为 `FAIL`，未执行或证据不属于本轮时为 `BLOCKED_NOT_VERIFIED`，两者均不得为 `PASS` 或 `PASS_WITH_ADVISORIES`，不能写“预计可用”；只有 `release-scope.yaml` 明确排除的平台或项才能标 `NOT_IN_SCOPE`，且 WebGL browser WS 往返不适用 `NOT_IN_SCOPE`。
 
 - [ ] **步骤 4：Commit**
 
 ```bash
-git add production/quality/p0-gate-<run-id>.md production/quality/artifacts/<run-id> \
+RUN_ID="YYYYMMDDTHHMMSSZ-<shortsha>"  # 替换为本轮 run-id，与报告及 artifacts 目录一致
+git add "production/quality/p0-gate-$RUN_ID.md" "production/quality/artifacts/$RUN_ID" \
+  tools/tests/quality-gate-selftest.ps1 \
   Assets/Scripts/Hotfix/GameSystems/*/README.md Assets/Scripts/AOT/*/README.md Server/README.md
 git commit -m "docs: record p0 quality gate evidence"
 ```
