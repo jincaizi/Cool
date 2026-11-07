@@ -1,0 +1,17 @@
+{
+  "role": "responder",
+  "transport": "udp",
+  "protocol": "Noise_XX_25519_ChaChaPoly_BLAKE2s",
+  "library": "Noise-C",
+  "library_commit": "cfe25410979a87391bb9ac8d4d4bef64e9f268c6",
+  "hostname": "127.0.0.1",
+  "port": 47114,
+  "handshake_completed": false,
+  "client_static_ok": false,
+  "decrypt_ok": 0,
+  "decrypt_failures": 0,
+  "error_codes": [],
+  "client_static_fingerprint": null,
+  "error": "handshake timeout or reset",
+  "elapsed_ms": 5151.7182
+}

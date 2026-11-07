@@ -1,0 +1,19 @@
+{
+  "role": "initiator",
+  "mode": "main",
+  "protocol": "Noise_XX_25519_ChaChaPoly_BLAKE2s",
+  "library": "Noise-C",
+  "library_commit": "cfe25410979a87391bb9ac8d4d4bef64e9f268c6",
+  "host": "127.0.0.1",
+  "port": 47113,
+  "pinned_server_fingerprint": "99080c8fc4aa9999",
+  "handshake_completed": true,
+  "server_identity_ok": true,
+  "roundtrip_ok": true,
+  "tampered_sent": 1,
+  "replay_sent": 1,
+  "unexpected_response": false,
+  "learned_server_fingerprint": "99080c8fc4aa9999",
+  "handshake_ms": 7.9313,
+  "elapsed_ms": 532.7451
+}

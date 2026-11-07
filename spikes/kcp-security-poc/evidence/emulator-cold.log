@@ -1,0 +1,180 @@
+INFO         | Android emulator version 35.4.9.0 (build_id 13025442) (CL:N/A)
+INFO         | Graphics backend: gfxstream
+INFO         | Found systemPath E:\Unity\Editor\2022.3.25f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\system-images\android-36\google_apis_playstore\x86_64\
+I1107 11:37:47.374494  167188 opengles.cpp:285] android_startOpenglesRenderer: gpu info
+I1107 11:37:47.374535  167188 opengles.cpp:286] GPU #1
+  Make: 1002
+  Model: AMD Radeon RX 6950 XT
+  Device ID: 73a5
+
+WARNING      | Please update the emulator to one that supports the feature(s): VulkanVirtualQueue
+INFO         | IPv4 server found: 192.168.1.1
+INFO         | Ignore IPv6 address: 58f5:6191:3702:0:20ed:6191:3702:0
+INFO         | Ignore IPv6 address: 58f5:6191:3702:0:20ed:6191:3702:0
+INFO         | Ignore IPv6 address: 58f5:6191:3702:0:20ed:6191:3702:0
+INFO         | Ignore IPv6 address: 48fb:6191:3702:0:20ed:6191:3702:0
+INFO         | Ignore IPv6 address: 48fb:6191:3702:0:20ed:6191:3702:0
+INFO         | Ignore IPv6 address: 48fb:6191:3702:0:20ed:6191:3702:0
+INFO         | Ignore IPv6 address: e00a:6291:3702:0:20ed:6191:3702:0
+INFO         | Ignore IPv6 address: e00a:6291:3702:0:20ed:6191:3702:0
+INFO         | Ignore IPv6 address: e00a:6291:3702:0:20ed:6191:3702:0
+INFO         | Checking system compatibility:
+INFO         |   Checking: hasCompatibleHypervisor
+INFO         |      Ok: Hypervisor compatibility to run avd: `Medium_Phone_API_36` are met
+INFO         |   Checking: hasSufficientSystem
+INFO         |      Ok: System requirements to run avd: `Medium_Phone_API_36` are met
+INFO         |   Checking: hasSufficientHwGpu
+INFO         |      Ok: Hardware GPU requirements to run avd: `Medium_Phone_API_36` are passed
+INFO         |   Checking: hasSufficientDiskSpace
+INFO         |      Ok: Disk space requirements to run avd: `Medium_Phone_API_36` are met
+WARNING      | Emualtor does not support more than 6 cores. Number of cores set to 6
+INFO         | Storing crashdata in: C:\Users\jincaizi\AppData\Local\Temp\\AndroidEmulator\emu-crash-35.4.9.db, detection is enabled for process: 112052
+INFO         | Guest Driver: Auto (ext controls)
+library_mode swiftshader_indirect gpu mode swiftshader_indirect
+INFO         | Initializing hardware OpenGLES emulation support
+INFO         | HealthMonitor disabled.
+INFO         | initIcdPaths: ICD set to 'swiftshader', using Swiftshader ICD
+INFO         | Setting ICD filenames for the loader = E:\Unity\Editor\2022.3.25f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\emulator\qemu\windows-x86_64\lib64\vulkan\vk_swiftshader_icd.json;E:\Unity\Editor\2022.3.25f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\emulator\lib64\vulkan\vk_swiftshader_icd.json
+INFO         | SharedLibrary::open for [vulkan-1.dll]
+
+INFO         | SharedLibrary::open for [vulkan-1.dll]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [vulkan-1.dll] (win32): call LoadLibraryA
+
+INFO         | SharedLibrary::open succeeded for [vulkan-1.dll]. File name: [C:\Windows\SYSTEM32\vulkan-1.dll]
+
+INFO         | Added library: vulkan-1.dll
+INFO         | Selecting Vulkan device: SwiftShader Device (LLVM 10.0.0), Version: 1.2.0
+INFO         | Supports id properties, got a vulkan device UUID
+INFO         | SharedLibrary::open for [libGLESv2.dll]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [libGLESv2.dll] (win32): call LoadLibraryA
+
+INFO         | SharedLibrary::open succeeded for [libGLESv2.dll]. File name: [E:\Unity\Editor\2022.3.25f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\emulator\lib64\gles_swiftshader\libGLESv2.dll]
+
+INFO         | SharedLibrary::open for [libEGL.dll]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [libEGL.dll] (win32): call LoadLibraryA
+
+INFO         | SharedLibrary::open succeeded for [libEGL.dll]. File name: [E:\Unity\Editor\2022.3.25f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\emulator\lib64\gles_swiftshader\libEGL.dll]
+
+INFO         | Initializing VkEmulation features:
+INFO         |     glInteropSupported: false
+INFO         |     useDeferredCommands: true
+INFO         |     createResourceWithRequirements: true
+INFO         |     useVulkanComposition: false
+INFO         |     useVulkanNativeSwapchain: false
+INFO         |     enable guestRenderDoc: false
+INFO         |     ASTC LDR emulation mode: 2
+INFO         |     enable ETC2 emulation: true
+INFO         |     enable Ycbcr emulation: false
+INFO         |     guestVulkanOnly: false
+INFO         |     useDedicatedAllocations: false
+INFOI1107 11:37:47.426919  167188 userspace-boot-properties.cpp:713] Userspace boot properties:
+I1107 11:37:47.426934  167188 userspace-boot-properties.cpp:717]   androidboot.boot_devices=pci0000:00/0000:00:03.0 pci0000:00/0000:00:06.0
+I1107 11:37:47.426938  167188 userspace-boot-properties.cpp:717]   androidboot.dalvik.vm.heapsize=512m
+I1107 11:37:47.426941  167188 userspace-boot-properties.cpp:717]   androidboot.debug.hwui.renderer=skiagl
+I1107 11:37:47.426944  167188 userspace-boot-properties.cpp:717]   androidboot.debug.sf.nobootanimation=1
+I1107 11:37:47.426947  167188 userspace-boot-properties.cpp:717]   androidboot.hardware=ranchu
+I1107 11:37:47.426950  167188 userspace-boot-properties.cpp:717]   androidboot.hardware.gltransport=pipe
+I1107 11:37:47.426953  167188 userspace-boot-properties.cpp:717]   androidboot.hardware.vulkan=ranchu
+I1107 11:37:47.426956  167188 userspace-boot-properties.cpp:717]   androidboot.logcat=*:V
+I1107 11:37:47.426959  167188 userspace-boot-properties.cpp:717]   androidboot.opengles.version=196608
+I1107 11:37:47.426962  167188 userspace-boot-properties.cpp:717]   androidboot.qemu=1
+I1107 11:37:47.426965  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.adb.pubkey=QAAAACtHB/Z9wDYyG8dyKt0xR2Ri/+fcoiQntuNEiP7jcB0wIEhOHgXNVP5bMfL/x7zpfDCMrmN8Tsdo7eZD47OJeHXqbxSZkMT7AeLLOF+6RGQ1QC5QWmxc3HA8z0UrVB7OEYKGbZgGhvc7IuyCK9RhpxGrPFlh4vkL8/lf2ZHH881n0O8zrEvPSWW+YC857wZvn8php9sd2lbLntDJHiC1Rp7aPjKndOelq/sR80EFJImJQ2EtRstcbUArYAx5dZNBJ9JFpiAvmmUPe17oo0j2+jPqQaG8DUG6brvSXcJEO8SUp3t254ABuzBUYRZjGPY5NqYEDe6DZcAYJKkrM3caD6Lg05m610Z4JTJGykWP3UEwYWJRCAKlM9RaApWwKrEaYJjwvmUPv/8uU7ZUZ7Z3DWi96suqOgToyQv/LRJDJ1ofTaNYOQ7tTHCK/BNROISiR15pK9Ndj99mC+kLM8Znu7P4A9XDQ+YZXc1g/QtZ+g8EsVN3Qrhf42r9TqWplP8WLTUK4nH5wVMdLPiw7ENgxFdDG8WlwEDrUk5NSgB3C/DjSGGPFHYAzsJ8zOeSNw0RCyYZX8j2GoQZU18l09KsY4jBvi2k/njnuU2kQn2ffAw1BfyenqVI3qQYyuDK/rP6MttMMAdDCQPBGOOTeSBBuuHPl4MRUvJXK3i4Lu1XyF1rJrhvigEAAQA= @unknown
+I1107 11:37:47.426970  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.avd_name=Medium_Phone_API_36
+I1107 11:37:47.426973  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.camera_hq_edge_processing=0
+I1107 11:37:47.426976  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.camera_protocol_ver=1
+I1107 11:37:47.426978  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.cpuvulkan.version=4202496
+I1107 11:37:47.426981  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.gltransport.drawFlushInterval=800
+I1107 11:37:47.426984  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.gltransport.name=pipe
+I1107 11:37:47.426987  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.hwcodec.avcdec=2
+I1107 11:37:47.426994  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.hwcodec.hevcdec=2
+I1107 11:37:47.426997  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.hwcodec.vpxdec=2
+I1107 11:37:47.426999  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.settings.system.screen_off_timeout=2147483647
+I1107 11:37:47.427002  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.virtiowifi=1
+I1107 11:37:47.427005  167188 userspace-boot-properties.cpp:717]   androidboot.qemu.vsync=60
+I1107 11:37:47.427008  167188 userspace-boot-properties.cpp:717]   androidboot.serialno=EMULATOR35X4X9X0
+I1107 11:37:47.427010  167188 userspace-boot-properties.cpp:717]   androidboot.vbmeta.digest=293227bc6e6783d54fe0fb539c237cbe338734260603fb3e59aa73c947f45920
+I1107 11:37:47.427013  167188 userspace-boot-properties.cpp:717]   androidboot.vbmeta.hash_alg=sha256
+I1107 11:37:47.427062  167188 userspace-boot-properties.cpp:717]   androidboot.vbmeta.size=6720
+I1107 11:37:47.427066  167188 userspace-boot-properties.cpp:717]   androidboot.veritymode=enforcing
+         | Graphics Adapter Vendor Google (Google Inc.)
+INFO         | Graphics Adapter Android Emulator OpenGL ES Translator (Google SwiftShader)
+INFO         | Graphics API Version OpenGL ES 3.0 (OpenGL ES 3.0 SwiftShader 4.0.0.1)
+INFO         | Graphics API Extensions GL_OES_EGL_sync GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint GL_OES_texture_float GL_OES_texture_float_linear GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_packed_depth_stencil GL_OES_vertex_half_float GL_OES_standard_derivatives GL_OES_texture_npot GL_OES_rgb8_rgba8 GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 
+INFO         | Graphics Device Extensions N/A
+INFO         | Sending adb public key [QAAAACtHB/Z9wDYyG8dyKt0xR2Ri/+fcoiQntuNEiP7jcB0wIEhOHgXNVP5bMfL/x7zpfDCMrmN8Tsdo7eZD47OJeHXqbxSZkMT7AeLLOF+6RGQ1QC5QWmxc3HA8z0UrVB7OEYKGbZgGhvc7IuyCK9RhpxGrPFlh4vkL8/lf2ZHH881n0O8zrEvPSWW+YC857wZvn8php9sd2lbLntDJHiC1Rp7aPjKndOelq/sR80EFJImJQ2EtRstcbUArYAx5dZNBJ9JFpiAvmmUPe17oo0j2+jPqQaG8DUG6brvSXcJEO8SUp3t254ABuzBUYRZjGPY5NqYEDe6DZcAYJKkrM3caD6Lg05m610Z4JTJGykWP3UEwYWJRCAKlM9RaApWwKrEaYJjwvmUPv/8uU7ZUZ7Z3DWi96suqOgToyQv/LRJDJ1ofTaNYOQ7tTHCK/BNROISiR15pK9Ndj99mC+kLM8Znu7P4A9XDQ+YZXc1g/QtZ+g8EsVN3Qrhf42r9TqWplP8WLTUK4nH5wVMdLPiw7ENgxFdDG8WlwEDrUk5NSgB3C/DjSGGPFHYAzsJ8zOeSNw0RCyYZX8j2GoQZU18l09KsY4jBvi2k/njnuU2kQn2ffAw1BfyenqVI3qQYyuDK/rP6MttMMAdDCQPBGOOTeSBBuuHPl4MRUvJXK3i4Lu1XyF1rJrhvigEAAQA= @unknown]
+AEHD is operational
+netsimd I 11-07 03:37:47.458 daemon\src\rust_main.rs:98 - netsim artifacts path: "C:\\Users\\jincaizi\\AppData\\Local\\Temp\\netsimd"
+netsimd I 11-07 03:37:47.458 daemon\src\rust_main.rs:101 - NetsimdArgs {
+    fd_startup_str: None,
+    no_cli_ui: true,
+    no_web_ui: true,
+    pcap: false,
+    disable_address_reuse: false,
+    hci_port: None,
+    connector_instance: None,
+    instance: None,
+    logtostderr: false,
+    dev: false,
+    forward_host_mdns: false,
+    vsock: None,
+    config: None,
+    host_dns: Some(
+        "192.168.1.1",
+    ),
+    http_proxy: None,
+    wifi_tap: None,
+    test_beacons: false,
+    no_test_beacons: false,
+    no_shutdown: false,
+    verbose: false,
+    version: false,
+}
+INFO         | Monitoring duration of emulator setup.
+WARNING      | The emulator now requires a signed jwt token for gRPC access! Use the -grpc flag if you really want an open unprotected grpc port
+INFO         | Using security allow list from: E:\Unity\Editor\2022.3.25f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\emulator\lib\emulator_access.json
+WARNING      | *** Basic token auth should only be used by android-studio ***
+INFO         | The active JSON Web Key Sets can be found here: C:\Users\jincaizi\AppData\Local\Temp\avd\running\112052\jwks\a43254e7-0ff1-47a7-bd6b-5a8f9ade4197\active.jwk
+INFO         | Scanning C:\Users\jincaizi\AppData\Local\Temp\avd\running\112052\jwks\a43254e7-0ff1-47a7-bd6b-5a8f9ade4197 for jwk keys.
+INFO         | Started GRPC server at 127.0.0.1:8554, security: Local, auth: +token
+INFO         | Advertising in: C:\Users\jincaizi\AppData\Local\Temp\avd\running\pid_112052.ini
+INFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420 
+INFO         | setDisplayActiveConfig 0
+USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
+INFO         | Activated packet streamer for uwb emulation
+INFO         | Activated packet streamer for bluetooth emulation
+INFO         | Boot completed in 38268 ms
+INFO         | Increasing screen off timeout, logcat buffer size to 2M.
+INFO         | IPv4 server found: 192.168.1.1
+INFO         | Ignore IPv6 address: 5803:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 5803:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 5803:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 4809:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 4809:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 4809:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: e018:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: e018:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: e018:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | IPv4 server found: 192.168.1.1
+INFO         | Ignore IPv6 address: 5803:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 5803:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 5803:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 4809:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 4809:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: 4809:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: e018:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: e018:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | Ignore IPv6 address: e018:ba3a:3802:0:20fb:b93a:3802:0
+INFO         | IPv4 server found: 192.168.1.1
+INFO         | Ignore IPv6 address: 4827:115f:3802:0:101f:115f:3802:0
+INFO         | Ignore IPv6 address: 4827:115f:3802:0:101f:115f:3802:0
+INFO         | Ignore IPv6 address: 4827:115f:3802:0:101f:115f:3802:0
+INFO         | Ignore IPv6 address: 382d:115f:3802:0:101f:115f:3802:0
+INFO         | Ignore IPv6 address: 382d:115f:3802:0:101f:115f:3802:0
+INFO         | Ignore IPv6 address: 382d:115f:3802:0:101f:115f:3802:0
+INFO         | Ignore IPv6 address: d03c:115f:3802:0:101f:115f:3802:0
+INFO         | Ignore IPv6 address: d03c:115f:3802:0:101f:115f:3802:0
+INFO         | Ignore IPv6 address: d03c:115f:3802:0:101f:115f:3802:0
+INFO         | Created VkInstance:00000238678E2420 for application:KcpSecurityPoc engine:Unity.

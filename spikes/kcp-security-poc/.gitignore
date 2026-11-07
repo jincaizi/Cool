@@ -1,0 +1,12 @@
+/out/
+/native/noise-c-src/
+/native/android/
+**/bin/
+**/obj/
+UnityPoc/[Ll]ibrary/
+UnityPoc/[Tt]emp/
+UnityPoc/[Bb]uild/
+UnityPoc/[Ll]ogs/
+UnityPoc/[Uu]ser[Ss]ettings/
+UnityPoc/*.csproj
+UnityPoc/*.sln
