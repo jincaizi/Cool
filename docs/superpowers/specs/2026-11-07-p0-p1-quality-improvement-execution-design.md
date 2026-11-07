@@ -1,7 +1,7 @@
 # P0/P1 质量改进执行设计
 
 日期：2026-11-07
-状态：已批准进入阶段 0；原 Spec 与计划完成回写前，运行时代码实施阻塞
+状态：阶段 0 文档完成；Codex consumer sentinel BLOCKED_NOT_VERIFIED；执行基线激活待用户裁决
 版本：Revision 2.1（Unity 专家复核闭环版 + 可行性修正）
 适用范围：Unity 客户端、共享同步规则、网络传输、.NET 服务端、构建与质量门禁
 
@@ -440,13 +440,17 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 | 项目 | 值 |
 |---|---|
-| 批准后的 Spec Git SHA | 待阶段 0 填写 |
-| 批准后的计划 Git SHA | 待阶段 0 填写 |
-| 平台传输 ADR | 待阶段 0 填写 |
-| Gate 证据 ADR | 待阶段 0 填写 |
-| KCP 会话安全 ADR | 待阶段 0 填写 |
-| Release scope Git SHA | 待阶段 0 填写 |
-| 激活日期 | 待阶段 0 填写 |
+| 批准后的 Spec Git SHA | `c773a5b180b04c033e8472bf2a073052b375856d` |
+| 批准后的计划 Git SHA | `5383a413701fe5d1f54336d7e5aa3c2367319f30` |
+| 平台传输 ADR | `c64457f15041245fa072d098dcbc58cc3ebdf720` |
+| Gate 证据 ADR | `8dadf176473617179e311a67f6f926b4c74df0a6` |
+| KCP 会话安全 ADR | `c24eeafdb05d1c62576d4d4a43acea6174e75e21` |
+| Release scope Git SHA | `1ab9596b21a9055200ba064b29caed6b1e85adad` |
+| 激活日期 | 2026-11-07 |
+
+以上 SHA 为基线提交 `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b` 上对应路径的 Git blob SHA（`git rev-parse HEAD:<path>`）。
+
+激活状态：**待裁决**。阶段 0 文档与治理项已完成；`production/quality/technical-preferences-sentinel.md` 的 Codex consumer sentinel 为 `BLOCKED_NOT_VERIFIED`（本机无 `codex` CLI），因此本文状态不改为“已确认，执行基线”，执行基线激活等待用户裁决。
 
 完成上述清单后，将本文状态改为“已确认，执行基线”，然后进入 Gate 0。清单未完成时，只允许修改文档、测试基础设施设计和治理文件，不允许开始任务 2–33 的运行时代码实施。
 
