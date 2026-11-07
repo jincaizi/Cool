@@ -2238,17 +2238,24 @@ git commit -m "fix(ui): serialize panel transitions and safe-area updates"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Nameplate/NameplateMobileBudgetTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Nameplate/FloatTextPoolReuseTests.cs`
+- 创建：`Assets/Scripts/Tests/PlayMode/Performance/NameplateFrameBudgetTests.cs`
+- 创建：`tools/performance/run-player-perf.sh`
+- 修改：`Packages/manifest.json` 与 `Packages/packages-lock.json`（加入 `com.unity.test-framework.performance`）
+- 修改：`production/qa/device-profiles/android-reference.yaml`（P1-B2 开场填入批准档位；任务 27 复用，禁止每个 run 临时改档）
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Nameplate/README.md`
 
 - [ ] **步骤 1：编写失败的零分配/复用测试**
 
 ```csharp
 CullPlanner_After_Warmup_Allocates_Zero_Bytes();
+CullPlanner_Zero_Allocation_Uses_Isolated_GetAllocatedBytesForCurrentThread();
 CullPlanner_Uses_Squared_Distance_And_Valid_Fade_Range();
 Unchanged_Visibility_Does_Not_Call_SetActive_Again();
 Old_Merge_Record_Cannot_Mutate_Reused_FloatText_Lease();
 Entity_Unregister_Removes_Block_Throttle_Entry();
 NonInteractive_Display_Canvas_Has_No_GraphicRaycaster();
+Nameplate_Frame_Budget_Runs_In_Standalone_Player_With_Approved_Profile();
+Missing_Or_Unconfigured_Device_Profile_Blocks_Performance_Conclusion();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -2260,20 +2267,36 @@ NonInteractive_Display_Canvas_Has_No_GraphicRaycaster();
 
 CullPlanner 使用 caller-owned buffers、`sqrMagnitude` 和可见状态缓存；PooledNameplateView 缓存组件引用。FloatText lease 带 generation，旧 merge 记录自动失效。移除无用 GraphicRaycaster，清理节流字典。
 
+性能测量方法固定：
+
+- 纯 C# 热路径用隔离后的 `GC.GetAllocatedBytesForCurrentThread`：同一线程预热后取前后差值，固定迭代次数，测试期间不得有并发测试线程、日志或 Editor 后台分配，断言差值为 0。该断言只证明托管分配，不作为移动端性能结论。
+- Unity 对象和帧性能用 Unity Performance Testing package 在 Standalone Player 或参考设备运行，不得以 Editor 结果替代。
+- 设备/分辨率/Quality Level/`targetFps`/`warmupSeconds`/`sampleSeconds`/`p95Algorithm`/`rawDataFormat` 全部读取 `production/qa/device-profiles/android-reference.yaml`；`configured: false` 或必填项缺失时性能结论为 `BLOCKED_NOT_VERIFIED`。
+- 原始数据固定为逐帧 CSV `frame_index,timestamp_s,frame_ms` 加 `summary.json`（p50/p95/p99、样本数、profile hash），写入 `production/quality/artifacts/<run-id>/perf/nameplate/`；p95 按 nearest-rank 算法计算。已配置档位要求 p95 frame ≤ 33.3ms。
+- Coverage 固定为任务 31 的同一组参数：`-enableCodeCoverage`、`-coverageResultsPath production/quality/artifacts/<run-id>/coverage`、`-coverageOptions "generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+DataDefinition,+Core,+Cool.Protocol,+SyncCore,+KcpNet,+WebSocketNet,+GameSys,+Hotfix.GameSystems.*,-GameSys.EditorTests,-*PlayModeTests"`；Coverage XML 缺失、损坏或目标程序集未出现即失败。
+
 - [ ] **步骤 4：验证通过**
 
 ```bash
 bash tools/unity-tests.sh EditMode NameplateMobileBudgetTests
 bash tools/unity-tests.sh EditMode FloatTextPoolReuseTests
 bash tools/unity-tests.sh PlayMode PlayerHudBindingTests
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
+bash tools/performance/run-player-perf.sh --suite NameplateFrameBudgetTests \
+  --device-profile production/qa/device-profiles/android-reference.yaml --run-id "$RUN_ID"
 ```
 
-预期：预热后 cull/过期清理零分配，池复用不串实体。
+预期：预热后 cull/过期清理零分配，池复用不串实体；Standalone/设备 p95 frame ≤ 33.3ms，原始数据与 profile hash 写入本轮 artifact；profile 未配置时报告 `BLOCKED_NOT_VERIFIED`。
+
+**执行设计 §4.2 U-P1-10 验收补齐（任务 24）：** 纯 C# 热路径使用隔离后的 `GC.GetAllocatedBytesForCurrentThread`（同线程、预热后、固定迭代、无并发测试分配），不得把一次 Editor 内零分配断言当作移动端性能结论；Unity 对象与帧性能使用 Unity Performance Testing package 在 Standalone Player/参考设备运行；`production/qa/device-profiles/android-reference.yaml` 固定设备型号/SoC/RAM/系统/分辨率/Quality Level/目标帧率/预热/采样窗口/p95 算法/原始数据格式，`configured: false` 或必填缺失时性能 Gate 为 `BLOCKED_NOT_VERIFIED`；原始数据按固定 CSV + `summary.json` 保存到同一 run-id artifact；Coverage 固定 `-enableCodeCoverage`、`-coverageResultsPath`、`-coverageOptions`、assembly filter 与排除规则，XML 缺失、损坏或目标程序集未出现即失败。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Assets/Scripts/Hotfix/GameSystems/Nameplate Assets/Scripts/Tests/Editor/Nameplate
+git add Assets/Scripts/Hotfix/GameSystems/Nameplate Assets/Scripts/Tests/Editor/Nameplate \
+  Assets/Scripts/Tests/PlayMode/Performance/NameplateFrameBudgetTests.cs* \
+  tools/performance/run-player-perf.sh Packages/manifest.json Packages/packages-lock.json \
+  production/qa/device-profiles/android-reference.yaml
 git commit -m "perf(nameplate): bound mobile display updates and pooling"
 ```
 
@@ -2295,10 +2318,12 @@ git commit -m "perf(nameplate): bound mobile display updates and pooling"
 ```csharp
 Remote_Hit_Does_Not_Freeze_Animator_Or_Time();
 Local_Hit_Does_Not_Change_Global_TimeScale();
+Local_Hit_Uses_Local_Animator_Or_Playable_Speed_Only();
 Disable_During_Freeze_Restores_Source_And_Target_Speeds();
 Overlapping_Stops_Old_Generation_Cannot_Restore_Early();
 Destroyed_Target_Does_Not_Leak_Tracked_State();
 Zero_Duration_Is_A_NoOp();
+Vfx_Code_Contains_No_Time_timeScale_Write();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -2308,7 +2333,7 @@ Zero_Duration_Is_A_NoOp();
 
 - [ ] **步骤 3：实现局部 Animator/Playable 停顿**
 
-`RequestLocalHitStop(Animator source, Animator target, float duration)` 只接受本地 source；保存原 speed，重叠使用 generation/deadline，unscaled time 恢复。Disable/Destroy 恢复全部跟踪对象；VFX 目录不得再写 `Time.timeScale`。
+`RequestLocalHitStop` 只响应本地来源：远端命中、远端事件和服务器回放不得冻结本地表现。默认使用局部 Animator/Playable 速度：Animator 目标写 `Animator.speed`，Playable 目标只写根 Playable 的 speed，二者都保存原值并在恢复时写回；重叠请求使用 generation/deadline，按 unscaled time 恢复。`Disable`/`Destroy` 恢复全部跟踪对象与 Playable speed；VFX 目录不得出现任何 `Time.timeScale` 写入，用源码守卫锁定。禁止用全局时间缩放实现顿帧。
 
 - [ ] **步骤 4：验证通过**
 
@@ -2318,6 +2343,8 @@ bash tools/unity-tests.sh PlayMode ThreeClientCombatConsistencyTests
 ```
 
 预期：远端攻击不冻结本地，全局时间不变，多人表现回归通过。
+
+**执行设计 §4.3 局部 HitStop 验收补齐（任务 25）：** 只响应本地来源；默认使用局部 Animator/Playable 速度（`Animator.speed` 或根 Playable speed），保存并恢复原值；不修改全局 `Time.timeScale`；Disable/Destroy、重叠请求和零时长均有自动化测试，VFX 源码守卫禁止 `Time.timeScale` 写入。
 
 - [ ] **步骤 5：Commit**
 
@@ -2333,24 +2360,36 @@ git commit -m "fix(vfx): replace global hit stop with local animator freeze"
 **优先级：** P1；依赖任务 21、25
 
 **文件：**
+- 创建：`Assets/Scripts/AOT/DataDefinition/VfxId.cs`（AOT 层，供 `GameSettings` 引用，不反向依赖 GameSys）
+- 创建：`Assets/Scripts/Hotfix/GameSystems/VFX/IVfxCatalog.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/VFX/VfxCatalog.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/VFX/Configs/VfxCatalog.asset`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/VFX/Pooling/IVfxPool.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/VFX/Pooling/PrefabVfxPool.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/VFX/Pooling/VfxLease.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/VFX/Pooling/VfxPoolScope.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/HitParticleController.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/IceBurstVFX.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/IceDecalVFX.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/PlayerHealVFX.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/HitFeedbackSystem.cs`
-- 修改：`Assets/Scripts/AOT/DataDefinition/GameConsts.cs`
-- 修改：`Assets/AddressableAssetsData/`（用 Unity API 更新 `VFX` group）
-- 移动并保留 `.meta`：`Assets/VFX/HitSparkParticle.prefab` 到 `Assets/Addressables/VFX/HitSparkParticle.prefab`
+- 修改：`Assets/Scripts/AOT/DataDefinition/GameSettings.cs`（`HealVfxPrefab` 改为带显式数值的 `VfxId HealVfxId`）
+- 修改：`Assets/Resources/Setting/GameSettings.asset`
+- 修改：`Assets/Scenes/DemoDay.unity`
+- 修改：所有实际引用 `HitSparkBurst`/`HealGreenParticles` 的非 Addressable Prefab（以 GUID 扫描结果为准）
+- 修改：`Assets/AddressableAssetsData/`（用 Unity API 更新 `CombatVFX` group）
+- 移动并保留 `.meta`：`Assets/Prefabs/VFX/HitSparkBurst.prefab` 到 `Assets/Addressables/VFX/HitSparkBurst.prefab`
 - 移动并保留 `.meta`：`Assets/Prefabs/VFX/HealGreenParticles.prefab` 到 `Assets/Addressables/VFX/HealGreenParticles.prefab`
+- 保留不移动：`Assets/VFX/HitSparkParticle.prefab`（无引用遗留物，记录在 README，不删除）
+- 创建：`Assets/Scripts/Tests/Editor/VFX/VfxCatalogContractTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/VFX/VfxAddressableGuidGuardTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/VFX/VfxLeaseSourceGuardTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/VFX/VfxPoolLifecycleTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Resource/AddressableVfxCatalogTests.cs`
 - 创建：`Assets/Scripts/Tests/PlayMode/VFX/VfxPoolSceneLifecycleTests.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/README.md`
 
-- [ ] **步骤 1：编写失败的池生命周期测试**
+- [ ] **步骤 1：编写失败的池与 catalog 测试**
 
 ```csharp
 Different_Prefabs_Never_Share_Pool_Entries();
@@ -2360,38 +2399,61 @@ IceDecal_Without_Renderer_Still_Returns();
 Repeated_Heal_Reuses_Instance_After_Warmup();
 Pool_Does_Not_Overwrite_Active_Lease();
 HighFrequency_Vfx_Addresses_Resolve_Without_Resources_Fallback();
+VfxCatalog_Is_ScriptableObject_Implementing_IVfxCatalog();
+VfxId_Has_Explicit_Unique_Values_And_Forbids_Reuse();
+Catalog_Rejects_Duplicate_Or_Empty_Address();
+Catalog_Rejects_Missing_Addressable_Entry_Or_Non_GameObject();
+Hit_And_Heal_Leases_Are_Acquired_And_Preheated_Before_Combat_Subscription();
+Early_Combat_Event_Before_Ready_Is_Dropped_With_Rate_Limited_Warning();
+Preload_Failure_Releases_Leases_Destroys_Clones_And_Does_Not_Subscribe();
+Scene_Exit_Destroys_Active_And_Idle_Clones_Before_Releasing_Leases();
+Vfx_Code_Has_No_AddressablesInstantiateAsync_Or_ReleaseInstance();
+Addressable_Vfx_Prefabs_Have_No_Direct_Scene_Resources_Or_NonAddressable_Guid_References();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
 
-运行：`bash tools/unity-tests.sh EditMode VfxPoolLifecycleTests` 和 `bash tools/unity-tests.sh EditMode AddressableVfxCatalogTests`
-预期：FAIL；静态池绑定首 prefab，活动对象未统一追踪。
+运行：`bash tools/unity-tests.sh EditMode VfxCatalogContractTests`、`bash tools/unity-tests.sh EditMode VfxPoolLifecycleTests` 和 `bash tools/unity-tests.sh EditMode AddressableVfxCatalogTests`
+预期：FAIL；catalog/lease 不存在，静态池绑定首 prefab，活动对象未统一追踪。
 
-- [ ] **步骤 3：实现按 prefab key 的 owner 池**
+- [ ] **步骤 3：实现 VfxCatalog、lease 预热与 owner 池**
 
-`IVfxPool.Rent(prefab, position, rotation, owner)` 返回幂等 `VfxLease`；每个 prefab 独立 bucket，owner 销毁回收 active/idle。PlayerHeal 与高频 hit/decal 迁移统一池；资源 prefab 通过任务 21 lease 持有，并加入 `VFX` Addressables group，address 由 `GameConsts` 集中定义。测试同时断言 catalog 中不存在重复 address 或落回 `Resources.Load` 的 VFX 路径。
+- `VfxId` 是 `DataDefinition`（AOT）中带显式数值的 enum，旧值禁止复用；`GameSettings` 可引用它而不反向依赖 GameSys。`IVfxCatalog` 只暴露 `VfxId → Addressables address`；`VfxCatalog : ScriptableObject, IVfxCatalog` 不保存 Prefab 直接引用，是 VFX 地址的唯一映射（`GameSettings` 只保存 `VfxId` 数值）。
+- build-time/EditMode 校验重复 ID、空 address、缺失 Addressable entry 和非 `GameObject` 类型，任一错误即失败。
+- `ResourceManager` 获取 `AssetLease<GameObject>`；pool 用 `Object.Instantiate(lease.Asset)` 克隆，禁止混用 `Addressables.InstantiateAsync`/`ReleaseInstance`。
+- `VfxPoolScope` 在 World/Combat loading 阶段取得 catalog 与核心 Hit/Heal lease，并完成全量预热后才订阅战斗事件；未 Ready 时到达的事件直接丢弃并输出限频警告，不排队播放过期效果。可选技能 VFX 只按当前角色/场景所需 ID 预热。
+- 场景退出先销毁 active/idle clone，再释放 prefab lease；预加载中途失败时释放已取得 lease、销毁已预热 clone、不订阅事件并返回初始化失败。
+- `HitSparkBurst` 与 `HealGreenParticles` 迁移到 Addressables；未使用的 `Assets/VFX/HitSparkParticle.prefab` 不删除，登记为无引用遗留物。
+- CI 按 GUID 检查 Addressable VFX 不再被 Scene、Resources asset 或非 Addressable Prefab 直接引用；`VfxAddressableGuidGuardTests` 与 `VfxLeaseSourceGuardTests` 由任务 31 纳入 CI。
 
 - [ ] **步骤 4：验证通过**
 
 ```bash
+bash tools/unity-tests.sh EditMode VfxCatalogContractTests
+bash tools/unity-tests.sh EditMode VfxAddressableGuidGuardTests
+bash tools/unity-tests.sh EditMode VfxLeaseSourceGuardTests
 bash tools/unity-tests.sh EditMode VfxPoolLifecycleTests
 bash tools/unity-tests.sh EditMode AddressableVfxCatalogTests
 bash tools/unity-tests.sh PlayMode VfxPoolSceneLifecycleTests
 bash tools/unity-tests.sh PlayMode PlayerHealVFXTests
 ```
 
-预期：场景退出无活动对象/资源 lease 泄漏，预热后无重复 Instantiate/Destroy。
+预期：场景退出无活动对象/资源 lease 泄漏，预热后无重复 Instantiate/Destroy；catalog 无重复/空 address，GUID 守卫无直接引用，VFX 代码无 `Addressables.InstantiateAsync`/`ReleaseInstance`。
+
+**执行设计 §4.2 U-P1-07 验收补齐（任务 26）：** 迁移真实 `HitSparkBurst`/Heal；未使用的 `HitSparkParticle` 不删除但记录为无引用遗留物；`GameSettings.cs`、`GameSettings.asset`、`DemoDay.unity` 和实际引用 Prefab 加入文件清单；`GameSettings` 只保存带显式数值的 `VfxId` enum，`VfxCatalog : ScriptableObject, IVfxCatalog` 将 `VfxId` 映射为稳定 Addressables address；`ResourceManager` 获取 `AssetLease<GameObject>`，pool 通过 `Object.Instantiate` 克隆；World/Combat loading 获取 lease 并预热，完成后才订阅战斗事件；异常早到事件直接丢弃并输出限频警告，不排队播放过期效果；场景退出先销毁 active/idle clone 再释放 prefab lease；禁止混用 `Addressables.InstantiateAsync`/`ReleaseInstance`；CI 按 GUID 检查 Addressable VFX 不再被 Scene、Resources asset 或非 Addressable Prefab 直接引用。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
+# 若 GUID 扫描发现其他实际引用 Prefab 被修改，逐个加入其具体路径，禁止整目录暂存
 git add Assets/Scripts/Hotfix/GameSystems/VFX Assets/Scripts/Tests/Editor/VFX \
   Assets/Scripts/Tests/Editor/Resource/AddressableVfxCatalogTests.cs* \
   Assets/Scripts/Tests/PlayMode/VFX/VfxPoolSceneLifecycleTests.cs* \
-  Assets/Scripts/AOT/DataDefinition/GameConsts.cs Assets/AddressableAssetsData \
-  Assets/VFX/HitSparkParticle.prefab* Assets/Prefabs/VFX/HealGreenParticles.prefab* \
-  Assets/Addressables/VFX
-git commit -m "perf(vfx): centralize prefab-keyed effect pooling"
+  Assets/Scripts/AOT/DataDefinition/GameSettings.cs Assets/Scripts/AOT/DataDefinition/VfxId.cs* \
+  Assets/Resources/Setting/GameSettings.asset* Assets/Scenes/DemoDay.unity* \
+  Assets/Prefabs/VFX/HitSparkBurst.prefab* Assets/Prefabs/VFX/HealGreenParticles.prefab* \
+  Assets/AddressableAssetsData Assets/Addressables/VFX
+git commit -m "perf(vfx): centralize vfx catalog leases and pooling"
 ```
 
 ---
@@ -2409,6 +2471,8 @@ git commit -m "perf(vfx): centralize prefab-keyed effect pooling"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/AI/AIBrain.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/PhysicsRegistry.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Monster/PerceptionBudgetTests.cs`
+- 创建：`Assets/Scripts/Tests/PlayMode/Performance/MonsterPerceptionFrameBudgetTests.cs`
+- 读取：`production/qa/device-profiles/android-reference.yaml`（复用任务 24 填入的批准档位，本任务不得改档）
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Monster/README.md`
 
 - [ ] **步骤 1：编写失败的预算测试**
@@ -2419,6 +2483,9 @@ NoTarget_Performs_At_Most_Five_Queries_Per_Second();
 Scheduler_Never_Exceeds_Eight_Queries_Per_Frame();
 Existing_Valid_Target_Does_Not_Rescan_Every_Frame();
 Warm_Query_Path_Allocates_Zero_Bytes();
+Warm_Query_Zero_Allocation_Uses_Isolated_GetAllocatedBytesForCurrentThread();
+Perception_Frame_Budget_Runs_In_Standalone_Player_With_Approved_Profile();
+Missing_Or_Unconfigured_Device_Profile_Blocks_Performance_Conclusion();
 Online_Npc_View_Does_Not_Run_Local_Ai();
 ```
 
@@ -2431,20 +2498,28 @@ Online_Npc_View_Does_Not_Run_Local_Ai();
 
 默认无目标感知 5Hz，每帧最多 8 次空间查询；已有目标只做无分配有效性检查。`ITargetQuery.FindNearbyNonAlloc(position, radius, List<ITargetable> results)` 复用 caller buffer。所有数值来自 `MonsterPerformanceSettings`。
 
+性能测量与任务 24 使用同一固定方法：纯 C# 热路径用隔离后的 `GC.GetAllocatedBytesForCurrentThread`（同线程、预热后、固定迭代、无并发测试分配）；Unity 帧性能用 Unity Performance Testing package 在 Standalone Player/参考设备运行；设备/分辨率/Quality Level/`targetFps`/`warmupSeconds`/`sampleSeconds`/`p95Algorithm`/`rawDataFormat` 读取 `production/qa/device-profiles/android-reference.yaml`，`configured: false` 或必填缺失时性能结论为 `BLOCKED_NOT_VERIFIED`；原始数据为逐帧 `frame_index,timestamp_s,frame_ms` CSV 加 `summary.json`，写入同一 run-id 的 `production/quality/artifacts/<run-id>/perf/monster-perception/`，p95 用 nearest-rank。Coverage 固定为任务 31 的同一组参数（`-enableCodeCoverage`、`-coverageResultsPath production/quality/artifacts/<run-id>/coverage`、`-coverageOptions` 与 assembly filter/排除规则）；Coverage XML 缺失、损坏或目标程序集未出现即失败。
+
 - [ ] **步骤 4：验证通过**
 
 ```bash
 bash tools/unity-tests.sh EditMode PerceptionBudgetTests
 bash tools/unity-tests.sh PlayMode MonsterWorldTests
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
+bash tools/performance/run-player-perf.sh --suite MonsterPerceptionFrameBudgetTests \
+  --device-profile production/qa/device-profiles/android-reference.yaml --run-id "$RUN_ID"
 ```
 
-预期：预热后热路径零 GC，在线 NPC 不运行本地 AI。
+预期：预热后热路径零 GC，在线 NPC 不运行本地 AI；Standalone/设备 p95 frame ≤ 33.3ms，原始数据与 profile hash 写入本轮 artifact；profile 未配置时报告 `BLOCKED_NOT_VERIFIED`。
+
+**执行设计 §4.2 U-P1-10 验收补齐（任务 27）：** 纯 C# 感知热路径使用隔离后的 `GC.GetAllocatedBytesForCurrentThread`，不把 Editor 零分配断言当作移动端性能结论；Unity 帧性能使用 Unity Performance Testing package 在 Standalone Player/参考设备运行；复用任务 24 的 `production/qa/device-profiles/android-reference.yaml` 固定设备/分辨率/Quality Level/预热/采样窗口/p95 算法/原始数据格式，不得每个 run 临时改档，`configured: false` 或必填缺失时性能 Gate 为 `BLOCKED_NOT_VERIFIED`；原始数据按固定 CSV + `summary.json` 保存到同一 run-id artifact；Coverage 固定 `-enableCodeCoverage`、`-coverageResultsPath`、`-coverageOptions`、assembly filter 与排除规则，XML 缺失、损坏或目标程序集未出现即失败。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Monster Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Combat/PhysicsRegistry.cs \
-  Assets/PreRes/Settings/Monster Assets/Scripts/Tests/Editor/Monster/PerceptionBudgetTests.cs*
+  Assets/PreRes/Settings/Monster Assets/Scripts/Tests/Editor/Monster \
+  Assets/Scripts/Tests/PlayMode/Performance/MonsterPerceptionFrameBudgetTests.cs*
 git commit -m "perf(monster): budget local perception queries"
 ```
 
@@ -2473,7 +2548,11 @@ Rent_After_Death_Has_Fresh_Stats_Ai_Damage_And_Effects();
 Repeated_Rent_Does_Not_Duplicate_Event_Handlers();
 Despawn_Unregisters_Physics_And_Perception();
 Respawn_Update_Uses_Reusable_Buffer();
-SetActive_True_Happens_After_ResetForSpawn();
+SetActive_True_Happens_After_PrepareForSpawn();
+Spawn_Sequence_Is_Prepare_Activate_Warp_Verify_Register();
+OnEnable_Does_Not_Read_Previous_Lifecycle_Data();
+Ai_First_Frame_Sees_IsOnNavMesh_True();
+Projection_Failure_Returns_To_Pool_Without_Registering();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -2484,11 +2563,19 @@ SetActive_True_Happens_After_ResetForSpawn();
 - [ ] **步骤 3：实现显式复位合同**
 
 ```csharp
-public void ResetForSpawn(MonsterConfig config, Vector3 spawnPoint);
+public bool PrepareForSpawn(MonsterConfig config, Vector3 spawnPoint); // 对象仍 inactive
 public void ResetForDespawn();
 ```
 
-对象保持 inactive 完成全部复位后再 SetActive(true)。复位 NavAgent、Animator、Stats、AIContext、DamagePipeline、collider、target、状态效果、订阅与注册。`DestroyingMonsterPool` 作为可配置回滚实现，不绕过接口。
+严格按以下顺序执行，任何一步失败都回池且不进入活跃怪物集合：
+
+1. 对象保持 inactive 时调用 `PrepareForSpawn`，复位 Stats、AIContext、DamagePipeline、Animator、collider、target、状态效果和订阅；
+2. `SetActive(true)`；
+3. 在 NavMesh 上投影出生点，启用 `NavMeshAgent` 并 `Warp` 到投影点；
+4. 确认 `NavMeshAgent.isOnNavMesh == true`；
+5. 之后才注册 Physics、感知查询和 AI tick。
+
+`OnEnable` 不读取上一次生命周期数据，只做与当前对象无关的幂等复位。AI 首帧 tick 必须看到 `isOnNavMesh == true`。`ResetForDespawn` 先注销 Physics/感知/AI 与事件订阅，再停用对象；连续 rent/return 不得累积订阅、碰撞注册或状态效果。`DestroyingMonsterPool` 作为可配置回滚实现，不绕过接口。
 
 - [ ] **步骤 4：验证通过与 100 次复用**
 
@@ -2497,7 +2584,9 @@ bash tools/unity-tests.sh PlayMode MonsterPoolLifecycleTests
 bash tools/unity-tests.sh PlayMode MonsterWorldTests
 ```
 
-预期：同一实体 100 次 rent/return 后订阅、注册和活动对象数量为常数。
+预期：同一实体 100 次 rent/return 后订阅、注册和活动对象数量为常数；投影失败对象回池且不在活跃集合。
+
+**执行设计 §4.2 U-P1-12 验收补齐（任务 28）：** 严格按 inactive 阶段 `PrepareForSpawn` → 激活对象 → NavMesh 投影/启用 agent/`Warp` → 确认 `isOnNavMesh` → 注册 Physics/感知/AI tick 的顺序执行；`OnEnable` 不读取上一次生命周期数据；AI 首帧前 `NavMeshAgent.isOnNavMesh == true`；连续租出和归还不累积订阅、碰撞注册或状态效果；投影失败的对象回池且不进入活跃怪物集合；不复用旧订阅或状态。
 
 - [ ] **步骤 5：Commit**
 
@@ -2517,10 +2606,16 @@ git commit -m "perf(monster): implement reset-safe entity pooling"
 - 创建：`Assets/Scripts/Editor/Build/MobileBuildSettings.cs`
 - 创建：`Assets/Scripts/Editor/Build/AndroidBuildScript.cs`
 - 创建：`Assets/Scripts/Editor/Build/IosBuildScript.cs`
+- 创建：`Assets/Scripts/Editor/Build/BuildArtifactVerifier.cs`
 - 修改：`Assets/Scripts/Editor/BuildScript.cs`
 - 修改：`Assets/Scripts/Editor/WebGLBuildScript.cs`
 - 修改：`ProjectSettings/ProjectSettings.asset`
+- 创建：`Assets/link.xml`
 - 创建：`Assets/Scripts/Tests/Editor/Build/MobileBuildSettingsTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/Build/BuildArtifactVerifierTests.cs`
+- 创建：`tools/mobile/verify-build-artifacts.ps1`
+- 创建：`tools/mobile/android-smoke.sh`
+- 读取：`production/quality/release-scope.yaml`（Gate 启动时复制到 run artifact，运行期间禁止修改）
 - 创建：`docs/release/mobile-build.md`
 
 - [ ] **步骤 1：编写失败的构建合同测试**
@@ -2533,6 +2628,14 @@ Ios_Export_Requires_Il2Cpp_And_Arm64();
 All_Targets_Use_One_Explicit_Scene_List();
 Build_Settings_Are_Restored_After_Failure();
 Addressables_Content_Is_Built_Before_Player();
+Build_Method_Rejects_Mismatched_Active_Target();
+Windows_Runner_Only_Validates_Ios_Configuration();
+Release_Scope_Excludes_Ios_As_NotInScope();
+Release_Scope_Blocking_Ios_Without_Runner_Is_BlockedNotVerified();
+Build_Report_Apk_Aab_And_Xcode_Project_Are_Verified();
+Candidate_Records_Signing_Fingerprint_Version_Stripping_Backend_And_Abi();
+Smoke_Writes_Completion_Flag_Before_Timeout();
+LinkXml_Covers_Stripped_Il2Cpp_Protocol_Types();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -2540,25 +2643,76 @@ Addressables_Content_Is_Built_Before_Player();
 运行：`bash tools/unity-tests.sh EditMode MobileBuildSettingsTests`
 预期：FAIL；移动构建入口不存在，项目仍是默认身份。
 
-- [ ] **步骤 3：实现统一构建设置**
+- [ ] **步骤 3：实现统一构建设置、产物校验与平台状态**
 
-Android Release：IL2CPP/ARM64/AAB；Development 可显式 APK。iOS：IL2CPP/ARM64，导出 Xcode 到 `Build/iOS`，签名留 CI/Xcode。company/app id/version/keystore 从环境读取；Development 缺省 application id 为 `com.jincaizi.cool.dev`，商店/Release 构建不得使用该值；Release 检测 `DefaultCompany`、Unity 默认 id、开发 id 或缺失身份立即失败。所有临时 PlayerSettings 在 finally 还原；日志写 Unity、Git commit、ProtocolVersion、catalog hash，不写秘密。
+**构建入口与目标验证：**
 
-- [ ] **步骤 4：验证构建**
+- Android 与 iOS 分别在独立进程中用 `-buildTarget Android` / `-buildTarget iOS` 启动；build method 只验证 `EditorUserBuildSettings.activeBuildTarget` 与请求一致，不一致立即失败，不调用 `SwitchActiveBuildTarget`。
+- Windows runner 只执行 `IosBuildScript.ValidateIosConfiguration`，不得假装导出 Xcode。
+- iOS job 由仓库变量 `HAS_IOS_RUNNER` 控制；先读取 `production/quality/release-scope.yaml`：iOS 被明确排除时写 `ios-status = NOT_IN_SCOPE`；iOS 属于 blocking platforms 但缺 macOS runner/Xcode/设备时写 `ios-status = BLOCKED_NOT_VERIFIED`，两者都写入 artifact/summary 且不无限排队。只有 `HAS_IOS_RUNNER == true` 且预检通过才实际导出。
 
-```powershell
-Unity.exe -batchmode -nographics -quit -projectPath E:\CodeForJob\Cool -executeMethod Cool.EditorTools.AndroidBuildScript.BuildDevelopment
-Unity.exe -batchmode -nographics -quit -projectPath E:\CodeForJob\Cool -executeMethod Cool.EditorTools.IosBuildScript.ExportXcode
+**构建前预检：** 固定 runner label，校验 Unity 版本、许可证、Build Support、Android SDK/NDK/JDK 与 Xcode 版本；任一缺失即失败或按平台标记 `BLOCKED_NOT_VERIFIED`。
+
+**唯一 BuildScenes：** `BuildScenes.cs` 是 Android/iOS/WebGL/Windows 共用的唯一场景清单，禁止各构建脚本各自维护。
+
+**Android：**
+
+- P1 Engineering Gate 产物：ARM64 IL2CPP Development Build（`BuildOptions.Development`）；Mobile Release Readiness 产物：同一 Git SHA、同一 Addressables content manifest 的非 Development 候选包（APK/AAB）。
+- Release 使用 IL2CPP/ARM64/AAB；Development 可显式 APK。company/app id/version/keystore 从环境读取；Development 缺省 application id 为 `com.jincaizi.cool.dev`，商店/Release 构建不得使用该值；Release 检测 `DefaultCompany`、Unity 默认 id、开发 id 或缺失身份立即失败。
+- Release 候选包设置 Managed Stripping Level `High` 并记录实际值；记录非敏感 signing identity 指纹、versionCode/versionName、Managed Stripping Level、Scripting Backend、Development/Debuggable 标志与 ABI；ABI 必须为 `arm64-v8a`。
+
+**iOS：** IL2CPP/ARM64，导出 Xcode 到 `Build/iOS`，签名留 CI/Xcode。
+
+**产物校验：** 校验 BuildReport、APK/AAB 或 Xcode 工程确实存在，记录 SHA-256 与 catalog hash；所有临时 PlayerSettings 在 `finally` 还原，恢复失败即 Gate 失败。日志写 Unity、Git commit、ProtocolVersion、catalog hash、Managed Stripping Level，不写秘密。
+
+**IL2CPP AOT：** 按 strip diagnostics 和 smoke 证据配置 `link.xml` 或 `[Preserve]`；无法构造的消息必须有显式 AOT preserve 证据。
+
+- [ ] **步骤 4：验证构建、产物与 Android smoke**
+
+先在同一 shell 会话生成并导出 run-id，供后续 Unity、校验与 smoke 命令共用：
+
+```bash
+export RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
 ```
 
-预期：Windows runner 生成 Android APK/AAB；iOS 仅在 macOS runner 报完整成功，其他环境明确“未执行”。
+```powershell
+# P1 Engineering Gate：Android ARM64 IL2CPP Development Build
+Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget Android \
+  -executeMethod Cool.EditorTools.AndroidBuildScript.BuildDevelopment \
+  -logFile "production/quality/artifacts/$env:RUN_ID/android-development-build.log"
+# Mobile Release Readiness：同 SHA、同 content manifest 的非 Development 候选包
+Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget Android \
+  -executeMethod Cool.EditorTools.AndroidBuildScript.BuildReleaseCandidate \
+  -logFile "production/quality/artifacts/$env:RUN_ID/android-release-build.log"
+# iOS 只在 macOS runner 且有 HAS_IOS_RUNNER 时执行；Windows 仅 ValidateIosConfiguration
+Unity.exe -batchmode -nographics -quit -projectPath "$(pwd)" -buildTarget iOS \
+  -executeMethod Cool.EditorTools.IosBuildScript.ExportXcode \
+  -logFile "production/quality/artifacts/$env:RUN_ID/ios-export.log"
+```
+
+```bash
+pwsh -File tools/mobile/verify-build-artifacts.ps1 -Platform Android \
+  -ArtifactDir Build/Android -RunId "$RUN_ID"
+bash tools/mobile/android-smoke.sh --apk Build/Android/cool-dev.apk \
+  --run-id "$RUN_ID" --device "$ANDROID_SERIAL" --evidence production/qa/evidence/"$RUN_ID"
+```
+
+预期：Windows runner 生成 Android APK/AAB；iOS 仅在 macOS runner 报完整成功，其他环境写 `ios-status = NOT_IN_SCOPE` 或 `BLOCKED_NOT_VERIFIED`，不写“已验证”。
+
+Android smoke 覆盖安装、冷启动、CharacterSelect、Addressables 初始化、内建 UI 加载、MessageTypeRegistry 非默认 fixture 编解码和进入 DemoDay；smoke 在超时前主动写出完成标志与退出状态，保存 `adb logcat`、设备型号、系统、build fingerprint 和包版本。ARM64 emulator 只证明安装、启动、IL2CPP/AOT、协议和场景进入；帧时间、GC、热状态、网络切换、前后台、低内存、ANR 与 30 分钟 soak 必须使用批准的物理参考设备。
+
+移动生命周期 smoke（任务 23 提供信号接口）：冷启动与热启动、前台/后台恢复、Wi-Fi 与移动网络切换、断网/重连/服务端断开、Safe Area/分辨率/方向变化、Android 返回键与 modal back stack、低内存回调、场景切换期间取消 Addressables 加载。自动或人工证据统一写入 `production/qa/evidence/<run-id>/`，记录 build SHA、设备、系统、分辨率、Quality Level、步骤、期望/实际、超时、logcat/Player.log、截图或录屏、执行人和 `PASS`/`FAIL`/`BLOCKED_NOT_VERIFIED`/`NOT_IN_SCOPE`；泄漏使用明确比较点与容差。只有非 Development 候选包的设备证据存在时，任务 33 才可声明 Android runtime verified。
+
+**执行设计 §4.2 U-P1-08/09/13 验收补齐（任务 29）：** Android/iOS 分别用 `-buildTarget Android`/`-buildTarget iOS` 启动，build method 只验证 active target 不切换；Windows 仅执行 `ValidateIosConfiguration`；`HAS_IOS_RUNNER` 控制 iOS job；读取批准的 `release-scope.yaml` 后写 `ios-status = NOT_IN_SCOPE` 或 `BLOCKED_NOT_VERIFIED` 并写入 artifact/summary，不无限排队；固定 runner labels 并检查 Unity 版本、许可证、Build Support、SDK/NDK/JDK 与 Xcode；唯一 BuildScenes 清单；校验 BuildReport、APK/AAB/Xcode 工程确实存在；构建设置由 `finally` 恢复。P1 Engineering Gate 生成 Android ARM64 IL2CPP Development Build；Mobile Release Readiness 从同一 Git SHA、同一 content manifest 生成非 Development 候选包并完成安装、冷启动、CharacterSelect、Addressables、内建 UI、协议 fixture 与 DemoDay smoke；记录 signing 指纹、versionCode/versionName、Managed Stripping Level、Scripting Backend、Development/Debuggable 与 ABI；smoke 写完成标志与退出状态，保存 `adb logcat`、设备信息与包版本；按 strip diagnostics 配置 `link.xml`/`[Preserve]`；只有候选包证据存在时才可声明 Android runtime verified。移动生命周期 smoke 覆盖冷/热启动、前后台、网络切换、断线重连、Safe Area/分辨率/方向、返回键与 back stack、低内存和场景切换取消，证据写入 `production/qa/evidence/<run-id>/`。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Editor/Build Assets/Scripts/Editor/BuildScript.cs \
   Assets/Scripts/Editor/WebGLBuildScript.cs Assets/Scripts/Tests/Editor/Build \
-  ProjectSettings/ProjectSettings.asset docs/release/mobile-build.md
+  ProjectSettings/ProjectSettings.asset Assets/link.xml* \
+  tools/mobile/verify-build-artifacts.ps1 tools/mobile/android-smoke.sh \
+  docs/release/mobile-build.md
 git commit -m "build: add reproducible android and ios pipelines"
 ```
 
@@ -2572,7 +2726,10 @@ git commit -m "build: add reproducible android and ios pipelines"
 - 创建：`Assets/Scripts/Tests/Editor/Architecture/MonoBehaviourLookupGuardTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Architecture/AsmdefDependencyGuardTests.cs`
 - 创建：`Assets/Scripts/Tests/Editor/Architecture/GameplayResourcesLoadGuardTests.cs`
-- 创建：`Assets/Scripts/Tests/Editor/Architecture/mono-behaviour-lookup-baseline.txt`
+- 创建：`Assets/Scripts/Tests/Editor/Architecture/legacy-allowlist.json`
+- 修改：`Assets/Scripts/Tests/Editor/SyncLayer/TransportFactoryBoundaryGuardTests.cs`（纳入长期守卫，不重定义语义）
+- 修改：`Assets/Scripts/Tests/Editor/Network/KcpPluginPlatformGuardTests.cs`（纳入长期守卫，不重定义语义）
+- 修改：`tools/check-webgl-kcp-artifacts.sh`（WebGL 产物守卫，由任务 31 的 CI 调用）
 - 创建：`Assets/Scripts/Hotfix/GameSystems/Bag/Hotfix.GameSystems.Bag.asmdef`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/Stamina/Hotfix.GameSystems.Stamina.asmdef`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/GameSys.asmdef`
@@ -2582,29 +2739,35 @@ git commit -m "build: add reproducible android and ios pipelines"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Stamina/README.md`
 - 修改：`docs/superpowers/specs/2026-05-06-gamesystems-assembly-split-design.md`（标记被本计划部分取代）
 
-- [ ] **步骤 1：先写守卫测试与当前 baseline**
+- [ ] **步骤 1：先写守卫测试与 legacy allowlist**
 
 ```csharp
-No_New_Public_MonoBehaviour_Runtime_Lookup_Above_Baseline();
-Removed_Source_Violation_Must_Be_Removed_From_Baseline();
+No_New_Public_MonoBehaviour_Runtime_Lookup_Above_Allowlist();
+Removed_Source_Violation_Must_Be_Removed_From_Allowlist();
+Allowlist_Entry_Requires_Owner_Reason_And_Expiry();
 No_Executable_ResourcesLoad_In_GameSystems();
 Commented_Legacy_ResourcesLoad_Text_Does_Not_Trigger_Guard();
 Bag_Assembly_Does_Not_Reference_GameSys();
 Stamina_Assembly_Does_Not_Reference_GameSys();
 GameSys_References_Bag_And_Stamina_Explicitly();
+GameSys_Does_Not_Bypass_TransportFactory_For_KcpNet_Or_WebSocketNet();
+Transport_Factory_Plugin_And_WebGL_Artifact_Guards_Remain_Enforced();
 No_Document_Claims_HybridClr_Is_Installed();
 ```
 
-- [ ] **步骤 2：运行守卫，确认 baseline 能抓新增违规**
+- [ ] **步骤 2：运行守卫，确认 allowlist 能抓新增违规**
 
 运行：`bash tools/unity-tests.sh EditMode Architecture`
-预期：首次按当前存量生成 baseline 后，通过注入一个临时 fixture 验证新增违规会失败，再删除 fixture。
+预期：首次按当前存量生成 `legacy-allowlist.json` 后，通过注入一个临时 fixture 验证新增违规会失败，再删除 fixture。
 
-- [ ] **步骤 3：拆分低依赖程序集**
+- [ ] **步骤 3：扩展长期守卫并拆分低依赖程序集**
 
-先拆 Bag，再全量编译/测试；再拆 Stamina。新程序集不得反向引用 `GameSys`。更大范围 Sys3C/Skills/Combat/Monster 拆分登记 P2，不在本任务夹带。架构守卫只允许 MonoBehaviour lookup baseline 减少；P1 触及文件必须清零自身违规。
+保留并扩展任务 13 已通过 P0 Gate 的 `TransportFactoryBoundaryGuardTests`、`KcpPluginPlatformGuardTests` 和 `tools/check-webgl-kcp-artifacts.sh`：任务 30 只维护 allowlist、CI 接线与 asmdef 重构，不重新定义 transport factory、PluginImporter 或 WebGL 产物的语义。
 
-`GameplayResourcesLoadGuardTests` 扫描 `Assets/Scripts/Hotfix/GameSystems/**/*.cs` 的可执行调用并忽略注释/字符串，任何 `Resources.Load*` 调用都立即失败，不设置存量 baseline 或永久白名单。任务 22 必须已迁移当前 `UIManager` 调用；`ItemCell` 中仅有的注释文本由专门 fixture 证明不会误报。若执行时发现新的真实调用，必须在本任务内迁到任务 21 的 `ResourceLease` API，并同步所属模块 README，不能把它加入豁免表。
+- `MonoBehaviourLookupGuardTests` 禁止非白名单 `GetComponent`/`FindObject*`；`legacy-allowlist.json` 每项必须含 owner、reason、expiresAt 和恢复条件，现有基线只允许收缩，新增违规立即失败，过期条目失败。
+- `GameplayResourcesLoadGuardTests` 扫描 `Assets/Scripts/Hotfix/GameSystems/**/*.cs` 的可执行调用并忽略注释/字符串，任何 `Resources.Load*` 调用都立即失败，不设置存量 baseline 或永久白名单。任务 22 必须已迁移当前 `UIManager` 调用；`ItemCell` 中仅有的注释文本由专门 fixture 证明不会误报。若执行时发现新的真实调用，必须在本任务内迁到任务 21 的 `ResourceLease` API，并同步所属模块 README，不能把它加入豁免表。
+- `AsmdefDependencyGuardTests` 校验 `GameSys.asmdef` 对 `KcpNet`/`WebSocketNet` 的引用不能绕过 factory/编译边界，并禁止跨层 asmdef 反向引用。
+- 守卫连续两轮全绿后才拆分：先拆 Bag，再全量编译/测试；再拆 Stamina。新程序集不得反向引用 `GameSys`。更大范围 Sys3C/Skills/Combat/Monster/SyncLayer 拆分登记 P2，不在本任务夹带。P1 触及文件必须清零自身违规。
 
 - [ ] **步骤 4：验证通过**
 
@@ -2612,15 +2775,21 @@ No_Document_Claims_HybridClr_Is_Installed();
 bash tools/unity-tests.sh EditMode Architecture
 bash tools/unity-tests.sh EditMode
 bash tools/unity-tests.sh PlayMode StaminaIntegrationTests
+bash tools/check-webgl-kcp-artifacts.sh --build-target WebGL
 ```
 
-预期：Bag/Stamina 独立编译，所有引用显式，GameSystems 可执行代码中 `Resources.Load*` 为 0，且未重新引入 HybridCLR 承诺。
+预期：Bag/Stamina 独立编译，所有引用显式，GameSystems 可执行代码中 `Resources.Load*` 为 0，allowlist 未增长；任务 13 的 factory/plugin/WebGL 产物守卫仍全绿；未重新引入 HybridCLR 承诺。
+
+**执行设计 §4.3 架构守卫验收补齐（任务 30）：** 保留并扩展任务 13 已通过 P0 Gate 的 transport factory、PluginImporter 与 WebGL 产物守卫，不在 P1 重新定义其语义；新增守卫禁止非白名单 `GetComponent`/`FindObject*`、玩法层 `Resources.Load` 和跨层 asmdef 反向引用；校验 `GameSys.asmdef` 对 `KcpNet`/`WebSocketNet` 的引用不能绕过 factory/编译边界；建立带责任人、原因和到期日的 legacy allowlist，现有基线只允许收缩，新增违规立即失败；守卫稳定后再拆 Bag/Stamina asmdef，并用依赖守卫证明不反向引用 `GameSys`；Sys3C/Skills/Combat/Monster/SyncLayer 的大规模拆分留 P2。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Assets/Scripts/Tests/Editor/Architecture Assets/Scripts/Hotfix/GameSystems/Bag \
-  Assets/Scripts/Hotfix/GameSystems/Stamina Assets/Scripts/Hotfix/GameSystems/GameSys.asmdef \
+git add Assets/Scripts/Tests/Editor/Architecture Assets/Scripts/Tests/Editor/SyncLayer \
+  Assets/Scripts/Tests/Editor/Network/KcpPluginPlatformGuardTests.cs* \
+  tools/check-webgl-kcp-artifacts.sh \
+  Assets/Scripts/Hotfix/GameSystems/Bag Assets/Scripts/Hotfix/GameSystems/Stamina \
+  Assets/Scripts/Hotfix/GameSystems/GameSys.asmdef \
   Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef Assets/Scripts/Tests/PlayMode \
   docs/superpowers/specs/2026-05-06-gamesystems-assembly-split-design.md
 git commit -m "refactor: isolate bag and stamina assemblies with architecture guards"
@@ -2638,8 +2807,11 @@ git commit -m "refactor: isolate bag and stamina assemblies with architecture gu
 - 创建：`tools/ci/run-unity-tests.ps1`
 - 创建：`tools/ci/assert-test-results.ps1`
 - 创建：`tools/ci/check-coverage.ps1`
+- 创建：`tools/ci/check-artifacts.ps1`
+- 创建：`tools/ci/resolve-platform-status.ps1`
 - 创建：`tools/ci/fixtures/zero-tests.xml`
 - 创建：`tools/ci/fixtures/passing.xml`
+- 创建：`tools/ci/fixtures/coverage-passing.xml`
 - 创建：`coverage-baseline.json`
 - 修改：`Server/Server.Tests/Server.Tests.csproj`
 - 修改：`Packages/manifest.json` 与 `Packages/packages-lock.json`（锁定 Unity Code Coverage 包）
@@ -2647,24 +2819,32 @@ git commit -m "refactor: isolate bag and stamina assemblies with architecture gu
 
 - [ ] **步骤 1：给 CI 脚本写 fixture 自测**
 
-断言测试 XML 中 0 tests、失败、崩溃、超时均返回非零；覆盖率任一目标程序集比 baseline 下降 >1 个百分点返回非零；首次失败即失败，诊断性重跑不能转绿。
+断言测试 XML 中 0 tests、失败、崩溃、超时均返回非零；覆盖率 XML 缺失、损坏或目标程序集未出现返回非零；任一目标程序集比 baseline 下降 >1 个百分点返回非零；`release-scope.yaml` 缺失、不可解析或与运行平台状态冲突返回非零；首次失败即失败，诊断性重跑不能转绿。
 
 - [ ] **步骤 2：本地运行脚本验证失败/成功 fixture**
 
 ```powershell
 pwsh tools/ci/assert-test-results.ps1 -Fixture tools/ci/fixtures/zero-tests.xml
 pwsh tools/ci/assert-test-results.ps1 -Fixture tools/ci/fixtures/passing.xml
+pwsh tools/ci/check-coverage.ps1 -Fixture tools/ci/fixtures/coverage-passing.xml
 ```
 
-预期：第一条非零、第二条 0。
+预期：第一条非零、后两条 0（覆盖率 fixture 含完整目标程序集）。
 
-- [ ] **步骤 3：创建工作流**
+- [ ] **步骤 3：创建工作流、release scope 与 Addressables 编排**
 
-GitHub hosted runner 跑 Server build/test；Windows self-hosted Unity runner 跑 EditMode、通用 PlayMode、native PlayMode、Addressables content build、Android Development Build、架构守卫。macOS self-hosted runner 存在时导出 iOS；不存在则 workflow 状态明确为 skipped/not-verified，不计入 iOS 发布门禁。上传 XML、日志、coverage、构建产物。
+- 每个 workflow 启动时复制 `production/quality/release-scope.yaml` 到 `production/quality/artifacts/<run-id>/`，运行期间禁止修改；`resolve-platform-status.ps1` 输出每个平台的 `PASS`/`BLOCKED_NOT_VERIFIED`/`NOT_IN_SCOPE`，只有该文件明确排除的平台才可标 `NOT_IN_SCOPE`。
+- GitHub hosted runner 跑 Server build/test；Windows self-hosted Unity runner（固定 label）跑 EditMode、通用 PlayMode、native PlayMode、Addressables content build + Use Existing Build 生命周期测试、Android Development Build、架构守卫、VFX GUID 守卫与 `tools/check-webgl-kcp-artifacts.sh`。
+- Addressables 生产验证按执行设计 §4.2.1：保存原 settings → 清理本平台旧 catalog/hash/bundle → `BuildPlayerContent` 写 manifest/hash → 切 Use Existing Build → 生命周期测试读取同一 manifest → `finally` 恢复；恢复失败或回退 Use Asset Database 即失败。
+- iOS job 由仓库变量 `HAS_IOS_RUNNER` 控制：无 runner 时 workflow 必须写 `ios-status = BLOCKED_NOT_VERIFIED`（或 release scope 明确排除时 `NOT_IN_SCOPE`），不能无限排队或跳过而不留证据。
+- 构建前检查 Unity 版本、许可证、Build Support、Android SDK/NDK/JDK 与 Xcode；缺任一项按平台写 `BLOCKED_NOT_VERIFIED`。
+- `check-artifacts.ps1` 校验 XML、日志、coverage、APK/AAB/Xcode、catalog/hash/bundle 存在、创建时间晚于 Gate 开始时间且 SHA-256 一致；旧产物或 hash 不匹配即失败。所有 artifact 上传到同一 run-id。
 
-- [ ] **步骤 4：生成并提交基线**
+- [ ] **步骤 4：生成并提交覆盖率基线**
 
-运行本地完整门禁生成 `coverage-baseline.json`。P1 只要求禁止下降；80%/70% 目标留 P2。检查 GitHub required checks 与分支保护配置文档一致。
+Coverage 参数固定为 `-enableCodeCoverage`、`-coverageResultsPath production/quality/artifacts/<run-id>/coverage`、`-coverageOptions "generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+DataDefinition,+Core,+Cool.Protocol,+SyncCore,+KcpNet,+WebSocketNet,+GameSys,+Hotfix.GameSystems.*,-GameSys.EditorTests,-*PlayModeTests"`，排除测试程序集与生成代码；assembly filter 与排除规则写入 `tools/ci/check-coverage.ps1`，不得每个 run 临时改。Coverage XML 缺失、损坏或任一目标程序集未出现即失败。运行本地完整门禁生成 `coverage-baseline.json`；P1 只要求禁止下降，80%/70% 目标留 P2。CI 对 0 tests、测试清单异常下降、未知 skip、默认包名、协议漂移、配置错误、架构护栏和覆盖率下降明确失败。检查 GitHub required checks 与分支保护配置文档一致。
+
+**执行设计 §4.2 U-P1-06/08/10 验收补齐（任务 31）：** CI 启动时读取并复制 `release-scope.yaml`，`HAS_IOS_RUNNER` 控制 iOS job，缺 runner/Xcode/设备时写 `ios-status = BLOCKED_NOT_VERIFIED`、明确排除时写 `NOT_IN_SCOPE`，不无限排队；固定 runner labels 并预检 Unity 版本/许可证/Build Support/SDK/NDK/JDK/Xcode；Addressables 使用 §4.2.1 的 BuildPlayerContent → Use Existing Build 编排并读取同一 content manifest；`check-artifacts.ps1` 校验 BuildReport、APK/AAB/Xcode、catalog/hash/bundle、产物新鲜度与 SHA-256；Coverage 固定 `-enableCodeCoverage`、`-coverageResultsPath`、`-coverageOptions`、assembly filter 与排除规则，XML 缺失、损坏或目标程序集未出现即失败；CI 对 0 tests、测试清单异常下降、默认包名、协议漂移、配置错误、架构护栏和覆盖率下降明确失败。
 
 - [ ] **步骤 5：Commit**
 
@@ -2678,7 +2858,7 @@ git commit -m "ci: enforce tests builds architecture and coverage baselines"
 
 ### 任务 32：加入 OpenTelemetry、健康检查与 WSS 部署基线
 
-**优先级：** P1；依赖任务 9、10、29
+**优先级：** P1；依赖任务 9、10、13、29
 
 **文件：**
 - 创建：`Server/Diagnostics/Telemetry.cs`
@@ -2687,13 +2867,27 @@ git commit -m "ci: enforce tests builds architecture and coverage baselines"
 - 修改：`Server/Server3C.cs`
 - 修改：`Server/Program.cs`
 - 修改：`Server/Server3C.csproj`
+- 创建：`Server/Security/NoiseSecurityProvider.cs`
+- 创建：`Server/Security/NoiseNative.cs`
+- 创建：`Server/Security/SecurityKeyStore.cs`
+- 创建：`Server/Security/KeyRotationService.cs`
+- 创建：`Assets/Scripts/AOT/KcpNet/Security/NoiseSecurityProvider.cs`
+- 创建：`Assets/Scripts/AOT/KcpNet/Security/NoiseNative.cs`
+- 创建：`Assets/Plugins/Android/libs/arm64-v8a/libnoise.so` 及 `.meta`
+- 创建：`Assets/Plugins/Android/libs/x86_64/libnoise.so` 及 `.meta`（仅 emulator）
 - 创建：`Server/Server.Tests/Diagnostics/TelemetryContractTests.cs`
 - 创建：`Server/Server.Tests/Diagnostics/HealthServerTests.cs`
+- 创建：`Server/Server.Tests/Security/NoiseSecurityProviderTests.cs`
+- 创建：`Server/Server.Tests/Security/KeyRotationTests.cs`
+- 创建：`Assets/Scripts/Tests/Editor/Network/NoiseSecurityProviderTests.cs`
 - 创建：`production/deploy/Caddyfile`
 - 创建：`production/deploy/README.md`
+- 创建：`production/deploy/security/key-ids.example.json`（非敏感 key ID/轮换代次）
+- 创建：`tools/security/key-rotation-drill.sh`
+- 创建：`docs/security/key-rotation-drill.md`
 - 修改：`Server/README.md`
 
-- [ ] **步骤 1：编写失败的指标/健康测试**
+- [ ] **步骤 1：编写失败的指标/健康/安全测试**
 
 ```csharp
 Metrics_Expose_Tick_Queue_Session_Backpressure_Aoi_Nav_And_Allocation();
@@ -2701,74 +2895,132 @@ Live_Is_Healthy_When_Process_Is_Running();
 Ready_Fails_When_World_Tick_Is_Stalled_Or_Auth_Is_Misconfigured();
 Management_Endpoint_Defaults_To_Loopback();
 Shutdown_Stops_Admission_Drains_Bounded_Queues_And_Closes_Sessions();
-Production_Profile_Requires_Wss_Proxy_And_Rejects_DevAuth();
+NonDevelopment_Requires_Approved_NoiseProvider();
+Plaintext_Kcp_Fails_Closed_In_NonDevelopment();
+Handshake_Rejects_Wrong_Static_Key_And_Binds_Original_Hostname();
+Aead_Roundtrip_Rejects_Tampered_And_Replayed_Frames();
+Rekey_Rotates_At_Configured_Threshold_Without_Downgrade();
+Expired_Key_And_Downgrade_Are_Rejected();
+Logs_And_Metrics_Contain_No_Secrets();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
 
-运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Diagnostics"`
-预期：FAIL；telemetry/health 不存在。
+运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Diagnostics"` 和 `bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Security"`
+预期：FAIL；telemetry/health/security provider 不存在。
 
-- [ ] **步骤 3：实现标准指标与部署样例**
+- [ ] **步骤 3：实现标准指标、健康检查、ADR-0003 安全 provider 与部署样例**
 
-使用 `System.Diagnostics.Metrics` + OpenTelemetry Prometheus exporter；管理端默认 `127.0.0.1`。`/health/live` 只表示进程，`/health/ready` 检查最近世界 tick、auth 配置与队列健康。Caddy 示例只向公网暴露 WSS，代理到私网 WS；指标/健康不公开。停机不声称持久化未存在的数据。
+**可观测性：** 使用 `System.Diagnostics.Metrics` + OpenTelemetry Prometheus exporter；指标至少包含 tick p50/p95/p99、队列深度/丢弃、session/unauth 数、WS/KCP 背压、AOI 可见数、导航 p95、GC/分配。管理端默认 `127.0.0.1`；`/health/live` 只表示进程存活，`/health/ready` 检查最近世界 tick、auth 配置与队列健康。Caddy 示例只向公网暴露 WSS，代理到私网 WS；指标/健康不公开。生产模式对配置、怪物表、地图、协议版本和 security provider 做 fail-fast 校验。
 
-- [ ] **步骤 4：验证通过与停机演练**
+**ADR-0003 安全 provider：** 按 `docs/architecture/adr-0003-kcp-session-security.md` 完成客户端/服务端 `IKcpSecurityProvider` 实现：Noise-C `Noise_XX_25519_ChaChaPoly_BLAKE2s`，Android 通过 `libnoise.so`（arm64-v8a、x86_64），服务端通过 `noise.dll`；每端一份静态 X25519 key pair，peer public key 带外提供并与握手结果比对；identity 是固定静态 key，prologue 绑定原始 `NetworkEndpoint` hostname/port，不绑定 DNS 解析 IP。AEAD 使用隐式 per-direction nonce，解密成功才推进，重放/篡改 fail-closed；按配置的字节/时间阈值在会话层建立新 Noise session 完成 rekey/轮换；协议名固定、无协商降级路径；释放时清理密钥材料，日志/指标只含协议名、库版本、公钥指纹和错误码，不含私钥、票据或明文载荷。非 Development 构建缺 provider 或允许明文 KCP 时拒绝启动/构建；Development/loopback/受控测试网络可显式启用明文。
+
+**优雅停机：** 先停止准入，再排空有界队列、关闭世界与会话，最后关闭 listeners；不声称持久化未存在的数据。密钥轮换演练记录旧 key 到期、新 key 生效、重连与拒绝过期/降级证据。
+
+- [ ] **步骤 4：验证通过、轮换演练与停机演练**
 
 ```bash
+export RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Diagnostics"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Security"
+bash tools/unity-tests.sh EditMode NoiseSecurityProviderTests
+bash tools/security/key-rotation-drill.sh --run-id "$RUN_ID" --evidence production/qa/evidence/"$RUN_ID"
 dotnet run -c Release --project tools/ServerLoadHarness -- --profile graceful-shutdown
 ```
 
-预期：指标可抓取、readiness 能发现 tick stall、停机无残留 listener/session/world task。
+预期：指标可抓取、readiness 能发现 tick stall；Noise 握手、AEAD 往返、篡改/重放/错误身份/过期密钥/降级拒绝全部通过；轮换演练不丢证据且不泄露秘密；停机无残留 listener/session/world task。
+
+**执行设计 §4.2 U-P1 可观测性 + ADR-0003 验收补齐（任务 32）：** 指标包含 tick p50/p95/p99、队列深度/丢弃、session/unauth 数、WS/KCP 背压、AOI 可见数、导航 p95、GC/分配；健康检查区分进程存活与世界 tick；Caddy 示例终止 WSS；按 `adr-0003-kcp-session-security.md` 完成移动 KCP 标准安全 provider、服务端身份验证、AEAD、重放保护、rekey/轮换、降级拒绝和不含秘密的指标/日志；非 Development 构建明文 fail-closed；管理/指标端点默认 loopback；配置/怪物表/地图/协议/安全 provider 生产模式 fail-fast；优雅停机先停止准入、排空有限队列、关闭世界与会话。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Server/Diagnostics Server/Server3C.cs Server/Program.cs Server/Server3C.csproj \
-  Server/Server.Tests/Diagnostics production/deploy Server/README.md
-git commit -m "feat(ops): add telemetry health and wss deployment baseline"
+git add Server/Diagnostics Server/Security Server/Server3C.cs Server/Program.cs \
+  Server/Server3C.csproj Server/Server.Tests/Diagnostics Server/Server.Tests/Security \
+  Assets/Scripts/AOT/KcpNet/Security Assets/Plugins/Android/libs \
+  Assets/Scripts/Tests/Editor/Network/NoiseSecurityProviderTests.cs* \
+  production/deploy tools/security docs/security Server/README.md
+git commit -m "feat(ops): add telemetry health and adr-0003 security provider"
 ```
 
 ---
 
-### 任务 33：执行 P1 Gate 并形成发布准备结论
+### 任务 33：执行三个 P1 Gate 并形成发布准备结论
 
 **优先级：** P1 收尾；依赖任务 15–32
 
 **文件：**
-- 创建：`production/quality/p1-gate-2026-11.md`
-- 创建：`production/quality/mobile-profile-2026-11.md`
+- 创建：`production/quality/p1-engineering-gate-<run-id>.md`
+- 创建：`production/quality/mobile-release-gate-<run-id>.md`
+- 创建：`production/quality/webgl-public-gate-<run-id>.md`
+- 创建：`production/quality/artifacts/<run-id>/`（本轮 XML、日志、coverage、构建产物、设备证据与 SHA-256）
 - 修改：`AGENTS.md` Current Status 与测试数（仅在实际结果确认后）
 - 修改：相关模块 README 的已知限制与证据链接
 
-- [ ] **步骤 1：运行完整自动门禁**
+- [ ] **步骤 1：在 clean worktree 执行 P1 Engineering Gate**
+
+`run-id = YYYYMMDDTHHMMSSZ-<shortsha>`；dirty worktree 只能输出 `DIAGNOSTIC_ONLY`，不得产生 Gate 结论。
 
 ```bash
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
 bash tools/quality-gate.sh --p1
 dotnet run -c Release --project tools/ServerLoadHarness -- --profile p1-reference --runner-name cool-perf --warmup 120 --duration 600 --bots 200 --monsters 50 --clients 50 --position-hz 15 --cast-hz 2 --require-baseline-env
 ```
 
-预期：所有 required checks 通过；专用 perf runner 达到 p95/p99；0 tests、skip 冒充通过或覆盖率下降均失败。
+报告路径：`production/quality/p1-engineering-gate-<run-id>.md`。必须逐项记录：
 
-- [ ] **步骤 2：运行 30 分钟客户端 soak 与移动 profiling**
+- 两个 WorldInstance 同坐标实体互不可见、不可命中、不进入仇恨或 ORCA 邻居集合。
+- 200 bots + 怪物压测 tick p95 < 50ms、p99 < 66ms，无持续队列增长。
+- release scope 中所有 blocking platforms 的目标构建成功且 BuildReport 与产物存在；Android ARM64 IL2CPP Development Build 成功；iOS 按 runner 能力与 release scope 诚实报告。非 Development 候选包与设备 runtime smoke 独立归入 Mobile Release Readiness。缺设备不伪造 Engineering 结果，但对应 Mobile Release Readiness 必须为 `BLOCKED_NOT_VERIFIED`。
+- Addressables `BuildPlayerContent` 与 Use Existing Build 生命周期测试通过；Analyze 无阻塞级问题；catalog/hash/bundle 产物存在且来自同一 content manifest。
+- 热路径性能数据可复现；场景退出后 VFX 与 Monster 资源归零。
+- 经 ADR-0003 批准的 KCP security provider 在 `release-scope.yaml` 所有 blocking mobile platforms 的 IL2CPP Player Build 中编译通过，非 Development 配置禁止明文/降级；factory、endpoint、DNS、IPv4/IPv6、篡改/重放拒绝的自动测试通过。被排除平台的兼容性只能列 advisory 或平台级 `NOT_IN_SCOPE`，不得反向阻塞整个 Engineering Gate；本 Gate 不替代候选包真机网络证据。
+- WebGL 为 blocking platform 时，完成 release 配置的 WebGL Player Build、禁止 `ws://` 公网 endpoint 的静态检查、反向代理配置语法检查与 artifact digest；真实证书、DNS、公开代理和浏览器往返由 WebGL Public Deployment Readiness 判定。
+- CI 对 0 tests、测试清单异常下降、未知 skip、默认包名、协议漂移、配置错误、架构护栏和覆盖率下降明确失败。
+- 关闭 Domain Reload 后连续两轮运行无静态状态与资源泄漏。
+- iOS 被 `release-scope.yaml` 明确排除时为 `NOT_IN_SCOPE`；纳入 blocking platforms 但缺 macOS/Xcode/runner/设备证据时为 `BLOCKED_NOT_VERIFIED`，不能写成 iOS verified。
 
-循环进入/退出 UI、世界、战斗和场景；记录 Addressables leases、池 active/idle、EventBus subscriptions、managed allocations、FPS/frame-time。Android 参考机要求 p95 frame <=33.3ms、稳态无每帧 GC；实际机型/OS/分辨率写入报告。
+- [ ] **步骤 2：执行 Mobile Release Readiness**
 
-- [ ] **步骤 3：验证双世界与公网边界**
+报告路径：`production/quality/mobile-release-gate-<run-id>.md`。只对 `release-scope.yaml` 中 blocking platforms 包含的移动平台判定，Android/iOS 分别报告。
 
-两个 WorldInstance 同坐标实体互不可见/不可命中/不可仇恨/不可 ORCA；生产 profile 仅 WSS、协议 v2、HMAC/外部票据 validator，v1/dev-auth/KCP 默认禁用。Caddy/WSS、health、metrics、优雅停机演练留证。
+- 从 P1 Engineering Gate 相同 Git SHA、相同 Addressables content manifest 生成非 Development 候选包；记录并校验 BuildReport、非敏感 signing identity 指纹、versionCode/versionName、Managed Stripping Level、Scripting Backend、Development/Debuggable 标志与 ABI，任一项不匹配即失败。
+- Android ARM64 IL2CPP 候选包在物理参考设备或明确 ARM64 emulator 完成安装与 runtime smoke：冷启动、CharacterSelect、Addressables 初始化、内建 UI 加载、MessageTypeRegistry 非默认 fixture 编解码、进入 DemoDay；保存主动完成标志、退出状态、`adb logcat`、设备型号、系统、build fingerprint、包版本与 ABI，harness 校验 `ro.product.cpu.abi == arm64-v8a`。
+- 候选包通过已批准的 KCP security provider 连接受控公网测试端点；按 §3.4 把客户端包、实际服务端 artifact/deployment/config、provider/协议/ADR、非敏感 key ID、endpoint/DNS 与测试窗口绑定到同一 run ID，任一端重新部署后旧证据失效；保存域名、IPv4、IPv6-only/NAT64、服务端身份、AEAD、重放/篡改/降级拒绝、重连与 rekey/密钥轮换证据，且不记录密钥、票据或明文敏感载荷。仅 emulator 证据不能替代物理设备网络切换与 NAT64 验证。
+- Android 参考设备档位已配置；帧时间、GC、内存与 30 分钟 soak 达到固定阈值并保留原始数据（p95 frame ≤ 33.3ms，稳态无持续每帧 GC）。
+- 冷/热启动、前后台恢复、网络切换、断网重连、Safe Area、返回键、低内存和场景切换取消均有 PASS 证据，写入 `production/qa/evidence/<run-id>/`。
+- 本次测试窗口内未观测到崩溃、ANR、未观察异常或超过已定义容差的资源泄漏。
+- 当前里程碑包含 iOS 时，iOS 必须完成对应非 Development 候选包、Xcode/archive 与设备验证；证据缺失为 `BLOCKED_NOT_VERIFIED`，被批准范围明确排除时为 `NOT_IN_SCOPE`。
+- 任一目标平台 blocking 项缺证据时，本 Gate 不得 PASS，也不得标记“公开测试/商店发布准备”。
 
-- [ ] **步骤 4：诚实记录未执行项**
+- [ ] **步骤 3：执行 WebGL Public Deployment Readiness**
 
-iOS 若无 macOS runner，结论必须是“Android 公开测试准备；iOS 未验证”，不能写全移动平台通过。任何物理设备、TLS、压测或安全项未执行，都保持对应 Gate 未通过。
+报告路径：`production/quality/webgl-public-gate-<run-id>.md`。
+
+- WebGL 不在批准范围时本 Gate 为 `NOT_IN_SCOPE`；纳入 blocking platforms 时下列项目全部为 blocking，不能用 P0 的本地 `ws://` browser smoke 替代。
+- Engineering Gate 生成的 WebGL artifact digest 与实际 CDN/站点部署 artifact 一致；Addressables catalog/hash/bundle 来自同一 Git SHA 和 content manifest。
+- 公开 `https://` 页面只连接 release scope 中批准的完整 `wss://host:port/path`；DNS、有效证书链、hostname、有效期、反向代理路由/Upgrade/超时/消息上限配置均通过；浏览器控制台无 mixed-content、证书或握手错误。
+- 在 `requiredBrowserLanes` 指定的浏览器/版本上完成冷启动、登录、消息往返、断线/重连、页面隐藏/恢复和至少一个场景进入 smoke；保存 HAR/代理日志/浏览器日志与主动完成标志。
+- 按 §3.4 把 WebGL artifact、实际服务端/代理 artifact 或镜像 digest、配置 hash、部署时间、endpoint/DNS/证书指纹和测试窗口绑定到同一 run ID；任一部署、DNS、证书或代理配置变化后旧证据失效。
+- 任何 blocking 项缺失时为 `BLOCKED_NOT_VERIFIED` 或 `FAIL`，不得宣称 WebGL 公网发布准备。
+
+- [ ] **步骤 4：按平台矩阵与状态机形成结论**
+
+三份报告相互独立，不能用一个 Gate 的 PASS 代替另一个 Gate 的平台证据。平台传输按 release scope 与 ADR-0001 判定：Android/iOS 为 KCP + Protobuf，公网候选包叠加 ADR-0003 批准的 Noise 安全层；WebGL 为 WebSocket，公网为 WSS；每个平台/构建配置只启用一个主传输。旧的全局默认传输与全局禁用单一传输的表述全部删除，不再断言任何平台全局默认值。
+
+状态只能取 `PASS`、`PASS_WITH_ADVISORIES`、`FAIL`、`BLOCKED_NOT_VERIFIED`、`NOT_IN_SCOPE` 或 `DIAGNOSTIC_ONLY`。任一 blocking 平台为 `BLOCKED_NOT_VERIFIED` 时，对应的 Mobile Release Readiness / WebGL Public Deployment Readiness 不得 PASS，也不得写“预计可用”；只有 `release-scope.yaml` 明确排除的平台或项才能标 `NOT_IN_SCOPE`；dirty worktree 只能输出 `DIAGNOSTIC_ONLY`。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add production/quality AGENTS.md Assets/Scripts/Hotfix/GameSystems/*/README.md \
+RUN_ID="YYYYMMDDTHHMMSSZ-<shortsha>"  # 替换为本轮 run-id，与三份报告及 artifacts 目录一致
+git add "production/quality/p1-engineering-gate-$RUN_ID.md" \
+  "production/quality/mobile-release-gate-$RUN_ID.md" \
+  "production/quality/webgl-public-gate-$RUN_ID.md" \
+  "production/quality/artifacts/$RUN_ID" \
+  AGENTS.md Assets/Scripts/Hotfix/GameSystems/*/README.md \
   Assets/Scripts/AOT/*/README.md Server/README.md
-git commit -m "docs: record p1 release-readiness evidence"
+git commit -m "docs: record p1 engineering and release-readiness evidence"
 ```
 
 ---
