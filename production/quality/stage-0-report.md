@@ -1,9 +1,9 @@
 # Stage 0 Report
 
 - Date: 2026-11-07
-- Run ID: `stage0-20261107T062118Z-0425fc4a`
+- Run ID: `stage0-20261107T081551Z-3c5ab6bc`
 - Source branch: `codex/quality/stage-0`
-- Base Git SHA: `0425fc4a5637c15f89de0dd1a79f18fb978f3b3b` (evidence captured on this clean commit; this report was committed after evidence capture)
+- Base Git SHA: `3c5ab6bc740d251329bbf97aa5849ddc6c77ae92` (evidence captured on this clean commit; this report was committed after evidence capture)
 - Checker: `bash tools/check-stage0-consistency.sh` — **PASS**, exit 0 (captured on the clean evidence commit; full output below)
 - Checker log: `production/quality/stage-0-checker.log` (full output and exit code)
 - Technical preferences source marker: `TP-SENTINEL: 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096`
@@ -75,10 +75,9 @@ therefore remains **pending** and is not changed to “已确认，执行基线�
 
 ## Checker output
 
-Actual full output and exit code captured on the clean evidence commit `0425fc4a5637c15f89de0dd1a79f18fb978f3b3b` (report committed after):
+Actual full output and exit code captured on the clean evidence commit `3c5ab6bc740d251329bbf97aa5849ddc6c77ae92` (report committed after):
 
 ```text
-$ bash tools/check-stage0-consistency.sh
 ok: file docs/technical-preferences.md
 ok: file .claude/docs/technical-preferences.md
 ok: file .codex/docs/technical-preferences.md
@@ -206,6 +205,6 @@ exit=0
 
 ## Notes
 
-- Evidence is captured on the clean evidence commit `0425fc4a5637c15f89de0dd1a79f18fb978f3b3b` (`Run ID` `stage0-20261107T062118Z-0425fc4a`); the report itself is committed after evidence capture, so the commit containing this report is newer than the evidence commit.
+- Evidence is captured on the clean evidence commit `3c5ab6bc740d251329bbf97aa5849ddc6c77ae92` (`Run ID` `stage0-20261107T081551Z-3c5ab6bc`); the report itself is committed after evidence capture, so the commit containing this report is newer than the evidence commit.
 - The activation table records approved blob SHAs at baseline `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b`, which is the commit that contains all approved content; the Release scope row is that commit itself because `release-scope.yaml` was introduced there. The YAML `sourceGitSha` uses the same commit, not the parent `da7e3d1a`.
 - The execution design status remains pending: it was not changed to “已确认，执行基线”; the §8 activation checklist remains unsatisfied for the Linux consumer/hash, so activation waits for user decision.
