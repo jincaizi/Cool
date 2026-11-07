@@ -415,6 +415,8 @@ Gate 0 测试可信
   -> WebGL Public Deployment Readiness（任务 33，WebGL 纳入 blocking platforms 时）
 ```
 
+执行波次将这里的 P0-A..P0-E 收敛为 P0-A（任务 2–4）、P0-B（任务 5–8）、P0-C（任务 9–13）；子阶段顺序不变。
+
 允许并行：P0-A 与 P0-B；P0-D 的 GameLoop 与客户端 P0-E。
 禁止并行：P0-C 必须基于 P0-B 的稳定玩家身份/单一状态；P1-A 必须在单世界收口测试通过后开始；Addressables 迁移必须在 lease API 稳定后开始。
 P1 波次同样严格串行：P1-A → P1-B1 → P1-B2 → P1-C1 → P1-C2；P1-B2 依赖 P1-B1 的资源/UI 生命周期契约，P1-C1 依赖 P1-B2 的可测量性能基线，P1-C2 依赖 P1-C1 的可复现构建产物。三个 P1 Gate 的顺序为 P1 Engineering Gate → Mobile Release Readiness 与 WebGL Public Deployment Readiness；P1 Engineering Gate 通过前不得进入发布候选，任一 Release Readiness 为 `FAIL` 或 `BLOCKED_NOT_VERIFIED` 时对应平台不得标记“公开测试/商店发布准备”。
