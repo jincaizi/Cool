@@ -1,7 +1,7 @@
 # P0/P1 质量改进执行设计
 
 日期：2026-11-07
-状态：阶段 0 文档完成；Codex consumer sentinel BLOCKED_NOT_VERIFIED；执行基线激活待用户裁决
+状态：文档/治理工作完成；§8 激活清单待裁决（Codex consumer sentinel 未满足）；执行基线激活待用户裁决
 版本：Revision 2.1（Unity 专家复核闭环版 + 可行性修正）
 适用范围：Unity 客户端、共享同步规则、网络传输、.NET 服务端、构建与质量门禁
 
@@ -450,7 +450,7 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 以上 SHA 为基线提交 `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b` 上对应路径的 Git blob SHA（`git rev-parse HEAD:<path>`）。
 
-激活状态：**待裁决**。阶段 0 文档与治理项已完成；`production/quality/technical-preferences-sentinel.md` 的 Codex consumer sentinel 为 `BLOCKED_NOT_VERIFIED`（本机无 `codex` CLI），因此本文状态不改为“已确认，执行基线”，执行基线激活等待用户裁决。
+激活状态：**待裁决**。文档/治理工作完成；§8 激活清单待裁决（Codex consumer sentinel 未满足）。`production/quality/technical-preferences-sentinel.md` 的 Codex consumer sentinel 为 `BLOCKED_NOT_VERIFIED`（本机无 `codex` CLI），因此本文状态不改为“已确认，执行基线”，执行基线激活等待用户裁决。
 
 完成上述清单后，将本文状态改为“已确认，执行基线”，然后进入 Gate 0。清单未完成时，只允许修改文档、测试基础设施设计和治理文件，不允许开始任务 2–33 的运行时代码实施。
 

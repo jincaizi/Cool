@@ -4,18 +4,18 @@
 - Run ID: `stage0-20261107T055129Z-c739dfbd`
 - Source branch: `codex/quality/stage-0`
 - Base Git SHA: `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b`
-- Checker: `bash tools/check-stage0-consistency.sh` -> **PASS**
+- Checker: `bash tools/check-stage0-consistency.sh` -> **PASS**, exit 0 (captured output below)
 - Technical preferences source marker: `TP-SENTINEL: 05761703d9d3a2715c41bddfc6187eb1042d253e2d0b858b579d9290fb2ad8b9`
 - Claude consumer sentinel: **PASS** (opened generated file and reported marker)
 - Codex consumer sentinel: **BLOCKED_NOT_VERIFIED** (no `codex` CLI on this host)
 - Estimate: `production/quality/stage-0-estimate.md`
-- Activation: **PENDING USER DECISION** — Stage 0 documents are complete, but the execution baseline has not been activated and Stage 0 is not declared fully complete.
+- Activation: **PENDING USER DECISION** — Documentation/governance work is complete; the §8 activation checklist is pending a decision (Codex consumer sentinel not satisfied); the execution baseline is not activated and Stage 0 is not declared fully complete.
 
 ## Status detail
 
 | Item | Status | Evidence / reason |
 |---|---|---|
-| Stage 0 consistency checker | PASS | `bash tools/check-stage0-consistency.sh` exits 0 |
+| Stage 0 consistency checker | PASS | Captured tail output and exit code in “Checker output” below |
 | Technical preferences sync (Claude/Codex generated entries) | PASS | `.claude/docs/technical-preferences.md`, `.codex/docs/technical-preferences.md` carry the source SHA-256 above |
 | Claude consumer sentinel | PASS | `production/quality/technical-preferences-sentinel.md` |
 | Codex consumer sentinel | BLOCKED_NOT_VERIFIED | No `codex` CLI; Codex minimal review not executed |
@@ -27,10 +27,25 @@
 | Mobile KCP public security | BLOCKED_NOT_VERIFIED | POC accepted the provider only; fail-closed release config, identity/prologue provisioning and observability redaction not verified |
 | WebGL public deployment | BLOCKED_NOT_VERIFIED | `production/quality/release-scope.yaml` has `publicEndpoints: []`; no public WSS/DNS/certificate/reverse-proxy/browser-lane evidence exists |
 | iOS | NOT_IN_SCOPE | No macOS runner; excluded by the approved release scope |
-| Stage 0 estimate | PASS (file present) | `production/quality/stage-0-estimate.md`; Revision 2 by-wave estimate, original 49–86 person-days explicitly not used as the complete estimate |
+| Stage 0 estimate | PRESENT | `production/quality/stage-0-estimate.md`; Revision 2 by-wave estimate, original 49–86 person-days explicitly not used as the complete estimate |
 
 No unverified item above is recorded as PASS. The ADR-0003 POC PASS is limited to the provider integration
 and does not imply that the mobile KCP/UDP public path, ARM64 runtime, NAT64/IPv6 or rekey/rotation are verified.
+
+## Checker output
+
+Actual captured tail output and exit code from this run:
+
+```text
+$ bash tools/check-stage0-consistency.sh
+ok: production/qa/device-profiles/android-reference.yaml contains: p95Algorithm:
+ok: production/qa/device-profiles/android-reference.yaml contains: rawDataFormat:
+ok: no legacy -buildTarget win64
+ok: no .Codex/ path in Git index
+ok: docs/superpowers/specs/2026-11-07-p0-p1-quality-improvement-execution-design.md excludes: 待阶段 0 填写
+STAGE 0 CHECK: PASS
+exit=0
+```
 
 ## Unexecuted items
 
@@ -50,9 +65,9 @@ and does not imply that the mobile KCP/UDP public path, ARM64 runtime, NAT64/IPv
 - `production/quality/release-scope.yaml` — approved scope; `publicEndpoints: []`.
 - `production/qa/device-profiles/android-reference.yaml` — Android reference profile.
 - `production/quality/stage-0-estimate.md` — Revision 2 by-wave estimate.
-- `production/quality/artifacts/stage0-20261107T055129Z-c739dfbd/` — reserved run artifact directory; this run produced no additional binary artifacts.
+- Checker output is embedded in this report (see “Checker output”); this run produced no additional binary artifacts.
 
 ## Notes
 
-- The execution design status remains pending: it was not changed to “已确认，执行基线”.
+- The execution design status remains pending: it was not changed to “已确认，执行基线”, and the §8 activation checklist remains unchecked, including the consumer sentinel item.
 - The activation table records Git blob SHAs at base commit `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b`; it does not imply approval of the Codex consumer sentinel.
