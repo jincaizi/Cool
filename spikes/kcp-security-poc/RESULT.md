@@ -1,23 +1,33 @@
 # ADR-0003 KCP Session Security POC — RESULT
 
 - **Date:** 2026-11-07
-- **Status:** PASS
+- **Status:** PASS (provider only)
 - **Selected provider:** Noise-C (`github.com/rweather/noise-c`), commit `cfe25410979a87391bb9ac8d4d4bef64e9f268c6` (2023-12-07), MIT. Reference implementation of the Noise Protocol Framework, revision 34 pattern set; POC protocol `Noise_XX_25519_ChaChaPoly_BLAKE2s`.
 - **.NET 8 server result:** PASS — .NET SDK 8.0.419, `net8.0`; UDP handshake, AEAD roundtrip, tamper rejection, replay rejection and wrong-server-identity rejection all passed.
-- **Unity 2022.3 Android IL2CPP result:** PASS — Unity 2022.3.25f1, IL2CPP, APK contains `arm64-v8a` and `x86_64`; the x86_64 emulator completed the handshake and AEAD roundtrip under IL2CPP. The emulator leg used TCP framing through `adb reverse` because the emulator guest has no working UDP route in this host environment; the provider handshake and AEAD are transport-agnostic and were exercised identically.
-- **Handshake:** PASS
-- **AEAD roundtrip:** PASS
-- **Tamper rejection:** PASS (`NOISE_ERROR_MAC_FAILURE` = `0x4504`)
-- **Replay rejection:** PASS (`NOISE_ERROR_MAC_FAILURE` = `0x4504`)
-- **Wrong server identity:** PASS (client rejects the learned static key before sending application data)
+- **Unity 2022.3 Android IL2CPP result:** PASS (provider handshake/AEAD only) — Unity 2022.3.25f1, IL2CPP, APK contains `arm64-v8a` and `x86_64`; the x86_64 emulator completed the handshake and AEAD roundtrip under IL2CPP. The emulator leg used TCP framing through `adb reverse` because the emulator guest has no working UDP route in this host environment; the provider handshake and AEAD are transport-agnostic and were exercised identically. See **Limitations / not verified** below.
+- **Handshake:** PASS (provider handshake; .NET UDP and Unity IL2CPP over TCP framing)
+- **AEAD roundtrip:** PASS (provider handshake scope; .NET UDP and Unity IL2CPP over TCP framing)
+- **Tamper rejection:** PASS (`NOISE_ERROR_MAC_FAILURE` = `0x4504`; provider-level on .NET UDP/TCP, not re-run on the Unity leg)
+- **Replay rejection:** PASS (`NOISE_ERROR_MAC_FAILURE` = `0x4504`; provider-level on .NET UDP/TCP, not re-run on the Unity leg)
+- **Wrong server identity:** PASS (provider-level on .NET; client rejects the learned static key before sending application data)
 - **Fallback:** None. WSS is not selected; it remains a contingency only if task 32 integration exposes a defect that invalidates this provider.
+
+## Limitations / not verified
+
+This POC accepts the Noise-C **provider integration only**. It does **not** verify the mobile KCP/UDP public path.
+
+- **Unity transport:** the Unity 2022.3 Android IL2CPP leg ran on an **x86_64 emulator**. The emulator guest had no working UDP route to the host (`ping 10.0.2.2` and `ip route get 10.0.2.2` returned "Network is unreachable"; `eth0` policy rules existed but the route tables were absent), so the Unity leg used 4-byte-length-prefixed Noise messages over **TCP framing via `adb reverse`**. The KCP/UDP datagram path was not exercised on Android by this POC. The .NET 8 POC exercises UDP only on loopback.
+- **ABI:** ARM64 was **built only**. The APK contains `arm64-v8a/libil2cpp.so` and `arm64-v8a/libnoise.so`, but the only installed emulator image is x86_64; no ARM64 device or ARM64 image was available, so no ARM64 runtime execution was performed.
+- **Provider maintenance:** the selected provider is Noise-C commit `cfe2541` (no tagged release) and this tree has **no in-place rekey API**. Task 32 must vendor/mirror the exact commit, implement session-layer key rotation/rekey, and run the KCP/UDP path on ARM64 hardware.
+- **Network paths:** IPv6/NAT64 behavior, replay-window behavior on a real KCP transport (as opposed to the loopback UDP probe), and public-candidate packet security configuration (fail-closed release guard, identity/prologue provisioning, observability redaction) were **not verified in Stage 0**.
+- **Other:** iOS was not built or run. No loss/latency/reordering, throughput, or public-internet measurements were taken. Managed key material is not zeroed in the POC.
 
 ## Candidate matrix
 
 | Candidate | Protocol version | Package / version / date | License | Maintenance | Unity IL2CPP Android | .NET 8 | Size | Verdict |
 |---|---|---|---|---|---|---|---|---|
 | Noise.NET (Metalnem) | Noise spec **revision 33** | `Noise.NET` 1.0.0, 2018-05-30 | MIT | Dormant since 2018; no later release | Managed netstandard1.3, but depends on native libsodium 1.0.16; that NuGet ships only win/linux/osx natives, no Android ABI | Yes (netstandard1.3 assets) | 38 KB nupkg, 51 KB `Noise.dll`, 586 KB libsodium | **REJECTED** — protocol revision 33 (not current revision 34), unmaintained since 2018, Android requires a separate libsodium build not provided by the package |
-| Noise-C (rweather) | Noise **revision 34** pattern set (XX, XX_FALLBACK, HFS) | Git commit `cfe2541`, 2023-12-07 (no tagged release) | MIT | Reference implementation; last commit 2023-12-07; stable | C; cross-compiled for arm64-v8a and x86_64 with NDK r23b and consumed via P/Invoke from Unity IL2CPP — **verified** | Yes, via P/Invoke — **verified** | 14 MB source tree; `noise.dll` 351 KB; `libnoise.so` 224 KB (arm64) / 264 KB (x86_64) | **SELECTED** |
+| Noise-C (rweather) | Noise **revision 34** pattern set (XX, XX_FALLBACK, HFS) | Git commit `cfe2541`, 2023-12-07 (no tagged release) | MIT | Reference implementation; last commit 2023-12-07; stable | C; cross-compiled for arm64-v8a and x86_64 with NDK r23b and consumed via P/Invoke from Unity IL2CPP — **verified on x86_64 emulator (provider handshake/AEAD only; no KCP/UDP runtime)** | Yes, via P/Invoke — **verified** | 14 MB source tree; `noise.dll` 351 KB; `libnoise.so` 224 KB (arm64) / 264 KB (x86_64) | **SELECTED (provider only)** |
 | wolfSSL DTLS | DTLS 1.3 supported since the 5.7.x line; 5.8.x carried DTLS 1.3 reliability fixes | 5.8.4 (2025-11-21); actively maintained | GPLv2 or commercial | Active | Native C; cross-compiling possible, but no maintained Android binding for Unity | No maintained .NET 8 binding; P/Invoke required | Multi-MB native library per ABI | **REJECTED** — GPLv2/commercial licensing is not acceptable for this closed client without a commercial license; no maintained .NET 8 or Unity binding; DTLS record layer over reliable KCP is a poor fit |
 | BouncyCastle C# DTLS | **DTLS 1.2 only** (`DtlsClientProtocol`/`DtlsServerProtocol`; no DTLS 1.3 handshake types) | `BouncyCastle.Cryptography` 2.7.0, 2026-07-30 | MIT | Active | Pure managed netstandard2.0; plausible but not verified | Yes (netstandard2.0/net6.0) | 8.73 MB nupkg; 4.89 MB netstandard2.0 DLL | **REJECTED** — protocol version condition: DTLS 1.2, not DTLS 1.3 |
 | OpenSSL DTLS | **DTLS 1.3 only in OpenSSL 4.1.0 (released 2026-10-23)**; 3.2/3.5/3.6 are DTLS 1.2 only | 4.1.0, 2026-10-23 | Apache 2.0 | Active | Native; per-ABI build required; no maintained Unity binding | No maintained .NET 8 binding; P/Invoke required | Multi-MB native library per ABI | **REJECTED** — DTLS 1.3 support was two weeks old at POC date, not enough for production selection; no maintained .NET 8 binding; native packaging cost; DTLS-over-KCP mismatch |
@@ -83,7 +93,7 @@ Runtime:
 - `RESULT PASS handshake+aead_roundtrip`
 - .NET server: `handshake_completed=true`, `client_static_ok=true`, `decrypt_ok=1`, client fingerprint `b6d4a4941f575970`
 
-Caveats recorded honestly:
+Caveats specific to the Unity leg (consolidated in **Limitations / not verified**):
 
 1. **Transport:** the emulator guest's UDP path was unavailable in this environment (`ping 10.0.2.2` and `ip route get 10.0.2.2` both returned "Network is unreachable"; `eth0` policy rules existed but the route tables were absent). The Unity leg therefore used 4-byte-length-prefixed Noise messages over TCP via `adb reverse tcp:47120 tcp:47120`. This does not change the provider handshake/AEAD being tested, but it is not KCP/UDP runtime evidence on Android. The .NET server leg exercises UDP.
 2. **ABI:** the only installed emulator image is x86_64, so the executed ABI is x86_64. The APK was built for ARM64 too and contains `arm64-v8a/libil2cpp.so` and `arm64-v8a/libnoise.so`, but no ARM64 execution was possible here. The ADR already states that emulator evidence accepts the library but is not sufficient for Mobile Release Readiness; task 32 must run the KCP/UDP path on ARM64 hardware.
@@ -122,6 +132,7 @@ The committed POC-only key set lives in `spikes/kcp-security-poc/keys/` and is m
 
 ## Residual risks
 
+- **The mobile KCP/UDP public path is not verified by this POC.** ARM64 runtime, IPv6/NAT64, replay-window behavior on real KCP, and public-candidate packet security configuration remain open; see **Limitations / not verified**.
 - Noise-C has no tagged release; the POC pins commit `cfe2541`. Task 32 should vendor or mirror the exact tree and track upstream security fixes.
 - The native library is per-ABI (`arm64-v8a`, `x86_64`); iOS would need an additional build. The POC did not evaluate iOS.
 - Managed key material is not zeroed in the POC; production integration must clear it.

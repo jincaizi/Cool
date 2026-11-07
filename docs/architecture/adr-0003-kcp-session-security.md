@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — 2026-11-07. POC passed; evidence is recorded in [`spikes/kcp-security-poc/RESULT.md`](../../spikes/kcp-security-poc/RESULT.md). The mobile KCP public path still needs the task 13/32 integration and an ARM64 KCP/UDP runtime check before Mobile Release Readiness.
+Accepted — provider integration verified; KCP/UDP, ARM64 runtime, NAT64/IPv6 and rekey/rotation remain blocking in task 32 / Mobile Release Readiness. Evidence and limitations: [`spikes/kcp-security-poc/RESULT.md`](../../spikes/kcp-security-poc/RESULT.md).
 
 ## Context
 
@@ -30,13 +30,14 @@ KCP + Protobuf provides neither confidentiality nor peer authentication. The HMA
 - License, maintenance, package size, and IL2CPP compatibility evidence are recorded.
 - Evidence is stored in `spikes/kcp-security-poc/RESULT.md` and referenced here.
 - A physical Android device is not required for the Stage 0 POC; emulator evidence is enough to accept the library, but not enough for Mobile Release Readiness.
-- Result (2026-11-07): all acceptance criteria passed for the library. The Unity emulator leg used TCP framing because the guest UDP route was unavailable in the POC environment, and the executed ABI was x86_64; the KCP/UDP ARM64 path must still be exercised in task 32 before Mobile Release Readiness.
+- Result (2026-11-07): the provider acceptance criteria passed (provider only). The Unity emulator leg used TCP framing because the guest UDP route was unavailable in the POC environment, and the executed ABI was x86_64; KCP/UDP, ARM64 runtime, NAT64/IPv6 and rekey/rotation remain unverified. See `RESULT.md` § Limitations / not verified.
 
 ## Consequences
 
 - Task 13 implements only the provider interface, configuration fail-fast, and plaintext release guard.
+- This ADR accepts the provider only. It does not verify the mobile KCP/UDP public path: the Unity leg ran on an x86_64 emulator over TCP framing, ARM64 was build-only, and IPv6/NAT64, replay-window behavior on real KCP, and public-candidate packet security configuration remain unverified in Stage 0.
 - Task 32 implements the selected provider, key rotation drill, and security tests, and must run the KCP/UDP path on ARM64 hardware.
-- Mobile Release Readiness cannot pass while the ARM64 KCP/UDP runtime evidence is missing, or if the POC evidence is invalidated.
+- Mobile Release Readiness cannot pass until task 32 provides ARM64 KCP/UDP runtime evidence and the unverified network paths above are covered.
 
 ## Alternatives
 
