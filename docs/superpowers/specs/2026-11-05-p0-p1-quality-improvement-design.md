@@ -288,7 +288,7 @@ P0 不在全局容器上零散补过滤，而先关闭尚未实现的多世界�
 
 - `GameLoop` 只处理 tick 开始时的快照数量，不在同一 tick 追赶新入队项。
 - KCP 的 `Input/Update/Send/TryRecv` 由同一执行上下文拥有；不允许每会话多个线程并发触达 KCP 实例。
-- 每个平台/构建配置只能启用一个主传输；Android/iOS Player 用 KCP + Protobuf + ADR-0003 安全层，WebGL 用 WebSocket/WSS，Editor/Windows 测试 lane 显式选择。生产默认不再是全平台 WSS；KCP 只在非 WebGL 的移动 Player 路径启用。
+- 每个平台/构建配置只能启用一个主传输；Android/iOS 公网候选包用 KCP + Protobuf + ADR-0003 安全层，WebGL 用 WebSocket/WSS，Editor/Windows 测试 lane 显式选择。生产环境 KCP 只用于非 WebGL 的移动 Player；Editor/Windows 测试 lane 可显式选择 KCP（Win64 KCP lane 用于生命周期与 soak），WebGL 不编译/启用 KCP。
 - 协议收到 `Encrypted/Compressed` 标志但当前未配置实现时立即拒绝；XOR/空压缩不得标作安全能力。
 
 ### P0-7：客户端主线程封送与有界消费
