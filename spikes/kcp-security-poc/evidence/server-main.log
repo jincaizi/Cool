@@ -1,0 +1,6 @@
+{"event":"listening","port":47113,"hostname":"127.0.0.1","protocol":"Noise_XX_25519_ChaChaPoly_BLAKE2s","library":"Noise-C","library_commit":"cfe25410979a87391bb9ac8d4d4bef64e9f268c6"}
+{"event":"handshake_complete","elapsed_ms":150.3798,"client_static_fingerprint":"b6d4a4941f575970"}
+{"event":"decrypt_ok","len":37,"index":0}
+{"event":"decrypt_rejected","error":"0x4504 MAC failure"}
+{"event":"decrypt_rejected","error":"0x4504 MAC failure"}
+summary_path=E:\CodeForJob\Cool\.claude\worktrees\quality-stage-0\spikes\kcp-security-poc\out\server-main.json

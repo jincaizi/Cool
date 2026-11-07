@@ -1,0 +1,4 @@
+{"event":"handshake_complete","elapsed_ms":7.9458,"server_fingerprint":"99080c8fc4aa9999"}
+{"event":"aead_roundtrip","ok":true,"error":null,"payload_len":37}
+{"event":"rejection_probes_sent","tampered":true,"replayed":true,"unexpected_response":false}
+summary_path=E:\CodeForJob\Cool\.claude\worktrees\quality-stage-0\spikes\kcp-security-poc\out\client-main.json

@@ -1,0 +1,7 @@
+# Keep the technical-preferences source hash reproducible on Windows checkouts
+# where core.autocrlf=true. The sentinel and generated copies must match the
+# LF bytes that the sync script hashes.
+docs/technical-preferences.md text eol=lf
+.claude/docs/technical-preferences.md text eol=lf
+.codex/docs/technical-preferences.md text eol=lf
+production/quality/technical-preferences-sentinel.md text eol=lf

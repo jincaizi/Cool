@@ -1,0 +1,20 @@
+{
+  "role": "responder",
+  "transport": "tcp",
+  "protocol": "Noise_XX_25519_ChaChaPoly_BLAKE2s",
+  "library": "Noise-C",
+  "library_commit": "cfe25410979a87391bb9ac8d4d4bef64e9f268c6",
+  "hostname": "127.0.0.1",
+  "port": 47115,
+  "handshake_completed": true,
+  "client_static_ok": true,
+  "decrypt_ok": 1,
+  "decrypt_failures": 2,
+  "error_codes": [
+    "0x4504 MAC failure",
+    "0x4504 MAC failure"
+  ],
+  "client_static_fingerprint": "b6d4a4941f575970",
+  "handshake_ms": 150.4967,
+  "elapsed_ms": 687.3461
+}

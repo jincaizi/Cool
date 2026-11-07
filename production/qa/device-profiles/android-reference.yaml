@@ -1,0 +1,12 @@
+configured: false
+deviceModel: ""
+soc: ""
+ramGb: 0
+os: ""
+resolution: ""
+qualityLevel: ""
+targetFps: 30
+warmupSeconds: 120
+sampleSeconds: 1800
+p95Algorithm: "nearest-rank"
+rawDataFormat: "csv: frame_index,timestamp_s,frame_ms"

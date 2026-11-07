@@ -59,6 +59,10 @@ Unity 2022 LTS MMO 客户端（服务端集成中），发布目标为移动平�
 - **Hit 表现覆盖**：只有 `Hit` / `DefendHit` / `Dizzy` 可达；`Knockback` / `Launched` / `Death` / `Down` / `GetUp` 无动画表现（backlog）。
 - **远端实体分档**：进入 60m / 退出 69m（迟滞）；升档要当场 `Apply(view.ActionState, view.Dead)`。详见 [SyncLayer](Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md)。
 
+## 技术偏好（强制）
+
+- 修改代码前读取 `docs/technical-preferences.md`；Claude 入口使用 `.claude/docs/technical-preferences.md`（generated，禁止手改）。
+
 ## 开发约定
 
 - Interface-oriented、高内聚低耦合；适配器解耦；EventBus 层间通信；Addressable 异步加载 + 对象池高频对象。

@@ -1,0 +1,88 @@
+# ADR-0003 POC - commands actually executed (2026-11-07)
+
+Host: Windows 10 Pro 19045
+.NET SDK: 8.0.419 (pinned by global.json; SDK 10.0.105 also installed, not used)
+Unity: 2022.3.25f1
+MSVC: 19.44.35225 (VS 2022 Community 14.44.35207)
+Windows SDK: 10.0.26100.0 (D:\Windows Kits\10)
+Android NDK: r23b (23.1.7779620, bundled with Unity)
+Emulator: Medium_Phone_API_36 (Android API 36, x86_64)
+
+## Noise-C source
+
+git clone https://github.com/rweather/noise-c.git
+git checkout cfe25410979a87391bb9ac8d4d4bef64e9f268c6
+
+The native build scripts in native/ reproduce the exact source list and flags.
+
+## Windows native library (noise.dll)
+
+cl.exe /c /O2 /W3 /std:c11 /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /DWIN32
+  /DED25519_CUSTOMRANDOM /DED25519_REFHASH
+  /I<noise-c>/include /I<noise-c>/src /I<noise-c>/src/protocol
+  <protocol sources> <ref backend sources> <crypto sources> native/stubs.c
+link.exe /DLL /DEF:native/noise.def /OUT:native/win-x64/noise.dll <objects> advapi32.lib
+
+Output: native/win-x64/noise.dll, 351,232 bytes.
+
+## Android native library (libnoise.so)
+
+clang.exe --target=aarch64-linux-android21 --sysroot=<ndk>/toolchains/llvm/prebuilt/windows-x86_64/sysroot
+  -shared -fPIC -O2 -DED25519_CUSTOMRANDOM -DED25519_REFHASH
+  -I<noise-c>/include -I<noise-c>/src -I<noise-c>/src/protocol
+  <protocol sources> <ref backend sources> <crypto sources> native/stubs.c
+  -o native/android/arm64-v8a/libnoise.so
+clang.exe --target=x86_64-linux-android21 ... -o native/android/x86_64/libnoise.so
+
+Outputs: arm64-v8a/libnoise.so 223,992 bytes; x86_64/libnoise.so 264,136 bytes.
+
+## .NET 8 POC
+
+cd spikes/kcp-security-poc
+dotnet build Server/Server.csproj -c Release
+dotnet build Client/Client.csproj -c Release
+bash run-poc.sh
+
+run-poc.sh runs:
+  Server --port 47114 --hostname 127.0.0.1 --client-pub keys/client.pub ... (wrong-identity case)
+  Client --port 47114 --server-pub keys/wrong-server.pub --mode wrong-identity
+  Server --port 47113 --hostname 127.0.0.1 ... (UDP main case)
+  Client --port 47113 --server-pub keys/server.pub --mode main
+  Server --transport tcp --port 47115 --hostname 127.0.0.1 ... (TCP framing case)
+  Client --transport tcp --port 47115 --server-pub keys/server.pub --mode main
+
+## Unity Android IL2CPP build
+
+Unity.exe -batchmode -nographics -quit
+  -projectPath E:/CodeForJob/Cool/.claude/worktrees/quality-stage-0/spikes/kcp-security-poc/UnityPoc
+  -buildTarget Android
+  -executeMethod KcpPocUnity.Editor.BuildScript.BuildAndroid
+  -logFile E:/CodeForJob/Cool/.claude/worktrees/quality-stage-0/spikes/kcp-security-poc/UnityPoc/Build/unity-build.log
+
+Build settings (logged by BuildScript): scripting_backend=IL2CPP, architectures=ARM64, X86_64.
+Result: BuildResult=Succeeded, size_bytes=120942514, errors=0, duration_seconds=33.7.
+APK: UnityPoc/Build/KcpSecurityPoc.apk, 15,886,942 bytes,
+     SHA256 31cce7a27a5aaa945f0f1634b46913a28a0d7dfbd9e8f821f6a34fd6183e0522.
+Native code in APK: lib/arm64-v8a/{libil2cpp,libnoise}.so and lib/x86_64/{libil2cpp,libnoise}.so.
+
+## Emulator run
+
+emulator.exe -avd Medium_Phone_API_36 -no-window -no-audio -no-boot-anim
+  -gpu swiftshader_indirect -no-snapshot-load -no-snapshot-save
+  -netdelay none -netspeed full
+
+bash run-unity-poc.sh
+
+run-unity-poc.sh:
+  adb reverse tcp:47120 tcp:47120
+  Server --transport tcp --port 47120 --hostname 127.0.0.1 --client-pub keys/client.pub ...
+  adb install -r UnityPoc/Build/KcpSecurityPoc.apk
+  adb shell am start -n com.poc.kcpsecurity/com.unity3d.player.UnityPlayerActivity
+  adb logcat -d -s Unity:V > out/unity-logcat.txt
+
+Emulator limitation: the guest has no working route to 10.0.2.2 (ip route get and ping
+return "Network is unreachable"; eth0 policy rules exist but no route tables), so the
+Unity leg uses TCP framing through adb reverse. The .NET POC exercises UDP; Noise is
+transport-agnostic and the provider/IL2CPP compatibility is what the Unity leg verifies.
+The only installed emulator image is x86_64, so the APK was built for ARM64 + x86_64
+but the executed ABI is x86_64.

@@ -1,0 +1,41 @@
+Archive:  /e/CodeForJob/Cool/.claude/worktrees/quality-stage-0/spikes/kcp-security-poc/UnityPoc/Build/KcpSecurityPoc.apk
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+       56  1981-01-01 01:01   META-INF/com/android/build/gradle/app-metadata.properties
+   125628  1981-01-01 01:01   classes.dex
+  9179944  1981-01-01 01:01   lib/arm64-v8a/libil2cpp.so
+     6728  1981-01-01 01:01   lib/arm64-v8a/libmain.so
+   223992  1981-01-01 01:01   lib/arm64-v8a/libnoise.so
+  9187712  1981-01-01 01:01   lib/arm64-v8a/libunity.so
+  9204280  1981-01-01 01:01   lib/x86_64/libil2cpp.so
+     9088  1981-01-01 01:01   lib/x86_64/libmain.so
+   264136  1981-01-01 01:01   lib/x86_64/libnoise.so
+ 10359904  1981-01-01 01:01   lib/x86_64/libunity.so
+      320  1981-01-01 01:01   assets/bin/Data/2ad418e12cdc73141b1f95a2edf26087
+  1560964  1981-01-01 01:01   assets/bin/Data/Managed/Metadata/global-metadata.dat
+   337563  1981-01-01 01:01   assets/bin/Data/Managed/Resources/mscorlib.dll-resources.dat
+   600852  1981-01-01 01:01   assets/bin/Data/Resources/unity_builtin_extra
+      157  1981-01-01 01:01   assets/bin/Data/RuntimeInitializeOnLoads.json
+     2435  1981-01-01 01:01   assets/bin/Data/ScriptingAssemblies.json
+      171  1981-01-01 01:01   assets/bin/Data/boot.config
+  1048576  1981-01-01 01:01   assets/bin/Data/globalgamemanagers.assets.split0
+  1048576  1981-01-01 01:01   assets/bin/Data/globalgamemanagers.assets.split1
+   700800  1981-01-01 01:01   assets/bin/Data/globalgamemanagers.assets.split2
+    20660  1981-01-01 01:01   assets/bin/Data/globalgamemanagers
+      756  1981-01-01 01:01   assets/bin/Data/level0
+    15180  1981-01-01 01:01   assets/bin/Data/sharedassets0.assets
+  1110848  1981-01-01 01:01   assets/bin/Data/unity default resources
+       36  1981-01-01 01:01   assets/bin/Data/unity_app_guid
+       68  1981-01-01 01:01   META-INF/com.android.games.engine.build_fingerprint
+     4724  1981-01-01 01:01   AndroidManifest.xml
+     1612  1981-01-01 01:01   res/0y.png
+      448  1981-01-01 01:01   res/7w.xml
+      448  1981-01-01 01:01   res/K1.xml
+      926  1981-01-01 01:01   res/bg.png
+      101  1981-01-01 01:01   res/cZ.png
+     2668  1981-01-01 01:01   resources.arsc
+     3544  1981-01-01 01:01   META-INF/CERT.SF
+     1167  1981-01-01 01:01   META-INF/CERT.RSA
+     3470  1981-01-01 01:01   META-INF/MANIFEST.MF
+---------                     -------
+ 45028538                     36 files

@@ -1,0 +1,13 @@
+milestone: p0-p1-quality-2026-11
+blockingPlatforms:
+  - android
+  - webgl
+requiredDeviceLanes:
+  - android-reference
+requiredBrowserLanes:
+  - chromium-desktop
+publicEndpoints: []
+approver: jincaizi
+approvedAt: "2026-11-07"
+# Commit that introduced the approved release scope (contains this approver/approvedAt).
+sourceGitSha: "c739dfbd5b1115ec7f53292f79d5de8ad5e9348b"
