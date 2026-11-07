@@ -1,10 +1,10 @@
 # Stage 0 Report
 
 - Date: 2026-11-07
-- Run ID: `pending evidence capture`
+- Run ID: `stage0-20261107T062118Z-0425fc4a`
 - Source branch: `codex/quality/stage-0`
-- Base Git SHA: `pending evidence capture`
-- Checker: `bash tools/check-stage0-consistency.sh` — actual result captured on the clean evidence commit (see “Checker output” below); not pre-written
+- Base Git SHA: `0425fc4a5637c15f89de0dd1a79f18fb978f3b3b` (evidence captured on this clean commit; this report was committed after evidence capture)
+- Checker: `bash tools/check-stage0-consistency.sh` — **PASS**, exit 0 (captured on the clean evidence commit; full output below)
 - Checker log: `production/quality/stage-0-checker.log` (full output and exit code)
 - Technical preferences source marker: `TP-SENTINEL: 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096`
 - Technical preferences reproducibility: `.gitattributes` pins `docs/technical-preferences.md`, both generated entries and the sentinel to `text eol=lf`; `git add --renormalize` applied, so a Windows checkout with `core.autocrlf=true` keeps the LF hash
@@ -18,9 +18,9 @@
 
 | Item | Status | Evidence / reason |
 |---|---|---|
-| Stage 0 consistency checker | Captured on evidence commit (see below) | `production/quality/stage-0-checker.log`; actual output embedded below |
+| Stage 0 consistency checker | PASS, exit 0 | `production/quality/stage-0-checker.log`; actual output embedded below |
 | Technical preferences sync (Claude/Codex generated entries) | PASS | `.claude/docs/technical-preferences.md`, `.codex/docs/technical-preferences.md` carry source SHA-256 `670a084a...` |
-| Technical preferences hash reproducibility | PASS (Windows) | `.gitattributes` `text eol=lf`; renormalized; LF hash `670a084a...` reproduced from a clean export |
+| Technical preferences hash reproducibility | PASS (Windows) | `.gitattributes` `text eol=lf`; renormalized; a clean `git checkout-index` export produced SHA-256 `670a084a...` with 0 CRLF; Linux re-run BLOCKED_NOT_VERIFIED |
 | Claude consumer sentinel | PASS | `production/quality/technical-preferences-sentinel.md` |
 | Codex consumer sentinel | BLOCKED_NOT_VERIFIED | No `codex` CLI; Codex minimal review not executed |
 | Linux consumer/hash | BLOCKED_NOT_VERIFIED | No WSL distribution or Linux runner; hash/checker not re-run under Linux |
@@ -75,8 +75,110 @@ therefore remains **pending** and is not changed to “已确认，执行基线�
 
 ## Checker output
 
-Pending capture on the clean evidence commit; the actual full output and exit code will be embedded here from
-`production/quality/stage-0-checker.log` after the run.
+Actual full output and exit code captured on the clean evidence commit `0425fc4a5637c15f89de0dd1a79f18fb978f3b3b` (report committed after):
+
+```text
+$ bash tools/check-stage0-consistency.sh
+ok: file docs/technical-preferences.md
+ok: file .claude/docs/technical-preferences.md
+ok: file .codex/docs/technical-preferences.md
+ok: file tools/sync-technical-preferences.sh
+ok: file docs/architecture/adr-0001-platform-transport-matrix.md
+ok: file docs/architecture/adr-0002-quality-gate-evidence-model.md
+ok: file docs/architecture/adr-0003-kcp-session-security.md
+ok: file spikes/kcp-security-poc/RESULT.md
+ok: file production/quality/release-scope.yaml
+ok: file production/quality/test-manifest.json
+ok: file production/quality/gate-exceptions.json
+ok: file production/quality/technical-preferences-sentinel.md
+ok: file production/quality/stage-0-report.md
+ok: file production/quality/stage-0-estimate.md
+ok: file production/qa/device-profiles/android-reference.yaml
+ok: file tools/generate-test-manifest.py
+ok: file docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md
+ok: file docs/superpowers/specs/2026-11-07-p0-p1-quality-improvement-execution-design.md
+ok: file docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md
+ok: docs/technical-preferences.md excludes: [TO BE CONFIGURED]
+ok: docs/technical-preferences.md contains: ## Engine & Language
+ok: docs/technical-preferences.md contains: ## Input & Platform
+ok: docs/technical-preferences.md contains: ## Naming Conventions
+ok: docs/technical-preferences.md contains: ## Performance Budgets
+ok: docs/technical-preferences.md contains: ## Testing
+ok: docs/technical-preferences.md contains: ## Forbidden Patterns
+ok: docs/technical-preferences.md contains: ## Allowed Libraries / Addons
+ok: docs/technical-preferences.md contains: ## Architecture Decisions Log
+ok: .claude/docs/technical-preferences.md contains: generated, do not edit
+ok: .claude/docs/technical-preferences.md contains: source-sha256: 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096
+ok: .codex/docs/technical-preferences.md contains: generated, do not edit
+ok: .codex/docs/technical-preferences.md contains: source-sha256: 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096
+ok: CLAUDE.md contains: docs/technical-preferences.md
+ok: AGENTS.md contains: .codex/docs/technical-preferences.md
+ok: production/quality/technical-preferences-sentinel.md contains: TP-SENTINEL: 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096
+ok: docs/architecture/adr-0001-platform-transport-matrix.md contains: ## Status
+ok: docs/architecture/adr-0001-platform-transport-matrix.md contains: ## Context
+ok: docs/architecture/adr-0001-platform-transport-matrix.md contains: ## Decision
+ok: docs/architecture/adr-0001-platform-transport-matrix.md contains: ## Consequences
+ok: docs/architecture/adr-0001-platform-transport-matrix.md contains: ## Alternatives
+ok: docs/architecture/adr-0002-quality-gate-evidence-model.md contains: ## Status
+ok: docs/architecture/adr-0002-quality-gate-evidence-model.md contains: ## Context
+ok: docs/architecture/adr-0002-quality-gate-evidence-model.md contains: ## Decision
+ok: docs/architecture/adr-0002-quality-gate-evidence-model.md contains: ## Consequences
+ok: docs/architecture/adr-0002-quality-gate-evidence-model.md contains: ## Alternatives
+ok: docs/architecture/adr-0003-kcp-session-security.md contains: ## Status
+ok: docs/architecture/adr-0003-kcp-session-security.md contains: ## Context
+ok: docs/architecture/adr-0003-kcp-session-security.md contains: ## Decision
+ok: docs/architecture/adr-0003-kcp-session-security.md contains: ## Consequences
+ok: docs/architecture/adr-0003-kcp-session-security.md contains: ## Alternatives
+ok: docs/architecture/adr-0003-kcp-session-security.md contains: POC
+ok: docs/architecture/adr-0003-kcp-session-security.md contains: fallback
+ok: docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md contains: Android/iOS
+ok: docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md contains: KCP
+ok: docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md contains: WebGL
+ok: docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md excludes: 近期公开测试所有平台默认 WSS
+ok: docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md contains: PASS_WITH_ADVISORIES
+ok: docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md contains: BLOCKED_NOT_VERIFIED
+ok: docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md contains: NOT_IN_SCOPE
+ok: docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md contains: release-scope.yaml
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: P1-B1
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: P1-B2
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: P1-C1
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: P1-C2
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: GameSys.EditorQuality
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: StandaloneWindows64
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: TestServerEndpoint
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: TransportFactoryBoundaryGuardTests
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: KcpPluginPlatformGuardTests
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: ClientEnvelope.cs
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: DrainResult.cs
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: LoginResult.cs
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: SceneLease
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: VfxCatalog
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: HAS_IOS_RUNNER
+ok: docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md contains: release-scope.yaml
+ok: task 13 precedes task 14
+ok: task 13 is P0
+ok: production/quality/release-scope.yaml contains: milestone:
+ok: production/quality/release-scope.yaml contains: blockingPlatforms:
+ok: production/quality/release-scope.yaml contains: requiredDeviceLanes:
+ok: production/quality/release-scope.yaml contains: requiredBrowserLanes:
+ok: production/quality/release-scope.yaml contains: publicEndpoints:
+ok: production/quality/release-scope.yaml contains: approver:
+ok: production/quality/release-scope.yaml contains: approvedAt:
+ok: production/quality/release-scope.yaml contains: sourceGitSha:
+ok: test-manifest.json is valid JSON
+ok: gate-exceptions.json is valid JSON
+ok: production/qa/device-profiles/android-reference.yaml contains: configured:
+ok: production/qa/device-profiles/android-reference.yaml contains: targetFps:
+ok: production/qa/device-profiles/android-reference.yaml contains: warmupSeconds:
+ok: production/qa/device-profiles/android-reference.yaml contains: sampleSeconds:
+ok: production/qa/device-profiles/android-reference.yaml contains: p95Algorithm:
+ok: production/qa/device-profiles/android-reference.yaml contains: rawDataFormat:
+ok: no legacy -buildTarget win64
+ok: no .Codex/ path in Git index
+ok: docs/superpowers/specs/2026-11-07-p0-p1-quality-improvement-execution-design.md excludes: 待阶段 0 填写
+STAGE 0 CHECK: PASS
+exit=0
+```
 
 ## Unexecuted items
 
@@ -105,6 +207,6 @@ Pending capture on the clean evidence commit; the actual full output and exit co
 
 ## Notes
 
-- Evidence is captured on the clean evidence commit recorded in `Base Git SHA` above; the report itself is committed after evidence capture, so the commit containing this report is newer than the evidence commit.
+- Evidence is captured on the clean evidence commit `0425fc4a5637c15f89de0dd1a79f18fb978f3b3b` (`Run ID` `stage0-20261107T062118Z-0425fc4a`); the report itself is committed after evidence capture, so the commit containing this report is newer than the evidence commit.
 - The activation table records approved blob SHAs at baseline `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b`, which is the commit that contains all approved content; the Release scope row is that commit itself because `release-scope.yaml` was introduced there. The YAML `sourceGitSha` uses the same commit, not the parent `da7e3d1a`.
 - The execution design status remains pending: it was not changed to “已确认，执行基线”; the §8 activation checklist remains unsatisfied for the Codex/Linux consumer sentinels, so activation waits for user decision.
