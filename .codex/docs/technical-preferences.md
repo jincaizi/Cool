@@ -1,4 +1,4 @@
-<!-- generated, do not edit; source: docs/technical-preferences.md; source-sha256: 05761703d9d3a2715c41bddfc6187eb1042d253e2d0b858b579d9290fb2ad8b9 -->
+<!-- generated, do not edit; source: docs/technical-preferences.md; source-sha256: 670a084a1a9a33de91dcbb37922d4c5c67e01c04de2c7a8bebca1481618fe096 -->
 # Technical Preferences
 
 ## Engine & Language
@@ -52,8 +52,9 @@
 
 ## Allowed Libraries / Addons
 
-- UniTask, Addressables, protobuf-net, KCP (mobile only with ADR-0003 security provider), DOTween, TextMeshPro, NUnit, xUnit
-- Security provider: selected by ADR-0003 after POC; no self-rolled cryptographic primitives
+- UniTask, Addressables, protobuf-net, DOTween, TextMeshPro, NUnit, xUnit
+- KCP: Android/iOS Player 与显式选择的 Win64 测试 lane；公网候选包需 ADR-0003 provider
+- Security provider: Noise-C per ADR-0003; no self-rolled cryptographic primitives
 
 ## Architecture Decisions Log
 

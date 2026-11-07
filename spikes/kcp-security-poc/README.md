@@ -1,5 +1,7 @@
 # KCP Session Security POC
 
+> **Status:** pre-execution plan written before the POC ran. Actual results, evidence and limitations are in [`RESULT.md`](RESULT.md).
+
 This spike is not part of any Unity assembly or server project. It exists only to select and verify the ADR-0003 provider.
 
 ## Candidate matrix

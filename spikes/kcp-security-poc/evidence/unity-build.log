@@ -1,13 +1,13 @@
 [Licensing::Module] Trying to connect to existing licensing client channel...
-[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-jincaizi" at "2026-11-07T03:39:51.947985Z"
+[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-[redacted-user]" at "2026-11-07T03:39:51.947985Z"
 [Licensing::Client] Error: Code 10 while verifying Licensing Client signature (process Id: 22076, path: "D:/Unity Hub/UnityLicensingClient_V1/Unity.Licensing.Client.exe")
 [Licensing::Module] Error: LicensingClient has failed validation; ignoring
 [Licensing::Client] Error: HandshakeResponse reported an error:
 	ResponseCode: 505
 	ResponseStatus: Unsupported protocol version '1.15.2'. Current supported versions are: 1.0,1.1,1.2,1.3,1.4,1.4.1,1.5,1.6,1.7,1.8,1.9,1.10
-[Licensing::Module] Error: Failed to handshake to channel: "LicenseClient-jincaizi"
+[Licensing::Module] Error: Failed to handshake to channel: "LicenseClient-[redacted-user]"
 [Licensing::IpcConnector] License Client channel disconnected successfully.
-[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-jincaizi-2022.3.25" at "2026-11-07T03:39:51.982166Z"
+[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-[redacted-user]-2022.3.25" at "2026-11-07T03:39:51.982166Z"
 [Licensing::Client] Error: Code 10 while verifying Licensing Client signature (process Id: 151324, path: "E:/Unity/Editor/2022.3.25f1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
 [Licensing::Module] Error: LicensingClient has failed validation; ignoring
 [Licensing::Client] Handshaking with LicensingClient:
@@ -16,8 +16,8 @@
   Correlation Id:          43bcdb14cd00f3aeb82971e49ddc92fe
   External correlation Id: 4927595193891839039
   Machine Id:              mnltZw+vhRqCjCeQyhH8d8R9xac=
-[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-jincaizi-2022.3.25" (connect: 0.00s, validation: 0.01s, handshake: 0.00s)
-[Licensing::IpcConnector] Successfully connected to the License Notification on channel: "LicenseClient-jincaizi-2022.3.25-notifications" at "2026-11-07T03:39:51.9972463Z"
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-[redacted-user]-2022.3.25" (connect: 0.00s, validation: 0.01s, handshake: 0.00s)
+[Licensing::IpcConnector] Successfully connected to the License Notification on channel: "LicenseClient-[redacted-user]-2022.3.25-notifications" at "2026-11-07T03:39:51.9972463Z"
 [Licensing::Module] Error: Access token is unavailable; failed to update
 [Licensing::Client] Successfully updated license
 Built from '2022.3/staging' branch; Version is '2022.3.25f1 (530ae0ba3889) revision 5442272'; Using compiler version '192829333'; Build Type 'Release'
@@ -72,9 +72,9 @@ E:/CodeForJob/Cool/.claude/worktrees/quality-stage-0/spikes/kcp-security-poc/Uni
     "memorysetup-temp-allocator-size-cloud-worker=32768"
     "memorysetup-temp-allocator-size-gi-baking-worker=262144"
     "memorysetup-temp-allocator-size-gfx=262144"
-Player connection [126964] Host "[IP] 192.168.0.102 [Port] 55506 [Flags] 2 [Guid] 2123738298 [EditorId] 2123738298 [Version] 1048832 [Id] WindowsEditor(7,jincaizi) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" joined multi-casting on [225.0.0.222:54997]...
+Player connection [126964] Host "[IP] 192.168.0.102 [Port] 55506 [Flags] 2 [Guid] 2123738298 [EditorId] 2123738298 [Version] 1048832 [Id] WindowsEditor(7,[redacted-user]) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" joined multi-casting on [225.0.0.222:54997]...
 
-Player connection [126964] Host "[IP] 192.168.0.102 [Port] 55506 [Flags] 2 [Guid] 2123738298 [EditorId] 2123738298 [Version] 1048832 [Id] WindowsEditor(7,jincaizi) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" joined alternative multi-casting on [225.0.0.222:34997]...
+Player connection [126964] Host "[IP] 192.168.0.102 [Port] 55506 [Flags] 2 [Guid] 2123738298 [EditorId] 2123738298 [Version] 1048832 [Id] WindowsEditor(7,[redacted-user]) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" joined alternative multi-casting on [225.0.0.222:34997]...
 
 [Physics::Module] Initialized MultithreadedJobDispatcher with 31 workers.
 [Package Manager] UpmClient::Connect -- Connected to IPC stream "Upm-230368" after 0.3 seconds.
