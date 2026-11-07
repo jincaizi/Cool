@@ -1275,33 +1275,55 @@ git commit -m "fix(kcp): enforce platform transport boundary and bound client li
 
 ### 任务 14：执行 P0 Gate 并发布验收报告
 
-**优先级：** P0 收尾；依赖任务 1–12，任务 13 至少保证默认禁用
+**优先级：** P0 收尾；依赖任务 1–13（任务 13 的平台传输边界与 KCP 生命周期硬化已合并）
 
 **文件：**
-- 创建：`production/quality/p0-gate-2026-11.md`
+- 创建：`production/quality/p0-gate-<run-id>.md`
+- 创建：`production/quality/artifacts/<run-id>/`（本轮 XML、日志、进程退出码、test manifest、release scope 与产物 hash）
 - 修改：所有触及模块 README 的最终状态段
 
-- [ ] **步骤 1：运行自动门禁**
+- [ ] **步骤 1：在 clean worktree 生成 run-id 并运行自动门禁**
+
+`run-id = <UTC timestamp>-<short-git-sha>`。dirty worktree 只能输出 `DIAGNOSTIC_ONLY`，不得生成 P0 Gate 结论。
 
 ```bash
+pwsh -File tools/tests/quality-gate-selftest.ps1
 bash tools/quality-gate.sh --p0
 dotnet run -c Release --project tools/ServerLoadHarness -- --profile p0-flood --duration 600
 ```
 
-预期：服务端/Unity 全量绿色、PlayMode 非 0、洪泛下队列有界且 tick 推进。
+预期：
 
-- [ ] **步骤 2：运行跨端恶意输入验收**
+- `quality-gate-selftest.ps1` 全部通过，证明 runner 对 server ready 超时、Unity 非零退出、XML 缺失/损坏、manifest 数量下降、stale artifact 与残留子进程不会假绿。
+- 服务端全量测试通过；Unity EditMode、通用 PlayMode 与每个 Native profile（`native-clean`/`native-bots`/`native-monsters`）各自输出独立 XML，且各自 `discovered > 0`、失败为 0、与 `test-manifest.json` 一致；任一 XML 缺失/不可解析、0 tests 或未知 skip 均失败。
+- Native suite 从清洁环境自行启动并停止服务端：每个 profile 使用动态 TCP/UDP 端口并记录 PID，以 application-ready 日志与对应传输 probe 判定 ready；结束后无残留进程或端口占用。
+- `Pump_Drains_LoginResponse_While_LoggingIn` 与 `Pump_Drains_Error_And_Disconnect_Before_InWorld` 通过，登录响应不被状态判断阻塞；`Injected_Network_Delay_Does_Not_Block_MainThread` 通过，Unity 主线程无测试延迟阻塞。
+- 洪泛下队列与内存保持有界且 tick 继续推进；报告记录队列峰值、tick p95/p99 与 working set。
+
+- [ ] **步骤 2：运行跨端恶意输入、KCP 生命周期与平台边界验收**
 
 逐项记录：重复登录、换身份、未知 Zone、倒序/重复/回绕 sequence、伪造 timestamp、NaN/Infinity、异常 Y、永久 defend、WS 永不结束分片、慢发送端、UDP 垃圾包、客户端 10,000 条消息洪泛。
 
-- [ ] **步骤 3：确认 P0 不变量**
+```bash
+bash tools/kcp-soak.sh --minutes 30 --platform StandaloneWindows64
+bash tools/check-webgl-kcp-artifacts.sh --build-target WebGL
+```
 
-报告必须列出精确测试总数、构建目标、队列峰值、tick p95/p99、working set、未执行项和证据路径。任何未执行项保持 Gate 为未通过，不能写“预计可用”。
+- KCP 生命周期已修复并有自动化测试：连接、断开、重复释放、接收循环停止均幂等且无未观察异常；若某项无法在 P0 内修复，只能在本轮报告中明确隔离并保持对应 blocking 项为 `BLOCKED_NOT_VERIFIED`，不得静默放过或写“预计可用”。Win64 KCP 30 分钟 soak 无泄漏、无未观察异常；移动真机 soak 归 Mobile Release Readiness，不在 P0 宣称。
+- 平台传输矩阵按任务 13 的实现逐平台/构建配置验证：Android/iOS 为 KCP、WebGL 为 WebSocket（公网 WSS）、Editor/Windows 测试 lane 显式选择；每个平台/构建配置只启用一个主传输，`NetworkTransportFactory` 之外无具体 transport 构造，缺省或歧义配置 fail-fast。不得把任一平台的选择外推为全局默认值。
+- WebGL compile contract、WebGL Player Build 与 runtime smoke 使用独立结果，互不替代：compile contract 与 Player Build 分别以本轮日志/产物证明，KCP plugin 与 `KcpNetClientAdapter` 不得进入 WebGL Player；未执行 runtime smoke 时报告中只能写 `WebGL compile/build verified`，runtime smoke 保持 `BLOCKED_NOT_VERIFIED`，不得写 runtime verified。
+- P0 结论不得宣称 Android/iOS 真机、移动 KCP 公网安全或 WebGL 公网部署已验证；这些属于后续 Mobile Release Readiness / WebGL Public Deployment Readiness。
+
+- [ ] **步骤 3：汇总本轮证据并发布报告**
+
+报告路径：`production/quality/p0-gate-<run-id>.md`。把本轮 XML、日志、进程退出码、`production/quality/test-manifest.json`、`production/quality/release-scope.yaml` 与产物 hash 复制到 `production/quality/artifacts/<run-id>/`；报告只引用同一 run-id 且与之一致的证据，旧产物与历史日志不得作为本轮证据。
+
+报告必须列出：精确测试发现/通过/失败/跳过数、构建目标、各 profile 服务器 PID/端口与 ready 判据、队列峰值、tick p95/p99、working set、平台矩阵结论、WebGL compile/build 状态、产物 hash、Git SHA、clean worktree 检查、未执行项和证据路径。状态只能取 `PASS`、`PASS_WITH_ADVISORIES`、`FAIL`、`BLOCKED_NOT_VERIFIED`、`NOT_IN_SCOPE` 或 `DIAGNOSTIC_ONLY`；任何 blocking 项未执行或证据不属于本轮时保持 `BLOCKED_NOT_VERIFIED`，Gate 不得为 `PASS`，不能写“预计可用”；只有 `release-scope.yaml` 明确排除的平台或项才能标 `NOT_IN_SCOPE`。
 
 - [ ] **步骤 4：Commit**
 
 ```bash
-git add production/quality/p0-gate-2026-11.md \
+git add production/quality/p0-gate-<run-id>.md production/quality/artifacts/<run-id> \
   Assets/Scripts/Hotfix/GameSystems/*/README.md Assets/Scripts/AOT/*/README.md Server/README.md
 git commit -m "docs: record p0 quality gate evidence"
 ```
