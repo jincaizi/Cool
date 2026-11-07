@@ -2,7 +2,7 @@
 
 日期：2026-11-07
 状态：已批准进入阶段 0；原 Spec 与计划完成回写前，运行时代码实施阻塞
-版本：Revision 2（Unity 专家复核闭环版）
+版本：Revision 2.1（Unity 专家复核闭环版 + 可行性修正）
 适用范围：Unity 客户端、共享同步规则、网络传输、.NET 服务端、构建与质量门禁
 
 依据：
@@ -22,7 +22,7 @@
 3. **KCP 前移并按平台选传输**：采纳复核 U-P0-04 的推荐，任务 13 前移为 P0，排在任务 14 前。Android/iOS 以 KCP + Protobuf 为主传输，WebGL 以 WebSocket 为主传输；公网 WebGL 由反向代理终止 WSS。每个平台和构建配置只允许一个主传输。
 4. **阶段 0 先行**：先修订原 Spec 与计划，把复核要求写进任务、文件清单和 Gate，再改代码。
 5. **证据规则**：每个 Gate 只认本轮生成的 XML、日志、退出码和产物；blocking 项未执行时状态为 `BLOCKED_NOT_VERIFIED`，不得显示为 PASS。
-6. **双层 P1 Gate**：P1 Engineering Gate 判断工程质量；Mobile Release Readiness Gate 按目标平台判断候选包、真机运行、性能与生命周期证据。被批准的 `release-scope.yaml` 明确排除的平台标记为 `NOT_IN_SCOPE`，但不得宣称该平台已验证或具备发布条件。
+6. **工程与平台发布 Gate 分层**：P1 Engineering Gate 判断工程质量；Mobile Release Readiness 判断移动候选包、真机运行、性能与生命周期证据；WebGL Public Deployment Readiness 判断公开域名、WSS、代理与浏览器证据。被批准的 `release-scope.yaml` 明确排除的平台标记为 `NOT_IN_SCOPE`，但不得宣称该平台已验证或具备发布条件。
 
 本文件是阶段 0 的执行与修订基线。**任务级细节以阶段 0 完成后修订并批准的原计划为准**；本文件不重复 33 个任务的完整步骤，只定义执行模型、修订要求、Gate 条件和遗漏补齐项。阶段 0 退出时必须在本文记录批准后的 Spec、计划和 Git SHA，随后才把状态改为“已确认，执行基线”。
 
@@ -44,15 +44,17 @@
 
 ### 2.3 冻结规则
 
-P0 Gate 通过前，不新增联网玩法。P1 Engineering Gate 通过前，不进入发布候选阶段；Mobile Release Readiness 必须基于非 Development 候选包通过，之后才可标记“公开测试/商店发布准备”。该规则来自原 Spec 第 3 节，继续有效。
+P0 Gate 通过前，不新增联网玩法。P1 Engineering Gate 通过前，不进入发布候选阶段；移动平台必须由 Mobile Release Readiness 基于非 Development 候选包通过，WebGL 若纳入公开发布范围则必须由 WebGL Public Deployment Readiness 通过，之后才可对相应平台标记“公开测试/商店发布准备”。该规则来自原 Spec 第 3 节，继续有效。
 
 ### 2.4 平台传输矩阵
 
 | 平台 | 主传输 | P0/P1 Gate 要求 |
 |---|---|---|
-| Android/iOS | KCP + Protobuf；公网候选包必须叠加经 ADR 批准的标准安全层 | P0 只验证选择策略、Win64 KCP 生命周期/soak 与共享实现；P1 Engineering 验证 IL2CPP 构建和安全配置；Mobile Release Readiness 用非 Development 候选包在真机验证加密 KCP、IPv4/IPv6/NAT64、前后台、网络切换、断线重连和 30 分钟 soak；不得同时启用 WebSocket 主传输 |
+| Android/iOS | KCP + Protobuf；公网候选包必须叠加经 ADR 批准的标准安全层 | P0 只验证选择策略、Win64 KCP 生命周期/soak 与共享实现；P1 Engineering 对 release scope 中的 blocking mobile platforms 验证 IL2CPP 构建和安全配置；Mobile Release Readiness 用非 Development 候选包在真机验证加密 KCP、IPv4/IPv6/NAT64、前后台、网络切换、断线重连和 30 分钟 soak；不得同时启用 WebSocket 主传输 |
 | WebGL | WebSocket；公网为 WSS | P0 验证 WebGL 编译和浏览器 WebSocket 往返；公开环境验证完整 WSS URI、证书与反向代理配置；不得编译、打包或启用 KCP 玩家路径 |
 | Editor/Windows 测试 | 按测试 lane 显式选择 | Native KCP lane 与 WebSocket/WebGL lane 分开报告，不得用一个平台结果替代另一个平台 |
+
+原 Spec §6.0 的“近期公开测试所有平台默认 WSS、KCP 实验性默认禁用”与本矩阵冲突；阶段 0 必须把原 Spec 和 ADR-0001 一起改写为本矩阵，改写完成前不得进入 Gate 0。
 
 如果后续改变移动平台主传输，必须先更新平台传输 ADR、Spec、本文与 Gate 断言，不能只修改运行时代码。
 
@@ -75,6 +77,7 @@ P0 Gate 通过前，不新增联网玩法。P1 Engineering Gate 通过前，不�
 | P1-C2 | 32 | 可观测性、WSS 部署、移动 KCP 公网安全与优雅停机 | 波次报告 |
 | P1 Engineering Gate | 33 | 原 Spec 10.2 的工程项 + 复核 7.2 的自动化项满足 | `production/quality/p1-engineering-gate-<run-id>.md` |
 | Mobile Release Readiness | 33 | 当前目标平台的设备运行、性能和生命周期证据全部满足 | `production/quality/mobile-release-gate-<run-id>.md` |
+| WebGL Public Deployment Readiness | 33 | WebGL 被列为 blocking platform 时，公开域名/WSS/证书/反向代理与浏览器往返证据全部满足 | `production/quality/webgl-public-gate-<run-id>.md` |
 
 波次之间严格串行，P0-A 与 P0-B 不再跨波次并行。波次内部只有在文件所有权和依赖互不重叠时才允许并行，并且每个并行任务必须使用独立 worktree、独立 Unity `Library`、独立端口和独立 artifact 目录。并行分支合并到当前波次集成分支后，必须重新执行该波次完整 Gate；子分支上的旧结果不能替代合并后结果。
 
@@ -99,7 +102,8 @@ P0 Gate 通过前，不新增联网玩法。P1 Engineering Gate 通过前，不�
 ### 3.4 Gate 证据与报告
 
 - 每次 Gate 生成唯一 `run-id = <UTC timestamp>-<short-git-sha>`，所有产物写入 `production/quality/artifacts/<run-id>/`。
-- Gate 报告至少包含：run ID、开始/结束时间、Git SHA、分支、dirty 状态、Unity 版本、OS、runner label、完整命令、构建目标、测试程序集与 server profile、服务端 PID/端口/参数、测试总数、通过、失败、跳过、耗时、XML/日志/产物路径及 SHA-256、设备信息、未执行项及原因。
+- Gate 报告至少包含：run ID、开始/结束时间、Git SHA、分支、dirty 状态、Unity 版本、OS、runner label、完整命令、构建目标、测试程序集与 server profile、服务端 PID/端口/参数、测试总数、通过、失败、跳过、耗时、XML/日志/产物路径及 SHA-256、设备/浏览器信息、未执行项及原因。
+- 涉及公开网络的 Release Readiness 必须把客户端/网页 artifact SHA、服务端二进制 SHA 或镜像 digest、非敏感部署配置 hash、transport/security provider 与协议版本、ADR Git SHA、非敏感 key ID/轮换代次、endpoint/原始 hostname/DNS 记录、部署时间和测试窗口绑定到同一 run ID。服务端、配置、key generation、DNS 或代理重新部署后，旧端到端证据自动失效；不得只凭客户端包或本地服务器结果通过。
 - XML、日志与构建产物的创建时间必须晚于 Gate 开始时间；旧文件、缺失文件、不可解析文件或 hash 不匹配均失败。
 - Gate 0 的历史参考快照为：2026-11-07、Git `c80b884b`，服务端 409/409；Unity EditMode 629/630；Unity PlayMode 在 WebGL 活动目标下为 0。该快照必须由 Gate 0 重新测量，不作为未来精确数量门禁，也不得把外部 MCP `ping` 污染的推断当成通过证据。
 - 门禁例外必须写明到期日、责任人、风险和恢复条件；不能用“已知问题”无限期豁免。
@@ -116,20 +120,20 @@ P0 Gate 通过前，不新增联网玩法。P1 Engineering Gate 通过前，不�
 | `NOT_IN_SCOPE` | 由已批准且版本受控的里程碑范围明确排除 | 不阻塞其他平台，但不得写成已验证 |
 | `DIAGNOSTIC_ONLY` | 在 dirty worktree 或非标准环境中运行，只用于收集诊断 | 不产生 Gate PASS |
 
-Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命周期属于 Mobile Release Readiness 的 blocking 项。iOS 只有被 `production/quality/release-scope.yaml` 明确排除时才是 `NOT_IN_SCOPE`；一旦 iOS 纳入 blocking platforms，缺少 macOS/Xcode/设备证据将使 iOS Release Readiness 为 `BLOCKED_NOT_VERIFIED`。Gate 开始后禁止在同一 run 内修改 release scope。
+Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命周期属于 Mobile Release Readiness 的 blocking 项。iOS 只有被 `production/quality/release-scope.yaml` 明确排除时才是 `NOT_IN_SCOPE`；一旦 iOS 纳入 blocking platforms，缺少 macOS/Xcode/设备证据将使 iOS Release Readiness 为 `BLOCKED_NOT_VERIFIED`。WebGL 被明确排除时 WebGL Public Deployment Readiness 为 `NOT_IN_SCOPE`；一旦纳入 blocking platforms，缺公开域名、有效证书、反向代理或批准浏览器 lane 证据即为 `BLOCKED_NOT_VERIFIED`。Gate 开始后禁止在同一 run 内修改 release scope。
 
 ### 3.6 Gate 验收归属
 
-| 验收类别 | P0 Gate | P1 Engineering Gate | Android Release Readiness | iOS Release Readiness |
-|---|---|---|---|---|
-| Unity/.NET 编译、单元/集成测试、0-tests、manifest、协议一致性 | Blocking | Blocking | 引用 Engineering 结果 | 引用 Engineering 结果 |
-| WorldInstance/AOI/ORCA/导航服务端规模与延迟 | — | Blocking | 引用 Engineering 结果 | 引用 Engineering 结果 |
-| Addressables content build、Use Existing Build、Analyze、handle/lease 归零 | — | Blocking | 引用同平台 content hash | 引用同平台 content hash |
-| Android/iOS Player Build 与 BuildReport | — | Development Build 为 Blocking（按 release scope） | 同一 Git SHA、同一 content manifest 的非 Development 候选包为 Blocking | 同一 Git SHA、同一 content manifest 的非 Development 候选包为 Blocking |
-| IL2CPP/AOT 安装启动与协议 runtime smoke | — | 不宣称已验证 | Blocking | Blocking |
-| 真机帧时间、GC、热状态、30 分钟 soak | — | 不宣称已验证 | Blocking，必须物理参考设备 | Blocking，必须物理参考设备 |
-| 前后台、网络切换、Safe Area、返回键、低内存、ANR | — | 不宣称已验证 | Blocking，必须物理设备 | Blocking，必须物理设备 |
-| 平台传输与公网安全 | 策略/factory、Win64 KCP 生命周期与 soak、WebGL compile/browser WS 往返为 Blocking；不得宣称移动真机已验证 | Android/iOS IL2CPP 编译、安全 provider/config 与 release 明文禁用守卫为 Blocking | 非 Development 候选包的加密 KCP、域名、IPv4/IPv6/NAT64 与重放/篡改拒绝为 Blocking | 非 Development 候选包的加密 KCP、域名、IPv4/IPv6/NAT64 与重放/篡改拒绝为 Blocking |
+| 验收类别 | P0 Gate | P1 Engineering Gate | Android Release Readiness | iOS Release Readiness | WebGL Public Deployment Readiness |
+|---|---|---|---|---|---|
+| Unity/.NET 编译、单元/集成测试、0-tests、manifest、协议一致性 | Blocking | Blocking | 引用 Engineering 结果 | 引用 Engineering 结果 | 引用 Engineering 结果 |
+| WorldInstance/AOI/ORCA/导航服务端规模与延迟 | — | Blocking | 引用 Engineering 结果 | 引用 Engineering 结果 | 引用 Engineering 结果 |
+| Addressables content build、Use Existing Build、Analyze、handle/lease 归零 | — | Blocking | 引用同平台 content hash | 引用同平台 content hash | 引用 WebGL content hash |
+| 平台 Player Build 与 BuildReport | — | release scope 中所有 blocking platforms 的工程构建为 Blocking | 同一 Git SHA、同一 content manifest 的非 Development 候选包为 Blocking | 同一 Git SHA、同一 content manifest 的非 Development 候选包为 Blocking | 引用实际部署的 WebGL artifact digest |
+| IL2CPP/AOT 安装启动与协议 runtime smoke | — | 不宣称已验证 | Blocking | Blocking | 不适用 |
+| 真机帧时间、GC、热状态、30 分钟 soak | — | 不宣称已验证 | Blocking，必须物理参考设备 | Blocking，必须物理参考设备 | 按批准的 WebGL browser profile；未纳入时为 `NOT_IN_SCOPE` |
+| 前后台、网络切换、Safe Area、返回键、低内存、ANR | — | 不宣称已验证 | Blocking，必须物理设备 | Blocking，必须物理设备 | 浏览器可见性、网络恢复与页面生命周期按 release scope 判定 |
+| 平台传输与公网安全 | 策略/factory、Win64 KCP 生命周期与 soak、WebGL compile/browser WS 往返为 Blocking；不得宣称移动真机或公网 WSS 已验证 | release scope 中所有 blocking platforms 的目标构建、安全 provider/config、release 明文禁用与 WSS 静态配置为 Blocking | 非 Development 候选包的加密 KCP、域名、IPv4/IPv6/NAT64 与重放/篡改拒绝为 Blocking | 非 Development 候选包的加密 KCP、域名、IPv4/IPv6/NAT64 与重放/篡改拒绝为 Blocking | 公开域名、有效证书链、WSS URI/path、反向代理与批准浏览器消息往返为 Blocking |
 
 每一条原 Spec 10.2 与复核 7.2 检查项在阶段 0 回写时必须映射到上述某一列；同一检查项不得同时被 Engineering Gate 宣称 PASS、又在 Release Readiness 中标为未验证。
 
@@ -141,8 +145,8 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 | 复核项 | 落点 | 必须写入的内容 |
 |---|---|---|
-| U-P0-01 | 任务 1 | 新建 Editor-only `GameSys.EditorQuality.asmdef`；`QualityGate` 只做纯验证，不切 BuildTarget；`InternalsVisibleTo("GameSys.EditorTests")`；asmdef、`.meta`、程序集引用和提交清单全部列出 |
-| U-P0-02 | 任务 1、14、31 | 原生 Unity CLI runner 前移到任务 1；启动独立进程时传 `-buildTarget win64`，Editor 内再验证 `BuildTarget.StandaloneWindows64`；测试进程内不执行 `SwitchActiveBuildTarget`；EditMode、通用 PlayMode、Native PlayMode 各自独立 XML 与日志；MCP `tests-run` 仅本地便利；0 tests、XML 缺失/不可解析、异常退出均返回非零；WebGL 使用独立进程和明确的 compile/build lane；门禁输出总数/通过/失败/跳过/耗时 |
+| U-P0-01 | 任务 1 | 新建 Editor-only `GameSys.EditorQuality.asmdef`；`QualityGate` 提供可被 EditMode 测试直接调用的纯 preflight 验证器（active target、包名、asmdef 契约），不切 BuildTarget；测试发现数/失败数由 `quality-gate.ps1` 解析 XML，并用 `quality-gate-selftest.ps1` 的 fixture XML 做负向自测；`InternalsVisibleTo("GameSys.EditorTests")`；asmdef、`.meta`、程序集引用和提交清单全部列出 |
+| U-P0-02 | 任务 1、14、31 | 原生 Unity CLI runner 前移到任务 1；启动独立进程时传 `-buildTarget StandaloneWindows64`，Editor 内再验证 `BuildTarget.StandaloneWindows64`；测试进程内不执行 `SwitchActiveBuildTarget`；EditMode、通用 PlayMode、Native PlayMode 各自独立 XML 与日志；MCP `tests-run` 仅本地便利；0 tests、XML 缺失/不可解析、异常退出均返回非零；WebGL 使用独立进程和明确的 compile/build lane；门禁输出总数/通过/失败/跳过/耗时 |
 | U-P0-03 | 任务 1、14、31 | Native tests 按 `native-clean`、`native-bots`、`native-monsters` 和确有测试时的 `native-navigation` profile 执行；每个 profile 独立启动服务器、选择同时可用的 TCP/UDP 动态端口、记录 PID，并以 application-ready 日志 + 对应传输 probe 作为 ready 判据；启动失败、提前退出、端口冲突、超时或 teardown 残留均失败；`finally` 只停止本次 PID/子进程树并保存日志；各 profile 分别传 `-assemblyNames` + category/filter、分别生成 XML；迁移测试文件及 `.meta` 清单必须显式列出 |
 | U-P0-04 | 任务 13、14、32 | 任务 13 前移为 P0，排在任务 14 前；KCP 连接、断开、重复释放、接收循环停止有自动测试，P0 的 30 分钟 soak 在 Win64 KCP lane 执行，移动真机 soak 归 Mobile Release Readiness；把 `ClientNetworkHost` 中直接构造 transport 的分支收敛到可测试的 platform transport factory：Android/iOS Player 构建创建 `KcpNetClientAdapter`，WebGL Player 构建创建 `WebSocketClientAdapter + WebGLWebSocketChannel`，Editor/Windows 测试必须由 lane 显式选择而不能继承隐式默认值；Gate 验证每个平台/构建配置只启用一个主传输，不再断言“KCP 全局默认禁用”；WebGL compile contract 与构建产物检查必须证明 KCP 玩家类型及 plugin 未进入 WebGL Player；公开移动候选包在任务 32 完成经 ADR 批准的标准安全层前不得 Release Ready |
 | U-P0-05 | 任务 4 | `EventSubscription` 改为 `sealed class`，用 `Interlocked.Exchange` 或等价原子状态保证跨副本幂等退订；`Emit` 使用 copy-on-write 快照，不在热路径 `ToArray()`；`ResetAll` 同时清普通订阅、定向订阅和暂停状态并回收空桶；`SubsystemRegistration` 重置；测试 `Copied_Tokens_Dispose_Only_Once`、重复 Dispose 不抛异常、Emit 热路径无临时数组分配 |
@@ -160,7 +164,7 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 | U-P1-05 | 任务 23 | 采用场景 Presenter 在 `Awake` 调用 `UIBootstrap.RegisterFailurePresenter(this)`、`AfterSceneLoad` 注入 `UIManager` 的方案，不新增 `UIBootstrapBehaviour`；注册返回 token，Presenter 在 `OnDestroy` 精确注销，重复注册采用新实例替换旧实例并处理 Unity fake-null；增加 `SubsystemRegistration` 清理纯托管静态引用；覆盖 `CharacterSelect → DemoDay → CharacterSelect`、Presenter 先销毁和直接进入 `DemoDay`；没有 Presenter 时提供非递归、非 Addressables 依赖的降级行为 |
 | U-P1-06 | 任务 22、31 | 增加 `AddressablesBuildScript.BuildPlayerContent` batchmode 入口；快速测试使用 Use Asset Database；生产验证使用外层 orchestrator 顺序执行“目标平台进程 → 清理本平台旧输出 → BuildPlayerContent → Use Existing Build 生命周期测试 → 恢复设置”；`CoreUI` 使用 Local Build/Load Path、LZ4、Pack Together、Static Content、label `core-ui`，地址固定为 `ui/player-hud`、`ui/target`、`ui/character-select`，失败 Presenter 保持场景直接依赖而不进入 Addressables；当前 `CombatVFX` 只包含必预热的 Hit/Heal，使用 Local Build/Load Path、LZ4、Pack Together、Static Content、label `combat-vfx-core`，地址固定为 `vfx/hit-spark-burst`、`vfx/heal-green`；未来大量可选技能特效进入独立 `OptionalSkillVFX` group，Pack Separately 且仅预热当前角色/场景所需 ID；禁止使用文件路径作为 address；Android 与 WebGL 分平台构建并隔离 bundle 输出；运行 Analyze 并校验重复 address、缺失依赖、重复 bundle dependency、Resources/Addressables 双重打包；保存 content manifest/hash，Player Build 必须引用同一份 manifest；catalog、hash、bundle 缺失或 BuildPlayerContent 返回错误即失败 |
 | U-P1-07 | 任务 26 | 明确迁移真实 `HitSparkBurst`；未使用的 `HitSparkParticle` 不删除，但记录为无引用遗留物；把 `GameSettings.cs`、`GameSettings.asset`、`DemoDay.unity` 和实际引用 Prefab 加入文件清单；选定唯一模型：`GameSettings` 仅保存带显式数值的 `VfxId` enum，`VfxCatalog : ScriptableObject, IVfxCatalog` 将 `VfxId` 映射为稳定 Addressables address，`ResourceManager` 获取 `AssetLease<GameObject>`，pool 通过 `Object.Instantiate` 克隆；World/Combat loading 期间获取 lease 并预热，完成后才订阅战斗事件；异常早到事件直接丢弃并输出限频警告，不排队播放过期效果；场景退出时先销毁 active/idle clone，再释放 prefab lease；禁止混用 `Addressables.InstantiateAsync`/`ReleaseInstance` 模型；CI 按 GUID 检查 Addressable VFX 不再被 Scene、Resources asset 或非 Addressable Prefab 直接引用 |
-| U-P1-08 | 任务 29、31 | Android 和 iOS 进程启动时分别指定 `-buildTarget android` / `-buildTarget ios`；build method 只验证 active target，不负责切换；Windows 仅执行 `ValidateIosConfiguration`；用仓库变量 `HAS_IOS_RUNNER` 控制 iOS job；先读取批准的 `release-scope.yaml`：iOS 被明确排除时生成 `ios-status = NOT_IN_SCOPE`，iOS 属于 blocking platforms 但缺 runner/Xcode/设备时生成 `ios-status = BLOCKED_NOT_VERIFIED`，均写入 artifact/summary 且不无限排队；固定 runner labels，检查 Unity 版本、许可证、Build Support、SDK/NDK/JDK 与 Xcode；写明唯一 BuildScenes 清单；校验 BuildReport、APK/AAB 或 Xcode 工程确实存在；构建脚本的设置修改由 `finally` 恢复 |
+| U-P1-08 | 任务 29、31 | Android 和 iOS 进程启动时分别指定 `-buildTarget Android` / `-buildTarget iOS`；build method 只验证 active target，不负责切换；Windows 仅执行 `ValidateIosConfiguration`；用仓库变量 `HAS_IOS_RUNNER` 控制 iOS job；先读取批准的 `release-scope.yaml`：iOS 被明确排除时生成 `ios-status = NOT_IN_SCOPE`，iOS 属于 blocking platforms 但缺 runner/Xcode/设备时生成 `ios-status = BLOCKED_NOT_VERIFIED`，均写入 artifact/summary 且不无限排队；固定 runner labels，检查 Unity 版本、许可证、Build Support、SDK/NDK/JDK 与 Xcode；写明唯一 BuildScenes 清单；校验 BuildReport、APK/AAB 或 Xcode 工程确实存在；构建脚本的设置修改由 `finally` 恢复 |
 | U-P1-09 | 任务 29、33 | P1 Engineering Gate 生成 Android ARM64 IL2CPP Development Build；Mobile Release Readiness 必须从同一 Git SHA、同一 Addressables content manifest 生成非 Development 候选包，并用候选包完成安装、冷启动、CharacterSelect、Addressables 初始化、内建 UI 加载、MessageTypeRegistry 非默认 fixture 编解码和进入 DemoDay；记录非敏感 signing identity 指纹、versionCode/versionName、Managed Stripping Level、Scripting Backend、Development/Debuggable 标志与 ABI；smoke 在超时前主动写出完成标志与退出状态，保存 `adb logcat`、设备型号、系统、build fingerprint 和包版本；根据 strip diagnostics 和 smoke 证据配置 `link.xml` 或 `[Preserve]`，无法构造的消息必须有显式 AOT preserve 证据；只有候选包证据存在时才可声明 Android runtime verified |
 | U-P1-10 | 任务 24、27、31、33 | 纯 C# 热路径使用隔离后的 `GC.GetAllocatedBytesForCurrentThread`；Unity 对象和帧性能使用 Unity Performance Testing package 或 Standalone Player 性能测试；阶段 0 新建 `production/qa/device-profiles/android-reference.yaml`，在 P1-B2 前填入实际设备型号/SoC/RAM/系统/分辨率/Quality Level/目标帧率/预热/采样窗口/p95 算法/原始数据格式，未填则性能 Gate 为 `BLOCKED_NOT_VERIFIED`；Coverage 固定 `-enableCodeCoverage`、`-coverageResultsPath`、`-coverageOptions`、assembly filter 和排除规则；Coverage XML 缺失、损坏或目标程序集未出现时失败；不把一次 Editor 内零分配断言作为移动端性能结论 |
 | U-P1-11 | 任务 4、21、23、30 | 区分全局 `ResourceManager.ShutdownAsync` 与场景/会话级 `ResourceScope.CloseAsync`：场景退出只关闭当前 owner 的 scope，不停止全局服务，也不释放 application/UI scope 的 CoreUI lease；每个 lease 必须登记 owner，scope 关闭后断言该 owner 的 lease 数为 0；全局 Shutdown 只用于应用真正退出、测试套件结束或显式全局重启；`SubsystemRegistration` 只重置纯托管静态引用，不调用异步 Addressables API，若发现未释放 handle 则在开发/测试构建报告泄漏而不是静默清表；测试提供受控的 `ResetForTests`；UI 销毁顺序固定为取消加载 → 销毁实例 → 释放 descriptor lease → 清空 Instance；增加“未先关闭 scope 直接开始第二轮 PlayMode”负向测试、`CharacterSelect CoreUI 保留 → DemoDay world scope 创建/关闭 → 返回 CharacterSelect`，并在关闭 Domain Reload 的配置下验证无残留 |
@@ -218,13 +222,16 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 **端点契约：**
 
 - `NetworkEndpoint` 明确携带 transport kind、host、port，以及 WebSocket 的完整 scheme/path；`WebSocketClientAdapter` 接收已验证的完整 `Uri`，不得内部硬编码 `ws://` 或 `/`；公网 WebGL 强制 `wss://`，明文 `ws://` 只允许 loopback/Development Build；
-- KCP 端点支持域名、IPv4 与 IPv6。DNS 在连接流程中异步解析一次，根据解析结果创建匹配的 `AddressFamily` socket；禁止 `IPAddress.Parse(host)` 作为域名路径，禁止固定 `AddressFamily.InterNetwork`；
-- 自动测试覆盖域名、IPv4、IPv6、DNS 无结果/多结果、取消与超时；Mobile Release Readiness 在批准设备/网络上保存 IPv4、IPv6-only/NAT64 连接证据。
+- KCP 端点支持域名、IPv4 与 IPv6。连接流程始终保留原始 hostname 作为服务端身份验证输入；DNS 通过系统 resolver 异步解析并去重候选，根据每个结果创建匹配的 `AddressFamily` socket。禁止 `IPAddress.Parse(host)` 作为域名路径，禁止固定 `AddressFamily.InterNetwork`，NAT64 依赖系统 DNS64/getaddrinfo 结果，不在应用内手工拼接 IPv6 地址；
+- 多地址连接采用有界 candidate race：尊重系统候选顺序，首个候选立即尝试，250ms 后启动下一地址族候选，最多同时 2 个；单候选握手超时 3 秒、整个连接 10 秒，值可由受版本控制的配置收紧但不得在同一 Gate run 临时改变。首个完成服务端身份验证与安全握手的候选获胜并取消/释放其余候选；首个不可达必须继续后续候选，全部失败时返回去敏后的聚合错误；调用方取消必须立即停止 DNS、计时器、socket 与握手；
+- 实现清单必须包含 `WebSocketClientAdapter.cs`（当前 `ConnectAsync` 硬编码 `ws://host:port/`，改为接收完整 `Uri`）、`KcpNetClientAdapter.cs`（当前 `IPAddress.Parse(host)`）、`KcpClient.cs`（当前取 `addresses[0]`）以及新增的 endpoint resolver/candidate race；不得只在工厂层包装旧行为；
+- 自动测试覆盖域名、IPv4、IPv6、DNS 无结果/多结果、首个失败后续成功、全部候选失败、取消、单次/总超时与 loser 清理；Mobile Release Readiness 在批准设备/网络上保存 IPv4、IPv6-only/NAT64 连接证据。
 
 **KCP 公网安全：**
 
 - KCP + Protobuf 本身不提供机密性或对端认证；HMAC 登录票据只用于身份/完整性，不能替代传输加密。Development/loopback/受控测试网络可显式启用明文 KCP，非 Development 公网候选包必须 fail-closed；
-- 阶段 0 新建 `docs/architecture/adr-0003-kcp-session-security.md`，在运行时代码实施前选择并锁定一个经过维护、支持 Unity 2022 IL2CPP Android/iOS 的成熟 DTLS 或 Noise 实现；禁止自研密码学原语。本项通过集成外部审查过的 provider 保留原 Spec“不在应用协议层自研加密”的原则。ADR 至少确定协议/库版本、许可证、服务端与客户端集成点、身份与密钥来源、双向密钥派生、AEAD、nonce/序列号、重放窗口、重连/rekey/轮换、版本降级拒绝、秘密清理和观测脱敏；
+- 阶段 0 新建 `docs/architecture/adr-0003-kcp-session-security.md`，在运行时代码实施前选择并锁定一个经过维护、支持 Unity 2022 IL2CPP Android/iOS 的成熟 DTLS 或 Noise 实现；禁止自研密码学原语。本项通过集成外部审查过的 provider 保留原 Spec“不在应用协议层自研加密”的原则。ADR 至少确定协议/库版本、许可证、服务端与客户端集成点、身份与密钥来源、双向密钥派生、AEAD、nonce/序列号、重放窗口、重连/rekey/轮换、版本降级拒绝、秘密清理和观测脱敏；服务端身份验证必须绑定 `NetworkEndpoint` 的原始 hostname，而不是某次 DNS 解析得到的 IP；
+- ADR-0003 批准前必须完成最小 POC：Unity 2022.3 Android IL2CPP 客户端与 .NET 8 服务端完成所选 provider 的握手、一条 AEAD 消息往返、篡改/重放拒绝，并记录许可证、维护状态与 IL2CPP 兼容性证据；POC 失败时 ADR 必须写明回退方案（例如移动端改用 WSS），不得锁定未验证的库；
 - 任务 13 建立 security provider 接口、配置 fail-fast 与明文 release 守卫；任务 32 完成经 ADR 批准的客户端/服务端安全 provider、部署配置、密钥轮换演练与安全测试。篡改、重放、错误服务端身份、过期密钥、降级和握手超时必须被拒绝并留下不含秘密的结构化证据；
 - 在 ADR 未批准、provider 未完成或候选包仍可回退明文 KCP 时，P0 只能报告“平台选择策略与共享 KCP 实现已验证”，P1 Engineering/Mobile Release Readiness 不得把移动公网传输标为 PASS。
 
@@ -232,10 +239,11 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 **WebGL 构建边界：**
 
-- `GameSys.asmdef` 当前无条件引用 `KcpNet` 与 `WebSocketNet`，两个 transport asmdef 也没有平台排除；`Kcp.dll` plugin 当前对 Any Platform 启用。任务 13/30 必须把 `Assets/Packages/Kcp.2.7.0/lib/netstandard2.1/Kcp.dll.meta` 明确设为 WebGL 不兼容，或用等价的 PluginImporter 配置排除；
-- 新增 `KcpPluginPlatformGuardTests` 校验 importer，WebGL Player 构建产物检查不得包含 KCP plugin/adapter；所有依赖 KCP plugin 的源码保持 `!UNITY_WEBGL` 编译守卫。通用 PlayMode asmdef 移除直接 `KcpNet` 引用不等于完成生产边界隔离。
+- `GameSys.asmdef` 当前无条件引用 `KcpNet` 与 `WebSocketNet`，两个 transport asmdef 也没有平台排除。P0 任务 13 必须完成 factory 唯一构造边界、KCP 源码 `!UNITY_WEBGL` 编译守卫、全部 KCP PluginImporter 的 WebGL 排除、`TransportFactoryBoundaryGuardTests`、`KcpPluginPlatformGuardTests` 和 WebGL 构建产物检查；任务 30 只把这些既有规则纳入长期架构守卫、allowlist 与后续 asmdef 重构，P0 Gate 不依赖任务 30；
+- 当前快照存在两份字节相同的 `Kcp.dll`（SHA-256 `09707B5EBA20070ED922C7293AF342404A162A263C5965189EB687C90690FB9D`）：Git 已跟踪的 `Assets/Plugins/ProtoBuf/Kcp.dll` 与未跟踪的 `Assets/Packages/Kcp.2.7.0/lib/netstandard2.1/Kcp.dll`，两份 importer 都启用 Any Platform。阶段 0 指定已跟踪副本为本轮唯一权威来源；任务 13 将其 importer 设为 WebGL 不兼容，并在再次核对 hash、GUID 引用、生成来源与工作树归属后处理未跟踪重复副本，同时修正会重新生成/提交重复 DLL 的 restore/install 配置。任何删除未跟踪副本的动作都必须先确认它是可再生输出且不含用户改动；内容漂移或归属不明时停止并请求确认，不得静默删除；去重完成前两份 `.meta` 都必须显式设为 WebGL 不兼容；阶段 0 必须明确 `Assets/Packages/` 的归属：若为 NuGetForUnity 生成目录，加入 `.gitignore` 并清理未跟踪副本；若非生成目录，纳入版本控制并解决双份 DLL；该决定写入任务 13 文件清单与提交清单；
+- `KcpPluginPlatformGuardTests` 必须按程序集名/GUID 枚举所有 Kcp plugin importer，发现重复副本、未知路径、Any Platform/WebGL enabled 或固定路径漏检均失败；WebGL Player 构建产物必须同时证明没有 Kcp 托管/原生 plugin 和 `KcpNetClientAdapter`。所有依赖 KCP plugin 的源码保持 `!UNITY_WEBGL` 编译守卫。通用 PlayMode asmdef 移除直接 `KcpNet` 引用不等于完成生产边界隔离。
 
-阶段 0 回写任务 13、30、32 时，文件清单至少包含 `ClientNetworkHost.cs`、`NetworkTransportFactory.cs`、`NetworkEndpoint.cs`、`KcpNetClientAdapter.cs`、`WebSocketClientAdapter.cs`、WebGL/.NET channel、`Kcp.dll.meta`、客户端/服务端 security provider 与上述测试及 `.meta`；若最终命名不同，计划必须给出一一对应关系，不能保留“相关文件”占位描述。
+阶段 0 回写任务 13、30、32 时必须区分所有权：任务 13 文件清单至少包含 `ClientNetworkHost.cs`、`NetworkTransportFactory.cs`、`NetworkEndpoint.cs`、`KcpNetClientAdapter.cs`、`WebSocketClientAdapter.cs`、WebGL/.NET channel、两份现有 `Kcp.dll`/`.meta`、factory/importer/产物守卫测试及 `.meta`；任务 30 接管守卫维护与 allowlist，不重复承担 P0 实现；任务 32 包含客户端/服务端 security provider、部署配置与安全测试。若最终命名不同，计划必须给出一一对应关系，不能保留“相关文件”占位描述。`KcpNet` 当前 15 个 `.cs` 中只有 8 个带 `#if !UNITY_WEBGL`；任务 13 文件清单必须显式包含 `IKcpTransport.cs`、`ILogger.cs`、`IMessageExecutor.cs`、`KcpOptions.cs`、`KcpSession.cs`、`MessageDispatcher.cs`、`KcpServerSession.cs`，逐个确认是否引用 Kcp plugin 类型并补齐守卫或改为平台无关接口；`KcpNet.asmdef` 当前无平台排除，WebGL 排除 `Kcp.dll` 后必须仍能编译出空/安全程序集。
 
 ### 4.3 原计划任务的显式验收补齐
 
@@ -250,13 +258,13 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 | 10 准入与 WS 背压 | 按 Spec 6.0.2 实现单 IP/session/Login/消息/字节/PositionSync/Cast/控制消息速率；WS 单消息 64KiB；待发 256 帧或 4MiB，先到者为准，慢客户端断开；分片聚合 5 秒超时；未配置的 `Encrypted/Compressed` 标志立即拒绝；每个平台/构建配置只启用一个主传输 |
 | 11 服务端 KCP | `Input/Update/Send/TryRecv` 由同一执行上下文拥有；删除每会话多线程并发触达；未认证 UDP 全局 512、单 IP 8；cookie 验证后才创建高频会话 |
 | 25 局部 HitStop | 只响应本地来源；默认使用局部 Animator/Playable 速度；不修改全局 `Time.timeScale` |
-| 30 架构守卫与 asmdef | 先实现守卫：禁止非白名单 `GetComponent/FindObject*`、禁止玩法层 `Resources.Load`、禁止跨层 asmdef 反向引用；校验 `GameSys.asmdef` 对 `KcpNet`/`WebSocketNet` 的现有双引用不会绕过任务 13 的 platform factory 与编译守卫；`TransportFactoryBoundaryGuardTests` 禁止 factory 外构造具体 transport，`KcpPluginPlatformGuardTests` 校验 WebGL importer 排除，WebGL 构建产物不得包含 KCP plugin/adapter；建立带责任人、原因和到期日的 legacy allowlist，现有基线只允许收缩，新增违规立即失败；守卫稳定后再拆 Bag/Stamina asmdef，并用依赖守卫证明不反向引用 `GameSys`；Sys3C/Skills/Combat/Monster/SyncLayer 的大规模拆分留 P2 |
+| 30 架构守卫与 asmdef | 保留并扩展任务 13 已通过 P0 Gate 的 transport factory、PluginImporter 与 WebGL 产物守卫，不在 P1 重新定义其语义；新增守卫禁止非白名单 `GetComponent/FindObject*`、玩法层 `Resources.Load` 和跨层 asmdef 反向引用；校验 `GameSys.asmdef` 对 `KcpNet`/`WebSocketNet` 的引用不能绕过 factory/编译边界；建立带责任人、原因和到期日的 legacy allowlist，现有基线只允许收缩，新增违规立即失败；守卫稳定后再拆 Bag/Stamina asmdef，并用依赖守卫证明不反向引用 `GameSys`；Sys3C/Skills/Combat/Monster/SyncLayer 的大规模拆分留 P2 |
 | 32 可观测性、公网与 KCP 安全基线 | `System.Diagnostics.Metrics` + OpenTelemetry Prometheus exporter；指标含 tick p50/p95/p99、队列深度/丢弃、session/unauth 数、WS/KCP 背压、AOI 可见数、导航 p95、GC/分配；健康检查区分进程存活与世界 tick；Caddy 示例终止 WSS；按 `adr-0003-kcp-session-security.md` 完成移动 KCP 标准安全 provider、服务端身份验证、AEAD、重放保护、rekey/轮换、降级拒绝和不含秘密的指标/日志；非 Development 构建明文 fail-closed；管理/指标端点默认 loopback；配置/怪物表/地图/协议/安全 provider 生产模式 fail-fast；优雅停机先停止准入、排空有限队列、关闭世界与会话 |
-| 33 P1 Gate | 分别输出 P1 Engineering Gate 与 Mobile Release Readiness：两个 WorldInstance 互不可见/不可命中/不进入仇恨或 ORCA；200 bots + 怪物压测 tick p95 < 50ms、p99 < 66ms；Android ARM64 IL2CPP Development Build 与同 SHA/同 content manifest 的非 Development 候选包、runtime smoke 分开判定；iOS 按批准的 release scope 与 runner/设备能力报告 `PASS`、`BLOCKED_NOT_VERIFIED` 或 `NOT_IN_SCOPE`；Addressables 并发单飞与 owner 级句柄归零；30 分钟资源/订阅基线；已配置 Android 参考档位 p95 frame ≤ 33.3ms；CI 对 0 tests/测试清单异常下降/默认包名/协议漂移/配置错误/架构护栏/覆盖率下降明确失败；TLS/WSS、移动 KCP 安全 provider、域名/IPv4/IPv6/NAT64、重放/篡改/降级拒绝、鉴权、指标、密钥轮换和优雅停机演练完成；任何 blocking 平台为 `BLOCKED_NOT_VERIFIED` 时对应 Release Readiness 不得 PASS |
+| 33 P1 Gate | 分别输出 P1 Engineering Gate、Mobile Release Readiness，以及 WebGL 纳入 blocking platforms 时的 WebGL Public Deployment Readiness：两个 WorldInstance 互不可见/不可命中/不进入仇恨或 ORCA；200 bots + 怪物压测 tick p95 < 50ms、p99 < 66ms；Android ARM64 IL2CPP Development Build 与同 SHA/同 content manifest 的非 Development 候选包、runtime smoke 分开判定；iOS/WebGL 按批准的 release scope 与 runner/设备/浏览器能力报告 `PASS`、`BLOCKED_NOT_VERIFIED` 或 `NOT_IN_SCOPE`；Addressables 并发单飞与 owner 级句柄归零；30 分钟资源/订阅基线；已配置 Android 参考档位 p95 frame ≤ 33.3ms；CI 对 0 tests/测试清单异常下降/默认包名/协议漂移/配置错误/架构护栏/覆盖率下降明确失败；公网 WebGL 的域名/证书/WSS/代理/浏览器往返、移动 KCP 安全 provider、域名/IPv4/IPv6/NAT64、重放/篡改/降级拒绝、鉴权、指标、密钥轮换和优雅停机演练完成；任何 blocking 平台为 `BLOCKED_NOT_VERIFIED` 时对应 Release Readiness 不得 PASS |
 
 ### 4.4 Gate 条件固化
 
-阶段 0 必须为 Gate 0、P0 Gate、P1 Engineering Gate 和 Mobile Release Readiness 分别固定：
+阶段 0 必须为 Gate 0、P0 Gate、P1 Engineering Gate、Mobile Release Readiness 和 WebGL Public Deployment Readiness 分别固定：
 
 - 输入：任务范围、构建目标、测试程序集、服务端启动参数；
 - 命令：完整可复制命令；
@@ -272,12 +280,12 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 ### 4.5 治理文件与脚本
 
-- **技术偏好单一来源**：新建 `docs/technical-preferences.md` 作为唯一人工维护源；由阶段 0 脚本同步生成 `.claude/docs/technical-preferences.md` 与 `.codex/docs/technical-preferences.md`，生成文件带“generated, do not edit”头，并在 Windows/Linux Gate 中比较内容 hash，禁止三份文件独立手改或产生大小写不同的第四份路径。填入引擎、平台传输矩阵、输入、命名、性能预算、测试、禁止模式、允许库和 Unity specialist 路由。
+- **技术偏好单一来源**：新建 `docs/technical-preferences.md` 作为唯一人工维护源；由阶段 0 脚本同步生成 `.claude/docs/technical-preferences.md` 与 `.codex/docs/technical-preferences.md`，生成文件带“generated, do not edit”头。Codex 目录以仓库当前真实目录 `.codex/` 的全小写拼写为唯一契约；历史复核中的 `.Codex/` 是待修正的旧引用，不得创建大小写变体。同步更新根 `CLAUDE.md` 与 `AGENTS.md`，分别显式要求读取对应生成文件；Windows/Linux Gate 比较三份内容 hash，并通过 Git 索引/大小写敏感路径检查拒绝 `.Codex/` 或其他变体。增加 toolchain consumer sentinel：生成文件写入 schema/hash marker，Claude 与 Codex 的最小审查会话分别回报 marker 并保存证据；任一入口未读取、路径解析失败或 hash 不同均阻塞阶段 0。填入引擎、平台传输矩阵、输入、命名、性能预算、测试、禁止模式、允许库和 Unity specialist 路由。
 - **ADR**：使用跨平台稳定的小写文件名，新建 `docs/architecture/adr-0001-platform-transport-matrix.md`、`docs/architecture/adr-0002-quality-gate-evidence-model.md` 与 `docs/architecture/adr-0003-kcp-session-security.md`。前者记录 Android/iOS KCP、WebGL WebSocket/WSS、endpoint/factory 边界和单平台单主传输；第二份记录 Gate 状态机、证据、例外、超时、回滚，以及 `NOT_IN_SCOPE`/`BLOCKED_NOT_VERIFIED` 的严格语义；第三份按 4.2.2 锁定移动公网 KCP 的标准安全协议/库和密钥生命周期。Coverage、可观测性和停机不再塞进一个 mega ADR，后续按独立决策补充。
 - **协议双端一致性**：Gate 0 必须运行 `Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs`、`Assets/Scripts/Tests/Editor/Protocol/ProtocolShapeGuardTests.cs` 与服务端协议测试；若缺少跨端一致性断言，在任务 1 补一个双端 roundtrip 测试。
-- **测试脚本定位**：Windows 上以 `tools/quality-gate.ps1` 作为进程编排权威入口，负责 Unity/服务器 PID、timeout、profile、XML 解析、hash 和清理；`tools/quality-gate.sh` 与 `tools/unity-tests.sh` 作为薄包装保留现有 Bash 使用方式；MCP `tests-run` 的便利入口移到 `tools/unity-tests-mcp.sh`，不得作为 Gate 证据。同步更新 `docs/agent-token-hygiene.md`。
+- **测试脚本定位**：Windows 上以 `tools/quality-gate.ps1` 作为进程编排权威入口，负责 Unity/服务器 PID、timeout、profile、XML 解析、hash 和清理；`tools/quality-gate.sh` 与 `tools/unity-tests.sh` 作为薄包装保留现有 Bash 使用方式；MCP `tests-run` 的便利入口移到 `tools/unity-tests-mcp.sh`，不得作为 Gate 证据。同步更新 `docs/agent-token-hygiene.md`。Linux CI 默认只做内容 hash/静态检查；若要在 Linux 执行 Unity Gate，必须显式提供 `pwsh` 或 POSIX runner，不能假设 PowerShell 可用。
 - **测试清单与例外**：新建 `production/quality/test-manifest.json` 和 `production/quality/gate-exceptions.json`；manifest 结构固定为 `assembly → profile → cohort → serverArgs/testFilter/fixtures/timeout`，记录测试全名与基线；exceptions 必须包含 owner、reason、expiresAt 和恢复条件。
-- **发布范围**：新建 `production/quality/release-scope.yaml`，记录 milestone、blockingPlatforms、requiredDeviceLanes、approver、approvedAt 和 sourceGitSha。Gate 启动时读取并复制到 run artifact，运行期间禁止更改；只有该文件明确排除的平台才可标记 `NOT_IN_SCOPE`。
+- **发布范围**：新建 `production/quality/release-scope.yaml`，记录 milestone、blockingPlatforms、requiredDeviceLanes、requiredBrowserLanes、publicEndpoints、approver、approvedAt 和 sourceGitSha。Gate 启动时读取并复制到 run artifact，运行期间禁止更改；只有该文件明确排除的平台才可标记 `NOT_IN_SCOPE`。
 - **README 同步**：任何模块行为变化同步更新该模块 README；波次 Gate 报告引用更新后的 README。
 - **工作树分类**：阶段 0 前重新采样工作树；特别关注 `Assets/PreRes/Texture/UI/` 的删除和 `Assets/Plugins/NuGet/` 的 DLL 变更。先备份到分支、具名 stash 或隔离 worktree，不得盲提交或直接丢弃。
 
@@ -311,13 +319,13 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 ### 5.2 实现要点
 
-1. `QualityGate.cs` 只做 Editor 内 preflight：验证 active target、包名、asmdef 契约和配置；不调用 `SwitchActiveBuildTarget`，也不判断当前 NUnit run 的最终发现数或失败数。
+1. `QualityGate.cs` 只做 Editor 内 preflight：验证 active target、包名、asmdef 契约和配置，并提供可被 EditMode 测试直接调用的纯验证器；不调用 `SwitchActiveBuildTarget`，也不判断当前 NUnit run 的最终发现数或失败数；后者由 `quality-gate.ps1` 解析 XML，`quality-gate-selftest.ps1` 用 fixture XML 负向验证。
 2. `quality-gate.ps1` 在 Unity 退出后解析 XML，验证 discovered、failed、skipped、manifest、进程退出码、timeout、产物新鲜度与 hash。
-3. 原生 runner 启动独立 Unity 进程，传 `-buildTarget win64`；Editor 内验证 `BuildTarget.StandaloneWindows64`。EditMode、通用 PlayMode和每个 Native server profile 分别输出 XML 与日志。同一 project 已被 Unity 打开时 fail-fast，并提示使用独立 worktree。
+3. 原生 runner 启动独立 Unity 进程，传 `-buildTarget StandaloneWindows64`；Editor 内验证 `BuildTarget.StandaloneWindows64`。EditMode、通用 PlayMode和每个 Native server profile 分别输出 XML 与日志。同一 project 已被 Unity 打开时 fail-fast，并提示使用独立 worktree。
 4. 服务器先执行 `dotnet build Server/Server3C.csproj -c Debug`，再以 `dotnet Server/bin/Debug/net8.0/Server3C.dll <port> <profile args>` 启动。runner 记录 PID，使用动态 TCP/UDP 端口，必须先同时观察现有日志 `Server3C started on port ... with KCP protocol` 与 `WebSocket listener started on ...`，再执行对应传输 probe；timeout 或失败时只终止本次进程树。若未来改用统一 `SERVER_READY` marker，必须把 `Server/Program.cs` 和对应服务端测试显式加入任务 1。
 5. Native profile 固定为：`native-clean` 不带 bots/monsters，运行除下列特殊 profile 外的 Native 测试；`native-bots` 运行 `AoiWorldTests`，使用 `--bots 100 --bots-radius 500`；`native-monsters` 运行 `MonsterWorldTests` 与 `HitJudgmentAlignmentTests`，使用 `--monsters 4` 及测试要求的地图参数。新增导航专用测试时再启用 `native-navigation`，不得建立空 profile。profile 只描述服务器配置，runner 根据 `test-manifest.json` 按 fixture/cohort 多次调用 Unity `-testFilter`；默认每个 test fixture 使用全新服务器进程，只有被显式证明状态互不影响的 fixture 才能组成共享进程 cohort。禁止跨 profile 或未声明 cohort 共享世界状态。
 6. `test-manifest.json` 保存每个 assembly/profile 的预期测试全名；测试新增、删除或迁移必须显式更新 manifest。未解释的测试数下降、未知 skip/ignore/inconclusive 均失败。
-7. WebGL 使用独立 `-buildTarget webgl` 进程。Gate 0 明确区分“通用测试程序集 WebGL compile contract”“WebGL Player Build”和“WebGL runtime smoke”，不得用其中一种替代另外两种。移除 `GameSys.PlayModeTests.asmdef` 的直接 `KcpNet` 引用只隔离测试程序集，不代表生产传输已隔离；`GameSys.asmdef` 当前仍引用 `KcpNet` 与 `WebSocketNet`，任务 13/30 必须用 platform factory、预处理编译守卫和 WebGL compile contract 共同证明 KCP 玩家路径不可达。
+7. WebGL 使用独立 `-buildTarget WebGL` 进程。Gate 0 明确区分“通用测试程序集 WebGL compile contract”“WebGL Player Build”和“WebGL runtime smoke”，不得用其中一种替代另外两种。移除 `GameSys.PlayModeTests.asmdef` 的直接 `KcpNet` 引用只隔离测试程序集，不代表生产传输已隔离；`GameSys.asmdef` 当前仍引用 `KcpNet` 与 `WebSocketNet`，任务 13 必须用 platform factory、预处理编译守卫、PluginImporter/产物检查和 WebGL compile contract 证明 KCP 玩家路径不可达，任务 30 仅维护这组已通过 P0 Gate 的守卫。
 8. `quality-gate-selftest.ps1` 使用 stub 进程和 fixture XML 证明以下情况必定返回非零并保留证据：server ready 超时、Unity 非零退出、XML 缺失/损坏、manifest 数量下降、过期 exception、stale artifact、teardown 超时和残留子进程。
 9. `--infra` 与 `--baseline` 在 dirty worktree 上只能输出 `DIAGNOSTIC_ONLY`，并保存 patch hash；`--p0`、`--p1` 与 Mobile Release Readiness 默认要求 clean worktree，dirty 时不得产生 PASS。
 
@@ -336,7 +344,7 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 ### 5.4 Gate 0 风险
 
 - headless-safe suite 固定使用 `-nographics`；UI、渲染或需要图形设备的 suite 固定使用有图形 runner。不得在失败后临时改变参数并沿用同一 run ID；lane 变更必须新建 run ID 并完整重跑。
-- `-buildTarget win64` 首次切换会触发资源重导入，属预期；把耗时写入 Gate 报告。
+- `-buildTarget StandaloneWindows64` 首次切换会触发资源重导入，属预期；把耗时写入 Gate 报告。
 - Gate 永远启动新 Unity 进程并写独立 `-logFile`，不调用 Console clear。新进程产生的 Error/Exception 默认失败；确需豁免时使用 `gate-exceptions.json` 精确匹配并设置到期日。
 - 当前 629/630 与 PlayMode 0 只作为历史快照。Gate 0 必须重新测量并保存本轮证据，不能通过清历史日志证明问题消失。
 
@@ -344,7 +352,7 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 | 风险 | 缓解 | 回滚 |
 |---|---|---|
-| 全量周期长（原计划 49–86 人天） | 波次 Gate；每波次独立可交付 | 只回滚当前波次分支 |
+| 全量周期长（原计划 49–86 人天；Revision 2 新增移动 KCP 安全层、IPv6/NAT64、公网 WebGL 部署与 release governance，阶段 0 必须重估） | 波次 Gate；每波次独立可交付 | 只回滚当前波次分支 |
 | 阶段 0 文档修订漂移 | 复核第 7 节作为验收清单；逐项映射 | 重新修订，不进入 Gate 0 |
 | KCP 前移扩大 P0 | 任务 13 独立提交；soak 失败不阻塞其他 P0 波次，但 P0 Gate 不通过 | 回滚到 last-green KCP；若无 last-green，则 Android/iOS 网络就绪状态为 BLOCKED，不得改成 WSS 冒充通过 |
 | KCP 安全 provider/密钥配置失败 | ADR、client/server provider、配置与轮换演练独立提交；非 Development 明文/降级守卫为 blocking | 原子回滚 client/server/provider/config 到同一 last-green；无完整配对版本时禁止生成公开候选包，不得临时启用明文 |
@@ -371,13 +379,14 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 ### 7.2 P1 Engineering Gate 完成
 
-原 Spec 10.2 中可由 CI、Editor 或 Standalone 自动验证的工程项，以及复核 7.2 中非设备专属的自动化项全部满足；任务 15–33 的工程 Gate 报告存在。设备专属要求单独由 7.3 判定。关键项：
+原 Spec 10.2 中可由 CI、Editor 或 Standalone 自动验证的工程项，以及复核 7.2 中非设备/公网部署专属的自动化项全部满足；任务 15–33 的工程 Gate 报告存在。设备专属要求由 7.3 判定，公网 WebGL 要求由 7.4 判定。关键项：
 
 - 两个 WorldInstance 隔离；200 bots 压测 tick p95 < 50ms、p99 < 66ms。
 - Android ARM64 IL2CPP Development Build 成功；非 Development 候选包及设备 runtime smoke 独立归入 Mobile Release Readiness。缺设备不伪造 Engineering 结果，但对应 Mobile Release Readiness 必须为 `BLOCKED_NOT_VERIFIED`。
 - Addressables Use Existing Build 验证通过；Analyze 无阻塞级问题；catalog/hash/bundle 产物存在。
 - 热路径性能数据可复现；场景退出后 VFX 与 Monster 资源归零。
-- 经 ADR 批准的 KCP security provider 可在 Android/iOS IL2CPP 编译，非 Development 配置禁止明文/降级；factory、endpoint、DNS、IPv4/IPv6 与篡改/重放拒绝的自动测试通过。Engineering Gate 不替代候选包真机网络证据。
+- 经 ADR 批准的 KCP security provider 在 `release-scope.yaml` 的所有 blocking mobile platforms 的 IL2CPP Player Build 中编译通过，非 Development 配置禁止明文/降级；factory、endpoint、DNS、IPv4/IPv6 与篡改/重放拒绝的自动测试通过。被排除平台的兼容性只能列 advisory 或平台级 `NOT_IN_SCOPE`，不得反向阻塞整个 Engineering Gate。Engineering Gate 不替代候选包真机网络证据。
+- WebGL 为 blocking platform 时，Engineering Gate 必须完成 release 配置的 WebGL Player Build、禁止 `ws://` 公网 endpoint 的静态检查、反向代理配置语法检查与 artifact digest；真实证书、DNS、公开代理和浏览器往返由 7.4 判定。
 - CI 对 0 tests、测试清单异常下降、未知 skip、默认包名、协议漂移、配置错误、架构护栏和覆盖率下降明确失败。
 - 关闭 Domain Reload 后连续两轮运行无静态状态与资源泄漏。
 - iOS 是否 blocking 由批准的 `release-scope.yaml` 决定；被明确排除时为 `NOT_IN_SCOPE`，纳入 blocking platforms 但缺 macOS/Xcode/runner/设备证据时为 `BLOCKED_NOT_VERIFIED`，不能写成 iOS verified。
@@ -386,12 +395,21 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 - 当前 blocking 平台已经从 Engineering Gate 相同 Git SHA、相同 Addressables content manifest 生成非 Development 候选包；候选包记录 BuildReport、非敏感 signing identity 指纹、版本号、Managed Stripping Level、Scripting Backend、Development/Debuggable 标志与 ABI，任何一项不匹配均失败。
 - 当前目标 Android 平台的 ARM64 IL2CPP 候选包已在真机或明确 ARM64 emulator 完成安装与 runtime smoke，并保存主动完成标志、`adb logcat`、设备信息、包版本、协议 fixture 结果和 ABI。
-- 候选包通过已批准的 KCP 安全 provider 连接受控公网测试端点；保存域名、IPv4、IPv6-only/NAT64、服务端身份、AEAD、重放/篡改/降级拒绝、重连与 rekey/密钥轮换证据，且未记录密钥、票据或明文敏感载荷。仅 emulator 证据不能替代物理设备网络切换与 NAT64 验证。
+- 候选包通过已批准的 KCP 安全 provider 连接受控公网测试端点；按 3.4 把客户端包、实际服务端 artifact/deployment/config、provider/协议/ADR、非敏感 key ID、endpoint/DNS 与测试窗口绑定到同一 run ID，任一端重新部署后旧证据失效；保存域名、IPv4、IPv6-only/NAT64、服务端身份、AEAD、重放/篡改/降级拒绝、重连与 rekey/密钥轮换证据，且未记录密钥、票据或明文敏感载荷。仅 emulator 证据不能替代物理设备网络切换与 NAT64 验证。
 - Android 参考设备档位已经配置；帧时间、GC、内存和 30 分钟 soak 达到固定阈值并保留原始数据。
 - 冷/热启动、前后台恢复、网络切换、断网重连、Safe Area、返回键、低内存和场景切换取消均有 PASS 证据。
 - 本次测试窗口内未观测到崩溃、ANR、未观察异常或超过已定义容差的资源泄漏。
 - 当前里程碑包含 iOS 时，iOS 必须完成对应的非 Development 候选包、Xcode/archive 与设备验证，证据缺失则为 `BLOCKED_NOT_VERIFIED`；被批准范围明确排除时为 `NOT_IN_SCOPE`。
 - 任一目标平台 blocking 项缺证据时，本 Gate 不得 PASS，也不得标记“公开测试/商店发布准备”。
+
+### 7.4 WebGL Public Deployment Readiness 完成
+
+- WebGL 不在批准范围时，本 Gate 为 `NOT_IN_SCOPE`；纳入 blocking platforms 时，下列项目全部为 blocking，不能用 P0 的本地 `ws://` browser smoke 替代；
+- Engineering Gate 生成的 WebGL artifact digest 与实际 CDN/站点部署 artifact 一致；Addressables catalog/hash/bundle 来自同一 Git SHA 和 content manifest；
+- 公开 `https://` 页面只连接 release scope 中批准的完整 `wss://host:port/path`，DNS、有效证书链、hostname、有效期、反向代理路由/Upgrade/超时/消息上限配置均通过；浏览器控制台无 mixed-content、证书或握手错误；
+- 在 `requiredBrowserLanes` 指定的浏览器/版本上完成冷启动、登录、消息往返、断线/重连、页面隐藏/恢复和至少一个场景进入 smoke；保存 HAR/代理日志/浏览器日志与主动完成标志；
+- 按 3.4 把 WebGL artifact、实际服务端/代理 artifact 或镜像 digest、配置 hash、部署时间、endpoint/DNS/证书指纹和测试窗口绑定到同一 run ID；任一部署、DNS、证书或代理配置变化后旧证据失效；
+- 任何 blocking 项缺失时为 `BLOCKED_NOT_VERIFIED` 或 `FAIL`，不得宣称 WebGL 公网发布准备。
 
 ## 8. 阶段 0 退出与基线激活
 
@@ -399,13 +417,19 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 
 - [ ] 原 Spec 已写回平台传输矩阵、Gate 状态机、资源/消息泵/UI 启动器/静态生命周期契约。
 - [ ] 原 33 任务计划已按 U-P0-01 至 U-P0-07、U-P1-01 至 U-P1-13 更新文件清单、命令、测试和验收条件。
+- [ ] 原计划已把任务 13 前移到 P0 并设为任务 14 的显式依赖；原 Spec §6.0 与 ADR-0001 已删除“所有平台默认 WSS/KCP 实验禁用”的旧默认值并改写为本文平台矩阵；任务 30/32 的职责与本文一致。
 - [ ] 任务 1 已包含完整 Native 测试迁移清单、server profile、`TestServerEndpoint`、runner 职责和 WebGL lane。
-- [ ] `docs/technical-preferences.md` 的权威来源和两个工具链同步策略已经写明。
+- [ ] `docs/technical-preferences.md` 的权威来源和两个工具链同步策略已经写明；`.codex/` 小写契约、Git 大小写变体检查、`AGENTS.md`/`CLAUDE.md` 入口及 Windows/Linux consumer sentinel 均通过。
 - [ ] 三个基础 ADR 已创建并通过一致性检查，平台传输不再存在 WSS/KCP 全局默认值冲突，移动公网 KCP 已锁定标准安全协议/库与密钥生命周期。
+- [ ] ADR-0003 的 POC 已完成并通过：Android IL2CPP 客户端与 .NET 8 服务端握手、AEAD 往返、篡改/重放拒绝；失败时已写回退方案。
+- [ ] `KcpNet` WebGL 编译守卫清单（7 个未带守卫文件）已逐项处理；排除 `Kcp.dll` 后 `KcpNet` 仍可在 WebGL 编译。
+- [ ] `Assets/Packages/` 的归属（生成目录 vs 版本控制）已决定，并写入 `.gitignore` 或任务 13 文件清单。
+- [ ] 端点重构清单（`WebSocketClientAdapter`、`KcpNetClientAdapter`、`KcpClient`、endpoint resolver）已写入任务 13。
+- [ ] 阶段 0 已按 Revision 2 范围重估工期，不再引用 49–86 人天作为完整范围估算。
 - [ ] Gate 状态、run ID、timeout、test manifest、skip/flaky、产物新鲜度和原子回滚规则已写回原计划。
-- [ ] `release-scope.yaml` 已由明确 approver 批准，Android/iOS 的 blocking/NOT_IN_SCOPE 状态不再由执行者临时决定。
+- [ ] `release-scope.yaml` 已由明确 approver 批准，Android/iOS/WebGL 的 blocking/NOT_IN_SCOPE 状态及 device/browser lanes 不再由执行者临时决定。
 - [ ] Gate 0 的 cohort manifest、profile sentinel 与 runner 负向自测已经写入任务 1。
-- [ ] 任务 13/30/32 已包含 platform factory、`NetworkEndpoint`、WebGL KCP plugin 排除、DNS/IPv4/IPv6/NAT64、安全 provider、release 明文 fail-closed 与完整文件/测试清单。
+- [ ] 任务 13 已独立拥有 P0 所需的 platform factory、`NetworkEndpoint`、两份 Kcp.dll 去重/Importer 排除、DNS candidate policy、IPv4/IPv6/NAT64、factory/plugin/产物守卫与完整文件/测试清单；任务 30 只接管长期守卫维护；任务 32 包含安全 provider、release 明文 fail-closed、部署与轮换演练。
 - [ ] 全局 `ResourceManager.ShutdownAsync` 与 owner 级 `ResourceScope.CloseAsync` 已分离，CoreUI application/UI scope 与 DemoDay world scope 的往返测试已写入任务 21/23/30。
 - [ ] P1 Engineering Gate 的 Development Build 与 Mobile Release Readiness 的同 SHA、同 content manifest、非 Development 候选包已分别写入任务 29/33。
 - [ ] P1-B1/P1-B2/P1-C1/P1-C2 波次和依赖已经写回原计划。
