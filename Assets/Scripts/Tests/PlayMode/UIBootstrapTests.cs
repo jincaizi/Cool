@@ -19,6 +19,11 @@ namespace KcpNet.PlayModeTests
         [UnityTest]
         public IEnumerator test_ensure_ui_manager_is_idempotent()
         {
+            // bootstrap 是 PlayMode 会话里 UIManager 的唯一创建者 —— 断言它真的跑了。
+            // 没有这一行，删掉 UIBootstrap 的 [RuntimeInitializeOnLoadMethod] 属性、
+            // 或者 bootstrap 根本不跑，这两条用例照样全绿（它们会自己建一个出来）。
+            Assert.IsNotNull(UIManager.Instance, "bootstrap 没有创建 UIManager —— AfterSceneLoad 没跑？");
+
             var first = UIBootstrap.EnsureUIManager();
             yield return null;
 
@@ -35,6 +40,8 @@ namespace KcpNet.PlayModeTests
         [UnityTest]
         public IEnumerator test_ensure_event_system_is_idempotent()
         {
+            Assert.IsNotNull(EventSystem.current, "bootstrap 没有创建 EventSystem");
+
             var first = UIBootstrap.EnsureEventSystem();
             yield return null;
 

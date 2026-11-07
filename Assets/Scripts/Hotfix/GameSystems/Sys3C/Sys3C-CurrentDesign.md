@@ -233,7 +233,7 @@ struct MoveCommand
 | SprintSpeed | 8.0f | 冲刺速度 |
 | RotationSpeed | 10.0f | 旋转平滑系数 |
 | Gravity | -30f | 重力加速度 |
-| JumpForce | 12f | 跳跃初速度 |
+| JumpForce | 10.95f | 跳跃初速度（峰值约 2.0m） |
 
 #### Update() 流程
 

@@ -15,7 +15,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public float SprintSpeed { get; set; } = 8.0f;
         public float RotationSpeed { get; set; } = 10.0f;
         public float Gravity { get; set; } = -30f;
-        public float JumpForce { get; set; } = 12f;
+        public float JumpForce { get; set; } = 10.95f;
 
         private CharacterData _data;
         private Vector3 _velocity;

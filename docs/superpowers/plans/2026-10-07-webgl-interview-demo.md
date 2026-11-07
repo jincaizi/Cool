@@ -2818,6 +2818,16 @@ dotnet run --project E:/CodeForJob/Cool/Server/Server3C.csproj -- 8000 --monster
 
 ### Task 9: `WebGLBuildScript` + 部署
 
+> **人类裁定（2026-10-11）：部署路线 = A「裸 IP + http + 开压缩」。**
+> 目标机：腾讯云轻量应用服务器，**Windows**。
+>
+> **为什么不需要域名/证书/备案**：`ProjectSettings` 里 `webGLThreadsSupport: 0` ⇒ 不用 `SharedArrayBuffer` ⇒ 不需要跨源隔离 ⇒ **不需要 HTTPS**。于是 `http://<公网IP>:8080` + `ws://<公网IP>:8000` 直接可用；而 **ICP 备案针对的是"域名 + 大陆服务器 + 80/443"，裸 IP + 非标端口不需要**。原计划里的"WSS 域名 + 证书"整段**作废**。
+>
+> **先决条件：压缩。** 当前包是**未压缩的 76 MB**（`WebGL.wasm` 55.1 MB + `WebGL.data` 20.8 MB）——因为 `Assets/Scripts/Editor/WebGLBuildScript.cs:52` 显式设了 `WebGLCompressionFormat.Disabled`（T4 时为验证写的），而仓库值是 **Gzip**。Gzip 通常把 wasm 压到 25–30%，**76 MB → 约 20 MB**。这是本任务最大的杠杆。
+>
+> **带宽是唯一的真风险**（R1 从"未测量"变成实数）：入门套餐 3–6 Mbps 峰值下，76 MB 要 **约 2 分钟**，压缩后约 33 秒。**本任务要测出真实传输量与加载时长**——这是测量，不是 D-W4 裁定的"包体优化"。
+
+
 **Files:**
 - 创建：`Assets/Scripts/Editor/WebGLBuildScript.cs`
 - 创建：`docs/superpowers/guides/webgl-demo-runbook.md`
@@ -2946,6 +2956,28 @@ The runbook covers the parts that are not code: HTTPS static hosting, the
 WebSocket upgrade forward, Let's Encrypt, and the Windows URL ACL that
 HttpListener needs before it will bind a non-localhost prefix."
 ```
+
+---
+
+### Task 13: URL 参数带服务器地址（`?host=<IP>`）
+
+> **为什么插队**：客户端的默认地址写死为 `127.0.0.1:8000`（`ClientNetworkHost.cs:35-36`），所以**面试官打开链接后必须手填公网 IP**——这是现场最容易出岔子的一步，而且发生在他第一次看到页面的那一刻。
+> 做成 URL 参数之后，你发给他的链接里就把地址带上了，**他不用填任何东西**。机制与 `?touch=1` 同源（`TouchInputAvailability.cs:67` 已在读 `Application.absoluteURL`，**不需要新的 jslib**）。
+
+**Files:**
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`（读参数覆盖默认地址）
+- 视实现方式可能需要修改：承载 `?touch=` 解析的那个类型（复用它的解析，别写第二套）
+- 测试：EditMode（解析层可单测，不需要真连接）
+
+- [ ] **Step 1: 写失败的测试** —— 参数解析要可单测：`?host=1.2.3.4` / `?host=1.2.3.4:9000` / 无参数 / 畸形参数（都要有确定行为）。**复用 `?touch=` 已有的解析路径**，不要新写一套。
+- [ ] **Step 2: 运行验证失败**
+- [ ] **Step 3: 实现** —— 解析出的 host/port 覆盖 `_serverHost`/`_serverPort`。**无参数时行为必须与现在逐字等价**（默认仍是 `127.0.0.1:8000`）。
+- [ ] **Step 4: 运行验证通过**
+- [ ] **Step 5: 回归** —— EditMode ≥239 + 新增 · Server.Tests 141/141 · PlayMode 三个用例至少各过一次
+- [ ] **Step 6: 重出 WebGL 包并实测** —— 用 `?host=<某个真实地址>` 打开，确认地址被带上、能连上（本地用 `127.0.0.1` 或局域网 IP 都行）
+- [ ] **Step 7: Commit**
+
+> **别忘了**：runbook（`docs/superpowers/guides/webgl-demo-runbook.md`）里现在写的是"面试官手填地址"，**改成"你把地址写进链接"**。
 
 ---
 

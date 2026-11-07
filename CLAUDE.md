@@ -10,11 +10,11 @@ Unity 2022 LTS MMO 客户端（服务端集成中），发布目标为移动平�
 ## 技术栈
 
 - Unity 2022.3.25f1 (LTS)
-- 网络：KCP + Protobuf
+- 网络：移动平台（KCP + Protobuf） WebGL（websocket）后续可能会改动
 - 资源：Addressable
 - 程序集分层：`Assets/Scripts/AOT/`（IL2CPP 编译的基础设施）+ `Assets/Scripts/Hotfix/GameSystems/`（业务系统）
 - 热更：无。HybridCLR 未安装（`Packages/manifest.json` 无该包，`Assets/HybridCLRData` 不存在）；
-  `Hotfix.*` 只是普通 asmdef 程序集，没有代码热重载能力
+  `Hotfix.*` 只是普通 asmdef 程序集，没有代码热重载能力。当前未实现热更，保留能快速接入热更的可能性
 
 ## 常用命令
 

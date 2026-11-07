@@ -69,19 +69,21 @@ right before `/compact`.
 
 ### 4. Reduce the fixed prompt/tool surface
 
-- The project `.mcp.json` starts the Unity MCP (`ai-game-developer`). Its tool list was
-  cut from **81 to 7** in `UserSettings/AI-Game-Developer-Config.json`, keeping only the
-  tools this project used: `tests-run`, `assets-refresh`, `script-execute`,
-  `screenshot-game-view`, `console-get-logs`, `assets-get-data`,
-  `editor-application-get-state`. Re-enable an extra tool in the Unity
-  **AI Game Developer** window when a task needs it.
+- The project `.mcp.json` starts the Unity MCP (`ai-game-developer`). Under core **1.3.0**
+  the tool list is **18 tools**, with 6 enabled in `UserSettings/AI-Game-Developer-Config.json`:
+  `tests-run`, `script-execute`, `screenshot-game-view`, `rql-mutate`, `rql-query`,
+  `rql-schema`. The old `console-get-logs` / `assets-refresh` / `assets-get-data` /
+  `editor-application-get-state` no longer exist — use `rql-query` (`console`, `unity.asset`,
+  `editor` sources) instead. Re-enable an extra tool in the Unity **AI Game Developer**
+  window when a task needs it. Extension packages (animation / particlesystem) must stay on
+  the same major line as core; mismatched versions break compilation.
 - The global `agentmemory` server was removed with `claude mcp remove agentmemory`
   (its tools were unused and it warned about missing env vars). `codegraph` stays
   because it is used; its `impact`/`trace`/`status` tools have no per-tool switch.
   The VS Code `getDiagnostics` tool was used once and stays with the extension.
-- Keep the always-loaded `CLAUDE.md` small. The long per-system architecture text now
-  lives in `docs/agent-architecture.md`; `CLAUDE.md` keeps the compact index and the
-  guardrails. Read the detailed doc only when the task touches that system.
+- Keep the always-loaded `CLAUDE.md` small. Per-system details live in each module's
+  `README.md`; `CLAUDE.md` keeps the compact index and guardrails. Read only the
+  README of the module you touch.
 - Do not re-load a long skill body for every small task. `brainstorming`,
   `writing-plans` and `subagent-driven-development` are ~4–14KB each per injection;
   for a 1–3 task change, inline execution is usually enough.
@@ -136,7 +138,7 @@ right before `/compact`.
 
 1. Start a fresh session; keep `/compact` around 200k–300k.
 2. Run `python tools/shrink_image.py` before reading any screenshot.
-3. Read `docs/agent-architecture.md` only for the subsystem you touch.
+3. Read the `README.md` in the module you touch; `docs/agent-architecture.md` is only an index.
 4. Use `codegraph` / offset reads; do not read whole large files.
 5. Write large docs with a heredoc; review diff files, not whole trees.
 6. Batch review rounds; one final integration review.
