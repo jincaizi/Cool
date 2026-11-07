@@ -10,3 +10,7 @@ UnityPoc/[Ll]ogs/
 UnityPoc/[Uu]ser[Ss]ettings/
 UnityPoc/*.csproj
 UnityPoc/*.sln
+# The .NET POC projects are hand-written inputs, not generated files.
+!Server/Server.csproj
+!Client/Client.csproj
+!KcpSecurityPoc.sln

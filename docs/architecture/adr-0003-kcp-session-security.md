@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — provider integration verified; KCP/UDP, ARM64 runtime, NAT64/IPv6 and rekey/rotation remain blocking in task 32 / Mobile Release Readiness. Evidence and limitations: [`spikes/kcp-security-poc/RESULT.md`](../../spikes/kcp-security-poc/RESULT.md).
+Accepted — 2026-11-07. Provider integration verified; KCP/UDP, ARM64 runtime, NAT64/IPv6 and rekey/rotation remain blocking in task 32 / Mobile Release Readiness. Evidence and limitations: [`spikes/kcp-security-poc/RESULT.md`](../../spikes/kcp-security-poc/RESULT.md).
 
 ## Context
 
@@ -11,6 +11,7 @@ KCP + Protobuf provides neither confidentiality nor peer authentication. The HMA
 ## Decision
 
 - Selected provider: **Noise-C** (`github.com/rweather/noise-c`) at commit `cfe25410979a87391bb9ac8d4d4bef64e9f268c6` (2023-12-07), MIT, reference implementation of the Noise Protocol Framework revision 34. Evaluation matrix and rejection reasons for Noise.NET, wolfSSL DTLS, BouncyCastle DTLS, OpenSSL DTLS and Torann are in [`spikes/kcp-security-poc/RESULT.md`](../../spikes/kcp-security-poc/RESULT.md).
+- Evaluation criteria: Unity 2022.3 IL2CPP Android/iOS compatibility, .NET 8 server support, license, maintenance status, package size, performance, and key-lifecycle fit. The RESULT matrix records the evidence for these columns for every candidate.
 - Protocol: `Noise_XX_25519_ChaChaPoly_BLAKE2s` (X25519, ChaCha20-Poly1305, BLAKE2s). XX provides mutual static-key authentication: the initiator pins the responder static key and the responder pins the initiator static key.
 - Client/server integration: Unity 2022.3 IL2CPP via P/Invoke to a per-ABI `libnoise.so` (arm64-v8a, x86_64); .NET 8 server via P/Invoke to `noise.dll`. Both are built from the pinned source with the Noise-C reference backend. iOS is portable C but was not verified in the Stage 0 POC.
 - Identity and key source: one static X25519 key pair per endpoint. Peer public keys are provisioned out of band and compared with the keys learned during the handshake. Identity is the pinned static key, not a DNS-resolved IP; the Noise prologue additionally binds the original `NetworkEndpoint` hostname and port.

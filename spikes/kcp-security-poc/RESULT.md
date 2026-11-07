@@ -1,7 +1,8 @@
 # ADR-0003 KCP Session Security POC — RESULT
 
 - **Date:** 2026-11-07
-- **Status:** PASS (provider only)
+- **Status:** PASS
+- **Scope:** provider only — the Noise-C provider integration is verified; the mobile KCP/UDP public path, ARM64 runtime, NAT64/IPv6 and rekey/rotation are not verified (see **Limitations / not verified**).
 - **Selected provider:** Noise-C (`github.com/rweather/noise-c`), commit `cfe25410979a87391bb9ac8d4d4bef64e9f268c6` (2023-12-07), MIT. Reference implementation of the Noise Protocol Framework, revision 34 pattern set; POC protocol `Noise_XX_25519_ChaChaPoly_BLAKE2s`.
 - **.NET 8 server result:** PASS — .NET SDK 8.0.419, `net8.0`; UDP handshake, AEAD roundtrip, tamper rejection, replay rejection and wrong-server-identity rejection all passed.
 - **Unity 2022.3 Android IL2CPP result:** PASS (provider handshake/AEAD only) — Unity 2022.3.25f1, IL2CPP, APK contains `arm64-v8a` and `x86_64`; the x86_64 emulator completed the handshake and AEAD roundtrip under IL2CPP. The emulator leg used TCP framing through `adb reverse` because the emulator guest has no working UDP route in this host environment; the provider handshake and AEAD are transport-agnostic and were exercised identically. See **Limitations / not verified** below.
