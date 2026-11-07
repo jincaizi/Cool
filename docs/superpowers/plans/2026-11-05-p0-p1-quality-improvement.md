@@ -879,6 +879,8 @@ dotnet run -c Release --project tools/ServerLoadHarness -- --duration 600 --floo
 
 预期：tick 持续推进；队列不超过 8192；working set 无单调增长；所有拒绝有指标。
 
+**执行设计 §4.3 验收补齐（任务 9）：** tick 15Hz；每 tick 最多 2048 条且最多 20ms；只处理 tick 开始时的快照数量；全局入站队列 8192；单 session 未处理消息 256；持续超限断开。
+
 - [ ] **步骤 5：Commit**
 
 ```bash
@@ -964,6 +966,21 @@ bash tools/unity-tests.sh EditMode ProtocolRoundtripTests
 
 预期：所有上限/超时/flag 测试通过；服务端停机关闭已接受 WS。
 
+**执行设计 §4.3 验收补齐（任务 10）：** 按 Spec 6.0.2 实现单 IP/session/Login/消息/字节/PositionSync/Cast/控制消息速率；WS 单消息 64KiB；待发 256 帧或 4MiB，先到者为准，慢客户端断开；分片聚合 5 秒超时；未配置的 `Encrypted/Compressed` 标志立即拒绝；每个平台/构建配置只启用一个主传输。
+
+Spec §6.0.2 准入速率默认值（写死为默认值，允许受版本控制的配置覆盖）：
+
+| 类别 | 速率 / burst | 超限策略 |
+|---|---|---|
+| 单 IP 未认证 datagram | 10/s，burst 20 | 静默丢弃并计数 |
+| 单 IP 新 session 创建 | 2/s，burst 4 | 拒绝创建 |
+| 单 session Login | 1/s，burst 3 | 拒绝；10 秒内 3 次超限断开 |
+| 已认证总消息 | 120/s，burst 240 | 状态消息丢弃；可靠命令累计违规后断开 |
+| 已认证总字节 | 256KiB/s，burst 512KiB | 累计违规后断开 |
+| PositionSync | 30/s，burst 30 | 只保留最高 sequence 的待处理项 |
+| Cast | 20/s，burst 20 | 拒绝并计 strike |
+| 控制消息 | 10/s，burst 20 | 拒绝；累计违规后断开 |
+
 - [ ] **步骤 5：Commit**
 
 ```bash
@@ -1021,6 +1038,8 @@ dotnet run -c Release --project tools/ServerLoadHarness -- --duration 600 --udp-
 
 预期：无 per-session 100Hz Task、无并发损坏、垃圾 UDP 不增长 KCP state。
 
+**执行设计 §4.3 验收补齐（任务 11）：** `Input/Update/Send/TryRecv` 由同一执行上下文拥有；删除每会话多线程并发触达；未认证 UDP 全局 512、单 IP 8；cookie 验证后才创建高频会话。
+
 - [ ] **步骤 5：Commit**
 
 ```bash
@@ -1038,6 +1057,9 @@ git commit -m "fix(kcp): serialize server kcp ownership and admission"
 **文件：**
 - 创建：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientMessagePump.cs`
 - 创建：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/IClientMessageBus.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientEnvelope.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/DrainResult.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/LoginResult.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/MessageDispatcher.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`
@@ -1059,6 +1081,9 @@ Handler_Unsubscribes_During_Dispatch_Uses_Start_Snapshot();
 Dispose_Drops_Late_Transport_Callbacks();
 CombatBridge_Does_Not_Subscribe_Directly_To_Adapter();
 Concurrent_ConnectAndLogin_Starts_One_Connection();
+Pump_Drains_LoginResponse_While_LoggingIn();
+Pump_Drains_Error_And_Disconnect_Before_InWorld();
+Host_OnDestroy_Cancels_Connect_Task_And_Observes_Exception();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
@@ -1088,11 +1113,14 @@ public interface IClientMessageBus
     IDisposable Subscribe(MessageId id, Action<IMessage> handler);
 }
 
+// 纯 C# 核心签名；Unity 业务层以 UniTask 包装，暴露 UniTask<LoginResult>
 public Task<LoginResult> ConnectAndLoginAsync(
     ClientLoginOptions options, CancellationToken cancellationToken);
 ```
 
-adapter 的 Message/Disconnected/Error 只入泵；主线程 `Update` 以 64 条/2ms 排放。当前 WorldSnapshot 含增量掩码，保持 FIFO，不能 latest-wins。任何溢出在下一主线程帧主动断线并重建世界。移除 `_pendingSnapshots/_pendingNames/_pendingLeaves/_pendingResponses`；CombatBridge 订阅 manager bus。
+`ConnectAndLogin` 在 Unity 层返回 `UniTask<LoginResult>`，纯 C# 核心返回 `Task<LoginResult>`，两者都必须接受 `CancellationToken`，取消后不得遗留连接或未观察异常。
+
+adapter 的 Message/Disconnected/Error 只入泵；主线程 `Update` 每帧先 drain 登录、错误、断线与其他 control 消息，再根据状态判断是否执行 `InWorld` tick——登录响应不得被 `InWorld` 判断阻塞。主线程 `Update` 以 64 条/2ms 排放；邮箱容量 512。WorldSnapshot 含增量掩码，必须保持有界 FIFO，不能 latest-wins。可靠命令不得静默丢弃：容量满时置 overflow fatal 标志，并在下一主线程帧主动断线/重同步。`OnError`/`OnDisconnected`/`OnServerRespawn` 只在主线程触发，不得在 transport 回调线程直接调用业务委托。`ClientNetworkHost` 持有连接 lifetime CTS 与正在执行的 Task；`Disconnect` 与 `OnDestroy` 取消任务并 `await`/观察全部异常，禁止未观察的 fire-and-forget。移除 `_pendingSnapshots/_pendingNames/_pendingLeaves/_pendingResponses`；CombatBridge 订阅 manager bus。
 
 - [ ] **步骤 4：验证通过**
 
@@ -1117,66 +1145,123 @@ git commit -m "fix(sync): confine client networking to bounded main-thread pump"
 
 ---
 
-### 任务 13：硬化客户端 KCP 生命周期并保持实验性默认禁用
+### 任务 13：建立平台传输边界并硬化客户端 KCP 生命周期
 
-**优先级：** P1 安全项；P0 Gate 要求确认默认生产不启用 KCP；依赖任务 10、11
+**优先级：** P0；依赖任务 10、11、12；位于任务 14 前
 
 **文件：**
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`
+- 创建：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/NetworkTransportFactory.cs` 及 `.meta`
+- 创建：`Assets/Scripts/AOT/Protocol/NetworkEndpoint.cs` 及 `.meta`
+- 修改：`Assets/Scripts/AOT/KcpNet/KcpNetClientAdapter.cs`
+- 修改：`Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs`
+- 创建：`Assets/Scripts/AOT/KcpNet/Client/KcpEndpointResolver.cs` 及 `.meta`
+- 创建：`Assets/Scripts/AOT/KcpNet/Client/KcpCandidateRace.cs` 及 `.meta`
+- 修改：`Assets/Scripts/AOT/WebSocketNet/WebSocketClientAdapter.cs`
+- 修改：`Assets/Scripts/AOT/WebSocketNet/WebGLWebSocketChannel.cs`
+- 修改：`Assets/Scripts/AOT/WebSocketNet/DotNetWebSocketChannel.cs`
 - 修改：`Assets/Scripts/AOT/KcpNet/Common/KcpOptions.cs`
 - 修改：`Assets/Scripts/AOT/KcpNet/Common/KcpTransportBase.cs`
 - 修改：`Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs`
 - 修改：`Assets/Scripts/AOT/KcpNet/Client/KcpClientTransport.cs`
-- 修改：`Assets/Scripts/AOT/KcpNet/Client/KcpClient.cs`
-- 修改：`Assets/Scripts/AOT/KcpNet/KcpNetClientAdapter.cs`
 - 修改：`Assets/Scripts/AOT/KcpNet/Common/IKcpTransport.cs`
-- 创建：`Assets/Scripts/AOT/KcpNet/Common/PooledBuffer.cs`
-- 创建：`Assets/Scripts/AOT/KcpNet/Common/KcpBackpressureException.cs`
-- 创建：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/NetworkTransportFactory.cs`
-- 创建：`Assets/Scripts/Tests/Editor/Network/KcpClientSingleConsumerTests.cs`
-- 创建：`Assets/Scripts/Tests/Editor/Network/KcpBackpressureTests.cs`
-- 创建：`Assets/Scripts/Tests/Editor/Network/KcpShutdownTests.cs`
-- 创建：`Assets/Scripts/Tests/Editor/Network/KcpBufferReuseTests.cs`
+- 创建：`Assets/Scripts/AOT/KcpNet/Common/PooledBuffer.cs` 及 `.meta`
+- 创建：`Assets/Scripts/AOT/KcpNet/Common/KcpBackpressureException.cs` 及 `.meta`
+- WebGL 编译守卫逐项处理（7 个当前未带 `#if !UNITY_WEBGL` 的文件，逐个确认是否引用 Kcp plugin 类型并补守卫或改为平台无关接口）：`Assets/Scripts/AOT/KcpNet/Common/IKcpTransport.cs`、`Assets/Scripts/AOT/KcpNet/Common/ILogger.cs`、`Assets/Scripts/AOT/KcpNet/Common/IMessageExecutor.cs`、`Assets/Scripts/AOT/KcpNet/Common/KcpOptions.cs`、`Assets/Scripts/AOT/KcpNet/Common/KcpSession.cs`、`Assets/Scripts/AOT/KcpNet/Common/MessageDispatcher.cs`、`Assets/Scripts/AOT/KcpNet/Server/KcpServerSession.cs`
+- 核对：`Assets/Plugins/ProtoBuf/Kcp.dll`（唯一权威副本；内容不修改，SHA-256 必须保持 `09707B5EBA20070ED922C7293AF342404A162A263C5965189EB687C90690FB9D`）
+- 修改：`Assets/Plugins/ProtoBuf/Kcp.dll.meta`（唯一权威副本的 importer，显式排除 WebGL）
+- 去重/清理：`Assets/Packages/Kcp.2.7.0/lib/netstandard2.1/Kcp.dll` 及其 `.meta`（NuGetForUnity 生成目录；先核对 SHA-256、GUID 引用、可再生性与工作树归属；去重完成前 `.meta` 同样显式排除 WebGL）
+- 修改：`.gitignore`（加入 `Assets/Packages/`）
+- 创建：`Assets/Scripts/AOT/KcpNet/Common/IKcpSecurityProvider.cs` 及 `.meta`
+- 创建：`Assets/Scripts/AOT/KcpNet/Common/KcpSecurityOptions.cs` 及 `.meta`
+- 创建：`Server/Transport/Kcp/KcpSecurityPolicy.cs`
+- 创建：`Assets/Scripts/Tests/Editor/Network/KcpClientSingleConsumerTests.cs` 及 `.meta`
+- 创建：`Assets/Scripts/Tests/Editor/Network/KcpBackpressureTests.cs` 及 `.meta`
+- 创建：`Assets/Scripts/Tests/Editor/Network/KcpShutdownTests.cs` 及 `.meta`
+- 创建：`Assets/Scripts/Tests/Editor/Network/KcpBufferReuseTests.cs` 及 `.meta`
+- 创建：`Assets/Scripts/Tests/Editor/Network/KcpEndpointResolverTests.cs` 及 `.meta`
+- 创建：`Assets/Scripts/Tests/Editor/Network/KcpSecurityOptionsTests.cs` 及 `.meta`
+- 创建：`Assets/Scripts/Tests/Editor/Network/KcpPluginPlatformGuardTests.cs` 及 `.meta`
+- 创建：`Assets/Scripts/Tests/Editor/SyncLayer/TransportFactoryBoundaryGuardTests.cs` 及 `.meta`
+- 创建：`Server/Server.Tests/Kcp/KcpSecurityPolicyTests.cs`
+- 创建：`tools/check-webgl-kcp-artifacts.sh`
 - 创建：`tools/kcp-soak.sh`
 - 修改：`Assets/Scripts/AOT/KcpNet/README.md`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md`
 
-- [ ] **步骤 1：编写失败的单消费者/生命周期测试**
+- [ ] **步骤 1：编写失败的生命周期、边界与平台守卫测试**
 
 ```csharp
 Connect_Starts_Exactly_One_Receive_Consumer();
 Input_Send_Update_TryRecv_Run_On_One_Driver();
+Disconnect_Closes_Transport_And_Raises_Disconnected_Once();
+Receive_Loop_Stops_After_Disconnect();
+Repeat_Dispose_Is_Idempotent();
 SendQueue_Rejects_257th_Message_Or_Over_OneMiB();
 Pooled_Buffer_Returns_On_Success_Exception_And_Cancel();
 Shutdown_Completes_Within_OneSecond();
 Dispose_On_MainThread_Does_Not_Block_FiveSeconds();
 SendFailure_Raises_Observed_Adapter_Error();
-ProductionFactory_Defaults_All_Platforms_To_WebSocket();
+TransportFactory_Is_The_Only_Concrete_Transport_Construction_Point();
+Android_Ios_Player_Selects_Kcp_WebGL_Player_Selects_WebSocket_Editor_Requires_Explicit_Lane();
+NetworkEndpoint_WebSocket_Carries_Full_Scheme_And_Path();
+EndpointResolver_Uses_System_Resolver_And_Deduplicates_Candidates();
+EndpointResolver_Races_Next_Family_After_250ms_With_At_Most_Two_In_Flight();
+EndpointResolver_Fails_Over_Unreachable_First_Candidate();
+EndpointResolver_Applies_ThreeSecond_Candidate_And_TenSecond_Total_Timeouts();
+EndpointResolver_Cancellation_Stops_Dns_Timers_Sockets_And_Handshakes();
+KcpPluginImporters_Exclude_WebGL_And_Have_No_Duplicate_Copies();
+WebGL_Player_Artifact_Contains_No_Kcp_Plugin_Or_Adapter();
+KcpSecurityOptions_Fail_Fast_When_Release_Lacks_Provider();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
 
-运行：`bash tools/unity-tests.sh EditMode KcpClientSingleConsumerTests`
-预期：FAIL；存在双消费者、无界发送或阻塞 Dispose。
+运行：`bash tools/unity-tests.sh EditMode Kcp`
+预期：FAIL；存在双消费者、无界发送或阻塞 Dispose；`ClientNetworkHost` 直接构造 transport，旧 adapter 硬编码 `ws://host:port/`，`IPAddress.Parse(host)` 与 `addresses[0]` 不支持域名/IPv6。
 
-- [ ] **步骤 3：实现单 driver 与有界发送**
+- [ ] **步骤 3：实现工厂边界、端点/候选竞争与 KCP 生命周期**
 
-`NetworkDriverLoop` 成为客户端 KCP 唯一 owner；删除第二 receive loop。`KcpOptions` 增加 `MaxQueuedSendMessages=256`、`MaxQueuedSendBytes=1MiB`、`SendEnqueueTimeoutMs=50`、`MaxMessageBytes=65536`。复用 UDP buffer/writer，公开 `ShutdownAsync`，同步 Dispose 仅短兜底。`NetworkTransportFactory` 默认 WSS；KCP 只在显式实验配置且非 WebGL 时选择。
+实现要求：
 
-- [ ] **步骤 4：验证通过与 30 分钟 soak**
+1. 只有 `NetworkTransportFactory` 可以引用和构造 `KcpNetClientAdapter`、`WebSocketClientAdapter`、`WebGLWebSocketChannel` 与 `DotNetWebSocketChannel`；`ClientNetworkHost` 及其余 `GameSys` 代码只依赖 `INetworkClient` 与不可变 `NetworkEndpoint`。`TransportFactoryBoundaryGuardTests` 扫描生产调用点，factory 外构造具体 transport 立即失败；源码扫描不能替代目标平台编译/Player Build 证据。
+2. 平台选择固定为：`UNITY_WEBGL && !UNITY_EDITOR` → `WebSocketClientAdapter + WebGLWebSocketChannel`；Android/iOS Player 构建 → `KcpNetClientAdapter`；Editor/Windows 必须由 Gate lane 或显式开发配置选择 KCP 或 WebSocket lane，缺少选择时 fail-fast，禁止从 Inspector、上次运行状态或隐式默认值漂移。每个平台/构建配置只启用一个主传输。
+3. `NetworkEndpoint` 携带 transport kind、host、port，以及 WebSocket 的完整 scheme/path；`WebSocketClientAdapter.ConnectAsync` 接收已验证的完整 `Uri`，不得内部硬编码 `ws://` 或 `/`；公网 WebGL 强制 `wss://`，明文 `ws://` 只允许 loopback 或 Development Build。KCP 端点支持域名、IPv4 与 IPv6：始终保留原始 hostname 作为服务端身份验证输入；DNS 通过系统 resolver 异步解析并去重候选，按每个结果创建匹配 `AddressFamily` 的 socket；禁止 `IPAddress.Parse(host)` 作为域名路径，禁止固定 `AddressFamily.InterNetwork`，NAT64 依赖系统 DNS64/getaddrinfo 结果。多地址采用有界 candidate race：尊重系统候选顺序，首个候选立即尝试，250ms 后启动下一地址族候选、最多同时 2 个；单候选握手超时 3 秒、整个连接 10 秒；首个完成服务端身份验证与安全握手的候选获胜并取消/释放其余候选；首个不可达必须继续后续候选，全部失败返回去敏后的聚合错误；调用方取消必须立即停止 DNS、计时器、socket 与握手。
+4. WebGL 边界：全部 KCP PluginImporter 显式排除 WebGL；排除 `Kcp.dll` 后 `KcpNet` 必须在 WebGL 编译为空/安全程序集，依赖 KCP plugin 的源码（含上述 7 个当前未守卫文件）逐个补齐 `#if !UNITY_WEBGL` 或改为平台无关接口。`KcpPluginPlatformGuardTests` 按程序集名/GUID 枚举所有 Kcp plugin importer，重复副本、未知路径、Any Platform/WebGL enabled 或固定路径漏检均失败；WebGL Player 构建产物必须同时证明没有 Kcp 托管/原生 plugin 和 `KcpNetClientAdapter`。通用 PlayMode asmdef 移除直接 `KcpNet` 引用不等于完成生产边界隔离。
+5. 两份 `Kcp.dll` 去重：`Assets/Plugins/ProtoBuf/Kcp.dll` 为本轮唯一权威来源（先用 SHA-256 `09707B5EBA20070ED922C7293AF342404A162A263C5965189EB687C90690FB9D` 核对）；`Assets/Packages/` 判定为 NuGetForUnity 生成目录，加入 `.gitignore`；`Assets/Packages/Kcp.2.7.0/lib/netstandard2.1/Kcp.dll` 及其 `.meta` 在确认可再生、内容未漂移且无用户改动后清理；去重完成前两份 `.meta` 都显式设为 WebGL 不兼容；任何归属不明或内容漂移都停止并请求确认，不得静默删除。
+6. 生产默认不再断言“KCP 全局禁用”或“所有平台默认 WSS”；改为“每个平台/构建配置只启用一个主传输”。P0 只声明平台选择策略、factory 边界、WebGL 排除与 Win64 KCP 生命周期/soak 已验证，不宣称 Android/iOS 真机或公网安全已验证。
+7. 安全 provider 接口、配置 fail-fast 与明文 release 守卫：建立 `IKcpSecurityProvider`/`KcpSecurityOptions` 接口与配置校验；非 Development 构建缺少经 ADR-0003 批准的安全 provider 时拒绝启动/构建失败；明文 KCP 仅允许 Development/loopback/受控测试网络。完整的客户端/服务端 provider、部署配置与轮换演练留任务 32。
+
+生命周期实现：`NetworkDriverLoop` 成为客户端 KCP 唯一 owner；删除第二 receive loop。`KcpOptions` 增加 `MaxQueuedSendMessages=256`、`MaxQueuedSendBytes=1MiB`、`SendEnqueueTimeoutMs=50`、`MaxMessageBytes=65536`。复用 UDP buffer/writer，公开 `ShutdownAsync`，同步 Dispose 仅短兜底；连接、断开与重复释放幂等。
+
+- [ ] **步骤 4：验证通过、WebGL 产物检查与 30 分钟 Win64 KCP soak**
 
 ```bash
 bash tools/unity-tests.sh EditMode Kcp
 bash tools/unity-tests.sh PlayMode EchoSmokeTests
-bash tools/kcp-soak.sh --minutes 30
+bash tools/unity-tests.sh EditMode TransportFactoryBoundaryGuardTests
+bash tools/unity-tests.sh EditMode KcpPluginPlatformGuardTests
+bash tools/check-webgl-kcp-artifacts.sh --build-target WebGL
+bash tools/kcp-soak.sh --minutes 30 --platform StandaloneWindows64
 ```
 
-预期：无任务/队列增长；无每 datagram MTU 数组和 64KiB writer 分配；默认仍是 WSS。
+预期：无任务/队列增长；无每 datagram MTU 数组和 64KiB writer 分配；factory 外无具体 transport 构造；WebGL 构建产物无 Kcp plugin/`KcpNetClientAdapter`；Win64 KCP 30 分钟 soak 无泄漏、无未观察异常。移动真机 soak 归 Mobile Release Readiness，不在本任务宣称。
+
+**执行设计 §4.1 U-P0-04 验收补齐（任务 13）：** 任务 13 前移为 P0 并排在任务 14 前；KCP 连接、断开、重复释放、接收循环停止有自动测试；P0 的 30 分钟 soak 在 Win64 KCP lane 执行，移动真机 soak 归 Mobile Release Readiness；`ClientNetworkHost` 直接构造 transport 的分支收敛到可测试的 platform transport factory；Gate 验证每个平台/构建配置只启用一个主传输，不再断言“KCP 全局默认禁用”；WebGL compile contract 与构建产物检查证明 KCP 玩家类型及 plugin 未进入 WebGL Player；公开移动候选包在任务 32 完成经 ADR 批准的安全层前不得 Release Ready。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Assets/Scripts/AOT/KcpNet Assets/Scripts/Hotfix/GameSystems/SyncLayer/NetworkTransportFactory.cs* \
-  Assets/Scripts/Tests/Editor/Network Assets/Scripts/AOT/KcpNet/README.md tools/kcp-soak.sh
-git commit -m "fix(kcp): bound client transport lifecycle"
+# Assets/Packages/ 已判定为 NuGetForUnity 生成目录；未跟踪副本清理后无需暂存
+git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs \
+  Assets/Scripts/Hotfix/GameSystems/SyncLayer/NetworkTransportFactory.cs* \
+  Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md Assets/Scripts/AOT/Protocol/NetworkEndpoint.cs* \
+  Assets/Scripts/AOT/KcpNet Assets/Scripts/AOT/WebSocketNet \
+  Assets/Plugins/ProtoBuf/Kcp.dll.meta .gitignore \
+  Assets/Scripts/Tests/Editor/Network Assets/Scripts/Tests/Editor/SyncLayer/TransportFactoryBoundaryGuardTests.cs* \
+  Server/Transport/Kcp/KcpSecurityPolicy.cs Server/Server.Tests/Kcp/KcpSecurityPolicyTests.cs \
+  tools/kcp-soak.sh tools/check-webgl-kcp-artifacts.sh
+git commit -m "fix(kcp): enforce platform transport boundary and bound client lifecycle"
 ```
 
 ---
