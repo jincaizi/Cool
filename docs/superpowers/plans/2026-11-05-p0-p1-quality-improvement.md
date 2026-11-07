@@ -12,14 +12,18 @@
 
 ## 全局约束
 
+- **阶段 0 先行**：Spec、计划与 ADR 修订完成且阶段 0 退出清单全绿前，不改运行时代码。
 - 不安装 HybridCLR；`Hotfix.*` 只是普通 asmdef。
 - 服务端世界状态只有单线程拥有；IO 线程只验证、解码并向有界邮箱投递。
 - 客户端 Unity API 只在主线程调用；网络回调不得读取 `Time.*` 或触碰 Unity 对象。
 - `SyncCore` 零 `UnityEngine` 依赖，规则改动必须同时通过 Unity 与服务端测试。
 - 协议只追加字段；不复用 ProtoMember tag；破坏语义时提升 `ProtocolVersion`。
+- **平台传输矩阵**：Android/iOS 主传输为 KCP + Protobuf，公网候选包必须叠加经 ADR 批准的标准安全层；WebGL 主传输为 WebSocket，公网为 WSS。每个平台和构建配置只允许一个主传输；Editor/Windows 测试按 lane 显式选择，Native KCP lane 与 WebSocket/WebGL lane 分开报告。不得把任一平台的选择外推为所有平台的默认值。
 - 每个行为改动同步相应模块 README。
 - 非内部 MonoBehaviour 禁止新增 `GetComponent/FindObject*`。
 - 当前工作树存在大量无关改动；每次只暂存本任务明确列出的路径，禁止 `git add .` / `git add -A`。
+- **dirty worktree 只产生 `DIAGNOSTIC_ONLY`**：`--infra` / `--baseline` 在 dirty worktree 上只能输出诊断结果并保存 patch hash；`--p0`、`--p1` 与 Release Readiness 要求 clean worktree，dirty 时不得产生 PASS。
+- **任务级证据使用 run-id**：每次执行生成唯一 `run-id = <UTC timestamp>-<short-git-sha>`，XML、日志、报告与产物写入 `production/quality/artifacts/<run-id>/`，报告引用同一 run-id；旧产物与历史日志不得作为本轮证据。
 - 每个任务先红灯、再最小实现、再目标回归、再提交；不得把多个任务揉成一次大提交。
 - P0 未通过前冻结新增联网玩法；P1 未通过前不标记“公开测试/商店发布准备”。
 
@@ -35,18 +39,24 @@
 
 ## 交付波次
 
-| 波次 | 任务 | 退出条件 | 单人粗估 |
-|---|---|---|---:|
-| Gate 0 | 1 | 测试入口可信，PlayMode 非 0 | 1–2 天 |
-| P0-A 客户端正确性 | 2–4 | Bag、DamageContext、EventBus/技能事务全绿 | 4–7 天 |
-| P0-B 身份与权威 | 5–8 | 单世界、幂等登录、移动、格挡精力全绿 | 8–14 天 |
-| P0-C 容量与线程 | 9–13 | loop/WS/KCP/client mailbox 有界且无竞态；实验 KCP 默认禁用 | 8–14 天 |
-| P0 Gate | 14 | P0 全量/压力/报告通过 | 2–3 天 |
-| P1-A 世界规模化 | 15–18 | WorldInstance、AOI、ORCA、导航规模门禁 | 10–18 天 |
-| P1-B 客户端收敛 | 19–28 | 3C/战斗、Addressables、UI/VFX/Monster 移动性能 | 10–18 天 |
-| P1-C 发布治理 | 29–33 | 移动构建、CI、可观测性、最终报告 | 6–10 天 |
+| 波次 | 任务 | 退出条件 |
+|---|---|---|
+| 阶段 0 | 文档修订 | 阶段 0 退出清单全绿 |
+| Gate 0 | 1 | runner/发现/server profile/XML/失败传播可信 |
+| P0-A | 2–4 | Bag、伤害上下文、EventBus/技能事务 |
+| P0-B | 5–8 | 单世界、幂等登录、移动、格挡精力 |
+| P0-C | 9–13 | 有界队列、准入背压、KCP、客户端邮箱 |
+| P0 Gate | 14 | 原 Spec 10.1 + 复核 7.1 |
+| P1-A | 15–18 | WorldInstance/AOI/ORCA/导航 |
+| P1-B1 | 19–23 | 伤害管线、Sys3C 注入、资源、Addressables/UI |
+| P1-B2 | 24–28 | 性能、HitStop、VFX、Monster 池 |
+| P1-C1 | 29–31 | 移动构建、架构守卫、CI/Coverage |
+| P1-C2 | 32 | 可观测性、WSS、KCP 安全、优雅停机 |
+| P1 Engineering Gate | 33 | 工程项 |
+| Mobile Release Readiness | 33 | 设备证据 |
+| WebGL Public Deployment Readiness | 33 | 公网 WSS/浏览器证据 |
 
-粗估用于排期，不是承诺工期。一个任务完成并审查通过后再开始依赖它的任务。
+波次之间严格串行，P0-A 与 P0-B 不得跨波次并行；波次内部仅当文件所有权与依赖互不重叠时才允许并行，且每个并行任务必须使用独立 worktree、独立 Unity `Library`、独立端口与独立 artifact 目录。合并回集成分支后必须重新执行该波次完整 Gate。
 
 ## 文件结构总览
 
@@ -63,77 +73,101 @@
 
 ---
 
-### 任务 1：建立可信质量门禁
+### 任务 1：建立可信质量门禁（Gate 0）
 
 **优先级：** P0 / 所有任务前置
 
+阶段 0 完成后，第一波只做本任务。
+
 **文件：**
-- 创建：`tools/quality-gate.sh`
-- 修改：`tools/unity-tests.sh`
-- 创建：`Assets/Scripts/Editor/Quality/QualityGate.cs`
-- 创建：`Assets/Scripts/Tests/Editor/Quality/QualityGateTests.cs`
-- 修改：`Assets/Scripts/Tests/PlayMode/KcpNet.PlayModeTests.asmdef`（改为通用 `GameSys.PlayModeTests`）
-- 创建：`Assets/Scripts/Tests/PlayMode/NativeNetwork/KcpNet.NativePlayModeTests.asmdef`
-- 移动：依赖原生 socket/KCP 的 PlayMode 测试到 `Assets/Scripts/Tests/PlayMode/NativeNetwork/`
-- 创建：`Assets/Scripts/Tests/Editor/Architecture/PlayModeAssemblyContractTests.cs`
+- 新建：`Assets/Scripts/Editor/Quality/GameSys.EditorQuality.asmdef` 及 `.meta`
+- 新建：`Assets/Scripts/Editor/Quality/QualityGate.cs` 及 `.meta`
+- 新建：`Assets/Scripts/Editor/Quality/AssemblyInfo.cs`（`InternalsVisibleTo`）及 `.meta`
+- 修改：`Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef`（引用 `GameSys.EditorQuality`）
+- 新建：`Assets/Scripts/Tests/Editor/Quality/QualityGateTests.cs`
+- 新建：`Assets/Scripts/Tests/Editor/Architecture/PlayModeAssemblyContractTests.cs`
+- 移动并保留 `.meta`：`Assets/Scripts/Tests/PlayMode/KcpNet.PlayModeTests.asmdef` → `Assets/Scripts/Tests/PlayMode/GameSys.PlayModeTests.asmdef`；程序集名改为 `GameSys.PlayModeTests`，移除 `KcpNet` 引用与 `!UNITY_WEBGL`，保留纯 Unity 通用测试
+- 新建：`Assets/Scripts/Tests/PlayMode/NativeNetwork/KcpNet.NativePlayModeTests.asmdef` 及 `.meta`；保留 `KcpNet` 引用与 `!UNITY_WEBGL`
+- 新建：`Assets/Scripts/Tests/PlayMode/NativeNetwork/TestServerEndpoint.cs` 及 `.meta`
+- 新建：`Assets/Scripts/Tests/PlayMode/NativeNetwork/NativeServerProfileSentinelTests.cs` 及 `.meta`
+- 移动并保留各自 `.meta` 到 `Assets/Scripts/Tests/PlayMode/NativeNetwork/`：`AdapterConnectTests.cs`、`AoiWorldTests.cs`、`BlockMitigationE2ETests.cs`、`ClientRespawnWaitTests.cs`、`CombatSyncTests.cs`、`EchoSmokeTests.cs`、`HitJudgmentAlignmentTests.cs`、`LoginEnterWorldTests.cs`、`MonsterWorldTests.cs`、`MovementSyncTests.cs`、`ThreeClientCombatConsistencyTests.cs`、`TwoClientWorldTests.cs`
+- 修改上述 Native 测试：移除硬编码 `127.0.0.1:8000`，改用 `TestServerEndpoint` 读取 `COOL_TEST_SERVER_HOST` / `COOL_TEST_SERVER_PORT`，并按 `native-clean`、`native-bots`、`native-monsters` 标记 profile
+- 新建：`tools/quality-gate.ps1`（Windows 权威 runner）
+- 新建：`tools/tests/quality-gate-selftest.ps1`（不依赖外部服务的 runner 负向自测）
+- 新建：`tools/quality-gate.sh`（调用 PowerShell 权威 runner 的薄包装）
+- 修改：`tools/unity-tests.sh`（薄包装）
+- 新建：`tools/unity-tests-mcp.sh`（便利入口）
+- 修改/重新生成：`production/quality/test-manifest.json`、`production/quality/gate-exceptions.json`（阶段 0 已建立基线，本任务迁移测试后重新生成，不重复创建）
 - 修改：`docs/agent-token-hygiene.md`
+
+所有位于 `Assets/` 下的新建或移动文件都必须在提交中包含对应 `.meta`；移动使用 Unity AssetDatabase 或等价的“文件 + `.meta`”原子移动，禁止重新生成 GUID。
 
 - [ ] **步骤 1：编写失败的测试与门禁断言**
 
-`QualityGateTests` 固定以下 API 与断言：
+`QualityGateTests` 固定以下纯验证断言（不切 BuildTarget，不解析当前 NUnit run 的最终结果）：
 
 ```csharp
-[Test] public void test_quality_gate_rejects_zero_discovered_tests();
 [Test] public void test_quality_gate_rejects_default_company_and_application_id();
 [Test] public void test_quality_gate_playmode_target_is_standalone_windows64();
 [Test] public void test_generic_playmode_assembly_has_no_webgl_exclusion();
 [Test] public void test_native_network_tests_are_isolated_and_exclude_webgl();
 ```
 
-`QualityGate.ValidateTestSummary(int discovered, int failed)` 必须在 `discovered == 0` 或 `failed > 0` 时返回失败；`ValidatePlayerIdentity` 必须拒绝 `DefaultCompany` 与 `com.DefaultCompany.*`。
+`PlayModeAssemblyContractTests` 断言 `GameSys.PlayModeTests.asmdef` 不含 `KcpNet` 引用与 `!UNITY_WEBGL`，`KcpNet.NativePlayModeTests.asmdef` 保留两者，且 12 个 Native 测试文件只位于 `NativeNetwork/`。
 
 - [ ] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/unity-tests.sh EditMode QualityGateTests`
 预期：FAIL，缺少 `QualityGate`。
 
-- [ ] **步骤 3：实现最小质量入口**
+- [ ] **步骤 3：实现 Gate 0 基础设施**
 
-实现签名：
+1. `QualityGate.cs` 只做 Editor 内 preflight：验证 active target、包名、asmdef 契约与配置，并提供可被 EditMode 直接调用的纯验证器；不调用 `SwitchActiveBuildTarget`，不判断当前 NUnit run 的最终发现数或失败数。
+2. `quality-gate.ps1` 在 Unity 退出后解析 XML，验证 discovered、failed、skipped、manifest、进程退出码、timeout、产物新鲜度与 hash。
+3. 原生 runner 启动独立 Unity 进程并传 `-buildTarget StandaloneWindows64`，Editor 内验证 `BuildTarget.StandaloneWindows64`；测试进程内不切换 BuildTarget。EditMode、通用 PlayMode 与每个 Native server profile 分别输出独立 XML 与日志。同一 project 已被 Unity 打开时 fail-fast，并提示使用独立 worktree。
+4. 服务器先执行 `dotnet build Server/Server3C.csproj -c Debug`，再以 `dotnet Server/bin/Debug/net8.0/Server3C.dll <port> <profile args>` 启动。runner 记录 PID，使用动态 TCP/UDP 端口，先同时观察现有日志 `Server3C started on port ... with KCP protocol` 与 `WebSocket listener started on ...`，再执行对应传输 probe；timeout 或失败时只终止本次进程树。若改为统一 `SERVER_READY` marker，必须同时把 `Server/Program.cs` 与对应服务端测试加入本任务。
+5. Native profile 固定为：`native-clean` 不带 bots/monsters，运行除特殊 profile 外的 Native 测试；`native-bots` 运行 `AoiWorldTests`，使用 `--bots 100 --bots-radius 500`；`native-monsters` 运行 `MonsterWorldTests` 与 `HitJudgmentAlignmentTests`，使用 `--monsters 4` 及测试要求的地图参数。新增导航专用测试时再启用 `native-navigation`，不得建立空 profile。profile 只描述服务器配置；runner 根据 `test-manifest.json` 按 fixture/cohort 多次调用 Unity `-testFilter`；默认每个 fixture 使用全新服务器进程，只有被显式证明状态互不影响的 fixture 才能组成共享进程 cohort，禁止跨 profile 或未声明 cohort 共享世界状态。
+6. `test-manifest.json` 保存每个 assembly/profile 的预期测试全名；测试新增、删除或迁移必须显式更新 manifest；未解释的测试数下降、未知 skip/ignore/inconclusive 均失败；`discovered == 0` 直接失败。
+7. WebGL 使用独立 `-buildTarget WebGL` 进程。Gate 0 区分“通用测试程序集 WebGL compile contract”“WebGL Player Build”和“WebGL runtime smoke”，三者不得互相替代。移除 `GameSys.PlayModeTests.asmdef` 的 `KcpNet` 直接引用只隔离测试程序集，不代表生产传输已隔离；`GameSys.asmdef` 仍引用 `KcpNet` 与 `WebSocketNet`，由任务 13 用 platform factory、预处理编译守卫、PluginImporter/产物检查和 WebGL compile contract 证明 KCP 玩家路径不可达，任务 30 只维护这组已通过 P0 Gate 的守卫。
+8. `quality-gate-selftest.ps1` 用 stub 进程与 fixture XML 证明以下情况必定非零并保留证据：server ready 超时、Unity 非零退出、XML 缺失/损坏、manifest 数量下降、过期 exception、stale artifact、teardown 超时与残留子进程。
+9. `--infra` 与 `--baseline` 在 dirty worktree 上只能输出 `DIAGNOSTIC_ONLY` 并保存 patch hash；`--p0`、`--p1` 与 Mobile Release Readiness 要求 clean worktree，dirty 时不得产生 PASS。
+10. Gate 0 运行 `Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs`、`Assets/Scripts/Tests/Editor/Protocol/ProtocolShapeGuardTests.cs` 与服务端协议测试；缺跨端一致性断言时在本任务补一个双端 roundtrip。`quality-gate.ps1` 是 Windows 权威入口；Linux 默认只做内容 hash/静态检查，若要在 Linux 跑 Unity Gate 必须显式提供 `pwsh` 或 POSIX runner。
 
-```csharp
-internal static class QualityGate
-{
-    internal static QualityGateResult ValidateTestSummary(int discovered, int failed);
-    internal static QualityGateResult ValidatePlayerIdentity(string companyName, string applicationId);
-    internal static bool EnsurePlayModeTarget();
-}
-```
-
-根 PlayMode 程序集移除 `KcpNet` 引用与 `!UNITY_WEBGL`；原生网络测试迁到 `NativeNetwork` 程序集并保留该约束。`tools/unity-tests.sh PlayMode` 在执行 native 套件前清本轮 Unity 控制台、调用 `EnsurePlayModeTarget` 切到 `StandaloneWindows64`；输出无法解析或发现数为 0 时返回非零。正式 CI 使用 Unity 原生命令行测试，不依赖 MCP 日志。`quality-gate.sh` 依次执行服务端全量、Unity EditMode、通用 PlayMode、native PlayMode，并汇总总数/失败/耗时。
-
-- [ ] **步骤 4：验证通过**
+- [ ] **步骤 4：验证**
 
 运行：
 
 ```bash
-bash tools/unity-tests.sh EditMode QualityGateTests
-bash tools/unity-tests.sh PlayMode EchoSmokeTests
-bash tools/quality-gate.sh --core
+bash tools/quality-gate.sh --infra
+pwsh -File tools/tests/quality-gate-selftest.ps1
+bash tools/quality-gate.sh --baseline
 ```
 
-预期：三条命令退出码 0；PlayMode 报告 discovered > 0；历史 MCP 错误不污染本次结果。
+验收：
+- clean worktree 执行 `bash tools/quality-gate.sh --infra`，每个 assembly/profile 至少运行一个确定性 sentinel，退出码 0；这只证明 runner、发现、XML、服务器编排与失败传播可信。
+- `quality-gate-selftest.ps1` 全部通过，确认负向场景不会假绿。
+- 随后 `bash tools/quality-gate.sh --baseline` 运行全量测试并生成基线报告；产品测试可以在此阶段失败，但每个失败必须分类并映射到任务 2–13；runner、发现、profile、teardown 或证据失败仍阻塞任务 2。
+- P0 Gate 执行 `bash tools/quality-gate.sh --p0` 时所有 blocking tests 必须全绿，不能沿用 Gate 0 baseline 的失败。
+- EditMode、通用 PlayMode 与每个 Native profile 的 XML 均可解析且与 test manifest 一致；仅 `discovered > 0` 不足以通过。
+- 每个 server profile 结束后无残留服务端进程；再次执行结果一致。
+- dirty worktree 运行只能生成 `DIAGNOSTIC_ONLY`；clean worktree 的正式 Gate 报告记录 release scope 与 manifest/exception 文件 hash。
+- WebGL compile contract 与 Player Build 使用独立结果；未执行 runtime smoke 时只能报告 `WebGL compile/build verified`，不能报告 runtime verified。
+- 不依赖 MCP `tests-run` 作为证据。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add tools/quality-gate.sh tools/unity-tests.sh \
-  Assets/Scripts/Editor/Quality/QualityGate.cs* \
-  Assets/Scripts/Tests/Editor/Quality/QualityGateTests.cs* \
+git add \
+  Assets/Scripts/Editor/Quality \
+  Assets/Scripts/Tests/Editor/GameSys.EditorTests.asmdef* \
+  Assets/Scripts/Tests/Editor/Quality \
   Assets/Scripts/Tests/Editor/Architecture/PlayModeAssemblyContractTests.cs* \
   Assets/Scripts/Tests/PlayMode \
+  tools/quality-gate.ps1 tools/quality-gate.sh tools/unity-tests.sh \
+  tools/unity-tests-mcp.sh tools/tests/quality-gate-selftest.ps1 \
+  production/quality/test-manifest.json production/quality/gate-exceptions.json \
   docs/agent-token-hygiene.md
-git commit -m "test: establish trustworthy quality gate"
+git commit -m "test: establish trustworthy gate 0 runner"
 ```
 
 ---
