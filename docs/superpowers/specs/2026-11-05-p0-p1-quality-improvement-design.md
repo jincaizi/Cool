@@ -97,7 +97,11 @@
 以下选择由本 Spec 作出，不代表用户此前已逐项确认；它们用于消除实施者必须猜测的空白：
 
 - **认证**：本轮交付 HMAC-SHA256 票据验证器。票据权威产出 AccountId、CharacterId、AllowedWorldId；客户端字段不得覆盖。密钥来自环境秘密。开发票据仅 loopback/Debug 可用。
-- **传输**：近期公开测试所有平台默认 WSS；WebGL 固定 WSS。KCP 完成 P0/P1 硬化但默认禁用，只作为实验传输，直到另立带密钥协商与机密性保护的安全规格。
+- **传输**：按平台选择唯一主传输，同一平台/构建配置不得同时启用多个主传输，也不得用一个平台的结果替代另一个平台：
+  - **Android/iOS**：KCP + Protobuf；公网候选包必须叠加经 ADR-0003 批准的标准安全层；不得同时启用 WebSocket 主传输。
+  - **WebGL**：WebSocket；公网为 WSS；不得编译、打包或启用 KCP 玩家路径。公网使用完整 `wss://` URI、证书与反向代理。
+  - **Editor/Windows 测试**：按测试 lane 显式选择主传输；Native KCP lane 与 WebSocket/WebGL lane 分开报告；缺少显式选择时 fail-fast。
+  - 如果后续改变主传输，必须先更新平台传输 ADR（ADR-0001）、本 Spec 与 Gate 断言，不能只修改运行时代码。
 - **TLS**：生产由受控反向代理终止 WSS，仓库提供 Caddy 示例；Unity/服务端之间的内部明文 WS 只允许 loopback 或受控私网。
 - **协议**：本轮将 `ProtocolVersion` 升到 2。生产拒绝 v1；开发环境可显式开放 v1 诊断，但不得无鉴权进入世界。
 - **CI**：使用 GitHub Actions。Unity/Android 使用带 Unity 2022.3.25f1 许可证的 Windows self-hosted runner；iOS 完整导出使用 macOS self-hosted runner，未配置时必须报告“未执行”，不能标绿为已验证。
@@ -132,6 +136,16 @@
 - 单 `Global`/单 WorldInstance：200 bots、50 monsters、50 模拟客户端；客户端各以 15Hz 位置上报、2Hz 施法。
 - 自动门禁：tick p95 < 50ms、p99 < 66ms、队列无持续增长、进程 working set 在稳态窗口内无单调增长。
 - 非专用 runner 只产出趋势数据，不用来推翻或放宽上述门禁。
+
+### 6.0.4 端点与公网安全契约
+
+- **唯一构造边界**：只有可测试的 `NetworkTransportFactory`（或等价名称）可以引用和构造 `KcpNetClientAdapter`、`WebSocketClientAdapter`、`WebGLWebSocketChannel` 与 `DotNetWebSocketChannel`；其余 `GameSys` 代码只能依赖 `INetworkClient` 和不可变的 `NetworkEndpoint`。编译分支顺序固定：`UNITY_WEBGL && !UNITY_EDITOR` 只允许 WebSocket；Android/iOS Player 只允许 KCP；Editor/Windows 必须由 Gate lane 或显式开发配置选择，缺少选择时 fail-fast，禁止从 Inspector、上次运行状态或隐式默认值漂移。`TransportFactoryBoundaryGuardTests` 扫描生产调用点，factory 外的具体 transport 构造立即失败；源码扫描不能替代目标平台编译/Player Build 证据。
+- **端点**：`NetworkEndpoint` 明确携带 transport kind、host、port，以及 WebSocket 的完整 scheme/path；`WebSocketClientAdapter` 接收已验证的完整 `Uri`，不得内部硬编码 `ws://` 或 `/`。公网 WebGL 强制 `wss://`；明文 `ws://` 只允许 loopback 或 Development Build。
+- **KCP 地址解析**：KCP 端点支持域名、IPv4 与 IPv6。连接流程始终保留原始 hostname 作为服务端身份验证输入；DNS 通过系统 resolver 异步解析并去重候选，并按每个结果创建匹配 `AddressFamily` 的 socket。禁止用 `IPAddress.Parse(host)` 处理域名路径，禁止固定 `AddressFamily.InterNetwork`；NAT64 依赖系统 DNS64/getaddrinfo 结果，不在应用内手工拼接 IPv6 地址。
+- **有界候选竞争**：多地址连接尊重系统候选顺序，首个候选立即尝试，250ms 后启动下一地址族候选，最多同时 2 个；单候选握手超时 3 秒、整个连接 10 秒。这些值只能由受版本控制的配置收紧，不得在同一 Gate run 临时改变。首个完成服务端身份验证与安全握手的候选获胜，其余候选取消并释放；首个不可达必须继续后续候选，全部失败时返回去敏后的聚合错误；调用方取消必须立即停止 DNS、计时器、socket 与握手。
+- **KCP 公网安全**：KCP + Protobuf 本身不提供机密性或对端认证；HMAC 登录票据只用于身份/完整性，不能替代传输加密。Development/loopback/受控测试网络可显式启用明文 KCP；非 Development 公网候选包必须 fail-closed：缺少经 ADR-0003 批准的安全 provider 时拒绝启动。服务端身份验证必须绑定 `NetworkEndpoint` 的原始 hostname，而不是某次 DNS 解析得到的 IP。
+- **安全 provider**：ADR-0003 在运行时代码实施前锁定一个经过维护、支持 Unity 2022 IL2CPP Android/iOS 的成熟 DTLS 或 Noise 实现，禁止自研密码学原语；ADR 至少确定协议/库版本、许可证、服务端与客户端集成点、身份与密钥来源、双向密钥派生、AEAD、nonce/序列号、重放窗口、重连/rekey/轮换、版本降级拒绝、秘密清理与观测脱敏。ADR-0003 未批准、provider 未完成或候选包仍可回退明文 KCP 时，移动公网传输不得声明已验证。
+- **WebGL 构建边界**：KCP 源码保持 `!UNITY_WEBGL` 编译守卫，全部 KCP PluginImporter 显式排除 WebGL。`KcpPluginPlatformGuardTests` 按程序集名/GUID 枚举所有 Kcp plugin importer，发现重复副本、未知路径、Any Platform/WebGL enabled 或固定路径漏检均失败；WebGL Player 构建产物必须同时证明没有 Kcp 托管/原生 plugin 和 `KcpNetClientAdapter`。通用 PlayMode asmdef 移除直接 `KcpNet` 引用不等于完成生产边界隔离。
 
 ### 6.1 服务端数据流
 
@@ -168,6 +182,25 @@ INetworkClient callback thread
 ```
 
 资源句柄不得靠调用者记忆 key 后手工配对；失败、取消、重复场景加载和管理器销毁都必须释放底层 handle。
+
+### 6.3.1 生命周期契约
+
+**Addressables 生产验证编排**：外层 `quality-gate.ps1` 保存原 Addressables settings 与 data builder；清理目标平台的旧 catalog、hash 与 bundle 输出；用目标平台 Unity 进程执行 `BuildPlayerContent` 并写 content manifest/hash；设置 Use Existing Build，后续生命周期测试进程必须读取该设置与本轮 manifest；测试内验证实际 catalog hash 等于本轮 manifest，禁止回退 Use Asset Database；生命周期测试全部结束后，外层 `finally` 才恢复 settings，恢复失败使 Gate 失败；整条流程在隔离 worktree 执行，避免进程崩溃污染日常 Editor 工作区。
+
+**全局 `ResourceManager.ShutdownAsync` 与 `ResourceScope.CloseAsync` 分离**：
+
+- `ResourceManager` 是跨场景全局服务；只有应用真正退出、测试套件结束或显式全局重启时才调用 `ShutdownAsync`，场景切换不得让全局服务进入 `Stopped`；
+- `ApplicationResourceScope`/`UIResourceScope` 持有 CoreUI 等跨场景 lease；`GameSessionScope`、`VfxPoolScope` 等场景/会话 scope 只拥有自己的 scene、VFX、实例与 pending load；每个 lease 必须登记稳定 owner ID，禁止无 owner 的 acquire；
+- 场景切换前显式 `await GameSessionScope.CloseAsync()`：停止该 scope 的事件接入 → 取消该 scope 的 pending loads → 销毁该 scope 的 active/idle instances → 卸载该 scope 的 Addressable scenes → 释放该 scope 的 asset leases，并断言该 owner 的 lease 数为 0；不得释放 application/UI scope 的 CoreUI lease；
+- 全局关闭状态固定为 `Running → ShuttingDown → Stopped`；进入 `ShuttingDown` 后拒绝新的 Acquire/Load；多次或并发 `ShutdownAsync` 共享同一个完成任务，并在所有 scope 已关闭后释放全局 lease、清纯托管静态引用；
+- Unity `OnDestroy`/`OnApplicationQuit` 只做 best-effort 兜底，不能宣称完成正常异步卸载；`SubsystemRegistration` 只清纯托管静态引用并报告 outstanding handles，不执行异步释放；
+- `ResetForTests` 在任一 owner 仍有 outstanding handle 时必须失败，不能绕过 scope close/global shutdown 静默清表；覆盖 `CharacterSelect` CoreUI 保留 → 创建并关闭 `DemoDay` world scope → 返回 `CharacterSelect`、重复/并发 close，以及全局 shutdown 后拒绝新加载。
+
+**UI failure Presenter 注册**：注册 token 同时记录实例身份和 generation；Presenter B 替换 A 后，A 的旧 token Dispose 不得注销 B；新 Presenter 注册时立即更新已存在的持久化 `UIManager`，不能只等待下一次 `AfterSceneLoad`；测试覆盖 A 注册 → B 替换 → A 销毁，以及场景往返和 Domain Reload disabled。
+
+**VfxCatalog 初始化**：`VfxId` 使用带显式数值、禁止复用旧值的 enum；`VfxCatalog : ScriptableObject, IVfxCatalog` 只保存 `VfxId → address`，不保存 Prefab 直接引用；build-time 校验重复 ID、空 address、缺失 Addressable entry 和非 `GameObject` 类型，任一错误均失败；场景 `VfxPoolScope` 持有 catalog、pool 和全部 asset lease，预加载到一半失败时释放已取得 lease、销毁已预热 clone、不订阅事件并返回初始化失败；核心 Hit/Heal 全量预热，可选技能 VFX 只按当前角色/场景所需 ID 预热。
+
+**IL2CPP 协议 fixture**：不允许只对空消息做 roundtrip；为每种协议 shape 准备非默认值 fixture，覆盖 `IList<T>`、嵌套消息、空/非空集合、枚举、负数/边界整数和字符串；runtime 完成标志包含 build SHA、`MessageTypeRegistry` hash、Addressables catalog hash 与 ABI；harness 验证 `ro.product.cpu.abi == arm64-v8a`；ARM64 emulator 只证明安装、启动、IL2CPP/AOT、协议和场景进入，帧时间、GC、热状态、网络切换、前后台、低内存、ANR 与 30 分钟 soak 必须使用已批准的物理参考设备。
 
 ## 7. P0 设计
 
