@@ -208,16 +208,19 @@ INetworkClient callback thread
 
 在任何行为修复前，先让测试能真实发现回归：
 
-- PlayMode 测试在 `StandaloneWindows64` Editor 目标下执行，测试数量必须大于 0；WebGL 构建仍单独验证。
-- Unity 测试门禁只收集本次运行期间产生的日志，外部 MCP 历史错误不得污染结果。
-- 质量脚本顺序执行：服务端测试、Unity EditMode、Unity PlayMode 核心套件、协议双端一致性。
-- 门禁输出总数、通过、失败、跳过和耗时；0 tests 为失败。
+- 以 Windows 原生 CLI runner `tools/quality-gate.ps1` 启动独立 Unity 进程，传 `-buildTarget StandaloneWindows64`；Editor 内验证 `BuildTarget.StandaloneWindows64`，测试进程内不执行 `SwitchActiveBuildTarget`。同一 project 已被 Unity 打开时 fail-fast，并提示使用独立 worktree。
+- EditMode、通用 PlayMode 与 Native PlayMode 各自启动独立进程，分别输出 XML 与日志；PlayMode 测试实际发现数必须大于 0。WebGL 使用独立 `-buildTarget WebGL` 进程和明确的 compile/build lane；通用测试程序集 compile contract、WebGL Player Build 与 runtime smoke 分别记录，不能用其中一种替代另一种。
+- Native 测试按 `native-clean`、`native-bots`、`native-monsters` 和确有测试时的 `native-navigation` profile 执行；每个 profile 独立启动服务器、动态选择同时可用的 TCP/UDP 端口并记录 PID，以 application-ready 日志加对应传输 probe 作为 ready 判据；启动失败、提前退出、端口冲突、超时或 teardown 残留均失败，`finally` 只停止本次 PID/子进程树并保存日志。
+- 门禁只使用本次运行产生的 XML 与日志，并输出总数、通过、失败、跳过和耗时；0 tests、XML 缺失/不可解析、进程非零退出、超时和未解释的测试数下降均失败。MCP `tests-run` 只是本地便利入口（`tools/unity-tests-mcp.sh`），不得作为 Gate 证据。
+- 每次运行使用统一 run ID，所有产物校验新鲜度与 SHA-256；`production/quality/test-manifest.json` 保存每个 assembly/profile 的预期测试全名，测试新增、删除或迁移必须显式更新 manifest。
+- Gate 0 覆盖服务端测试、Unity EditMode、通用 PlayMode、Native PlayMode 与协议双端一致性测试。
+- dirty worktree 上 `--infra` 与 `--baseline` 只能输出 `DIAGNOSTIC_ONLY` 并保存 patch hash；`--p0`、`--p1` 与 Mobile Release Readiness 默认要求 clean worktree，dirty 时不得产生 PASS。
 
 ### P0-1：背包数据正确性与安全降级
 
 - `Compact` 只稳定压缩空洞，保持非空槽位相对顺序；不得合并堆栈、重建物品或生成新实例 ID。
 - `Compact` 必须保留原 `ItemData` 引用、`InstanceId`、锁定、过期、耐久、等级、附加属性和扩展容量。
-- 所有公开写操作要求已初始化；未初始化返回明确结果，不抛 `NullReferenceException`。
+- 所有公开写操作要求已初始化；未初始化写操作返回明确的失败结果且不产生任何数据变更，不抛 `NullReferenceException`。
 - `LoadFromServer(null)` 明确失败并保留当前数据，不能把传输/反序列化异常静默解释为空背包。
 - `AddItem` 返回实际变更的槽位/物品集合；旧三元组 API 标记过渡废弃，不再返回伪造的槽位 0。
 - 在服务端权威库存完成前，联网模式只读展示或隐藏 Bag UI；不得本地提交永久物品变更。
@@ -228,8 +231,10 @@ INetworkClient callback thread
 - 每次施法创建独立 `DamageContext`；每个目标从施法上下文派生独立 `DamageHitContext`。
 - `SkillDamageHelper` 返回计算结果，不回写配置。
 - 技能启动采用“验证 -> 启动 -> 提交精力/冷却/注册”的事务顺序；启动失败不消耗资源。
-- EventBus 订阅返回可释放 token；派发使用订阅快照或延迟变更，允许回调安全增删订阅。
-- `ResetAll()` 同时清普通订阅、定向订阅和暂停状态；空桶被回收。
+- EventBus 订阅返回可释放 token；`EventSubscription` 改为 `sealed class`，用 `Interlocked.Exchange` 或等价原子状态保证跨副本幂等退订，重复 `Dispose` 不抛异常。
+- `Emit` 使用 copy-on-write 快照，不在热路径 `ToArray()` 分配临时数组；允许回调安全增删订阅。
+- `ResetAll()` 同时清普通订阅、定向订阅和暂停状态；空桶被回收；`SubsystemRegistration` 时重置纯托管订阅状态。
+- 测试覆盖 `Copied_Tokens_Dispose_Only_Once`、重复 `Dispose` 不抛异常，以及 `Emit` 热路径无临时数组分配。
 
 ### P0-3：世界边界收口
 
@@ -249,17 +254,20 @@ P0 不在全局容器上零散补过滤，而先关闭尚未实现的多世界�
 - 对 X/Y/Z、Rotation、Speed 做有限值检查；异常输入回退到上次权威状态。
 - 一次可接受位移只由 `MaxSpeed * serverElapsed * tolerance + jitterAllowance` 决定；删除 50m 绕过门槛和 `dt=0` 绕过路径。
 - Y 也要钳制；最终位置必须通过地图投影/可达性策略。地图服务不可用时采取“保持上一权威位置”，不信任客户端位置。
-- 客户端上报时间戳仅作诊断，不参与裁决；上报时使用已经同步的服务器时钟语义。
+- 客户端上报时间戳仅作诊断，不参与裁决；`MovementReporter` 使用可注入时钟而非直接读取 `DateTime.UtcNow`，并沿用已经同步的服务器时钟语义。
+- 从生产 `MovementReporter` 删除 `injectedSendDelayMs` 与 `Thread.Sleep`；延迟、抖动和丢包模拟只允许放在 fake transport 或可控 test scheduler 中。
+- 测试 `Injected_Network_Delay_Does_Not_Block_MainThread` 证明注入网络延迟不会阻塞 Unity 主线程。
 - 防御改为独立 `DefendCommand(Start/Stop, sequence)`；服务端持有起手、收手、朝向、死亡清理和精力消耗。
 - 位置同步中的旧 `IsDefending` 字段仅兼容读取并忽略，后续协议版本废弃。
 
 ### P0-5：幂等登录与认证边界
 
 - 会话登录状态机：`Connected -> Authenticating -> InWorld -> Closing`。
-- `LoginRequest` 增加 `RequestId`、`AuthTicket`、`CharacterId`；同一 RequestId 重传返回同一结果。
-- 同一 session 已登录时不得再创建 playerId；同一角色的并发登录执行明确的“拒绝新会话”策略。
-- 引入 `ILoginTicketValidator`。开发模式可通过显式 `--allow-dev-auth` 使用开发票据；生产模式未配置验证器必须拒绝启动。
-- 生产验证器解析 HMAC 票据并权威给出 AccountId、CharacterId、AllowedWorldId；请求中的 CharacterId/ZoneId 只能与票据匹配，不能改变身份或路由。
+- `LoginRequest` 增加 `RequestId`、`AuthTicket`、`CharacterId`；同一 RequestId 重传返回同一响应且不重复创建实体。
+- 同一 session 已登录时不得再创建 playerId，也不得切换角色；同一角色的并发登录执行明确的“拒绝新会话”策略。
+- 引入 `ILoginTicketValidator`。开发票据 `--allow-dev-auth` 只在 Debug/loopback 启用；生产 profile 拒绝开发验证器；生产模式未配置验证器必须拒绝启动。
+- 生产验证器解析 HMAC-SHA256 票据，签名载荷覆盖 AccountId、CharacterId、AllowedWorldId、到期时间与 nonce，并权威给出身份；请求中的 CharacterId/ZoneId 只能与票据匹配，不能改变身份或路由；无效或过期票据不得创建 session/player/world 状态。
+- `ProtocolVersion` 升到 2；生产 profile 拒绝 v1，开发 profile 只在显式诊断开关下解析 v1 且仍必须先通过票据认证，禁止无鉴权降级路径。
 - 客户端移除 `md5_hash_placeholder`；不得在日志记录票据或密码。
 - 断线清理按稳定 CharacterId 幂等执行；旧实体、Room 项、observer 和反向映射必须一次性清完。
 
@@ -280,7 +288,7 @@ P0 不在全局容器上零散补过滤，而先关闭尚未实现的多世界�
 
 - `GameLoop` 只处理 tick 开始时的快照数量，不在同一 tick 追赶新入队项。
 - KCP 的 `Input/Update/Send/TryRecv` 由同一执行上下文拥有；不允许每会话多个线程并发触达 KCP 实例。
-- 当前构建只能启用一个主传输。生产默认 WSS；KCP 即使通过本轮并发/背压测试也保持实验性默认禁用，直到另立安全握手与机密性规格。
+- 每个平台/构建配置只能启用一个主传输；Android/iOS Player 用 KCP + Protobuf + ADR-0003 安全层，WebGL 用 WebSocket/WSS，Editor/Windows 测试 lane 显式选择。生产默认不再是全平台 WSS；KCP 只在非 WebGL 的移动 Player 路径启用。
 - 协议收到 `Encrypted/Compressed` 标志但当前未配置实现时立即拒绝；XOR/空压缩不得标作安全能力。
 
 ### P0-7：客户端主线程封送与有界消费
@@ -290,6 +298,10 @@ P0 不在全局容器上零散补过滤，而先关闭尚未实现的多世界�
   - 位置纠偏、名字变化、离场、复活、错误：有界 FIFO。
   - 战斗结果与可靠命令：有界 FIFO，不允许静默丢弃；溢出触发重同步或断线。
 - 邮箱容量 512 条；主线程每帧最多处理 64 条或 2ms。发生溢出时设置一次性 fatal 标志，下一主线程帧断线并重建世界；不能静默丢可靠消息。
+- 主线程 `Update` 先 drain 登录、错误、断线和其他 control 消息，再根据状态决定是否执行 InWorld tick；登录中的登录响应、InWorld 前的错误与断线必须在状态迁移前被消费。
+- 明确列出 `ClientEnvelope.cs`、`DrainResult.cs`、`LoginResult.cs`；若实现为既有文件的嵌套类型，计划必须说明宿主文件，不得用“相关文件”占位。
+- `ClientNetworkHost` 持有连接 lifetime CTS 与正在执行的 Task；`Disconnect` 与 `OnDestroy` 取消任务并观察所有异常，禁止未观察的 fire-and-forget。
+- 测试覆盖 `Pump_Drains_LoginResponse_While_LoggingIn`、`Pump_Drains_Error_And_Disconnect_Before_InWorld`，以及 Host 销毁取消且无未观察异常。
 - `OnError`、`OnDisconnected`、`OnServerRespawn` 等事件只在主线程触发。
 - `MessageDispatcher` 只在主线程访问，或内部做不可变订阅快照；不得让普通 Dictionary 被并发读写。
 - `ConnectAndLogin` 返回 `UniTask<LoginResult>` 或 `Task<LoginResult>` 并接收 CancellationToken，不再使用 `async void`。
