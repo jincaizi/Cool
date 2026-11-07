@@ -1213,11 +1213,17 @@ EndpointResolver_Cancellation_Stops_Dns_Timers_Sockets_And_Handshakes();
 KcpPluginImporters_Exclude_WebGL_And_Have_No_Duplicate_Copies();
 WebGL_Player_Artifact_Contains_No_Kcp_Plugin_Or_Adapter();
 KcpSecurityOptions_Fail_Fast_When_Release_Lacks_Provider();
+Plaintext_Kcp_Rejected_In_Non_Development_Release();
+Plaintext_Kcp_Allowed_In_Development_Loopback();
 ```
 
 - [ ] **步骤 2：运行测试验证失败**
 
-运行：`bash tools/unity-tests.sh EditMode Kcp`
+```bash
+bash tools/unity-tests.sh EditMode Kcp
+bash tools/unity-tests.sh EditMode TransportFactoryBoundaryGuardTests
+```
+
 预期：FAIL；存在双消费者、无界发送或阻塞 Dispose；`ClientNetworkHost` 直接构造 transport，旧 adapter 硬编码 `ws://host:port/`，`IPAddress.Parse(host)` 与 `addresses[0]` 不支持域名/IPv6。
 
 - [ ] **步骤 3：实现工厂边界、端点/候选竞争与 KCP 生命周期**
@@ -1226,7 +1232,7 @@ KcpSecurityOptions_Fail_Fast_When_Release_Lacks_Provider();
 
 1. 只有 `NetworkTransportFactory` 可以引用和构造 `KcpNetClientAdapter`、`WebSocketClientAdapter`、`WebGLWebSocketChannel` 与 `DotNetWebSocketChannel`；`ClientNetworkHost` 及其余 `GameSys` 代码只依赖 `INetworkClient` 与不可变 `NetworkEndpoint`。`TransportFactoryBoundaryGuardTests` 扫描生产调用点，factory 外构造具体 transport 立即失败；源码扫描不能替代目标平台编译/Player Build 证据。
 2. 平台选择固定为：`UNITY_WEBGL && !UNITY_EDITOR` → `WebSocketClientAdapter + WebGLWebSocketChannel`；Android/iOS Player 构建 → `KcpNetClientAdapter`；Editor/Windows 必须由 Gate lane 或显式开发配置选择 KCP 或 WebSocket lane，缺少选择时 fail-fast，禁止从 Inspector、上次运行状态或隐式默认值漂移。每个平台/构建配置只启用一个主传输。
-3. `NetworkEndpoint` 携带 transport kind、host、port，以及 WebSocket 的完整 scheme/path；`WebSocketClientAdapter.ConnectAsync` 接收已验证的完整 `Uri`，不得内部硬编码 `ws://` 或 `/`；公网 WebGL 强制 `wss://`，明文 `ws://` 只允许 loopback 或 Development Build。KCP 端点支持域名、IPv4 与 IPv6：始终保留原始 hostname 作为服务端身份验证输入；DNS 通过系统 resolver 异步解析并去重候选，按每个结果创建匹配 `AddressFamily` 的 socket；禁止 `IPAddress.Parse(host)` 作为域名路径，禁止固定 `AddressFamily.InterNetwork`，NAT64 依赖系统 DNS64/getaddrinfo 结果。多地址采用有界 candidate race：尊重系统候选顺序，首个候选立即尝试，250ms 后启动下一地址族候选、最多同时 2 个；单候选握手超时 3 秒、整个连接 10 秒；首个完成服务端身份验证与安全握手的候选获胜并取消/释放其余候选；首个不可达必须继续后续候选，全部失败返回去敏后的聚合错误；调用方取消必须立即停止 DNS、计时器、socket 与握手。
+3. `NetworkEndpoint` 携带 transport kind、host、port，以及 WebSocket 的完整 scheme/path；`WebSocketClientAdapter.ConnectAsync` 接收已验证的完整 `Uri`，不得内部硬编码 `ws://` 或 `/`；公网 WebGL 强制 `wss://`，明文 `ws://` 只允许 loopback 或 Development Build。KCP 端点支持域名、IPv4 与 IPv6：始终保留原始 hostname 作为服务端身份验证输入；DNS 通过系统 resolver 异步解析并去重候选，按每个结果创建匹配 `AddressFamily` 的 socket；禁止 `IPAddress.Parse(host)` 作为域名路径，禁止固定 `AddressFamily.InterNetwork`，NAT64 依赖系统 DNS64/getaddrinfo 结果，不在应用内手工拼接 IPv6 地址。多地址采用有界 candidate race：尊重系统候选顺序，首个候选立即尝试，250ms 后启动下一地址族候选、最多同时 2 个；单候选握手超时 3 秒、整个连接 10 秒，这些超时值可由受版本控制的配置收紧，但不得在同一 Gate run 临时改变；首个完成服务端身份验证与安全握手的候选获胜并取消/释放其余候选；首个不可达必须继续后续候选，全部失败返回去敏后的聚合错误；调用方取消必须立即停止 DNS、计时器、socket 与握手。
 4. WebGL 边界：全部 KCP PluginImporter 显式排除 WebGL；排除 `Kcp.dll` 后 `KcpNet` 必须在 WebGL 编译为空/安全程序集，依赖 KCP plugin 的源码（含上述 7 个当前未守卫文件）逐个补齐 `#if !UNITY_WEBGL` 或改为平台无关接口。`KcpPluginPlatformGuardTests` 按程序集名/GUID 枚举所有 Kcp plugin importer，重复副本、未知路径、Any Platform/WebGL enabled 或固定路径漏检均失败；WebGL Player 构建产物必须同时证明没有 Kcp 托管/原生 plugin 和 `KcpNetClientAdapter`。通用 PlayMode asmdef 移除直接 `KcpNet` 引用不等于完成生产边界隔离。
 5. 两份 `Kcp.dll` 去重：`Assets/Plugins/ProtoBuf/Kcp.dll` 为本轮唯一权威来源（先用 SHA-256 `09707B5EBA20070ED922C7293AF342404A162A263C5965189EB687C90690FB9D` 核对）；`Assets/Packages/` 判定为 NuGetForUnity 生成目录，加入 `.gitignore`；`Assets/Packages/Kcp.2.7.0/lib/netstandard2.1/Kcp.dll` 及其 `.meta` 在确认可再生、内容未漂移且无用户改动后清理；去重完成前两份 `.meta` 都显式设为 WebGL 不兼容；任何归属不明或内容漂移都停止并请求确认，不得静默删除。
 6. 生产默认不再断言“KCP 全局禁用”或“所有平台默认 WSS”；改为“每个平台/构建配置只启用一个主传输”。P0 只声明平台选择策略、factory 边界、WebGL 排除与 Win64 KCP 生命周期/soak 已验证，不宣称 Android/iOS 真机或公网安全已验证。
@@ -1241,11 +1247,12 @@ bash tools/unity-tests.sh EditMode Kcp
 bash tools/unity-tests.sh PlayMode EchoSmokeTests
 bash tools/unity-tests.sh EditMode TransportFactoryBoundaryGuardTests
 bash tools/unity-tests.sh EditMode KcpPluginPlatformGuardTests
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~KcpSecurityPolicy"
 bash tools/check-webgl-kcp-artifacts.sh --build-target WebGL
 bash tools/kcp-soak.sh --minutes 30 --platform StandaloneWindows64
 ```
 
-预期：无任务/队列增长；无每 datagram MTU 数组和 64KiB writer 分配；factory 外无具体 transport 构造；WebGL 构建产物无 Kcp plugin/`KcpNetClientAdapter`；Win64 KCP 30 分钟 soak 无泄漏、无未观察异常。移动真机 soak 归 Mobile Release Readiness，不在本任务宣称。
+预期：无任务/队列增长；无每 datagram MTU 数组和 64KiB writer 分配；factory 外无具体 transport 构造；WebGL 构建产物无 Kcp plugin/`KcpNetClientAdapter`；服务端 `KcpSecurityPolicy` 测试 PASS，缺 provider 或非 Development 明文 KCP 必须失败；Win64 KCP 30 分钟 soak 无泄漏、无未观察异常。移动真机 soak 归 Mobile Release Readiness，不在本任务宣称。
 
 **执行设计 §4.1 U-P0-04 验收补齐（任务 13）：** 任务 13 前移为 P0 并排在任务 14 前；KCP 连接、断开、重复释放、接收循环停止有自动测试；P0 的 30 分钟 soak 在 Win64 KCP lane 执行，移动真机 soak 归 Mobile Release Readiness；`ClientNetworkHost` 直接构造 transport 的分支收敛到可测试的 platform transport factory；Gate 验证每个平台/构建配置只启用一个主传输，不再断言“KCP 全局默认禁用”；WebGL compile contract 与构建产物检查证明 KCP 玩家类型及 plugin 未进入 WebGL Player；公开移动候选包在任务 32 完成经 ADR 批准的安全层前不得 Release Ready。
 
