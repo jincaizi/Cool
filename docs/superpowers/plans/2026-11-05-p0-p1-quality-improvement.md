@@ -257,6 +257,8 @@ git add Assets/Scripts/Hotfix/GameSystems/Bag \
 git commit -m "fix(bag): preserve item metadata during mutations"
 ```
 
+> **P0-A 波次 Gate 覆盖要求：** P0-A 波次 Gate 必须覆盖原 Spec 10.1 的 Bag/DamageContext 项。
+
 ---
 
 ### 任务 3：把技能配置与运行时伤害上下文分离
@@ -332,6 +334,8 @@ git add Assets/Scripts/Hotfix/GameSystems/Skills \
 git commit -m "fix(skills): isolate runtime damage context"
 ```
 
+> **P0-A 波次 Gate 覆盖要求：** P0-A 波次 Gate 必须覆盖原 Spec 10.1 的 Bag/DamageContext 项。
+
 ---
 
 ### 任务 4：修复 EventBus 生命周期与技能启动事务
@@ -347,12 +351,18 @@ git commit -m "fix(skills): isolate runtime damage context"
 - 创建：`Assets/Scripts/Tests/Editor/Skills/SkillActivationTransactionTests.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/README.md`
 
+`EventSubscription` 采用 `sealed class`（内部共享原子退订状态，副本只持有同一状态引用）；U-P0-05 的跨副本/重复 Dispose 与零分配断言写入 `EventBusLifecycleTests.cs`。
+
 - [ ] **步骤 1：编写失败的生命周期/事务测试**
 
 ```csharp
 ResetAll_Clears_Normal_Targeted_And_Pause_State();
 Dispatch_Allows_Callback_To_Remove_Another_Callback_Safely();
 Disposed_Subscription_Is_Idempotent_And_Prunes_Empty_Bucket();
+Copied_Tokens_Dispose_Only_Once();
+Duplicate_Dispose_Does_Not_Throw();
+Emit_Hot_Path_Allocates_No_Temporary_Arrays();
+SubsystemRegistration_Resets_Managed_State();
 Failed_TryStart_Does_Not_Consume_Stamina_Or_Start_Cooldown();
 Completed_Executor_Unsubscribes_Exactly_Once();
 ```
@@ -371,7 +381,7 @@ bash tools/unity-tests.sh EditMode SkillActivationTransactionTests
 实现签名：
 
 ```csharp
-public readonly struct EventSubscription : IDisposable { public void Dispose(); }
+public sealed class EventSubscription : IDisposable { public void Dispose(); }
 public static EventSubscription Subscribe<T>(Action<T> callback) where T : IEvent;
 public static EventSubscription SubscribeTargeted<T>(int targetId, Action<T> callback) where T : IEvent;
 public static void ResetAll();
@@ -380,7 +390,7 @@ private bool TryActivateSkill(int skillId, SkillInput input);
 private void CommitActivation(SkillExecutor executor, SkillData data);
 ```
 
-EventBus 派发读取委托快照；所有订阅 bucket 在归零时移除。SkillCoordinator 先验证并让 executor `TryStart()` 成功，再提交精力、冷却和活动注册；保存 token/真实委托实例，在完成、中断、Dispose 时释放。
+`EventSubscription` 为 `sealed class`，内部共享一份订阅状态，用 `Interlocked.Exchange`（或等价原子状态）标记已退订；token 副本或重复 `Dispose` 只执行一次退订且不抛异常。EventBus 对每个事件类型维护 copy-on-write 委托快照：订阅/退订复制并原子替换快照，`Emit` 只读取一次快照，热路径不调用 `ToArray()`、不分配临时数组，回调可安全增删订阅。`ResetAll` 清普通订阅、定向订阅与暂停状态，并回收归零的空 bucket；添加 `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` 重置方法调用 `ResetAll()`，只清纯托管状态。SkillCoordinator 先验证并让 executor `TryStart()` 成功，再提交精力、冷却和活动注册；保存 token/真实委托实例，在完成、中断、Dispose 时释放。
 
 - [ ] **步骤 4：验证通过**
 
@@ -425,6 +435,7 @@ Room_And_EntityStore_Reference_The_Same_PlayerState();
 MaxRooms_And_MaxPlayers_Are_Enforced();
 Zone_Name_Over_Limit_Is_Rejected();
 GetOtherPlayerSessions_Excludes_By_PlayerId_Not_SessionId();
+Empty_Room_Is_Recycled_After_Last_Player_Leaves();
 ChangeZone_Is_Disabled_Until_WorldInstance_Is_Available();
 ```
 
@@ -449,7 +460,7 @@ public bool RegisterEntity(PlayerState state);
 public bool TryChangePlayerZone(...); // 仅同 world 幂等成功；跨 world 返回 false
 ```
 
-登录必须先验证 world，再创建唯一 `PlayerState`，同一实例同时交给 Room 和 EntityStore。修正 `GetOtherPlayerSessions` 的 ID 域。空房回收和 MaxRooms 真正使用配置；默认白名单只有 `Global`。
+登录必须先验证 world，再创建唯一 `PlayerState`，同一实例同时交给 Room 和 EntityStore。修正 `GetOtherPlayerSessions` 的 ID 域。空房回收和 MaxRooms 真正使用配置；默认白名单只有 `Global`。`TryChangePlayerZone` 在 `WorldInstance` 可用前返回“不支持”，不得先删除旧 Room/旧实体再尝试创建新房。
 
 - [ ] **步骤 4：验证通过**
 
@@ -459,6 +470,8 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~LoginRosterTest
 ```
 
 预期：新测试与既有登录/AOI 测试全过。
+
+**执行设计 §4.3 验收补齐（任务 5）：** 登录只接受白名单 `Global`；Room 与 `EntityStore` 使用同一 `PlayerState`；`MaxRooms`、最大人数、Zone 名称长度和空房回收生效；换区返回“不支持”，不得先删旧房。
 
 - [ ] **步骤 5：Commit**
 
@@ -490,6 +503,8 @@ git commit -m "fix(server): contain runtime to one authoritative world"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs`
 - 创建：`Server/Server.Tests/Auth/LoginIdempotencyTests.cs`
 - 创建：`Server/Server.Tests/Auth/LoginTicketValidatorTests.cs`
+- 修改：`Server/Server.Tests/Protocol/CodecRoundtripTests.cs`（移除 `md5_hash_placeholder`）
+- 修改：`Assets/Scripts/Examples/ClientExample.cs`（移除 `md5_hash_placeholder`）
 - 修改：`Assets/Scripts/AOT/Protocol/README.md`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md`
 - 修改：`Server/README.md`
@@ -504,6 +519,7 @@ Ticket_Signature_Covers_AllowedWorldId();
 Requested_Zone_Not_In_Ticket_Is_Rejected_Without_State();
 Same_Character_Second_Session_Is_Rejected();
 Disconnect_Cleans_All_Identity_Maps_Exactly_Once();
+Disconnect_Cleanup_Is_Idempotent_By_Stable_CharacterId();
 Production_Profile_Rejects_Development_Validator();
 Login_V2_Fields_RoundTrip_On_Unity_And_Server();
 Sensitive_Ticket_Is_Not_Written_To_Logs();
@@ -545,7 +561,7 @@ public interface ILoginTicketValidator
 public enum ServerSessionState { Connected, Authenticating, InWorld, Closing, Closed }
 ```
 
-HMAC 票据格式固定为 `v1.accountId.characterId.allowedWorldId.expiresUnixSeconds.nonce.signature`；`accountId`、`characterId`、`allowedWorldId`、到期时间与 nonce 全部进入签名载荷。HMAC-SHA256 密钥来自 `COOL_AUTH_HMAC_KEY`，至少 32 字节。validator 权威构造 `LoginIdentity(AccountId, CharacterId, AllowedWorldId)`；`LoginRequest.CharacterId/ZoneId` 只能作为一致性声明，任一值与 identity 不匹配都拒绝且不得创建 session/player/world 状态。`--allow-dev-auth` 只在 Debug/loopback 启用；生产未配置 validator 直接拒绝启动。`ClientNetworkManager.ConnectAndLoginAsync(ClientLoginOptions, CancellationToken)` 替换 `async void` 和占位密码。
+HMAC 票据格式固定为 `v1.accountId.characterId.allowedWorldId.expiresUnixSeconds.nonce.signature`；`accountId`、`characterId`、`allowedWorldId`、到期时间与 nonce 全部进入签名载荷。HMAC-SHA256 密钥来自 `COOL_AUTH_HMAC_KEY`，至少 32 字节。validator 权威构造 `LoginIdentity(AccountId, CharacterId, AllowedWorldId)`；`LoginRequest.CharacterId/ZoneId` 只能作为一致性声明，任一值与 identity 不匹配都拒绝且不得创建 session/player/world 状态。`--allow-dev-auth` 只在 Debug/loopback 启用；生产未配置 validator 直接拒绝启动。`ClientNetworkManager.ConnectAndLoginAsync(ClientLoginOptions, CancellationToken)` 替换 `async void` 和占位密码；同时删除 `ClientNetworkManager`、`ClientExample` 与协议 fixture 中的 `md5_hash_placeholder`，生产登录只发送 `RequestId`/`AuthTicket`/`CharacterId`，日志不得输出票据或密码。断线清理以稳定 `CharacterId` 为键幂等执行，重复断线或重复登录响应不得重复删除实体或身份映射。
 
 同时把 `ProtocolConstants.ProtocolVersion` 提升为 `2`：生产 profile 明确拒绝 v1；开发 profile 只有在显式诊断开关开启时才解析 v1，并且仍必须先通过票据认证，禁止任何无鉴权降级路径。
 
@@ -559,12 +575,18 @@ bash tools/unity-tests.sh EditMode ProtocolRoundtripTests
 
 预期：登录、版本拒绝与协议 roundtrip 全过；重复请求实体数恒定。
 
+验收：`grep -R "md5_hash_placeholder" Assets/Scripts Server` 无输出。
+
+**执行设计 §4.3 验收补齐（任务 6）：** `Connected → Authenticating → InWorld → Closing` 状态机；`LoginRequest` 含 `RequestId`、`AuthTicket`、`CharacterId`；同一 RequestId 重传返回同一结果；HMAC-SHA256 票据验证器权威给出身份；开发票据仅 loopback/Debug；生产未配置验证器拒绝启动；移除 `md5_hash_placeholder`；`ProtocolVersion` 升到 2；断线清理按稳定 CharacterId 幂等。
+
 - [ ] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol Assets/Scripts/Hotfix/GameSystems/SyncLayer \
+  Assets/Scripts/Examples/ClientExample.cs* \
   Server/Auth Server/Session Server/Handler/LoginHandler.cs Server/Program.cs \
-  Server/Server.Tests/Auth Server/README.md
+  Server/Server.Tests/Auth Server/Server.Tests/Protocol/CodecRoundtripTests.cs \
+  Server/README.md
 git commit -m "feat(auth): add idempotent ticket-based login"
 ```
 
@@ -578,6 +600,7 @@ git commit -m "feat(auth): add idempotent ticket-based login"
 - 创建：`Assets/Scripts/Hotfix/GameSystems/SyncCore/SequenceMath.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncCore/MovementValidator.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs`
+- 创建：`Assets/Scripts/Tests/Editor/SyncLayer/MovementReporterTests.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs`
 - 创建：`Server/Ingress/InboundEnvelope.cs`
 - 创建：`Server/Movement/IMovementConstraint.cs`
@@ -615,6 +638,7 @@ Rotation_Is_Normalized_To_ZeroInclusive_360Exclusive();
 Projection_Over_HalfMeter_Or_NonWalkable_Segment_Is_Rejected();
 Dead_Player_Cannot_Move();
 MovementReporter_Uses_Synchronized_Server_Clock_For_Diagnostics();
+Injected_Network_Delay_Does_Not_Block_MainThread();
 ```
 
 - [ ] **步骤 2：运行双端测试验证失败**
@@ -656,12 +680,13 @@ public MovementApplyResult AuthoritativeMovementService.Apply(
 
 `InboundEnvelope` 在每条传输的收包入口、排队和 `MessageCodec.Decode` 之前用 `Stopwatch.GetTimestamp()` 捕获 `ReceivedMonotonicTicks`，随后沿 GameLoop/dispatch context 传给 handler；任务 9 只把同一 envelope 的队列改为有界，不重新定义时间源。`PlayerState` 增加 `LastAcceptedMoveReceivedTicks`，只在 sequence 严格更新且移动被接受时推进。
 
-elapsed 使用相邻两次已接受包的单调接收时间，并钳制到 `[1/120s, 0.25s]`。水平预算固定为 `MaxSpeed * elapsed * 1.2 + 0.25m`，向上预算为 `8m/s * elapsed + 0.25m`；旋转归一化到 `[0, 360)`。终点必须能在最多 `0.5m` 内投影到 navmesh，且从上一权威位置到投影点的线段可行走；本路径不得为每个移动包执行完整 A*。非新 sequence 只回当前权威 ack，排队延迟不能给下一包增加预算。`MovementReporter` 注入 `Func<long> serverClock`，客户端时间戳只作诊断。地图约束失败时保持上一位置。
+elapsed 使用相邻两次已接受包的单调接收时间，并钳制到 `[1/120s, 0.25s]`。水平预算固定为 `MaxSpeed * elapsed * 1.2 + 0.25m`，向上预算为 `8m/s * elapsed + 0.25m`；旋转归一化到 `[0, 360)`。终点必须能在最多 `0.5m` 内投影到 navmesh，且从上一权威位置到投影点的线段可行走；本路径不得为每个移动包执行完整 A*。非新 sequence 只回当前权威 ack，排队延迟不能给下一包增加预算。从生产 `MovementReporter` 删除 `injectedSendDelayMs` 构造函数参数与 `Thread.Sleep`；`DateTime.UtcNow` 改为可注入时钟（宿主传入已同步的服务器时钟），客户端时间戳只作诊断。延迟、抖动与丢包模拟只放在 fake transport 或可控 test scheduler 中，`Injected_Network_Delay_Does_Not_Block_MainThread` 证明注入网络延迟不阻塞 Unity 主线程。地图约束失败时保持上一位置。服务端移动校验 v2 的其余规则（sequence、elapsed 钳制、预算、投影/可达性）不变。
 
 - [ ] **步骤 4：验证通过**
 
 ```bash
 bash tools/unity-tests.sh EditMode MovementValidatorTests
+bash tools/unity-tests.sh EditMode MovementReporterTests
 bash tools/unity-tests.sh PlayMode MovementSyncTests
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Movement|FullyQualifiedName~InboundReceiveTimeTests"
 ```
@@ -675,6 +700,7 @@ git add Assets/Scripts/Hotfix/GameSystems/SyncCore \
   Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs \
   Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs \
   Assets/Scripts/Tests/Editor/SyncCore/MovementValidatorTests.cs \
+  Assets/Scripts/Tests/Editor/SyncLayer/MovementReporterTests.cs \
   Server/Ingress/InboundEnvelope.cs Server/Movement Server/GameLoop.cs Server/Server3C.cs \
   Server/WebSocketServerListener.cs Server/Handler/PositionSyncHandler.cs Server/Player/PlayerState.cs \
   Server/Server.Tests/SyncCore/MovementValidatorTests.cs \
@@ -715,6 +741,9 @@ git commit -m "fix(sync): validate movement by server time and sequence"
 
 ```csharp
 PositionSync_IsDefending_Cannot_Activate_Guard();
+Permanent_PositionSync_Defend_True_Cannot_Sustain_Guard();
+DefendCommand_Start_Stop_Uses_Sequence_Without_Replaying_Old_Intent();
+Guard_Start_Captures_Facing_And_Death_Cleans_Up_State();
 Duplicate_Guard_Intent_Is_Idempotent();
 Guard_Drains_Stamina_By_Server_Tick();
 Blocked_Hit_Consumes_Server_Stamina();
@@ -738,10 +767,12 @@ bash tools/unity-tests.sh EditMode StaminaRulesTests
 协议与接口：
 
 ```csharp
-public sealed class GuardIntentRequest : IMessage
+public enum DefendAction { Start = 0, Stop = 1 }
+
+public sealed class DefendCommand : IMessage
 {
     public uint Sequence { get; set; }
-    public bool DesiredActive { get; set; }
+    public DefendAction Action { get; set; }
 }
 
 public sealed class GuardStateResponse : IMessage
@@ -755,13 +786,13 @@ public sealed class GuardStateResponse : IMessage
 
 public sealed class GuardSystem
 {
-    public GuardTransition ApplyIntent(GuardState state, GuardIntentRequest request, uint tick);
+    public GuardTransition ApplyIntent(GuardState state, DefendCommand command, uint tick);
     public void Tick(GuardState state, uint tick);
     public bool TryConsumeBlockedHit(GuardState state, float cost, uint tick);
 }
 ```
 
-`SyncCore/StaminaRules` 使用 `System.Math`，成为两端数值真值；客户端 `StaminaSystem` 包装同一规则。服务端忽略旧 `PositionSyncRequest.IsDefending`。客户端可预测动画，但 UI/状态最终采信 `GuardStateResponse` 与 snapshot。
+`SyncCore/StaminaRules` 使用 `System.Math`，成为两端数值真值；客户端 `StaminaSystem` 包装同一规则。服务端只接受独立的 `DefendCommand`，在 `Start` 时捕获起手状态与朝向，在 `Stop`/死亡/断线/精力归零时收手并清理；精力消耗由服务端 tick 与命中结算权威扣减。旧 `PositionSyncRequest.IsDefending` 仅兼容读取并忽略，持续发送 true 不能激活或维持格挡。客户端可预测动画，但 UI/状态最终采信 `GuardStateResponse` 与 snapshot。
 
 - [ ] **步骤 4：验证通过**
 
@@ -773,6 +804,8 @@ bash tools/unity-tests.sh PlayMode BlockMitigationE2ETests
 ```
 
 预期：服务端权威、双端精力规则和既有格挡表现全过。
+
+**执行设计 §4.3 验收补齐（任务 8）：** 独立 `DefendCommand(Start/Stop, sequence)`；服务端持有起手、收手、朝向、死亡清理和精力消耗；客户端永久发送防御 true 不能获得无限格挡；精力归零后服务端强制结束防御；旧 `IsDefending` 仅兼容读取并忽略。
 
 - [ ] **步骤 5：Commit**
 
