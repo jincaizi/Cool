@@ -1,7 +1,7 @@
 # P0/P1 质量改进执行设计
 
 日期：2026-11-07
-状态：文档/治理工作完成；§8 激活清单待裁决（Codex consumer sentinel 未满足）；执行基线激活待用户裁决
+状态：文档/治理文档已就绪；§8 仍有 2 项 `BLOCKED_NOT_VERIFIED`（Codex/Linux consumer sentinel），另有 3 项执行类 DEFERRED（KCP WebGL 守卫、Assets/Packages 归属、WebGL compile contract）到 task 13/Gate 0；执行基线激活待裁决
 版本：Revision 2.1（Unity 专家复核闭环版 + 可行性修正）
 适用范围：Unity 客户端、共享同步规则、网络传输、.NET 服务端、构建与质量门禁
 
@@ -24,7 +24,7 @@
 5. **证据规则**：每个 Gate 只认本轮生成的 XML、日志、退出码和产物；blocking 项未执行时状态为 `BLOCKED_NOT_VERIFIED`，不得显示为 PASS。
 6. **工程与平台发布 Gate 分层**：P1 Engineering Gate 判断工程质量；Mobile Release Readiness 判断移动候选包、真机运行、性能与生命周期证据；WebGL Public Deployment Readiness 判断公开域名、WSS、代理与浏览器证据。被批准的 `release-scope.yaml` 明确排除的平台标记为 `NOT_IN_SCOPE`，但不得宣称该平台已验证或具备发布条件。
 
-本文件是阶段 0 的执行与修订基线。**任务级细节以阶段 0 完成后修订并批准的原计划为准**；本文件不重复 33 个任务的完整步骤，只定义执行模型、修订要求、Gate 条件和遗漏补齐项。阶段 0 退出时必须在本文记录批准后的 Spec、计划和 Git SHA，随后才把状态改为“已确认，执行基线”。
+本文件是阶段 0 的执行与修订基线。**任务级细节以阶段 0 完成后修订并批准的原计划为准**；本文件不重复 33 个任务的完整步骤，只定义执行模型、修订要求、Gate 条件和遗漏补齐项。阶段 0 退出时必须在本文记录批准后的 Spec、计划和 Git SHA；仅当 §8 清单全部满足后才把状态改为“已确认，执行基线”，否则保持“待裁决”。
 
 ## 2. 范围
 
@@ -445,14 +445,14 @@ Android IL2CPP runtime smoke、当前目标 Android 设备性能与移动生命�
 | 平台传输 ADR | `c64457f15041245fa072d098dcbc58cc3ebdf720` |
 | Gate 证据 ADR | `8dadf176473617179e311a67f6f926b4c74df0a6` |
 | KCP 会话安全 ADR | `c24eeafdb05d1c62576d4d4a43acea6174e75e21` |
-| Release scope Git SHA | `1ab9596b21a9055200ba064b29caed6b1e85adad` |
+| Release scope 提交（包含已批准内容） | `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b` |
 | 激活日期 | 2026-11-07 |
 
-以上 SHA 为基线提交 `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b` 上对应路径的 Git blob SHA（`git rev-parse HEAD:<path>`）。
+Spec/计划/ADR 行为基线提交 `c739dfbd5b1115ec7f53292f79d5de8ad5e9348b` 上对应路径的 Git blob SHA（`git rev-parse c739dfbd:<path>`）；该提交包含全部被批准内容。Release scope 行为包含已批准 release scope 内容的提交 SHA（该提交加入 `production/quality/release-scope.yaml`），不是父提交或提交前 `HEAD`，与 `release-scope.yaml` 的 `sourceGitSha` 一致。
 
-激活状态：**待裁决**。文档/治理工作完成；§8 激活清单待裁决（Codex consumer sentinel 未满足）。`production/quality/technical-preferences-sentinel.md` 的 Codex consumer sentinel 为 `BLOCKED_NOT_VERIFIED`（本机无 `codex` CLI），因此本文状态不改为“已确认，执行基线”，执行基线激活等待用户裁决。
+激活状态：**待裁决**。文档/治理文档已就绪；§8 仍有 2 项 `BLOCKED_NOT_VERIFIED`（Codex consumer sentinel、Linux consumer/hash），另有 3 项执行类 DEFERRED（KCP WebGL 守卫、Assets/Packages 归属、WebGL compile contract）到 task 13/Gate 0。`production/quality/technical-preferences-sentinel.md` 的 Codex consumer sentinel 与本机 Linux hash 复核均为 `BLOCKED_NOT_VERIFIED`（本机无 `codex` CLI、无 WSL/Linux runner），因此本文状态不改为“已确认，执行基线”，执行基线激活等待用户裁决。
 
-完成上述清单后，将本文状态改为“已确认，执行基线”，然后进入 Gate 0。清单未完成时，只允许修改文档、测试基础设施设计和治理文件，不允许开始任务 2–33 的运行时代码实施。
+仅当上述清单全部满足后，才将本文状态改为“已确认，执行基线”，然后进入 Gate 0。清单未完成时，只允许修改文档、测试基础设施设计和治理文件，不允许开始任务 2–33 的运行时代码实施。
 
 ## 9. 参考
 

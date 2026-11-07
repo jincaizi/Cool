@@ -17,7 +17,7 @@
 - 从当前 `master` 创建阶段 0 分支：`git checkout -b codex/quality/stage-0`。工作树不干净时停止并请求确认，不得丢弃改动。
 - 只暂存本任务明确列出的路径；禁止 `git add .` / `git add -A`。
 - 阶段 0 不改运行时代码；`spikes/` 下的 POC 不进入 Unity 程序集，也不得被生产代码引用。
-- 每个任务结束时运行 `bash tools/check-stage0-consistency.sh`。该脚本在阶段 0 完成前会持续报红，红灯数量必须随任务推进减少；任务 16 必须全绿。
+- 每个任务结束时运行 `bash tools/check-stage0-consistency.sh`。该脚本在阶段 0 完成前会持续报红，红灯数量必须随任务推进减少；任务 17 的 evidence commit 必须全绿（报告与激活表在任务 17 生成，不能提前要求 checker PASS）。
 - 所有文档中的构建目标一律使用 Unity 枚举名：`StandaloneWindows64`、`Android`、`iOS`、`WebGL`。禁止 `win64` 等别名。
 - 所有新建的 `Assets/` 文件必须同时提交对应 `.meta`；本阶段只新建文档与脚本，不新建 Unity 资源。
 - 提交信息使用英文 conventional commit，与仓库现有历史一致。
@@ -1131,12 +1131,7 @@ approvedAt: "2026-11-07"
 sourceGitSha: ""
 ```
 
-运行以下命令写入实际 SHA：
-
-```bash
-SHA="$(git rev-parse HEAD)"
-sed -i "s/^sourceGitSha:.*/sourceGitSha: \"$SHA\"/" production/quality/release-scope.yaml
-```
+`sourceGitSha` 先留空，在步骤 5 提交后回填为**包含已批准内容的提交**（即引入 `release-scope.yaml` 的提交）；不能使用提交前的 `git rev-parse HEAD`（那会指向父提交），也不要为了写入自身 SHA 而 amend（amend 会改变提交 SHA）。若需要区分“批准内容所在提交”和“基线提交”，可另增 `approvedInGitSha` 字段；不得保留指向父提交的 `sourceGitSha`。
 
 WebGL 纳入 blocking；P0/P1 Engineering 仍验证 WebGL compile/WS lane；WebGL Public Deployment Readiness 需要公开域名、证书、反向代理和 `requiredBrowserLanes` 证据，缺失时 `BLOCKED_NOT_VERIFIED`。当前 `publicEndpoints` 为空，因此阶段 0 不得宣称 WebGL 公网准备完成。
 
@@ -1164,7 +1159,7 @@ targetFps: 30
 warmupSeconds: 120
 sampleSeconds: 1800
 p95Algorithm: "nearest-rank"
-rawDataFormat: "csv: frame,ms"
+rawDataFormat: "csv: frame_index,timestamp_s,frame_ms"
 ```
 
 `configured: false` 是显式未配置状态；P1-B2 前未填实际设备时，性能 Gate 为 `BLOCKED_NOT_VERIFIED`。
@@ -1285,14 +1280,20 @@ bash tools/check-stage0-consistency.sh
 
 预期：manifest 有效，包含至少 3 个 assembly（`GameSys.EditorTests`、`GameSys.PlayModeTests`、`KcpNet.NativePlayModeTests`）；整体仍 FAIL。这是 Stage 0 基线；Gate 0 任务 1 迁移测试后必须重新运行生成器并提交更新。
 
-- [ ] **步骤 5：Commit**
+- [ ] **步骤 5：Commit 并回填 sourceGitSha**
 
 ```bash
 git add production/quality/release-scope.yaml production/quality/gate-exceptions.json \
   production/qa/device-profiles/android-reference.yaml tools/generate-test-manifest.py \
   production/quality/test-manifest.json
 git commit -m "chore(quality): add release scope and test manifest"
+APPROVED_SHA="$(git rev-parse HEAD)"
+sed -i "s/^sourceGitSha:.*/sourceGitSha: \"$APPROVED_SHA\"/" production/quality/release-scope.yaml
+git add production/quality/release-scope.yaml
+git commit -m "docs(quality): record release scope approval commit"
 ```
+
+`APPROVED_SHA` 是引入被批准 release scope 的提交；回填提交本身不改动批准语义。
 
 ---
 
@@ -1300,92 +1301,85 @@ git commit -m "chore(quality): add release scope and test manifest"
 
 **文件：**
 - 修改：`docs/superpowers/specs/2026-11-07-p0-p1-quality-improvement-execution-design.md`
+- 创建：`production/quality/stage-0-estimate.md`
 - 创建：`production/quality/stage-0-report.md`
+- 创建：`production/quality/stage-0-checker.log`
 
-- [ ] **步骤 1：运行完整一致性检查**
+- [ ] **步骤 1：填写激活表并生成估算/报告草案**
+
+运行 `git rev-parse HEAD` 与 `git rev-parse HEAD:<path>` 取得当前提交和 blob SHA，填入执行设计 §8 的“激活记录”表，替换所有“待阶段 0 填写”。`Release scope` 行填写**包含已批准内容的提交 SHA**，不是父提交或提交前 `HEAD`。此时状态保持“待裁决”；仅当 §8 全部满足时才改为“已确认，执行基线”，否则不得改。
+
+写 `production/quality/stage-0-estimate.md`，按波次列出 Revision 2 范围的估算（人天、假设、未覆盖项）。必须明确说明原 49–86 人天只覆盖原 P0/P1 工程部分，不得作为 Revision 2 的完整估算；估算状态使用 `PRESENT`，不要写成 Gate PASS。
+
+生成 `production/quality/stage-0-report.md`，必须包含：
+
+- §8 三列表格（§8 条目 / 状态 `DELIVERED` / `DEFERRED` / `BLOCKED_NOT_VERIFIED` / `NOT_IN_SCOPE` / 证据或落点）；
+- 未执行项与 `BLOCKED_NOT_VERIFIED` 项，包括 `Linux consumer/hash`；
+- 证据路径，至少包含 `test-manifest.json`、`gate-exceptions.json`、`release-scope.yaml`、checker 日志；
+- `Mobile KCP public security` 固定写 `BLOCKED_NOT_VERIFIED (provider-only POC; task 32 required)`，不得由 `POC_STATUS` 推导为 PASS；
+- 不得预先写 `Checker: PASS` 或 `Unexecuted items: none`；checker 输出在步骤 4 捕获后回填实际内容。
+
+- [ ] **步骤 2：运行 sync 与 checker 预检（不写报告 PASS）**
 
 ```bash
 bash tools/sync-technical-preferences.sh
 bash tools/check-stage0-consistency.sh
 ```
 
-预期：`STAGE 0 CHECK: PASS`。若仍有 FAIL，逐项修复；不得跳过。
+预期：`STAGE 0 CHECK: PASS`、exit 0。若 FAIL，逐项修复后重跑；不得跳过，也不得把预期 PASS 写进报告代替实际输出。此步骤在工作树仍有未提交修改时执行，只是预检；正式证据在步骤 4 的干净提交上捕获。
 
-- [ ] **步骤 2：记录 Git SHA 并更新激活表**
-
-运行：
+- [ ] **步骤 3：提交 evidence commit**
 
 ```bash
-git rev-parse HEAD
-git rev-parse HEAD:docs/superpowers/specs/2026-11-05-p0-p1-quality-improvement-design.md
-git rev-parse HEAD:docs/superpowers/plans/2026-11-05-p0-p1-quality-improvement.md
-git rev-parse HEAD:docs/architecture/adr-0001-platform-transport-matrix.md
-git rev-parse HEAD:docs/architecture/adr-0002-quality-gate-evidence-model.md
-git rev-parse HEAD:docs/architecture/adr-0003-kcp-session-security.md
-git rev-parse HEAD:production/quality/release-scope.yaml
+git add docs/superpowers/specs/2026-11-07-p0-p1-quality-improvement-execution-design.md \
+  production/quality/stage-0-estimate.md \
+  production/quality/stage-0-report.md
+git commit -m "docs(quality): capture stage 0 evidence"
+git status --porcelain   # 必须为空
 ```
 
-把输出填入执行设计 §8 的“激活记录”表，替换所有“待阶段 0 填写”。把状态改为“已确认，执行基线”。
+该提交必须包含可让 checker PASS 的 report/estimate/激活表；checker 日志在步骤 4 随回填一起提交。
 
-- [ ] **步骤 3：写阶段 0 工期重估与报告**
-
-先写 `production/quality/stage-0-estimate.md`，按波次列出 Revision 2 范围的估算（人天、假设、未覆盖项）。必须明确说明原 49–86 人天只覆盖原 P0/P1 工程部分，不得作为 Revision 2 的完整估算。
-
-然后生成 `production/quality/stage-0-report.md`：
+- [ ] **步骤 4：在干净工作树上运行 checker 并回填 run ID/Base SHA**
 
 ```bash
-RUN_ID="stage0-$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
-mkdir -p "production/quality/artifacts/$RUN_ID"
-SHA="$(git rev-parse HEAD)"
-HASH="$(sha256sum docs/technical-preferences.md | awk '{print $1}')"
-POC_STATUS="$(grep -m1 '^Status:' spikes/kcp-security-poc/RESULT.md | sed 's/^Status:[[:space:]]*//' | tr -d '\r' | xargs)"
-cat > production/quality/stage-0-report.md <<EOF
-# Stage 0 Report
-
-- Date: 2026-11-07
-- Run ID: $RUN_ID
-- Source branch: codex/quality/stage-0
-- Base Git SHA: $SHA
-- Checker: bash tools/check-stage0-consistency.sh -> PASS
-- Technical preferences marker: $HASH
-- ADR-0003 POC: $POC_STATUS
-- Mobile KCP public security: $( [ "$POC_STATUS" = "PASS" ] && echo PASS || echo BLOCKED_NOT_VERIFIED )
-- WebGL public deployment: BLOCKED_NOT_VERIFIED until public endpoint/browser lane evidence exists
-- iOS: NOT_IN_SCOPE (no macOS runner)
-- Estimate: production/quality/stage-0-estimate.md
-- Unexecuted items: none beyond the statuses above
-- Evidence paths: production/quality/artifacts/$RUN_ID/
-EOF
+git status --porcelain   # 必须为空
+bash tools/check-stage0-consistency.sh > production/quality/stage-0-checker.log 2>&1
+CHECK_EXIT=$?
+echo "exit=$CHECK_EXIT" >> production/quality/stage-0-checker.log
+EVIDENCE_SHA="$(git rev-parse HEAD)"
+SHORT_SHA="$(git rev-parse --short HEAD)"
 ```
 
-不得把未执行的 POC、设备或公网证据写成 PASS。
+确认 `CHECK_EXIT=0` 且输出为 `STAGE 0 CHECK: PASS`。用 `EVIDENCE_SHA` 更新报告的 `Run ID`（`stage0-<UTC时间>-<SHORT_SHA>`）和 `Base Git SHA`，内嵌步骤 2/4 的实际 checker 输出与日志路径，并注明 “evidence captured on `<EVIDENCE_SHA>`; report committed after”。提交：
 
-- [ ] **步骤 4：最终一致性检查**
+```bash
+git add production/quality/stage-0-report.md production/quality/stage-0-checker.log
+git commit -m "docs(quality): backfill stage 0 evidence run id"
+```
+
+- [ ] **步骤 5：最终一致性检查**
 
 ```bash
 bash tools/check-stage0-consistency.sh
 ```
 
-预期：PASS。
-
-- [ ] **步骤 5：Commit**
-
-```bash
-git add docs/superpowers/specs/2026-11-07-p0-p1-quality-improvement-execution-design.md \
-  production/quality/stage-0-report.md
-git commit -m "docs: activate stage 0 baseline"
-```
+预期：exit 0，`STAGE 0 CHECK: PASS`；输出应与 `production/quality/stage-0-checker.log` 一致。若不一致，重新捕获日志并提交。
 
 - [ ] **步骤 6：阶段 0 完成判定**
 
 只有以下全部满足才算完成：
 
-- `tools/check-stage0-consistency.sh` 退出 0；
+- `tools/check-stage0-consistency.sh` 退出 0，且实际输出与退出码已写入 `production/quality/stage-0-checker.log` 和报告；
 - 三份 ADR 存在且 ADR-0003 记录了 POC 结果；
 - 原 Spec 与计划不再有旧 WSS 默认、旧 Gate 结构和旧任务 13 优先级；
 - `release-scope.yaml`、`test-manifest.json`、`gate-exceptions.json`、Android profile 存在；
+- `release-scope.yaml` 的 `sourceGitSha` 指向包含已批准 release scope 的提交（不是父提交或提交前 HEAD），且报告/激活表语义一致；
 - 激活表全部填 Git SHA；
-- 阶段 0 报告记录未执行项，且没有把 `BLOCKED_NOT_VERIFIED` 写成 PASS。
+- 阶段 0 报告记录未执行项，且没有把 `BLOCKED_NOT_VERIFIED` 写成 PASS；
+- `docs/technical-preferences.md` 的 hash 在 LF 检出下可复现（`.gitattributes` 已提交并 `--renormalize`）；
+- Codex consumer sentinel 与 Linux consumer/hash 均为 PASS；若任一为 `BLOCKED_NOT_VERIFIED`，§8 保持“待裁决”，不得激活执行基线；
+- §8 退出清单全部满足（或经用户明确裁决的例外已记录），否则激活状态保持“待裁决”。
 
 若 ADR-0003 POC 为 FAIL：阶段 0 不能标记完成。停止并请求用户确认 WSS 回退或更换候选重跑 POC；不得把 `BLOCKED_NOT_VERIFIED` 写成 PASS，也不得进入 Gate 0 的移动 KCP 公网路径。
 

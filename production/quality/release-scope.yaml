@@ -9,4 +9,5 @@ requiredBrowserLanes:
 publicEndpoints: []
 approver: jincaizi
 approvedAt: "2026-11-07"
-sourceGitSha: "da7e3d1ae8d9bf3099f646ebeb6c782ff6d8eaea"
+# Commit that introduced the approved release scope (contains this approver/approvedAt).
+sourceGitSha: "c739dfbd5b1115ec7f53292f79d5de8ad5e9348b"
