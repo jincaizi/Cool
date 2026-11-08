@@ -553,7 +553,7 @@ RectTransform 的 `anchorMin/anchorMax/anchoredPosition` **不手改 YAML**：�
 | 同上 | `test_desktop_pitch_limits_stay_minus30_and_60` | `VerticalAngle` 钳到 `60`/`-30` |
 | `Assets/Scripts/Tests/Editor/UIScaleResolverTests.cs` | `test_platform_scale_webgl_and_mobile_is_115` | WebGL/Android/iOS → 1.15 |
 | 同上 | `test_platform_scale_desktop_and_editor_is_1` | Windows/Mac/Editor → 1.0 |
-| 同上 | `test_global_scale_multiplies_and_clamps` | 1.2×1.15=1.38；2.0 钳到 1.5；0 回退 1.0 |
+| 同上 | `test_global_scale_multiplies_and_clamps` | 1.2×1.15=1.38；2.0 钳到 1.5；global 0 回退 1.0 后有效=1.15 |
 | 同上 | `test_reference_resolution_divides_by_effective_scale` | 1920×1080 / 1.15 = 1669.565×939.130 |
 | `Assets/Scripts/Tests/Editor/SyncLayer/NetworkModeServiceTests.cs` | `test_default_mode_is_online_without_save` | 删除 `net.mode` → Online |
 | 同上 | `test_saved_single_player_wins` | 保存 SinglePlayer → SinglePlayer |
@@ -585,6 +585,8 @@ RectTransform 的 `anchorMin/anchorMax/anchoredPosition` **不手改 YAML**：�
 - 几何测试覆盖联网（ServerSettings 显示）与单机（隐藏且不跳位），并断言第 4.2.3 节列出的组间距。首命中用 `GetComponentInParent<Button>()` / `GetComponentInParent<TMP_InputField>()` 归类，TMP 输入框可能命中的是子文本。
 
 `TouchLookAreaEventSystemTests` 保留真实 EventSystem 与 StandaloneInputModule，用测试专用 `BaseInput` / `inputOverride` 逐帧提供触摸、鼠标状态，交由模块执行射线与按下/拖拽/抬起/结束派发；测试场景必须有带 `GraphicRaycaster` 的 Canvas 和已知 RectTransform，`BaseInput.touchSupported=true`。不能直接调用 `OnPointerUp` 冒充生命周期集成验证。固定 160dpi 的换算由 EditMode 检查；事件流程测试按运行时解析出的阈值安排位置（每步不超过 1px，到阈值前不输出、达到阈值即输出）。失焦/暂停等平台回调可单独触发，但恢复后的旧/新手势仍经输入模块验证。测试必须保存/恢复 inputOverride、全局状态、设置资产值与 PlayerPrefs，销毁测试对象，不遗留第二个 EventSystem。
+
+PlayMode 测试需要访问 `TouchLookArea.ResolveDragThresholdPixels`（internal）：在 `Assets/Scripts/Hotfix/GameSystems/AssemblyInfo.cs` 增加 `[assembly: InternalsVisibleTo("KcpNet.PlayModeTests")]`。这只扩大测试程序集的可见性，不改变生产 API。
 
 `KeyboardInputAdapter` 读旧 `UnityEngine.Input`，EventSystem 的 `BaseInput` 驱动不到它；因此右键回退的 `IsLookFromTouch=false` 由 EditMode 的 `InputManagerLookSourceTests` / `MobileInputAdapterTests` 用 fake fallback 覆盖，PlayMode 只验证鼠标 UGUI 指针事件不写 `Delta`、不结束当前触摸。
 
@@ -690,6 +692,7 @@ bash tools/unity-tests.sh PlayMode MobileTouchInputTests
 - `Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs`：使用解析后的参考分辨率。
 - `Assets/Scripts/Hotfix/GameSystems/SyncLayer/NetworkModeService.cs`：默认联网、随机昵称、空用户名兜底。
 - `Assets/Scripts/Hotfix/GameSystems/SyncLayer/RandomNicknameGenerator.cs`：新增。
+- `Assets/Scripts/Hotfix/GameSystems/AssemblyInfo.cs`：增加 `InternalsVisibleTo("KcpNet.PlayModeTests")`，供 PlayMode 测试读取 `TouchLookArea.ResolveDragThresholdPixels`。
 
 ### 8.2 场景/Prefab/资产
 
