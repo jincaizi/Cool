@@ -1,7 +1,7 @@
 # 体验改进：相机、观察区、UI 缩放、默认联网与随机昵称设计
 
 日期：2026-11-09
-状态：**Draft — 设计已按用户确认的决策冻结，待规格审查；尚未实现。**
+状态：**Reviewed — 已按用户确认补齐第二轮测试装置、卡片交互与门槛覆盖；尚未实现。**
 工作流：Superpowers brainstorming → 用户确认 → 两轮代码审核（含 Unity 专家视角）→ 本 spec → 规格自检 → 用户审查 → writing-plans。
 范围：本文件是两份规格中的第一份，只覆盖 5 个体验需求与支撑布局修复。4 个战斗/AI bug（跳跃闪避、跳跃中死亡复活卡姿势、R 技能偶发无伤害、怪物贴身不攻击）放入第二份《战斗与 AI 修复规格》，不在本文件实现。
 
@@ -27,12 +27,12 @@
 - 不新增玩家可见的设置面板；`UIScale` 是 `GameSettings` 资产上的设计期参数，不是玩家滑块。
 - 不做昵称唯一性/重复校验；不做断线自动重连。
 - 不给 `MobileUiRoot` 启用安全区（notch/手势条适配留 backlog）。
-- 不修 4:3 平板上 `TargetPanel` 等既有裁切；只保证本次重锚定的技能栏与选人面板 ServerSettings 在 16:9–21:9 手机比例下安全。
+- 不修 4:3 平板上 `TargetPanel` 等既有裁切；保证本次重锚定的技能栏，以及选人面板的角色卡片、模式按钮、确认按钮、ServerSettings 在 16:9–21:9 手机比例下可见且不互相遮挡。
 - 不实现第二份规格中的 4 个 bug。
 
 ### 1.3 交付边界
 
-本规格的“完成”指：代码、场景/Prefab/资产改动、新增测试与 README 更新全部落地，且第 7 节验收项在 Editor（逻辑）与 WebGL/移动构建（视觉与输入）上都通过。规格本身不代表实现完成。
+本规格的“完成”指：代码、场景/Prefab/资产改动、新增测试与 README 更新全部落地，且第 6 节验收项在 Editor（逻辑）与 WebGL/移动构建（视觉与输入）上都通过。规格本身不代表实现完成。
 
 ## 2. 现状证据
 
@@ -48,6 +48,8 @@
 | `EntityDisplayCanvas` 独立创建 CanvasScaler，参考分辨率 1920×1080 | [EntityDisplayManager.cs:55](../../../Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs#L55) |
 | 技能/动作按钮全部为中心锚点；最高按钮 Meteor 顶边在画布中心下方 87px（1920×1080） | `DemoDay.unity` 的 MobileUiRoot 子节点 RectTransform |
 | 选人面板 `ServerSettings` 为中心锚点 `(0, -435)`，尺寸 640×132 | [CharacterSelectPanel.prefab](../../../Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab) |
+| PC/Editor 默认也显示触控 HUD；`TouchLookArea` 当前不区分鼠标与触摸，且没有按下/结束拖拽处理 | `TouchInputAvailability.Resolve`、`MobileInputBinder.Update`、`TouchLookArea.cs` |
+| `ConfirmButton` 为中心锚点 `(0,-330)`、220×70；模式按钮为 `(±130,-255)`、200×60 | `CharacterSelectPanel.prefab`；仅 ServerSettings 改底部锚点会在 1.15 倍率下与这些控件重叠 |
 | `NetworkModeService.Load()` 无存档时返回 `SinglePlayer`；`DefaultUsername = "Player"` | [NetworkModeService.cs:26](../../../Assets/Scripts/Hotfix/GameSystems/SyncLayer/NetworkModeService.cs#L26)、[NetworkModeService.cs:39](../../../Assets/Scripts/Hotfix/GameSystems/SyncLayer/NetworkModeService.cs#L39) |
 | TMP 字体 `ZhunYuan SDF` 为 Dynamic、单 1024 图集 | `Assets/PreRes/Font/ZhunYuan SDF.asset` 的 `m_AtlasPopulationMode: 1`、`m_IsMultiAtlasTexturesEnabled: 0` |
 | 项目使用旧 Input Manager（`activeInputHandler: 0`），`Mouse X/Y` 轴存在 | `ProjectSettings/ProjectSettings.asset`、`ProjectSettings/InputManager.asset` |
@@ -59,13 +61,14 @@
 |---|---|---|
 | 交付拆分 | 先体验、后 bug，两份规格 | 每份可独立验收/回滚；本文件只做体验 |
 | PC/Editor 视角 | 按住鼠标右键拖拽 | 不跟随鼠标移动；左键继续留给 UI/交互 |
+| 观察区输入归属 | 只接收真实触摸指针；鼠标统一走键鼠适配器 | PC 默认显示触控 HUD，也不能绕过右键门控或误用触屏俯仰限位 |
 | 触屏观察区 | 右上象限；水平 360°、垂直 `[-10,25]` | 技能栏在右下，右上象限天然避开；水平自由、垂直小幅 |
 | 垂直限位来源 | 按本帧视角输入来源切换 | PC 右键用 `[-30,60]`，触屏用 `[-10,25]`，互不牺牲 |
-| 观察区死区 | 12px@160dpi，按 DPI 换算 | 高 DPI 轻点不误转；只影响 LookArea |
+| 观察区死区 | 从按下位置计算总位移；12px@160dpi，按 DPI 换算 | LookArea 单独关闭 UGUI 默认拖拽门槛，避免门槛叠加与起始位移丢失 |
 | UI 缩放 | 反算参考分辨率 + 平台/全局倍率 | CanvasScaler 继续用 ScaleWithScreenSize；安全区逻辑不变 |
 | 平台倍率 | WebGL/移动端 1.15；桌面/Editor 1.0 | 按用户选择；Editor 不伪装成移动端 |
 | 手机 HUD 缩放 | 给 `MobileUiRoot` 加 `ScreenAdapter`（`ApplySafeArea=false`） | 手机 HUD 有自己的 Canvas，不改它就不会缩放 |
-| 布局修复 | 技能/动作按钮改右下锚点；ServerSettings 改底部锚点 | 1.15 倍率下 16:9–21:9 不被裁切；16:9 绝对坐标不变 |
+| 布局修复 | 技能/动作按钮改右下锚点；选人内容统一底部锚点 | 选人相邻内容组保留 16 Canvas 单位间距；技能栏在 1920×1080、1.0 倍率下位置不变 |
 | 默认联网 | 无 `net.mode` → Online | 新安装默认联网；已有存档优先 |
 | 随机昵称 | 首次 `LoadUsername()` 生成中文 4 字并持久化 | 面板、网络、HUD 读到同一个名字；玩家修改后确认保存 |
 | 昵称迁移 | 不迁移旧 `"Player"` | 不覆盖玩家自定义值；新安装才生效 |
@@ -95,7 +98,9 @@ internal static Vector2 GateLookToRightDrag(Vector2 look, bool rightButtonHeld)
 
 - `HasCameraRotationInput()` 继续调用 `GetCameraRotationInput()`，自动继承门控。
 - 不锁定/隐藏光标；不改 `MouseSensitivityX/Y`。
-- 触屏观察区仍优先：`JoystickInputAdapter` 先读 `TouchLookArea.Delta`，空闲时回退到键鼠适配器；右键拖拽在触屏 UI 显示时仍可用。
+- `TouchLookArea` 只接收真实触摸。项目使用旧 Input Manager + `StandaloneInputModule`：触摸 `pointerId >= 0`，鼠标左/右/中键 ID 为负；不能只用 `e.button == Left` 判断触摸。
+- 所有鼠标指针都不能写入或重置观察区手势；`JoystickInputAdapter` 只在真实触摸产生非零 `Delta` 时优先，否则回退键鼠适配器。PC/Editor 和桌面 WebGL 的鼠标右键均走这条回退路径，使用桌面俯仰限位。
+- 保留 PC/Editor 的摇杆、技能/动作按钮与观察区透明 Image；只收紧观察区事件归属，不关闭整个 `MobileUiRoot`。鼠标左键/中键拖动右上空白区不转视角。
 - `InputBlockGate` 阻断时 `InputManager.GetCameraRotationInput()` 已返回零；本改动不改变阻断语义。
 
 #### 4.1.2 触屏来源标记与俯仰限位
@@ -138,6 +143,7 @@ public Vector2 GetCameraRotationInput()
 
     if (_lookNeedsRelease)
     {
+        IsLookFromTouch = false;
         if (look.sqrMagnitude > 0f) return Vector2.zero;
         _lookNeedsRelease = false;
     }
@@ -194,7 +200,7 @@ public void HandleRotationInput(Vector2 input)
 
 #### 4.1.3 移动端观察区与起始死区
 
-`TouchLookArea` 增加 DPI 换算的起始死区；只影响 LookArea，不影响摇杆与火球瞄准：
+`TouchLookArea` 增加 DPI 换算的起始死区；只影响 LookArea，不影响摇杆与火球瞄准。组件必须实现 `IPointerDownHandler`、`IInitializePotentialDragHandler`、`IDragHandler`、`IPointerUpHandler`、`IEndDragHandler`，以下成员替换当前手势逻辑：
 
 ```csharp
 [SerializeField] private float _sensitivity = 0.2f;
@@ -203,7 +209,9 @@ public void HandleRotationInput(Vector2 input)
 
 private Vector2 _pending;
 private Vector2 _delta;
-private Vector2 _dragAccum;
+private int _activePointerId = -1;
+private Vector2 _pressPosition;
+private Vector2 _lastPosition;
 private bool _dragStarted;
 
 public Vector2 Delta => _delta;
@@ -217,31 +225,77 @@ internal static float ResolveDragThresholdPixels(float minPixelsAt160Dpi, float 
 private float DragThresholdPixels
     => ResolveDragThresholdPixels(_minDragPixelsAt160Dpi, Screen.dpi);
 
-public void OnDrag(PointerEventData e)
+internal static bool IsTouchPointer(PointerEventData e)
+    => e.pointerId >= 0 && e.button == PointerEventData.InputButton.Left;
+
+private bool OwnsPointer(PointerEventData e)
+    => _activePointerId >= 0 && IsTouchPointer(e)
+        && e.pointerId == _activePointerId;
+
+public void OnPointerDown(PointerEventData e)
 {
-    if (!_dragStarted)
-    {
-        _dragAccum += e.delta;
-        if (_dragAccum.magnitude < DragThresholdPixels) return;
-
-        _dragStarted = true;
-        _pending += _dragAccum * _sensitivity;
-        _dragAccum = Vector2.zero;
-        return;
-    }
-
-    _pending += e.delta * _sensitivity;
+    if (!IsTouchPointer(e) || _activePointerId >= 0) return;
+    ResetGesture();
+    _activePointerId = e.pointerId;
+    _pressPosition = e.position;
+    _lastPosition = e.position;
 }
 
-public void OnPointerUp(PointerEventData e) => ResetGesture();
+public void OnInitializePotentialDrag(PointerEventData e)
+{
+    if (OwnsPointer(e)) e.useDragThreshold = false;
+}
+
+public void OnDrag(PointerEventData e)
+{
+    if (!OwnsPointer(e)) return;
+
+    if (!_dragStarted)
+    {
+        Vector2 total = e.position - _pressPosition;
+        float threshold = DragThresholdPixels;
+        if (total.sqrMagnitude < threshold * threshold) return;
+
+        _dragStarted = true;
+        _pending += total * _sensitivity;
+    }
+    else
+    {
+        _pending += (e.position - _lastPosition) * _sensitivity;
+    }
+
+    _lastPosition = e.position;
+}
+
+public void OnPointerUp(PointerEventData e)
+{
+    if (OwnsPointer(e)) ResetGesture();
+}
+
+public void OnEndDrag(PointerEventData e)
+{
+    if (OwnsPointer(e)) ResetGesture();
+}
 
 private void OnDisable() => ResetGesture();
+
+private void OnApplicationFocus(bool hasFocus)
+{
+    if (!hasFocus) ResetGesture();
+}
+
+private void OnApplicationPause(bool paused)
+{
+    if (paused) ResetGesture();
+}
 
 private void ResetGesture()
 {
     _pending = Vector2.zero;
     _delta = Vector2.zero;
-    _dragAccum = Vector2.zero;
+    _activePointerId = -1;
+    _pressPosition = Vector2.zero;
+    _lastPosition = Vector2.zero;
     _dragStarted = false;
 }
 
@@ -252,10 +306,12 @@ private void LateUpdate()
 }
 ```
 
-- 死区按屏幕物理距离换算（12px@160dpi ≈ 1.9mm）；UI 缩放不改变该阈值。
-- 超过阈值的首帧把累计位移一并输出，不丢开头一段。
-- `OnPointerUp`、`OnDisable` 重置；失焦/隐藏 UI 的既有清理路径继续有效。
-- EventSystem 默认 10px 拖拽阈值仍在，死区是在其之上的观察区专属门槛。
+- 死区从**本次按下位置**量起，采用直线位移而非路径长度；小于阈值不输出，达到阈值的首帧输出完整总位移，之后只输出新增位移。160dpi 下缓慢移动到 11px 不输出，到 12px 输出 `12 × 0.2 = 2.4`；一次移到 12px 也输出相同值。
+- 死区按屏幕物理距离换算（12px@160dpi ≈ 1.9mm）；UI 缩放不改变该阈值。未知 DPI 回退 160；低于 160dpi 时仍保留至少 12px，与换算函数一致。
+- 仅在观察区已接管的真实触摸上设 `useDragThreshold=false`，由上述门槛完全接管起拖；**不改全局** `EventSystem.pixelDragThreshold`，摇杆、火球瞄准及其他 UI 的行为不变。
+- `IPointerDownHandler` 使 UGUI 的 `pointerPress` 指向观察区，抬指才能沿真实事件路径到达 `OnPointerUp`；`IEndDragHandler` 作为结束清理，两者连续触发时重置必须幂等。`TouchPhase.Canceled` 也经模块的释放/结束路径清理。
+- 同一时刻只接管首个触摸 ID。第二根手指及鼠标的拖拽、抬起不能改变当前手势；不从已按住的第二根手指自动接棒，必须等一次新的按下。
+- 抬指、结束/取消、失焦、暂停或停用均清空指针、死区、待发布位移和 `Delta`；恢复后忽略旧指针继续发来的拖拽，必须重新按下。`OnPointerUp` 与 `OnEndDrag` 的真实派发要用第 5 节集成测试验证，不能仅直接调用处理函数。
 
 ### 4.2 移动端 HUD 布局
 
@@ -293,19 +349,22 @@ private void LateUpdate()
 - `TargetSwitchButton` 已是右下锚点 `(-123,141)`，`Joystick` 已是左下锚点 `(220,220)`，均不动。
 - 新偏移的计算：`newX = oldX - 960`，`newY = oldY + 540`；1920×1080 下逐值等价。
 
-#### 4.2.3 选人面板 ServerSettings 改底部锚点
+#### 4.2.3 选人内容统一底部锚点与间距
 
-`Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab` 的 `ServerSettings`：
+`Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab` 中下列对象统一改为 `anchorMin = anchorMax = (0.5,0)`、pivot `(0.5,0.5)`，保持当前父子关系、尺寸、序列化引用与按钮功能。`Bg` 仍全屏拉伸，`ServerSettings` 的三个输入行保持其容器内的现有布局。
 
-| 字段 | 当前 | 修改后 |
-|---|---|---|
-| `anchorMin` / `anchorMax` | `(0.5, 0.5)` | `(0.5, 0)` |
-| `anchoredPosition` | `(0, -435)` | `(0, 105)` |
-| `sizeDelta` | `(640, 132)` | 不变 |
-| pivot | `(0.5, 0.5)` | 不变 |
+| 对象 | 当前 anchoredPosition（中心锚点） | 新 anchoredPosition（底部锚点） | size | 距面板底部的纵向范围 |
+|---|---|---|---|---|
+| ServerSettings | `(0,-435)` | `(0,105)` | 640×132 | `[39,171]` |
+| ConfirmButton | `(0,-330)` | `(0,222)` | 220×70 | `[187,257]` |
+| SoloButton / NetButton | `(±130,-255)` | `(±130,303)` | 各 200×60 | `[273,333]` |
+| MaleCard / FemaleCard | `(±130,-80)` | `(±130,499)` | 各 200×280 | `[359,639]` |
+| MaleHighlight / FemaleHighlight | `(±130,-80)` | `(±130,499)` | 各 220×300 | `[349,649]` |
 
-- 1920×1080 下绝对位置不变（原中心 `y=105`）；底部保留 39px 边距。
-- `ConfirmButton` 等其余中心元素在 16:9–21:9、1.15 下仍有正边距，本次不动。
+- 从下向上按“服务器设置 → 确认 → 模式选择 → 角色卡片（含高亮外框）”排列，组间净距分别为 `187−171=16`、`273−257=16`、`349−333=16` Canvas 单位。两个角色外框之间横向净距 40，两个模式按钮之间净距 60。
+- 不新增布局容器，不改 UI 交互。高亮外框与所属卡片的重叠是设计；除此之外，不同内容组和不同可交互控件不得相交。
+- `ServerSettings` 保持原 1920×1080、1.0 倍率下的位置；`ConfirmButton` / 模式按钮 / 卡片与高亮相对原中心锚点分别上移 `12 / 18 / 39`（这是为 1.15 下留出 16 净距的有意变化，本次不保证 1.0 像素不变）。单机隐藏服务器设置时其他控件不跳位。
+- 选人内容整体横向范围 `[-320,320]`，纵向 `[39,649]`；16:9–21:9、1.15 倍率下均在面板内。验收必须同时检查实际矩形的可见性、组间距和点击/输入结果；“所有边距为正”不能替代不重叠检查。
 
 ### 4.3 UI 缩放
 
@@ -471,7 +530,7 @@ RectTransform 的 `anchorMin/anchorMax/anchoredPosition` **不手改 YAML**：�
 - 场景：`rql-mutate` / `gameobject-component-add` → 修改 → `scene-save`。
 - Prefab：`assets-prefab-open` → 修改 → `assets-prefab-save` / `assets-prefab-close`。
 - `GameSettings.asset`：`assets-modify` 或 Inspector；修改后回读字段确认。
-- 所有改动完成后跑第 6 节测试；`MobileLookAreaLayoutTests` 会验证锚点与 CanvasScaler 实际值。
+- 所有改动完成后跑第 5 节测试；`MobileLookAreaLayoutTests`、`CharacterSelectPanelLayoutFitTests` 会验证实际锚点、CanvasScaler 值、控件间距与交互命中。
 
 ## 5. 测试
 
@@ -484,9 +543,12 @@ RectTransform 的 `anchorMin/anchorMax/anchoredPosition` **不手改 YAML**：�
 | `Assets/Scripts/Tests/Editor/TouchLookAreaTests.cs` | `test_drag_below_threshold_does_not_emit` | 小于死区的拖拽经 `LateUpdate` 后 `Delta == zero` |
 | 同上 | `test_drag_above_threshold_emits_accumulated_delta` | 超过死区后 `Delta` 非零且包含首段累计 |
 | 同上 | `test_pointer_up_resets_dead_zone` | 抬起后再拖小位移仍不输出 |
+| 同上 | `test_mouse_pointers_do_not_change_touch_gesture` | 鼠标左/右/中键 ID 均不能写入 Delta，也不能结束另一真实触摸 |
+| 同上 | `test_only_active_touch_pointer_can_drag_or_release` | 第二根手指不能累加位移、重置或接棒第一根手指 |
 | 同上 | `test_drag_threshold_scales_with_dpi` | `ResolveDragThresholdPixels(12,160)=12`、`(12,320)=24`、`(12,0)=12` |
 | `Assets/Scripts/Tests/Editor/Sys3C/InputManagerLookSourceTests.cs` | `test_look_source_reports_touch_when_touch_look_active` | `IsLookFromTouch == true` |
 | 同上 | `test_look_source_reports_mouse_when_touch_look_idle` | `IsLookFromTouch == false` |
+| 同上 | `test_blocked_or_release_gated_look_clears_touch_source` | 两种门控返回零时 `IsLookFromTouch == false` |
 | `Assets/Scripts/Tests/Editor/Sys3C/ThirdPersonCameraControllerTests.cs` | `test_mobile_pitch_limits_clamp_to_minus10_and_25` | `VerticalAngle` 钳到 `25`/`-10` |
 | 同上 | `test_desktop_pitch_limits_stay_minus30_and_60` | `VerticalAngle` 钳到 `60`/`-30` |
 | `Assets/Scripts/Tests/Editor/UIScaleResolverTests.cs` | `test_platform_scale_webgl_and_mobile_is_115` | WebGL/Android/iOS → 1.15 |
@@ -499,20 +561,39 @@ RectTransform 的 `anchorMin/anchorMax/anchoredPosition` **不手改 YAML**：�
 | 同上 | `test_empty_connection_username_falls_back_to_saved_name` | `SaveConnection("", "", "")` 保留当前名 |
 | `Assets/Scripts/Tests/Editor/SyncLayer/RandomNicknameGeneratorTests.cs` | `test_generated_name_is_four_chinese_characters` | 匹配 `^[一-鿿]{4}$` |
 | 同上 | `test_seeded_generator_is_deterministic` | 同种子两次结果相同 |
-| `Assets/Scripts/Tests/Editor/CharacterSelectPanelLayoutTests.cs` | `test_server_settings_is_bottom_anchored` | anchor `(0.5,0)`、pos `(0,105)`、size 640×132 |
-| `Assets/Scripts/Tests/Editor/MobileHudLayoutFitTests.cs` | `test_mobile_hud_fits_phone_aspects_at_115_scale` | 16:9/20:9/21:9 下技能栏与 ServerSettings 边距为正（复刻 CanvasScaler log 空间公式） |
+| `Assets/Scripts/Tests/Editor/CharacterSelectPanelLayoutTests.cs` | `test_character_select_content_uses_shared_bottom_anchors` | 从实际 Prefab 读取第 4.2.3 节全部对象，锚点、偏移和尺寸与表格一致 |
+| `Assets/Scripts/Tests/Editor/MobileHudLayoutFitTests.cs` | `test_mobile_hud_and_character_select_fit_phone_aspects_at_115_scale` | 按 CanvasScaler log 空间公式 + CharacterSelect Prefab 实际 RectTransform 数据计算；16:9/20:9/21:9 下选人内容在面板内且组间净距 ≥16。DemoDay 技能栏实际几何由 PlayMode `MobileLookAreaLayoutTests` 覆盖 |
+| `Assets/Scripts/Tests/PlayMode/TouchLookAreaEventSystemTests.cs` | `test_touch_dead_zone_starts_at_total_displacement_threshold` | 经真实 EventSystem + StandaloneInputModule 输入路径，缓慢移动和单次移动均在达到阈值时首次输出完整位移，不叠加全局 10px 门槛 |
+| 同上 | `test_second_touch_gesture_requires_threshold_again` | 完成第一次拖拽并抬指后，第二次低于阈值仍无输出；实际 OnPointerUp/OnEndDrag 后状态已清空 |
+| 同上 | `test_touch_cancel_focus_loss_and_disable_clear_gesture` | 取消、失焦、暂停、停用分别清零；恢复后旧指针拖拽无效，重新按下才可起拖 |
+| 同上 | `test_touch_dead_zone_can_start_below_global_drag_threshold` | 把解析后的死区设为 5px（按运行时 DPI 反算 `_minDragPixelsAt160Dpi`，或 internal test override），真实触摸 4px 不输出、5px 首次输出；证明观察区门槛覆盖全局 10px |
+| 同上 | `test_mouse_drag_over_look_area_never_becomes_touch_look` | 默认触控 HUD 开启时，鼠标左/右/中键的 UGUI 指针事件均不产生观察区 Delta，也不结束当前触摸；右键回退的 `IsLookFromTouch=false` 由 EditMode adapter 测试覆盖（见 5.2） |
+| 同上 | `test_unowned_pointer_release_preserves_active_touch` | 第二触摸/鼠标释放不结束首个触摸；首个触摸释放后不自动接棒 |
 | `Assets/Scripts/Tests/PlayMode/MobileLookAreaLayoutTests.cs` | `test_mobile_look_area_uses_top_right_quadrant` | LookArea anchor `(0.5,0.5)–(1,1)`，`TouchLookArea` 存在，Image raycastTarget |
 | 同上 | `test_mobile_action_buttons_are_bottom_right_anchored` | 8 个按钮 anchor `(1,0)`，世界角点在屏内 |
 | 同上 | `test_mobile_ui_root_applies_effective_reference_resolution` | `MobileUiRoot.lossyScale` 非零；CanvasScaler.referenceResolution == `ResolveReferenceResolution()` |
 | 同上 | `test_mobile_look_area_leaves_blank_drag_region_above_skill_cluster` | 最上方技能按钮顶边之上仍有 ≥100 Canvas 单位的空白高度；按钮与 LookArea 矩形重叠时由按钮优先 |
+| `Assets/Scripts/Tests/PlayMode/CharacterSelectPanelLayoutFitTests.cs` | `test_character_select_controls_fit_without_overlap_at_phone_aspects` | 几何：Prefab 实例化到固定尺寸 `RectTransform` 父节点（尺寸 = `screen / CanvasScalerScale`，分别取 16:9/20:9/21:9），`LayoutRebuilder.ForceRebuildLayoutImmediate` 后读实际角点；净距 ≥16，高亮与所属卡片重叠除外 |
+| 同上 | `test_character_select_inputs_and_buttons_receive_expected_pointer` | 交互：真实 `Canvas + GraphicRaycaster + EventSystem + BaseInput`；联网 `OnShow` 后点击三输入框、`MaleCard`/`FemaleCard`、`Solo`/`Net`、`Confirm`；首命中用父组件归类；Confirm 只验证事件，不连接、不加载场景 |
+| 同上 | `test_character_select_highlights_do_not_block_card_clicks` | 激活 `MaleHighlight`/`FemaleHighlight`（`raycastTarget=0`）后点击卡片，首命中仍是 `MaleCard`/`FemaleCard`，`OnSelectionChanged` 触发 |
 
-`MobileHudLayoutFitTests` 的按钮偏移/尺寸常量与 DemoDay 场景一致；场景布局改动必须同步更新该测试，避免测试通过但场景已漂移。
+布局测试的几何与交互分开，避免在 Editor 里用 `Screen.SetResolution` 模拟多个宽高比：
+
+- **几何**：`CharacterSelectPanelLayoutFitTests` 把 Prefab 实例化到固定尺寸 `RectTransform` 父节点，父尺寸 = `screen / CanvasScalerScale(screen, ReferenceResolution / 1.15, 0.5)`，分别取 16:9/20:9/21:9；测试显式锁 1.15，不依赖 Editor 平台倍率。`LayoutRebuilder.ForceRebuildLayoutImmediate` 后读实际 `GetWorldCorners`。这条不需要真实 Canvas 或屏幕分辨率。
+- **交互**：同一 Prefab 在真实 `Canvas + GraphicRaycaster + EventSystem + StandaloneInputModule + BaseInput` 下验证首命中、输入框编辑与按钮点击；测试 CanvasScaler 同样使用 `ReferenceResolution / 1.15`。只在当前 Game View 分辨率做，不声称覆盖三个比例。
+- **EditMode**：`MobileHudLayoutFitTests` 只算 CanvasScaler log 空间公式并读 CharacterSelect Prefab 的实际 RectTransform 数据；DemoDay 技能栏/观察区的实际几何由 PlayMode `MobileLookAreaLayoutTests` 读取。EditMode 不为读 DemoDay 打开场景。
+- 几何测试覆盖联网（ServerSettings 显示）与单机（隐藏且不跳位），并断言第 4.2.3 节列出的组间距。首命中用 `GetComponentInParent<Button>()` / `GetComponentInParent<TMP_InputField>()` 归类，TMP 输入框可能命中的是子文本。
+
+`TouchLookAreaEventSystemTests` 保留真实 EventSystem 与 StandaloneInputModule，用测试专用 `BaseInput` / `inputOverride` 逐帧提供触摸、鼠标状态，交由模块执行射线与按下/拖拽/抬起/结束派发；测试场景必须有带 `GraphicRaycaster` 的 Canvas 和已知 RectTransform，`BaseInput.touchSupported=true`。不能直接调用 `OnPointerUp` 冒充生命周期集成验证。固定 160dpi 的换算由 EditMode 检查；事件流程测试按运行时解析出的阈值安排位置（每步不超过 1px，到阈值前不输出、达到阈值即输出）。失焦/暂停等平台回调可单独触发，但恢复后的旧/新手势仍经输入模块验证。测试必须保存/恢复 inputOverride、全局状态、设置资产值与 PlayerPrefs，销毁测试对象，不遗留第二个 EventSystem。
+
+`KeyboardInputAdapter` 读旧 `UnityEngine.Input`，EventSystem 的 `BaseInput` 驱动不到它；因此右键回退的 `IsLookFromTouch=false` 由 EditMode 的 `InputManagerLookSourceTests` / `MobileInputAdapterTests` 用 fake fallback 覆盖，PlayMode 只验证鼠标 UGUI 指针事件不写 `Delta`、不结束当前触摸。
 
 ### 5.2 现有测试调整
 
 - `MobileInputAdapterTests`：补 `LastLookFromTouch` 在触屏/键鼠回退两种路径的断言。
 - `CharacterSelectPanelReopenTests`：保存/恢复 `net.mode`、`net.host`、`net.port`、`net.username`；测试开始设 SinglePlayer。原因：`OnShow` 现在会生成并保存随机昵称，`Confirm` 会写连接设置，默认联网也会改变 `_mode`。
 - `MobileTouchInputTests`、`MobileSkillHudTests`：加载 DemoDay 前保存/恢复 `net.mode` 与 `net.username`，并设 SinglePlayer，避免默认联网与随机昵称生成污染后续测试。
+- `CharacterSelectPanelLayoutFitTests`：联网 `OnShow` 后保存/恢复 `net.mode`、`net.host`、`net.port`、`net.username`；Confirm 点击只验证 `CharacterSelectedEvent`/按钮回调，不触发真实连接或 `OnClosed` 场景加载。
 - `ClientRespawnWaitTests`：已保存/恢复模式与连接名，无需改动；它显式设 Online。
 - 所有新增测试遵循 `.claude/rules/test-standards.md` 的 `test_[system]_[scenario]_[expected_result]` 命名与 Arrange/Act/Assert 结构。
 
@@ -528,7 +609,9 @@ bash tools/unity-tests.sh EditMode NetworkModeServiceTests
 bash tools/unity-tests.sh EditMode RandomNicknameGeneratorTests
 bash tools/unity-tests.sh EditMode CharacterSelectPanelLayoutTests
 bash tools/unity-tests.sh EditMode MobileHudLayoutFitTests
+bash tools/unity-tests.sh PlayMode TouchLookAreaEventSystemTests
 bash tools/unity-tests.sh PlayMode MobileLookAreaLayoutTests
+bash tools/unity-tests.sh PlayMode CharacterSelectPanelLayoutFitTests
 bash tools/unity-tests.sh PlayMode MobileTouchInputTests
 ```
 
@@ -537,23 +620,28 @@ bash tools/unity-tests.sh PlayMode MobileTouchInputTests
 ### 6.1 相机与输入
 
 - `GateLookToRightDrag((3,4), false) == Vector2.zero`；`GateLookToRightDrag((3,4), true) == (3,4)`。
-- PC/Editor：不按右键移动鼠标，相机 yaw/pitch 不变；按住右键拖拽，yaw/pitch 变化。
+- PC/Editor 默认触控 HUD 开启时：不按右键移动鼠标，或用左/中键拖动右上观察区，相机 yaw/pitch 不变；右键在观察区内外拖拽均有效，`IsLookFromTouch == false`，均使用 `[-30,60]` 限位，不因经过观察区跳成触屏限位。桌面 WebGL 使用相同鼠标归属规则，浏览器右键菜单限制见第 7 节。
 - 移动端触屏拖拽：`VerticalAngle` 不超过 `25`、不低于 `-10`；水平 yaw 可连续超过 360°。
-- 观察区死区：12px@160dpi；`ResolveDragThresholdPixels(12,160)=12`、`(12,320)=24`、`(12,0)=12`；低于阈值拖拽 `Delta == zero`。
+- 观察区死区：`ResolveDragThresholdPixels(12,160)=12`、`(12,320)=24`、`(12,0)=12`；以按下位置为原点，160dpi 下总位移 11px 时 `Delta == zero`，到 12px 首次输出 `2.4`（沿拖动方向）。慢速每步 1px 与单次移动 12px 的首次输出一致；320dpi 对应边界为 23px/24px。
+- 真实 EventSystem 派发中，只有被观察区接管的真实触摸关闭默认拖拽门槛；全局 `pixelDragThreshold` 和其他 UI 保持原值。连续两次手势均重新经过完整死区；鼠标和非所属触摸不能累加位移或结束当前手势。
+- 抬指、结束、取消、失焦、暂停、停用后 `Delta == zero`，没有活动指针或已起拖状态；恢复后原指针继续拖动无效，必须重新按下。不能仅以直接调用 `OnPointerUp` 的单测作为通过证据。
 - 阻断/失焦后恢复：`IsLookFromTouch` 不沿用旧值，必须重新按下/拖拽。
 
 ### 6.2 布局
 
-- LookArea anchor `(0.5,0.5)–(1,1)`；8 个技能/动作按钮 anchor `(1,0)`；ServerSettings anchor `(0.5,0)`、pos `(0,105)`。
+- LookArea anchor `(0.5,0.5)–(1,1)`；8 个技能/动作按钮 anchor `(1,0)`；选人内容全部按第 4.2.3 节改底部锚点，ServerSettings/确认/模式/卡片的 y 分别为 `105/222/303/499`，高亮外框与所属卡片同位置。
 - 在 1.15 倍率、`matchWidthOrHeight=0.5` 下，以下屏幕的 Canvas 尺寸与边距必须为正：
 
 | 屏幕 | 有效参考分辨率 | Canvas 尺寸（约） | 技能栏底边距 | ServerSettings 底边距 |
 |---|---:|---:|---:|---:|
 | 1920×1080 | 1669.57×939.13 | 1669.57×939.13 | Attack 底边 134 | 39 |
-| 2400×1080 | 1669.57×939.13 | 1866.6×840.0 | Attack 底边 134 | 39 |
-| 2520×1080 | 1669.57×939.13 | 1913.3×819.9 | Attack 底边 134 | 39 |
+| 2400×1080 | 1669.57×939.13 | 1866.63×839.98 | Attack 底边 134 | 39 |
+| 2520×1080 | 1669.57×939.13 | 1912.73×819.74 | Attack 底边 134 | 39 |
 
 - 技能栏距右边最大偏移 477、距底边最大顶高 453（相对右下锚点）；上述 Canvas 尺寸均大于这些值。
+- 选人内容纵向范围为 `[39,649]`，三个相邻内容组净距均为 16 Canvas 单位，在上述三个比例下保持不变；卡片高亮外框之间横向净距 40，模式按钮之间净距 60。以实际面板矩形为边界，所有内容均在面板内，其他组/交互控件互不重叠（容差 0.01）。
+- 1.0 倍率下 `ServerSettings` 位置不变；`ConfirmButton` / 模式按钮 / 卡片与高亮分别上移 `12 / 18 / 39`，这是为 1.15 留出 16 净距的有意变化。
+- 不能只检查边距：联网模式下分别点击并编辑三个输入框、点击 `MaleCard`/`FemaleCard`、选择两个模式按钮、点击确认，首命中与实际响应均属于预期控件；激活 `MaleHighlight`/`FemaleHighlight`（`raycastTarget=0`）后卡片仍可点击；单机隐藏 ServerSettings 后其余控件坐标不变。PlayMode 验证使用实际 Prefab，WebGL/移动构建补充视觉与交互验收。
 - 4:3 平板不在本表验收范围；其 `TargetPanel` 等既有裁切记 backlog。
 
 ### 6.3 UI 缩放
@@ -574,7 +662,7 @@ bash tools/unity-tests.sh PlayMode MobileTouchInputTests
 
 ## 7. 风险与已知限制
 
-- **4:3 平板**：本次只修技能栏与 ServerSettings；`TargetPanel` 等既有裁切不在范围。
+- **4:3 平板**：本次布局保证范围为 16:9–21:9 的技能栏与选人内容；`TargetPanel` 等平板既有裁切不在范围。
 - **安全区/notch**：`MobileUiRoot` 不启用 `ApplySafeArea`；右上观察区可能被右侧刘海遮挡一部分，留 backlog。
 - **WebGL 桌面右键**：浏览器可能弹右键菜单；本功能目标 PC/Editor，WebGL 主要面向移动端。
 - **TMP 单图集**：Dynamic 字体可在运行时补字，但只有一个 1024 图集；昵称词池只用常用字，验收检查输入框/名字板无缺字。
@@ -585,6 +673,7 @@ bash tools/unity-tests.sh PlayMode MobileTouchInputTests
 - **名字板/飘字/精力环**：跟随 UI 倍率一起放大；精力环 offset 也随 `canvas.scaleFactor` 放大，验收时确认位置合理。
 - **昵称唯一性**：不保证不重名；不迁移旧 `"Player"`。
 - **PC 右键拖拽**：不锁光标，光标到屏幕边缘后该方向拖拽受限；本次不处理。
+- **输入模块约束**：观察区的触摸/鼠标区分基于当前旧 Input Manager + StandaloneInputModule 的指针 ID；未来切换 Input System 时必须同步调整分类与事件流程测试，不能只沿用 ID 正负判断。
 
 ## 8. 改动清单
 
@@ -596,7 +685,7 @@ bash tools/unity-tests.sh PlayMode MobileTouchInputTests
 - `Assets/Scripts/Hotfix/GameSystems/Sys3C/Input/InputManager.cs`：`IsLookFromTouch`。
 - `Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`：相机模式设置顺序。
 - `Assets/Scripts/Hotfix/GameSystems/Sys3C/Camera/ThirdPersonCameraController.cs`：移动端俯仰限位。
-- `Assets/Scripts/Hotfix/GameSystems/UI/Mobile/TouchLookArea.cs`：DPI 死区。
+- `Assets/Scripts/Hotfix/GameSystems/UI/Mobile/TouchLookArea.cs`：真实触摸分类、单指归属、完整手势生命周期、按下位置起算的 DPI 死区与观察区专属拖拽门槛。
 - `Assets/Scripts/Hotfix/GameSystems/UI/Core/ScreenAdapter.cs`：使用解析后的参考分辨率。
 - `Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs`：使用解析后的参考分辨率。
 - `Assets/Scripts/Hotfix/GameSystems/SyncLayer/NetworkModeService.cs`：默认联网、随机昵称、空用户名兜底。
@@ -610,22 +699,40 @@ bash tools/unity-tests.sh PlayMode MobileTouchInputTests
   - MobileUiRoot 新增 `ScreenAdapter`（`ApplySafeArea=0`）。
   - 相机新增 `MobileMinPitch=-10`、`MobileMaxPitch=25`。
   - `MobileUiRoot` 的 `m_LocalScale` 显式设为 `(1,1,1)`（当前序列化为 0）。
-- `Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab`：ServerSettings 底部锚点。
+- `Assets/Resources/Prefabs/UI/CharacterSelectPanel.prefab`：ServerSettings、确认按钮、两个模式按钮、两个角色卡片及两个高亮外框统一底部锚点与间距，具体值见第 4.2.3 节。
 - `Assets/Resources/Setting/GameSettings.asset`：三个 UI 倍率字段。
 
 ### 8.3 测试
 
-- 新增：`KeyboardInputAdapterTests`、`TouchLookAreaTests`、`InputManagerLookSourceTests`、`ThirdPersonCameraControllerTests`、`UIScaleResolverTests`、`NetworkModeServiceTests`、`RandomNicknameGeneratorTests`、`CharacterSelectPanelLayoutTests`、`MobileHudLayoutFitTests`、`MobileLookAreaLayoutTests`。
+- 新增：`KeyboardInputAdapterTests`、`TouchLookAreaTests`、`TouchLookAreaEventSystemTests`、`InputManagerLookSourceTests`、`ThirdPersonCameraControllerTests`、`UIScaleResolverTests`、`NetworkModeServiceTests`、`RandomNicknameGeneratorTests`、`CharacterSelectPanelLayoutTests`、`CharacterSelectPanelLayoutFitTests`、`MobileHudLayoutFitTests`、`MobileLookAreaLayoutTests`。
 - 修改：`MobileInputAdapterTests`、`CharacterSelectPanelReopenTests`、`MobileTouchInputTests`、`MobileSkillHudTests`。
 
 ### 8.4 文档
 
-- `Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md`：右键拖拽、触屏俯仰限位、观察区死区。
-- `Assets/Scripts/Hotfix/GameSystems/UI/README.md`：UI 倍率、MobileUiRoot ScreenAdapter、LookArea 右上象限、技能按钮右下锚点、ServerSettings 底部锚点。
+- `Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md`：右键拖拽、鼠标/触摸输入归属、触屏俯仰限位、观察区死区。
+- `Assets/Scripts/Hotfix/GameSystems/UI/README.md`：UI 倍率、MobileUiRoot ScreenAdapter、LookArea 右上象限与手势生命周期、技能按钮右下锚点、选人内容统一底部锚点与间距。
+- `Assets/Scripts/Hotfix/GameSystems/Nameplate/README.md`：名字板、飘字与精力环同步使用解析后的 UI 倍率。
 - `Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md`：默认联网、随机中文昵称、已有存档优先。
 - `Assets/Scripts/AOT/DataDefinition/README.md`：`GameSettings` 的 UI 倍率字段（一句说明）。
 
-## 9. 后续
+## 9. 本轮审核修订记录
+
+| 审核项 | 本次规格修订 | 实现时所需证据 |
+|---|---|---|
+| P1：选人控件放大后重叠 | 第 4.2.3 节统一底部锚点，覆盖卡片/高亮、模式、确认与服务器设置；组间净距 16 | 三种比例的 Prefab 实际角点；当前 Game View 分辨率的射线命中与输入/按钮交互 |
+| P1：观察区绕过 PC 右键门控 | 第 4.1.1、4.1.3 节只允许真实触摸写观察区，鼠标统一回退键鼠适配器 | 默认触控 HUD 下左/中键不转视角，右键区内外均使用桌面来源与限位 |
+| P2：抬指重置缺少可达事件路径 | 第 4.1.3 节新增按下/结束处理、单指归属及取消/失焦/暂停清理 | 真实 UGUI 输入派发下连续手势、取消与非所属指针释放测试 |
+| P2：12px 死区实际叠加默认门槛 | 第 4.1.3 节按下点起算，局部关闭默认门槛，保留其他 UI 原规则 | 慢速/快速两种输入在同一总位移边界起拖，首段位移完整输出 |
+| P1：多比例 PlayMode 布局测试不可执行 | 第 5.1 节拆分几何（固定尺寸父 RectTransform）与交互（真实 Canvas/GraphicRaycaster/EventSystem/BaseInput）；EditMode 不读 DemoDay 场景 | 三种比例的 Prefab 实际角点；当前 Game View 的射线/输入 |
+| P2：角色卡片交互未覆盖 | 第 5.1 节加入 `MaleCard`/`FemaleCard` 点击与高亮不挡点击；第 6.2 节补验收 | 首命中父组件归类、`OnSelectionChanged`、高亮 `raycastTarget=0` |
+| P2：`useDragThreshold=false` 未被 12px 用例证明 | 第 5.1 节新增解析死区 = 5px 的子 10px 用例（按运行时 DPI 反算或 internal override） | 4px 不输出、5px 首次输出 |
+| P2：右键回退 `IsLookFromTouch` 无法由 BaseInput 驱动 | 第 5.1 节拆分 PlayMode 鼠标指针归属与 EditMode fake fallback 断言 | `MobileInputAdapterTests`/`InputManagerLookSourceTests` 覆盖 false |
+| P3：Confirm 交互测试可能触发连接/场景加载 | 第 5.2 节要求保存/恢复 PlayerPrefs，Confirm 只验证事件 | 无真实连接、无 `OnClosed` 场景加载 |
+| P3：1.0 下选人控件位置变化 | 第 4.2.3、6.2 节明确 Confirm/模式/卡片分别上移 12/18/39；ServerSettings 不变 | 1.0 视觉确认；1.15 组间距测试 |
+
+本轮仅修改设计文档。第二轮复审补齐了测试可执行性、卡片交互、子 10px 门槛、右键来源拆分与 PlayerPrefs 隔离；以上是待实现的修订方案与验收要求，不表示运行时代码、场景/Prefab 或测试已经完成。
+
+## 10. 后续
 
 - 本规格实现并验收后，按用户选择进入第二份《战斗与 AI 修复规格》，覆盖 4 个 bug：跳跃闪避、跳跃中死亡复活卡姿势、R 技能多 tick 伤害、怪物贴身不攻击。
 - 4:3 平板其余面板布局、`MobileUiRoot` 安全区、WebGL 桌面右键菜单、玩家可调 UI 大小均记为 backlog，不在本规格实现。
