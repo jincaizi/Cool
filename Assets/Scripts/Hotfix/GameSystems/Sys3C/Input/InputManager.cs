@@ -473,13 +473,13 @@ namespace Hotfix.GameSystems.Sys3C.Input
         }
 
         /// <summary>
-        /// 防御键按住（持续状态）— PC/Editor 鼠标右键，或手游 UI 按钮
+        /// 防御键按住（持续状态）— PC/Editor 键盘 F，或手游 UI 按钮
         /// </summary>
         public bool IsDefendHeld()
         {
             if (InputBlockGate.IsBlocked) return false;
 
-            bool raw = _defendHeldFromUI || UnityInput.GetMouseButton(1);
+            bool raw = _defendHeldFromUI || UnityInput.GetKey(KeyCode.F);
             if (_defendNeedsRelease)
             {
                 if (raw) return false;

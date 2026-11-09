@@ -288,7 +288,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             _movementPolicy.Update(command);
 
-            // 蓄力中无移动输入时，角色朝向跟随相机（拖动鼠标调整抛投方向）。
+            // 蓄力中无移动输入时，角色朝向跟随相机（按住右键拖动调整抛投方向）。
             // 移动端瞄准由 UpdateFireballAim 按摇杆方向转向，这里不抢朝向。
             if (!IsMobileAimActive()
                 && _skillCoordinator.CurrentSubState == Skills.Definition.SkillSubState.Charging
@@ -373,7 +373,7 @@ namespace Hotfix.GameSystems.Sys3C
             // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）
             if (_isDead) return;
 
-            // 防御处理（按住右键举盾，松开放下）；瞄准蓄力期间禁止举盾
+            // 防御处理（按住 F 举盾，松开放下）；瞄准蓄力期间禁止举盾
             if (!aimCharging && _inputManager.IsDefendHeld())
             {
                 if (!_defendStaminaLatch && _stamina.CanStartConsuming

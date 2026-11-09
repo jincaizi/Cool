@@ -70,7 +70,7 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
 ## 相机视角输入
 
 - **PC / Editor：只有按住鼠标右键拖拽才旋转视角**（`KeyboardInputAdapter.GateLookToRightDrag`）；
-  单纯移动鼠标不转视角。
+  单纯移动鼠标不转视角。右键仅用于拖拽视角，不再举盾；**PC/Editor 防御键为 F**。
 - `TouchLookArea` 只接收真实触摸（`pointerId >= 0` 且左键；鼠标事件完全忽略）；按下后的起始死区
   按 160dpi 基准 12px × `Mathf.Max(1, Screen.dpi/160)`（`Screen.dpi` 无效时按 160 处理）。
 - 俯仰限位：桌面 `[-30, 60]`；视角采样来自触屏（`InputManager.IsLookFromTouch`）时切换为
