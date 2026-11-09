@@ -2,6 +2,7 @@ using System.Collections;
 using System.Reflection;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.SyncLayer;
+using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.UI;
 using NUnit.Framework;
@@ -25,6 +26,7 @@ namespace KcpNet.PlayModeTests
         private string _previousHost;
         private int _previousPort;
         private string _previousUser;
+        private CharacterGender _previousGender;
 
         [SetUp]
         public void SetUp()
@@ -40,6 +42,7 @@ namespace KcpNet.PlayModeTests
             _previousHost = NetworkModeService.LoadHost();
             _previousPort = NetworkModeService.LoadPort();
             _previousUser = NetworkModeService.LoadUsername();
+            _previousGender = CharacterSelectionService.Load();
             NetworkModeService.Save(NetworkMode.Online);
 
             if (_prefab == null)
@@ -90,6 +93,7 @@ namespace KcpNet.PlayModeTests
             NetworkModeService.Save(_previousMode);
             NetworkModeService.SaveConnection(
                 _previousHost, _previousPort.ToString(), _previousUser);
+            CharacterSelectionService.Save(_previousGender);
         }
 
         private static float ScaleFactor(Vector2 screen, Vector2 reference, float match)
