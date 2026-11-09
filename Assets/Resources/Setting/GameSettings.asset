@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: GameSettings
   m_EditorClassIdentifier: 
   ReferenceResolution: {x: 1920, y: 1080}
+  UIScale: 1
+  MobilePlatformUIScale: 1.15
+  DesktopPlatformUIScale: 1
   TargetFrameRate: 60
   HitFlashSprite: {fileID: 21300000, guid: f6221782b350e0042bbc88b6ef537fdf, type: 3}
   HitFlashColor: {r: 0.90188676, g: 0.2325391, b: 0.07997859, a: 1}

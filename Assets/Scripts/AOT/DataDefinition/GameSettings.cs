@@ -24,6 +24,45 @@ namespace DataDefinition
         [Tooltip("目标帧率")]
         public int TargetFrameRate = 60;
 
+        [Header("UI Scale")]
+        [Tooltip("UI 全局倍率，叠加在平台默认倍率上")]
+        [Range(0.8f, 1.5f)]
+        public float UIScale = 1f;
+
+        [Tooltip("移动端/WebGL 平台默认倍率")]
+        [Min(0.8f)]
+        public float MobilePlatformUIScale = 1.15f;
+
+        [Tooltip("桌面/编辑器平台默认倍率")]
+        [Min(0.8f)]
+        public float DesktopPlatformUIScale = 1f;
+
+        public float ResolveUIScale()
+            => ResolveEffectiveUIScale(Application.platform, Application.isMobilePlatform,
+                MobilePlatformUIScale, DesktopPlatformUIScale, UIScale);
+
+        public Vector2 ResolveReferenceResolution()
+            => ScaleReferenceResolution(ReferenceResolution, ResolveUIScale());
+
+        public static float ResolvePlatformUIScale(RuntimePlatform platform, bool isMobilePlatform,
+            float mobileScale, float desktopScale)
+            => platform == RuntimePlatform.WebGLPlayer || isMobilePlatform
+                ? SanitizeScale(mobileScale)
+                : SanitizeScale(desktopScale);
+
+        public static float ResolveEffectiveUIScale(RuntimePlatform platform, bool isMobilePlatform,
+            float mobileScale, float desktopScale, float globalScale)
+            => Mathf.Clamp(
+                ResolvePlatformUIScale(platform, isMobilePlatform, mobileScale, desktopScale)
+                * SanitizeScale(globalScale),
+                0.8f, 1.5f);
+
+        public static Vector2 ScaleReferenceResolution(Vector2 referenceResolution, float uiScale)
+            => referenceResolution / Mathf.Clamp(SanitizeScale(uiScale), 0.8f, 1.5f);
+
+        private static float SanitizeScale(float value)
+            => float.IsFinite(value) && value > 0f ? value : 1f;
+
         [Header("VFX")]
         [Tooltip("受击闪屏贴图")]
         public Sprite HitFlashSprite;
