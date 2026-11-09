@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Definition;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.Core.Events;
@@ -33,6 +34,29 @@ namespace KcpNet.PlayModeTests
     public class MobileTouchInputTests
     {
         private MobileInputBinder _aimBinder;
+        private NetworkMode _previousMode;
+        private string _previousHost;
+        private int _previousPort;
+        private string _previousUser;
+
+        [UnitySetUp]
+        public IEnumerator SavePrefsAndForceSinglePlayer()
+        {
+            _previousMode = NetworkModeService.Load();
+            _previousHost = NetworkModeService.LoadHost();
+            _previousPort = NetworkModeService.LoadPort();
+            _previousUser = NetworkModeService.LoadUsername();
+            NetworkModeService.Save(NetworkMode.SinglePlayer);
+            yield return null;
+        }
+
+        [TearDown]
+        public void RestorePrefs()
+        {
+            NetworkModeService.Save(_previousMode);
+            NetworkModeService.SaveConnection(
+                _previousHost, _previousPort.ToString(), _previousUser);
+        }
 
         private static GameObject FindRoot(string name)
         {

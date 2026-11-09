@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Linq;
 using Hotfix.GameSystems.Skills.Definition;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.UI;
 using NUnit.Framework;
 using UnityEngine;
@@ -12,6 +13,29 @@ namespace KcpNet.PlayModeTests
 {
     public class MobileSkillHudTests
     {
+        private NetworkMode _previousMode;
+        private string _previousHost;
+        private int _previousPort;
+        private string _previousUser;
+
+        [SetUp]
+        public void SavePrefsAndForceSinglePlayer()
+        {
+            _previousMode = NetworkModeService.Load();
+            _previousHost = NetworkModeService.LoadHost();
+            _previousPort = NetworkModeService.LoadPort();
+            _previousUser = NetworkModeService.LoadUsername();
+            NetworkModeService.Save(NetworkMode.SinglePlayer);
+        }
+
+        [TearDown]
+        public void RestorePrefs()
+        {
+            NetworkModeService.Save(_previousMode);
+            NetworkModeService.SaveConnection(
+                _previousHost, _previousPort.ToString(), _previousUser);
+        }
+
         [UnityTest]
         public IEnumerator test_demo_day_has_five_radial_skill_buttons_and_attack_ready_view()
         {
