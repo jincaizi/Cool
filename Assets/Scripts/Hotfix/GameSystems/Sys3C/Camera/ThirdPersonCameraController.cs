@@ -25,6 +25,16 @@ namespace Hotfix.GameSystems.Sys3C.Camera
         public float MouseSensitivityX = 2.0f;
         public float MouseSensitivityY = 2.0f;
 
+        [Header("Mobile Pitch Limits")]
+        [Tooltip("触屏拖拽时的最低俯仰角")]
+        public float MobileMinPitch = -10f;
+        [Tooltip("触屏拖拽时的最高俯仰角")]
+        public float MobileMaxPitch = 25f;
+
+        public bool UseMobilePitchLimits { get; set; }
+
+        internal float VerticalAngle => _verticalAngle;
+
         private const float CameraCollisionRadius = 0.25f;
         private const float MinCameraDistance = 0.8f;
 
@@ -87,8 +97,13 @@ namespace Hotfix.GameSystems.Sys3C.Camera
             _horizontalAngle += input.x * MouseSensitivityX;
             _verticalAngle -= input.y * MouseSensitivityY;
 
-            // 限制俯仰角
-            _verticalAngle = Mathf.Clamp(_verticalAngle, MinPitch, MaxPitch);
+            float minPitch = UseMobilePitchLimits
+                ? Mathf.Min(MobileMinPitch, MobileMaxPitch)
+                : MinPitch;
+            float maxPitch = UseMobilePitchLimits
+                ? Mathf.Max(MobileMinPitch, MobileMaxPitch)
+                : MaxPitch;
+            _verticalAngle = Mathf.Clamp(_verticalAngle, minPitch, maxPitch);
         }
 
         /// <summary>

@@ -275,10 +275,12 @@ namespace Hotfix.GameSystems.Sys3C
                 Heal(30f);
 #endif
             _inputManager.SprintAllowed = _stamina.CanStartConsuming;
-            // P6 ③：相机旋转接线——HandleRotationInput 此前全项目零调用者，相机角度永远停在初始值。
-            // 键鼠/手柄的观察输入由 InputManager 的 adapter 提供（PC 形态无需触屏适配）。
             if (_camera != null)
-                _camera.HandleRotationInput(_inputManager.GetCameraRotationInput());
+            {
+                Vector2 lookInput = _inputManager.GetCameraRotationInput();
+                _camera.UseMobilePitchLimits = _inputManager.IsLookFromTouch;
+                _camera.HandleRotationInput(lookInput);
+            }
             HandleInput();
 
             Vector3 cameraForward = _camera != null ? _camera.transform.forward : Vector3.forward;
