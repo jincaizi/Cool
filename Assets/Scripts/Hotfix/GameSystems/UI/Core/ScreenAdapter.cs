@@ -51,13 +51,17 @@ namespace Hotfix.GameSystems.UI
         }
 
         private void ConfigureCanvasScaler()
-        {
-            if (_scaler == null) return;
+            => ApplyReferenceResolution(_scaler, DataDefinition.GameSettings.Instance);
 
-            _scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            _scaler.referenceResolution = DataDefinition.GameSettings.Instance.ReferenceResolution;
-            _scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            _scaler.matchWidthOrHeight = 0.5f;
+        internal static void ApplyReferenceResolution(
+            CanvasScaler scaler, DataDefinition.GameSettings settings)
+        {
+            if (scaler == null || settings == null) return;
+
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = settings.ResolveReferenceResolution();
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
         }
 
         private void ApplySafeAreaOffset()

@@ -61,7 +61,8 @@ namespace Hotfix.GameSystems.Nameplate
             _canvas.sortingOrder = 4500;
             var scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = DataDefinition.GameSettings.Instance.ReferenceResolution;
+            scaler.referenceResolution =
+                DataDefinition.GameSettings.Instance.ResolveReferenceResolution();
             scaler.matchWidthOrHeight = 0.5f;
             go.AddComponent<GraphicRaycaster>();
         }
