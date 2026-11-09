@@ -60,6 +60,7 @@ namespace GameSys.EditorTests
             // Assert（触屏拖拽量原样透传，灵敏度由相机侧既有参数负责）
             Assert.AreEqual(new Vector2(3f, -2f), look);
             Assert.IsTrue(adapter.HasCameraRotationInput());
+            Assert.IsTrue(adapter.LastLookFromTouch);
         }
 
         private sealed class FakeAdapter : IInputAdapter
@@ -115,6 +116,7 @@ namespace GameSys.EditorTests
             Assert.AreEqual(new Vector2(5f, -2f), adapter.GetCameraRotationInput(),
                 "触屏观察区空闲时必须回退到鼠标视角");
             Assert.IsTrue(adapter.HasCameraRotationInput());
+            Assert.IsFalse(adapter.LastLookFromTouch);
         }
 
         [Test]
@@ -126,6 +128,7 @@ namespace GameSys.EditorTests
 
             Assert.AreEqual(new Vector2(3f, -2f), adapter.GetCameraRotationInput(),
                 "触屏观察区有输入时不得被鼠标覆盖");
+            Assert.IsTrue(adapter.LastLookFromTouch);
         }
     }
 }

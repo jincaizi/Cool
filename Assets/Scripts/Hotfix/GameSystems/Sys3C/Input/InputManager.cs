@@ -247,18 +247,27 @@ namespace Hotfix.GameSystems.Sys3C.Input
             };
         }
 
+        /// <summary>本次视角采样是否来自触屏；阻断 / 释放门控期间清 false。</summary>
+        public bool IsLookFromTouch { get; private set; }
+
         /// <summary>
         /// 获取相机旋转输入（原始向量）
         /// </summary>
         public Vector2 GetCameraRotationInput()
         {
-            if (InputBlockGate.IsBlocked) return Vector2.zero;
+            if (InputBlockGate.IsBlocked)
+            {
+                IsLookFromTouch = false;
+                return Vector2.zero;
+            }
 
             Vector2 look = _adapter.GetCameraRotationInput();
+            IsLookFromTouch = _adapter is JoystickInputAdapter joystick
+                && joystick.LastLookFromTouch;
 
-            // 与移动同理：阻断解除时仍按住的视角指针/鼠标必须先归零。
             if (_lookNeedsRelease)
             {
+                IsLookFromTouch = false;
                 if (look.sqrMagnitude > 0f) return Vector2.zero;
                 _lookNeedsRelease = false;
             }

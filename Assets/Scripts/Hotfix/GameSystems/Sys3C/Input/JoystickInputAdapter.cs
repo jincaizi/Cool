@@ -43,6 +43,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
             return new Vector3(v.x, 0f, v.y);   // 注意是 v.y → z（俯视平面）
         }
 
+        /// <summary>本次采样是否来自触屏（触屏空闲回退键鼠时为 false）。</summary>
+        public bool LastLookFromTouch { get; private set; }
+
         /// <summary>
         /// 触屏拖拽量原样透传（灵敏度由相机侧既有参数负责，不在此再缩放）；
         /// 触屏空闲时回退到 fallback（PC/Editor 上的鼠标视角）。
@@ -50,7 +53,13 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public Vector2 GetCameraRotationInput()
         {
             Vector2 look = _lookSource();
-            if (look.sqrMagnitude > 0f) return look;
+            if (look.sqrMagnitude > 0f)
+            {
+                LastLookFromTouch = true;
+                return look;
+            }
+
+            LastLookFromTouch = false;
             return _fallback != null ? _fallback.GetCameraRotationInput() : Vector2.zero;
         }
 
