@@ -54,10 +54,10 @@ namespace GameSys.EditorTests
             var press = new Vector2(100f, 100f);
             float threshold = Threshold();
             _area.OnPointerDown(Pointer(0, press));
-            _area.OnDrag(Pointer(0, press + new Vector2(threshold, 0f)));
+            _area.OnDrag(Pointer(0, press + new Vector2(threshold + 1f, 0f)));
             Publish(_area);
 
-            Assert.AreEqual(threshold * 0.2f, _area.Delta.x, 0.001f);
+            Assert.AreEqual((threshold + 1f) * 0.2f, _area.Delta.x, 0.001f);
         }
 
         [Test]
