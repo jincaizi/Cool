@@ -243,12 +243,38 @@ namespace KcpNet.PlayModeTests
             yield return null;
             Assert.AreEqual(2, selected);
 
+            string[] modes = { "SoloButton", "NetButton" };
+            foreach (string name in modes)
+            {
+                var modeRect = (RectTransform)_panel.transform.Find(name);
+                Assert.IsNotNull(modeRect, name);
+                GameObject hit = FirstHit(ScreenPoint(modeRect));
+                Assert.IsNotNull(hit, name);
+                Assert.IsNotNull(hit.GetComponentInParent<Button>(),
+                    name + " 首命中应是模式按钮");
+            }
+
+            Click((RectTransform)_panel.transform.Find("SoloButton"));
+            yield return null;
+            Assert.IsFalse(_panel.transform.Find("ServerSettings").gameObject.activeSelf,
+                "单机模式必须隐藏 ServerSettings");
+            Click((RectTransform)_panel.transform.Find("NetButton"));
+            yield return null;
+            Assert.IsTrue(_panel.transform.Find("ServerSettings").gameObject.activeSelf,
+                "联网模式必须显示 ServerSettings");
+
+            var confirmRect = (RectTransform)_panel.transform.Find("ConfirmButton");
+            GameObject confirmHit = FirstHit(ScreenPoint(confirmRect));
+            Assert.IsNotNull(confirmHit, "ConfirmButton");
+            Assert.IsNotNull(confirmHit.GetComponentInParent<Button>(),
+                "ConfirmButton 首命中应是确认按钮");
+
             int confirmed = 0;
             void OnSelected(CharacterSelectedEvent e) => confirmed++;
             EventBus.Subscribe<CharacterSelectedEvent>(OnSelected);
             try
             {
-                Click((RectTransform)_panel.transform.Find("ConfirmButton"));
+                Click(confirmRect);
                 yield return null;
                 Assert.AreEqual(1, confirmed, "确认按钮必须触发 CharacterSelectedEvent");
             }
