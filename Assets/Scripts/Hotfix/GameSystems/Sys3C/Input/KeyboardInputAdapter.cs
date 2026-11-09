@@ -44,11 +44,14 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public Vector2 GetCameraRotationInput()
         {
-            // Mouse X = 水平旋转，Mouse Y = 垂直旋转
             float mouseX = UnityEngine.Input.GetAxisRaw("Mouse X");
             float mouseY = UnityEngine.Input.GetAxisRaw("Mouse Y");
-            return new Vector2(mouseX, mouseY);
+            return GateLookToRightDrag(new Vector2(mouseX, mouseY),
+                UnityEngine.Input.GetMouseButton(1));
         }
+
+        internal static Vector2 GateLookToRightDrag(Vector2 look, bool rightButtonHeld)
+            => rightButtonHeld ? look : Vector2.zero;
 
         /// <summary>
         /// 是否有移动输入
