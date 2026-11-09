@@ -11,7 +11,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
     /// <summary>
     /// 网络模式持久化：读写 PlayerPrefs（镜像 CharacterSelectionService 范式）。
-    /// 默认单机——无存档 / 非法值一律单机（联网须显式选择，避免无服务器环境误连）。
+    /// 默认联网——无存档时联网；存档值非法时回落到单机。
     /// </summary>
     public static class NetworkModeService
     {
@@ -25,7 +25,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
         public static NetworkMode Load()
         {
-            if (!PlayerPrefs.HasKey(PrefsKey)) return NetworkMode.SinglePlayer;
+            if (!PlayerPrefs.HasKey(PrefsKey)) return NetworkMode.Online;
             int raw = PlayerPrefs.GetInt(PrefsKey);
             return raw == (int)NetworkMode.Online ? NetworkMode.Online : NetworkMode.SinglePlayer;
         }
@@ -93,7 +93,18 @@ namespace Hotfix.GameSystems.SyncLayer
             => ServerAddressQuery.TryParse(pageUrl, DefaultPort, out _, out int port) ? port : savedPort;
 
         public static string LoadUsername()
-            => PlayerPrefs.HasKey(UserKey) ? PlayerPrefs.GetString(UserKey) : DefaultUsername;
+        {
+            string saved = PlayerPrefs.HasKey(UserKey)
+                ? PlayerPrefs.GetString(UserKey)
+                : string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(saved)) return saved;
+
+            string generated = RandomNicknameGenerator.Generate();
+            PlayerPrefs.SetString(UserKey, generated);
+            PlayerPrefs.Save();
+            return generated;
+        }
 
         /// <summary>保存连接参数；端口非法或地址为空时回落到默认值（防手输错误导致无法连接）</summary>
         public static void SaveConnection(string host, string portText, string username)
@@ -104,7 +115,9 @@ namespace Hotfix.GameSystems.SyncLayer
             if (int.TryParse(portText, out int parsed) && parsed > 0 && parsed <= 65535)
                 safePort = parsed;
 
-            string safeUser = string.IsNullOrWhiteSpace(username) ? DefaultUsername : username.Trim();
+            string safeUser = string.IsNullOrWhiteSpace(username)
+                ? LoadUsername()
+                : username.Trim();
 
             PlayerPrefs.SetString(HostKey, safeHost);
             PlayerPrefs.SetInt(PortKey, safePort);
