@@ -17,8 +17,13 @@ namespace GameSys.EditorTests
         private sealed class ControlledOperation : AsyncOperationBase<Object>
         {
             public int DestroyCount;
+            public bool Finished;
             protected override void Execute() { }
-            public void Finish(Object asset, Exception error = null) => Complete(asset, error == null, error);
+            public void Finish(Object asset, Exception error = null)
+            {
+                Finished = true;
+                Complete(asset, error == null, error);
+            }
             protected override void Destroy() => DestroyCount++;
         }
 
@@ -60,7 +65,7 @@ namespace GameSys.EditorTests
         public void TearDown()
         {
             foreach (var operation in _backend.Loads)
-                if (!operation.IsDone) operation.Finish(_asset);
+                if (!operation.Finished) operation.Finish(_asset);
             for (int i = 0; i < 20 && _manager.GetRefCount(Key) > 0; i++) _manager.Release(Key);
             _backend.Operations.Dispose();
             UnityEngine.ResourceManagement.ResourceManager.ExceptionHandler = _exceptionHandler;
