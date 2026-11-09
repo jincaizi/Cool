@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -20,6 +21,13 @@ namespace Core.Resource
         {
             return ResourceManager.Instance.LoadAsync<T>(reference);
         }
+
+        /// <summary>Cancel only this consumer. A successful result owns one Release; cancellation owns none.</summary>
+        public static UniTask<T> LoadAsync<T>(string key, CancellationToken cancellationToken) where T : UnityEngine.Object
+            => ResourceManager.Instance.LoadAsync<T>(key, cancellationToken);
+
+        public static UniTask<T> LoadAsync<T>(AssetReference reference, CancellationToken cancellationToken) where T : UnityEngine.Object
+            => ResourceManager.Instance.LoadAsync<T>(reference, cancellationToken);
 
         // ===== Sync Load =====
 
@@ -70,3 +78,4 @@ namespace Core.Resource
         }
     }
 }
+

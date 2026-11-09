@@ -43,13 +43,29 @@ Hit 层只有 `Hit` / `DefendHit` / `Dizzy` 三态可达。`Knockback` / `Launch
 ## 测试
 
 - Editor：`Assets/Scripts/Tests/Editor/Sys3C/`、`FSMManagerHitFeedbackTests`、`JumpTransitionTableTests`、
-  `HitAnimatorContractTests`、`CharacterSelectionServiceTests`、`MobileInputAdapterTests`。
+  `HitAnimatorContractTests`、`CharacterSelectionServiceTests`、`MobileInputAdapterTests`、
+  `InputBlockGateTests`、`InputManagerAttackSourceTests`。
 - PlayMode：`PlayerSpawnerFeedbackWiringTests`、`PlayerDeathRespawnTests`、`MovementSyncTests`、`HitJudgmentAlignmentTests`。
 
 ```bash
 bash tools/unity-tests.sh EditMode FSMManagerHitFeedbackTests
 bash tools/unity-tests.sh PlayMode MovementSyncTests
 ```
+
+### 攻击来源与输入阻断
+
+- **普攻只认触控 HUD 的普攻按钮（所有平台一致）**：`InputManager.Update` 只消费
+  `MobileActionButtons.AttackHeld → MobileInputBinder → SetAttackHeld` 的通路。
+  鼠标左键不再读取，场景与 UI 上的点击都不产生普攻；按住/松开的轻击、重击语义保持不变。
+- `InputBlockGate` 合并竖屏遮罩（`Landscape`）与失焦（`FocusLost`）两个原因，静态状态跨角色重建
+  与场景切换。阻断生效时立即 `SuspendForBlock`：清 pressed/held/release/瞄准锁存，不合成释放；
+  解除后移动、视角、防御、冲刺、火球/炎爆按住都要求先释放再接受新按下。普攻按钮状态在阻断时
+  由 Binder 清除，解除后不会恢复旧按住。
+- `MobileLandscapeGate` 是 WebGL 下的常驻 `DontDestroyOnLoad` 组件，逐帧轮询页面
+  `window.CoolLandscape`。页面状态未就绪时保持阻断（fail-closed）；使用
+  `Assets/WebGLTemplates/MobileLandscape` 模板出包，`WebGLBuildScript` 会检查模板与产物。
+- `MobileInputBinder` 在阻断期间释放绑定、隐藏 `MobileUiRoot`，并跳过 `LateUpdate` 的状态回写；
+  解除后重新发现当前本地角色再绑定，旧按住不会漏给新角色。
 
 ## 相关模块
 

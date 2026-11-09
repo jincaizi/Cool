@@ -52,6 +52,16 @@ namespace KcpServer.Monster
             return best;
         }
 
+        public static SelectedSkill? SelectPotential(MonsterState monster, PlayerState self, uint tick)
+        {
+            SelectedSkill? best=null;
+            foreach(var skill in monster.Config.skills) {
+                if(!CombatRules.TryGet(skill.skillId,out var entry) || !HpAllowed(skill,self) || !self.IsCastReady(skill.skillId,tick,CombatRules.CooldownTicks(entry))) continue;
+                if(best==null || skill.priority>best.Value.Config.priority || skill.priority==best.Value.Config.priority && skill.skillId<best.Value.Config.skillId) best=new SelectedSkill(skill,entry);
+            }
+            return best;
+        }
+
         /// <summary>距离是否落在任一（血量条件满足的）技能区间；忽略冷却——用于 Chase 停步。
         /// 与 Select 分开：目标在射程内但技能冷却时，怪物应站定等待而不是继续贴近。</summary>
         public static bool IsWithinAnySkillRange(MonsterState monster, PlayerState self, float distance)

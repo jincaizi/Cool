@@ -1,5 +1,4 @@
 using Hotfix.GameSystems.Sys3C.Character;
-using System;
 using UnityEngine;
 using UnityInput = UnityEngine.Input;
 
@@ -12,6 +11,15 @@ namespace Hotfix.GameSystems.Sys3C.Input
     public class InputManager : MonoBehaviour
     {
         private IInputAdapter _adapter;
+
+        // 阻断解除后，仍按住的源必须先释放，才接受下一次按下。
+        // 普攻不在其中：鼠标左键已全局取消，按钮状态在阻断时由 Binder 清除。
+        private bool _moveNeedsRelease;
+        private bool _lookNeedsRelease;
+        private bool _sprintNeedsRelease;
+        private bool _defendNeedsRelease;
+        private bool _fireballNeedsRelease;
+        private bool _chargeBlastNeedsRelease;
 
         // 移动速度
         public float MoveSpeed { get; set; } = 5.0f;
@@ -29,6 +37,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// <summary>由移动端摇杆手势 / UI 按键调用（手机端由 MobileInputBinder 每帧汇入）。</summary>
         public void SetSprintHeld(bool held)
         {
+            if (held && InputBlockGate.IsBlocked) return;
             _sprintHeldFromUI = held;
         }
 
@@ -81,6 +90,58 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _adapter = new KeyboardInputAdapter();
         }
 
+        private void OnEnable()
+        {
+            InputBlockGate.Changed += OnInputBlockChanged;
+            if (InputBlockGate.IsBlocked) SuspendForBlock();
+        }
+
+        private void OnDisable()
+        {
+            InputBlockGate.Changed -= OnInputBlockChanged;
+        }
+
+        private void OnInputBlockChanged()
+        {
+            if (InputBlockGate.IsBlocked) SuspendForBlock();
+        }
+
+        /// <summary>
+        /// 阻断生效时立即取消所有未消费的手势。不合成释放（不产生重击），
+        /// 也不触碰已经提交给技能协调器的动作。
+        /// </summary>
+        private void SuspendForBlock()
+        {
+            _sprintHeldFromKeyboard = false;
+            _sprintHeldFromUI = false;
+            _attackHeldFromUI = false;
+            _defendHeldFromUI = false;
+            _skillFireballHeldFromUI = false;
+            _skillChargeBlastHeldFromUI = false;
+            _jumpPressedFromUI = false;
+            _skillQPressedFromUI = false;
+            _skillRPressedFromUI = false;
+            _skillFireballPressedFromUI = false;
+            _skillChargeBlastPressedFromUI = false;
+            _skillMeteorPressedFromUI = false;
+            _targetSwitchPressedFromUI = false;
+            _skillFireballAimActiveFromUI = false;
+            _skillFireballAimFromUI = Vector2.zero;
+            _skillFireballCancelArmedFromUI = false;
+            _skillFireballReleaseFromUI = false;
+            _skillFireballReleaseCanceledFromUI = false;
+            _skillFireballReleaseConsumed = true;
+
+            CancelAttackHold();
+
+            _moveNeedsRelease = true;
+            _lookNeedsRelease = true;
+            _sprintNeedsRelease = true;
+            _defendNeedsRelease = true;
+            _fireballNeedsRelease = true;
+            _chargeBlastNeedsRelease = true;
+        }
+
         /// <summary>注入适配器 —— 触控 UI 显示时由 MobileInputBinder 安装 Joystick（含 KeyboardInputAdapter 兜底）；
         /// 不调用则维持键鼠。</summary>
         public void SetAdapter(IInputAdapter adapter)
@@ -103,16 +164,27 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _targetSwitchConsumed = false;
             _lastReleaseDuration = -1f;
             _attackJustPressed = false;
+            _sprintHeldFromKeyboard = false;
+
+            // 门控先于采样：阻断期间不读取按钮输入，也不留下可被下一帧消费的旧状态。
+            if (InputBlockGate.IsBlocked)
+            {
+                SuspendForBlock();
+                return;
+            }
+
             _sprintHeldFromKeyboard = UnityInput.GetKey(KeyCode.LeftShift);
 
-            bool mouseDown = UnityInput.GetMouseButton(0) || _attackHeldFromUI;
-            if (mouseDown && !_attackHeld)
+            // 普攻只认触控 HUD 的普攻按钮（按下 / 按住 / 松开），所有平台一致。
+            // 鼠标左键不再采集成攻击信号，场景与 UI 上的点击都不挥刀。
+            bool attackDown = _attackHeldFromUI;
+            if (attackDown && !_attackHeld)
             {
                 _attackHeld = true;
                 _attackHoldStart = Time.time;
                 _attackJustPressed = true;
             }
-            else if (!mouseDown && _attackHeld)
+            else if (!attackDown && _attackHeld)
             {
                 _lastReleaseDuration = Time.time - _attackHoldStart;
                 _attackHeld = false;
@@ -125,7 +197,17 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public MoveCommand GetMoveCommand(Vector3 cameraForward)
         {
+            if (InputBlockGate.IsBlocked) return ZeroMove();
+
             Vector3 moveInput = _adapter.GetMoveInput();
+
+            // 解除阻断时仍按住的移动键/摇杆必须先归零，避免角色恢复后继续跑。
+            if (_moveNeedsRelease)
+            {
+                if (moveInput.sqrMagnitude > 0.01f) return ZeroMove();
+                _moveNeedsRelease = false;
+            }
+
             bool rawSprintHeld = IsSprintHeld();
 
             if (!SprintAllowed && rawSprintHeld)
@@ -170,7 +252,18 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public Vector2 GetCameraRotationInput()
         {
-            return _adapter.GetCameraRotationInput();
+            if (InputBlockGate.IsBlocked) return Vector2.zero;
+
+            Vector2 look = _adapter.GetCameraRotationInput();
+
+            // 与移动同理：阻断解除时仍按住的视角指针/鼠标必须先归零。
+            if (_lookNeedsRelease)
+            {
+                if (look.sqrMagnitude > 0f) return Vector2.zero;
+                _lookNeedsRelease = false;
+            }
+
+            return look;
         }
 
         /// <summary>
@@ -178,6 +271,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsMoving()
         {
+            if (InputBlockGate.IsBlocked) return false;
+            if (_moveNeedsRelease) return false;
             return _adapter.HasMoveInput();
         }
 
@@ -186,6 +281,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsJumpPressed()
         {
+            if (InputBlockGate.IsBlocked) return false;
             bool pressed = UnityInput.GetButtonDown("Jump") || _jumpPressedFromUI;
             if (pressed && !_jumpConsumed)
             {
@@ -201,6 +297,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsTargetSwitchPressed()
         {
+            if (InputBlockGate.IsBlocked) return false;
             bool pressed = _targetSwitchPressedFromUI || UnityInput.GetKeyDown(KeyCode.T);
             if (!pressed || _targetSwitchConsumed) return false;
             _targetSwitchConsumed = true;
@@ -211,6 +308,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// <summary>由移动端 UI 按钮调用，置位切换目标的一次性按下（消费后自动清除）。</summary>
         public void SetTargetSwitchPressedFromUI(bool pressed)
         {
+            if (pressed && InputBlockGate.IsBlocked) return;
             if (pressed)
             {
                 _targetSwitchPressedFromUI = true;
@@ -226,12 +324,12 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsAttackJustPressed()
         {
-            return _attackJustPressed;
+            return !InputBlockGate.IsBlocked && _attackJustPressed;
         }
 
         public float GetAttackReleaseDuration()
         {
-            return _lastReleaseDuration;
+            return InputBlockGate.IsBlocked ? -1f : _lastReleaseDuration;
         }
 
         /// <summary>
@@ -239,6 +337,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsAttackHeldOver(float seconds)
         {
+            if (InputBlockGate.IsBlocked) return false;
             return _attackHeld && _attackHoldStart > 0f && (Time.time - _attackHoldStart) >= seconds;
         }
 
@@ -247,7 +346,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsAttackHeld()
         {
-            return _attackHeld;
+            return !InputBlockGate.IsBlocked && _attackHeld;
         }
 
         /// <summary>
@@ -255,7 +354,15 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSprintHeld()
         {
-            return _sprintHeldFromUI || _sprintHeldFromKeyboard;
+            if (InputBlockGate.IsBlocked) return false;
+
+            bool raw = _sprintHeldFromUI || _sprintHeldFromKeyboard;
+            if (_sprintNeedsRelease)
+            {
+                if (raw) return false;
+                _sprintNeedsRelease = false;
+            }
+            return raw;
         }
 
         // UI 按钮设置的防御状态（手游平台使用）
@@ -266,6 +373,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public void SetDefendHeld(bool held)
         {
+            if (held && InputBlockGate.IsBlocked) return;
             _defendHeldFromUI = held;
         }
 
@@ -275,6 +383,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// <summary>由 UI 按钮调用，设置攻击按住状态（与 SetDefendHeld 同形）。</summary>
         public void SetAttackHeld(bool held)
         {
+            if (held && InputBlockGate.IsBlocked) return;
             _attackHeldFromUI = held;
         }
 
@@ -297,23 +406,27 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// <summary>由 UI 按钮调用，置位跳跃的一次性按下（手游平台使用）。</summary>
         public void SetJumpPressed(bool pressed)
         {
+            if (pressed && InputBlockGate.IsBlocked) return;
             _jumpPressedFromUI = pressed;
         }
 
         public void SetSkillQPressedFromUI(bool pressed)
         {
+            if (pressed && InputBlockGate.IsBlocked) return;
             _skillQPressedFromUI = pressed;
             if (pressed) _skill2Consumed = false;
         }
 
         public void SetSkillRPressedFromUI(bool pressed)
         {
+            if (pressed && InputBlockGate.IsBlocked) return;
             _skillRPressedFromUI = pressed;
             if (pressed) _skill3Consumed = false;
         }
 
         public void SetSkillFireballPressedFromUI(bool pressed)
         {
+            if (pressed && InputBlockGate.IsBlocked) return;
             _skillFireballPressedFromUI = pressed;
             if (pressed)
             {
@@ -324,18 +437,28 @@ namespace Hotfix.GameSystems.Sys3C.Input
             }
         }
 
-        public void SetSkillFireballHeldFromUI(bool held) => _skillFireballHeldFromUI = held;
+        public void SetSkillFireballHeldFromUI(bool held)
+        {
+            if (held && InputBlockGate.IsBlocked) return;
+            _skillFireballHeldFromUI = held;
+        }
 
         public void SetSkillChargeBlastPressedFromUI(bool pressed)
         {
+            if (pressed && InputBlockGate.IsBlocked) return;
             _skillChargeBlastPressedFromUI = pressed;
             if (pressed) _skillChargeBlastConsumed = false;
         }
 
-        public void SetSkillChargeBlastHeldFromUI(bool held) => _skillChargeBlastHeldFromUI = held;
+        public void SetSkillChargeBlastHeldFromUI(bool held)
+        {
+            if (held && InputBlockGate.IsBlocked) return;
+            _skillChargeBlastHeldFromUI = held;
+        }
 
         public void SetSkillMeteorPressedFromUI(bool pressed)
         {
+            if (pressed && InputBlockGate.IsBlocked) return;
             _skillMeteorPressedFromUI = pressed;
             if (pressed) _skillMeteorConsumed = false;
         }
@@ -345,7 +468,15 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsDefendHeld()
         {
-            return _defendHeldFromUI || UnityInput.GetMouseButton(1);
+            if (InputBlockGate.IsBlocked) return false;
+
+            bool raw = _defendHeldFromUI || UnityInput.GetMouseButton(1);
+            if (_defendNeedsRelease)
+            {
+                if (raw) return false;
+                _defendNeedsRelease = false;
+            }
+            return raw;
         }
 
         /// <summary>
@@ -353,6 +484,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkill2Pressed()
         {
+            if (InputBlockGate.IsBlocked) return false;
             bool pressed = _skillQPressedFromUI || UnityInput.GetKeyDown(KeyCode.Q);
             if (pressed && !_skill2Consumed)
             {
@@ -368,6 +500,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkill3Pressed()
         {
+            if (InputBlockGate.IsBlocked) return false;
             bool pressed = _skillRPressedFromUI || UnityInput.GetKeyDown(KeyCode.R);
             if (pressed && !_skill3Consumed)
             {
@@ -383,6 +516,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillFireballPressed()
         {
+            if (InputBlockGate.IsBlocked) return false;
             bool pressed = _skillFireballPressedFromUI || UnityInput.GetKeyDown(KeyCode.Alpha1);
             if (pressed && !_skillFireballConsumed)
             {
@@ -395,14 +529,23 @@ namespace Hotfix.GameSystems.Sys3C.Input
 
         /// <summary>只读 UI 按下沿（不清锁存）。激活时用来区分移动端手势与 PC 键鼠；
         /// 必须在 <see cref="IsSkillFireballPressed"/> 之前读取——后者消费时会清零该标志。</summary>
-        public bool IsSkillFireballPressedFromUI() => _skillFireballPressedFromUI;
+        public bool IsSkillFireballPressedFromUI()
+            => !InputBlockGate.IsBlocked && _skillFireballPressedFromUI;
 
         /// <summary>
         /// 火球术按住（1键，持续状态）— 蓄力瞄准
         /// </summary>
         public bool IsSkillFireballHeld()
         {
-            return _skillFireballHeldFromUI || UnityInput.GetKey(KeyCode.Alpha1);
+            if (InputBlockGate.IsBlocked) return false;
+
+            bool raw = _skillFireballHeldFromUI || UnityInput.GetKey(KeyCode.Alpha1);
+            if (_fireballNeedsRelease)
+            {
+                if (raw) return false;
+                _fireballNeedsRelease = false;
+            }
+            return raw;
         }
 
         /// <summary>
@@ -411,18 +554,23 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public void SetSkillFireballAimFromUI(bool active, Vector2 aim, bool cancelArmed)
         {
+            if (active && InputBlockGate.IsBlocked) return;
             _skillFireballAimActiveFromUI = active;
             _skillFireballAimFromUI = active ? aim : Vector2.zero;
             _skillFireballCancelArmedFromUI = active && cancelArmed;
         }
 
-        public bool IsSkillFireballAimActive() => _skillFireballAimActiveFromUI;
-        public Vector2 SkillFireballAim => _skillFireballAimFromUI;
-        public bool IsSkillFireballCancelArmed() => _skillFireballCancelArmedFromUI;
+        public bool IsSkillFireballAimActive()
+            => !InputBlockGate.IsBlocked && _skillFireballAimActiveFromUI;
+        public Vector2 SkillFireballAim
+            => InputBlockGate.IsBlocked ? Vector2.zero : _skillFireballAimFromUI;
+        public bool IsSkillFireballCancelArmed()
+            => !InputBlockGate.IsBlocked && _skillFireballCancelArmedFromUI;
 
         /// <summary>瞄准摇杆释放：置位一次释放锁存（一次按下最多消费一次）。</summary>
         public void SetSkillFireballReleaseFromUI(bool canceled)
         {
+            if (InputBlockGate.IsBlocked) return;
             _skillFireballReleaseFromUI = true;
             _skillFireballReleaseCanceledFromUI = canceled;
             _skillFireballReleaseConsumed = false;
@@ -433,6 +581,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public bool ConsumeSkillFireballRelease(out bool canceled)
         {
             canceled = _skillFireballReleaseCanceledFromUI;
+            if (InputBlockGate.IsBlocked) return false;
             if (!_skillFireballReleaseFromUI || _skillFireballReleaseConsumed) return false;
             _skillFireballReleaseConsumed = true;
             _skillFireballReleaseFromUI = false;
@@ -442,7 +591,9 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// <summary>是否还有未消费的 UI 释放锁存。移动端松手在帧末写入、下一帧才被消费，
         /// 期间 aim 状态已归零——Sys3CEntry 据此跳过 PC 兜底，保住拖动落点。</summary>
         public bool HasSkillFireballReleasePending()
-            => _skillFireballReleaseFromUI && !_skillFireballReleaseConsumed;
+            => !InputBlockGate.IsBlocked
+               && _skillFireballReleaseFromUI
+               && !_skillFireballReleaseConsumed;
 
         /// <summary>teardown 清掉未消费的释放锁存（避免复活后补取消）。</summary>
         public void ClearSkillFireballReleaseFromUI()
@@ -457,6 +608,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillChargeBlastPressed()
         {
+            if (InputBlockGate.IsBlocked) return false;
             bool pressed = _skillChargeBlastPressedFromUI || UnityInput.GetKeyDown(KeyCode.Alpha2);
             if (pressed && !_skillChargeBlastConsumed)
             {
@@ -472,7 +624,15 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillChargeBlastHeld()
         {
-            return _skillChargeBlastHeldFromUI || UnityInput.GetKey(KeyCode.Alpha2);
+            if (InputBlockGate.IsBlocked) return false;
+
+            bool raw = _skillChargeBlastHeldFromUI || UnityInput.GetKey(KeyCode.Alpha2);
+            if (_chargeBlastNeedsRelease)
+            {
+                if (raw) return false;
+                _chargeBlastNeedsRelease = false;
+            }
+            return raw;
         }
 
         /// <summary>
@@ -480,6 +640,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         public bool IsSkillMeteorPressed()
         {
+            if (InputBlockGate.IsBlocked) return false;
             bool pressed = _skillMeteorPressedFromUI || UnityInput.GetKeyDown(KeyCode.Alpha3);
             if (pressed && !_skillMeteorConsumed)
             {
@@ -498,6 +659,17 @@ namespace Hotfix.GameSystems.Sys3C.Input
         public bool IsSprinting()
         {
             return IsSprintHeld() && IsMoving();
+        }
+
+        private static MoveCommand ZeroMove()
+        {
+            return new MoveCommand
+            {
+                MoveDir = Vector3.zero,
+                Speed = 0f,
+                Rotation = Quaternion.identity,
+                IsSprint = false
+            };
         }
 
         /// <summary>

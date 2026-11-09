@@ -54,6 +54,8 @@
 #     Cool.EditorTools.WebGLBuildScript.BuildWebGL）
 #     构建脚本会临时把压缩设为 Disabled（部署层负责 gzip），出包后自动还原项目设置，
 #     并自查产物里没有 .gz/.br、四个 payload 文件都在。
+#     出包必须使用 Assets/WebGLTemplates/MobileLandscape（竖屏遮罩 + 触摸追踪）；
+#     脚本会检查 webGLTemplate 设置与产物 index.html 是否包含 landscape-gate。
 #
 # 2.2 打包成"拷过去就能跑"的 dist/
 bash production/deploy/webgl-demo/publish-server.sh

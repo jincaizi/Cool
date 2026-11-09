@@ -220,6 +220,7 @@ namespace Cool.Protocol
             RegisterMessageType(MessageId.NpcDespawn, typeof(NpcDespawn));
             RegisterMessageType(MessageId.NpcPosSync, typeof(NpcPosSync));
             RegisterMessageType(MessageId.NpcAnimSync, typeof(NpcAnimSync));
+            RegisterMessageType(MessageId.NpcActionEvent, typeof(NpcActionEvent));
         }
 
         /// <summary>注册消息类型（重复注册同一 id 覆盖旧值）</summary>

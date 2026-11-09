@@ -53,6 +53,23 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 
 ## 双端一致性校验（人工/CI 各跑一次）
 
+### NPC ActionV1 追加合同（2026-11-08）
+
+`ProtocolVersion` 仍为 1；能力位 `ProtocolFeatures.NpcActionTimelineV1 = 1u`。
+登录请求 tag7/8 为 `SupportedFeatures/NpcContentHash`，响应 tag12/13 为
+`EnabledFeatures/NpcContentHash`。仅协商成功的 ActionV1 世界消费以下字段：
+
+- `EntitySnapshot` tag16/17：`NpcAction/NpcActionHistory`，同受 `NpcAction = 1 << 9` 掩码控制；缺位保留已有值。
+- `WorldSnapshot` tag4 为 `NpcExits`，tag5/6/7 为 `SnapshotSequence/PartIndex/PartCount`，tag8 为 `TickAnchorServerTimestamp`。
+- `TickAnchorServerTimestamp` 是所有观察者/分片共用的模拟状态采样时刻；旧 `ServerTimestamp` 继续表示发送时刻。
+- `CastBroadcast` tag14 为 `NpcAction`；`MessageId.NpcActionEvent = 2004` 已在 codec registry 注册，tag1/2/3 为 `EntityId/Action/ServerTimestamp`。
+
+`NpcActionSnapshot` 固定 tag1–20，Kind/Phase/CancelReason 是 byte 底层具名枚举；
+`Clone()` 复制全部标量，供状态冻结使用。tick 0 合法，不作缺省哨兵。所有协议序列均声明
+`IList<T>`，避免 IL2CPP tuple 探测问题。老消息缺追加字段时得到零、null 或空序列。
+服务器测试 `NpcActionProtocolTests` 验证注册、20字段回环、序列形状与 legacy 缺省；
+它不代替 IL2CPP 真机构建解码门禁。
+
 ```bash
 # 服务器侧测试（xUnit）：codec 回环 + registry 完备性 + 守卫（21 项）
 # 官方 testhost 在本机 Win32Exception(5) 时用 in-process runner（见 Server/README.md）

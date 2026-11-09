@@ -69,9 +69,19 @@ namespace KcpServer.Monster
                 || m.Follower.HasAttackLineOfSight(m.Position, target)))
                 return BtStatus.Success;
 
-            float moved = m.Follower != null
-                ? (m.Follower.Tick(m, target, ctx.Mover, ctx.DeltaTime, ctx.Tick) ? 1f : 0f)
-                : ctx.Mover.MoveTo(m, target, ctx.DeltaTime);
+            float moved;
+            if(m.ActionRunner != null && m.Follower != null) {
+                var result=m.Follower.TickResult(m,target,ctx.Mover,ctx.DeltaTime,ctx.Tick);
+                moved=result.Status==MovementStatus.Moving?1f:0f;
+                if(result.ValidQueries!=m.ObservedQueries) {
+                    m.ObservedQueries=result.ValidQueries;
+                    if(result.Status==MovementStatus.Unreachable) m.UnreachableCount++; else if(result.Status!=MovementStatus.PendingBudget) m.UnreachableCount=0;
+                }
+                if(m.UnreachableCount>=3 && m.TargetId.HasValue) {
+                    m.UnreachableUntil[m.TargetId.Value]=ctx.Tick+75;
+                    m.SearchStartTick ??= ctx.Tick; m.TargetId=null;m.UnreachableCount=0;
+                }
+            } else moved=m.Follower!=null?(m.Follower.Tick(m,target,ctx.Mover,ctx.DeltaTime,ctx.Tick)?1f:0f):ctx.Mover.MoveTo(m,target,ctx.DeltaTime);
             SetMovementState(ctx, moved > MovementEpsilon);
             return BtStatus.Running;
         }
@@ -91,6 +101,7 @@ namespace KcpServer.Monster
             }
 
             if (!m.TargetId.HasValue) return BtStatus.Failure;
+            if (m.ActionRunner != null && TrySetupSkill(ctx)) return BtStatus.Running;
 
             Vector3 target = m.LastKnownTargetPosition ?? m.Position;
             float distance = DistanceXZ(m.Position, target);
@@ -112,10 +123,34 @@ namespace KcpServer.Monster
                 return BtStatus.Failure;
 
             ctx.Module.QueueCast(m.NpcId, request);
-            m.AttackResolveTick = ctx.Tick + CombatRules.HitDelayTicks(selected.Value.Entry);
-            entity.ActionState = (byte)NpcAnimationState.Attack;
+            if (m.ActionRunner == null) {
+                m.AttackResolveTick = ctx.Tick + CombatRules.HitDelayTicks(selected.Value.Entry);
+                entity.ActionState = (byte)NpcAnimationState.Attack;
+            }
             return BtStatus.Running;
         }
+
+        private static bool TrySetupSkill(MonsterTickContext ctx)
+        {
+            var m=ctx.State;
+            if(!MonsterActionRunner.Due(ctx.Tick,m.SetupRetryTick) || !m.LastKnownTargetPosition.HasValue) return false;
+            var potential=SkillSelector.SelectPotential(m,ctx.Entity,ctx.Tick);
+            if(potential==null) return false;
+            var skill=potential.Value;
+            var target=m.LastKnownTargetPosition.Value;
+            float distance=DistanceXZ(m.Position,target);
+            if(distance>=skill.Config.minRange) {m.SetupStartTick=null;m.DesiredSkillId=0;return false;}
+            m.SetupStartTick ??= ctx.Tick; m.DesiredSkillId=skill.Config.skillId;
+            if(unchecked(ctx.Tick-m.SetupStartTick.Value)>=30) { EndSetup(m,ctx.Tick); return false; }
+            var away=m.Position-target;away.Y=0;
+            if(away.X*away.X+away.Z*away.Z<0.0001f) away=new Vector3(0,0,-1);
+            var goal=target+away.Normalize()*(skill.Config.minRange+0.25f);
+            if(DistanceXZ(goal,m.SpawnPosition)>m.Config.LeashRadiusOf) {EndSetup(m,ctx.Tick);return false;}
+            var result=m.Follower!.TickResult(m,goal,ctx.Mover,ctx.DeltaTime,ctx.Tick);
+            if(result.Status==MovementStatus.Unreachable) {EndSetup(m,ctx.Tick);return false;}
+            SetMovementState(ctx,result.Status==MovementStatus.Moving);return true;
+        }
+        private static void EndSetup(MonsterState state,uint tick) { state.SetupStartTick=null;state.DesiredSkillId=0;state.SetupRetryTick=tick+30;state.Follower?.Reset(); }
 
         public static BtStatus Reposition(MonsterTickContext ctx)
         {
@@ -165,6 +200,7 @@ namespace KcpServer.Monster
         private static void SetMovementState(MonsterTickContext ctx, bool moved)
         {
             ctx.State.Moving = moved;
+            if (ctx.State.ActionRunner?.CanStartSkill == true) ctx.State.ActionRunner.SetContinuous(moved, ctx.Tick);
             ctx.Entity.ActionState = (byte)(moved ? NpcAnimationState.Run : NpcAnimationState.Idle);
         }
 

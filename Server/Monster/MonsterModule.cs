@@ -27,6 +27,11 @@ namespace KcpServer.Monster
         public const float TickDeltaSeconds = 0.066f; // 主循环 66ms
 
         private readonly EntityStore _store;
+        private readonly NpcCatalogDefinition? _actionCatalog;
+        private uint _currentTick;
+        private int _roundRobin;
+        private readonly List<MonsterState> _tickOrder = new();
+        public bool ActionV1 => _actionCatalog != null;
         private readonly Func<long> _nextNpcId;
         private readonly MonsterBrain _brain;
         private readonly Dictionary<int, MonsterData> _templates = new();
@@ -45,9 +50,10 @@ namespace KcpServer.Monster
         /// null = 本模块自建一个只看得见自己的（单测/独立宿主就是这条路径）。</param>
         /// <param name="navigation">navmesh 寻路服务；null = 无导航（巡逻/追击/回巢走直线，行为与旧版一致）。</param>
         public MonsterModule(EntityStore store, Func<long> nextNpcId, string? configPath = null,
-            AvoidanceSystem? avoidance = null, NavigationService? navigation = null)
+            AvoidanceSystem? avoidance = null, NavigationService? navigation = null, bool actionV1 = false, NpcCatalogDefinition? catalog = null)
         {
             _store = store;
+            _actionCatalog = actionV1 ? catalog ?? NpcCatalogDefaults.Create() : null;
             _nextNpcId = nextNpcId;
             _navigation = navigation;
             // 配置路径按程序集基准目录解析（CWD 相对路径在 dotnet run/test 不同 CWD 下静默落默认值——
@@ -156,6 +162,7 @@ namespace KcpServer.Monster
                 LastHp = config.hp,
                 Follower = new PathFollower(_navigation)
             };
+            if (_actionCatalog != null) state.ActionRunner = new MonsterActionRunner(state, _store, _actionCatalog);
             state.BehaviorTree = BuildBehaviorTree();
             _monsters[npcId] = state;
             return npcId;
@@ -189,6 +196,7 @@ namespace KcpServer.Monster
         /// <summary>推进一 tick（服务器主循环每 tick 调用——先于施法裁决 drain 与快照广播）</summary>
         public void Tick(uint tick)
         {
+            _currentTick = tick;
             _navigation?.BeginTick(tick);
 
             // ORCA 快照（Jacobi）：Server3C 在主循环 tick 起始处已调过一次（同一 tick 是 no-op）——
@@ -196,8 +204,11 @@ namespace KcpServer.Monster
             _avoidance.EnsureSnapshot(tick);
 
             var done = new List<long>();
-            foreach (var m in _monsters.Values)
-            {
+            _tickOrder.Clear(); _tickOrder.AddRange(_monsters.Values);
+            _tickOrder.Sort((a,b)=>a.NpcId.CompareTo(b.NpcId));
+            int start=ActionV1 && _tickOrder.Count>0 ? _roundRobin++ % _tickOrder.Count : 0;
+            for(int order=0;order<_tickOrder.Count;order++) {
+                var m=_tickOrder[(start+order)%_tickOrder.Count];
                 var entity = _store.GetPlayer(m.NpcId);
                 if (entity == null) { done.Add(m.NpcId); continue; }
 
@@ -215,6 +226,7 @@ namespace KcpServer.Monster
                 }
 
                 DetectHitOrDeath(m, entity, tick);
+                m.ActionRunner?.Advance(tick);
 
                 if (!m.DeathTick.HasValue)
                 {
@@ -237,7 +249,7 @@ namespace KcpServer.Monster
                         continue;
                     }
 
-                    if (!inHitWindow)
+                    if (!inHitWindow && (m.ActionRunner == null || m.ActionRunner.CanStartSkill))
                     {
                         var ctx = new MonsterTickContext(m, entity, this, _mover, TickDeltaSeconds, tick);
                         m.BehaviorTree?.Tick(ctx);
@@ -254,7 +266,7 @@ namespace KcpServer.Monster
 
                 // 前摇到期 → 解锁（D-10：到期即恢复行为树；本 tick 的判定由 Server3C 的
                 // DrainResolved 负责，二者互不依赖——解锁只影响"怪物下一步做什么"）
-                if (m.AttackResolveTick.HasValue && tick >= m.AttackResolveTick.Value)
+                if (m.ActionRunner == null && m.AttackResolveTick.HasValue && tick >= m.AttackResolveTick.Value)
                     m.AttackResolveTick = null;
 
                 // 硬直窗口**刚过期那一 tick**的状态写回（终审 I1）：本 tick BT 已恢复，但 Chase 在攻击距离内
@@ -292,6 +304,7 @@ namespace KcpServer.Monster
             if (entity.Hp < m.LastHp)
             {
                 m.LastHp = entity.Hp;
+                if (m.ActionRunner != null) { if (!entity.IsAlive) m.ActionRunner.Die(tick); else m.ActionRunner.OnDirectDamage(tick); return; }
                 if (!entity.IsAlive)
                 {
                     m.DeathTick = tick;
@@ -316,7 +329,16 @@ namespace KcpServer.Monster
         public void OnDamageTaken(long npcId, long attackerId, float damage, MonsterDamageKind kind)
         {
             if (_monsters.TryGetValue(npcId, out var state))
+                {
                 _brain.OnDamageTaken(state, attackerId, damage, kind);
+                if (state.ActionRunner != null && damage > 0) {
+                    var entity = _store.GetPlayer(npcId);
+                    if (entity != null) { state.LastHp = entity.Hp;
+                        if (!entity.IsAlive) state.ActionRunner.Die(_currentTick);
+                        else if (kind == MonsterDamageKind.Direct) state.ActionRunner.OnDirectDamage(_currentTick);
+                    }
+                }
+            }
         }
 
         /// <summary>嘲讽 API（v1 无玩家技能，仅单测）。</summary>
@@ -344,6 +366,10 @@ namespace KcpServer.Monster
             _removedNpcs.Clear();
             return result;
         }
+
+        public NpcActionSnapshot? GetActionSnapshot(long id) => GetState(id)?.ActionRunner?.Current;
+        public List<NpcActionSnapshot> GetActionHistory(long id, uint afterTick) => GetState(id)?.ActionRunner?.History(afterTick) ?? new List<NpcActionSnapshot>();
+        public void CaptureActionHistory(uint tick) { foreach (var state in _monsters.Values) state.ActionRunner?.Capture(tick); }
 
         private BtNode BuildBehaviorTree()
         {

@@ -32,6 +32,8 @@ namespace GameSys.EditorTests
                 if (_created[i] != null) Object.DestroyImmediate(_created[i]);
             }
             _created.Clear();
+            // 失焦用例会置位静态阻断门；不清会污染同域内后续输入测试。
+            InputBlockGate.ClearAll();
         }
 
         [Test]

@@ -59,6 +59,7 @@ namespace Cool.Protocol
         NpcSpawn = 2000,
         NpcDespawn = 2001,
         NpcPosSync = 2002,
-        NpcAnimSync = 2003
+        NpcAnimSync = 2003,
+        NpcActionEvent = 2004
     }
 }

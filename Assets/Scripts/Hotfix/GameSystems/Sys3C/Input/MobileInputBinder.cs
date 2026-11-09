@@ -41,6 +41,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private TouchOverride _resolvedOverride;
         private bool _touch;
         private bool _resolved;
+        private bool _gateBlocked;
         private Sys3CEntry _boundEntry;
 
         public Sys3CEntry BoundEntry => _boundEntry;
@@ -63,8 +64,20 @@ namespace Hotfix.GameSystems.Sys3C.Input
                 _resolved = true;
             }
 
-            if (_mobileUiRoot != null && _mobileUiRoot.activeSelf != _touch)
-                _mobileUiRoot.SetActive(_touch);
+            // 阻断期间释放绑定并隐藏触控 UI：按钮/摇杆的 OnDisable 会清掉 held 状态，
+            // 遮罩解除后必须重新按下才会产生新的输入。
+            bool blocked = InputBlockGate.IsBlocked;
+            if (blocked != _gateBlocked)
+            {
+                _gateBlocked = blocked;
+                if (blocked) ReleaseBinding();
+            }
+
+            bool showMobileUi = _touch && !blocked;
+            if (_mobileUiRoot != null && _mobileUiRoot.activeSelf != showMobileUi)
+                _mobileUiRoot.SetActive(showMobileUi);
+
+            if (blocked) return;
 
             if (!_touch)
             {
@@ -136,6 +149,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
         /// </summary>
         private void LateUpdate()
         {
+            // 阻断期间不得把按钮旧状态重新写回 InputManager；恢复后等待新的按下。
+            if (InputBlockGate.IsBlocked) return;
             if (_inputManager == null) return;
 
             // 摇杆手势不依赖 MobileActionButtons：_buttons 未配置时也要喂。
@@ -192,11 +207,28 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private void OnDisable()
         {
             ReleaseBinding();
+            // 只清自己持有的原因；Landscape 由常驻方向门持有。
+            InputBlockGate.Set(InputBlockGate.Reason.FocusLost, false);
         }
 
         private void OnApplicationFocus(bool hasFocus)
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // 浏览器失焦是"多原因阻断"的一支：竖屏遮罩还在时，单独切回前台不得解除阻断。
+            // 仅 WebGL 构建启用 —— Editor/PlayMode 测试的窗口焦点不代表游戏输入状态。
+            if (hasFocus)
+            {
+                InputBlockGate.Set(InputBlockGate.Reason.FocusLost, false);
+                return;
+            }
+
+            // 只有当前真的持有输入时才阻断。
+            if (_inputManager == null && _boundEntry == null) return;
+
+            InputBlockGate.Set(InputBlockGate.Reason.FocusLost, true);
+#else
             if (hasFocus) return;
+#endif
             // 顺序：先取消正在瞄准的技能，再清 UI 状态 —— 否则清掉的释放锁存
             // 会让蓄力中的火球在失焦后被 level-based 释放打出去。
             if (_boundEntry != null) _boundEntry.CancelAimingSkill();

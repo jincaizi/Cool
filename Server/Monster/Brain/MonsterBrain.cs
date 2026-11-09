@@ -39,6 +39,7 @@ namespace KcpServer.Monster
             }
 
             // Combat
+            if(m.SearchStartTick.HasValue && unchecked(tick-m.SearchStartTick.Value)>=45) { EnterEvade(m,tick);return; }
             if (allowEvadeTransition && DistanceXZ(m.Position, m.SpawnPosition) > m.Config.LeashRadiusOf)
             {
                 EnterEvade(m, tick);
@@ -62,7 +63,7 @@ namespace KcpServer.Monster
             else
             {
                 selected = TargetSelector.Select(m.Threats, m.TargetId,
-                    id => IsValidTarget(m, id),
+                    id => IsValidTarget(m, id) && (!m.UnreachableUntil.TryGetValue(id,out var until) || MonsterActionRunner.Due(tick,until)),
                     m.IsTauntActive(tick) ? m.TauntTargetId : null);
             }
 
@@ -75,6 +76,7 @@ namespace KcpServer.Monster
                     m.TargetId = selected;
                     m.LastKnownTargetPosition = target.Position;
                     m.NoValidTargetSinceTick = null;
+                    m.SearchStartTick = null;
                     m.NeedsReposition = SkillSelector.NeedsReposition(
                         m, entity, DistanceXZ(m.Position, target.Position));
                     return;
@@ -131,6 +133,8 @@ namespace KcpServer.Monster
 
         public void EnterEvade(MonsterState m, uint tick)
         {
+            m.ActionRunner?.Cancel(Cool.Protocol.NpcActionCancelReason.Leash, tick);
+            m.AttackResolveTick = null;
             m.Mode = MonsterMode.Evade;
             m.EvadeStartTick = tick;
             m.Threats.Clear();

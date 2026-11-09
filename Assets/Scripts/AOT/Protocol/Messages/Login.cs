@@ -32,6 +32,8 @@ namespace Cool.Protocol
         /// <summary>协议版本（握手校验，来自 ProtocolConstants.ProtocolVersion）</summary>
         [ProtoMember(6)]
         public long ProtocolVersion { get; set; }
+        [ProtoMember(7)] public uint SupportedFeatures { get; set; }
+        [ProtoMember(8)] public string NpcContentHash { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -83,5 +85,7 @@ namespace Cool.Protocol
         /// <summary>出生朝向（Y 轴欧拉角）</summary>
         [ProtoMember(11)]
         public float SpawnRotation { get; set; }
+        [ProtoMember(12)] public uint EnabledFeatures { get; set; }
+        [ProtoMember(13)] public string NpcContentHash { get; set; } = string.Empty;
     }
 }

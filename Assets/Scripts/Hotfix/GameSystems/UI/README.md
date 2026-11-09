@@ -29,6 +29,14 @@ HUD 联网读数：`PlayerHudPanel` 在 HP/MP 与 buff 行下方预留 `NetStats
 
 `Mobile/VirtualJoystick`、`Mobile/TouchLookArea`、`Mobile/MobileActionButtons`、`Mobile/SprintGestureState`。
 
+- **普攻只认普攻按钮（所有平台）**：鼠标左键点击场景或 UI 都不再产生普攻；触控 UI 关闭时也没有
+  攻击入口（`?touch=0` / `ForceNoTouch` 仅用于开发调试）。`TouchLookArea` 只是透明拖拽区，
+  不参与攻击归属判定。
+- 竖屏遮罩/失焦期间 `MobileInputBinder` 会把 `MobileUiRoot` 设为不激活并释放绑定；摇杆、观察区与
+  按钮的 `OnDisable` 清除 held 状态，解除后必须重新按下。
+- `ScreenAdapter.Update` 比较屏幕尺寸与 `Screen.safeArea` 的缓存值，地址栏伸缩或横竖屏切换
+  只改安全区域时也会重算偏移。
+
 ## 测试
 
 Editor：`UIManagerRegistrationTests`、`UIManagerLayerCanvasTests`、`UIPanelLifecycleTests`、`UIPanelContractTests`、

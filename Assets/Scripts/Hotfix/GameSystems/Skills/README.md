@@ -57,6 +57,9 @@ bash tools/unity-tests.sh EditMode SkillExecutorMeteorTests
   speed 18），服务端按落点圆判定并叠加飞行延迟 `ProjectileTravelTicks`。
 - 资产与表逐值对齐由 EditMode `FireballAssetTableTests` 锁定（HoldToAim / MinAimDistance /
   CanMoveWhileCharging / 爆炸半径 / 射程 / 速度）。
+- **施法表现**：`Character3C.controller` 的 `Fireball` 条件不再进入 `SkillQ`
+  （`Attack03_SwordAndShield` 挥剑）；施法期间 Attack 层保持 `AttackIdle`（战斗待机），
+  不再出现像普攻的挥剑动作。Q 技能仍走自己的 `SkillQ` 状态。
 
 - [Sys3C](../Sys3C/README.md) —— 攻击层、角色状态与突进
 - [Combat](../Combat/README.md) —— 命中检测与伤害接口

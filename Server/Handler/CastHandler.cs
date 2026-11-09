@@ -14,6 +14,7 @@ namespace KcpServer
     /// </summary>
     public sealed class CombatResolver
     {
+        public Func<long, KcpServer.Monster.MonsterActionRunner?>? NpcActionRunner { get; set; }
         private readonly EntityStore _store;
         private readonly Random _rng;
 
@@ -67,13 +68,15 @@ namespace KcpServer
         /// <see cref="NextStage"/>/<see cref="Spent"/> 等在 DrainResolved 推进时原地更新。</summary>
         private sealed class PendingCast
         {
+            public KcpServer.Monster.MonsterActionRunner? Runner;
+            public ulong InstanceId;
             public readonly long CasterId;
             public readonly CastRequest Request;
             public readonly CastBroadcast Broadcast;
             public readonly bool IsNpcCaster;
             public readonly ProjectileSpec? Projectile;
             public readonly float Charge;
-            public readonly uint[] StageTicks;              // 升序；无 Projectile 时长度 1 = 首段 tick
+            public uint[] StageTicks;              // 升序；无 Projectile 时长度 1 = 首段 tick
             public int NextStage;                            // 下一段下标
             public readonly HashSet<long> GroupHitIds = new HashSet<long>();  // LineAll 组内去重
             public bool Spent;                               // 火球首中即停
@@ -126,6 +129,12 @@ namespace KcpServer
                 + CombatRules.ProjectileTravelTicks(entry.Projectile,
                     caster.Position.X, caster.Position.Z, request.ImpactX, request.ImpactZ);
 
+            var runner = caster.Kind == (byte)EntityKind.Npc ? NpcActionRunner?.Invoke(casterId) : null;
+            if (runner != null) {
+                var error = runner.Validate(request.SkillId, request.TargetPlayerId, tick);
+                if (error != null) return Reject(resolution, error);
+                if (!runner.TryBeginSkill(request.SkillId, request.TargetPlayerId, tick)) return Reject(resolution, "npc-action-busy");
+            }
             // D-3：冷却记录在决策（空挥也冷却，D-P4-5）
             caster.RecordCast(request.SkillId, tick);
 
@@ -150,7 +159,8 @@ namespace KcpServer
             // D-1/D-2：判定帧延迟由服务端表自持——判定发生在
             // tick + HitDelayTicks + ProjectileTravelTicks（CircleAtPoint 飞行延迟，见上方 firstTick）
             _pending.Add(new PendingCast(casterId, request, resolution.Broadcast, resolution.IsNpcCaster,
-                entry.Projectile, charge, firstTick));
+                entry.Projectile, charge, firstTick) { Runner = runner, InstanceId = runner?.Current.InstanceId ?? 0 });
+            if (runner != null) { _pending[_pending.Count-1].StageTicks = runner.StageTicks(); resolution.Broadcast.NpcAction = runner.Current; }
             return resolution;
         }
 
@@ -167,6 +177,7 @@ namespace KcpServer
                        && pending.NextStage < pending.StageTicks.Length
                        && pending.StageTicks[pending.NextStage] <= tick)
                 {
+                    if (pending.Runner != null && !pending.Runner.TryCommitStage(pending.InstanceId, tick)) { pending.Spent = true; break; }
                     var resolution = ResolveStage(pending);
                     // **每个判定都产出一条**（可能 Hits 为空）——沿用原合同（原实现对每次判定都入列，
                     // 空 Hits 由广播端 `BroadcastDamageAsync` 跳过）。按 Hits.Count 过滤会改变既有
@@ -261,7 +272,7 @@ namespace KcpServer
 
             foreach (var targetId in hitIds)
             {
-                if (!pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
+                if (pending.Runner == null && !pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
                 bool blocked = ApplyHit(pending, entry, spec, targetId, lineAttackerPos, resolution);
                 if (blocked && spec != null && spec.Kind == ProjectileKind.LineAll)
                 {

@@ -14,6 +14,26 @@
 
 ## 约束
 
+### NPC 共享目录与动作时间（2026-11-08）
+
+`Npc/` 包含可由 Unity JsonUtility 序列化的 `[Serializable]` 公共字段 DTO：
+`NpcCatalogDefinition`、模板、碰撞、AI、技能绑定/定义、表现定义；不依赖 Unity 或平台资源包。
+`NpcCatalogValidator.Validate` 返回错误列表，拒绝非有限数值、非法引用/距离带、零长度阶段、
+非递增 activeOffsets 及 >=2^31 的累计时间窗。`NpcTickMath` 提供环绕安全比较；tick0 合法。
+
+`NpcCatalogHasher.Compute` 先校验，再将模板/技能/表现/绑定的副本按稳定 ID 排序，写入
+版本化 little-endian UTF8 语义流并计算 SHA256 小写十六进制；不修改作者列表，排除 ContentHash，
+不接收平台二进制、绝对路径或导出时间。浮点 +/-0 归一化；所有影响运行的 DTO 字段纳入 hash。
+
+`NpcCatalogDefaults.Create()` 仅提供既有4模板/6技能的迁移作者种子，保留 Wolf 逻辑名与显式
+placeholder，0.35s 前摇按15Hz向上取6 tick。碰撞尺寸/阶段映射为待校准初值，`Approved=false`；
+不能将种子或校验通过解释为人工批准，不允许正式 ActionV1 启动缺产物时 fallback。
+正式发布审批、平台 BuildHash/资源新鲜度由 Editor 发布门禁负责。
+
+霸体为 `NpcWindupArmorOverride.Inherit/Interruptible/Armor`；模板默认在
+`Ai.DefaultWindupArmor`，SpiderBoss 种子默认霸体，普通怪默认可打断。
+NPC CombatRules 接线由服务端从共享发布定义注册；玩家规则及几何保持原有语义。
+
 - 不能引用 `UnityEngine`；两端同源编译，改规则必须两端测试同时通过。
 - 非线程安全：`ClockSyncAlgorithm`、`PredictionReconciler` 由单消费者串行调用。
 - 判定几何改动要同步客户端 `AttackShape` 与服务端裁决的测试。

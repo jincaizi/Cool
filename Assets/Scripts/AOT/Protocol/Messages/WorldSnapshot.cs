@@ -28,7 +28,8 @@ namespace Cool.Protocol
         /// <summary>Hp / MaxHp 有效（只加不删：新字段追加高位）</summary>
         Health = 1 << 7,
         /// <summary>IsDefending 有效</summary>
-        Defending = 1 << 8
+        Defending = 1 << 8,
+        NpcAction = 1 << 9
     }
 
     /// <summary>
@@ -97,6 +98,8 @@ namespace Cool.Protocol
         [ProtoMember(14)] public float MaxHp { get; set; }
         /// <summary>是否防御中（FieldMask.Defending 置位时有效）</summary>
         [ProtoMember(15)] public bool IsDefending { get; set; }
+        [ProtoMember(16)] public NpcActionSnapshot? NpcAction { get; set; }
+        [ProtoMember(17)] public IList<NpcActionSnapshot> NpcActionHistory { get; set; } = new List<NpcActionSnapshot>();
     }
 
     /// <summary>
@@ -122,5 +125,11 @@ namespace Cool.Protocol
         /// </summary>
         [ProtoMember(3)]
         public IList<EntitySnapshot> Entities { get; set; } = new List<EntitySnapshot>();
+        [ProtoMember(4)] public IList<NpcVisibilityExit> NpcExits { get; set; } = new List<NpcVisibilityExit>();
+        [ProtoMember(5)] public ulong SnapshotSequence { get; set; }
+        [ProtoMember(6)] public int PartIndex { get; set; }
+        [ProtoMember(7)] public int PartCount { get; set; }
+        /// <summary>Shared simulation sample anchor; ServerTimestamp remains the send time.</summary>
+        [ProtoMember(8)] public long TickAnchorServerTimestamp { get; set; }
     }
 }

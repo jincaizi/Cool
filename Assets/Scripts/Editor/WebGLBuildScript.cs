@@ -28,6 +28,9 @@ namespace Cool.EditorTools
     {
         private const string OutputDir = "Build/WebGL";
         private const string BuildSubDir = OutputDir + "/Build";
+        private const string TemplateDir = "Assets/WebGLTemplates/MobileLandscape";
+        private const string TemplateSetting = "PROJECT:MobileLandscape";
+        private const string LandscapeGateMarker = "id=\"landscape-gate\"";
 
         // 静态服务器按这四个名字找文件（见 Assets/.../index.html 的 config）
         private static readonly string[] Payload =
@@ -69,6 +72,22 @@ namespace Cool.EditorTools
                     if (Application.isBatchMode) EditorApplication.Exit(1);
                     return;
                 }
+            }
+
+            // 移动端横屏遮罩在页面模板里；模板没设对时，画面能出来但手机竖屏仍可操作。
+            // 产物检查（VerifyPayloadShape）是第二道闸门。
+            if (!File.Exists(TemplateDir + "/index.html"))
+            {
+                Debug.LogError("[WebGLBuild] WebGL 模板缺失: " + TemplateDir + "/index.html");
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                return;
+            }
+            if (PlayerSettings.WebGL.template != TemplateSetting)
+            {
+                Debug.LogError("[WebGLBuild] webGLTemplate 应为 " + TemplateSetting
+                    + "，当前是 " + PlayerSettings.WebGL.template);
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                return;
             }
 
             var previousCompression = PlayerSettings.WebGL.compressionFormat;
@@ -156,6 +175,14 @@ namespace Cool.EditorTools
                         + " —— Unity 侧压缩没关掉，静态服务器会 404 掉 WebGL.wasm");
                     broken = true;
                 }
+            }
+
+            var indexPath = OutputDir + "/index.html";
+            if (!File.Exists(indexPath) || !File.ReadAllText(indexPath).Contains(LandscapeGateMarker))
+            {
+                Debug.LogError("[WebGLBuild] index.html 未包含横屏遮罩 —— 出包没有使用 "
+                    + TemplateSetting + " 模板");
+                broken = true;
             }
 
             if (broken)

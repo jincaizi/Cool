@@ -111,7 +111,7 @@ Death:
 #### 攻击流程
 
 ```
-普通攻击 (鼠标左键):
+普通攻击 (普攻按钮):
   Attack1 → (5帧后可连击) → Attack2 → Idle
 
 技能Q (Q键):
@@ -131,7 +131,7 @@ Death:
 
 | 按键 | 输入方法 | 行为 |
 |------|----------|------|
-| 鼠标左键 | RequestNormalAttack() | 普通攻击 (Attack1↔Attack2 交替) |
+| 普攻按钮（HUD 中心按钮） | RequestNormalAttack() | 普通攻击 (Attack1↔Attack2 交替)；所有平台唯一攻击入口 |
 | Q | RequestSkillQ() | ���能Q，可空中释放 |
 | R | RequestSkillR() | 技能R，仅地面 |
 | Space | RequestJump() | 跳跃 |

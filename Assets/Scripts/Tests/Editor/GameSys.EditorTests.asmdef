@@ -11,7 +11,10 @@
         "SyncCore",
         "WebSocketNet",
         "Unity.TextMeshPro",
-        "GameSys.EditorNavigation"
+        "GameSys.EditorNavigation",
+        "Core",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [
         "Editor"

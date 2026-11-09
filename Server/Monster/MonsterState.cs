@@ -23,6 +23,7 @@ namespace KcpServer.Monster
     /// </summary>
     public sealed class MonsterState
     {
+        public MonsterActionRunner? ActionRunner { get; set; }
         public long NpcId { get; }
         public int TemplateId { get; }
         public MonsterData Config { get; }
@@ -44,6 +45,12 @@ namespace KcpServer.Monster
         public long? TauntTargetId { get; set; }
         public uint TauntUntilTick { get; set; }
         public bool NeedsReposition { get; set; }
+        public int DesiredSkillId;
+        public uint? SetupStartTick;
+        public uint SetupRetryTick;
+        public uint? SearchStartTick;
+        public int ObservedQueries, UnreachableCount;
+        public readonly System.Collections.Generic.Dictionary<long,uint> UnreachableUntil = new();
 
         public bool IsTauntActive(uint tick)
             => TauntTargetId.HasValue && tick < TauntUntilTick;

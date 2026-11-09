@@ -46,12 +46,30 @@ namespace KcpServer.Monster
 
         // 状态观察口（Task 7 状态机接入前暂无调用者；HasPath 供卡死/重寻测试观察）。
         public bool HasPath => _path != null;
+        private string _lastFailure = "";
+        private int _validQueries;
+        private uint _lastProgressTick, _goalRevision;
+        private Vector3 _requestedGoal;
+        public MovementResult LastResult { get; private set; }
+        public MovementResult TickResult(MonsterState monster, Vector3 goal, SimpleMoveSystem mover, float deltaTime, uint tick)
+        {
+            if (DistanceXZ(goal,_requestedGoal)>0.01f) { _goalRevision++; _requestedGoal=goal; }
+            bool moved=Tick(monster,goal,mover,deltaTime,tick);
+            if(moved) _lastProgressTick=tick;
+            var status=moved?MovementStatus.Moving:
+                _lastFailure=="budget"?MovementStatus.PendingBudget:
+                _path!=null && _index>=_path.Waypoints.Length?MovementStatus.Arrived:
+                _lastFailure!=""?MovementStatus.Unreachable:
+                DistanceXZ(monster.Position,goal)<=0.1f?MovementStatus.Arrived:MovementStatus.TemporarilyBlocked;
+            return LastResult=new MovementResult(status,_lastFailure,_lastProgressTick,_validQueries,_goalRevision);
+        }
         public int WaypointIndex => _index;
 
         /// <summary>清空跟随状态（进入 Evade / 到家重置时用，强制下一 tick 重寻）。</summary>
         public void Reset()
         {
             _path = null;
+            _lastFailure="";
             _index = 0;
             _goal = default;
             _nextRepathTick = 0;
@@ -82,6 +100,8 @@ namespace KcpServer.Monster
                     monster.Config.NavigationRadiusOf);
                 if (_navigation.TryFindPath(query, out NavPath path))
                 {
+                    _validQueries++;
+                    _lastFailure="";
                     _path = path;
                     _goal = goal;
                     _index = 0;
@@ -98,6 +118,8 @@ namespace KcpServer.Monster
                 else
                 {
                     // 预算拒绝不是寻路失败：下 tick 立刻重试；真正失败才退避。
+                    _lastFailure=path.FailReason;
+                    if(path.FailReason!="budget") _validQueries++;
                     _nextAttemptTick = path.FailReason == "budget" ? tick + 1 : tick + FailureBackoffTicks;
                 }
             }

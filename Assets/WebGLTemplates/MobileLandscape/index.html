@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes, viewport-fit=cover, interactive-widget=resizes-visual">
+    <title>Unity WebGL Player | {{{ PRODUCT_NAME }}}</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+#if SHOW_DIAGNOSTICS
+    <link rel="stylesheet" href="<<<TemplateData/diagnostics.css>>>">
+    <script src="<<<TemplateData/diagnostics.js>>>"></script>
+#endif
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+      }
+
+      /* 竖屏遮罩：覆盖整个游戏容器，层级高于 Unity 画布、加载条与游戏 UI。 */
+      #landscape-gate {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        padding: 24px;
+        background: #0b0f14;
+        color: #f2f6fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        text-align: center;
+        touch-action: none;
+        overscroll-behavior: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #landscape-gate.is-visible {
+        display: flex;
+      }
+
+      #landscape-gate .landscape-gate__icon {
+        color: #8fb7ff;
+        margin-bottom: 22px;
+      }
+
+      #landscape-gate .landscape-gate__title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+
+      #landscape-gate .landscape-gate__hint {
+        margin: 10px 0 0;
+        font-size: 13px;
+        color: #93a4b8;
+      }
+
+      /* 竖屏阻断期间禁止页面滚动/缩放，横屏恢复后移除。 */
+      .cool-landscape-blocked,
+      .cool-landscape-blocked body {
+        overflow: hidden;
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="landscape-gate" role="alertdialog" aria-hidden="true"
+         aria-label="请横置手机后继续游戏">
+      <div class="landscape-gate__icon" aria-hidden="true">
+        <svg width="64" height="104" viewBox="0 0 64 104" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <rect x="7" y="4" width="50" height="96" rx="10"
+                stroke="currentColor" stroke-width="4"/>
+          <rect x="13" y="14" width="38" height="72" rx="3"
+                fill="currentColor" fill-opacity="0.14"/>
+          <circle cx="32" cy="93" r="4" fill="currentColor"/>
+          <path d="M20 34c-6 5-9 12-9 19a22 22 0 0 0 9 18"
+                stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="4 6" opacity="0.55"/>
+        </svg>
+      </div>
+      <p class="landscape-gate__title">请横置手机后继续游戏</p>
+      <p class="landscape-gate__hint">横屏后自动恢复</p>
+    </div>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var root = document.documentElement;
+        var gate = document.getElementById('landscape-gate');
+
+        // ---- 横屏遮罩 ----
+        // 方向优先读 Screen Orientation；缺失时回退布局视口宽高。
+        // 不使用 visualViewport：软键盘只缩小可视视口，会把竖屏误判成横屏。
+        function touchOverride() {
+          var match = /[?&]touch=([^&#]*)/.exec(window.location.search);
+          if (!match || match[1].length === 0) return null;
+          if (match[1].charAt(0) === '1') return true;
+          if (match[1].charAt(0) === '0') return false;
+          return null;
+        }
+
+        function isMobileBrowser() {
+          var forced = touchOverride();
+          if (forced !== null) return forced;
+
+          var coarse = window.matchMedia
+            ? window.matchMedia('(pointer: coarse)').matches
+            : false;
+          var mobileUa = /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent);
+          return (navigator.maxTouchPoints || 0) > 0 && (coarse || mobileUa);
+        }
+
+        function isPortrait() {
+          if (window.screen && window.screen.orientation
+              && typeof window.screen.orientation.type === 'string') {
+            return window.screen.orientation.type.indexOf('portrait') === 0;
+          }
+
+          var width = document.documentElement.clientWidth || window.innerWidth;
+          var height = document.documentElement.clientHeight || window.innerHeight;
+          return height > width;
+        }
+
+        var mobile = isMobileBrowser();
+        var landscape = window.CoolLandscape = {
+          ready: false,
+          mobile: mobile,
+          blocked: false,
+          state: 'landscape'
+        };
+
+        function sync() {
+          var blocked = mobile && isPortrait();
+          landscape.blocked = blocked;
+          landscape.state = blocked ? 'portrait' : 'landscape';
+
+          if (blocked) gate.classList.add('is-visible');
+          else gate.classList.remove('is-visible');
+          gate.setAttribute('aria-hidden', blocked ? 'false' : 'true');
+          root.classList.toggle('cool-landscape-blocked', blocked);
+
+          // 最后一次赋值：Unity 侧看到 ready=true 时，blocked 已经是当前值。
+          landscape.ready = true;
+        }
+        landscape.sync = sync;
+
+        window.addEventListener('resize', sync, { passive: true });
+        window.addEventListener('orientationchange', sync, { passive: true });
+        document.addEventListener('visibilitychange', sync);
+        if (window.screen && window.screen.orientation
+            && window.screen.orientation.addEventListener) {
+          window.screen.orientation.addEventListener('change', sync);
+        }
+        sync();
+
+        // 页面层兜底：遮罩上的触摸不再传给 Unity。
+        ['touchstart', 'touchmove', 'touchend', 'touchcancel',
+         'pointerdown', 'pointermove', 'pointerup', 'wheel', 'contextmenu']
+          .forEach(function (type) {
+            gate.addEventListener(type, function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+            }, { passive: false });
+          });
+      })();
+    </script>
+
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width={{{ WIDTH }}} height={{{ HEIGHT }}} tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+#if SHOW_DIAGNOSTICS
+        <img id="diagnostics-icon" src="TemplateData/webmemd-icon.png">
+#endif
+        <div id="unity-build-title">{{{ PRODUCT_NAME }}}</div>
+      </div>
+    </div>
+    <script>
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
+#if SHOW_DIAGNOSTICS
+      var diagnostics_icon = document.getElementById("diagnostics-icon");
+#endif
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      var config = {
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_THREADS
+        workerUrl: buildUrl + "/{{{ WORKER_FILENAME }}}",
+#endif
+#if USE_WASM
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if MEMORY_FILENAME
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        showBanner: unityShowBanner,
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas.
+        // viewport meta 已在 head 中静态声明，这里不再动态插入第二份。
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+#if SHOW_DIAGNOSTICS
+        // position the diagnostics icon in the corner on the canvas
+        diagnostics_icon.style.position = "fixed";
+        diagnostics_icon.style.bottom = "10px";
+        diagnostics_icon.style.right = "0px";
+        canvas.after(diagnostics_icon);
+#endif
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = "{{{ WIDTH }}}px";
+        canvas.style.height = "{{{ HEIGHT }}}px";
+      }
+
+#if BACKGROUND_FILENAME
+      canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}') center / cover";
+#endif
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                loadingBar.style.display = "none";
+#if SHOW_DIAGNOSTICS
+                diagnostics_icon.onclick = () => {
+                  unityDiagnostics.openDiagnosticsDiv(unityInstance.GetMemoryInfo);
+                };
+#endif
+                fullscreenButton.onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
+    </script>
+  </body>
+</html>

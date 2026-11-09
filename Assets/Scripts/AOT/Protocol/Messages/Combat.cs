@@ -61,6 +61,7 @@ namespace Cool.Protocol
         [ProtoMember(11)] public float ImpactY { get; set; }
         [ProtoMember(12)] public float ImpactZ { get; set; }
         [ProtoMember(13)] public float ChargeProgress { get; set; }
+        [ProtoMember(14)] public NpcActionSnapshot? NpcAction { get; set; }
     }
 
     /// <summary>单次命中结果（D4：战斗骰只有服务器掷——伤害值随消息下发，客户端不重算）。内嵌类型非线上消息，实现标记接口仅为协议层惯例</summary>
