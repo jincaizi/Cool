@@ -46,6 +46,17 @@ namespace KcpNet.PlayModeTests
                 _previousHost, _previousPort.ToString(), _previousUser);
         }
 
+        [UnityTearDown]
+        public IEnumerator UnloadDemoScene()
+        {
+            bool previousIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            SceneManager.SetActiveScene(SceneManager.CreateScene("MobileLookAreaLayoutCleanup"));
+            var unload = SceneManager.UnloadSceneAsync("DemoDay");
+            while (unload != null && !unload.isDone) yield return null;
+            LogAssert.ignoreFailingMessages = previousIgnore;
+        }
+
         private static Transform Find(string name)
         {
             var root = GameObject.Find("MobileUiRoot");
