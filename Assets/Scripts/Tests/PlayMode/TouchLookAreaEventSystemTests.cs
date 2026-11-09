@@ -121,6 +121,7 @@ namespace KcpNet.PlayModeTests
             _input.MousePosition = position;
             _input.SetMouse(button, down, held, up);
             yield return null;
+            yield return null; // 同 Touch：等 LateUpdate 发布本帧 Delta 后再断言
         }
 
         private static void SetPrivate(object target, string field, object value)
@@ -211,7 +212,9 @@ namespace KcpNet.PlayModeTests
             typeof(TouchLookArea)
                 .GetMethod("OnApplicationPause", BindingFlags.Instance | BindingFlags.NonPublic)
                 .Invoke(_area, new object[] { true });
-            yield return null;
+            // 不重新 Began：暂停清理后这次越界 Moved 必须被忽略。
+            // （若 OnApplicationPause 缺失，_dragStarted 仍为 true，会产生非零 Delta。）
+            yield return Touch(0, center + new Vector2(threshold + 11f, 0f), TouchPhase.Moved);
             Assert.AreEqual(0f, _area.Delta.x, 0.001f);
 
             _area.gameObject.SetActive(false);
