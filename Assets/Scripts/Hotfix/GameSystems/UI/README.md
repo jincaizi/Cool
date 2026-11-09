@@ -37,6 +37,17 @@ HUD 联网读数：`PlayerHudPanel` 在 HP/MP 与 buff 行下方预留 `NetStats
 - `ScreenAdapter.Update` 比较屏幕尺寸与 `Screen.safeArea` 的缓存值，地址栏伸缩或横竖屏切换
   只改安全区域时也会重算偏移。
 
+## UI 倍率与布局
+
+- **倍率解析**：`GameSettings.ResolveUIScale()` = 平台默认倍率（移动 / WebGL 用
+  `MobilePlatformUIScale`，桌面 / 编辑器用 `DesktopPlatformUIScale`）× 全局 `UIScale`，钳在
+  `[0.8, 1.5]`；`ResolveReferenceResolution()` = 设计分辨率 ÷ 该倍率。`MobileUiRoot` 挂
+  `ScreenAdapter`（不启用安全区），按解析结果设置 `CanvasScaler` 的 reference resolution。
+- **锚点**：`LookArea` 占右上象限（anchorMin `(0.5, 0.5)` / anchorMax `(1, 1)`）；技能与动作按钮
+  统一右下锚点 `(1, 0)`；选人面板内容统一底部锚点 `(0.5, 0)`，相邻内容纵向净距至少 16。
+- **观察区手势**：`TouchLookArea` 只接收真实触摸（鼠标事件忽略），按 `pointerId` 单指归属；
+  失焦、暂停或 `OnDisable` 时复位手势。
+
 ## 测试
 
 Editor：`UIManagerRegistrationTests`、`UIManagerLayerCanvasTests`、`UIPanelLifecycleTests`、`UIPanelContractTests`、

@@ -34,6 +34,13 @@
 | `NpcAttackSchedule.cs` | NPC 攻击节奏 |
 | `NetworkModeService.cs` / `ServerAddressQuery.cs` | 网络模式与服务器地址 |
 
+## 默认联网与玩家名
+
+- `NetworkModeService.Load()`：无 `net.mode` 存档时默认 `Online`；已有存档（含 `SinglePlayer`）
+  优先。连接失败 / 登录被拒时提示 3 秒后回选人界面，**不改写模式存档**，面板仍按联网预填。
+- 玩家名：`net.username` 无存档时由 `RandomNicknameGenerator` 首次生成并持久化（随机中文前缀 +
+  后缀，四字）；已有存档原样使用，不迁移旧 `"Player"`。
+
 ## 联网 HUD 读数（FPS + 延迟）
 
 - 仅联网进世界后显示；`ClientNetworkHost` 每 0.5 秒把 `FPS xx  延迟 xxms` 推给

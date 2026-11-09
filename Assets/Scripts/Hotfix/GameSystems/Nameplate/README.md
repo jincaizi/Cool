@@ -30,6 +30,12 @@
   → `NetworkTargetable` → `INetworkLabelSink.UpdateHp`。bot 在 registry 侧就不注册名牌，
   所以不会出现「僵尸 bot 名牌」。
 
+## UI 倍率
+
+`EntityDisplayManager` 创建的 `EntityDisplayCanvas` 是 `ScreenSpaceOverlay` Canvas，其
+`CanvasScaler` 使用 `GameSettings.ResolveReferenceResolution()`；名字板、飘字与精力环都挂在该
+Canvas 下，跟随同一套解析后的 UI 倍率。
+
 ## 测试
 
 Editor：`FloatTextRendererZeroDamageTests`。
