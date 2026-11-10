@@ -1,6 +1,7 @@
 using System;
 using Cool.Protocol;
 using Cool.SyncCore;
+using DataDefinition;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.SyncLayer
@@ -151,7 +152,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 Username = _username,
                 PasswordHash = "md5_hash_placeholder",
                 ZoneId = "Global",
-                ClientVersion = "1.0.0",
+                ClientVersion = BuildVersion.Raw,
                 DeviceInfo = "P1",
                 ProtocolVersion = ProtocolConstants.ProtocolVersion
             });
