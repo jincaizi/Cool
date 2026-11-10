@@ -75,6 +75,8 @@ namespace Cool.EditorTools
 
             if (summary.result != BuildResult.Succeeded)
             {
+                // 失败必须让命令行拿到非零退出码（自动化出包依赖）。
+                // 交互模式下不得 Exit——会直接关掉编辑器。
                 Debug.LogError("[Build] 出包失败: result=" + summary.result
                     + " errors=" + summary.totalErrors
                     + " size=" + summary.totalSize);
