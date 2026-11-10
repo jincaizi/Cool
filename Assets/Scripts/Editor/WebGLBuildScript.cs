@@ -124,6 +124,15 @@ namespace Cool.EditorTools
             {
                 Directory.CreateDirectory(OutputDir);
 
+                // Unity 不会覆盖已存在的 index.html，上次注入过时间戳的产物会让
+                // __BUILD_STAMP__ 找不到；先删掉，强制本次从模板重新生成。
+                var indexPath = OutputDir + "/index.html";
+                if (File.Exists(indexPath))
+                {
+                    File.Delete(indexPath);
+                    Debug.Log("[WebGLBuild] 清理旧 index.html，强制从模板重新生成");
+                }
+
                 var options = new BuildPlayerOptions
                 {
                     scenes = Scenes,
