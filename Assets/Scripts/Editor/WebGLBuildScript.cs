@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using DataDefinition;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -31,6 +33,7 @@ namespace Cool.EditorTools
         private const string TemplateDir = "Assets/WebGLTemplates/MobileLandscape";
         private const string TemplateSetting = "PROJECT:MobileLandscape";
         private const string LandscapeGateMarker = "id=\"landscape-gate\"";
+        private const string BuildStampMarker = "__BUILD_STAMP__";
 
         // 静态服务器按这四个名字找文件（见 Assets/.../index.html 的 config）
         private static readonly string[] Payload =
@@ -90,14 +93,30 @@ namespace Cool.EditorTools
                 return;
             }
 
+            var baseVersion = PlayerSettings.bundleVersion;
+            if (!BuildVersion.IsBaseVersion(baseVersion))
+            {
+                Debug.LogError("[WebGLBuild] bundleVersion 必须是三段数字（a.b.c），当前是 '" + baseVersion + "'");
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                return;
+            }
+
+            if (!BuildVersionStamp.TryGetGitShortSha4(out var sha4))
+                Debug.LogWarning("[WebGLBuild] git SHA 不可用，使用 0000");
+
+            var stampedVersion = BuildVersion.Compose(baseVersion, sha4);
+            Debug.Log("[WebGLBuild] version " + baseVersion + " -> " + stampedVersion);
+
             var previousCompression = PlayerSettings.WebGL.compressionFormat;
             var previousFallback = PlayerSettings.WebGL.decompressionFallback;
+            var previousVersion = PlayerSettings.bundleVersion;
 
             Debug.Log("[WebGLBuild] compression " + previousCompression + " -> Disabled"
                 + "（部署层边传边 gzip；Unity 侧预压缩会双重压缩）");
 
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
             PlayerSettings.WebGL.decompressionFallback = false;
+            PlayerSettings.bundleVersion = stampedVersion;
 
             bool succeeded;
             BuildSummary summary;
@@ -121,6 +140,7 @@ namespace Cool.EditorTools
                 // 还原项目设置（含把改动落盘）——出包的副作用必须止于出包
                 PlayerSettings.WebGL.compressionFormat = previousCompression;
                 PlayerSettings.WebGL.decompressionFallback = previousFallback;
+                PlayerSettings.bundleVersion = previousVersion;
                 AssetDatabase.SaveAssets();
             }
 
@@ -139,7 +159,18 @@ namespace Cool.EditorTools
                 + " size=" + summary.totalSize + "B"
                 + " time=" + summary.totalTime);
 
-            VerifyPayloadShape();
+            var buildStamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            var cacheKey = stampedVersion + "-" + buildStamp;
+            if (!InjectBuildStamp(OutputDir + "/index.html", buildStamp))
+            {
+                Debug.LogError("[WebGLBuild] index.html 中未找到 " + BuildStampMarker
+                    + "，缓存键无法注入");
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                return;
+            }
+
+            Debug.Log("[WebGLBuild] cacheKey=" + cacheKey);
+            VerifyPayloadShape(stampedVersion, buildStamp);
         }
 
         /// <summary>
@@ -147,7 +178,7 @@ namespace Cool.EditorTools
         /// 这里报 error（批处理下非零退出）而不是 warning：形状不对的包能构建成功、
         /// 能在 file:// 下打开，只在浏览器里 404 —— 留到部署时才发现，代价是一次面试。
         /// </summary>
-        private static void VerifyPayloadShape()
+        private static void VerifyPayloadShape(string stampedVersion, string buildStamp)
         {
             long total = 0;
             bool broken = false;
@@ -178,10 +209,38 @@ namespace Cool.EditorTools
             }
 
             var indexPath = OutputDir + "/index.html";
-            if (!File.Exists(indexPath) || !File.ReadAllText(indexPath).Contains(LandscapeGateMarker))
+            string indexHtml = File.Exists(indexPath) ? File.ReadAllText(indexPath) : string.Empty;
+
+            if (!indexHtml.Contains(LandscapeGateMarker))
             {
                 Debug.LogError("[WebGLBuild] index.html 未包含横屏遮罩 —— 出包没有使用 "
                     + TemplateSetting + " 模板");
+                broken = true;
+            }
+
+            if (!indexHtml.Contains(stampedVersion))
+            {
+                Debug.LogError("[WebGLBuild] index.html 未包含构建版本 " + stampedVersion
+                    + " —— 模板没有消费 PRODUCT_VERSION");
+                broken = true;
+            }
+
+            if (!indexHtml.Contains(buildStamp))
+            {
+                Debug.LogError("[WebGLBuild] index.html 未包含构建时间戳 " + buildStamp
+                    + " —— 占位符替换失败");
+                broken = true;
+            }
+
+            if (indexHtml.Contains(BuildStampMarker))
+            {
+                Debug.LogError("[WebGLBuild] index.html 仍包含占位符 " + BuildStampMarker);
+                broken = true;
+            }
+
+            if (!indexHtml.Contains("?v="))
+            {
+                Debug.LogError("[WebGLBuild] index.html 未包含缓存查询参数 ?v=");
                 broken = true;
             }
 
@@ -193,6 +252,20 @@ namespace Cool.EditorTools
 
             Debug.Log("[WebGLBuild] 首屏体积合计 " + total + "B (" + (total / 1048576.0).ToString("F1")
                 + " MB，未压缩；gzip 后约 1/4 —— 见 production/verify/t9 的实测)");
+        }
+
+        /// <summary>
+        /// 把出包时间戳写进产物 index.html 的占位符。只改产物，不改模板。
+        /// </summary>
+        private static bool InjectBuildStamp(string indexPath, string buildStamp)
+        {
+            if (!File.Exists(indexPath)) return false;
+
+            string html = File.ReadAllText(indexPath);
+            if (!html.Contains(BuildStampMarker)) return false;
+
+            File.WriteAllText(indexPath, html.Replace(BuildStampMarker, buildStamp));
+            return true;
         }
     }
 }
