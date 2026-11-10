@@ -24,7 +24,7 @@
 | G1 | 触屏横向转 180° 约需 720px 滑动（当前约 450px） | 真机手感 + 数值断言 `0.25°/px` |
 | G2 | 按住摇杆时，另一只手点按钮/空白，相机 yaw 不变 | 真机复现；开发日志确认合成鼠标输入未进入相机 |
 | G3 | 火球瞄准手势激活时，相机距离 8 → 11.5，约 0.2s 完成主要行程；松手、取消、受击/精力耗尽打断、失焦/横屏、死亡后均回到 8 | PlayMode 距离收敛用例 + 真机 |
-| G4 | 死亡时正在蓄力的火球被取消，不发射、不进冷却 | EditMode/PlayMode 回归用例 |
+| G4 | 死亡时正在蓄力的火球被取消，不发射、不进冷却（现有伤害路径已通过 `InterruptCurrentSkill(Stun)` 保证；死亡分支再显式兜底） | PlayMode 回归用例 |
 
 ## 3. 非目标
 
@@ -157,11 +157,14 @@ _camera.AimZoomActive = IsMobileAimActive() && !_isDead;
 
 **死亡边界**：
 
-- 死亡链路当前不会立即取消 `SkillCoordinator` 的当前技能，`Charging` 可能继续存在；
-  拉远条件必须带 `!_isDead`，否则死亡期间镜头保持拉远。
-- 同时在 `Sys3CEntry.HandleInput` 的死亡分支调用 `CancelAimingSkill()`：不发射、不进冷却，
-  覆盖服务端判死、本地判死、受击致死等所有死亡路径；复活后松手不会补发火球。
-- 该取消每帧调用，`CancelCharge` 在非 `Casting/Charging` 时返回 false，幂等。
+- 现有的致死伤害路径（`ApplyServerDamage` / `IDamageable.TakeDamage`）在 HP 归零时已经调用
+  `InterruptCurrentSkill(Stun)`，`Projectile` 技能的打断矩阵也放行 `Stun`；`EvaluateLocalDeath`
+  本身不取消技能。也就是说当前正常死亡**已经**会取消蓄力。
+- 拉远条件仍必须带 `!_isDead`：快速死亡帧、服务端权威余血归零、以及未来新增的死亡路径都不应
+  让镜头停留在瞄准距离。
+- 同时在 `Sys3CEntry.HandleInput` 的死亡分支调用 `CancelAimingSkill()` 作为显式兜底：
+  不发射、不进冷却，覆盖所有 `_isDead` 路径；复活后松手不会补发火球。该调用每帧执行，
+  `CancelCharge` 在非 `Casting/Charging` 时返回 false，幂等。
 
 **其他边界**：
 
@@ -179,7 +182,8 @@ _camera.AimZoomActive = IsMobileAimActive() && !_isDead;
 
 - 位置：`Sys3CEntry.HandleInput` 的 `if (_isDead)` 分支，返回前调用 `CancelAimingSkill()`。
 - 语义：与 UI 取消相同——不发射、不进冷却、不上报 `CastRequest`。
-- 目的：消除“死后仍蓄力、复活后松手补发”的既有隐患，并保证相机拉远在死亡时必然结束。
+- 目的：死亡时显式保证瞄准结束。现有致死伤害路径已通过 `InterruptCurrentSkill(Stun)` 取消技能，
+  这条兜底覆盖快速死亡帧与未来新增的 `_isDead` 路径，并保证相机拉远条件必然转为 false。
 
 ## 5. 改动清单
 
@@ -257,7 +261,7 @@ _camera.AimZoomActive = IsMobileAimActive() && !_isDead;
 | 抬指后合成鼠标事件晚到 | 当前不处理；若复验出现，加 0.1s 宽限窗 |
 | 火球按下但冷却/精力不足 | 不进入 `Charging`，不拉远 |
 | 瞄准中受击打断/精力耗尽 | 技能取消 → 拉远条件 false → 平滑回 8 |
-| 瞄准中死亡（服务端/本地） | 取消蓄力 + 不拉远；复活后不会补发 |
+| 瞄准中死亡（服务端/本地） | 现有伤害打断 + 死亡分支兜底取消蓄力；不拉远，复活后不会补发 |
 | 瞄准中失焦/横屏 | `MobileInputBinder` 取消瞄准 → 回 8 |
 | 瞄准中贴墙 | 防穿墙把实际相机拉近，`_currentDistance` 不变；离墙回到 11.5 |
 | 顿帧 `timeScale == 0` | 缩放冻结，恢复后继续 |
@@ -271,8 +275,9 @@ _camera.AimZoomActive = IsMobileAimActive() && !_isDead;
    必须按 §4.2 的判定表回到规格修订，不得把门控当作已修复。
 2. **触屏手感是主观验收**。`0.125` 是计算档位，最终以目标手机试玩为准；若仍偏快，
    只调场景值并在 README 记录。
-3. **死亡取消蓄力是战斗行为改动**。已确认采用；若后续发现某些死亡演出依赖蓄力状态，
-   以 `!_isDead` 的相机回位为准，再单独评估取消时机。
+3. **死亡取消蓄力的兜底是行为保证**。现有致死伤害路径已经在打断矩阵里取消技能；
+   死亡分支的显式取消是幂等兜底。若后续发现某些死亡演出依赖蓄力状态，以 `!_isDead`
+   的相机回位为准，再单独评估取消时机。
 
 ## 9. 决策记录
 
@@ -282,5 +287,5 @@ _camera.AimZoomActive = IsMobileAimActive() && !_isDead;
 | 火球拉远方式 | 固定 `8 → 11.5`，约 0.2s | 用户选择 |
 | 火球拉远触发源 | 只跟随瞄准手势（触屏或编辑器火球按钮拖动）；键盘 1 不拉远 | 设计约束 |
 | 恢复时点 | 松手/取消那一帧开始恢复 | 用户选择 |
-| 死亡处理 | 取消蓄力 + 相机回位 | 用户选择 |
+| 死亡处理 | 取消蓄力（伤害打断已有；死亡分支显式兜底）+ 相机回位 | 用户选择 |
 | 问题 2 修法 | 触摸活跃时禁用鼠标视角兜底，先真机诊断 | 设计审核结论 |
