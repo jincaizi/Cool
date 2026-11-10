@@ -1,7 +1,7 @@
 # 版本号、构建标识与 WebGL 缓存失效设计
 
 日期：2026-11-11
-状态：**Reviewed — 已按第二轮复审修正安全上下文（公网 http 无 Cache Storage）与验收口径；待用户确认后进入实现计划。**
+状态：**Approved — 用户已确认第二轮复审后的规格；实现计划见 [2026-11-11-versioning-and-webgl-cache.md](../plans/2026-11-11-versioning-and-webgl-cache.md)。**
 工作流：Superpowers brainstorming → 逐节确认 → 本 spec → 规格自检 → 用户审查 → writing-plans。
 范围：版本号真值源与构建注入、全局 UGUI 版本标签、登录 `ClientVersion`、WebGL 静态站点的缓存失效与 StaticServer 响应头。
 
@@ -149,7 +149,7 @@ public static class BuildVersionStamp
 ```js
 var buildVersion = {{{ JSON.stringify(PRODUCT_VERSION) }}};   // 0.1.0.cbad
 var buildStamp = "__BUILD_STAMP__";                            // WebGLBuildScript 出包后替换
-if (buildStamp === "__BUILD_STAMP__") buildStamp = String(Date.now()); // 直接点 Build 的兜底
+if (buildStamp.charAt(0) === "_") buildStamp = String(Date.now()); // 直接点 Build 的兜底（不能用全等占位符，替换后会把时间戳覆盖掉）
 var cacheKey = buildVersion + "-" + buildStamp;                // 0.1.0.cbad-20261111143000
 var cacheBust = "?v=" + encodeURIComponent(cacheKey);
 
@@ -174,7 +174,7 @@ cacheControl: function (url) {
 
 **安全上下文限制（重要）**：`UnityCache` 同时依赖 `indexedDB` 与 `window.caches`，后者只在 HTTPS 或 localhost 可用。当前演示形态是 `http://<公网IP>:8080`，loader 会连接失败并自动降级为普通 `fetchWithProgress`——此时 `cacheControl` 覆盖不产生副作用，正确性与重复加载性能由**浏览器 HTTP 缓存 + 版本化 URL** 保证。若以后启用 HTTPS，UnityCache 才会按 `productVersion = cacheKey` 生效并清理旧条目。
 
-**直接点 Build Player 的兜底**：占位符未替换时用 `Date.now()`，每次加载都生成新 key——正确但完全不缓存。正式产物必须走 `WebGLBuildScript`，出包校验会拦住漏替换。
+**直接点 Build Player 的兜底**：占位符未替换时（首字符仍是 `_`）用 `Date.now()`，每次加载都生成新 key——正确但完全不缓存。不能用 `buildStamp === "__BUILD_STAMP__"` 判断：出包替换会把条件里的占位符一起替换，导致时间戳被 `Date.now()` 覆盖。正式产物必须走 `WebGLBuildScript`，出包校验会拦住漏替换。
 
 #### 4.2.2 缓存层次
 
