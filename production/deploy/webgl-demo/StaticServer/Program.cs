@@ -143,14 +143,16 @@ namespace Cool.Deploy
             var res = ctx.Response;
             long started = Environment.TickCount64;
             string urlPath = req.Url?.AbsolutePath ?? "/";
+            string vTag = req.QueryString["v"] ?? "-";
 
             try
             {
                 string? file = Resolve(urlPath);
                 if (file == null)
                 {
-                    Console.WriteLine(req.HttpMethod + " " + urlPath + " -> 404");
+                    Console.WriteLine(req.HttpMethod + " " + urlPath + " -> 404 v=" + vTag);
                     res.StatusCode = 404;
+                    res.AddHeader("Cache-Control", "no-store");
                     return;
                 }
 
@@ -159,6 +161,7 @@ namespace Cool.Deploy
                 string ext = Path.GetExtension(file);
                 string type = Types.TryGetValue(ext, out var t) ? t : "application/octet-stream";
                 res.ContentType = type;
+                AddCacheHeaders(req, res, file, ext);
 
                 // 单区间 Range。压缩与 Range 天然冲突（没法给压缩流任意偏移），
                 // 所以带 Range 的请求一律回原文件 —— 与 nginx 的 gzip 默认行为一致。
@@ -171,7 +174,7 @@ namespace Cool.Deploy
                     res.AddHeader("Accept-Ranges", "bytes");
                     res.ContentLength64 = slice.Length;
                     WriteBody(req, res, slice);
-                    Console.WriteLine(req.HttpMethod + " " + urlPath + " 206 " + slice.Length + "B range");
+                    Console.WriteLine(req.HttpMethod + " " + urlPath + " 206 " + slice.Length + "B range v=" + vTag);
                     return;
                 }
 
@@ -186,31 +189,54 @@ namespace Cool.Deploy
                     res.AddHeader("Accept-Ranges", "bytes");
                     res.ContentLength64 = raw.Length;
                     WriteBody(req, res, raw);
-                    Console.WriteLine(req.HttpMethod + " " + urlPath + " 200 " + raw.Length + "B plain "
-                        + (Environment.TickCount64 - started) + "ms");
+                    Console.WriteLine(req.HttpMethod + " " + urlPath + " 200 " + raw.Length + "B plain v=" + vTag
+                        + " " + (Environment.TickCount64 - started) + "ms");
                     return;
                 }
 
                 byte[] body = GzipOf(file, info);
                 res.StatusCode = 200;
                 res.AddHeader("Content-Encoding", "gzip");
-                res.AddHeader("Vary", "Accept-Encoding");
                 res.AddHeader("Accept-Ranges", "bytes");
                 res.ContentLength64 = body.Length;
                 WriteBody(req, res, body);
                 Console.WriteLine(req.HttpMethod + " " + urlPath + " 200 " + body.Length + "B gzip"
-                    + " (" + size + "B raw, " + (size == 0 ? 0 : body.Length * 100 / size) + "%)"
+                    + " (" + size + "B raw, " + (size == 0 ? 0 : body.Length * 100 / size) + "%) v=" + vTag
                     + " " + (Environment.TickCount64 - started) + "ms");
             }
             catch (Exception ex)
             {
                 Console.WriteLine("ERROR " + urlPath + ": " + ex.Message);
-                try { res.StatusCode = 500; } catch { }
+                try
+                {
+                    res.StatusCode = 500;
+                    res.AddHeader("Cache-Control", "no-store");
+                }
+                catch { }
             }
             finally
             {
                 try { res.Close(); } catch { }
             }
+        }
+
+        /// <summary>
+        /// 版本化资源长缓存；入口 HTML 与未版本化资源走 no-cache。
+        /// 不需要 ETag/304：静态资源靠构建时间戳生成新 URL。
+        /// </summary>
+        private static void AddCacheHeaders(
+            HttpListenerRequest req, HttpListenerResponse res, string file, string ext)
+        {
+            bool isHtml = ext.Equals(".html", StringComparison.OrdinalIgnoreCase);
+            string buildRoot = Path.Combine(_root, "Build") + Path.DirectorySeparatorChar;
+            bool inBuild = file.StartsWith(buildRoot, StringComparison.OrdinalIgnoreCase);
+            bool versioned = inBuild && !string.IsNullOrEmpty(req.QueryString["v"]);
+
+            res.AddHeader("Cache-Control",
+                isHtml || !versioned
+                    ? "no-cache"
+                    : "public, max-age=31536000, immutable");
+            res.AddHeader("Vary", "Accept-Encoding");
         }
 
         private static void WriteBody(HttpListenerRequest req, HttpListenerResponse res, byte[] body)
