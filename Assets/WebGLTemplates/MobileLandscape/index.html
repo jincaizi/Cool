@@ -230,27 +230,38 @@
         updateBannerVisibility();
       }
 
+      var buildVersion = {{{ JSON.stringify(PRODUCT_VERSION) }}};
+      var buildStamp = "__BUILD_STAMP__";
+      if (buildStamp.charAt(0) === "_") buildStamp = String(Date.now());
+      var cacheKey = buildVersion + "-" + buildStamp;
+      var cacheBust = "?v=" + encodeURIComponent(cacheKey);
+
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      var dataUrl = buildUrl + "/{{{ DATA_FILENAME }}}" + cacheBust;
+      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}" + cacheBust;
       var config = {
-        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
-        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+        dataUrl: dataUrl,
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}" + cacheBust,
 #if USE_THREADS
-        workerUrl: buildUrl + "/{{{ WORKER_FILENAME }}}",
+        workerUrl: buildUrl + "/{{{ WORKER_FILENAME }}}" + cacheBust,
 #endif
 #if USE_WASM
-        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}" + cacheBust,
 #endif
 #if MEMORY_FILENAME
-        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}" + cacheBust,
 #endif
 #if SYMBOLS_FILENAME
-        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}" + cacheBust,
 #endif
         streamingAssetsUrl: "StreamingAssets",
         companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
         productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
-        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        productVersion: cacheKey,
+        cacheControl: function (url) {
+          if (url === dataUrl) return "immutable";
+          return url.match(/\.bundle/) ? "must-revalidate" : "no-store";
+        },
         showBanner: unityShowBanner,
       };
 
@@ -287,7 +298,7 @@
       }
 
 #if BACKGROUND_FILENAME
-      canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}') center / cover";
+      canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}" + cacheBust + "') center / cover";
 #endif
       loadingBar.style.display = "block";
 
