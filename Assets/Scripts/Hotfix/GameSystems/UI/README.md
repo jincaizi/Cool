@@ -25,6 +25,12 @@ HUD 联网读数：`PlayerHudPanel` 在 HP/MP 与 buff 行下方预留 `NetStats
 联网时由 `ClientNetworkHost` 调用 `SetNetStats(string?)` 写入 `FPS xx  延迟 xxms`；传 null/空串隐藏。
 单机模式不显示。
 
+## 构建版本标签
+
+- `BuildInfoPanel` 在 `Top` 层常驻右下角，显示 `BuildVersion.Display`：WebGL 为 `v0.1.0.<sha4>`，编辑器/Windows 为 `v0.1.0`（Windows 也带 SHA 时为 `v0.1.0.<sha4>`）。
+- 预制体 `Resources/Prefabs/UI/BuildInfoPanel`；启动时由 `UIManager` 注册并显示。
+- 文本 `raycastTarget = false`，根节点无 Graphic，不拦截输入；安全区由层 Canvas 的 `ScreenAdapter` 处理。
+
 ## 移动端输入
 
 `Mobile/VirtualJoystick`、`Mobile/TouchLookArea`、`Mobile/MobileActionButtons`、`Mobile/SprintGestureState`。

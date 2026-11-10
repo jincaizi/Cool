@@ -24,6 +24,7 @@ namespace Hotfix.GameSystems.UI
             (typeof(PlayerHudPanel),       "Prefabs/UI/PlayerHudPanel"),
             (typeof(TargetPanel),          "Prefabs/UI/TargetPanel"),
             (typeof(CharacterSelectPanel), "Prefabs/UI/CharacterSelectPanel"),
+            (typeof(BuildInfoPanel),       "Prefabs/UI/BuildInfoPanel"),
         };
 
         private readonly Dictionary<System.Type, UIPanel> _panels = new Dictionary<System.Type, UIPanel>();
@@ -89,6 +90,11 @@ namespace Hotfix.GameSystems.UI
             if (_panels.TryGetValue(typeof(PlayerHudPanel), out var hud))
             {
                 await ShowPanelAsync(hud);
+            }
+
+            if (_panels.TryGetValue(typeof(BuildInfoPanel), out var buildInfo))
+            {
+                await ShowPanelAsync(buildInfo);
             }
 
             // 启动流程：先选人，再进世界（选人面板全屏覆盖 HUD）
