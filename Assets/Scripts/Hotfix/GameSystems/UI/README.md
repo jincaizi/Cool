@@ -27,7 +27,7 @@ HUD 联网读数：`PlayerHudPanel` 在 HP/MP 与 buff 行下方预留 `NetStats
 
 ## 构建版本标签
 
-- `BuildInfoPanel` 在 `Top` 层常驻右下角，显示 `BuildVersion.Display`：WebGL 为 `v0.1.0.<sha4>`，编辑器/Windows 为 `v0.1.0`（Windows 也带 SHA 时为 `v0.1.0.<sha4>`）。
+- `BuildInfoPanel` 在 `Top` 层常驻右下角，显示 `BuildVersion.Display`：编辑器为 `v0.1.0`；WebGL / Windows 构建为 `v0.1.0.<sha4>`（`BuildScript.BuildWindows` 无条件追加 SHA；若将来 Windows 改用不追加 SHA 的退路，则显示 `v0.1.0`）。
 - 预制体 `Resources/Prefabs/UI/BuildInfoPanel`；启动时由 `UIManager` 注册并显示。
 - 亮背景可读性由专用 TMP underlay 材质 `Assets/PreRes/Font/ZhunYuan SDF - BuildVersion Underlay.mat` 保证（underlay 黑 0.5）；不使用 UGUI `Shadow`（TMP 的 Rebuild 不走 `BaseMeshEffect`，Shadow 不生效）。
 - 文本 `raycastTarget = false`，根节点无 Graphic，不拦截输入；安全区由层 Canvas 的 `ScreenAdapter` 处理。

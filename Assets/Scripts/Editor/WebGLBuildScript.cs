@@ -118,31 +118,81 @@ namespace Cool.EditorTools
             PlayerSettings.WebGL.decompressionFallback = false;
             PlayerSettings.bundleVersion = stampedVersion;
 
-            bool succeeded;
-            BuildSummary summary;
+            var indexPath = OutputDir + "/index.html";
+            var backupPath = indexPath + ".bak";
+
+            bool succeeded = false;
+            bool injected = false;
+            bool verified = false;
+            bool backupCleanupFailed = false;
+            BuildSummary summary = default;
             try
             {
-                Directory.CreateDirectory(OutputDir);
-
-                // Unity 不会覆盖已存在的 index.html，上次注入过时间戳的产物会让
-                // __BUILD_STAMP__ 找不到；先删掉，强制本次从模板重新生成。
-                var indexPath = OutputDir + "/index.html";
-                if (File.Exists(indexPath))
+                try
                 {
-                    File.Delete(indexPath);
-                    Debug.Log("[WebGLBuild] 清理旧 index.html，强制从模板重新生成");
+                    Directory.CreateDirectory(OutputDir);
+
+                    // Unity 不会覆盖已存在的 index.html，上次注入过时间戳的产物会让
+                    // __BUILD_STAMP__ 找不到；先移走，强制本次从模板重新生成。
+                    // 移走的旧页面同时是失败/取消时的回退，成功链路走完才删除。
+                    PrepareIndexBackup(indexPath, backupPath);
+
+                    var options = new BuildPlayerOptions
+                    {
+                        scenes = Scenes,
+                        locationPathName = OutputDir,
+                        target = BuildTarget.WebGL,
+                        options = BuildOptions.None,
+                    };
+
+                    summary = BuildPipeline.BuildPlayer(options).summary;
+                    succeeded = summary.result == BuildResult.Succeeded;
+
+                    if (succeeded)
+                    {
+                        Debug.Log("[WebGLBuild] 出包成功: " + summary.outputPath
+                            + " size=" + summary.totalSize + "B"
+                            + " time=" + summary.totalTime);
+
+                        var buildStamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                        var cacheKey = stampedVersion + "-" + buildStamp;
+                        if (InjectBuildStamp(indexPath, buildStamp, out var injectFailure))
+                        {
+                            injected = true;
+                            Debug.Log("[WebGLBuild] cacheKey=" + cacheKey);
+                            verified = VerifyPayloadShape(stampedVersion, buildStamp);
+                        }
+                        else
+                        {
+                            Debug.LogError("[WebGLBuild] " + injectFailure + "，缓存键无法注入");
+                        }
+                    }
                 }
-
-                var options = new BuildPlayerOptions
+                finally
                 {
-                    scenes = Scenes,
-                    locationPathName = OutputDir,
-                    target = BuildTarget.WebGL,
-                    options = BuildOptions.None,
-                };
-
-                summary = BuildPipeline.BuildPlayer(options).summary;
-                succeeded = summary.result == BuildResult.Succeeded;
+                    // 三个条件（构建成功 + 注入成功 + 产物校验通过）缺一就把旧入口页面放回来，
+                    // 否则失败/取消的 Build/WebGL 会没有 index.html，publish-server.sh 会原样发布一个 404 站点。
+                    try
+                    {
+                        if (succeeded && injected && verified)
+                        {
+                            if (File.Exists(backupPath))
+                            {
+                                File.Delete(backupPath);
+                                Debug.Log("[WebGLBuild] 产物校验通过，删除 index.html.bak");
+                            }
+                        }
+                        else
+                        {
+                            RestoreIndexBackup(indexPath, backupPath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        backupCleanupFailed = true;
+                        Debug.LogError("[WebGLBuild] index.html 备份处理失败: " + ex.Message);
+                    }
+                }
             }
             finally
             {
@@ -164,30 +214,63 @@ namespace Cool.EditorTools
                 return;
             }
 
-            Debug.Log("[WebGLBuild] 出包成功: " + summary.outputPath
-                + " size=" + summary.totalSize + "B"
-                + " time=" + summary.totalTime);
-
-            var buildStamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            var cacheKey = stampedVersion + "-" + buildStamp;
-            if (!InjectBuildStamp(OutputDir + "/index.html", buildStamp))
+            // 注入或产物校验失败的具体原因已在上面的 LogError 里。
+            if (!injected || !verified || backupCleanupFailed)
             {
-                Debug.LogError("[WebGLBuild] index.html 中未找到 " + BuildStampMarker
-                    + "，缓存键无法注入");
                 if (Application.isBatchMode) EditorApplication.Exit(1);
                 return;
             }
+        }
 
-            Debug.Log("[WebGLBuild] cacheKey=" + cacheKey);
-            VerifyPayloadShape(stampedVersion, buildStamp);
+        /// <summary>
+        /// 出包前把旧 index.html 移到 .bak，强制本次构建从模板重新拷贝入口页。
+        /// 若发现上次中断留下的 .bak：有 index.html 时删掉陈旧备份，没有时先还原，
+        /// 避免上一次崩溃把唯一的入口页留在 .bak 里。
+        /// </summary>
+        private static void PrepareIndexBackup(string indexPath, string backupPath)
+        {
+            if (File.Exists(backupPath))
+            {
+                if (File.Exists(indexPath))
+                {
+                    File.Delete(backupPath);
+                    Debug.Log("[WebGLBuild] 删除上次中断遗留的 index.html.bak");
+                }
+                else
+                {
+                    File.Move(backupPath, indexPath);
+                    Debug.Log("[WebGLBuild] 上次中断遗留的 index.html.bak 已恢复为 index.html");
+                }
+            }
+
+            if (!File.Exists(indexPath))
+                return;
+
+            File.Move(indexPath, backupPath);
+            Debug.Log("[WebGLBuild] 备份旧 index.html -> index.html.bak（出包失败/取消时恢复）");
+        }
+
+        /// <summary>
+        /// 出包没有完整成功（构建失败/取消、注入失败、产物校验失败或异常）时，
+        /// 把备份的入口页放回去；成功路径不调用，.bak 由成功分支删除。
+        /// </summary>
+        private static void RestoreIndexBackup(string indexPath, string backupPath)
+        {
+            if (!File.Exists(backupPath))
+                return;
+
+            File.Copy(backupPath, indexPath, true);
+            File.Delete(backupPath);
+            Debug.LogWarning("[WebGLBuild] 出包未完成，已恢复备份的 index.html");
         }
 
         /// <summary>
         /// 断言产物是"静态服务器能直接托管"的形状，并把首屏体积打进日志。
-        /// 这里报 error（批处理下非零退出）而不是 warning：形状不对的包能构建成功、
-        /// 能在 file:// 下打开，只在浏览器里 404 —— 留到部署时才发现，代价是一次面试。
+        /// 这里报 error 而不是 warning：形状不对的包能构建成功、能在 file:// 下打开，
+        /// 只在浏览器里 404 —— 留到部署时才发现，代价是一次面试。
+        /// 返回 false 时由 Build 恢复 index.html 备份并让批处理非零退出。
         /// </summary>
-        private static void VerifyPayloadShape(string stampedVersion, string buildStamp)
+        private static bool VerifyPayloadShape(string stampedVersion, string buildStamp)
         {
             long total = 0;
             bool broken = false;
@@ -255,23 +338,33 @@ namespace Cool.EditorTools
 
             if (broken)
             {
-                if (Application.isBatchMode) EditorApplication.Exit(1);
-                return;
+                return false;
             }
 
             Debug.Log("[WebGLBuild] 首屏体积合计 " + total + "B (" + (total / 1048576.0).ToString("F1")
                 + " MB，未压缩；gzip 后约 1/4 —— 见 production/verify/t9 的实测)");
+            return true;
         }
 
         /// <summary>
         /// 把出包时间戳写进产物 index.html 的占位符。只改产物，不改模板。
+        /// 失败时用 failure 区分"产物缺失"与"占位符不存在"（增量构建两种都可能遇到）。
         /// </summary>
-        private static bool InjectBuildStamp(string indexPath, string buildStamp)
+        private static bool InjectBuildStamp(string indexPath, string buildStamp, out string failure)
         {
-            if (!File.Exists(indexPath)) return false;
+            failure = null;
+            if (!File.Exists(indexPath))
+            {
+                failure = "产物 index.html 不存在: " + indexPath;
+                return false;
+            }
 
             string html = File.ReadAllText(indexPath);
-            if (!html.Contains(BuildStampMarker)) return false;
+            if (!html.Contains(BuildStampMarker))
+            {
+                failure = "index.html 中未找到占位符 " + BuildStampMarker;
+                return false;
+            }
 
             File.WriteAllText(indexPath, html.Replace(BuildStampMarker, buildStamp));
             return true;

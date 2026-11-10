@@ -283,12 +283,12 @@ node production/verify/t8/t8-ws-lan-proxy.js --listen 8002 --target 8000
 
 ---
 
-## 版本号与缓存验证
+## 10. 版本号与缓存验证
 
 ### 升版本与出包
 
 1. 修改 `ProjectSettings` 的 Version，保持 `a.b.c` 三段数字。含义：`a` 大版本 / 里程碑 / 不兼容改动，`b` 中等更新 / 新系统 / 新玩法，`c` 小迭代 / 修复 / 数值与表现调整。
-2. 出 `Cool/Build/WebGL`（或 Windows）。出包脚本会临时把版本拼成 `a.b.c.<git sha4>`，结束后还原仓库值；构建日志会打印 `version ... -> ...` 与 `cacheKey=...`。
+2. 出 `Cool/Build/WebGL`（或 Windows）。出包脚本会临时把版本拼成 `a.b.c.<git sha4>`，结束后还原仓库值。WebGL 构建日志会打印 `version ... -> ...` 与 `cacheKey=...`；Windows 构建只打印 `version ... -> ...`。
 3. 出包后检查 `ProjectSettings.asset` 的 `bundleVersion` 仍是 `a.b.c`。
 
 ### 验证缓存键
@@ -299,19 +299,19 @@ grep -n 'var buildStamp =' Build/WebGL/index.html
 grep -n 'var cacheBust = "?v="' Build/WebGL/index.html
 ```
 
-预期：`buildVersion` 是 `0.1.0.<sha4>`，`buildStamp` 是 14 位时间戳，`cacheBust` 代码存在。实际请求里的 `?v=0.1.0.<sha4>-<yyyyMMddHHmmss>` 在 DevTools Network 里看。
+预期：`buildVersion` 是 `a.b.c.<sha4>`（例如 `0.1.0.abcd`），`buildStamp` 是 14 位时间戳，`cacheBust` 代码存在。实际请求里的 `?v=a.b.c.<sha4>-<yyyyMMddHHmmss>` 在 DevTools Network 里看。
 
 浏览器 DevTools → Network：
 
 - `WebGL.loader.js` / `WebGL.framework.js` / `WebGL.wasm` / `WebGL.data` 带同一个 `?v=`。
 - `index.html` 响应头 `Cache-Control: no-cache`。
 - 带 `?v=` 的 `Build/*` 响应头 `Cache-Control: public, max-age=31536000, immutable`。
-- 三者都带 `Vary: Accept-Encoding`。
+- `index.html`、带 `?v=` 的 `Build/*`、不带 `?v=` 的 `Build/*` 都带 `Vary: Accept-Encoding`（404 响应没有 `Vary`）。
 
 ### 更新后的行为
 
 - 正常刷新：先取新 `index.html`，再取新 `?v=` 资源，不会新旧混用。
-- 公网 `http://<公网IP>` 没有 Cache Storage，Unity loader 的 IndexedDB 缓存会自动降级；重复加载走浏览器 HTTP 缓存（DevTools 显示 from disk/memory cache）。
+- 公网 `http://<公网IP>` 不是 secure context，`window.caches`（Cache Storage）不可用：Unity loader 的 `UnityCache` 初始化失败，`cachedFetch` 回退到 `fetchWithProgress` 直连（没有 IndexedDB/Cache Storage 缓存）；重复加载能否命中取决于浏览器 HTTP 缓存（DevTools 显示 from disk/memory cache）。
 - 升级前已被浏览器缓存的旧 `index.html`：第一次可能需要强制刷新一次，之后 `no-cache` 不再复发。
 - 当前构建没有 Addressables 远程 catalog/bundle 或 StreamingAssets；以后加入时要另行版本化。
 - 直接用 Unity Build Player（不经 `WebGLBuildScript`）时 `__BUILD_STAMP__` 不会被替换，页面每次加载生成新 key——正确但不缓存；正式出包必须走 `Cool/Build/WebGL`。
