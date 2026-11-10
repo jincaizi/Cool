@@ -35,6 +35,12 @@ namespace GameSys.EditorTests
             StringAssert.Contains("frameworkUrl: buildUrl + \"/{{{ FRAMEWORK_FILENAME }}}\" + cacheBust", html);
             StringAssert.Contains("loaderUrl = buildUrl + \"/{{{ LOADER_FILENAME }}}\" + cacheBust", html);
             StringAssert.Contains("codeUrl: buildUrl + \"/{{{ CODE_FILENAME }}}\" + cacheBust", html);
+            StringAssert.Contains("dataUrl: dataUrl", html);
+            StringAssert.Contains("workerUrl: buildUrl + \"/{{{ WORKER_FILENAME }}}\" + cacheBust", html);
+            StringAssert.Contains("memoryUrl: buildUrl + \"/{{{ MEMORY_FILENAME }}}\" + cacheBust", html);
+            StringAssert.Contains("symbolsUrl: buildUrl + \"/{{{ SYMBOLS_FILENAME }}}\" + cacheBust", html);
+            StringAssert.Contains("+ cacheBust + \"') center / cover\"", html);
+            StringAssert.Contains("streamingAssetsUrl: \"StreamingAssets\"", html);
         }
 
         [Test]
