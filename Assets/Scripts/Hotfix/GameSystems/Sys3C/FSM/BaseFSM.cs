@@ -96,6 +96,21 @@ namespace Hotfix.GameSystems.Sys3C.FSM
             }
         }
 
+        /// <summary>
+        /// 复活复位：强制 Base 层进入 Locomotion 的**实际**动画状态。
+        /// 死亡锁（LockState(Idle)）只写 BaseState 参数，而 JumpAir 的出口只认参数 5——
+        /// 参数变 0/7 不会让动画层退出跳跃节点（B2：空中死亡复活后漂移、腿部无动画）。
+        /// </summary>
+        public void ResetToLocomotion()
+        {
+            _lockedState = null;
+            _currentState = BaseState.Locomotion;
+            _animator.SetInteger(AnimHashes.BaseState, (int)BaseState.Locomotion);
+            _animator.SetBool(AnimHashes.IsJumping, false);
+            _animator.Play(AnimHashes.LocomotionState, AnimHashes.BaseLayerIndex, 0f);
+            OnStateChanged?.Invoke(BaseState.Locomotion);
+        }
+
         private void TransitionTo(BaseState target)
         {
             _currentState = target;

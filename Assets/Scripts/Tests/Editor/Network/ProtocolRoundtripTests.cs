@@ -40,6 +40,17 @@ namespace Hotfix.GameSystems.Tests.Network
             }
         }
 
+        [Test]
+        public void Roundtrip_CancelCastRequest_Preserves_SkillId()
+        {
+            var source = new CancelCastRequest { SkillId = 20002 };
+            var encoded = MessageCodec.EncodeToArray(MessageId.CancelCastRequest, source);
+            var (_, decoded) = MessageCodec.Decode(encoded);
+
+            Assert.That(decoded, Is.InstanceOf<CancelCastRequest>());
+            Assert.AreEqual(20002, ((CancelCastRequest)decoded).SkillId);
+        }
+
         /// <summary>格挡减伤服务端化的输入侧（tag 8）：防御标志必须真的上线上网。</summary>
         [Test]
         public void Roundtrip_PositionSyncRequest_Preserves_Defending_Flag()

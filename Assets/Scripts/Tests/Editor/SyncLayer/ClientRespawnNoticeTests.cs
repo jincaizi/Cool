@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cool.Protocol;
+using Cool.SyncCore;
 using Hotfix.GameSystems.SyncLayer;
 using NUnit.Framework;
 using UnityEngine;
@@ -56,15 +57,58 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
-        public void Respawn_Notice_Is_Forwarded_With_The_Servers_Hp()
+        public void Respawn_Notice_Is_Forwarded_With_The_Servers_Hp_And_Position()
         {
-            // 服务端权威：客户端不自行判活，只采信这条通知里的血量（D-N4/D-5）
-            float seen = -1f;
-            _manager.OnServerRespawn += hp => seen = hp;
+            RespawnNotice seen = null;
+            _manager.OnServerRespawn += notice => seen = notice;
 
-            _client.Emit(MessageId.RespawnNotice, new RespawnNotice { Hp = 100f, Tick = 7u });
+            var respawn = new RespawnNotice
+            {
+                Hp = 100f, Tick = 7u, HasSpawnPosition = true, SpawnX = -15f, SpawnY = 0.3f, SpawnZ = -30f
+            };
+            _client.Emit(MessageId.RespawnNotice, respawn);
 
-            Assert.AreEqual(100f, seen, 0.0001f, "RespawnNotice 必须被转出去——否则躺下就起不来");
+            Assert.AreSame(respawn, seen);
+        }
+
+        [Test]
+        public void Respawn_Rejects_Old_Corrections_And_Reports_With_The_New_Tick()
+        {
+            var position = new Vec3(60f, 0f, 0f);
+            _manager.AttachMovementReporter(() => position, () => 0f, () => 0f);
+            _client.Emit(MessageId.LoginResponse, new LoginResponse { Success = true, ServerTickRateMs = 66 });
+            _manager.Reporter.Report();
+            var before = (PositionSyncRequest)_client.Sent[_client.Sent.Count - 1].msg;
+            _client.Emit(MessageId.PositionSyncResponse, new PositionSyncResponse
+            {
+                AcknowledgedSequence = before.Sequence, AuthoritativeX = 50f
+            });
+            int corrections = 0;
+            _manager.OnCorrectionNeeded += (_, _) => corrections++;
+
+            _manager.ResetMovementForRespawn(7);
+            position = new Vec3(-15f, 0.3f, -30f);
+            _manager.Update(0f);
+
+            Assert.Zero(corrections);
+            var after = (PositionSyncRequest)_client.Sent[_client.Sent.Count - 1].msg;
+            Assert.AreEqual(before.Sequence + 1, after.Sequence);
+            Assert.AreEqual(7u, after.RespawnTick);
+            Assert.AreEqual(-15f, after.X);
+
+            _client.Emit(MessageId.PositionSyncResponse, new PositionSyncResponse
+            {
+                AcknowledgedSequence = after.Sequence, AuthoritativeX = 60f
+            });
+            _manager.Update(0f);
+            Assert.Zero(corrections);
+
+            _client.Emit(MessageId.PositionSyncResponse, new PositionSyncResponse
+            {
+                AcknowledgedSequence = after.Sequence, RespawnTick = 7, AuthoritativeX = -16f
+            });
+            _manager.Update(0f);
+            Assert.AreEqual(1, corrections, "本次复活后的正常纠偏仍应生效");
         }
     }
 }

@@ -8,8 +8,8 @@
 | `ClockSyncAlgorithm.cs` | 时钟同步：min-filter + 一阶低通；`Offset = 服务器时钟 − 客户端墙钟` |
 | `MovementValidator.cs` | 移动合理性校验：瞬移门槛、速度钳制、纠偏目标 |
 | `PredictionReconciler.cs` | 客户端预测帧对账；位置阈值 0.5m、旋转 5°、最多 60 帧 |
-| `HitResolver.cs` | 服务端权威命中裁决；几何与客户端 `AttackShape` 对齐；锥形按目标半径扩展（圆-锥相交） |
-| `CombatRules.cs` | 投射物判定种类与参数（剑气 / 火球 / 落点圆） |
+| `HitResolver.cs` | 服务端权威命中裁决；几何与客户端 `AttackShape` 对齐；锥形按目标半径扩展（圆-锥相交）；可选高度重叠过滤 |
+| `CombatRules.cs` | 投射物判定种类与参数（剑气 / 火球 / 落点圆）、旋转重复判定（`RepeatSpec`）、攻击高度带（`AttackHeightSpec`） |
 | `Vec3.cs` | 共享向量 |
 
 ## 约束
@@ -34,8 +34,15 @@ placeholder，0.35s 前摇按15Hz向上取6 tick。碰撞尺寸/阶段映射为�
 `Ai.DefaultWindupArmor`，SpiderBoss 种子默认霸体，普通怪默认可打断。
 NPC CombatRules 接线由服务端从共享发布定义注册；玩家规则及几何保持原有语义。
 
+- 旋转 20002 的重复判定（`RepeatSpec`：首判 0.4s、间隔 0.2s、持续 3s、每目标 5 段）由服务端
+  按 tick 逐段裁决；时间参数以客户端 `Spin_SkillR` 资产为准，EditMode `SpinAssetTableTests`
+  锁定逐值一致。多段不能用 `GroupHitIds` 的“每施法一次”去重。
+- 攻击高度（B1，2026-11-10）：`AttackHeightSpec` 定义相对施法者脚底的攻击体积；`CombatCandidate.Height`
+  提供目标受击高度（0 = 未知 → 沿用纯 XZ）。第一批只配置地面近战（10001/10002 挥击、50001–50005），
+  投射物/AOE 不传高度。服务端对非 NPC 实体的 Y 做 navmesh 地面限幅（见 `Server/Handler/CastHandler.cs`）。
 - 不能引用 `UnityEngine`；两端同源编译，改规则必须两端测试同时通过。
 - 非线程安全：`ClockSyncAlgorithm`、`PredictionReconciler` 由单消费者串行调用。
+  复活落位时由客户端清空上一条命的预测帧。
 - 判定几何改动要同步客户端 `AttackShape` 与服务端裁决的测试。
 
 ## 测试

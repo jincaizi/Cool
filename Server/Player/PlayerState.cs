@@ -15,6 +15,8 @@ namespace KcpServer
         public float Speed { get; internal set; }
         public long LastUpdateTimestamp { get; internal set; }
         public uint LastReceivedSequence { get; internal set; }
+        internal bool SupportsAuthoritativeRespawn { get; set; }
+        internal uint? RespawnTick { get; set; }
 
         /// <summary>P4 战斗状态（服务器权威；登录重建 PlayerState 即满血——复活另见 D-2 的 8 秒计时）</summary>
         public float Hp { get; internal set; } = 100f;
@@ -46,7 +48,7 @@ namespace KcpServer
         /// <summary>
         /// 到点则复活：满血 + 清死亡标记，返回 true。
         /// 调用方（主循环 tick）负责在返回 true 时给本人发 `RespawnNotice`。
-        /// **位置不在这里改**——玩家位置由客户端上报（D-N5），服务端摆位置会被下一次上报覆盖。
+        /// 调用方负责更新支持权威复活的玩家的移动基准和落点。
         /// </summary>
         public bool TryRespawn(long nowTick, uint tickMs)
         {

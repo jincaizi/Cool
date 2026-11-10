@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cool.Protocol;
 using Cool.SyncCore;
 using Cysharp.Threading.Tasks;
@@ -123,15 +124,14 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _pendingReturnToMenu;
 
         // N5 服务端复活：通知在回调线程到达，Unity API 只能在主线程应用（见 HandleServerRespawn）
-        private bool _hasServerRespawn;
-        private float _serverRespawnHp;
+        private RespawnNotice? _pendingServerRespawn;
 
         // N5 阵亡等待：回调线程只置位，计时与提示留主线程 Update
         private bool _awaitingServerRespawn;
         private float _respawnWaitElapsed = -1f;   // <0 = 提示还没上屏（要读 Time，只能在主线程）
 
         // 任务 10：本地阵亡 → selector 清锁/暂停切换。死亡回调的线程取决于传输
-        // （见 HandleLocalPlayerDeath 注释），这里与 _hasServerRespawn 同款——回调只置位，
+        // （见 HandleLocalPlayerDeath 注释），回调只置位，
         // UI/Transform 操作留到主线程 Update 消费。
         private bool _pendingTargetOwnerDeath;
 
@@ -279,11 +279,8 @@ namespace Hotfix.GameSystems.SyncLayer
             // 封送点：RespawnNotice 在回调线程到达，而 ApplyServerRespawn 要动 Animator/Transform。
             // 角色还没装配就**留着通知**、下帧再试：此刻消费掉它、又清掉等待/兜底，
             // 会留下"躺在死亡画面且再无出口"的死局（该会话不会再有第二次 OnServerDeath）。
-            if (_hasServerRespawn && _localEntry != null)
-            {
-                _hasServerRespawn = false;
-                ApplyServerRespawn(_serverRespawnHp);
-            }
+            if (_localEntry != null && Interlocked.Exchange(ref _pendingServerRespawn, null) is RespawnNotice notice)
+                ApplyServerRespawn(notice);
 
             // —— 阵亡后的等待与兜底（N5，主线程计时）——
             if (_awaitingServerRespawn)
@@ -476,18 +473,17 @@ namespace Hotfix.GameSystems.SyncLayer
         /// （`KcpNetClientAdapter` + `DirectMessageExecutor`，PlayMode 测试用的那条）是驱动线程。
         /// 所以这里不赌传输实现，一律记账、由 Update 应用。
         /// </summary>
-        private void HandleServerRespawn(float hp)
+        private void HandleServerRespawn(RespawnNotice notice)
         {
-            _serverRespawnHp = hp;
-            _hasServerRespawn = true;
+            Interlocked.Exchange(ref _pendingServerRespawn, notice);
         }
 
         /// <summary>
         /// 应用服务端复活（**只在主线程**调用——Update 的封送分支；调用方已保证 `_localEntry` 非空：
-        /// 装不上就压根不进来，见 Update 的 `_hasServerRespawn &amp;&amp; _localEntry != null`）。
+        /// Update 在本地角色就绪后才消费通知）。
         /// 血量直接采信服务端的（D-N4/D-5：客户端不自行判活）。
         /// </summary>
-        private void ApplyServerRespawn(float hp)
+        private void ApplyServerRespawn(RespawnNotice notice)
         {
             _awaitingServerRespawn = false;
             // 复活：恢复目标切换（锁已在本死亡时清掉，玩家可重新 T 选目标）
@@ -496,8 +492,13 @@ namespace Hotfix.GameSystems.SyncLayer
             // 连接失败/登录被拒/断线那三个入口之后都收不到任何消息，它只可能是死亡兜底设的。
             _pendingReturnToMenu = false;
             _statusMessage = null;
-            Debug.Log("[NetHost] 服务端复活：HP=" + hp);
-            _localEntry.ApplyServerRespawn(hp);
+            _manager?.ResetMovementForRespawn(notice.HasSpawnPosition ? (uint?)notice.Tick : null);
+            _netPolicy?.ClearServerCorrection();
+            Vector3? spawn = notice.HasSpawnPosition
+                ? new Vector3(notice.SpawnX, notice.SpawnY, notice.SpawnZ)
+                : (Vector3?)null;
+            Debug.Log("[NetHost] 服务端复活：HP=" + notice.Hp);
+            _localEntry.ApplyServerRespawn(notice.Hp, spawn);
         }
 
         /// <summary>
@@ -529,7 +530,7 @@ namespace Hotfix.GameSystems.SyncLayer
             // 离开世界：阵亡等待随之作废（否则兜底计时会跨会话继续跑，15 秒后凭空把
             // 新会话的玩家送回选人界面）
             _awaitingServerRespawn = false;
-            _hasServerRespawn = false;
+            Interlocked.Exchange(ref _pendingServerRespawn, null);
         }
 
         private void OnGUI()
@@ -737,6 +738,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _adapter!.MessageReceived += _combatBridge.OnMessage;
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
             _localEntry.SkillCoordinator.OnChargeReleased += OnLocalChargeReleased;
+            _localEntry.SkillCoordinator.OnSkillCancelled += OnLocalSkillCancelled;
             // T12 乙-3：服务端判死 → 提示 + 回选人（重登即复活）
             _localEntry.OnServerDeath += HandleLocalPlayerDeath;
 
@@ -828,6 +830,10 @@ namespace Hotfix.GameSystems.SyncLayer
                 _networkTargetSelector != null ? _networkTargetSelector.LockedTargetId : 0L);
         }
 
+        /// <summary>旋转取消/被打断 → 服务端丢弃未到期判定段（B3）</summary>
+        private void OnLocalSkillCancelled(SkillData skillData)
+            => SkillCastReporter.ReportCancel(_combatBridge, skillData);
+
         /// <summary>远程视图移除（AOI 出界/离线）：目标就是当前锁定时先清锁（ViewRemoved 在 DestroyView 之前）</summary>
         private void HandleRemoteViewRemoved(long entityId)
         {
@@ -885,6 +891,7 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 _localEntry.SkillCoordinator.OnSkillActivated -= OnLocalSkillCast;
                 _localEntry.SkillCoordinator.OnChargeReleased -= OnLocalChargeReleased;
+                _localEntry.SkillCoordinator.OnSkillCancelled -= OnLocalSkillCancelled;
             }
             _combatBridge.OnLineProjectileStopped -= HandleLineProjectileStopped;
             _combatBridge = null;

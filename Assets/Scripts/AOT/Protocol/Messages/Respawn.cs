@@ -21,5 +21,10 @@ namespace Cool.Protocol
         /// <summary>服务器 tick</summary>
         [ProtoMember(2)]
         public uint Tick { get; set; }
+
+        [ProtoMember(3)] public bool HasSpawnPosition { get; set; }
+        [ProtoMember(4)] public float SpawnX { get; set; }
+        [ProtoMember(5)] public float SpawnY { get; set; }
+        [ProtoMember(6)] public float SpawnZ { get; set; }
     }
 }

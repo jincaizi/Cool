@@ -2,6 +2,7 @@ using System.Collections;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C;
+using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.FSM;
 using NUnit.Framework;
@@ -149,6 +150,57 @@ namespace GameSys.PlayModeTests
             yield return new WaitForSeconds(3.5f);
             Assert.IsTrue(_entry.IsDead, "联网下客户端不得自行复活（服务端仍判死，复活只能是重登）");
             Assert.AreEqual(0f, _entry.CurrentHp, 0.01f, "联网下客户端不得自行回满 HP");
+        }
+
+        [UnityTest]
+        public IEnumerator Online_Respawn_Uses_The_Position_From_The_Server()
+        {
+            NetworkModeService.Save(NetworkMode.Online);
+            _entry.ApplyServerDamage(LethalDamage, Vector3.back, 0f);
+            Assert.IsTrue(_entry.IsDead);
+
+            var serverSpawn = new Vector3(-15f, 0.3f, -30f);
+            _entry.ApplyServerRespawn(100f, serverSpawn);
+            Assert.AreEqual(serverSpawn, _entry.transform.position);
+            Assert.AreEqual(serverSpawn, _entry.CoreController.Data.Position,
+                "复活同帧的位置上报会读取 CharacterData");
+            yield return null;
+
+            Assert.IsFalse(_entry.IsDead);
+            Assert.AreEqual(serverSpawn.x, _entry.transform.position.x, 0.01f);
+            Assert.AreEqual(serverSpawn.z, _entry.transform.position.z, 0.01f);
+        }
+
+        /// <summary>
+        /// B2：空中死亡后复活必须退出 Base 层的跳跃节点。死亡锁只写 Animator 参数
+        /// （LockState(Idle) → ForceState 只 SetInteger），JumpAir 的实际状态不会因为参数变 0 而退出；
+        /// 复活必须做一次真实的动画状态切换，否则移动时腿部无动画（漂移），再跳一次才恢复。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator test_respawn_after_air_death_exits_jump_animator_state()
+        {
+            // Arrange：把 Base 层真实推到 JumpAir（模拟空中死亡）
+            NetworkModeService.Save(NetworkMode.Online);
+            var animator = _goInstance.GetComponentInChildren<Animator>();
+            Assert.IsNotNull(animator, "测试用玩家 Prefab 必须带 Animator");
+            animator.SetBool(AnimHashes.IsJumping, true);
+            animator.Play("JumpAir", 0, 0f);
+            animator.Update(0f);
+            Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("JumpAir"),
+                "前置：Base 层应停在 JumpAir");
+
+            _entry.ApplyServerDamage(LethalDamage, Vector3.back, 0f);
+            Assert.IsTrue(_entry.IsDead);
+
+            // Act：服务端复活（联网路径）
+            _entry.ApplyServerRespawn(100f, new Vector3(5f, 0f, 5f));
+            yield return null;
+
+            // Assert：实际状态必须退出跳跃节点，且参数一致
+            var info = animator.GetCurrentAnimatorStateInfo(0);
+            Assert.IsFalse(info.IsName("JumpAir"), "复活后 Base 层不得仍停在 JumpAir");
+            Assert.IsFalse(info.IsName("JumpStart"), "复活后 Base 层不得仍停在 JumpStart");
+            Assert.IsFalse(animator.GetBool(AnimHashes.IsJumping), "复活后 IsJumping 必须复位");
         }
 
         [UnityTest]

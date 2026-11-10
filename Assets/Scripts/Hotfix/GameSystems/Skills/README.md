@@ -20,6 +20,9 @@
 → `SkillExecutor`（目标检测、伤害、效果）→ `EventBus` 事件 → Nameplate / VFX / 状态效果。
 
 - 蓄力、旋转、冲刺、投射物各有独立数据类与测试。
+- 旋转取消上报（B3）：`SkillCoordinator.OnSkillCancelled` 在同键取消/被受击眩晕打断时触发；
+  `SkillCastReporter.ReportCancel` 只对 `SpinSkillData` 发 `CancelCastRequest`，服务端据此
+  丢弃未到期判定段。单段技能没有残留段，不上报。
 - 远程施法表现使用 `Data/SkillPresentationCatalog`，不依赖本地 `SkillCoordinator`。
 - 技能对 3C 的影响通过 `Sys3CEntry` 与 `StateCoordinator` 的接口完成。
 - 格挡成功事件 `BlockSucceededEvent` 定义在 `Sys3C/Core/Events/`，由战斗与同步层发布，表现层订阅。

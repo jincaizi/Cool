@@ -304,6 +304,74 @@ public class PathFollowerTests
     }
 
     [Fact]
+    public void Successful_Repath_Without_Progress_Still_Accumulates_Stuck_Windows()
+    {
+        NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (_, _) => true), "test");
+        var (monster, follower) = Setup(nav); // npcId 15 → 相位 0，重寻在 tick 15/30
+        monster.Config.moveSpeed = 0f;        // 每 tick 实际位移为 0：路径查得到但走不动
+        var mover = new SimpleMoveSystem();
+        var goal = new Vector3(8f, 0f, 8f);
+
+        nav.BeginTick(0);
+        follower.Tick(monster, goal, mover, 0.066f, 0);
+        Assert.True(follower.HasPath);
+
+        // 预算充足 ⇒ tick 15/30 的周期重寻都会成功；成功重寻不能清除停滞证据。
+        for (uint t = 1; t <= 30; t++)
+        {
+            nav.BeginTick(t);
+            follower.Tick(monster, goal, mover, 0.066f, t);
+        }
+
+        // 30 tick = 3 个 10 tick 停滞窗口，必须触发既有重寻/恢复流程。
+        Assert.False(follower.HasPath);
+    }
+
+    [Fact]
+    public void Path_Exhausted_Without_Attack_Range_Progress_Triggers_Stuck_Recovery()
+    {
+        NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (_, _) => true), "test");
+        var (monster, follower) = Setup(nav);
+        var mover = new SimpleMoveSystem();
+        // 目标离网格 1.9m：路径终点投影到 x=0，真实目标距投影点 1.9 > 模板 attackRange 1.5。
+        var goal = new Vector3(-1.9f, 0f, 6f);
+
+        nav.BeginTick(0);
+        follower.Tick(monster, goal, mover, 0.066f, 0);
+        Assert.True(follower.HasPath);
+        nav.MaxQueriesPerTick = 0; // 阻止周期重寻覆盖停滞触发；预算拒绝保留旧路径
+
+        for (uint t = 1; t <= 120; t++)
+        {
+            nav.BeginTick(t);
+            follower.Tick(monster, goal, mover, 0.066f, t);
+        }
+
+        Assert.False(follower.HasPath); // 路径走完但真实目标打不到 → 停滞恢复必须触发
+    }
+
+    [Fact]
+    public void Large_Engage_Range_Suppresses_Stuck_At_Projected_Path_End()
+    {
+        NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (_, _) => true), "test");
+        var (monster, follower) = Setup(nav);
+        var mover = new SimpleMoveSystem();
+        var goal = new Vector3(-1.9f, 0f, 6f);
+
+        nav.BeginTick(0);
+        follower.Tick(monster, goal, mover, 0.066f, 0, engageRange: 6f);
+        nav.MaxQueriesPerTick = 0;
+
+        for (uint t = 1; t <= 120; t++)
+        {
+            nav.BeginTick(t);
+            follower.Tick(monster, goal, mover, 0.066f, t, engageRange: 6f);
+        }
+
+        Assert.True(follower.HasPath); // 1.9m 在 50005 的 6m 射程内 → 合法等待，不判卡死
+    }
+
+    [Fact]
     public void Stuck_For_Three_Windows_Forces_Repath()
     {
         NavigationService nav = new NavigationService(NavMeshFixture.Grid(12, 12, (_, _) => true), "test");

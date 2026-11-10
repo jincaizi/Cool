@@ -1,5 +1,5 @@
 {
   "maps": [
-    { "id": "demoday", "navFile": "Config/nav/demoday.navbin" }
+    { "id": "demoday", "navFile": "Config/nav/demoday.navbin", "playerSpawn": { "x": -15, "y": 0.3, "z": -30 } }
   ]
 }

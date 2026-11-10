@@ -38,6 +38,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// <summary>蓄力释放（松开按钮或蓄满自动释放）：skillData / 释放进度 [0,1] / 释放瞬间落点。
         /// 联网上报用——蓄力技能在 OnSkillActivated 时不发 CastRequest，改为在这里发（取消蓄力不触发）</summary>
         public event Action<SkillData, float, Vector3> OnChargeReleased;
+        /// <summary>旋转技能被取消/打断（同键取消、受击、眩晕等）：联网上报 CancelCastRequest，
+        /// 让服务端丢弃未到期判定段。单段技能不触发。</summary>
+        public event Action<SkillData> OnSkillCancelled;
 
         // 属性
         public SkillExecutor CurrentSkill => _currentSkill;
@@ -162,7 +165,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 && input.SkillId == _currentSkill.SkillId)
             {
                 if (_currentSkill.CanCancel())
-                    _currentSkill.Cancel();
+                {
+                    // Cancel() 会同步走完成回调并清空 _currentSkill——先留引用再上报。
+                    var data = _currentSkill.Data;
+                    if (_currentSkill.Cancel())
+                        OnSkillCancelled?.Invoke(data);
+                }
                 return;
             }
 
@@ -512,6 +520,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnExecutorInterrupted(int skillId, InterruptionSource source)
         {
+            // 旋转被受击/眩晕等打断：服务端也要丢弃未到期段（同键取消走 HandleInput）。
+            if (_currentSkill != null && _currentSkill.SkillId == skillId
+                && _currentSkill.Data is SpinSkillData)
+            {
+                OnSkillCancelled?.Invoke(_currentSkill.Data);
+            }
             CleanupExecutor(skillId);
         }
 

@@ -43,6 +43,14 @@ namespace Cool.Protocol
         [ProtoMember(7)] public float ChargeProgress { get; set; }
     }
 
+    /// <summary>取消施法（客户端 → 服务器）。B3：旋转（20002）取消后必须丢弃未到期的
+    /// 服务端判定段，否则已取消的旋转仍会继续扣血。无匹配实例时服务端幂等忽略。</summary>
+    [ProtoContract]
+    public class CancelCastRequest : IMessage
+    {
+        [ProtoMember(1)] public int SkillId { get; set; }
+    }
+
     /// <summary>施法广播（服务器 → caster 及视野内观察者；远程表现驱动，P4 表现占位）</summary>
     [ProtoContract]
     public class CastBroadcast : IMessage

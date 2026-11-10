@@ -20,6 +20,8 @@ namespace Cool.SyncCore
 
         public int FrameCount => _frames.Count;
 
+        public void Clear() => _frames.Clear();
+
         /// <summary>记录一帧本地预测（上报时调用）</summary>
         public void RecordFrame(uint sequence, Vec3 position, float rotationY)
         {

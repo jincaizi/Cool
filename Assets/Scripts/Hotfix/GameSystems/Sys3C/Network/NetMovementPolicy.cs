@@ -48,5 +48,7 @@ namespace Hotfix.GameSystems.Sys3C.Network
             _targetRotation = rotation;
             _correcting = true;
         }
+
+        public void ClearServerCorrection() => _correcting = false;
     }
 }

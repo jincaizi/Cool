@@ -51,10 +51,11 @@ namespace KcpServer.Monster
         private uint _lastProgressTick, _goalRevision;
         private Vector3 _requestedGoal;
         public MovementResult LastResult { get; private set; }
-        public MovementResult TickResult(MonsterState monster, Vector3 goal, SimpleMoveSystem mover, float deltaTime, uint tick)
+        public MovementResult TickResult(MonsterState monster, Vector3 goal, SimpleMoveSystem mover,
+            float deltaTime, uint tick, float engageRange = 0f)
         {
             if (DistanceXZ(goal,_requestedGoal)>0.01f) { _goalRevision++; _requestedGoal=goal; }
-            bool moved=Tick(monster,goal,mover,deltaTime,tick);
+            bool moved=Tick(monster,goal,mover,deltaTime,tick,engageRange);
             if(moved) _lastProgressTick=tick;
             var status=moved?MovementStatus.Moving:
                 _lastFailure=="budget"?MovementStatus.PendingBudget:
@@ -83,7 +84,10 @@ namespace KcpServer.Monster
         /// <summary>推进路点跟随。返回本 tick 是否**实际**移动（ORCA 清零/无路可走/预算拒绝 → false）。
         /// 有导航但查询失败/退避/预算拒绝时**停住**，绝不回退直线穿地形；只有 `_navigation == null`
         /// 才保留旧的直线 MoveTo（未配置导航的宿主/`--no-nav` 负对照）。</summary>
-        public bool Tick(MonsterState monster, Vector3 goal, SimpleMoveSystem mover, float deltaTime, uint tick)
+        /// <param name="engageRange">“已经能打”的半径（B4：Chase 传当前血量条件下最大技能射程）；
+        /// ≤0 = 回退模板 attackRange。仅影响停滞检测的攻击距离豁免。</param>
+        public bool Tick(MonsterState monster, Vector3 goal, SimpleMoveSystem mover, float deltaTime,
+            uint tick, float engageRange = 0f)
         {
             if (_navigation == null)
                 return mover.MoveTo(monster, goal, deltaTime) > MovementEpsilon;
@@ -110,9 +114,14 @@ namespace KcpServer.Monster
                     uint phase = (uint)(monster.NpcId % RepathIntervalTicks);
                     _nextRepathTick = tick + RepathIntervalTicks + phase;
                     _nextGoalRepathTick = tick + GoalMoveRepathIntervalTicks;
-                    _stuckCheckPosition = monster.Position;
-                    _stuckCheckTick = tick;
-                    _stuckWindows = 0;
+                    // B4：周期重寻成功本身不代表有进展。只有新路径（首次/恢复后）或目标显著变化
+                    // 才重新取样停滞证据；否则 15–29 tick 的成功重寻会把 3×10 tick 窗口永远清零。
+                    if (noPath || goalMoved)
+                    {
+                        _stuckCheckPosition = monster.Position;
+                        _stuckCheckTick = tick;
+                        _stuckWindows = 0;
+                    }
                     SkipPassedWaypoints(monster);
                 }
                 else
@@ -126,6 +135,7 @@ namespace KcpServer.Monster
 
             // 有导航但当前没有可用路径（首次失败/退避中/预算拒绝）：原地停住。
             // 由行为树转入 Idle/Return；绝不朝 blocked/off-navmesh 目标直线移动。
+            // 这里不累计停滞证据：失败退避/预算重试已负责恢复，叠加会绕过退避造成查询抖动。
             if (_path == null) return Stop(monster, mover, deltaTime);
 
             AdvanceWaypoints(monster);
@@ -133,6 +143,9 @@ namespace KcpServer.Monster
             {
                 // 路径已走完：终点是投影点，剩余的“真实目标”可能离网格最多 2m（玩家站岩石上）。
                 // 再 MoveTo 真实目标会直线穿出 navmesh；停住等 BT 攻击判定或下一次重寻。
+                // B4：停住本身也是“无进展”，必须计入停滞证据；否则目标在投影点外且打不到时，
+                // 怪物会每 15–29 tick 成功重寻一次、永远停在原地。
+                CheckStuck(monster, goal, tick, engageRange);
                 return Stop(monster, mover, deltaTime);
             }
 
@@ -151,7 +164,7 @@ namespace KcpServer.Monster
             direction.Y = 0f;
             float moved = mover.MoveTowards(monster, direction, deltaTime);
 
-            CheckStuck(monster, goal, tick);
+            CheckStuck(monster, goal, tick, engageRange);
             return moved > MovementEpsilon;
         }
 
@@ -201,12 +214,15 @@ namespace KcpServer.Monster
                 _index++;
         }
 
-        private void CheckStuck(MonsterState monster, Vector3 goal, uint tick)
+        private void CheckStuck(MonsterState monster, Vector3 goal, uint tick, float engageRange)
         {
             if (tick - _stuckCheckTick < StuckWindowTicks) return;
 
             float moved = DistanceXZ(monster.Position, _stuckCheckPosition);
-            bool inAttackRange = DistanceXZ(monster.Position, goal) <= monster.Config.attackRange;
+            // B4：用当前血量条件下的最大技能射程（调用方传入），而不是模板 attackRange——
+            // 50005 的 6m 射程内站定是合法等待，不应被误判为卡死。
+            float attackRange = engageRange > 0f ? engageRange : monster.Config.attackRange;
+            bool inAttackRange = DistanceXZ(monster.Position, goal) <= attackRange;
             if (moved < 0.2f && !inAttackRange) _stuckWindows++;
             else _stuckWindows = 0;
 

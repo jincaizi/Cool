@@ -25,6 +25,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly PredictionReconciler _reconciler = new PredictionReconciler();
         private float _timer;
         private uint _sequence;
+        private uint? _respawnTick;
 
         /// <summary>最近一次上报的服务器时钟（纠偏用）</summary>
         public long LastServerTimestamp { get; private set; }
@@ -39,6 +40,13 @@ namespace Hotfix.GameSystems.SyncLayer
             _speedProvider = speedProvider;
             _injectedSendDelayMs = injectedSendDelayMs;
             _defendStateProvider = defendStateProvider;
+        }
+
+        public void ResetForRespawn(uint? tick)
+        {
+            _respawnTick = tick;
+            _reconciler.Clear();
+            _timer = 0f;
         }
 
         /// <summary>每帧驱动；reportIntervalSeconds = ServerTickRateMs/1000（默认 66ms）</summary>
@@ -72,13 +80,16 @@ namespace Hotfix.GameSystems.SyncLayer
                 Speed = _speedProvider(),
                 IsDefending = _defendStateProvider?.Invoke() ?? false,
                 Timestamp = DateTime.UtcNow.Ticks,
-                Sequence = seq
+                Sequence = seq,
+                RespawnTick = _respawnTick
             });
         }
 
         /// <summary>收到 PositionSyncResponse 时调用——返回是否需要纠偏（超阈值）</summary>
         public bool OnResponse(PositionSyncResponse response)
         {
+            if (response.RespawnTick != _respawnTick) return false;
+
             LastServerTimestamp = response.ServerTimestamp;
             _reconciler.Prune(response.AcknowledgedSequence);
             return _reconciler.TryGetCorrection(

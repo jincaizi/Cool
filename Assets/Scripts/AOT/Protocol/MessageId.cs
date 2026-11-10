@@ -45,6 +45,9 @@ namespace Cool.Protocol
         /// <summary>复活通知（服务器 → **被复活者本人**；D-N4）</summary>
         RespawnNotice = 303,
 
+        /// <summary>取消施法（客户端 → 服务器；B3 旋转多段：取消/换命后丢弃未到期判定段）</summary>
+        CancelCastRequest = 304,
+
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,
         BroadcastMessage = 201,

@@ -78,6 +78,13 @@ namespace Hotfix.GameSystems.SyncLayer
             _client.Send(MessageId.CastRequest, request);
         }
 
+        /// <summary>取消施法（B3：旋转多段取消后，服务端丢弃未到期判定段）。</summary>
+        public void NotifySkillCancel(int skillId)
+        {
+            if (!Cool.SyncCore.CombatRules.IsSynced(skillId)) return;
+            _client.Send(MessageId.CancelCastRequest, new CancelCastRequest { SkillId = skillId });
+        }
+
         /// <summary>网络线程回调入口（宿主接线 adapter.MessageReceived）——只入队</summary>
         public void OnMessage(MessageId messageId, IMessage message)
         {

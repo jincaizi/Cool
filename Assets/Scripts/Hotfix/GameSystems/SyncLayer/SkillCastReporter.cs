@@ -47,6 +47,14 @@ namespace Hotfix.GameSystems.SyncLayer
                 targetId: targetId);
         }
 
+        /// <summary>取消上报：只有重复判定技能（旋转 20002）需要——服务端按段结算，
+        /// 取消后必须丢弃未到期段。单段技能没有未到期段，不发。</summary>
+        public static void ReportCancel(CombatNetworkBridge bridge, SkillData data)
+        {
+            if (bridge == null || data == null || data is not SpinSkillData) return;
+            bridge.NotifySkillCancel(data.SkillId);
+        }
+
         /// <summary>释放时上报：可蓄力技能发一次（落点 + 进度）；取消蓄力不会走到这里</summary>
         public static void ReportChargeRelease(CombatNetworkBridge bridge, SkillData data,
             float chargeProgress, Vector3 impactPoint, long targetId = 0)

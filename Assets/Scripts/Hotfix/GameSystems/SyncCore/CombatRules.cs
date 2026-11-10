@@ -49,6 +49,56 @@ namespace Cool.SyncCore
         }
     }
 
+    /// <summary>攻击体积的垂直范围（相对施法者脚底，米）。null = 不做高度过滤（既有 XZ 语义）。</summary>
+    public readonly struct AttackHeightSpec
+    {
+        public float Min { get; }
+        public float Max { get; }
+
+        public AttackHeightSpec(float min, float max)
+        {
+            Min = min;
+            Max = max;
+        }
+    }
+
+    /// <summary>重复判定参数（旋转技能：一次施法按固定间隔多次判定）。</summary>
+    /// <remarks>
+    /// 时间轴与客户端 <c>SpinSkillData</c> 一致：首判 = 起手剪辑时长 + TickInterval，
+    /// 之后每 TickInterval 一段，直到 MaxDuration；每目标独立计数。
+    /// 服务端按 <see cref="CombatRules.TickRateHz"/> 向上取整（0.2s = 3 tick；首判 0.4s = 6 tick）。
+    /// </remarks>
+    public readonly struct RepeatSpec
+    {
+        public float FirstDelaySeconds { get; }
+        public float IntervalSeconds { get; }
+        public float DurationSeconds { get; }
+        public int MaxHitsPerTarget { get; }
+
+        public RepeatSpec(float firstDelaySeconds, float intervalSeconds,
+            float durationSeconds, int maxHitsPerTarget)
+        {
+            FirstDelaySeconds = firstDelaySeconds;
+            IntervalSeconds = intervalSeconds;
+            DurationSeconds = durationSeconds;
+            MaxHitsPerTarget = maxHitsPerTarget;
+        }
+
+        /// <summary>从决策 tick 起算的各段判定 tick（升序，含首段）。</summary>
+        public uint[] BuildStageTicks(uint firstTick)
+        {
+            float span = DurationSeconds - FirstDelaySeconds;
+            int count = span < 0f || IntervalSeconds <= 0f
+                ? 1
+                : 1 + (int)Math.Floor(span / IntervalSeconds + 0.0001f);
+            var ticks = new uint[count];
+            for (int k = 0; k < count; k++)
+                ticks[k] = firstTick + (uint)Math.Ceiling(
+                    (FirstDelaySeconds + k * IntervalSeconds) * CombatRules.TickRateHz);
+            return ticks;
+        }
+    }
+
     /// <summary>
     /// P4 技能规则表（spec §5-P4：CombatRules 冷却/消耗/射程判定，双端同源）。
     /// 表值 = 客户端 PreRes/SkillsCfg 资产实测（2026-09-11）：
@@ -80,9 +130,16 @@ namespace Cool.SyncCore
         /// <summary>投射物判定参数；null = 非投射物技能（既有瞬时技能）。</summary>
         public ProjectileSpec? Projectile { get; }
 
+        /// <summary>重复判定参数；null = 单段技能。旋转（20002）用。</summary>
+        public RepeatSpec? Repeat { get; }
+
+        /// <summary>攻击体积垂直范围；null = 不做高度过滤（投射物/AOE 等未纳入本批的技能）。</summary>
+        public AttackHeightSpec? AttackHeight { get; }
+
         public SkillEntry(int skillId, int shapeType, float maxRange, float maxAreaRadius,
             float maxAngle, float cooldownSeconds, float baseDamage, float criticalRate,
-            float hitDelaySeconds, ProjectileSpec? projectile = null)
+            float hitDelaySeconds, ProjectileSpec? projectile = null, RepeatSpec? repeat = null,
+            AttackHeightSpec? attackHeight = null)
         {
             SkillId = skillId;
             ShapeType = shapeType;
@@ -94,6 +151,8 @@ namespace Cool.SyncCore
             CriticalRate = criticalRate;
             HitDelaySeconds = hitDelaySeconds;
             Projectile = projectile;
+            Repeat = repeat;
+            AttackHeight = attackHeight;
         }
     }
 
@@ -101,6 +160,13 @@ namespace Cool.SyncCore
     {
         public const float CritMultiplier = 1.5f;
         public const float TickRateHz = 15f;
+
+        /// <summary>玩家受击体积高度（米，脚底起算）；B1 高度重叠判定用。</summary>
+        public const float PlayerBodyHeight = 1.8f;
+
+        /// <summary>地面近战攻击体积（相对施法者脚底，米）：跳起后脚底超过 1.2m 即脱离该体积。
+        /// 第一批只给玩家基础近战与怪物地面近战；投射物/AOE 保持纯 XZ 语义。</summary>
+        public static readonly AttackHeightSpec GroundMelee = new AttackHeightSpec(-0.3f, 1.2f);
 
         /// <summary>米制字段与角度字段共用的浮点容差：只吸收序列化/运算抖动，不容纳 1cm 级的范围放大。</summary>
         private const float ShapeEpsilon = 0.001f;
@@ -120,11 +186,15 @@ namespace Cool.SyncCore
         private static readonly Dictionary<int, SkillEntry> Table = new Dictionary<int, SkillEntry>
         {
             // 玩家四条：hitDelay = 客户端动画资产的判定帧实测（ShapeBlock._hitboxTimings + CastTime）
-            [10001] = new SkillEntry(skillId: 10001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0f, baseDamage: 50f, criticalRate: 0.15f, hitDelaySeconds: 0.30f),
-            // 10002：单机 BA_Heavy 的 0.35s 挥击（[0.35]）+ 剑气是两个独立伤害实例 ⇒ keepsSwing: true
-            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, totalFlightSeconds: 12f / 18f, keepsSwing: true)),
+            [10001] = new SkillEntry(skillId: 10001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0f, baseDamage: 50f, criticalRate: 0.15f, hitDelaySeconds: 0.30f, attackHeight: GroundMelee),
+            // 10002：单机 BA_Heavy 的 0.35s 挥击（[0.35]）+ 剑气是两个独立伤害实例 ⇒ keepsSwing: true。
+            // 高度只作用于挥击实例（ResolveSwing）；剑气走 ResolveLineAll，保持纯 XZ。
+            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, totalFlightSeconds: 12f / 18f, keepsSwing: true), attackHeight: GroundMelee),
             [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f, hitDelaySeconds: 0.30f),
-            [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f, hitDelaySeconds: 0f),
+            // 20002：单机 Spin_SkillR 时间轴 = 起手剪辑 0.2s（Attack04_Start_SwordAndShield，FBX 0–6 帧）
+            // + 0.2s 首判间隔，之后每 0.2s 一段，MaxDuration 3s，每目标最多 5 段（资产值，2026-11-10 实测）。
+            [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f, hitDelaySeconds: 0f,
+                repeat: new RepeatSpec(firstDelaySeconds: 0.4f, intervalSeconds: 0.2f, durationSeconds: 3f, maxHitsPerTarget: 5)),
             // 2026-10-18：投射物/蓄力进表（翻转 D-P4-1）。形状上限必须容纳客户端真实形状。
             [20003] = new SkillEntry(20003, shapeType: 0, maxRange: 0f, maxAreaRadius: 0f, maxAngle: 0f,
                 cooldownSeconds: 3f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0f,
@@ -145,16 +215,16 @@ namespace Cool.SyncCore
             //   Slime atk range 1.5 / Wolf atk range 2.0；伤害 Slime 10 / Wolf 15——旧 AiComponent 硬编码 10
             //   从未生效（死代码+攻击缺陷），P5 首次生效即差异化（D-P5-2 平衡选择，偏差记录）；
             //   cd 1s 与旧 SkillSystem 同值；怪物无暴击）
-            [50001] = new SkillEntry(skillId: 50001, shapeType: 0, maxRange: 1.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 10f, criticalRate: 0f, hitDelaySeconds: 0.35f),
-            [50002] = new SkillEntry(skillId: 50002, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 15f, criticalRate: 0f, hitDelaySeconds: 0.35f),
+            [50001] = new SkillEntry(skillId: 50001, shapeType: 0, maxRange: 1.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 10f, criticalRate: 0f, hitDelaySeconds: 0.35f, attackHeight: GroundMelee),
+            [50002] = new SkillEntry(skillId: 50002, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1f, baseDamage: 15f, criticalRate: 0f, hitDelaySeconds: 0.35f, attackHeight: GroundMelee),
             // 2026-10-12 新怪（spec §3）：t3 骑士精英 / t4 蜘蛛 Boss。
             // maxRange 必须 ≥ monster_config.json 的 attackRange——填小了怪物在攻击距离静默冻结
             //（MonsterModuleTests.Template_AttackRange_Fits_Its_Combat_Rule 守这条）。
-            [50003] = new SkillEntry(skillId: 50003, shapeType: 0, maxRange: 2.2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1.5f, baseDamage: 30f, criticalRate: 0f, hitDelaySeconds: 0.35f),
-            [50004] = new SkillEntry(skillId: 50004, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 2f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0.35f),
+            [50003] = new SkillEntry(skillId: 50003, shapeType: 0, maxRange: 2.2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 1.5f, baseDamage: 30f, criticalRate: 0f, hitDelaySeconds: 0.35f, attackHeight: GroundMelee),
+            [50004] = new SkillEntry(skillId: 50004, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 2f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0.35f, attackHeight: GroundMelee),
             // P2 怪物多技能（2026-11-03）：DogKnight 突进斩 / SpiderBoss 范围技（血量 50% 以下启用）
             [50005] = new SkillEntry(50005, shapeType: 0, maxRange: 6f, maxAreaRadius: 0f, maxAngle: 60f,
-                cooldownSeconds: 4f, baseDamage: 25f, criticalRate: 0f, hitDelaySeconds: 0.35f),
+                cooldownSeconds: 4f, baseDamage: 25f, criticalRate: 0f, hitDelaySeconds: 0.35f, attackHeight: GroundMelee),
             [50006] = new SkillEntry(50006, shapeType: 1, maxRange: 0f, maxAreaRadius: 4f, maxAngle: 0f,
                 cooldownSeconds: 5f, baseDamage: 40f, criticalRate: 0f, hitDelaySeconds: 0.35f),
         };

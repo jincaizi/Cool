@@ -52,6 +52,20 @@ namespace KcpServer.Monster
             return best;
         }
 
+        /// <summary>当前血量条件下所有可用技能的最大 maxRange——停滞检测用“已经能打”的半径。
+        /// 只过滤血量，不看冷却（冷却中仍然在射程内，不应被误判为卡死）。</summary>
+        public static float MaxRangeFor(MonsterState monster, PlayerState self)
+        {
+            float max = 0f;
+            foreach (var skill in monster.Config.skills)
+            {
+                if (!CombatRules.TryGet(skill.skillId, out var entry)) continue;
+                if (!HpAllowed(skill, self)) continue;
+                max = MathF.Max(max, skill.MaxRangeOf(entry));
+            }
+            return max;
+        }
+
         public static SelectedSkill? SelectPotential(MonsterState monster, PlayerState self, uint tick)
         {
             SelectedSkill? best=null;

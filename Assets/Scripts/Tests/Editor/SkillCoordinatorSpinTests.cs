@@ -69,6 +69,22 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void HandleInput_SameSkillAfterCancelWindow_Raises_OnSkillCancelled()
+        {
+            // B3：旋转取消必须上报服务端（丢弃未到期判定段）。minDuration=0 直接进入可取消窗口。
+            var data = CreateSpinData();
+            TestHelpers.SetField(data, "_minDuration", 0f);
+            _coordinator.RegisterSkill(data);
+            SkillData cancelled = null;
+            _coordinator.OnSkillCancelled += d => cancelled = d;
+
+            _coordinator.HandleInput(SkillInput.SkillToPosition(SpinId, Vector3.zero));
+            _coordinator.HandleInput(SkillInput.SkillToPosition(SpinId, Vector3.zero));
+
+            Assert.AreSame(data, cancelled, "同键取消旋转必须触发 OnSkillCancelled（联网取消上报挂点）");
+        }
+
+        [Test]
         public void HandleInput_OtherSkillWhileSpinning_IsBuffered()
         {
             _coordinator.HandleInput(SkillInput.SkillToPosition(SpinId, Vector3.zero));

@@ -40,6 +40,23 @@ Hit 层只有 `Hit` / `DefendHit` / `Dizzy` 三态可达。`Knockback` / `Launch
 | `Network/MovementPolicy.cs`、`Network/NetMovementPolicy.cs` | 本地 / 联网移动策略 |
 | `Skill/SkillDashComponent.cs` | 技能突进 |
 
+## 复活传送
+
+联网复活按服务端下发的坐标传送。单机和旧版服务端通知使用场景出生点。
+传送同步刷新角色移动数据，确保复活同一帧的位置上报读到新坐标。
+
+**复活基础层复位（B2，2026-11-10）**：`FSMManager.RequestResurrect` 在解锁后调用
+`CharacterController.ResetAirborneState`（清跳跃请求/延迟离地标记/空中状态）并
+`BaseFSM.ResetToLocomotion`（`Animator.Play` 实际切到 Locomotion）。死亡锁只写 `BaseState`
+参数，而 JumpAir 的出口只认参数 5——只改参数不会退出跳跃节点。单机 `TickRespawn` 与联网
+`ApplyServerRespawn` 共用这条路径。
+
+**接地检测与贴怪起跳（B5，2026-11-10）**：`GroundDetector` 优先用 `CharacterController.isGrounded`；
+为 false 时用只含 `GroundLayer` 的脚下球体补接地证据（覆盖 skinWidth 间隙），并在胶囊与
+NpcBody（层 10）贴边时提供跳跃支撑（0.25m 容差）——贴边/交叠不再被接地门控拒绝，普通空中
+二段跳不受影响。`CharacterController` 暴露 `JumpRequests` / `JumpRequestsRejectedUngrounded` /
+`JumpsConsumed` / `LastMoveFlags` 供真机采样。
+
 ## 测试
 
 - Editor：`Assets/Scripts/Tests/Editor/Sys3C/`、`FSMManagerHitFeedbackTests`、`JumpTransitionTableTests`、

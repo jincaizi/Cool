@@ -64,6 +64,16 @@ public class SkillSelectorTests
     }
 
     [Fact]
+    public void MaxRangeFor_Respects_Hp_Gated_Skills()
+    {
+        var (above, aboveSelf) = Make(hp: 80f); // 50005 血量条件不满足 → 只剩 50003 的 2.2m
+        Assert.Equal(2.2f, SkillSelector.MaxRangeFor(above, aboveSelf), 4);
+
+        var (below, belowSelf) = Make(hp: 40f); // 半血以下 → 50005 的 6m 纳入
+        Assert.Equal(6f, SkillSelector.MaxRangeFor(below, belowSelf), 4);
+    }
+
+    [Fact]
     public void Skips_High_Priority_Skill_Above_Hp_Threshold()
     {
         var (state, self) = Make(hp: 80f);

@@ -14,6 +14,7 @@ namespace KcpServer
     public sealed class Server3C : IDisposable
     {
         private readonly ILogger _logger;
+        private readonly Vector3 _respawnPosition;
         private readonly RoomManager _roomManager;
         private readonly LoginHandler _loginHandler;
         private readonly PositionSyncHandler _positionSyncHandler;
@@ -40,7 +41,7 @@ namespace KcpServer
         /// 主循环 tick 间隔（~15Hz）。**GameLoop 构造与复活计时（D-2）共用同一个值**——
         /// 两处各写一个 66 是复活时长随主循环调速静默漂移的隐患
         /// </summary>
-        private const int TickIntervalMs = 66;
+        internal const int TickIntervalMs = 66;
 
         // R2：唯一消费者线程独占世界状态；IO 线程只 Enqueue，不触碰状态
         private readonly GameLoop<(EndPoint endpoint, byte[] data)> _gameLoop;
@@ -97,6 +98,16 @@ namespace KcpServer
             {
                 _castHandler.SetNpcLineOfSight((npcId, from, to) =>
                     AttackLineOfSight.HasLineOfSight(navigation, from, to));
+
+                // B1：高度判定以客户端自报 Y 为候选，再用 navmesh 地面钳制（地面−1m .. 地面+MaxJumpHeight）。
+                // 无导航宿主不接线（ResolveCombatHeight 直接用客户端 Y）。
+                _castHandler.SetGroundHeight(pos =>
+                {
+                    if (!navigation.TryProject(new Vector3(pos.X, pos.Y, pos.Z), 10f,
+                            out Vector3 projected, out _))
+                        return (float?)null;
+                    return projected.Y;
+                });
             }
         }
 
@@ -119,9 +130,10 @@ namespace KcpServer
         /// <summary>当前主循环 tick（packet 处理时比 lambda 已推进值落后一个迭代——冷却记录与判定同基准，语义不受影响；勿'修正'为实时值）</summary>
         public uint CurrentTick { get; private set; }
 
-        public Server3C(ILogger logger)
+        public Server3C(ILogger logger, Vector3 respawnPosition = default)
         {
             _logger = logger;
+            _respawnPosition = respawnPosition;
             _sessionManager = new SessionManager(logger);
             _roomManager = new RoomManager(new RoomManagerConfig());
             _loginHandler = new LoginHandler(this, _roomManager, _logger);
@@ -249,13 +261,14 @@ namespace KcpServer
             _playerIdToSession.TryRemove(playerId, out _);
         }
 
-        public void RegisterEntity(long playerId, string playerName)
+        public void RegisterEntity(long playerId, string playerName, bool supportsAuthoritativeRespawn = false)
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
             // P5：登录标志置在 store 实例上——怪物感知（MonsterBrain.TryAcquireBySight）与
             // 怪物施法候选（CastHandler）过滤读的是本实例；LoginHandler 自建实例只进 RoomManager。
             // BotRunner 不经此路径（直接 AddPlayer）——压测 bot 保持非登录态（D-P5-3 语义）
             player.IsLoggedIn = true;
+            player.SupportsAuthoritativeRespawn = supportsAuthoritativeRespawn;
             // AOI：实体立即可见靠 AoiGrid 首帧 + AoiBandScheduler HasSent=false（无需标脏）——
             // MarkDirty 保留仅为 P2 测试语义（PositionSyncEntityStoreTests 断言 IsDirty）
             _entityStore.MarkDirty(player);
@@ -346,20 +359,27 @@ namespace KcpServer
         /// <summary>
         /// 每 tick 扫一遍实体：新死的打标记，到点的复活并**给本人**发通知。
         /// 复杂度 O(实体数)/tick——与既有的 AOI 广播同量级（本 tick 的第二遍遍历，无新增数据结构）。
-        /// **只改存活与血量，不摆位置**：玩家位置由客户端上报（D-N5），服务端写会被下一次上报覆盖。
+        /// 支持权威复活的客户端同时获得服务端落点和新的移动校验 tick。
         /// </summary>
         private void TickRespawns(uint tick)
         {
             foreach (var p in _entityStore.All)
             {
-                if (!AdvanceRespawn(p, tick, TickIntervalMs)) continue;
+                if (!AdvanceRespawn(p, tick, TickIntervalMs, _respawnPosition)) continue;
 
                 // 只发给**有会话**的实体（bot 没有 session，没人可通知）
                 if (!p.IsLoggedIn) continue;
                 var session = GetSession(p.PlayerId);
                 if (session == null) continue;
-                _ = SendToSessionAsync(session, MessageId.RespawnNotice,
-                    new RespawnNotice { Hp = p.Hp, Tick = tick });
+                var notice = new RespawnNotice { Hp = p.Hp, Tick = tick };
+                if (p.SupportsAuthoritativeRespawn)
+                {
+                    notice.HasSpawnPosition = true;
+                    notice.SpawnX = p.Position.X;
+                    notice.SpawnY = p.Position.Y;
+                    notice.SpawnZ = p.Position.Z;
+                }
+                _ = SendToSessionAsync(session, MessageId.RespawnNotice, notice);
             }
         }
 
@@ -369,10 +389,19 @@ namespace KcpServer
         /// （2026-11-01 浏览器 E2E 实测：受害者收到死亡判定后 15 秒等不到 `RespawnNotice`，
         /// 客户端兜底掉回选人界面）。
         /// </summary>
-        internal static bool AdvanceRespawn(PlayerState p, long tick, uint tickMs)
+        internal static bool AdvanceRespawn(PlayerState p, uint tick, uint tickMs, Vector3 spawn)
         {
             if (!p.IsAlive) p.MarkDead(tick);
-            return p.TryRespawn(tick, tickMs);
+            if (!p.TryRespawn(tick, tickMs)) return false;
+
+            if (p.SupportsAuthoritativeRespawn)
+            {
+                p.UpdatePosition(spawn, p.Rotation, 0f, 0L, p.LastReceivedSequence);
+                p.IsDefending = false;
+                p.RespawnTick = tick;
+            }
+
+            return true;
         }
 
         /// <summary>每 tick 为各在线 observer 组装并广播其 AOI 可见快照（带节拍/静止保活）</summary>
@@ -517,6 +546,10 @@ namespace KcpServer
 
                     case CastRequest cast:
                         await _castHandler.HandleCastAsync(session, cast);
+                        break;
+
+                    case CancelCastRequest cancel:
+                        _castHandler.HandleCancel(session, cancel);
                         break;
 
                     case Heartbeat heartbeat:

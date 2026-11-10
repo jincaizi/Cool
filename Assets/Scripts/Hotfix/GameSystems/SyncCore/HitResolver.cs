@@ -13,13 +13,16 @@ namespace Cool.SyncCore
         public readonly bool Alive;
         /// <summary>目标身体半径（米）；玩家恒 0，NPC 用 bodyRadius。命中按表面距离。</summary>
         public readonly float Radius;
+        /// <summary>目标受击体积高度（米，自 Position.Y 起算）；0 = 未提供，沿用纯 XZ 语义。</summary>
+        public readonly float Height;
 
-        public CombatCandidate(long id, Vec3 position, bool alive, float radius = 0f)
+        public CombatCandidate(long id, Vec3 position, bool alive, float radius = 0f, float height = 0f)
         {
             Id = id;
             Position = position;
             Alive = alive;
             Radius = radius;
+            Height = height;
         }
     }
 
@@ -43,7 +46,8 @@ namespace Cool.SyncCore
     public static class HitResolver
     {
         public static List<long> Resolve(Vec3 casterPos, float casterYawDeg, long targetId,
-            HitShape shape, IReadOnlyList<CombatCandidate> candidates)
+            HitShape shape, IReadOnlyList<CombatCandidate> candidates,
+            AttackHeightSpec? attackHeight = null)
         {
             var hits = new List<long>();
             if (shape == null || candidates == null) return hits;
@@ -53,6 +57,7 @@ namespace Cool.SyncCore
                 foreach (var c in candidates)
                 {
                     if (!c.Alive) continue;
+                    if (!HeightOverlaps(casterPos, c, attackHeight)) continue;
                     if (SurfaceDistance(casterPos, c.Position, c.Radius) <= shape.AreaRadius)
                         hits.Add(c.Id);
                 }
@@ -71,6 +76,7 @@ namespace Cool.SyncCore
                 foreach (var c in candidates)
                 {
                     if (c.Id != targetId || !c.Alive) continue;
+                    if (!HeightOverlaps(casterPos, c, attackHeight)) continue;
                     if (SurfaceDistance(casterPos, c.Position, c.Radius) > shape.Range) continue;
                     if (!InCone(casterPos, forwardX, forwardZ, halfCos, halfAngleRad,
                             c.Position, c.Radius)) continue;
@@ -86,6 +92,7 @@ namespace Cool.SyncCore
             foreach (var c in candidates)
             {
                 if (!c.Alive) continue;
+                if (!HeightOverlaps(casterPos, c, attackHeight)) continue;
                 float dist = SurfaceDistance(casterPos, c.Position, c.Radius);
                 if (dist > shape.Range) continue;
                 if (!InCone(casterPos, forwardX, forwardZ, halfCos, halfAngleRad,
@@ -115,6 +122,18 @@ namespace Cool.SyncCore
             float angle = (float)Math.Atan2(Math.Abs(forwardX * dz - forwardZ * dx), dot);
             float alpha = (float)Math.Asin(Math.Min(1f, targetRadius / dist));
             return angle <= halfAngleRad + alpha;
+        }
+
+        /// <summary>攻击体积与目标受击体积的垂直重叠。spec 为空 / 目标高度未知 ⇒ 不做高度过滤。
+        /// 攻击体积 = [施法者脚底 + Min, 施法者脚底 + Max]；受击体积 = [目标脚底, 脚底 + Height]。</summary>
+        private static bool HeightOverlaps(Vec3 casterPos, CombatCandidate c, AttackHeightSpec? spec)
+        {
+            if (!spec.HasValue || c.Height <= 0f) return true;
+            float attackMin = casterPos.Y + spec.Value.Min;
+            float attackMax = casterPos.Y + spec.Value.Max;
+            float targetMin = c.Position.Y;
+            float targetMax = targetMin + c.Height;
+            return attackMin < targetMax && attackMax > targetMin;
         }
 
         private static float SurfaceDistance(Vec3 a, Vec3 b, float radius)

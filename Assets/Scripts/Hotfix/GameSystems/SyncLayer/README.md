@@ -34,6 +34,11 @@
 | `NpcAttackSchedule.cs` | NPC 攻击节奏 |
 | `NetworkModeService.cs` / `ServerAddressQuery.cs` | 网络模式与服务器地址 |
 
+## 联网复活
+
+- 联网复活在主线程应用服务端落点。先清空旧预测帧和平滑纠偏，再传送并上报。
+  位置响应的复活 tick 必须匹配当前周期，迟到的纠偏不会跨复活生效。
+
 ## 默认联网与玩家名
 
 - `NetworkModeService.Load()`：无 `net.mode` 存档时默认 `Online`；已有存档（含 `SinglePlayer`）
@@ -100,6 +105,9 @@
 - **点按瞄准的目标来源**：`ClientNetworkHost` 通过 `SetSelectedTargetPositionProvider` 注入
   `NetworkTargetSelector.TryGetLockedPosition`；HoldToAim 火球点按（未拖动）时落点优先取锁定目标
   位置（按 15m 射程钳制），无锁定才回落到角色前方最大射程。移动端瞄准拖拽会覆盖该默认落点。
+- **旋转取消上报**：本地 `SkillCoordinator.OnSkillCancelled`（同键取消/受击打断）→
+  `SkillCastReporter.ReportCancel` → `CancelCastRequest`（仅 `SpinSkillData`）。服务端丢弃
+  未到期判定段，避免已取消的旋转继续扣血。
 - **远程火球按广播落点飞行/爆炸**：`RemoteCastPresenter.OnCastBroadcast` 只在
   `ProjectileSkillData.HoldToAim` 时把 `CastBroadcast.ImpactX/Y/Z` 记为投射物终点；
   `DamageResult` 到达后用该终点 `ExplodeAt`（不退回受击者位置），与服务端落点圆判定同源。

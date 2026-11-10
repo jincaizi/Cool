@@ -20,7 +20,7 @@
 
 - Unity 菜单 `Tools/Navigation/Export Server NavMesh` 把 DemoDay 的烘焙 navmesh 导出为
   `Server/Config/nav/demoday.navbin`（41103 B / 1701 三角面）。
-- `Server/Config/maps.json` 把 map id 映射到 navFile；`NavigationService.LoadFromConfig`
+- `Server/Config/maps.json` 为每张地图配置 `navFile` 和 `playerSpawn`（玩家权威复活落点）；`NavigationService.LoadFromConfig`
   按 `AppContext.BaseDirectory` 解析（`dotnet run` / `dotnet test` 的 CWD 不可靠）。
   `{"maps": null}` 会合并成空表（确定性 "map not found"，不是 NRE）。
 - 启动参数：`--map demoday` 必须配合 `--monsters N`；`--no-nav` 强制无导航（直线移动回退）。

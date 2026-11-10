@@ -50,8 +50,12 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
   tick 立刻重试、不计为寻路失败；另提供投影与 LOS。
 - `PathFollower`：每 15–29 tick（相位错峰）或目标移动 >2m 重寻；`goalMoved` 有独立 5 tick
   最小间隔；路点推进阈值 `bodyRadius * 0.5`；10 tick 窗口位移 <0.2m 计为卡住，连续 3 个窗口
-  触发重寻；真正失败退避 30 tick。**只有无导航时才调 `SimpleMoveSystem.MoveTo` 直线回退；
+  触发重寻；**成功重寻本身不清零停滞证据**（只有真实位移或目标显著变化才重新取样，B4，
+  2026-11-10）；真正失败退避 30 tick。**只有无导航时才调 `SimpleMoveSystem.MoveTo` 直线回退；
   有导航但失败/预算拒绝时停住**（C2）。`Tick` 返回实际是否移动，BT 据此写 `Moving`/Run-Idle。
+- **停滞次级项（B4，2026-11-10）**：路径走完（Arrived）分支也累计停滞证据；`Chase` 传入
+  `SkillSelector.MaxRangeFor`（当前血量条件下最大技能射程）作为停滞豁免半径，`CheckStuck`
+  不再用模板 `attackRange`。无路径分支仍由失败退避/预算重试负责，不叠加检测。
 - **判定帧 LOS**：`CombatResolver` 对 NPC caster 在 `DrainResolved` 再查一次
   `AttackLineOfSight`（0.25m 探针，与起手判定同源）；起手后玩家躲墙不命中（玩家施法不变）。
 - 接入：出生点投影容差 0.5m，失败即抛（fail fast）；巡逻点 9 方向投影并要求
@@ -83,6 +87,9 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
   （0 = 取 `CombatRules` 表值）、`hpBelow` / `hpAbove`（自身血量比例条件）。
 - 选择顺序：距离区间 → 血量条件 → 冷却（只认 `CombatRules`，50005 4s / 50006 5s）→
   `priority` 降序 → `skillId` 升序；无技能可用时，目标太近走 `Reposition`，否则 `Chase`。
+- **贴身选招（B4，2026-11-10）**：`Attack` 先 `Select` 合法就绪且在射程内的技能；只有完全
+  没有可施放技能时，才评估 `TrySetupSkill`（太近 → 后撤到 `minRange`）。半血 DogKnight 贴脸时
+  优先施放 50003 近战，不再被 50005 的后撤 setup 抢占。
 - `50005` DogKnight 中距离（2–6m，priority 10，血量 ≤50%）；`50006` SpiderBoss 低血 AoE
   （shapeType 1，半径 4，血量 ≤50%）。客户端按 `skillId` 固定映射到 Attack01/02 变体：
   `50001/50003/50004 → Attack01`，`50002/50005/50006 → Attack02`，未知技能回退时间戳变体。

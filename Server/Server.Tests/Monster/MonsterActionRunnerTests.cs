@@ -99,6 +99,8 @@ public class MonsterActionRunnerTests
     public void Low_hp_DogKnight_sets_up_special_then_casts_in_legal_range()
     {
         var f=Fixture(3);var self=f.Store.GetPlayer(f.State.NpcId)!;self.Hp=self.MaxHp*0.4f;f.State.LastHp=self.Hp;
+        // B4：合法就绪的贴身近战优先于 50005 setup；本用例要验 setup 本身，先把 50003 置冷却。
+        self.RecordCast(50003,0);
         f.State.Mode=MonsterMode.Combat;f.State.Threats.Ensure(1);
         bool moved=false,cast=false;
         for(uint t=0;t<30;t++) {

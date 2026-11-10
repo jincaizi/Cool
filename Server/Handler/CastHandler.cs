@@ -33,6 +33,10 @@ namespace KcpServer
         /// 在 ApplyHit 扣血后调用；格挡分支传减伤后的伤害。null = 不归属（测试/无怪物宿主）。</summary>
         public Action<long, long, float>? NpcDamaged { get; set; }
 
+        /// <summary>服务端认可的地面高度（B1 高度限幅）：参数 = 客户端上报位置，返回 navmesh 地面 Y。
+        /// null = 无导航宿主，高度直接用客户端自报值（不额外钳制）。只作用于非 NPC 实体。</summary>
+        public Func<Vec3, float?>? GroundHeight { get; set; }
+
         /// <summary>施放裁决结果（输出载体）——决策阶段只填 Accepted/RejectReason/Broadcast/IsNpcCaster，
         /// 判定阶段（DrainResolved）才填 Hits</summary>
         public sealed class CastResolution
@@ -75,25 +79,28 @@ namespace KcpServer
             public readonly CastBroadcast Broadcast;
             public readonly bool IsNpcCaster;
             public readonly ProjectileSpec? Projectile;
+            public readonly RepeatSpec? Repeat;               // 旋转多段；null = 单段
             public readonly float Charge;
-            public uint[] StageTicks;              // 升序；无 Projectile 时长度 1 = 首段 tick
+            public uint[] StageTicks;              // 升序；无 Projectile/Repeat 时长度 1 = 首段 tick
             public int NextStage;                            // 下一段下标
             public readonly HashSet<long> GroupHitIds = new HashSet<long>();  // LineAll 组内去重
+            public readonly Dictionary<long, int> RepeatHitCounts = new Dictionary<long, int>(); // 旋转每目标计数
             public bool Spent;                               // 火球首中即停
             public bool OriginCaptured;
             public Vec3 Origin;                              // 首段捕获的施法者位置
             public float Yaw;
 
             public PendingCast(long casterId, CastRequest request, CastBroadcast broadcast,
-                bool isNpcCaster, ProjectileSpec? projectile, float charge, uint firstTick)
+                bool isNpcCaster, ProjectileSpec? projectile, RepeatSpec? repeat, float charge, uint firstTick)
             {
                 CasterId = casterId; Request = request; Broadcast = broadcast;
-                IsNpcCaster = isNpcCaster; Projectile = projectile; Charge = charge;
-                StageTicks = BuildStageTicks(projectile, firstTick);
+                IsNpcCaster = isNpcCaster; Projectile = projectile; Repeat = repeat; Charge = charge;
+                StageTicks = BuildStageTicks(projectile, repeat, firstTick);
             }
 
-            private static uint[] BuildStageTicks(ProjectileSpec? spec, uint firstTick)
+            private static uint[] BuildStageTicks(ProjectileSpec? spec, RepeatSpec? repeat, uint firstTick)
             {
+                if (repeat.HasValue) return repeat.Value.BuildStageTicks(firstTick);
                 if (spec == null || spec.Stages <= 1) return new[] { firstTick };
                 var ticks = new uint[spec.Stages];
                 for (int k = 0; k < spec.Stages; k++)
@@ -159,7 +166,7 @@ namespace KcpServer
             // D-1/D-2：判定帧延迟由服务端表自持——判定发生在
             // tick + HitDelayTicks + ProjectileTravelTicks（CircleAtPoint 飞行延迟，见上方 firstTick）
             _pending.Add(new PendingCast(casterId, request, resolution.Broadcast, resolution.IsNpcCaster,
-                entry.Projectile, charge, firstTick) { Runner = runner, InstanceId = runner?.Current.InstanceId ?? 0 });
+                entry.Projectile, entry.Repeat, charge, firstTick) { Runner = runner, InstanceId = runner?.Current.InstanceId ?? 0 });
             if (runner != null) { _pending[_pending.Count-1].StageTicks = runner.StageTicks(); resolution.Broadcast.NpcAction = runner.Current; }
             return resolution;
         }
@@ -179,11 +186,13 @@ namespace KcpServer
                 {
                     if (pending.Runner != null && !pending.Runner.TryCommitStage(pending.InstanceId, tick)) { pending.Spent = true; break; }
                     var resolution = ResolveStage(pending);
+                    // 施法者死亡/移除：整组丢弃未到期段。只逐段返回 null 会让复活后的
+                    // 后续段继续结算（B3：旋转死亡/换命后不得残留伤害实例）。
+                    if (resolution == null) { pending.Spent = true; break; }
                     // **每个判定都产出一条**（可能 Hits 为空）——沿用原合同（原实现对每次判定都入列，
                     // 空 Hits 由广播端 `BroadcastDamageAsync` 跳过）。按 Hits.Count 过滤会改变既有
                     // 单段技能的返回值，可能打破既有测试。
-                    if (resolution != null)
-                        (resolved ??= new List<CastResolution>()).Add(resolution);
+                    (resolved ??= new List<CastResolution>()).Add(resolution);
                     pending.NextStage++;
                 }
                 if (!pending.Spent && pending.NextStage < pending.StageTicks.Length) keep = true;
@@ -191,6 +200,21 @@ namespace KcpServer
             }
             if (write < _pending.Count) _pending.RemoveRange(write, _pending.Count - write);
             return resolved ?? new List<CastResolution>();
+        }
+
+        /// <summary>丢弃某施法者某技能的未到期判定实例（客户端取消旋转 / 换命）。
+        /// 返回移除的实例数；无匹配时幂等。</summary>
+        public int CancelPending(long casterId, int skillId)
+        {
+            int removed = 0;
+            for (int i = _pending.Count - 1; i >= 0; i--)
+            {
+                var pending = _pending[i];
+                if (pending.CasterId != casterId || pending.Request.SkillId != skillId) continue;
+                _pending.RemoveAt(i);
+                removed++;
+            }
+            return removed;
         }
 
         /// <summary>判定一段：复查施法者存活 → 几何（按投射物种类）→ 服务端掷骰 → 扣血。
@@ -202,27 +226,28 @@ namespace KcpServer
             if (!CombatRules.TryGet(pending.Request.SkillId, out var entry)) return null; // 决策已校验，防御分支
 
             var candidates = BuildCandidates(pending);            // 原 ResolveHits 里的候选构造，抽成方法
+            var casterPos = new Vec3(caster.Position.X, ResolveCombatHeight(caster), caster.Position.Z);
             var spec = pending.Projectile;
             List<long> hitIds;
             List<long>? swingHitIds = null;
 
             if (spec == null)
             {
-                hitIds = ResolveSwing(caster, pending.Request, candidates);
+                hitIds = ResolveSwing(caster, casterPos, pending.Request, entry, candidates);
             }
             else
             {
                 if (!pending.OriginCaptured)
                 {
                     // 首段捕获一次：剑气/火球沿施法者当时的朝向，不随后续移动改变
-                    pending.Origin = new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z);
+                    pending.Origin = casterPos;
                     pending.Yaw = caster.Rotation;
                     pending.OriginCaptured = true;
                 }
                 // 10002：单机里 0.35s 挥击与剑气是两个独立伤害实例（spec §3.2），投射物分支
                 // 不能把挥击吞掉。只在首段结算一次，用施法者当前位置/朝向（与 spec==null 同源）。
                 if (spec.KeepsSwing && pending.NextStage == 0)
-                    swingHitIds = ResolveSwing(caster, pending.Request, candidates);
+                    swingHitIds = ResolveSwing(caster, casterPos, pending.Request, entry, candidates);
 
                 int stage = pending.NextStage;
                 hitIds = spec.Kind switch
@@ -253,7 +278,6 @@ namespace KcpServer
                 Accepted = true, IsNpcCaster = pending.IsNpcCaster, Broadcast = pending.Broadcast
             };
 
-            var casterPos = new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z);
             // 挥击实例先行（单机判定帧顺序：挥击结算、同帧再生成剑气），且**不写入 GroupHitIds、
             // 不受其 banned 过滤**——同一目标在挥击与剑气两条线上各结算一次（不跨组去重）
             if (swingHitIds != null)
@@ -272,8 +296,21 @@ namespace KcpServer
 
             foreach (var targetId in hitIds)
             {
-                if (pending.Runner == null && !pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
+                if (pending.Repeat is { } repeat)
+                {
+                    // 旋转：每目标独立计数（≤5），不能走 GroupHitIds 的“每施法一次”去重，
+                    // 否则只加 StageTicks 会静默丢掉第 2–5 段。
+                    pending.RepeatHitCounts.TryGetValue(targetId, out int repeatHits);
+                    if (repeat.MaxHitsPerTarget > 0 && repeatHits >= repeat.MaxHitsPerTarget) continue;
+                }
+                else if (pending.Runner == null && !pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
+
                 bool blocked = ApplyHit(pending, entry, spec, targetId, lineAttackerPos, resolution);
+                if (pending.Repeat.HasValue)
+                {
+                    pending.RepeatHitCounts.TryGetValue(targetId, out int repeatHits);
+                    pending.RepeatHitCounts[targetId] = repeatHits + 1;
+                }
                 if (blocked && spec != null && spec.Kind == ProjectileKind.LineAll)
                 {
                     var blocker = _store.GetPlayer(targetId);
@@ -323,12 +360,12 @@ namespace KcpServer
                  + (target.Position.Z - pending.Origin.Z) * fz;
         }
 
-        /// <summary>挥击实例几何（与 spec==null 同源）：施法者位置/朝向 + 请求形状 + 锁定目标。</summary>
-        private static List<long> ResolveSwing(PlayerState caster, CastRequest request,
-            List<CombatCandidate> candidates)
-            => HitResolver.Resolve(
-                new Vec3(caster.Position.X, caster.Position.Y, caster.Position.Z),
-                caster.Rotation, request.TargetPlayerId, request.Shape, candidates);
+        /// <summary>挥击实例几何（与 spec==null 同源）：施法者位置/朝向 + 请求形状 + 锁定目标。
+        /// B1：高度带只作用于挥击；投射物分支（ResolveLineAll/ResolveCircle）保持纯 XZ。</summary>
+        private static List<long> ResolveSwing(PlayerState caster, Vec3 casterPos, CastRequest request,
+            SkillEntry entry, List<CombatCandidate> candidates)
+            => HitResolver.Resolve(casterPos, caster.Rotation, request.TargetPlayerId,
+                request.Shape, candidates, entry.AttackHeight);
 
         /// <summary>对一个命中目标结算：掷骰（+蓄力倍率）→ 格挡 → 扣血 → HitEntry；返回是否格挡。
         /// 调用方决定是否先经 GroupHitIds（挥击实例不经过去重，与剑气各算一次）。</summary>
@@ -386,10 +423,28 @@ namespace KcpServer
                 if (p.PlayerId == pending.CasterId) continue;
                 if (pending.IsNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
                 candidates.Add(new CombatCandidate(p.PlayerId,
-                    new Vec3(p.Position.X, p.Position.Y, p.Position.Z), p.IsAlive, p.BodyRadius));
+                    new Vec3(p.Position.X, ResolveCombatHeight(p), p.Position.Z), p.IsAlive,
+                    p.BodyRadius, BodyHeightOf(p)));
             }
             return candidates;
         }
+
+        /// <summary>B1：非 NPC 实体的判定高度——以客户端自报 Y 为候选，有 navmesh 地面时
+        /// 钳到 [地面−1m, 地面+MaxJumpHeight]；NPC 位置是服务端权威，不钳制。</summary>
+        internal float ResolveCombatHeight(PlayerState p)
+        {
+            if (GroundHeight == null || p.Kind == (byte)EntityKind.Npc) return p.Position.Y;
+            float? ground = GroundHeight(new Vec3(p.Position.X, p.Position.Y, p.Position.Z));
+            if (!ground.HasValue) return p.Position.Y;
+            return Math.Clamp(p.Position.Y, ground.Value - 1f,
+                ground.Value + MovementValidator.MaxJumpHeight);
+        }
+
+        /// <summary>受击体积高度：玩家 1.8m；NPC 用 bodyRadius 近似（最小 1m）。B1 高度重叠判定用。</summary>
+        internal static float BodyHeightOf(PlayerState p)
+            => p.Kind == (byte)EntityKind.Npc
+                ? Math.Max(1f, p.BodyRadius * 2f)
+                : CombatRules.PlayerBodyHeight;
 
         private static float ScaledRadius(ProjectileSpec spec, float charge)
             => spec.ChargeScales
@@ -453,6 +508,10 @@ namespace KcpServer
         /// <summary>接线 NPC 受击归属（Server3C 在 EnableMonsters 后调用；null = 关闭）。</summary>
         public void SetNpcDamageObserver(Action<long, long, float>? observer)
             => _resolver.NpcDamaged = observer;
+
+        /// <summary>接线 B1 地面高度（Server3C 在 EnableMonsters 后调用；null = 不钳制客户端 Y）。</summary>
+        public void SetGroundHeight(Func<Vec3, float?>? groundHeight)
+            => _resolver.GroundHeight = groundHeight;
 
         /// <summary>裁决入口（怪物：tick 内决策 → 校验 + 冷却 + 入队）</summary>
         public CombatResolver.CastResolution Decide(long casterId, CastRequest request, uint tick)
@@ -563,6 +622,14 @@ namespace KcpServer
             // 见 CastResolutionSchedulingTests.Judgment_Lands_Exactly_On_DecideTick_Plus_HitDelay_Ticks 的注释）。
             var decision = _resolver.Decide(playerId.Value, request, _server.CurrentTick + 1);
             await BroadcastSwingAsync(playerId.Value, request, decision);
+        }
+
+        /// <summary>取消施法（B3：旋转取消后丢弃未到期判定段）。未登录/无匹配实例幂等忽略。</summary>
+        public void HandleCancel(IServerSession session, CancelCastRequest request)
+        {
+            long? playerId = _server.GetPlayerId(session);
+            if (!playerId.HasValue) return;
+            _resolver.CancelPending(playerId.Value, request.SkillId);
         }
     }
 }

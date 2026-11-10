@@ -33,6 +33,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse> _pendingResponses =
             new System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse>();
         private MovementReporter? _reporter;
+        private uint? _respawnTick;
 
         public State CurrentState { get; private set; } = State.Disconnected;
         public long LocalPlayerId { get; private set; }
@@ -62,10 +63,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 被复活者本人唯一的"你活了"信号：本地玩家不在自己的 AOI 快照里
         /// （Update 应用快照时 `entity.PlayerId == LocalPlayerId` 直接跳过）。
         /// **在回调线程触发**（与 OnError/OnDisconnected、以及 Sys3CEntry.OnServerDeath 同——
-        /// 见 INetworkClient.MessageReceived 的注释）：负载只有一个 float，没有 Unity 对象要等，
-        /// 封送交给消费者（`ClientNetworkHost.HandleServerRespawn` 只记账，Update 里才动 Unity API）。
+        /// 见 INetworkClient.MessageReceived 的注释）：通知只有协议数据，由宿主封送到主线程应用。
         /// </summary>
-        public event Action<float>? OnServerRespawn;
+        public event Action<RespawnNotice>? OnServerRespawn;
 
         public ClientNetworkManager(INetworkClient client, RemoteEntityRegistry remoteEntities, string username)
         {
@@ -121,7 +121,15 @@ namespace Hotfix.GameSystems.SyncLayer
 
             _reporter = new MovementReporter(_client, positionProvider, rotationProvider, speedProvider,
                 injectedSendDelayMs, defendStateProvider);
+            _reporter.ResetForRespawn(_respawnTick);
             _dispatcher.Subscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
+        }
+
+        /// <summary>主线程应用复活时更新上报周期，之后才消费纠偏响应。</summary>
+        public void ResetMovementForRespawn(uint? tick)
+        {
+            _respawnTick = tick;
+            _reporter?.ResetForRespawn(tick);
         }
 
         /// <summary>
@@ -154,7 +162,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 ZoneId = "Global",
                 ClientVersion = BuildVersion.Raw,
                 DeviceInfo = "P1",
-                ProtocolVersion = ProtocolConstants.ProtocolVersion
+                ProtocolVersion = ProtocolConstants.ProtocolVersion,
+                SupportedFeatures = ProtocolFeatures.AuthoritativeRespawn
             });
         }
 
@@ -287,7 +296,7 @@ namespace Hotfix.GameSystems.SyncLayer
         /// </summary>
         private void OnRespawnNotice(IMessage message)
         {
-            OnServerRespawn?.Invoke(((RespawnNotice)message).Hp);
+            OnServerRespawn?.Invoke((RespawnNotice)message);
         }
 
         private void OnSocketDisconnected(string reason)

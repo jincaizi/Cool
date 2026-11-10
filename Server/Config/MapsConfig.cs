@@ -11,5 +11,6 @@ namespace KcpServer.Config
     {
         public string id = string.Empty;
         public string navFile = string.Empty;
+        public Vector3? playerSpawn;
     }
 }

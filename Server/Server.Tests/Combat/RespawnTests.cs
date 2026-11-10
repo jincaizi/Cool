@@ -1,4 +1,5 @@
 using System;
+using Cool.Protocol;
 using KcpServer;
 using Xunit;
 
@@ -46,18 +47,70 @@ namespace KcpServer.Tests
             var p = new PlayerState(1) { PlayerName = "A" };
             p.ApplyDamage(150f);
 
-            const long deadTick = 1000;
-            Assert.False(Server3C.AdvanceRespawn(p, deadTick, TickMs));        // 第一遍：打死亡标记
+            const uint deadTick = 1000;
+            Assert.False(Server3C.AdvanceRespawn(p, deadTick, TickMs, default));        // 第一遍：打死亡标记
             Assert.False(p.IsAlive);
 
-            Assert.False(Server3C.AdvanceRespawn(p, deadTick + 121, TickMs));  // 8 秒前一个 tick
+            Assert.False(Server3C.AdvanceRespawn(p, deadTick + 121, TickMs, default));  // 8 秒前一个 tick
             Assert.False(p.IsAlive);
 
-            Assert.True(Server3C.AdvanceRespawn(p, deadTick + 122, TickMs));   // 到点：复活
+            Assert.True(Server3C.AdvanceRespawn(p, deadTick + 122, TickMs, default));   // 到点：复活
             Assert.True(p.IsAlive);
             Assert.Equal(p.MaxHp, p.Hp, 3);
 
-            Assert.False(Server3C.AdvanceRespawn(p, deadTick + 200, TickMs));  // 活着不再触发
+            Assert.False(Server3C.AdvanceRespawn(p, deadTick + 200, TickMs, default));  // 活着不再触发
+        }
+
+        [Fact]
+        public void First_Position_Report_After_Far_Respawn_Is_Not_Corrected_Towards_Death()
+        {
+            var spawn = new Vector3(-15f, 0.3f, -30f);
+            var player = new PlayerState(1) { SupportsAuthoritativeRespawn = true, IsDefending = true };
+            player.UpdatePosition(new Vector3(60f, 0f, 0f), 0f, 5f, TimeSpan.TicksPerSecond, 1);
+            player.ApplyDamage(150f);
+            using var server = new Server3C(new TestLogger());
+            var handler = new PositionSyncHandler(server, new TestLogger(), new EntityStore());
+
+            var stale = new PositionSyncRequest { X = 60f, Timestamp = 20_000_000L, Sequence = 2 };
+            Assert.Null(handler.ValidateAndApply(stale, player));
+            Assert.False(Server3C.AdvanceRespawn(player, 1000, TickMs, spawn));
+            Assert.True(Server3C.AdvanceRespawn(player, 1122, TickMs, spawn));
+            Assert.Equal(spawn, player.Position);
+            Assert.Equal(0f, player.Speed);
+            Assert.False(player.IsDefending);
+            Assert.Null(handler.ValidateAndApply(stale, player));
+            Assert.Equal(spawn, player.Position);
+
+            var result = handler.ValidateAndApply(new PositionSyncRequest
+            {
+                X = spawn.X, Y = spawn.Y, Z = spawn.Z,
+                Timestamp = TimeSpan.TicksPerSecond * 10,
+                Sequence = 3, RespawnTick = 1122
+            }, player);
+
+            Assert.False(Assert.IsType<Cool.SyncCore.MoveValidationResult>(result).NeedsCorrection);
+            Assert.Equal(spawn, player.Position);
+        }
+
+        [Fact]
+        public void Respawn_Wire_Data_Preserves_The_Spawn_And_Separates_Zero_Tick_From_Legacy()
+        {
+            var notice = new RespawnNotice
+            {
+                Hp = 100f, Tick = 7, HasSpawnPosition = true, SpawnX = -15f, SpawnY = 0.3f, SpawnZ = -30f
+            };
+            var decodedNotice = (RespawnNotice)MessageCodec.Decode(
+                MessageCodec.EncodeToArray(MessageId.RespawnNotice, notice)).message;
+            Assert.True(decodedNotice.HasSpawnPosition);
+            Assert.Equal(7u, decodedNotice.Tick);
+            Assert.Equal((-15f, 0.3f, -30f), (decodedNotice.SpawnX, decodedNotice.SpawnY, decodedNotice.SpawnZ));
+
+            var request = (PositionSyncRequest)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.PositionSyncRequest, new PositionSyncRequest { RespawnTick = 0 })).message;
+            Assert.Equal(0u, request.RespawnTick);
+            var response = (PositionSyncResponse)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.PositionSyncResponse, new PositionSyncResponse())).message;
+            Assert.Null(response.RespawnTick);
         }
 
         [Fact]

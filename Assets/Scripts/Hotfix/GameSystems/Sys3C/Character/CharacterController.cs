@@ -51,6 +51,21 @@ namespace Hotfix.GameSystems.Sys3C.Character
         public bool IsGrounded => _groundDetector.IsGrounded();
         public Transform Transform => _transform;
 
+        // —— B5 跳跃诊断（无行为影响；PlayMode 复现与真机采样读取）——
+        /// <summary>最近一次水平 Move 的碰撞标志（Below 是否贴地、Sides 是否贴墙/怪）。</summary>
+        public CollisionFlags LastMoveFlags { get; private set; }
+        public int JumpRequests { get; private set; }
+        public int JumpRequestsRejectedUngrounded { get; private set; }
+        public int JumpsConsumed { get; private set; }
+        /// <summary>最近一次消费跳跃请求时的接地值（用于区分“请求时闪烁”与“消费时闪烁”）。</summary>
+        public bool LastConsumeGrounded { get; private set; }
+        /// <summary>最近一次消费跳跃请求时是否靠贴怪（NpcBody）支撑放行。</summary>
+        public bool LastConsumeBodySupport { get; private set; }
+
+        /// <summary>跳跃支撑证据：真实接地，或胶囊与 NpcBody（层 10）相交（B5 贴怪起跳）。</summary>
+        private bool HasJumpSupport()
+            => _data.IsGrounded || _groundDetector.HasBodySupport();
+
         // 适配器引用
         private CharacterStatsAdapter _statsAdapter;
         private ShieldSystemAdapter _shieldSystemAdapter;
@@ -135,7 +150,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         {
             _transform = transform;
             _controller = controller;
-            _groundDetector = new GroundDetector(controller);
+            _groundDetector = new GroundDetector(controller, groundLayer);
 
             _data = new CharacterData
             {
@@ -150,9 +165,21 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
         public void RequestJump()
         {
-            if (_data.IsGrounded && !_data.IsDead && _data.BaseState != BaseState.JumpStart && _data.BaseState != BaseState.JumpAir)
+            JumpRequests++;
+            bool support = HasJumpSupport();
+            if (support && !_data.IsDead
+                && _data.BaseState != BaseState.JumpStart && _data.BaseState != BaseState.JumpAir)
             {
                 _jumpRequested = true;
+                return;
+            }
+            if (!support)
+            {
+                JumpRequestsRejectedUngrounded++;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                UnityEngine.Debug.Log("[JumpProbe] rejected: no support state=" + _data.BaseState
+                          + " dead=" + _data.IsDead + " flags=" + LastMoveFlags);
+#endif
             }
         }
 
@@ -235,6 +262,35 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.Rotation = _transform.rotation;
         }
 
+        public void Teleport(Vector3 position)
+        {
+            // 先禁用 Unity 控制器，避免下次 Move 恢复传送前的位置。
+            _controller.enabled = false;
+            _transform.position = position;
+            _controller.enabled = true;
+
+            // 网络宿主可能在同一帧上报，不能等下一次 Update 刷新数据。
+            SyncPositionAndRotation();
+            _velocity = Vector3.zero;
+            _data.Velocity = Vector3.zero;
+            _data.VerticalVelocity = 0f;
+        }
+
+        /// <summary>
+        /// 复活复位：清掉上一条命遗留的跳跃请求、延迟离地标记与空中状态。
+        /// 否则复活后 0.1s 的 LeftGround 仍会触发，或旧跳跃请求被下一帧消费（B2）。
+        /// </summary>
+        public void ResetAirborneState()
+        {
+            _jumpRequested = false;
+            _leftGroundTriggerTime = -1f;
+            _data.RequestJump = false;
+            _data.HasLeftGround = false;
+            _data.BaseState = BaseState.Idle;
+            _velocity.y = 0f;
+            _data.VerticalVelocity = 0f;
+        }
+
         /// <summary>
         /// 眩晕状态：只处理重力
         /// </summary>
@@ -268,7 +324,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
 
             Vector3 moveVelocity = command.MoveDir * currentSpeed;
             moveVelocity.y = _velocity.y;
-            _controller.Move(moveVelocity * Time.deltaTime);
+            LastMoveFlags = _controller.Move(moveVelocity * Time.deltaTime);
         }
 
         /// <summary>
@@ -292,8 +348,13 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         private void ProcessJumpRequest()
         {
-            if (_jumpRequested && _data.IsGrounded)
+            if (!_jumpRequested) return; // 无请求时不跑物理探针
+            bool support = HasJumpSupport();
+            LastConsumeGrounded = _data.IsGrounded;
+            LastConsumeBodySupport = support && !_data.IsGrounded;
+            if (support)
             {
+                JumpsConsumed++;
                 _velocity.y = JumpForce;
                 _jumpRequested = false;
                 SetBaseState(BaseState.JumpStart);

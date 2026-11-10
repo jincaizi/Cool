@@ -116,8 +116,15 @@ namespace KcpServer
 
             Console.WriteLine($"Starting Server3C on port {port}...");
 
+            string mapsPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Config", "maps.json");
+            string worldMapId = mapId ?? "demoday";
+            var map = Config.ConfigLoader.LoadMaps(mapsPath).maps.Find(entry => entry.id == worldMapId);
+            if (map?.playerSpawn is not Vector3 spawn || !float.IsFinite(spawn.X) ||
+                !float.IsFinite(spawn.Y) || !float.IsFinite(spawn.Z))
+                throw new InvalidOperationException($"map '{worldMapId}' needs a finite playerSpawn in {mapsPath}");
+
             var logger = new ConsoleLogger();
-            _server = new Server3C(logger);
+            _server = new Server3C(logger, spawn);
 
             // bot 必须先于 StartAsync 注册（EntityStore 主循环独占——R2）
             if (botCount > 0)
@@ -133,7 +140,6 @@ namespace KcpServer
             KcpServer.Navigation.NavigationService? navigation = null;
             if (monsterCount > 0 && !noNav && mapId != null)
             {
-                string mapsPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Config", "maps.json");
                 navigation = KcpServer.Navigation.NavigationService.LoadFromConfig(mapsPath, mapId, AppContext.BaseDirectory);
                 Console.WriteLine($"Navigation: map={mapId}");
             }

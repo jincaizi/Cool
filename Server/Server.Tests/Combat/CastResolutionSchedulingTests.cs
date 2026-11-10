@@ -121,12 +121,14 @@ public class CastResolutionSchedulingTests
     public void Zero_Delay_Skill_Resolves_In_The_Same_Tick()
     {
         var (store, resolver, caster, target) = World(1.5f);
-        var spin = new CastRequest
+        // 20004：HitDelay 0 的落点圆（speed 0 → 无飞行延迟）。20002 自 2026-11-10 起
+        // 是 0.4s 首判的旋转多段，不能再作零延迟样本。
+        var burst = new CastRequest
         {
-            SkillId = 20002,                                        // HitDelay = 0（D-9 向后兼容）
-            Shape = new HitShape { ShapeType = 1, AreaRadius = 2.5f, Angle = 120f }
+            SkillId = 20004,
+            Shape = new HitShape { ShapeType = 1, AreaRadius = 2f, Angle = 120f }
         };
-        resolver.Decide(caster, spin, 10);
+        resolver.Decide(caster, burst, 10);
 
         var one = Assert.Single(resolver.DrainResolved(10));
 

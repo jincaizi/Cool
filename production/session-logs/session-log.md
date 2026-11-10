@@ -107565,3 +107565,3743 @@ production/session-logs/compaction-log.txt
 production/session-logs/session-log.md
 ---
 
+## Session End: 20261109_123511
+### Commits
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+---
+
+## Session End: 20261109_125009
+### Commits
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_125125
+### Commits
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_125848
+### Commits
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_132012
+### Commits
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_182056
+### Commits
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_183349
+### Commits
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_183542
+### Commits
+e5643d63 feat(input): track touch look source and clear it on input gates
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_183840
+### Commits
+e5643d63 feat(input): track touch look source and clear it on input gates
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_190443
+### Commits
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/TouchLookArea.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_190531
+### Commits
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+e53cc027 chore(wip): snapshot pre-existing working tree changes
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_203529
+### Commits
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+### Uncommitted Changes
+Assets/Scripts/Tests/Editor/TouchLookAreaTests.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_203606
+### Commits
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_203742
+### Commits
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_204859
+### Commits
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+dc88c291 feat(input): gate mouse look behind right mouse button
+801e285e fix(tests): unblock GameSys.EditorTests compilation in resource lifecycle tests
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_215426
+### Commits
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+Assets/Scripts/Tests/PlayMode/TouchLookAreaEventSystemTests.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_215524
+### Commits
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_215822
+### Commits
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_215930
+### Commits
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_220220
+### Commits
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_220320
+### Commits
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_220540
+### Commits
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_220818
+### Commits
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_221439
+### Commits
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_222228
+### Commits
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_222252
+### Commits
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_225531
+### Commits
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_225913
+### Commits
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_230041
+### Commits
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_230609
+### Commits
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_230708
+### Commits
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_231035
+### Commits
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_231637
+### Commits
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_232240
+### Commits
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+Assets/Scripts/Tests/PlayMode/CharacterSelectPanelLayoutFitTests.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_232400
+### Commits
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_232518
+### Commits
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_232719
+### Commits
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_233005
+### Commits
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_233406
+### Commits
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_233618
+### Commits
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_234043
+### Commits
+8c13a7d3 docs: document experience polish behavior
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_234423
+### Commits
+8c13a7d3 docs: document experience polish behavior
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_234448
+### Commits
+fd06b5c1 docs: correct touch look dead zone formula
+8c13a7d3 docs: document experience polish behavior
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261109_234520
+### Commits
+fd06b5c1 docs: correct touch look dead zone formula
+8c13a7d3 docs: document experience polish behavior
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_004939
+### Commits
+fd06b5c1 docs: correct touch look dead zone formula
+8c13a7d3 docs: document experience polish behavior
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_005608
+### Commits
+2b73d901 test(login): restore character selection in reopen tests
+06113a92 test(ui): cover mode buttons and confirm hit testing
+2f25162f test(ui): unload demo scene after mobile layout tests
+09d12dd7 fix(input): move pc defend from right mouse to f key
+fd06b5c1 docs: correct touch look dead zone formula
+8c13a7d3 docs: document experience polish behavior
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_012613
+### Commits
+2b73d901 test(login): restore character selection in reopen tests
+06113a92 test(ui): cover mode buttons and confirm hit testing
+2f25162f test(ui): unload demo scene after mobile layout tests
+09d12dd7 fix(input): move pc defend from right mouse to f key
+fd06b5c1 docs: correct touch look dead zone formula
+8c13a7d3 docs: document experience polish behavior
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_012640
+### Commits
+2b73d901 test(login): restore character selection in reopen tests
+06113a92 test(ui): cover mode buttons and confirm hit testing
+2f25162f test(ui): unload demo scene after mobile layout tests
+09d12dd7 fix(input): move pc defend from right mouse to f key
+fd06b5c1 docs: correct touch look dead zone formula
+8c13a7d3 docs: document experience polish behavior
+48bddea6 test(login): isolate player prefs in selection and mobile ui tests
+ca50cbb7 feat(login): default online and generate random chinese nickname
+09aac0ed test(ui): restore character selection after interaction tests
+0dce9cb3 test(ui): verify character select clicks and highlight hit testing
+afbef117 test(ui): verify phone aspect layout with canvas scaler formula
+e60aafbd test(ui): verify character select layout fits phone aspects
+b4a5a514 feat(ui): bottom-anchor character select content
+6abe0a44 feat(ui): move look area to top-right and scale mobile hud
+de7a6f67 feat(ui): apply resolved reference resolution to canvases
+c1cb02d8 feat(ui): add platform-aware ui scale resolution
+b93fa782 test(ui): make mouse isolation and app pause checks observable
+4fd320c7 test(ui): verify touch look area gesture lifecycle through EventSystem
+57aa0e93 test(ui): harden touch look drag threshold boundary case
+c3ba3a3a feat(ui): track touch pointer ownership and dpi dead zone in look area
+df2ba3ec feat(camera): use mobile pitch limits for touch look
+e5643d63 feat(input): track touch look source and clear it on input gates
+### Uncommitted Changes
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_203643
+### Uncommitted Changes
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_205253
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_213522
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_215755
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261110_222438
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_003449
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_012903
+### Commits
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_013615
+### Commits
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_014516
+### Commits
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_014637
+### Commits
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_014749
+### Commits
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_015044
+### Commits
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_022325
+### Commits
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_022358
+### Commits
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_022421
+### Commits
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_022520
+### Commits
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_022827
+### Commits
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/WebGLTemplateCacheTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_022854
+### Commits
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_022941
+### Commits
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_023401
+### Commits
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_023659
+### Commits
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_023812
+### Commits
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_024013
+### Commits
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_024448
+### Commits
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_025147
+### Commits
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_025327
+### Commits
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_025530
+### Commits
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_025657
+### Commits
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_025737
+### Commits
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_025907
+### Commits
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_030005
+### Commits
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_030332
+### Commits
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+ProjectSettings/ProjectSettings.asset
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/webgl-demo-runbook.md
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_030908
+### Commits
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_031720
+### Commits
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_031831
+### Commits
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Editor/WebGLBuildScript.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_032043
+### Commits
+007074c7 fix: regenerate webgl index before stamping
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_032134
+### Commits
+007074c7 fix: regenerate webgl index before stamping
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_032618
+### Commits
+007074c7 fix: regenerate webgl index before stamping
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_032729
+### Commits
+007074c7 fix: regenerate webgl index before stamping
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_032828
+### Commits
+007074c7 fix: regenerate webgl index before stamping
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_033604
+### Commits
+007074c7 fix: regenerate webgl index before stamping
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_034343
+### Commits
+b0b9c8ef fix: protect webgl index on failed builds
+007074c7 fix: regenerate webgl index before stamping
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+### Uncommitted Changes
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/Scripts/AOT/Protocol/MessageCodec.cs
+Assets/Scripts/AOT/Protocol/MessageId.cs
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/Respawn.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/HitResolver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/PredictionReconciler.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/GroundDetector.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/BaseFSM.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/FSM/FSMManager.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs
+Assets/Scripts/Tests/Editor/SkillCoordinatorSpinTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/HitResolverTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/PlayMode/PlayerDeathRespawnTests.cs
+Server/Config/MapsConfig.cs
+Server/Config/maps.json
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/Brain/SkillSelector.cs
+Server/Monster/MonsterBtActions.cs
+Server/Monster/Movement/PathFollower.cs
+Server/Monster/README.md
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/Program.cs
+Server/README.md
+Server/Server.Tests/Combat/CastHandlerTests.cs
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/RespawnTests.cs
+Server/Server.Tests/Monster/MonsterActionRunnerTests.cs
+Server/Server.Tests/Monster/SkillSelectorTests.cs
+Server/Server.Tests/Navigation/PathFollowerTests.cs
+Server/Server.Tests/Protocol/CombatMessagesTests.cs
+Server/Server3C.cs
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+

@@ -136,6 +136,10 @@ namespace Hotfix.GameSystems.Sys3C.FSM
         public void RequestResurrect()
         {
             _stateCoordinator.HandleResurrect();
+            // B2：单机 TickRespawn 与联网 ApplyServerRespawn 共用这里。死亡锁只写 Animator 参数，
+            // 必须做一次真实状态切换，否则空中死亡复活后 Base 层仍停在 JumpAir（漂移/无腿部动画）。
+            _characterController.ResetAirborneState();
+            _baseFSM.ResetToLocomotion();
         }
 
         public void EnterDefend()

@@ -148,8 +148,10 @@ public class CastHandlerTests
 
         var request = new CastRequest
         {
-            SkillId = 20002,
-            Shape = new HitShape { ShapeType = 1, AreaRadius = 2.5f, Angle = 120f }
+            // 50006：圆形 AoE（半径 4、HitDelay 0.35s）。20002 自 2026-11-10 起是
+            // 0.4s 首判的旋转多段，不再适合作“单段圆形判定”的样本。
+            SkillId = 50006,
+            Shape = new HitShape { ShapeType = 1, AreaRadius = 2.5f }
         };
         var resolution = Resolve(resolver, 1, request, 10);
 
@@ -206,8 +208,8 @@ public class CastHandlerTests
 
         var request = new CastRequest
         {
-            SkillId = 20002,
-            Shape = new HitShape { ShapeType = 1, AreaRadius = 2.5f, Angle = 120f }
+            SkillId = 50006, // 同 Circle_Hits_Multiple：20002 已是旋转多段，改用单段圆形 AoE
+            Shape = new HitShape { ShapeType = 1, AreaRadius = 2.5f }
         };
         var resolution = Resolve(resolver, 1, request, 10);
 

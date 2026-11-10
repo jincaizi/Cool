@@ -1071,9 +1071,9 @@ namespace Hotfix.GameSystems.Sys3C
 
         /// <summary>
         /// 服务端说复活了（D-N4/D-5）。客户端**不自行判活**——只有收到这条才起身。
-        /// 位置由客户端自己摆：服务端不拥有玩家位置（D-N5）。
+        /// 联网落点随服务端通知下发，旧协议使用本地场景出生点。
         /// </summary>
-        public void ApplyServerRespawn(float hp)
+        public void ApplyServerRespawn(float hp, Vector3? spawnPosition = null)
         {
             _currentHP = hp;
             _stamina.Refill();
@@ -1086,7 +1086,7 @@ namespace Hotfix.GameSystems.Sys3C
             // 死亡锁（StateCoordinator.HandleDeath 的 LockState + LockLayer(Base)）必须一起解除，
             // 否则人虽然站起来了却动不了——单机 TickRespawn 一直是这么配对的。
             _fsmManager.RequestResurrect();
-            TeleportToSpawnPoint();
+            _cc.Teleport(spawnPosition ?? _spawnPoint);
         }
 
         private void TickRespawn(float deltaTime)
@@ -1112,20 +1112,7 @@ namespace Hotfix.GameSystems.Sys3C
             // 且 Down 的霸体让之后每一次命中都被优先级拒掉。EnterRespawn 覆盖 Down 与 Death。
             _fsmManager.HitFSM.EnterRespawn();
             _fsmManager.RequestResurrect();
-            TeleportToSpawnPoint();
-        }
-
-        /// <summary>
-        /// 传送回出生点。单机 3 秒复活与服务端复活**共用这一处**落位逻辑。
-        /// 传送须先禁用 CharacterController：直接写 transform.position 会被它的内部位置
-        /// 在下一帧 Move() 时吃掉（实测：写 (5,0,5) 下一帧回到 (0,-0.05,0)，复活点丢失）。
-        /// 禁/启后再写是 Unity 的标准传送做法，实测生效。
-        /// </summary>
-        private void TeleportToSpawnPoint()
-        {
-            CharacterController.enabled = false;
-            transform.position = _spawnPoint;
-            CharacterController.enabled = true;
+            _cc.Teleport(_spawnPoint);
         }
 
         private static bool IsOnlineMode()

@@ -58,7 +58,8 @@ namespace KcpServer
             };
 
             _server.BindPlayerToSession(playerId, session);
-            _server.RegisterEntity(playerId, request.Username);
+            _server.RegisterEntity(playerId, request.Username,
+                (request.SupportedFeatures & ProtocolFeatures.AuthoritativeRespawn) != 0);
 
             string zoneId = string.IsNullOrEmpty(request.ZoneId) ? "Global" : request.ZoneId;
             _roomManager.TryAddPlayerToRoom(playerId, session, playerState, zoneId);

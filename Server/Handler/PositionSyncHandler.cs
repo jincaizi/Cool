@@ -24,13 +24,19 @@ namespace KcpServer
         }
 
         /// <summary>核心校验+应用（可独立测试——不依赖 Server3C 运行时）</summary>
-        public MoveValidationResult ValidateAndApply(PositionSyncRequest request, PlayerState player)
+        public MoveValidationResult? ValidateAndApply(PositionSyncRequest request, PlayerState player)
         {
+            if (player.SupportsAuthoritativeRespawn && (!player.IsAlive || request.RespawnTick != player.RespawnTick))
+                return null;
+
+            // 第一帧以一个上报周期校验位移，避免把死亡等待时间算进移动预算。
+            bool firstReportAfterRespawn = player.RespawnTick.HasValue && player.LastUpdateTimestamp == 0L;
             var result = MovementValidator.Validate(
                 new Vec3(player.Position.X, player.Position.Y, player.Position.Z),
                 new Vec3(request.X, request.Y, request.Z),
                 request.Rotation, request.Speed,
-                player.LastUpdateTimestamp, request.Timestamp);
+                player.LastUpdateTimestamp,
+                firstReportAfterRespawn ? Server3C.TickIntervalMs * TimeSpan.TicksPerMillisecond : request.Timestamp);
 
             // 守卫回退：非有限输入时 validator 原样透传 rotation——回退到上次已知有限值，
             // 防 NaN 旋转进 store → ack → 快照广播（守卫注释口径：杜绝 NaN 经广播扩散）
@@ -76,13 +82,14 @@ namespace KcpServer
                 return;
             }
 
-            var result = ValidateAndApply(request, player);
+            if (ValidateAndApply(request, player) is not MoveValidationResult result) return;
 
             var response = new PositionSyncResponse
             {
                 AcknowledgedSequence = request.Sequence,
                 ServerTimestamp = DateTime.UtcNow.Ticks,
                 HasPositionCorrection = result.NeedsCorrection,
+                RespawnTick = player.RespawnTick,
                 AuthoritativeX = result.AuthoritativePosition.X,
                 AuthoritativeY = result.AuthoritativePosition.Y,
                 AuthoritativeZ = result.AuthoritativePosition.Z,

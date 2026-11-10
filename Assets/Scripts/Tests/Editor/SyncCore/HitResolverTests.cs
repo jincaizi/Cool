@@ -296,5 +296,57 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             Assert.That(HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single20, noRadius),
                 Is.Empty);
         }
+
+        // ===== B1：攻击高度（地面近战 [−0.3, 1.2]，目标 1.8m 高，脚底 Position.Y）=====
+
+        private static CombatCandidate H(long id, float x, float z, float y, float height)
+            => new CombatCandidate(id, new Vec3(x, y, z), true, 0f, height);
+
+        private static readonly AttackHeightSpec GroundMelee = new AttackHeightSpec(-0.3f, 1.2f);
+
+        [Test]
+        public void Height_Ground_Target_Is_Hit_By_Ground_Melee()
+        {
+            var candidates = new List<CombatCandidate> { H(2, 0f, 2f, 0f, 1.8f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates, GroundMelee);
+            Assert.That(hits, Is.EqualTo(new long[] { 2 }));
+        }
+
+        [Test]
+        public void Height_Jumping_Target_Is_Missed_By_Ground_Melee()
+        {
+            var candidates = new List<CombatCandidate> { H(2, 0f, 2f, 2.0f, 1.8f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates, GroundMelee);
+            Assert.That(hits, Is.Empty);
+        }
+
+        [Test]
+        public void Height_Landed_Target_Is_Hit_Again()
+        {
+            var candidates = new List<CombatCandidate> { H(2, 0f, 2f, 0.2f, 1.8f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates, GroundMelee);
+            Assert.That(hits, Is.EqualTo(new long[] { 2 }));
+        }
+
+        [Test]
+        public void Height_No_Spec_Keeps_Legacy_XZ_Behavior()
+        {
+            var candidates = new List<CombatCandidate> { H(2, 0f, 2f, 50f, 1.8f) };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 2, Single35, candidates);
+            Assert.That(hits, Is.EqualTo(new long[] { 2 }));
+        }
+
+        [Test]
+        public void Height_Auto_Target_Skips_Jumping_Target()
+        {
+            // 空中目标更近，但高度不重叠；自动目标必须落到地面目标上
+            var candidates = new List<CombatCandidate>
+            {
+                H(2, 0f, 1.5f, 2.0f, 1.8f),
+                H(3, 0f, 2.5f, 0f, 1.8f)
+            };
+            var hits = HitResolver.Resolve(new Vec3(0, 0, 0), 0f, 0, Single35, candidates, GroundMelee);
+            Assert.That(hits, Is.EqualTo(new long[] { 3 }));
+        }
     }
 }

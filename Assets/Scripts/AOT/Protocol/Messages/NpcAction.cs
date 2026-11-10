@@ -5,6 +5,7 @@ namespace Cool.Protocol
     public static class ProtocolFeatures
     {
         public const uint NpcActionTimelineV1 = 1u;
+        public const uint AuthoritativeRespawn = 1u << 1;
     }
 
     public enum NpcActionKind : byte { Idle = 0, Move = 1, Skill = 2, HitReaction = 3, Death = 4 }

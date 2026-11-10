@@ -33,6 +33,17 @@ public class CombatMessagesTests
     }
 
     [Fact]
+    public void CancelCastRequest_Roundtrip_Preserves_SkillId()
+    {
+        var request = new CancelCastRequest { SkillId = 20002 };
+        var bytes = MessageCodec.EncodeToArray(MessageId.CancelCastRequest, request, MessageFlags.Reliable);
+        var (id, decoded) = MessageCodec.Decode(bytes);
+
+        Assert.Equal(MessageId.CancelCastRequest, id);
+        Assert.Equal(20002, Assert.IsType<CancelCastRequest>(decoded).SkillId);
+    }
+
+    [Fact]
     public void DamageResult_Roundtrip_Preserves_Hits()
     {
         var result = new DamageResult

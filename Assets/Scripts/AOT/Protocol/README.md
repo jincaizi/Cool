@@ -51,7 +51,19 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 | `CastBroadcast` | `ImpactX` / `ImpactY` / `ImpactZ` | 10 / 11 / 12 | 服务端裁决的落点（火球爆炸、陨石落点） |
 | `CastBroadcast` | `ChargeProgress` | 13 | 蓄力进度 [0,1]（20004 半径/伤害缩放、20003 表现） |
 
+### 取消施法（2026-11-10）
+
+`MessageId.CancelCastRequest = 304`（客户端 → 服务器）：tag1 `SkillId`。服务端丢弃该玩家该技能的
+未到期判定段（旋转 20002 取消/换命）；无匹配实例幂等忽略。`ProtocolVersion` 保持 1。
+
 ## 双端一致性校验（人工/CI 各跑一次）
+
+### 权威复活
+
+`LoginRequest.SupportedFeatures` 的 bit 1 表示客户端支持权威复活落点。
+`RespawnNotice` 新增 tag 3–6（落点标志和 XYZ），标志为真时用已有的 `Tick` 标记本次复活。
+`PositionSyncRequest` tag 9 和 `PositionSyncResponse` tag 8 回传该 tick。
+缺省值与 tick 0 可区分。任一端为旧版本时保留旧的复活通知和位置同步行为。
 
 ### NPC ActionV1 追加合同（2026-11-08）
 

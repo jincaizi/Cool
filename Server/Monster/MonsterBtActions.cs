@@ -71,7 +71,9 @@ namespace KcpServer.Monster
 
             float moved;
             if(m.ActionRunner != null && m.Follower != null) {
-                var result=m.Follower.TickResult(m,target,ctx.Mover,ctx.DeltaTime,ctx.Tick);
+                // B4：停滞豁免用当前血量条件下的最大技能射程（含 50005 的 6m），而不是模板 attackRange。
+                var result=m.Follower.TickResult(m,target,ctx.Mover,ctx.DeltaTime,ctx.Tick,
+                    SkillSelector.MaxRangeFor(m,ctx.Entity));
                 moved=result.Status==MovementStatus.Moving?1f:0f;
                 if(result.ValidQueries!=m.ObservedQueries) {
                     m.ObservedQueries=result.ValidQueries;
@@ -81,7 +83,8 @@ namespace KcpServer.Monster
                     m.UnreachableUntil[m.TargetId.Value]=ctx.Tick+75;
                     m.SearchStartTick ??= ctx.Tick; m.TargetId=null;m.UnreachableCount=0;
                 }
-            } else moved=m.Follower!=null?(m.Follower.Tick(m,target,ctx.Mover,ctx.DeltaTime,ctx.Tick)?1f:0f):ctx.Mover.MoveTo(m,target,ctx.DeltaTime);
+            } else moved=m.Follower!=null?(m.Follower.Tick(m,target,ctx.Mover,ctx.DeltaTime,ctx.Tick,
+                SkillSelector.MaxRangeFor(m,ctx.Entity))?1f:0f):ctx.Mover.MoveTo(m,target,ctx.DeltaTime);
             SetMovementState(ctx, moved > MovementEpsilon);
             return BtStatus.Running;
         }
@@ -101,12 +104,17 @@ namespace KcpServer.Monster
             }
 
             if (!m.TargetId.HasValue) return BtStatus.Failure;
-            if (m.ActionRunner != null && TrySetupSkill(ctx)) return BtStatus.Running;
 
             Vector3 target = m.LastKnownTargetPosition ?? m.Position;
             float distance = DistanceXZ(m.Position, target);
-            if (!SkillSelector.IsWithinAnySkillRange(m, entity, distance)) return BtStatus.Failure;
 
+            // B4：合法就绪且在射程内的技能优先。旧顺序先跑 TrySetupSkill（SelectPotential
+            // 不看距离），半血 DogKnight 会在玩家贴身时反复后撤准备 50005，跳过可立即施放的 50003。
+            var selected = SkillSelector.Select(m, entity, distance, ctx.Tick);
+            if (selected == null && !SkillSelector.IsWithinAnySkillRange(m, entity, distance))
+                return BtStatus.Failure;
+
+            // LOS 先于选招/setup：隔墙时（含技能冷却）落回 Chase 绕行，不能一边隔墙一边后撤准备。
             if (m.Follower != null && !m.Follower.HasAttackLineOfSight(m.Position, target))
             {
                 m.Moving = false;
@@ -114,10 +122,17 @@ namespace KcpServer.Monster
                 return BtStatus.Failure;
             }
 
-            m.Moving = false;
+            if (selected == null)
+            {
+                // 没有可施放技能时才评估“太近 → 后撤到 minRange”；失败/无进展由 setup 超时与
+                // SetupRetryTick 退出，下一次重评近战或追击。
+                if (m.ActionRunner != null && TrySetupSkill(ctx)) return BtStatus.Running;
 
-            var selected = SkillSelector.Select(m, entity, distance, ctx.Tick);
-            if (selected == null) return BtStatus.Running; // 射程内但冷却：站定等待
+                m.Moving = false;
+                return BtStatus.Running; // 射程内但冷却：站定等待
+            }
+
+            m.Moving = false;
 
             if (!MonsterCastBuilder.TryBuild(m, selected.Value, target, out var request))
                 return BtStatus.Failure;
