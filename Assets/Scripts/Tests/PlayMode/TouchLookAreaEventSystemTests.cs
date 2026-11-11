@@ -139,7 +139,7 @@ namespace KcpNet.PlayModeTests
             Assert.AreEqual(0f, _area.Delta.x, 0.001f);
 
             yield return Touch(0, center + new Vector2(threshold + 1f, 0f), TouchPhase.Moved);
-            Assert.AreEqual((threshold + 1f) * 0.2f, _area.Delta.x, 0.02f);
+            Assert.AreEqual((threshold + 1f) * TouchLookArea.DefaultSensitivity, _area.Delta.x, 0.02f);
 
             yield return ReleaseTouch(0, center + new Vector2(threshold + 1f, 0f));
         }
@@ -157,7 +157,7 @@ namespace KcpNet.PlayModeTests
             Assert.AreEqual(0f, _area.Delta.x, 0.001f);
 
             yield return Touch(0, center + new Vector2(6f, 0f), TouchPhase.Moved);
-            Assert.AreEqual(1.2f, _area.Delta.x, 0.02f);
+            Assert.AreEqual(6f * TouchLookArea.DefaultSensitivity, _area.Delta.x, 0.02f);
 
             yield return ReleaseTouch(0, center + new Vector2(6f, 0f));
         }

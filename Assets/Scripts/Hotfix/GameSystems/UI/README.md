@@ -53,7 +53,8 @@ HUD 联网读数：`PlayerHudPanel` 在 HP/MP 与 buff 行下方预留 `NetStats
 - **锚点**：`LookArea` 占右上象限（anchorMin `(0.5, 0.5)` / anchorMax `(1, 1)`）；技能与动作按钮
   统一右下锚点 `(1, 0)`；选人面板内容统一底部锚点 `(0.5, 0)`，相邻内容纵向净距至少 16。
 - **观察区手势**：`TouchLookArea` 只接收真实触摸（鼠标事件忽略），按 `pointerId` 单指归属；
-  失焦、暂停或 `OnDisable` 时复位手势。
+  失焦、暂停或 `OnDisable` 时复位手势。灵敏度 `0.125 × 相机 MouseSensitivityX(2.0) = 0.25°/px`
+  （2026-11-11 从 0.4°/px 下调；横纵共用同一系数）。
 
 ## 测试
 

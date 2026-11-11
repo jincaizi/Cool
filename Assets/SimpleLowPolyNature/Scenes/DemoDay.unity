@@ -3408,7 +3408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4467a66380c26d47a384a6a739e2e52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sensitivity: 0.2
+  _sensitivity: 0.125
   _minDragPixelsAt160Dpi: 12
 --- !u!114 &312999715
 MonoBehaviour:

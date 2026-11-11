@@ -141,6 +141,17 @@ namespace KcpNet.PlayModeTests
         }
 
         [UnityTest]
+        public IEnumerator test_mobile_look_area_uses_default_sensitivity()
+        {
+            yield return null;
+
+            var look = Find("LookArea").GetComponent<TouchLookArea>();
+            Assert.IsNotNull(look, "LookArea 必须挂 TouchLookArea");
+            Assert.AreEqual(TouchLookArea.DefaultSensitivity, look.Sensitivity, 0.0001f,
+                "场景 LookArea 的 _sensitivity 必须与代码默认值同步");
+        }
+
+        [UnityTest]
         public IEnumerator test_mobile_look_area_leaves_blank_drag_region_above_skill_cluster()
         {
             yield return null;

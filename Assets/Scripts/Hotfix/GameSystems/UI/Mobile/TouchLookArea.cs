@@ -9,7 +9,9 @@ namespace Hotfix.GameSystems.UI
     public class TouchLookArea : MonoBehaviour, IPointerDownHandler,
         IInitializePotentialDragHandler, IDragHandler, IPointerUpHandler, IEndDragHandler
     {
-        [SerializeField] private float _sensitivity = 0.2f;
+        internal const float DefaultSensitivity = 0.125f;
+
+        [SerializeField] private float _sensitivity = DefaultSensitivity;
         [Tooltip("起始拖拽死区（160dpi 基准像素数，运行时按 Screen.dpi 换算）")]
         [SerializeField] private float _minDragPixelsAt160Dpi = 12f;
 
@@ -21,6 +23,8 @@ namespace Hotfix.GameSystems.UI
         private bool _dragStarted;
 
         public Vector2 Delta => _delta;
+
+        internal float Sensitivity => _sensitivity;
 
         internal static float ResolveDragThresholdPixels(float minPixelsAt160Dpi, float dpi)
         {

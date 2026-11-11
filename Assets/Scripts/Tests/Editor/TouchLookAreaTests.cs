@@ -38,6 +38,18 @@ namespace GameSys.EditorTests
             => TouchLookArea.ResolveDragThresholdPixels(12f, Screen.dpi);
 
         [Test]
+        public void test_default_sensitivity_is_quarter_degree_per_pixel()
+        {
+            // Arrange & Act
+            float sensitivity = TouchLookArea.DefaultSensitivity;
+
+            // Assert
+            Assert.AreEqual(0.125f, sensitivity, 0.0001f,
+                "触屏灵敏度应为 0.125（乘相机 MouseSensitivityX 2.0 后为 0.25°/px）");
+            Assert.AreEqual(TouchLookArea.DefaultSensitivity, _area.Sensitivity, 0.0001f);
+        }
+
+        [Test]
         public void test_drag_below_threshold_does_not_emit()
         {
             var press = new Vector2(100f, 100f);
@@ -57,7 +69,7 @@ namespace GameSys.EditorTests
             _area.OnDrag(Pointer(0, press + new Vector2(threshold + 1f, 0f)));
             Publish(_area);
 
-            Assert.AreEqual((threshold + 1f) * 0.2f, _area.Delta.x, 0.001f);
+            Assert.AreEqual((threshold + 1f) * TouchLookArea.DefaultSensitivity, _area.Delta.x, 0.001f);
         }
 
         [Test]
