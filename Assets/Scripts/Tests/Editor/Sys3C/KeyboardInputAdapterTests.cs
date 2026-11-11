@@ -11,7 +11,7 @@ namespace GameSys.EditorTests
         {
             // Arrange & Act
             Vector2 look = KeyboardInputAdapter.GateLookToRightDrag(
-                new Vector2(3f, 4f), rightButtonHeld: false);
+                new Vector2(3f, 4f), rightButtonHeld: false, touchActive: false);
 
             // Assert
             Assert.AreEqual(Vector2.zero, look, "未按右键时鼠标移动不得转视角");
@@ -22,10 +22,21 @@ namespace GameSys.EditorTests
         {
             // Arrange & Act
             Vector2 look = KeyboardInputAdapter.GateLookToRightDrag(
-                new Vector2(3f, 4f), rightButtonHeld: true);
+                new Vector2(3f, 4f), rightButtonHeld: true, touchActive: false);
 
             // Assert
             Assert.AreEqual(new Vector2(3f, 4f), look);
+        }
+
+        [Test]
+        public void test_keyboard_look_is_zero_while_touch_active()
+        {
+            // Arrange & Act
+            Vector2 look = KeyboardInputAdapter.GateLookToRightDrag(
+                new Vector2(3f, 4f), rightButtonHeld: true, touchActive: true);
+
+            // Assert
+            Assert.AreEqual(Vector2.zero, look, "触摸活跃时合成鼠标输入不得转视角");
         }
     }
 }

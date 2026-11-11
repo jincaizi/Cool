@@ -92,6 +92,10 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
   按 160dpi 基准 12px × `Mathf.Max(1, Screen.dpi/160)`（`Screen.dpi` 无效时按 160 处理）。
 - 俯仰限位：桌面 `[-30, 60]`；视角采样来自触屏（`InputManager.IsLookFromTouch`）时切换为
   `[-10, 25]`（`ThirdPersonCameraController.UseMobilePitchLimits`）。
+- **触摸活跃时鼠标视角兜底为零**（2026-11-11）：`Input.touchCount > 0` 时
+  `KeyboardInputAdapter.GetCameraRotationInput` 返回零向量。手机浏览器会把触摸合成为鼠标事件；
+  摇杆按住时观察区 `Delta` 为零，若无此门控，第二根手指落下会让合成 `Mouse X`
+  以 `2°/px` 灌进相机，表现为一次大角度跳转。PC/编辑器在 `touchCount == 0` 时右键拖拽不变。
 
 ## 相关模块
 

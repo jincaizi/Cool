@@ -46,12 +46,19 @@ namespace Hotfix.GameSystems.Sys3C.Input
         {
             float mouseX = UnityEngine.Input.GetAxisRaw("Mouse X");
             float mouseY = UnityEngine.Input.GetAxisRaw("Mouse Y");
-            return GateLookToRightDrag(new Vector2(mouseX, mouseY),
-                UnityEngine.Input.GetMouseButton(1));
+            bool rightButtonHeld = UnityEngine.Input.GetMouseButton(1);
+            bool touchActive = UnityEngine.Input.touchCount > 0;
+
+            return GateLookToRightDrag(new Vector2(mouseX, mouseY), rightButtonHeld, touchActive);
         }
 
-        internal static Vector2 GateLookToRightDrag(Vector2 look, bool rightButtonHeld)
-            => rightButtonHeld ? look : Vector2.zero;
+        /// <summary>
+        /// 触摸活跃时鼠标视角必须为零：手机浏览器会把触摸合成为鼠标事件，
+        /// 摇杆按住时观察区 Delta 为零，若放行合成 Mouse X 会以 2°/px 灌进相机。
+        /// PC/编辑器 touchCount == 0 时行为不变。
+        /// </summary>
+        internal static Vector2 GateLookToRightDrag(Vector2 look, bool rightButtonHeld, bool touchActive)
+            => rightButtonHeld && !touchActive ? look : Vector2.zero;
 
         /// <summary>
         /// 是否有移动输入
