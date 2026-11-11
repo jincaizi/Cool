@@ -280,6 +280,7 @@ namespace Hotfix.GameSystems.Sys3C
                 Vector2 lookInput = _inputManager.GetCameraRotationInput();
                 _camera.UseMobilePitchLimits = _inputManager.IsLookFromTouch;
                 _camera.HandleRotationInput(lookInput);
+                _camera.AimZoomActive = IsMobileAimActive() && !_isDead;
             }
             HandleInput();
 
@@ -370,8 +371,14 @@ namespace Hotfix.GameSystems.Sys3C
                 _fireballAimWasDragged = false;
             }
 
-            // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）
-            if (_isDead) return;
+            // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）。
+            // 致死伤害路径已通过 InterruptCurrentSkill(Stun) 取消技能；这里再显式兜底，
+            // 覆盖快速死亡帧与未来新增的 _isDead 路径，并让相机拉远条件立即转为 false。
+            if (_isDead)
+            {
+                CancelAimingSkill();
+                return;
+            }
 
             // 防御处理（按住 F 举盾，松开放下）；瞄准蓄力期间禁止举盾
             if (!aimCharging && _inputManager.IsDefendHeld())

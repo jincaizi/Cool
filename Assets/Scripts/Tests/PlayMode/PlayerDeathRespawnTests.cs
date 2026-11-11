@@ -1,5 +1,7 @@
 using System.Collections;
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Skills.Definition;
+using Hotfix.GameSystems.Skills.Runtime;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Animation;
@@ -244,6 +246,33 @@ namespace GameSys.PlayModeTests
             Vector3 position = _entry.transform.position;
             Assert.AreEqual(TestSpawnPoint.x, position.x, 0.5f, "复活应回到出生点 X");
             Assert.AreEqual(TestSpawnPoint.z, position.z, 0.5f, "复活应回到出生点 Z");
+        }
+
+        [UnityTest]
+        public IEnumerator test_death_cancels_charging_fireball()
+        {
+            // Arrange：直接激活火球（绕过输入层），推进到 Charging
+            _entry.SkillCoordinator.HandleInput(
+                SkillInput.SkillToPosition((int)SkillID.Fireball,
+                    _entry.transform.position + Vector3.forward * 5f));
+
+            float deadline = Time.realtimeSinceStartup + 2f;
+            while (_entry.SkillCoordinator.CurrentSubState != SkillSubState.Charging
+                   && Time.realtimeSinceStartup < deadline)
+                yield return null;
+
+            Assert.AreEqual(SkillSubState.Charging, _entry.SkillCoordinator.CurrentSubState,
+                "火球应进入 Charging");
+
+            // Act
+            _entry.ApplyServerDamage(LethalDamage, Vector3.back);
+            yield return null;
+            yield return null;
+
+            // Assert
+            Assert.IsTrue(_entry.IsDead);
+            Assert.AreNotEqual(SkillSubState.Charging, _entry.SkillCoordinator.CurrentSubState,
+                "死亡必须取消蓄力中的火球");
         }
     }
 }

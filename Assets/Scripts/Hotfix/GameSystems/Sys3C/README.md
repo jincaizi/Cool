@@ -105,6 +105,9 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
   `AimZoomActive` 变 false，距离缓动回 8。
 - 拉远开关只由 `Sys3CEntry` 每帧写入；键盘 1 键蓄力没有瞄准手势，不拉远。
   防穿墙使用同一个当前距离，贴墙只把实际相机拉近，不改当前距离。
+- 死亡时 `HandleInput` 的死亡分支会兜底调用 `CancelAimingSkill()`（不发射、不进冷却）；
+  现有致死伤害路径本身已通过 `InterruptCurrentSkill(Stun)` 取消技能，这条兜底覆盖快速死亡帧
+  与未来新增的 `_isDead` 路径，同时让相机拉远条件立即转为 false。
 
 ## 相关模块
 
