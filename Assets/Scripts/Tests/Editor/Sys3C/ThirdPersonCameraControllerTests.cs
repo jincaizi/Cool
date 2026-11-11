@@ -47,5 +47,86 @@ namespace GameSys.EditorTests
                 Object.DestroyImmediate(go);
             }
         }
+
+        [Test]
+        public void test_aim_zoom_eases_toward_aim_distance()
+        {
+            var go = new GameObject("CameraAimZoomIn");
+            try
+            {
+                var cam = go.AddComponent<ThirdPersonCameraController>();
+                cam.AimZoomActive = true;
+
+                for (int i = 0; i < 120; i++) cam.TickZoom(1f / 60f);
+
+                Assert.AreEqual(11.5f, cam.CurrentDistance, 0.05f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void test_aim_zoom_returns_to_distance_when_disabled()
+        {
+            var go = new GameObject("CameraAimZoomOut");
+            try
+            {
+                var cam = go.AddComponent<ThirdPersonCameraController>();
+                cam.AimZoomActive = true;
+                for (int i = 0; i < 120; i++) cam.TickZoom(1f / 60f);
+
+                cam.AimZoomActive = false;
+                for (int i = 0; i < 120; i++) cam.TickZoom(1f / 60f);
+
+                Assert.AreEqual(8f, cam.CurrentDistance, 0.05f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void test_aim_zoom_target_is_clamped_to_min_camera_distance()
+        {
+            var go = new GameObject("CameraAimZoomClamp");
+            try
+            {
+                var cam = go.AddComponent<ThirdPersonCameraController>();
+                cam.AimDistance = 0.1f;
+                cam.AimZoomActive = true;
+
+                Assert.GreaterOrEqual(cam.TargetDistance, 0.8f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void test_snap_to_target_resets_aim_zoom_distance()
+        {
+            var go = new GameObject("CameraAimZoomSnap");
+            var targetGo = new GameObject("CameraAimZoomTarget");
+            try
+            {
+                var cam = go.AddComponent<ThirdPersonCameraController>();
+                cam.Target = targetGo.transform;
+                cam.AimZoomActive = true;
+                for (int i = 0; i < 120; i++) cam.TickZoom(1f / 60f);
+
+                cam.SnapToTarget();
+
+                Assert.AreEqual(8f, cam.CurrentDistance, 0.001f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+                Object.DestroyImmediate(targetGo);
+            }
+        }
     }
 }

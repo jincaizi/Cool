@@ -1343,6 +1343,8 @@ MonoBehaviour:
   MouseSensitivityY: 2
   MobileMinPitch: -10
   MobileMaxPitch: 25
+  AimDistance: 11.5
+  ZoomDamping: 8
   CameraCollisionMask:
     serializedVersion: 2
     m_Bits: 4294966271

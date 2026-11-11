@@ -33,6 +33,15 @@ namespace Hotfix.GameSystems.Sys3C.Camera
 
         public bool UseMobilePitchLimits { get; set; }
 
+        [Header("Aim Zoom")]
+        [Tooltip("火球瞄准手势激活时的相机距离")]
+        public float AimDistance = 11.5f;
+        [Tooltip("距离缓动系数，与 PositionDamping 同形")]
+        public float ZoomDamping = 8.0f;
+
+        /// <summary>瞄准拉远开关，由 Sys3CEntry 每帧写入。</summary>
+        public bool AimZoomActive { get; set; }
+
         internal float VerticalAngle => _verticalAngle;
 
         private const float CameraCollisionRadius = 0.25f;
@@ -62,6 +71,9 @@ namespace Hotfix.GameSystems.Sys3C.Camera
         private float _verticalAngle = 20f;
 
         private bool _anglesInitialized;
+
+        private float _currentDistance;
+        private bool _distanceInitialized;
 
         private void Start()
         {
@@ -106,6 +118,36 @@ namespace Hotfix.GameSystems.Sys3C.Camera
             _verticalAngle = Mathf.Clamp(_verticalAngle, minPitch, maxPitch);
         }
 
+        internal float CurrentDistance
+        {
+            get
+            {
+                EnsureDistanceInitialized();
+                return _currentDistance;
+            }
+        }
+
+        internal float TargetDistance
+            => Mathf.Max(MinCameraDistance, AimZoomActive ? AimDistance : Distance);
+
+        private void EnsureDistanceInitialized()
+        {
+            if (_distanceInitialized) return;
+            _currentDistance = Distance;
+            _distanceInitialized = true;
+        }
+
+        /// <summary>
+        /// 推进距离缓动。独立成 internal 方法：EditMode 测试用固定 dt 驱动，
+        /// 不依赖 Time.deltaTime。
+        /// </summary>
+        internal void TickZoom(float deltaTime)
+        {
+            EnsureDistanceInitialized();
+            _currentDistance = Mathf.Lerp(_currentDistance, TargetDistance,
+                Mathf.Clamp01(ZoomDamping * deltaTime));
+        }
+
         /// <summary>
         /// P6 ③：改为 LateUpdate 由 Unity 驱动。
         /// 原来由 Sys3CEntry 手动调用以"保证角色更新完再更新相机"，但该类本身是 MonoBehaviour
@@ -118,10 +160,11 @@ namespace Hotfix.GameSystems.Sys3C.Camera
 
             // 确保角度已初始化
             EnsureAnglesInitialized();
+            TickZoom(Time.deltaTime);
 
             // 计算目标位置（球坐标）
             Quaternion rotation = Quaternion.Euler(_verticalAngle, _horizontalAngle, 0f);
-            Vector3 offset = rotation * new Vector3(0f, 0f, -Distance);
+            Vector3 offset = rotation * new Vector3(0f, 0f, -_currentDistance);
             offset.y = Height;
 
             Vector3 targetPosition = Target.position + offset;
@@ -195,10 +238,12 @@ namespace Hotfix.GameSystems.Sys3C.Camera
             if (Target == null) return;
 
             EnsureAnglesInitialized();
+            _currentDistance = Distance;
+            _distanceInitialized = true;
 
             // 立即设置相机位置
             Quaternion rotation = Quaternion.Euler(_verticalAngle, _horizontalAngle, 0f);
-            Vector3 offset = rotation * new Vector3(0f, 0f, -Distance);
+            Vector3 offset = rotation * new Vector3(0f, 0f, -_currentDistance);
             offset.y = Height;
 
             transform.position = Target.position + offset;

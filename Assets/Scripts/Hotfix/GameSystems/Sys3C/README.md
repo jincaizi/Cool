@@ -97,6 +97,15 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
   摇杆按住时观察区 `Delta` 为零，若无此门控，第二根手指落下会让合成 `Mouse X`
   以 `2°/px` 灌进相机，表现为一次大角度跳转。PC/编辑器在 `touchCount == 0` 时右键拖拽不变。
 
+### 火球瞄准拉远
+
+- 移动端火球进入 `Charging` 且瞄准手势激活时，`ThirdPersonCameraController` 的距离从
+  `Distance = 8` 平滑拉到 `AimDistance = 11.5`（`ZoomDamping = 8`，约 0.2s 完成主要行程）。
+- 松手发射、拖到取消区、受击/精力耗尽打断、失焦/横屏、死亡都会让
+  `AimZoomActive` 变 false，距离缓动回 8。
+- 拉远开关只由 `Sys3CEntry` 每帧写入；键盘 1 键蓄力没有瞄准手势，不拉远。
+  防穿墙使用同一个当前距离，贴墙只把实际相机拉近，不改当前距离。
+
 ## 相关模块
 
 ## 移动技能输入
