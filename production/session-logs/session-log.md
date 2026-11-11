@@ -111305,3 +111305,28 @@ production/session-logs/agent-audit.log
 production/session-logs/session-log.md
 ---
 
+## Session End: 20261111_034747
+### Commits
+81e282e3 chore: checkpoint pending combat, protocol and server work
+b0b9c8ef fix: protect webgl index on failed builds
+007074c7 fix: regenerate webgl index before stamping
+307ab1d8 docs: add camera feel and aim zoom implementation plan
+d31cc03c docs: correct death-cancel rationale in camera spec
+c6963d76 docs: specify camera feel and fireball aim zoom design
+8df1b5e8 docs: add version and cache verification runbook
+0f66a29a feat: report real client version on login
+e87ed6ea fix: remove inert shadow from build version label
+e0dcb315 fix: use tmp underlay for build version label
+ebbc6d43 feat: show build version in global ui corner
+f59fb80b fix: add cache headers to webgl static server
+5b4238e6 feat: stamp version and cache key into webgl build
+fd1e2486 test: strengthen webgl template cache assertions
+e2e62e41 feat: version webgl build urls
+d64e5b3b docs: restore build failure safety comments
+403f4a82 feat: stamp git sha into windows build version
+346443f9 feat: add build version formatting helper
+a7bc6de3 docs: add versioning and webgl cache implementation plan
+96c0c21b docs: review versioning and webgl cache design
+84539ec1 docs: add versioning and webgl cache design
+---
+
