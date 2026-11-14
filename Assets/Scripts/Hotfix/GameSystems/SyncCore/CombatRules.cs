@@ -189,7 +189,8 @@ namespace Cool.SyncCore
             [10001] = new SkillEntry(skillId: 10001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0f, baseDamage: 50f, criticalRate: 0.15f, hitDelaySeconds: 0.30f, attackHeight: GroundMelee),
             // 10002：单机 BA_Heavy 的 0.35s 挥击（[0.35]）+ 剑气是两个独立伤害实例 ⇒ keepsSwing: true。
             // 高度只作用于挥击实例（ResolveSwing）；剑气走 ResolveLineAll，保持纯 XZ。
-            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, totalFlightSeconds: 12f / 18f, keepsSwing: true), attackHeight: GroundMelee),
+            // 属性剑气 v1：Speed 与共享目录/SwordQi_Heavy.asset 同值（18 m/s），供线性投射物与客户端一致。
+            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, totalFlightSeconds: 12f / 18f, keepsSwing: true, speed: 18f), attackHeight: GroundMelee),
             [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f, hitDelaySeconds: 0.30f),
             // 20002：单机 Spin_SkillR 时间轴 = 起手剪辑 0.2s（Attack04_Start_SwordAndShield，FBX 0–6 帧）
             // + 0.2s 首判间隔，之后每 0.2s 一段，MaxDuration 3s，每目标最多 5 段（资产值，2026-11-10 实测）。

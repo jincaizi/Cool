@@ -24,6 +24,8 @@
   <!-- P5：怪物配置随构建复制——运行时按 AppContext.BaseDirectory/Config 解析（dotnet run/test 的 CWD 不可靠） -->
   <ItemGroup>
     <None Include="Config\monster_config.json" Link="Config\monster_config.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- 属性剑气共享目录（服务端与 Unity 客户端读取同一份作者数据） -->
+    <None Include="Config\elemental_catalog.json" Link="Config\elemental_catalog.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- 2026-11-02 地图导航：maps.json 与 navmesh 数据随构建复制（demoday.navbin 由 Task 9 生成，当前 glob 空集合正常） -->

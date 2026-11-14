@@ -1,0 +1,44 @@
+{
+  "SchemaVersion": 1,
+  "ContentHash": "",
+  "DefaultWeaponTemplateId": 90001,
+  "StartingWeaponTemplateIds": [90001, 90002, 90003, 90004, 90005],
+  "Weapons": [
+    { "TemplateId": 90001, "WeaponViewKey": "weapon/default", "ElementId": 0, "BaseAttack": 1.0, "AttackSpeedMultiplier": 1.0, "SwordQiDamageMultiplier": 1.0 },
+    { "TemplateId": 90002, "WeaponViewKey": "weapon/ice", "ElementId": 1, "BaseAttack": 1.0, "AttackSpeedMultiplier": 1.0, "SwordQiDamageMultiplier": 1.0 },
+    { "TemplateId": 90003, "WeaponViewKey": "weapon/fire", "ElementId": 2, "BaseAttack": 1.0, "AttackSpeedMultiplier": 1.0, "SwordQiDamageMultiplier": 1.0 },
+    { "TemplateId": 90004, "WeaponViewKey": "weapon/thunder", "ElementId": 3, "BaseAttack": 1.0, "AttackSpeedMultiplier": 1.0, "SwordQiDamageMultiplier": 1.0 },
+    { "TemplateId": 90005, "WeaponViewKey": "weapon/wind", "ElementId": 4, "BaseAttack": 1.0, "AttackSpeedMultiplier": 1.0, "SwordQiDamageMultiplier": 1.0 }
+  ],
+  "Elements": [
+    { "ElementId": 1, "SwordQiViewKey": "swordqi/ice", "StatusEffectIds": [101] },
+    { "ElementId": 2, "SwordQiViewKey": "swordqi/fire", "StatusEffectIds": [201] },
+    { "ElementId": 3, "SwordQiViewKey": "swordqi/thunder", "StatusEffectIds": [301] },
+    { "ElementId": 4, "SwordQiViewKey": "swordqi/wind", "StatusEffectIds": [401] }
+  ],
+  "Statuses": [
+    { "EffectId": 101, "EffectKind": 1, "StackGroupId": 1, "DurationSeconds": 2.0, "IntervalSeconds": 0.0, "DamagePerTick": 0.0, "SlowRatio": 0.3, "IncomingDamageMultiplier": 1.0, "ViewKey": "" },
+    { "EffectId": 201, "EffectKind": 2, "StackGroupId": 2, "DurationSeconds": 3.0, "IntervalSeconds": 1.0, "DamagePerTick": 8.0, "SlowRatio": 0.0, "IncomingDamageMultiplier": 1.0, "ViewKey": "" },
+    { "EffectId": 301, "EffectKind": 3, "StackGroupId": 3, "DurationSeconds": 0.8, "IntervalSeconds": 0.0, "DamagePerTick": 0.0, "SlowRatio": 0.0, "IncomingDamageMultiplier": 1.0, "ViewKey": "" },
+    { "EffectId": 401, "EffectKind": 4, "StackGroupId": 4, "DurationSeconds": 1.5, "IntervalSeconds": 0.0, "DamagePerTick": 0.0, "SlowRatio": 0.0, "IncomingDamageMultiplier": 2.0, "ViewKey": "" }
+  ],
+  "AttackTimings": [
+    { "SkillId": 10001, "WindupSeconds": 0.30, "ActiveSeconds": 0.10, "RecoverySeconds": 0.20, "ChainWindowSeconds": 0.25, "CooldownSeconds": 0.0 },
+    { "SkillId": 10002, "WindupSeconds": 0.35, "ActiveSeconds": 0.10, "RecoverySeconds": 0.25, "ChainWindowSeconds": 0.30, "CooldownSeconds": 0.5 }
+  ],
+  "SwordQi": {
+    "Length": 12.0,
+    "HalfWidth": 2.0,
+    "Speed": 18.0,
+    "Stages": 3,
+    "TotalFlightSeconds": 0.6666667,
+    "SwordQiDamageCoefficient": 1.0
+  },
+  "Pvp": {
+    "PlayerMaxHp": 720.0,
+    "WindVulnerabilityMultiplier": 1.28,
+    "ControlImmunitySeconds": 0.5,
+    "SameGroupVulnerabilityNoRefreshSeconds": 4.0,
+    "ThunderDurationSeconds": 0.8
+  }
+}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Cool.SyncCore;
 
 namespace KcpServer.Config
 {
@@ -14,6 +15,14 @@ namespace KcpServer.Config
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             // P5：MonsterData 全 public 字段——System.Text.Json 默认只反序列化属性，
             // 不开此项则整表静默落 0（templateId=0 → 怪物配置全失）——T2 实测修复
+            IncludeFields = true
+        };
+
+        // 属性剑气目录用 PascalCase 字段名（同一份 JSON 也供 Unity JsonUtility 读取，
+        // 后者字段名大小写敏感）——因此不能套用 CamelCase 命名策略。
+        private static readonly JsonSerializerOptions FieldJsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
             IncludeFields = true
         };
 
@@ -48,6 +57,16 @@ namespace KcpServer.Config
             // "没有地图" 的确定性错误而不是 NullReferenceException。
             config.maps ??= new System.Collections.Generic.List<MapEntry>();
             return config;
+        }
+
+        /// <summary>属性剑气共享目录（服务端启动入口）。文件缺失/反序列化失败由调用方停用该功能。</summary>
+        public static ElementalCatalogDefinition LoadElementalCatalog(string path)
+        {
+            if (!File.Exists(path)) throw new FileNotFoundException("elemental catalog not found", path);
+            string json = File.ReadAllText(path);
+            var catalog = JsonSerializer.Deserialize<ElementalCatalogDefinition>(json, FieldJsonOptions);
+            if (catalog == null) throw new InvalidOperationException("elemental catalog deserialized to null");
+            return catalog;
         }
 
         public static Dictionary<int, MonsterData> LoadMonsterTemplates(string configPath)
