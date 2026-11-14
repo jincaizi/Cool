@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cool.SyncCore;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Effect;
@@ -23,6 +24,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly SkillInterruptionMatrix _interruptionMatrix;
         private IDashComponent _dashComponent;
         private StaminaSystem _stamina;
+        private static readonly ElementalCatalogDefinition SharedAttackCatalog =
+            ElementalCatalogDefaults.Create();
 
         // 当前正在执行的技能
         private SkillExecutor _currentSkill;
@@ -287,6 +290,26 @@ namespace Hotfix.GameSystems.Skills.Runtime
         }
 
         /// <summary>
+        /// 普攻冷却 = max(资产冷却, 共享接续窗) / 攻速；与服务端 NextAllowedAttackTick 同源。
+        /// 10001 资产冷却为 0，仍受 0.25s 接续窗约束。
+        /// </summary>
+        internal static float BasicAttackCooldown(int skillId, float assetCooldown, float attackSpeed)
+        {
+            float chainWindow = 0f;
+            var timing = SharedAttackCatalog.AttackTimings;
+            for (int i = 0; i < timing.Count; i++)
+            {
+                if (timing[i].SkillId == skillId)
+                {
+                    chainWindow = timing[i].ChainWindowSeconds;
+                    break;
+                }
+            }
+            float baseCooldown = Mathf.Max(assetCooldown, chainWindow);
+            return baseCooldown / Mathf.Clamp(attackSpeed, 0.25f, 4f);
+        }
+
+        /// <summary>
         /// 尝试激活技能
         /// </summary>
         private bool TryActivateSkill(int skillId, SkillInput input = default)
@@ -351,7 +374,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // 启动冷却（可蓄力技能除外：冷却按"释放"起算，见 ReportChargeReleased——
             // 与服务端「CastRequest 到达才 RecordCast」同源）
             if (!SkillCastReporter.IsChargeable(skillData))
-                _cooldownManager.StartCooldown(skillId, skillData.Cooldown / attackSpeed);
+            {
+                // 普攻冷却与服务端同源：max(资产冷却, 共享接续窗) / 攻速。
+                float cooldown = skillId == 10001 || skillId == 10002
+                    ? BasicAttackCooldown(skillId, skillData.Cooldown, attackSpeed)
+                    : skillData.Cooldown;
+                _cooldownManager.StartCooldown(skillId, cooldown);
+            }
 
             // 尝试开始释放
             if (!executor.TryStart())

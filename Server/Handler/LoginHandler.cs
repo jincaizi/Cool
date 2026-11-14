@@ -62,6 +62,9 @@ namespace KcpServer
                     ServerTimestamp = DateTime.UtcNow.Ticks
                 };
                 await _server.SendToSessionAsync(session, MessageId.LoginResponse, reject);
+                // 与协议版本拒绝同序：留一个 flush 窗口再关会话，避免未认证会话长期挂起。
+                await Task.Delay(50);
+                await session.CloseAsync("ElementalCatalogMismatch");
                 _logger.LogWarning($"Rejected elemental login from session {session.SessionId}: catalog fingerprint mismatch");
                 return;
             }

@@ -94,6 +94,17 @@ Plan 01 用登录 `ZoneId`（服务端房间键）作为 `CombatSceneId`。`Play
 （`127.0.0.1:8123`）完成登录、权威换装、施法与同一 `CastId` 发射校验。
 需要手动启动服务端的步骤写在测试注释与最终报告中。
 
+## 14. 最终审查修复
+
+- 旧会话的登录武器基线/能力位在断线重连后可能残留：`ClientNetworkManager`
+  新连接时重置协商字段，`ClientNetworkHost` 断线/进入世界时清空待应用基线。
+- 指纹不匹配登录原先只回 `LoginResponse` 不关会话：补一个 flush 窗口后
+  `CloseAsync("ElementalCatalogMismatch")`。
+- 客户端普攻冷原先只用资产冷却（10001 为 0），与服务端接续窗不一致：
+  `SkillCoordinator.BasicAttackCooldown` 改为 `max(资产冷却, 共享接续窗) / 攻速`。
+- 新增 `SwordQiNetworkGateTests` 断言联机 gate 开启时本地
+  `SkillExecutor.OnSwordQiFrame` 不生成剑气/不发 `SwordQiSpawnedEvent`。
+
 ## 9. Unity 测试环境
 
 worktree 首次导入时 Package Manager 需要访问 GitHub/gitcode 拉取 UniTask 与

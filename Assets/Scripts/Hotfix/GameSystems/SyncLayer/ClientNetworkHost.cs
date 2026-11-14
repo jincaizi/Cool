@@ -533,6 +533,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _connectRequested = false;
             _inWorld = false;
             _entryLookedUp = false;
+            _pendingWeaponBaseline = null;   // 旧会话基线不得泄漏到下一次登录
             // 离开世界：阵亡等待随之作废（否则兜底计时会跨会话继续跑，15 秒后凭空把
             // 新会话的玩家送回选人界面）
             _awaitingServerRespawn = false;
@@ -663,11 +664,9 @@ namespace Hotfix.GameSystems.SyncLayer
             // 属性剑气登录基线：权威武器背包 + 默认装备。桥可能尚未装配（角色异步生成），
             // 基线留到 TryAttachLocalCharacter 再应用装备版本。
             var baseline = _manager?.WeaponInventory;
+            _pendingWeaponBaseline = baseline;
             if (baseline != null)
-            {
-                _pendingWeaponBaseline = baseline;
                 BagManager.Instance.ApplyServerWeapons(baseline.Weapons);
-            }
 
             OnEnterWorld?.Invoke();
         }

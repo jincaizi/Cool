@@ -158,6 +158,10 @@ namespace Hotfix.GameSystems.SyncLayer
         public async void ConnectAndLogin(string host, int port)
         {
             CurrentState = State.Connecting;
+            // 新会话重新协商；上一次登录的能力位/基线不得复用。
+            EnabledFeatures = 0;
+            ElementalCatalogFingerprint = string.Empty;
+            WeaponInventory = null;
             var ok = await _client.ConnectAsync(host, port);
             if (!ok)
             {

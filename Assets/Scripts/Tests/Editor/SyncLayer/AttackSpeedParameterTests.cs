@@ -53,6 +53,17 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void Basic_Attack_Cooldown_Uses_Shared_Chain_Window_And_Speed()
+        {
+            // 10001 资产冷却 0，但接续窗 0.25s；攻速 2 倍 -> 0.125s。
+            Assert.AreEqual(0.25f, SkillCoordinator.BasicAttackCooldown(10001, 0f, 1f), 0.001f);
+            Assert.AreEqual(0.125f, SkillCoordinator.BasicAttackCooldown(10001, 0f, 2f), 0.001f);
+            // 10002 冷却 0.5s > 接续窗 0.3s；攻速 1.25/0.8 缩放。
+            Assert.AreEqual(0.4f, SkillCoordinator.BasicAttackCooldown(10002, 0.5f, 1.25f), 0.001f);
+            Assert.AreEqual(0.625f, SkillCoordinator.BasicAttackCooldown(10002, 0.5f, 0.8f), 0.001f);
+        }
+
+        [Test]
         public void Real_Controller_Binds_AttackSpeed_On_Light_And_Heavy_States()
         {
             var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(
