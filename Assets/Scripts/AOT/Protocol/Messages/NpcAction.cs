@@ -6,6 +6,9 @@ namespace Cool.Protocol
     {
         public const uint NpcActionTimelineV1 = 1u;
         public const uint AuthoritativeRespawn = 1u << 1;
+
+        /// <summary>属性剑气 v1：权威换装、施法确认与按 CastId 的发射/终止。</summary>
+        public const uint ElementalSwordQiV1 = 1u << 2;
     }
 
     public enum NpcActionKind : byte { Idle = 0, Move = 1, Skill = 2, HitReaction = 3, Death = 4 }

@@ -103,5 +103,141 @@ namespace Hotfix.GameSystems.Tests.Network
             Assert.IsTrue(result.Hits[0].IsBlocked,
                 "IsBlocked 未往返——客户端无法区分格挡/普通受击表现");
         }
+
+        [Test]
+        public void Roundtrip_Equip_Request_And_Confirm()
+        {
+            var request = (EquipWeaponRequest)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.EquipWeaponRequest,
+                new EquipWeaponRequest { ClientEquipSeq = 7, WeaponInstanceId = 42, KnownEquipmentRevision = 3 })).message;
+            Assert.AreEqual(7u, request.ClientEquipSeq);
+            Assert.AreEqual(42L, request.WeaponInstanceId);
+            Assert.AreEqual(3u, request.KnownEquipmentRevision);
+
+            var confirm = (EquipWeaponConfirm)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.EquipWeaponConfirm,
+                new EquipWeaponConfirm
+                {
+                    ClientEquipSeq = 7, Accepted = false, RejectReason = "stale-revision",
+                    EquipmentRevision = 4, WeaponInstanceId = 42, TemplateId = 90002, ElementId = 1
+                })).message;
+            Assert.IsFalse(confirm.Accepted);
+            Assert.AreEqual("stale-revision", confirm.RejectReason);
+            Assert.AreEqual(4u, confirm.EquipmentRevision);
+            Assert.AreEqual(1, confirm.ElementId);
+        }
+
+        [Test]
+        public void Roundtrip_Login_Weapon_Baseline_Empty_And_Full()
+        {
+            var empty = (LoginResponse)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.LoginResponse,
+                new LoginResponse { Success = true, WeaponInventory = new WeaponInventoryBaseline() })).message;
+            Assert.IsNotNull(empty.WeaponInventory);
+            Assert.AreEqual(0, empty.WeaponInventory!.Weapons.Count);
+
+            var full = (LoginResponse)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.LoginResponse,
+                new LoginResponse
+                {
+                    Success = true,
+                    ElementalCatalogFingerprint = "abc",
+                    WeaponInventory = new WeaponInventoryBaseline
+                    {
+                        LifeId = 2, EquipmentRevision = 3, WeaponInstanceId = 42,
+                        TemplateId = 90002, ElementId = 1,
+                        Weapons =
+                        {
+                            new WeaponInstanceSummary { InstanceId = 42, TemplateId = 90002, ElementId = 1 },
+                            new WeaponInstanceSummary { InstanceId = 43, TemplateId = 90003, ElementId = 2 }
+                        }
+                    }
+                })).message;
+            Assert.AreEqual("abc", full.ElementalCatalogFingerprint);
+            Assert.AreEqual(2, full.WeaponInventory!.Weapons.Count);
+            Assert.AreEqual(43L, full.WeaponInventory.Weapons[1].InstanceId);
+        }
+
+        [Test]
+        public void Roundtrip_CastId_AttackSpeed_And_CastConfirm()
+        {
+            var broadcast = (CastBroadcast)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.CastBroadcast,
+                new CastBroadcast
+                {
+                    SkillId = 10002, CasterPlayerId = 1, CastId = 99, CasterLifeId = 2,
+                    AttackSpeedMultiplier = 1.25f, ElementId = 1, EquipmentRevision = 4
+                })).message;
+            Assert.AreEqual(99ul, broadcast.CastId);
+            Assert.AreEqual(1.25f, broadcast.AttackSpeedMultiplier, 0.001f);
+            Assert.AreEqual(1, broadcast.ElementId);
+
+            var confirm = (CastConfirm)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.CastConfirm,
+                new CastConfirm
+                {
+                    ClientCastSeq = 12, Accepted = true, CastId = 99, SkillId = 10002,
+                    CasterLifeId = 2, EquipmentRevision = 4, AttackSpeedMultiplier = 1.25f,
+                    AcceptedTick = 321
+                })).message;
+            Assert.AreEqual(12u, confirm.ClientCastSeq);
+            Assert.AreEqual(99ul, confirm.CastId);
+            Assert.AreEqual(321u, confirm.AcceptedTick);
+        }
+
+        [Test]
+        public void Roundtrip_Projectile_Launch_And_Stop()
+        {
+            var launch = (ProjectileLaunchBroadcast)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.ProjectileLaunchBroadcast,
+                new ProjectileLaunchBroadcast
+                {
+                    CastId = 77, CasterPlayerId = 1, CasterLifeId = 2, CombatSceneId = "room-a",
+                    LaunchTick = 123, OriginX = 1f, OriginY = 2f, OriginZ = 3f,
+                    Yaw = 45f, Speed = 18f, Range = 12f, ElementId = 1,
+                    SkillId = 10002, ServerTimestamp = 999
+                })).message;
+            Assert.AreEqual(77ul, launch.CastId);
+            Assert.AreEqual("room-a", launch.CombatSceneId);
+            Assert.AreEqual(18f, launch.Speed, 0.001f);
+            Assert.AreEqual(12f, launch.Range, 0.001f);
+
+            var stop = (ProjectileStopBroadcast)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.ProjectileStopBroadcast,
+                new ProjectileStopBroadcast
+                {
+                    CastId = 77, CasterLifeId = 2, CombatSceneId = "room-a",
+                    StopTick = 130, Reason = ProjectileStopReason.Blocked, StopX = 4f, StopZ = 5f
+                })).message;
+            Assert.AreEqual(77ul, stop.CastId);
+            Assert.AreEqual(ProjectileStopReason.Blocked, stop.Reason);
+            Assert.AreEqual(4f, stop.StopX);
+        }
+
+        [Test]
+        public void Roundtrip_HitEntry_Cast_Identity_Fields()
+        {
+            var result = (DamageResult)MessageCodec.Decode(MessageCodec.EncodeToArray(
+                MessageId.DamageResult,
+                new DamageResult
+                {
+                    Hits =
+                    {
+                        new HitEntry
+                        {
+                            TargetPlayerId = 3, CastId = 77, EventSeq = 5, EventId = 9001,
+                            DamageKind = DamageKind.Direct, TargetLifeId = 2, CombatVersion = 6
+                        }
+                    }
+                })).message;
+
+            var hit = result.Hits[0];
+            Assert.AreEqual(77ul, hit.CastId);
+            Assert.AreEqual(5u, hit.EventSeq);
+            Assert.AreEqual(9001ul, hit.EventId);
+            Assert.AreEqual(DamageKind.Direct, hit.DamageKind);
+            Assert.AreEqual(2u, hit.TargetLifeId);
+            Assert.AreEqual(6u, hit.CombatVersion);
+        }
     }
 }

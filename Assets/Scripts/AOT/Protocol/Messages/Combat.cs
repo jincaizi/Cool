@@ -41,6 +41,15 @@ namespace Cool.Protocol
         /// <summary>蓄力进度 [0,1]：20004 用于半径/伤害缩放；20003 释放时也随包发送
         /// （服务端忽略，仅 20004 的 ChargeScales 消费）。服务端钳制，NaN 视为 0。</summary>
         [ProtoMember(7)] public float ChargeProgress { get; set; }
+
+        /// <summary>客户端施法序号（同一序号重试只返回原结论；0 = 旧客户端，不做幂等缓存）</summary>
+        [ProtoMember(8)] public uint ClientCastSeq { get; set; }
+
+        /// <summary>客户端已确认的装备版本；不匹配时服务端拒绝并补发摘要</summary>
+        [ProtoMember(9)] public uint EquipmentRevision { get; set; }
+
+        /// <summary>客户端当前生命代次（0 = 旧客户端，跳过代次校验）</summary>
+        [ProtoMember(10)] public uint CasterLifeId { get; set; }
     }
 
     /// <summary>取消施法（客户端 → 服务器）。B3：旋转（20002）取消后必须丢弃未到期的
@@ -70,6 +79,85 @@ namespace Cool.Protocol
         [ProtoMember(12)] public float ImpactZ { get; set; }
         [ProtoMember(13)] public float ChargeProgress { get; set; }
         [ProtoMember(14)] public NpcActionSnapshot? NpcAction { get; set; }
+
+        /// <summary>服务端世界级单调施法 ID（玩家与 NPC 共用分配器；0 = 旧服务端）</summary>
+        [ProtoMember(15)] public ulong CastId { get; set; }
+
+        /// <summary>施法者生命代次（与 CastId 一起定位一次施法）</summary>
+        [ProtoMember(16)] public uint CasterLifeId { get; set; }
+
+        /// <summary>施法时冻结的武器攻速倍率（Animator AttackSpeed 参数）</summary>
+        [ProtoMember(17)] public float AttackSpeedMultiplier { get; set; } = 1f;
+
+        /// <summary>施法时冻结的武器元素 ID（0 = 无属性）</summary>
+        [ProtoMember(18)] public int ElementId { get; set; }
+
+        /// <summary>施法时的装备版本（在途换装不改变已接受施法的快照）</summary>
+        [ProtoMember(19)] public uint EquipmentRevision { get; set; }
+    }
+
+    /// <summary>施法确认（服务器 → 施法者本人）。与观察者广播分开消费；按 ClientCastSeq 幂等。</summary>
+    [ProtoContract]
+    public class CastConfirm : IMessage
+    {
+        [ProtoMember(1)] public uint ClientCastSeq { get; set; }
+        [ProtoMember(2)] public bool Accepted { get; set; }
+        [ProtoMember(3)] public string RejectReason { get; set; } = "";
+        [ProtoMember(4)] public ulong CastId { get; set; }
+        [ProtoMember(5)] public int SkillId { get; set; }
+        [ProtoMember(6)] public uint CasterLifeId { get; set; }
+        [ProtoMember(7)] public uint EquipmentRevision { get; set; }
+        [ProtoMember(8)] public float AttackSpeedMultiplier { get; set; } = 1f;
+        [ProtoMember(9)] public uint AcceptedTick { get; set; }
+        [ProtoMember(10)] public long WeaponInstanceId { get; set; }
+        [ProtoMember(11)] public int TemplateId { get; set; }
+        [ProtoMember(12)] public int ElementId { get; set; }
+    }
+
+    public enum ProjectileStopReason : byte
+    {
+        Blocked = 0,
+        Death = 1,
+        Depart = 2,
+        Expired = 3
+    }
+
+    /// <summary>剑气权威发射描述。服务端判定与客户端表现使用同一份 XZ 起点/方向/速度/射程。</summary>
+    [ProtoContract]
+    public class ProjectileLaunchBroadcast : IMessage
+    {
+        [ProtoMember(1)] public ulong CastId { get; set; }
+        [ProtoMember(2)] public long CasterPlayerId { get; set; }
+        [ProtoMember(3)] public uint CasterLifeId { get; set; }
+        [ProtoMember(4)] public string CombatSceneId { get; set; } = "";
+        [ProtoMember(5)] public uint LaunchTick { get; set; }
+        [ProtoMember(6)] public float OriginX { get; set; }
+        [ProtoMember(7)] public float OriginY { get; set; }
+        [ProtoMember(8)] public float OriginZ { get; set; }
+        [ProtoMember(9)] public float Yaw { get; set; }
+        [ProtoMember(10)] public float Speed { get; set; }
+        [ProtoMember(11)] public float Range { get; set; }
+        [ProtoMember(12)] public int ElementId { get; set; }
+
+        /// <summary>表现查表用技能 ID（晚到/未收到 CastBroadcast 时仍可建立视觉）</summary>
+        [ProtoMember(13)] public int SkillId { get; set; }
+
+        /// <summary>发射时刻的服务器时钟（客户端换算晚到进度）</summary>
+        [ProtoMember(14)] public long ServerTimestamp { get; set; }
+    }
+
+    /// <summary>剑气提前终止（格挡/死亡/离场）。正常飞满射程可由发射描述推导。</summary>
+    [ProtoContract]
+    public class ProjectileStopBroadcast : IMessage
+    {
+        [ProtoMember(1)] public ulong CastId { get; set; }
+        [ProtoMember(2)] public long CasterPlayerId { get; set; }
+        [ProtoMember(3)] public uint CasterLifeId { get; set; }
+        [ProtoMember(4)] public string CombatSceneId { get; set; } = "";
+        [ProtoMember(5)] public uint StopTick { get; set; }
+        [ProtoMember(6)] public ProjectileStopReason Reason { get; set; }
+        [ProtoMember(7)] public float StopX { get; set; }
+        [ProtoMember(8)] public float StopZ { get; set; }
     }
 
     /// <summary>单次命中结果（D4：战斗骰只有服务器掷——伤害值随消息下发，客户端不重算）。内嵌类型非线上消息，实现标记接口仅为协议层惯例</summary>
@@ -92,6 +180,30 @@ namespace Cool.Protocol
         /// 累积式协议：只加不删——新字段追加高位 tag；缺该字段的老客户端读到 false = 普通受击
         /// </summary>
         [ProtoMember(7)] public bool IsBlocked { get; set; }
+
+        /// <summary>本次命中所属施法（玩家与 NPC 共用世界级分配器）</summary>
+        [ProtoMember(8)] public ulong CastId { get; set; }
+
+        /// <summary>按 (LifeId, EntityId) 单调的事件序号（Plan 02 启用；0 = 未分配）</summary>
+        [ProtoMember(9)] public uint EventSeq { get; set; }
+
+        /// <summary>跨重试去重的事件 ID（Plan 02 启用；0 = 未分配）</summary>
+        [ProtoMember(10)] public ulong EventId { get; set; }
+
+        /// <summary>直接命中 / 持续伤害跳数（客户端据此选择反馈通道）</summary>
+        [ProtoMember(11)] public DamageKind DamageKind { get; set; }
+
+        /// <summary>目标生命代次（Plan 02 起用于跨复活去重）</summary>
+        [ProtoMember(12)] public uint TargetLifeId { get; set; }
+
+        /// <summary>目标战斗版本（Plan 02 起启用；0 = 未分配）</summary>
+        [ProtoMember(13)] public uint CombatVersion { get; set; }
+    }
+
+    public enum DamageKind : byte
+    {
+        Direct = 0,
+        Dot = 1
     }
 
     /// <summary>伤害结果（服务器 → caster + 每个受击者；双端伤害数字一致性载体）。AOE 多命中打包。</summary>

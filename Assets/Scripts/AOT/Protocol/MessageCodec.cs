@@ -211,6 +211,11 @@ namespace Cool.Protocol
             RegisterMessageType(MessageId.DamageResult, typeof(DamageResult));
             RegisterMessageType(MessageId.RespawnNotice, typeof(RespawnNotice));
             RegisterMessageType(MessageId.CancelCastRequest, typeof(CancelCastRequest));
+            RegisterMessageType(MessageId.EquipWeaponRequest, typeof(EquipWeaponRequest));
+            RegisterMessageType(MessageId.EquipWeaponConfirm, typeof(EquipWeaponConfirm));
+            RegisterMessageType(MessageId.CastConfirm, typeof(CastConfirm));
+            RegisterMessageType(MessageId.ProjectileLaunchBroadcast, typeof(ProjectileLaunchBroadcast));
+            RegisterMessageType(MessageId.ProjectileStopBroadcast, typeof(ProjectileStopBroadcast));
             RegisterMessageType(MessageId.ChatMessage, typeof(ChatMessage));
             RegisterMessageType(MessageId.BroadcastMessage, typeof(BroadcastMessage));
             RegisterMessageType(MessageId.RemotePlayerSync, typeof(RemotePlayerSync));

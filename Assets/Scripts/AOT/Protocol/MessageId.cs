@@ -48,6 +48,21 @@ namespace Cool.Protocol
         /// <summary>取消施法（客户端 → 服务器；B3 旋转多段：取消/换命后丢弃未到期判定段）</summary>
         CancelCastRequest = 304,
 
+        /// <summary>换装请求（客户端 → 服务器；属性剑气 v1）</summary>
+        EquipWeaponRequest = 305,
+
+        /// <summary>换装确认（服务器 → 客户端；含权威装备版本与武器摘要）</summary>
+        EquipWeaponConfirm = 306,
+
+        /// <summary>施法确认（服务器 → 施法者本人；按 ClientCastSeq 幂等重发）</summary>
+        CastConfirm = 307,
+
+        /// <summary>剑气权威发射描述（服务器 → 施法者与同场景观察者）</summary>
+        ProjectileLaunchBroadcast = 308,
+
+        /// <summary>剑气提前终止（服务器 → 已收到发射描述的会话）</summary>
+        ProjectileStopBroadcast = 309,
+
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,
         BroadcastMessage = 201,

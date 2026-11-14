@@ -34,6 +34,9 @@ namespace Cool.Protocol
         public long ProtocolVersion { get; set; }
         [ProtoMember(7)] public uint SupportedFeatures { get; set; }
         [ProtoMember(8)] public string NpcContentHash { get; set; } = string.Empty;
+
+        /// <summary>属性剑气共享目录指纹（客户端加载的 ElementalCatalogDefaults 与服务器 JSON 必须一致）</summary>
+        [ProtoMember(9)] public string ElementalCatalogFingerprint { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -87,5 +90,11 @@ namespace Cool.Protocol
         public float SpawnRotation { get; set; }
         [ProtoMember(12)] public uint EnabledFeatures { get; set; }
         [ProtoMember(13)] public string NpcContentHash { get; set; } = string.Empty;
+
+        /// <summary>服务端属性剑气目录指纹（与 LoginRequest 对应；不匹配时拒绝进入该功能场景）</summary>
+        [ProtoMember(14)] public string ElementalCatalogFingerprint { get; set; } = string.Empty;
+
+        /// <summary>登录装备基线（仅启用 ElementalSwordQiV1 且指纹匹配时下发）</summary>
+        [ProtoMember(15)] public WeaponInventoryBaseline? WeaponInventory { get; set; }
     }
 }

@@ -26,5 +26,8 @@ namespace Cool.Protocol
         [ProtoMember(4)] public float SpawnX { get; set; }
         [ProtoMember(5)] public float SpawnY { get; set; }
         [ProtoMember(6)] public float SpawnZ { get; set; }
+
+        /// <summary>复活后的生命代次（属性剑气 CastRequest.CasterLifeId 使用）。</summary>
+        [ProtoMember(7)] public uint LifeId { get; set; }
     }
 }
