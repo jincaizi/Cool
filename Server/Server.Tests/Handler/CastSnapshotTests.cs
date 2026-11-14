@@ -134,6 +134,44 @@ public class CastSnapshotTests
     }
 
     [Fact]
+    public void Equip_After_Cast_Does_Not_Change_Next_Allowed_Tick()
+    {
+        var store = new EntityStore();
+        var player = AddCaster(store);
+        Equip(player, 10, ElementalCatalogDefaults.IceSwordTemplateId, 0);
+
+        var catalog = Catalog(iceAttack: 1f, iceSpeed: 1.25f, iceQiMultiplier: 1f,
+            fireAttack: 1f, fireSpeed: 0.8f);
+        var resolver = new CombatResolver(store, new Random(1), catalog);
+
+        Assert.True(resolver.Decide(1, Basic(10002, seq: 1, revision: 0, lifeId: player.LifeId), 0).Accepted);
+        player.EquippedWeaponInstanceId = 11;
+        player.EquippedWeaponTemplateId = ElementalCatalogDefaults.FireSwordTemplateId;
+        player.EquipmentRevision = 1;
+
+        // 旧快照 1.25 倍：0.5s / 1.25 = 6 tick。换火剑（0.8 倍需 10 tick）不能推迟已接受的窗口。
+        Assert.False(resolver.Decide(1, Basic(10002, seq: 2, revision: 1, lifeId: player.LifeId), 5).Accepted);
+        Assert.True(resolver.Decide(1, Basic(10002, seq: 3, revision: 1, lifeId: player.LifeId), 6).Accepted);
+    }
+
+    [Fact]
+    public void Light_Attack_Uses_Chain_Window_When_Cooldown_Is_Zero()
+    {
+        var store = new EntityStore();
+        var player = AddCaster(store);
+        Equip(player, 10, ElementalCatalogDefaults.IceSwordTemplateId, 0);
+
+        var catalog = Catalog(iceAttack: 1f, iceSpeed: 1f, iceQiMultiplier: 1f,
+            fireAttack: 1f, fireSpeed: 1f);
+        var resolver = new CombatResolver(store, new Random(1), catalog);
+
+        Assert.True(resolver.Decide(1, Basic(10001, seq: 1, revision: 0, lifeId: player.LifeId), 0).Accepted);
+        // 10001 冷却 0，但接续窗 0.25s = 4 tick；同一 tick/窗口内不得无限接包。
+        Assert.False(resolver.Decide(1, Basic(10001, seq: 2, revision: 0, lifeId: player.LifeId), 3).Accepted);
+        Assert.True(resolver.Decide(1, Basic(10001, seq: 3, revision: 0, lifeId: player.LifeId), 4).Accepted);
+    }
+
+    [Fact]
     public void Cast_Snapshot_Keeps_Original_Weapon_After_Equip_Change()
     {
         var store = new EntityStore();

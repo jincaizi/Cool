@@ -11,7 +11,7 @@ namespace KcpServer
     {
         public long PlayerId { get; }
         public string PlayerName { get; set; } = string.Empty;
-        public string ZoneId { get; set; } = string.Empty;
+        public string ZoneId { get; set; } = "Global";
         public Vector3 Position { get; internal set; }
         public float Rotation { get; internal set; }
         public float Speed { get; internal set; }

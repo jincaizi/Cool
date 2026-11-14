@@ -207,7 +207,10 @@ namespace KcpServer
                     // 判定帧到期的施法——**与怪物无关**（玩家施法也要在这里结算，**不能放进上面的 if**），
                     // 且必须早于 TickRespawns（F13：本 tick 打死的实体即时进死亡流程）
                     foreach (var resolution in _castHandler.DrainResolved((uint)tick))
+                    {
+                        _ = _castHandler.BroadcastProjectileAsync(resolution);
                         _ = _castHandler.BroadcastDamageAsync(resolution);
+                    }
 
                     // P8：死亡计时与复活（D-2，8 秒）。客户端不自判死（F10），
                     // 所以这里是联网下唯一的复活路径。放在怪物 tick 之后——本 tick 由怪物

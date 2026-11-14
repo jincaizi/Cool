@@ -61,6 +61,8 @@ namespace KcpServer
             public bool Replay;
 
             public ulong CastId;
+            public ProjectileLaunchBroadcast? Launch;
+            public ProjectileStopBroadcast? Stop;
             public readonly List<HitEntry> Hits = new List<HitEntry>();
 
             /// <summary>LineAll 线形命中被格挡吸收时的停点（2026-10-21）</summary>
@@ -110,6 +112,7 @@ namespace KcpServer
             public ulong CastId;
             public WeaponCastSnapshot Weapon;
             public bool Launched;
+            public string SceneId = "";
 
             public PendingCast(long casterId, CastRequest request, CastBroadcast broadcast,
                 bool isNpcCaster, ProjectileSpec? projectile, RepeatSpec? repeat, float charge, uint firstTick)
@@ -240,7 +243,8 @@ namespace KcpServer
                 Runner = runner,
                 InstanceId = runner?.Current.InstanceId ?? 0,
                 CastId = castId,
-                Weapon = weapon
+                Weapon = weapon,
+                SceneId = caster.ZoneId
             });
             if (runner != null) { _pending[_pending.Count-1].StageTicks = runner.StageTicks(); resolution.Broadcast.NpcAction = runner.Current; }
             return resolution;
@@ -336,7 +340,34 @@ namespace KcpServer
                     var resolution = ResolveStage(pending, tick);
                     // 施法者死亡/移除：整组丢弃未到期段。只逐段返回 null 会让复活后的
                     // 后续段继续结算（B3：旋转死亡/换命后不得残留伤害实例）。
-                    if (resolution == null) { pending.Spent = true; break; }
+                    if (resolution == null)
+                    {
+                        // 已发射的剑气：向已收到发射描述的会话补一条权威终止。
+                        if (pending.Launched)
+                        {
+                            (resolved ??= new List<CastResolution>()).Add(new CastResolution
+                            {
+                                Accepted = true,
+                                IsNpcCaster = pending.IsNpcCaster,
+                                Broadcast = pending.Broadcast,
+                                CastId = pending.CastId,
+                                Stop = new ProjectileStopBroadcast
+                                {
+                                    CastId = pending.CastId,
+                                    CasterPlayerId = pending.CasterId,
+                                    CasterLifeId = pending.Broadcast.CasterLifeId,
+                                    CombatSceneId = pending.SceneId,
+                                    StopTick = tick,
+                                    Reason = ProjectileStopReason.Death,
+                                    StopX = pending.Origin.X,
+                                    StopZ = pending.Origin.Z
+                                }
+                            });
+                            pending.Launched = false;
+                        }
+                        pending.Spent = true;
+                        break;
+                    }
                     // **每个判定都产出一条**（可能 Hits 为空）——沿用原合同（原实现对每次判定都入列，
                     // 空 Hits 由广播端 `BroadcastDamageAsync` 跳过）。按 Hits.Count 过滤会改变既有
                     // 单段技能的返回值，可能打破既有测试。
@@ -423,8 +454,32 @@ namespace KcpServer
 
             var resolution = new CastResolution
             {
-                Accepted = true, IsNpcCaster = pending.IsNpcCaster, Broadcast = pending.Broadcast
+                Accepted = true, IsNpcCaster = pending.IsNpcCaster, Broadcast = pending.Broadcast,
+                CastId = pending.CastId
             };
+
+            // 剑气首段：发布权威发射描述（与判定同一原点/朝向；之后各段不重复）。
+            if (spec != null && spec.Kind == ProjectileKind.LineAll && pending.NextStage == 0)
+            {
+                pending.Launched = true;
+                resolution.Launch = new ProjectileLaunchBroadcast
+                {
+                    CastId = pending.CastId,
+                    CasterPlayerId = pending.CasterId,
+                    CasterLifeId = pending.Broadcast.CasterLifeId,
+                    CombatSceneId = pending.SceneId,
+                    LaunchTick = pending.StageTicks[pending.NextStage],
+                    OriginX = pending.Origin.X,
+                    OriginY = pending.Origin.Y,
+                    OriginZ = pending.Origin.Z,
+                    Yaw = pending.Yaw,
+                    Speed = spec.Speed > 0f ? spec.Speed : 18f,
+                    Range = spec.Length,
+                    ElementId = pending.Weapon.ElementId,
+                    SkillId = pending.Request.SkillId,
+                    ServerTimestamp = ServerClock.NowTicks()
+                };
+            }
 
             // 挥击实例先行（单机判定帧顺序：挥击结算、同帧再生成剑气），且**不写入 GroupHitIds、
             // 不受其 banned 过滤**——同一目标在挥击与剑气两条线上各结算一次（不跨组去重）
@@ -467,6 +522,17 @@ namespace KcpServer
                         resolution.StopPosition = new Vec3(
                             blocker.Position.X, blocker.Position.Y, blocker.Position.Z);
                     resolution.ProjectileStopped = true;
+                    resolution.Stop = new ProjectileStopBroadcast
+                    {
+                        CastId = pending.CastId,
+                        CasterPlayerId = pending.CasterId,
+                        CasterLifeId = pending.Broadcast.CasterLifeId,
+                        CombatSceneId = pending.SceneId,
+                        StopTick = tick,
+                        Reason = ProjectileStopReason.Blocked,
+                        StopX = resolution.StopPosition.X,
+                        StopZ = resolution.StopPosition.Z
+                    };
                     pending.Spent = true;
                     break;
                 }
@@ -583,9 +649,13 @@ namespace KcpServer
         private List<CombatCandidate> BuildCandidates(PendingCast pending)
         {
             var candidates = new List<CombatCandidate>();
+            var caster = _store.GetPlayer(pending.CasterId);
+            string zone = caster?.ZoneId ?? "";
             foreach (var p in _store.All)
             {
                 if (p.PlayerId == pending.CasterId) continue;
+                // 场景隔离：不同战斗场景的实体既不成为候选，也不接收广播。
+                if (zone.Length != 0 && p.ZoneId != zone) continue;
                 if (pending.IsNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
                 candidates.Add(new CombatCandidate(p.PlayerId,
                     new Vec3(p.Position.X, ResolveCombatHeight(p), p.Position.Z), p.IsAlive,
@@ -668,6 +738,10 @@ namespace KcpServer
         private readonly ILogger _logger;
         private readonly CombatResolver _resolver;
 
+        // 已收到发射描述的会话（终止时即使已移出视野也要送达）。有界清理见 BroadcastProjectileAsync。
+        private readonly Dictionary<ulong, (HashSet<long> recipients, uint launchTick)> _projectileRecipients =
+            new Dictionary<ulong, (HashSet<long>, uint)>();
+
         /// <summary>拒绝计数（验收/统计口径，与 AoiBroadcaster.TotalEntitySends 同惯例）</summary>
         public long RejectedCasts { get; private set; }
 
@@ -722,10 +796,13 @@ namespace KcpServer
             if (decision.Replay) return;
 
             var broadcast = decision.Broadcast;
+            var caster = _server.GetEntity(broadcast.CasterPlayerId);
+            string zone = caster?.ZoneId ?? "";
             if (decision.IsNpcCaster)
             {
                 foreach (var recipientId in _server.GetObserversOf(broadcast.CasterPlayerId))
                 {
+                    if (zone.Length != 0 && _server.GetEntity(recipientId)?.ZoneId != zone) continue;
                     var s = _server.GetSession(recipientId);
                     if (s != null)
                         await _server.SendToSessionAsync(s, MessageId.CastBroadcast, broadcast);
@@ -735,7 +812,8 @@ namespace KcpServer
 
             var castRecipients = new HashSet<long> { broadcast.CasterPlayerId };
             foreach (var p in _server.GetVisiblePlayers(broadcast.CasterPlayerId))
-                castRecipients.Add(p.PlayerId);
+                if (zone.Length == 0 || p.ZoneId == zone)
+                    castRecipients.Add(p.PlayerId);
             foreach (var recipientId in castRecipients)
             {
                 var s = _server.GetSession(recipientId);
@@ -785,12 +863,94 @@ namespace KcpServer
                 id => _server.GetObserversOf(id),
                 id => _server.GetVisiblePlayers(id));
 
+            var casterEntity = _server.GetEntity(resolution.Broadcast.CasterPlayerId);
+            if (casterEntity != null)
+                recipients.RemoveWhere(id =>
+                    _server.GetEntity(id) is PlayerState p && p.ZoneId != casterEntity.ZoneId);
+
             foreach (var recipientId in recipients)
             {
                 var s = _server.GetSession(recipientId);
                 if (s != null)
                     await _server.SendToSessionAsync(s, MessageId.DamageResult, result);
             }
+        }
+
+        /// <summary>剑气权威发射/终止广播。收件人 = 施法者 + 同场景可见观察者；
+        /// 终止时并上已收到发射描述的会话（移出视野后仍能收到）。</summary>
+        public async Task BroadcastProjectileAsync(CombatResolver.CastResolution resolution)
+        {
+            if (resolution.Launch != null)
+            {
+                var recipients = CollectCastRecipients(
+                    resolution.Launch.CasterPlayerId, resolution.IsNpcCaster);
+                _projectileRecipients[resolution.Launch.CastId] =
+                    (recipients, resolution.Launch.LaunchTick);
+                PruneProjectileRecipients();
+
+                foreach (var recipientId in recipients)
+                {
+                    var s = _server.GetSession(recipientId);
+                    if (s != null)
+                        await _server.SendToSessionAsync(
+                            s, MessageId.ProjectileLaunchBroadcast, resolution.Launch);
+                }
+            }
+
+            if (resolution.Stop != null)
+            {
+                var recipients = new HashSet<long>();
+                if (_projectileRecipients.TryGetValue(resolution.Stop.CastId, out var known))
+                {
+                    recipients.UnionWith(known.recipients);
+                    _projectileRecipients.Remove(resolution.Stop.CastId);
+                }
+                recipients.UnionWith(CollectCastRecipients(
+                    resolution.Stop.CasterPlayerId, resolution.IsNpcCaster));
+
+                foreach (var recipientId in recipients)
+                {
+                    var s = _server.GetSession(recipientId);
+                    if (s != null)
+                        await _server.SendToSessionAsync(
+                            s, MessageId.ProjectileStopBroadcast, resolution.Stop);
+                }
+            }
+        }
+
+        private HashSet<long> CollectCastRecipients(long casterId, bool isNpc)
+        {
+            var recipients = new HashSet<long>();
+            var caster = _server.GetEntity(casterId);
+            string zone = caster?.ZoneId ?? "";
+            recipients.Add(casterId);
+
+            if (isNpc)
+            {
+                foreach (var id in _server.GetObserversOf(casterId))
+                    if (zone.Length == 0 || _server.GetEntity(id)?.ZoneId == zone)
+                        recipients.Add(id);
+            }
+            else
+            {
+                foreach (var p in _server.GetVisiblePlayers(casterId))
+                    if (zone.Length == 0 || p.ZoneId == zone)
+                        recipients.Add(p.PlayerId);
+            }
+            return recipients;
+        }
+
+        private void PruneProjectileRecipients()
+        {
+            const int maxEntries = 128;
+            if (_projectileRecipients.Count <= maxEntries) return;
+
+            var ordered = new List<KeyValuePair<ulong, (HashSet<long> recipients, uint launchTick)>>(
+                _projectileRecipients);
+            ordered.Sort((a, b) => a.Value.launchTick.CompareTo(b.Value.launchTick));
+            int remove = _projectileRecipients.Count - maxEntries;
+            for (int i = 0; i < remove; i++)
+                _projectileRecipients.Remove(ordered[i].Key);
         }
 
         public async Task HandleCastAsync(IServerSession session, CastRequest request)
