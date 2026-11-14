@@ -114,12 +114,18 @@ namespace Hotfix.GameSystems.Bag.UI
         {
             if (item == null) return;
 
+            // 装备：交给联网宿主发权威换装请求（服务器确认后才切换）
+            if (item.Template?.Type == ItemType.Equipment)
+            {
+                BagManager.Instance.RequestEquip(item);
+                return;
+            }
+
             // 双击使用物品
             if (item.CanUse)
             {
                 BagManager.Instance.UseItem(slotIndex);
             }
-            // TODO: 装备穿戴
         }
 
         private void OnCellRightClick(int slotIndex, ItemData item)

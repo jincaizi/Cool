@@ -108,6 +108,12 @@ namespace Hotfix.GameSystems.Sys3C
 
         /// <summary>技能协调器（P4 网络宿主装配战斗桥接入点）</summary>
         public SkillCoordinator SkillCoordinator => _skillCoordinator;
+
+        /// <summary>攻击层组件（武器工厂/攻速参数接缝）。</summary>
+        public CharacterAttackHandler AttackHandler => _attackHandler;
+
+        /// <summary>本地攻击 Animator 攻速参数（0.25–4；禁止全局 Animator.speed）。</summary>
+        public void SetAttackSpeed(float multiplier) => _attackHandler?.SetAttackSpeed(multiplier);
         public bool CanFireHeavy => _canFireHeavy;
 
         /// <summary>清除剑气就绪表现（失焦、关闭触控、释放绑定等无输入上下文的场景）。</summary>
@@ -250,6 +256,7 @@ namespace Hotfix.GameSystems.Sys3C
             _attackHandler = GetComponent<CharacterAttackHandler>();
             if (_attackHandler == null)
                 _attackHandler = gameObject.AddComponent<CharacterAttackHandler>();
+            _attackHandler.SetAnimator(Animator);
 
             // 宿主可在 Start 前预置 NetMovementPolicy（Awake 阶段）——未预置才落本地默认
             if (_movementPolicy == null)

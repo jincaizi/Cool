@@ -34,6 +34,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 来源是否玩家或 bot（DamageResult.SourceKind——宿主据此区分玩家闪屏与怪物攻击）</summary>
         private readonly Action<long, float, bool, Vector3, float, bool, bool>? _onDamageToLocalPlayer;
         private readonly ConcurrentQueue<IMessage> _incoming = new ConcurrentQueue<IMessage>();
+        private readonly ClientEquipmentState _equipment = new ClientEquipmentState();
+        private uint _nextEquipSeq;
+        private uint _nextCastSeq;
 
         /// <summary>收到其他玩家施法（表现接线点；P4 宿主仅日志占位——远程实体为胶囊）</summary>
         public event Action<CastBroadcast>? OnCastBroadcast;
@@ -41,8 +44,21 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>收到伤害结果（扣血/飘字已内部处理；测试与上层观察用）</summary>
         public event Action<DamageResult>? OnDamageResult;
 
-        /// <summary>本机施放的 LineAll 剑气被格挡吸收（停点；客户端据此结束剑气特效）</summary>
+        /// <summary>本机施放的 LineAll 剑气被格挡吸收（旧服务端兼容；新服务端走 ProjectileStopBroadcast）</summary>
         public event Action<Vector3>? OnLineProjectileStopped;
+
+        /// <summary>权威装备状态（按 EquipmentRevision 合并）。</summary>
+        public ClientEquipmentState Equipment => _equipment;
+
+        /// <summary>装备状态实际更新（接受或较新的拒绝摘要）。</summary>
+        public event Action<EquipWeaponConfirm>? OnEquipmentChanged;
+
+        /// <summary>每个换装确认（含拒绝）——宿主用于关闭待确认态/恢复选中行。</summary>
+        public event Action<EquipWeaponConfirm>? OnEquipResult;
+
+        public event Action<CastConfirm>? OnCastConfirm;
+        public event Action<ProjectileLaunchBroadcast>? OnProjectileLaunch;
+        public event Action<ProjectileStopBroadcast>? OnProjectileStop;
 
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
             RemoteEntityRegistry registry,
@@ -52,6 +68,19 @@ namespace Hotfix.GameSystems.SyncLayer
             _localPlayerId = localPlayerId;
             _registry = registry;
             _onDamageToLocalPlayer = onDamageToLocalPlayer;
+            _equipment.Changed += confirm => OnEquipmentChanged?.Invoke(confirm);
+        }
+
+        /// <summary>发送换装请求（会话内序号 + 已确认版本）。</summary>
+        public void RequestEquip(long weaponInstanceId)
+        {
+            if (weaponInstanceId == 0) return;
+            _client.Send(MessageId.EquipWeaponRequest, new EquipWeaponRequest
+            {
+                ClientEquipSeq = ++_nextEquipSeq,
+                WeaponInstanceId = weaponInstanceId,
+                KnownEquipmentRevision = _equipment.Revision
+            });
         }
 
         /// <summary>
@@ -67,7 +96,10 @@ namespace Hotfix.GameSystems.SyncLayer
                 SkillId = skillId,
                 TargetPlayerId = targetId, // 默认 0 = 不锁定远程目标（D-P4-2）
                 Shape = shape,
-                ChargeProgress = chargeProgress
+                ChargeProgress = chargeProgress,
+                ClientCastSeq = ++_nextCastSeq,
+                EquipmentRevision = _equipment.Revision,
+                CasterLifeId = _equipment.LifeId
             };
             if (impactPoint.HasValue)
             {
@@ -88,8 +120,17 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>网络线程回调入口（宿主接线 adapter.MessageReceived）——只入队</summary>
         public void OnMessage(MessageId messageId, IMessage message)
         {
-            if (messageId == MessageId.CastBroadcast || messageId == MessageId.DamageResult)
-                _incoming.Enqueue(message);
+            switch (messageId)
+            {
+                case MessageId.CastBroadcast:
+                case MessageId.DamageResult:
+                case MessageId.EquipWeaponConfirm:
+                case MessageId.CastConfirm:
+                case MessageId.ProjectileLaunchBroadcast:
+                case MessageId.ProjectileStopBroadcast:
+                    _incoming.Enqueue(message);
+                    break;
+            }
         }
 
         /// <summary>主线程消费（宿主每帧调用）</summary>
@@ -105,6 +146,19 @@ namespace Hotfix.GameSystems.SyncLayer
                     case DamageResult result:
                         ApplyDamageResult(result);
                         OnDamageResult?.Invoke(result);
+                        break;
+                    case EquipWeaponConfirm equip:
+                        _equipment.TryApply(equip);
+                        OnEquipResult?.Invoke(equip);
+                        break;
+                    case CastConfirm castConfirm:
+                        OnCastConfirm?.Invoke(castConfirm);
+                        break;
+                    case ProjectileLaunchBroadcast launch:
+                        OnProjectileLaunch?.Invoke(launch);
+                        break;
+                    case ProjectileStopBroadcast stop:
+                        OnProjectileStop?.Invoke(stop);
                         break;
                 }
             }
@@ -172,7 +226,11 @@ namespace Hotfix.GameSystems.SyncLayer
                 }
             }
 
-            if (result.ProjectileStopped
+            // 新服务端通过 ProjectileStopBroadcast 按 CastId 停点；旧路径只服务 CastId=0 的旧消息。
+            bool authoritativeCast = result.Hits != null && result.Hits.Count > 0
+                                     && result.Hits[0].CastId != 0;
+            if (!authoritativeCast
+                && result.ProjectileStopped
                 && result.SourcePlayerId == localId
                 && Cool.SyncCore.CombatRules.TryGet(result.SkillId, out var stopEntry)
                 && stopEntry.Projectile?.Kind == Cool.SyncCore.ProjectileKind.LineAll)

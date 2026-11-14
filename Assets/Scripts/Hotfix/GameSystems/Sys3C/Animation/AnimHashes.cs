@@ -16,6 +16,8 @@ namespace Hotfix.GameSystems.Sys3C.Animation
         public static readonly int Blend = Animator.StringToHash("Blend");
         public static readonly int LocomotionSpeed = Animator.StringToHash("LocomotionSpeed");
         public static readonly int IsDefending = Animator.StringToHash("IsDefending");
+        /// <summary>攻击 state 的播放速度乘数（本地与远端同源；禁止全局 Animator.speed）。</summary>
+        public static readonly int AttackSpeed = Animator.StringToHash("AttackSpeed");
         /// <summary>Base 层 Locomotion 状态（复活复位用 Animator.Play 实际切状态）。</summary>
         public static readonly int LocomotionState = Animator.StringToHash("Locomotion");
 

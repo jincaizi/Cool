@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cool.Protocol;
 using Hotfix.GameSystems.Bag.Core;
 using Hotfix.GameSystems.Bag.Core.Events;
 using Hotfix.GameSystems.Bag.Data;
@@ -28,6 +29,9 @@ namespace Hotfix.GameSystems.Bag.Runtime
         public event Action<ItemUsedEvent> OnItemUsed;
         public event Action<ItemLockChangedEvent> OnItemLockChanged;
 
+        /// <summary>玩家在背包里请求装备某件物品（联网宿主接权威换装请求）。</summary>
+        public event Action<ItemData> OnEquipRequested;
+
         private BagManager()
         {
         }
@@ -44,6 +48,46 @@ namespace Hotfix.GameSystems.Bag.Runtime
             _bagData.Initialize();
             _isInitialized = true;
             UnityEngine.Debug.Log($"[Bag] BagManager initialized with {capacity} slots");
+        }
+
+        /// <summary>背包行点击“装备”→ 上层发送换装请求。</summary>
+        public void RequestEquip(ItemData item)
+        {
+            if (item != null) OnEquipRequested?.Invoke(item);
+        }
+
+        /// <summary>用服务端登录基线重建武器背包（会话内权威结果）。</summary>
+        public void ApplyServerWeapons(IList<WeaponInstanceSummary> weapons)
+        {
+            Initialize();
+            if (weapons == null || _bagData == null) return;
+
+            int count = Math.Min(weapons.Count, _bagData.Slots.Count);
+            for (int i = 0; i < count; i++)
+            {
+                var summary = weapons[i];
+                if (!ItemTemplateRegistry.TryGet(summary.TemplateId, out _))
+                {
+                    ItemTemplateRegistry.Register(new ItemTemplate
+                    {
+                        Id = summary.TemplateId,
+                        Name = "武器 " + summary.TemplateId,
+                        Type = ItemType.Equipment,
+                        EquipSlot = EquipmentSlot.Weapon,
+                        MaxStack = 1
+                    });
+                }
+
+                var item = new ItemData
+                {
+                    InstanceId = summary.InstanceId,
+                    TemplateId = summary.TemplateId,
+                    Count = 1,
+                    SlotIndex = i
+                };
+                _bagData.GetSlot(i)?.SetItem(item);
+                OnItemAdded?.Invoke(new ItemAddedEvent(item, i, 1));
+            }
         }
 
         /// <summary>
