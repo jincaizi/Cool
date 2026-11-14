@@ -15,6 +15,14 @@
 
 `BagManager` 通过 C# 事件（`OnItemAdded` 等）通知 UI，不依赖场景单例。
 
+## 属性剑气武器背包（2026-11-14）
+
+- 登录基线 `WeaponInventoryBaseline.Weapons` 经 `BagManager.ApplyServerWeapons` 重建背包：
+  物品使用服务器实例 ID/模板 ID，武器模板按需注册为 `ItemType.Equipment`。
+- 背包行点击装备调用 `BagManager.RequestEquip(item)` 触发 `OnEquipRequested`；
+  联网宿主接 `CombatNetworkBridge.RequestEquip` 发权威换装请求，服务器确认后才更新装备。
+  拒绝时宿主恢复到确认携带的服务器摘要。
+
 ## 测试
 
 本模块暂无专属测试。改动背包数据结构时至少跑一遍 EditMode 全量：

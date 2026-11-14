@@ -34,6 +34,22 @@
 | `NpcAttackSchedule.cs` | NPC 攻击节奏 |
 | `NetworkModeService.cs` / `ServerAddressQuery.cs` | 网络模式与服务器地址 |
 
+## 属性剑气 v1（2026-11-14）
+
+- **权威换装**：`ClientEquipmentState` 按 `EquipmentRevision` 应用 `EquipWeaponConfirm`；
+  旧版本忽略。拒绝确认携带的较新摘要也会应用（恢复服务器当前装备）；登录基线可把版本 0
+  作为起点。`CombatNetworkBridge.RequestEquip(instanceId)` 发送会话内递增的
+  `ClientEquipSeq + KnownEquipmentRevision`，宿主把 `OnEquipmentChanged` 接到
+  `CharacterAttackHandler.EquipWeapon(templateId, elementId)` 与 `Sys3CEntry.SetAttackSpeed`。
+- **权威剑气**：`CastBroadcast` 只驱动远端攻击动作；剑气视觉由
+  `ProjectileLaunchBroadcast` 按 `CastId` 唯一创建（本人与旁观者同路径）。晚到发射按
+  `ServerTimestamp` 与服务器时钟补飞行进度，终止先到时缓存并跳过后续生成，
+  重复发射/终止按 `CastId` 幂等。`ProjectileStopBroadcast` 只停指定 `CastId`；
+  旧服务端（`HitEntry.CastId == 0`）仍走 `DamageResult.StopX/StopZ` 兼容路径。
+- **不重影**：`NetworkSwordQiGate.SuppressLocalSpawn` 在启用能力位的联机客户端为 true，
+  `SkillExecutor.OnSwordQiFrame` 不再创建本地剑气；离线/单机保持 false。
+- **场景**：`CombatSceneId` 使用登录 `ZoneId`；客户端忽略不同场景的发射/终止。
+
 ## 联网复活
 
 - 联网复活在主线程应用服务端落点。先清空旧预测帧和平滑纠偏，再传送并上报。

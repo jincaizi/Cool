@@ -56,6 +56,33 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 `MessageId.CancelCastRequest = 304`（客户端 → 服务器）：tag1 `SkillId`。服务端丢弃该玩家该技能的
 未到期判定段（旋转 20002 取消/换命）；无匹配实例幂等忽略。`ProtocolVersion` 保持 1。
 
+### 属性剑气 v1（2026-11-14）
+
+能力位 `ProtocolFeatures.ElementalSwordQiV1 = 1u << 2`。登录请求 tag9
+`ElementalCatalogFingerprint`（共享目录 SHA-256 小写十六进制）；登录响应 tag14 同指纹、
+tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<WeaponInstanceSummary>`）。
+指纹不匹配时服务器拒绝登录。`RespawnNotice` tag7 追加 `LifeId`，客户端复活后继续用新生命代次施法。
+
+| 消息 | ID | 方向 | 关键 tag |
+|---|---|---|---|
+| `EquipWeaponRequest` | 305 | C→S | 1 `ClientEquipSeq`、2 `WeaponInstanceId`、3 `KnownEquipmentRevision` |
+| `EquipWeaponConfirm` | 306 | S→C | 1 seq、2 `Accepted`、3 `RejectReason`、4 版本、5 实例、6 模板、7 元素；拒绝也带当前摘要 |
+| `CastConfirm` | 307 | S→C 本人 | 1 `ClientCastSeq`、2 `Accepted`、3 原因、4 `CastId`、5 技能、6 `CasterLifeId`、7 装备版本、8 攻速、9 `AcceptedTick`、10–12 装备摘要 |
+| `ProjectileLaunchBroadcast` | 308 | S→C | 1 `CastId`、2 施法者、3 生命代次、4 场景、5 `LaunchTick`、6–8 原点、9 `Yaw`、10 速度、11 射程、12 元素、13 技能、14 服务器时间戳 |
+| `ProjectileStopBroadcast` | 309 | S→C | 1 `CastId`、2 施法者、3 生命代次、4 场景、5 `StopTick`、6 原因、7–8 停点 |
+
+追加字段（只加不删）：
+
+| 消息 | 追加内容 | tag |
+|---|---|---|
+| `CastRequest` | `ClientCastSeq` / `EquipmentRevision` / `CasterLifeId` | 8 / 9 / 10 |
+| `CastBroadcast` | `CastId` / `CasterLifeId` / `AttackSpeedMultiplier` / `ElementId` / `EquipmentRevision` | 15–19 |
+| `HitEntry` | `CastId` / `EventSeq` / `EventId` / `DamageKind` / `TargetLifeId` / `CombatVersion` | 8–13 |
+
+`DamageKind`：`Direct=0`、`Dot=1`（Plan 02 起消费 DoT 分支）。`EventSeq/EventId/CombatVersion`
+在 Plan 01 固定 0，由 Plan 02 的战斗投影计划启用。所有新消息已在 `MessageTypeRegistry` 注册；
+新增字段沿用 `IList<T>` 规则（`WeaponInventoryBaseline.Weapons` 不是 `List<T>`）。
+
 ## 双端一致性校验（人工/CI 各跑一次）
 
 ### 权威复活

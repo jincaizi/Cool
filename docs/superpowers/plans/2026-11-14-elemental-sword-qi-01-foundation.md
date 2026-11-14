@@ -1,6 +1,6 @@
 # 属性剑气 01：共享表、权威换装、普攻参数与剑气快照 实现计划
 
-> **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [ ]`）语法来跟踪进度。
+> **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [x]`）语法来跟踪进度。
 
 **目标** 建立共享配置、权威换装和普攻参数闭环。两个客户端从正常登录进入，能在背包切换武器，用权威施法确认和发射/停点消息识别同一道剑气。
 
@@ -55,7 +55,7 @@
 - 测试：`Server/Server.Tests/Elemental/ElementalCatalogValidatorTests.cs`
 - 测试：`Assets/Scripts/Tests/Editor/SyncCore/ElementalCatalogTests.cs`
 
-- [ ] **步骤 1：编写失败的服务端测试**
+- [x] **步骤 1：编写失败的服务端测试**
 
 ```csharp
 using Cool.SyncCore;
@@ -100,12 +100,12 @@ public class ElementalCatalogValidatorTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server.sh --filter "FullyQualifiedName~ElementalCatalogValidatorTests"`
 预期：编译失败，`ElementalCatalogDefaults` / `ElementalCatalogValidator` 不存在。若 testhost 抛 `Win32Exception(5)`，改用 `bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~ElementalCatalogValidatorTests"`。
 
-- [ ] **步骤 3：编写 DTO**
+- [x] **步骤 3：编写 DTO**
 
 `Assets/Scripts/Hotfix/GameSystems/SyncCore/Elemental/ElementalCatalogDefinition.cs`：
 
@@ -197,7 +197,7 @@ namespace Cool.SyncCore
 }
 ```
 
-- [ ] **步骤 4：编写校验器**
+- [x] **步骤 4：编写校验器**
 
 `Assets/Scripts/Hotfix/GameSystems/SyncCore/Elemental/ElementalCatalogValidator.cs`：
 
@@ -297,7 +297,7 @@ namespace Cool.SyncCore
 }
 ```
 
-- [ ] **步骤 5：编写默认表**
+- [x] **步骤 5：编写默认表**
 
 `Assets/Scripts/Hotfix/GameSystems/SyncCore/Elemental/ElementalCatalogDefaults.cs`：
 
@@ -356,7 +356,7 @@ namespace Cool.SyncCore
 }
 ```
 
-- [ ] **步骤 6：编写 Unity EditMode 测试**
+- [x] **步骤 6：编写 Unity EditMode 测试**
 
 `Assets/Scripts/Tests/Editor/SyncCore/ElementalCatalogTests.cs`：
 
@@ -387,7 +387,7 @@ namespace Hotfix.GameSystems.Tests.SyncCore
 }
 ```
 
-- [ ] **步骤 7：接入共享配置产物并运行测试**
+- [x] **步骤 7：接入共享配置产物并运行测试**
 
 将 `Create()` 用于生成作者初值和测试夹具。配置源 `Server/Config/elemental_catalog.json` 随服务端复制到发布目录，同时作为 Unity Addressables 目录构建的输入。服务端启动时加载、校验并解析为同一个只读目录，再注入登录、装备、施法与发射入口；客户端先加载同一版配置再握手。校验默认剑存在且出现在初始清单，初始清单的模板全部可解析。沿用 `NpcCatalogHasher` 的稳定字段排序与规范化语义编码做法，指纹包含所有玩法字段，排除 `ContentHash` 自身。缺表、校验失败或入场指纹不匹配时停用该功能场景或拒绝进入。测试读取实际构建输入，并逐项核对 `CombatRules` 10002 的 12 米、2 米半宽、18 米/秒、3 段，以及 `SwordQi_Heavy.asset` 对应的射程、判定半径、速度和系数。服务端 `10002` 明确写入 `speed: 18f`，共享规则与资产对照覆盖默认值和非法参数。
 
@@ -397,7 +397,7 @@ namespace Hotfix.GameSystems.Tests.SyncCore
 
 预期：全部 PASS。
 
-- [ ] **步骤 8：Commit**
+- [x] **步骤 8：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncCore/Elemental Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs Assets/Scripts/Tests/Editor/SyncCore/ElementalCatalogTests.cs Server/Config/elemental_catalog.json Server/Server3C.csproj Server/Server.Tests/Elemental
@@ -415,7 +415,7 @@ git commit -m "feat(synccore): add elemental catalog DTOs, validator and default
 - 测试：`Server/Server.Tests/Protocol/EquipmentMessagesTests.cs`
 - 测试：`Assets/Scripts/Tests/Editor/Network/ProtocolRoundtripTests.cs`（追加用例）
 
-- [ ] **步骤 1：编写失败的协议往返测试**
+- [x] **步骤 1：编写失败的协议往返测试**
 
 ```csharp
 using Cool.Protocol;
@@ -462,12 +462,12 @@ public class EquipmentMessagesTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server.sh --filter "FullyQualifiedName~EquipmentMessagesTests"`
 预期：编译失败，`EquipWeaponRequest` / `MessageId.EquipWeaponRequest` 不存在。
 
-- [ ] **步骤 3：新增装备消息**
+- [x] **步骤 3：新增装备消息**
 
 `Assets/Scripts/AOT/Protocol/Messages/Equipment.cs`：
 
@@ -498,7 +498,7 @@ namespace Cool.Protocol
 }
 ```
 
-- [ ] **步骤 4：追加消息 ID 并注册**
+- [x] **步骤 4：追加消息 ID 并注册**
 
 在 `Assets/Scripts/AOT/Protocol/MessageId.cs` 的战斗段末尾追加：
 
@@ -520,7 +520,7 @@ namespace Cool.Protocol
 
 `CastConfirm` 使用独立的 `[ProtoContract]`，含 `ClientCastSeq/Accepted/RejectReason/CastId/SkillId/CasterLifeId/EquipmentRevision/AttackSpeedMultiplier/AcceptedTick`。`ProjectileLaunchBroadcast` 含 `CastId/CasterPlayerId/CasterLifeId/CombatSceneId/LaunchTick/OriginX/Y/Z/Yaw/Speed/Range/ElementId`。`ProjectileStopBroadcast` 含 `CastId/CasterLifeId/CombatSceneId/StopTick/Reason/StopX/Z`。为各消息分配显式且唯一的 Protobuf tag，按设计文档的单位和缺省值编写往返测试。
 
-- [ ] **步骤 5：扩展 CastRequest / CastBroadcast / HitEntry**
+- [x] **步骤 5：扩展 CastRequest / CastBroadcast / HitEntry**
 
 在 `Assets/Scripts/AOT/Protocol/Messages/Combat.cs` 中，`CastRequest` 追加：
 
@@ -560,7 +560,7 @@ namespace Cool.Protocol
     public enum DamageKind : byte { Direct = 0, Dot = 1 }
 ```
 
-- [ ] **步骤 6：运行测试验证通过**
+- [x] **步骤 6：运行测试验证通过**
 
 运行：
 - `bash tools/test-server.sh --filter "FullyQualifiedName~EquipmentMessagesTests"`
@@ -568,7 +568,7 @@ namespace Cool.Protocol
 
 预期：全部 PASS。
 
-- [ ] **步骤 7：Commit**
+- [x] **步骤 7：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol/Messages/Equipment.cs Assets/Scripts/AOT/Protocol/Messages/Combat.cs Assets/Scripts/AOT/Protocol/Messages/Login.cs Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs Assets/Scripts/AOT/Protocol/MessageId.cs Assets/Scripts/AOT/Protocol/MessageCodec.cs Server/Server.Tests/Protocol/EquipmentMessagesTests.cs
@@ -586,7 +586,7 @@ git commit -m "feat(protocol): add equipment messages and cast identity/speed fi
 - 修改：`Server/Handler/LoginHandler.cs`（正式登录发放、权威库存基线）
 - 测试：`Server/Server.Tests/Handler/EquipHandlerTests.cs`
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 ```csharp
 using Cool.Protocol;
@@ -639,12 +639,12 @@ public class EquipHandlerTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server.sh --filter "FullyQualifiedName~EquipHandlerTests"`
 预期：编译失败，`EquipHandler` / `PlayerState.WeaponInstanceTemplates` 不存在。
 
-- [ ] **步骤 3：扩展 PlayerState**
+- [x] **步骤 3：扩展 PlayerState**
 
 在 `Server/Player/PlayerState.cs` 的字段区追加：
 
@@ -664,7 +664,7 @@ public class EquipHandlerTests
             LifeId++;
 ```
 
-- [ ] **步骤 4：编写 EquipHandler**
+- [x] **步骤 4：编写 EquipHandler**
 
 `Server/Handler/EquipHandler.cs`：
 
@@ -722,7 +722,7 @@ namespace KcpServer
 }
 ```
 
-- [ ] **步骤 5：接线 Server3C**
+- [x] **步骤 5：接线 Server3C**
 
 在 `Server/Server3C.cs` 的 handler 字段区追加：
 
@@ -757,12 +757,12 @@ namespace KcpServer
 
 `ValidateAndApply` 的示例覆盖归属、模板和版本检查。上线接线同时实现：同一 `ClientEquipSeq` 在有界窗口回原确认且只改一次版本，窗口外的旧序号拒绝，登录和每个确认都返回可用于同步的权威装备摘要，拒绝也带当前元素。序号与装备校验同处服务端主循环，结果提交后发送。从正常登录入口取得实例再发换装包，测试同序号重试、过旧序号、拒绝时的完整当前摘要，以及重登和复活的生命周期差异。
 
-- [ ] **步骤 6：运行测试验证通过**
+- [x] **步骤 6：运行测试验证通过**
 
 运行：`bash tools/test-server.sh --filter "FullyQualifiedName~EquipHandlerTests"`
 预期：归属、版本、幂等、登录发放与生命周期测试全部通过。登录与换装测试走真实 Handler 和协议输入，无需手工填充玩家库存。
 
-- [ ] **步骤 7：Commit**
+- [x] **步骤 7：Commit**
 
 ```bash
 git add Server/Player/PlayerState.cs Server/Handler/EquipHandler.cs Server/Handler/LoginHandler.cs Server/Server3C.cs Server/Server.Tests/Handler/EquipHandlerTests.cs
@@ -778,7 +778,7 @@ git commit -m "feat(server): add authoritative weapon slot and equip handler"
 - 修改：`Server/Handler/CastHandler.cs`
 - 测试：`Server/Server.Tests/Handler/CastSnapshotTests.cs`
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 ```csharp
 using Cool.Protocol;
@@ -826,12 +826,12 @@ public class CastSnapshotTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server.sh --filter "FullyQualifiedName~CastSnapshotTests"`
 预期：编译失败或断言失败（`CastId` 恒 0、`ElementId` 恒 0）。
 
-- [ ] **步骤 3：新增 WeaponCastSnapshot**
+- [x] **步骤 3：新增 WeaponCastSnapshot**
 
 `Assets/Scripts/Hotfix/GameSystems/SyncCore/Elemental/WeaponCastSnapshot.cs`：
 
@@ -863,7 +863,7 @@ namespace Cool.SyncCore
 }
 ```
 
-- [ ] **步骤 4：修改 CastHandler**
+- [x] **步骤 4：修改 CastHandler**
 
 在 `Server/Handler/CastHandler.cs` 的 `CombatResolver` 类中：
 
@@ -927,12 +927,12 @@ namespace Cool.SyncCore
 - 用共享时序和施法快照换算首判、接续与冷却 tick。按施法时装备固定下一次允许出手的 tick，换装不能提前解锁。`10001` 零基础冷却仍受实际接续窗约束。使用 tick 计算时保留首判和冷却原基线的对照测试。
 - 服务端测试至少使用两把不同攻击力和攻速的剑，验证真实 `DrainResolved` 输出的首判 tick、轻击/重击起手、剑气伤害、`HitEntry.CastId` 和冷却。补同序号重试、过期装备或生命、先施法后换装、两名 NPC 具有相同动作实例 ID。竞态要走正常请求输入，并固定随机源复现结果。
 
-- [ ] **步骤 5：运行测试验证通过**
+- [x] **步骤 5：运行测试验证通过**
 
 运行：`bash tools/test-server.sh --filter "FullyQualifiedName~CastSnapshotTests"`
 预期：广播、伤害、时序、输入幂等和生命周期测试全部通过。再跑 `bash tools/test-server.sh --filter "FullyQualifiedName~CombatResolver"` 确认既有测试不回归。
 
-- [ ] **步骤 6：Commit**
+- [x] **步骤 6：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncCore/Elemental/WeaponCastSnapshot.cs Server/Handler/CastHandler.cs Server/Server.Tests/Handler/CastSnapshotTests.cs
@@ -951,7 +951,7 @@ git commit -m "feat(server): allocate cast ids and freeze weapon cast snapshots"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/CharacterAttackHandler.cs`
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/ClientEquipmentStateTests.cs`
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 ```csharp
 using Cool.Protocol;
@@ -983,12 +983,12 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/unity-tests.sh EditMode ClientEquipmentStateTests`
 预期：编译失败，`ClientEquipmentState` 不存在。
 
-- [ ] **步骤 3：编写 ClientEquipmentState**
+- [x] **步骤 3：编写 ClientEquipmentState**
 
 `Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientEquipmentState.cs`：
 
@@ -1021,7 +1021,7 @@ namespace Hotfix.GameSystems.SyncLayer
 }
 ```
 
-- [ ] **步骤 4：接线 CombatNetworkBridge**
+- [x] **步骤 4：接线 CombatNetworkBridge**
 
 在 `CombatNetworkBridge` 给 `EquipWeaponConfirm`、`CastConfirm` 注册消息订阅。`OnMessage` 只入队，`Update` 主线程出队时执行：
 
@@ -1070,12 +1070,12 @@ namespace Hotfix.GameSystems.SyncLayer
 
 原有 `EquipWeapon(IWeapon weapon)` 保持原签名。实际实现时把目录资源键接到手持模型挂点与 Addressables 加载，加载结束核对会话和装备版本后再替换模型。过期加载释放引用。工作流测试从登录基线渲染背包并点装备，注入成功、重复、过期和带新摘要的拒绝确认，在 `Update` 后断言背包、当前模板及可视模型只更新一次。
 
-- [ ] **步骤 5：运行测试验证通过**
+- [x] **步骤 5：运行测试验证通过**
 
 运行：`bash tools/unity-tests.sh EditMode ClientEquipmentStateTests`
 预期：PASS。
 
-- [ ] **步骤 6：Commit**
+- [x] **步骤 6：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer Assets/Scripts/Hotfix/GameSystems/Bag Assets/Scripts/Hotfix/GameSystems/Sys3C/CharacterAttackHandler.cs Assets/Scripts/Tests/Editor/SyncLayer/ClientEquipmentStateTests.cs
@@ -1094,7 +1094,7 @@ git commit -m "feat(sync): apply authoritative equipment confirmations"
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/AttackSpeedParameterTests.cs`
 - 资产：攻击 Animator state 增加 float 参数 `AttackSpeed`（在 Unity Editor 中完成，或由 MCP/脚本批量加；本任务先加代码侧写入，资产改动在步骤 6 验证）
 
-- [ ] **步骤 1：编写失败的测试**
+- [x] **步骤 1：编写失败的测试**
 
 ```csharp
 using Hotfix.GameSystems.SyncLayer;
@@ -1130,12 +1130,12 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/unity-tests.sh EditMode AttackSpeedParameterTests`
 预期：编译失败，`PlayAttack` 没有 3 参数重载、`AttackSpeedForTest` 不存在。
 
-- [ ] **步骤 3：新增 AnimHashes 与 Animator 写入**
+- [x] **步骤 3：新增 AnimHashes 与 Animator 写入**
 
 在 `AnimHashes.cs` 追加：
 
@@ -1167,7 +1167,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
 远端把倍率与攻击触发一起保存，在现有 RefreshLayers 真正应用攻击 trigger 时同步写入当前 Animator。播放完成、取消或模型重绑时恢复默认值或重放当前快照。怪物技能沿用现有时序，NPC 动作同步归 Plan 02。
 
-- [ ] **步骤 4：让远端施法携带攻速**
+- [x] **步骤 4：让远端施法携带攻速**
 
 在 `RemoteCastPresenter.OnCastBroadcast` 中，把：
 
@@ -1184,7 +1184,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 broadcast.AttackSpeedMultiplier);
 ```
 
-- [ ] **步骤 5：本地施法写入同一参数**
+- [x] **步骤 5：本地施法写入同一参数**
 
 在 `CharacterAttackHandler` 增加序列化 Animator 与写入方法（避免 `GetComponent`）：
 
@@ -1200,14 +1200,14 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
 本地 `SkillCoordinator` 在普攻开始时冻结已确认的装备，按任务 4 的共享参数派生技能执行时序。在设置攻击 trigger 前写攻速参数，以同一倍率驱动 `SkillExecutor` 的执行、判定及接续计时，冷却用已缩放的秒数。每段时序只缩放一次。本人用 `CastConfirm` 对账，拒绝时停止对应预测。下一次普攻才读取新装备。
 
-- [ ] **步骤 6：在 Animator 控制器加参数并验证**
+- [x] **步骤 6：在 Animator 控制器加参数并验证**
 
 在 `Assets/RpgDuo/Animator/Character3C.controller` 的轻击、重击 state 上绑定 `AttackSpeed` 浮点乘数（默认 1）。验证本地与远端实际控制器。EditMode 检查真实资产参数与 state 绑定，PlayMode 断言 0.25、1、4 倍时动画窗口、连段与共享判定时序一致。
 
 `bash tools/unity-tests.sh EditMode AttackSpeedParameterTests`
 预期：PASS；再用 Unity Editor 播放 10001/10002 确认动画不被截断。
 
-- [ ] **步骤 7：Commit**
+- [x] **步骤 7：Commit**
 
 ```bash
 git add Assets/RpgDuo/Animator/Character3C.controller Assets/Scripts/Hotfix/GameSystems/Sys3C/Animation/AnimHashes.cs Assets/Scripts/Hotfix/GameSystems/Sys3C/CharacterAttackHandler.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs Assets/Scripts/Tests/Editor/SyncLayer/AttackSpeedParameterTests.cs
@@ -1224,25 +1224,25 @@ git commit -m "feat(animation): drive attack speed through animator parameter"
 - 客户端 `CombatNetworkBridge.cs`、`ClientNetworkHost.cs`、`RemoteCastPresenter.cs`、`SkillExecutor.cs`、`SwordQiSpawner.cs`。
 - 测试 `Server/Server.Tests/Handler/CombatResolverSwordQiLaunchTests.cs`、`Assets/Scripts/Tests/Editor/SyncLayer/RemoteCastPresenterCastIdTests.cs`。
 
-- [ ] **步骤 1：编写能真实走判定的失败测试**
+- [x] **步骤 1：编写能真实走判定的失败测试**
 
 服务端由两个合法重击请求产生施法 A/B，令 B 被格挡，断言发射、命中及提前终止的 `CastId` 均指向 B，后方实体免于该道剑气的命中。将服务器生成的消息编码并解码作为同一组协议测试的输入。客户端测试通过桥接消费发射、伤害及终止消息，分别绑定本地及远端呈现器，断言各自只生成 A/B 各一次、只停止 B。覆盖终止先到、重复发射、重复终止、延迟发射和派生自旧生命周期的事件。不通过直接手填 `HitEntry` 来替代服务端关联的测试。
 
-- [ ] **步骤 2：接线服务端发射和结束**
+- [x] **步骤 2：接线服务端发射和结束**
 
 重击在权威发射 tick 完成近身挥砍和发射。对存活并仍属原场景的施法者，冻结一份发射描述，服务端的线上判定和客户端发射由同一 XZ 起点/方向驱动。速度、射程、半宽和段数取已验证的共享 `10002`。绕开死亡或离场后的未发射施法。发射消息独立于命中结果，空挥也发射。Plan 01 默认采用设计文档的段末调度，使用默认三段做首段实测；若为满足同一文档的验收门槛必须细分，则保留 12 米、18 米/秒和 2 米半宽并记录实测决策。第一段也从同一发射时钟计算。
 
 格挡、死亡、离场提前终止由服务端生成 `ProjectileStopBroadcast`，带原 `CastId`、停点、原因和服务器 tick。发射后生成的命中结果用同一个 ID。首先发送给施法者和同场景有视野的客户端；订阅了该发射的会话即使随后移出距离也要收到其终止。观察者中途进入视野补发在途基线由 Plan 02 接入。
 
-- [ ] **步骤 3：本地和远端统一消费服务端剑气**
+- [x] **步骤 3：本地和远端统一消费服务端剑气**
 
 `CastBroadcast` 只驱动远端攻击动作。启用该功能的联机客户端在 `SkillExecutor.OnSwordQiFrame` 不再创建剑气，离线照常。`CombatNetworkBridge` 把发射和终止封送到主线程，由 `RemoteCastPresenter` 或共用发射呈现器为本人及远端创建剑气。以 `CastId` 检查重复，并按生命周期、场景和飞行窗口淘汰缓存。晚到的发射按服务端 tick 补进度，终止先到时暂存对应停点或终态。视觉只有权威停点能提前终止；同一流程移除 `StopNearest` 和按 `casterId + skillId` 猜剑气的旧联机分支。现有火球的表现路径保持原接口。
 
-- [ ] **步骤 4：验证默认剑和两端链路**
+- [x] **步骤 4：验证默认剑和两端链路**
 
 运行 `bash tools/test-server.sh --filter "FullyQualifiedName~CombatResolverSwordQiLaunchTests|FullyQualifiedName~CombatResolverSwordQiBlockTests"` 和 `bash tools/unity-tests.sh EditMode RemoteCastPresenterCastIdTests`。先核对 12 米默认剑、首段和末段，再验证冰剑发射后换火剑，两个客户端收到同一 `CastId`、起点、元素和停点。两端只停 B。
 
-- [ ] **步骤 5：提交本任务涉及的服务端、协议、客户端和测试文件**
+- [x] **步骤 5：提交本任务涉及的服务端、协议、客户端和测试文件**
 
 ---
 
@@ -1257,7 +1257,7 @@ git commit -m "feat(animation): drive attack speed through animator parameter"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Bag/README.md`、`Server/README.md`
 
-- [ ] **步骤 1：跑全部相关测试**
+- [x] **步骤 1：跑全部相关测试**
 
 ```bash
 bash tools/test-server.sh --filter "FullyQualifiedName~ElementalCatalogValidatorTests|FullyQualifiedName~EquipmentMessagesTests|FullyQualifiedName~EquipHandlerTests|FullyQualifiedName~CastSnapshotTests|FullyQualifiedName~CombatResolver|FullyQualifiedName~LoginRosterTests"
@@ -1270,7 +1270,7 @@ bash tools/unity-tests.sh EditMode CombatNetworkBridgeTests
 
 预期：全部 PASS；若 testhost 抛 `Win32Exception(5)`，服务端命令改用 `tools/test-server-inprocess.sh`。
 
-- [ ] **步骤 2：更新模块 README**
+- [x] **步骤 2：更新模块 README**
 
 在每个 README 中写清：
 - 协议：`EquipWeaponRequest/Confirm` 的 ID 与字段；`CastBroadcast.CastId/AttackSpeedMultiplier/ElementId` 的语义。
@@ -1279,14 +1279,14 @@ bash tools/unity-tests.sh EditMode CombatNetworkBridgeTests
 - Skills/Sys3C：攻击 state 的 `AttackSpeed` 参数；本地与远端同源。
 - Bag/Server：登录发放与装备确认的生命周期、场景隔离、权威普攻和投射物输出。
 
-- [ ] **步骤 3：手动双客户端冒烟**
+- [x] **步骤 3：手动双客户端冒烟**
 
 1. 启动服务端：`dotnet Server/bin/Debug/net8.0/Server3C.dll`（用 `dotnet <dll>`，不要 `dotnet run`：apphost 会让 `HttpListener.Start` 抛“句柄无效”）。
 2. 启动两个客户端，登录同一场景。
 3. 通过背包选择冰剑，在途换火剑后再施放。核对两端各次发射的 `CastId`、元素、轨迹和格挡停点。两发 ID 不同，且原冰剑气保持冰属性。
 4. 从测试配置选择另一把攻击力、攻速不同的剑，核对两端动画节奏、服务端首判 tick、扣血和最早出手时间。旧换装确认、重发施法请求、消息乱序分别注入验证。用不同房间、相同坐标的玩家对照，断言不互相命中也不收到对方剑气消息。
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol/README.md Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md Assets/Scripts/Hotfix/GameSystems/Skills/README.md Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md Assets/Scripts/Hotfix/GameSystems/Bag/README.md Server/README.md
@@ -1301,3 +1301,15 @@ git commit -m "docs: record elemental foundation protocol and sync behavior"
 - 双客户端从真实登录起通过背包换装，实际伤害与攻速、元素快照、发射和停点在同一 `CastId` 闭合；两端统一用同一份配置产物。跨场景与重试用例通过。
 - 未启用项（状态结算、取消、投影、PvP 预算）在 README 中明确标注为 02–05 计划，不写成已打通。
 - 计划 02 可以直接引用本计划的 `ElementalCatalogDefinition`、`WeaponCastSnapshot`、`CastBroadcast.CastId` 与 `ClientEquipmentState`。
+
+## 执行说明（2026-11-14）
+
+- 任务 8 的双客户端冒烟以 PlayMode `ElementalTwoClientTests` 自动化执行：两个真实
+  `ClientNetworkManager` 连接本机 `Server3C`（127.0.0.1:8123），完成真实登录、权威换装、
+  施法与同一 `CastId` 发射校验，结果 XML 见 `TestResults/elemental-two-client.xml`。
+- Unity 测试使用 batchmode（不能带 `-quit`，Test Framework 自行退出）：
+  `Unity.exe -batchmode -nographics -projectPath <worktree> -runTests
+  -testPlatform EditMode|PlayMode -testFilter <Class> -testResults <xml> -logFile <log>`。
+- 未做目测项：在编辑器里逐帧播放 10001/10002 确认“动画不被截断”。等价断言已覆盖
+  `AttackSpeedParameterTests`（0.25/1/4 钳制、状态机时间缩放、真实控制器 AttackSpeed 绑定），
+  但缺少实际动画播放的人眼/录屏证据。

@@ -12,6 +12,28 @@
 | `CombatRules.cs` | 投射物判定种类与参数（剑气 / 火球 / 落点圆）、旋转重复判定（`RepeatSpec`）、攻击高度带（`AttackHeightSpec`） |
 | `Vec3.cs` | 共享向量 |
 
+## 属性剑气共享目录（2026-11-14）
+
+`Elemental/` 是 Plan 01 的双端共享真值：
+
+| 文件 | 职责 |
+|---|---|
+| `ElementalCatalogDefinition.cs` | 武器/元素/状态/普攻时序/剑气几何/PvP 参数 DTO（`[Serializable]` 公共字段） |
+| `ElementalCatalogValidator.cs` | 纯函数校验：重复 ID、缺失引用、数值区间、默认剑在初始清单、剑气 `Length/Speed == TotalFlightSeconds` |
+| `ElementalCatalogDefaults.cs` | 首版默认表与稳定 ID（90001–90005；10001/10002 时序；12m/2m/18m/s/3 段） |
+| `ElementalCatalogHasher.cs` | 稳定排序 + little-endian 语义流 SHA-256；排除 `ContentHash` 自身 |
+| `WeaponCastSnapshot.cs` | 施法时冻结的武器实例/模板/元素/版本/攻击力/攻速/剑气倍率 |
+
+服务端启动从 `Server/Config/elemental_catalog.json` 加载并校验；Unity EditMode
+`ElementalCatalogTests` 读取 `SwordQi_Heavy.asset` 与默认表逐项对照，`CombatRules` 10002
+的 `Speed=18` 与目录同源。缺表/校验失败时服务端停用该功能（不发放武器、不协商能力位），
+客户端指纹不匹配时拒绝登录。构建校验命令：
+
+```bash
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~ElementalCatalogValidatorTests"
+bash tools/unity-tests.sh EditMode ElementalCatalogTests
+```
+
 ## 约束
 
 ### NPC 共享目录与动作时间（2026-11-08）

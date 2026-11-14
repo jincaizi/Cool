@@ -44,6 +44,29 @@ bash tools/test-server.sh
   AOI 分带调度把血量/防御变化视为脏位立即推送；客户端据此更新远程 `Targetable` 与名牌血条。
   `Server.Tests/Aoi/BandwidthBudgetTests` 断言含新字段的全字段快照字节上限。
 
+## 属性剑气 v1（2026-11-14，Plan 01）
+
+- **共享目录**：启动从 `Config/elemental_catalog.json` 加载、`ElementalCatalogValidator` 校验并
+  计算 SHA-256 指纹；缺表/校验失败时停用该功能（登录不发放武器）。客户端登录带指纹与
+  `ProtocolFeatures.ElementalSwordQiV1`，不匹配则拒绝登录。
+- **权威换装**：`LoginHandler` 按目录初始清单发放会话内武器实例并装备默认剑；
+  `EquipHandler` 校验归属/版本、按 `ClientEquipSeq` 幂等，确认/拒绝都带当前装备摘要。
+  `PlayerState` 持有 `WeaponInstanceTemplates / EquipmentRevision / LifeId`。
+- **施法身份**：`CombatResolver.Decide` 用世界级单调 `ulong CastId`（玩家与 NPC 共用），
+  冻结 `WeaponCastSnapshot`（攻击力/攻速/元素/装备版本），校验 `ClientCastSeq /
+  EquipmentRevision / CasterLifeId`；重复序号只回原 `CastConfirm`，不重排判定。
+  普攻首判/接续/冷却按共享时序与攻速换算 tick，`NextAllowedAttackTick` 在施法时固定。
+- **伤害**：普攻基础伤害乘武器 `BaseAttack / 默认武器 BaseAttack`；剑气分支另乘共享
+  `SwordQiDamageCoefficient` 与武器 `SwordQiDamageMultiplier`。挥击与剑气各自独立结算。
+- **发射/停点**：首个 LineAll 段发布 `ProjectileLaunchBroadcast`（与判定同一 XZ 原点/朝向，
+  12m / 18m/s / 3 段）；格挡、死亡/离场发布 `ProjectileStopBroadcast`，按 `CastId`
+  只停指定一发。发射收件人记录在 `CastHandler`，终止时并上已通知会话。
+- **场景隔离**：候选、挥砍/发射广播与伤害收件人统一按 `PlayerState.ZoneId` 过滤；
+  跨场景同坐标不互相命中。怪物按地图实例绑定场景留到 Plan 02。
+
+未启用：元素状态结算/DoT、`CastCancelBroadcast`、`CombatStateUpdate`/`CombatProjection`、
+AOI 重入补发、PvP 控制预算（Plan 02–05）。
+
 ## 投射物与落点判定（20003 火球）
 
 - 20003 在共享表 `CombatRules` 中是 `ProjectileKind.CircleAtPoint`：`radius=1.5`、

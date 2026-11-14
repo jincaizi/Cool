@@ -40,6 +40,14 @@ Hit 层只有 `Hit` / `DefendHit` / `Dizzy` 三态可达。`Knockback` / `Launch
 | `Network/MovementPolicy.cs`、`Network/NetMovementPolicy.cs` | 本地 / 联网移动策略 |
 | `Skill/SkillDashComponent.cs` | 技能突进 |
 
+## 攻击攻速参数（2026-11-14）
+
+`Character3C.controller` 的轻击 `BaseAttack` 与重击 `Attack02` 使用 float 参数
+`AttackSpeed` 作为 state speed multiplier（默认 1）。`Sys3CEntry.SetAttackSpeed` /
+`CharacterAttackHandler.SetAttackSpeed` 写入 0.25–4 的倍率；`CharacterAttackHandler`
+还提供 `SetWeaponFactory` / `EquipWeapon(templateId, elementId)` 按权威装备切换武器表现
+（当前仓库没有元素武器预制体，工厂为空时只更新状态）。禁止改全局 `Animator.speed`。
+
 ## 复活传送
 
 联网复活按服务端下发的坐标传送。单机和旧版服务端通知使用场景出生点。

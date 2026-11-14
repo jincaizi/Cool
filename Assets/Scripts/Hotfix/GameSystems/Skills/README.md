@@ -27,6 +27,17 @@
 - 技能对 3C 的影响通过 `Sys3CEntry` 与 `StateCoordinator` 的接口完成。
 - 格挡成功事件 `BlockSucceededEvent` 定义在 `Sys3C/Core/Events/`，由战斗与同步层发布，表现层订阅。
 
+## 属性剑气与攻速（2026-11-14）
+
+- 普攻 10001/10002 的攻速来自已确认装备：`SkillCoordinator.AttackSpeedProvider` 注入倍率
+  （0.25–4），`SkillExecutor.SetTimeScale` 驱动 `SkillStateMachine.ElapsedTime`，
+  冷却按 `Cooldown / attackSpeed` 起算；每段时序只缩放一次。蓄力/旋转/引导保持原计时。
+- `SkillStateMachine` 只缩放 `_elapsedTime`，不写全局 `Animator.speed`；Animator 由
+  `CharacterAttackHandler` / `RemoteEntityAnimator` 写 `AttackSpeed` 参数。
+- 联机启用属性剑气后，`NetworkSwordQiGate.SuppressLocalSpawn=true`：
+  `SkillExecutor.OnSwordQiFrame` 不生成剑气视觉，由 `ProjectileLaunchBroadcast` 统一创建。
+  离线路径不变（`SwordQiSpawner` 仍支持 `startDistance` 供晚到补进度）。
+
 ## 测试
 
 Editor：`SkillCoordinator*Tests`、`SkillExecutor*Tests`、`SkillStateMachine*Tests`、`SkillDataMeteorTests`、
