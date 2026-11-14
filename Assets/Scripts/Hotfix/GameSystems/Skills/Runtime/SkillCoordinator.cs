@@ -43,6 +43,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public event Action<SkillData> OnSkillCancelled;
 
         // 属性
+        /// <summary>已确认装备的攻速倍率（联网宿主注入；null = 1）。只作用于普攻 10001/10002。</summary>
+        public Func<float> AttackSpeedProvider { get; set; }
+
         public SkillExecutor CurrentSkill => _currentSkill;
         public SkillSubState CurrentSubState => _currentSkill?.CurrentSubState ?? SkillSubState.None;
         public bool IsSkillActive => _currentSkill != null && _currentSkill.IsActive;
@@ -310,6 +313,17 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             // 创建执行器
             var executor = new SkillExecutor(_owner, skillData, _interruptionMatrix);
+
+            // 普攻攻速：执行器状态机与 Animator AttackSpeed 使用同一冻结倍率。
+            float attackSpeed = 1f;
+            if (skillId == 10001 || skillId == 10002)
+            {
+                attackSpeed = AttackSpeedProvider != null
+                    ? Mathf.Clamp(AttackSpeedProvider(), 0.25f, 4f)
+                    : 1f;
+                executor.SetTimeScale(attackSpeed);
+            }
+
             if (_dashComponent != null)
             {
                 executor.SetDashComponent(_dashComponent);
@@ -337,7 +351,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // 启动冷却（可蓄力技能除外：冷却按"释放"起算，见 ReportChargeReleased——
             // 与服务端「CastRequest 到达才 RecordCast」同源）
             if (!SkillCastReporter.IsChargeable(skillData))
-                _cooldownManager.StartCooldown(skillId, skillData.Cooldown);
+                _cooldownManager.StartCooldown(skillId, skillData.Cooldown / attackSpeed);
 
             // 尝试开始释放
             if (!executor.TryStart())

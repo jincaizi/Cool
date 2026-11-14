@@ -44,6 +44,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public SkillSubState CurrentState => _currentState;
         public float ElapsedTime => _elapsedTime;
 
+        /// <summary>普攻攻速倍率（0.25–4）。只缩放执行/恢复窗口；蓄力/旋转保持原计时。</summary>
+        public float TimeScale { get; set; } = 1f;
+
         public event Action<SkillSubState> OnStateChanged
         {
             add => _onStateChanged += value;
@@ -118,7 +121,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             _lastDeltaTime = deltaTime;
             if (_stateStartTime < 0) return;
-            _elapsedTime = GetCurrentTime() - _stateStartTime;
+            _elapsedTime = (GetCurrentTime() - _stateStartTime) * TimeScale;
 
             switch (_currentState)
             {

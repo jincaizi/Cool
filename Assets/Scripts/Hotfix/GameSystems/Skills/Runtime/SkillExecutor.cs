@@ -140,6 +140,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _attackDirection = direction;
         }
 
+        /// <summary>普攻攻速：驱动状态机执行/恢复窗口（与 Animator AttackSpeed 同源）。</summary>
+        public void SetTimeScale(float scale)
+            => _stateMachine.TimeScale = Mathf.Clamp(scale, 0.25f, 4f);
+
         public void SetDashComponent(IDashComponent dashComponent)
         {
             _dashComponent = dashComponent;
@@ -285,6 +289,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
             var cfg = _skillData.SwordQi;
             if (cfg == null || cfg.Prefab == null) return;
             if (frameIndex != cfg.SpawnFrameIndex) return;
+
+            // 联网属性剑气：剑气视觉由服务端 ProjectileLaunchBroadcast 统一创建。
+            if (NetworkSwordQiGate.SuppressLocalSpawn) return;
 
             _swordQiSpawned = true;
 

@@ -85,6 +85,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private float _hitRemaining;
         private bool _hitBlocked;
         private float _attackRemaining;
+        private float _attackSpeed = 1f;
         private float _deathRemaining;
         private DeathPhase _deathPhase;
         private string? _attackTrigger;
@@ -202,6 +203,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 else if (hash == AnimHashes.HitState) _hasHitState = true;
                 else if (hash == AnimHashes.IsDefending) _hasDefending = true;
             }
+            ApplyAttackSpeed(1f);
         }
 
         /// <summary>
@@ -220,6 +222,7 @@ namespace Hotfix.GameSystems.SyncLayer
             // 生死翻转：进行中的短暂表现一律作废
             _hitRemaining = 0f;
             _attackRemaining = 0f;
+            _attackSpeed = 1f;
 
             if (dead)
             {
@@ -236,17 +239,25 @@ namespace Hotfix.GameSystems.SyncLayer
             RefreshLayers();
         }
 
-        /// <summary>事件驱动的挥砍。Death/Down 霸体期间忽略；GettingUp 非霸体，会被打断。</summary>
+        /// <summary>事件驱动的挥砍（默认攻速 1）。Death/Down 霸体期间忽略；GettingUp 非霸体，会被打断。</summary>
         internal void PlayAttack(string trigger, float duration)
+            => PlayAttack(trigger, duration, 1f);
+
+        /// <summary>带权威攻速的挥砍：动画窗口与计时都按倍率缩放（0.25–4）。</summary>
+        internal void PlayAttack(string trigger, float duration, float attackSpeed)
         {
             if (_dead || _deathPhase == DeathPhase.Down) return;
             if (_deathPhase == DeathPhase.GettingUp) _deathPhase = DeathPhase.None;
 
-            _attackRemaining = Mathf.Max(0.1f, duration);
+            _attackSpeed = Mathf.Clamp(attackSpeed, 0.25f, 4f);
+            _attackRemaining = Mathf.Max(0.1f, duration / _attackSpeed);
             _attackTrigger = trigger;
             _attackTriggerApplied = false;
             RefreshLayers();
         }
+
+        internal float AttackSpeedForTest => _attackSpeed;
+        internal float AttackRemainingForTest => _attackRemaining;
 
         /// <summary>
         /// 事件驱动的受击。Death/Down 霸体期间忽略；GettingUp 非霸体，会被打断。
@@ -261,6 +272,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _hitRemaining = Mathf.Max(0.1f, duration);
             _hitBlocked = blocked;
             _attackRemaining = 0f;
+            _attackSpeed = 1f;
             _hitTriggerApplied = false;   // 新一次受击事件：允许再次点 Trigger `Hit`
             RefreshLayers();
         }
@@ -329,6 +341,8 @@ namespace Hotfix.GameSystems.SyncLayer
             LastHitState = (int)hitState;   // 仲裁结果——没有 Animator 也照样记下来
             if (_animator == null) return;
 
+            _attackSpeed = 1f;
+            ApplyAttackSpeed(1f);
             WriteLayerWeight(AnimHashes.HitLayerIndex, 1f);
             WriteLayerWeight(AnimHashes.AttackLayerIndex, 0f);
             WriteLayerWeight(AnimHashes.DefendLayerIndex, 0f);
@@ -362,6 +376,7 @@ namespace Hotfix.GameSystems.SyncLayer
             WriteLayerWeight(AnimHashes.DefendLayerIndex, 0f);
             WriteLayerWeight(AnimHashes.AttackLayerIndex, 1f);
             if (_hasAttackState) _animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Attacking);
+            ApplyAttackSpeed(_attackSpeed);
 
             ResetHitTrigger();   // 进入攻击：受击层让位，未消费的 Hit 触发必须清掉
 
@@ -380,6 +395,8 @@ namespace Hotfix.GameSystems.SyncLayer
             LastHitState = (int)HitState.None;
             if (_animator == null) return;
 
+            _attackSpeed = 1f;
+            ApplyAttackSpeed(1f);
             WriteLayerWeight(AnimHashes.HitLayerIndex, 0f);
             WriteLayerWeight(AnimHashes.AttackLayerIndex, 0f);
             if (_hasAttackState) _animator.SetInteger(AnimHashes.AttackState, (int)AttackState.Idle);
@@ -388,6 +405,13 @@ namespace Hotfix.GameSystems.SyncLayer
 
             ResetHitTrigger();
             ResetAttackTrigger();
+        }
+
+        /// <summary>写攻击 state 的 AttackSpeed 参数；控制器没有该参数时静默跳过。</summary>
+        private void ApplyAttackSpeed(float speed)
+        {
+            if (_animator == null || !_availableParams.Contains(AnimHashes.AttackSpeed)) return;
+            _animator.SetFloat(AnimHashes.AttackSpeed, Mathf.Clamp(speed, 0.25f, 4f));
         }
 
         private void ResetAttackTrigger()
