@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Cool.SyncCore;
 
 namespace KcpServer
 {
@@ -124,7 +125,28 @@ namespace KcpServer
                 throw new InvalidOperationException($"map '{worldMapId}' needs a finite playerSpawn in {mapsPath}");
 
             var logger = new ConsoleLogger();
-            _server = new Server3C(logger, spawn);
+
+            // 属性剑气共享目录：缺表/校验失败时停用该功能（服务端仍可启动，登录不发放武器）。
+            ElementalCatalogDefinition? elementalCatalog = null;
+            bool elementalEnabled = false;
+            string elementalPath = System.IO.Path.Combine(
+                AppContext.BaseDirectory, "Config", "elemental_catalog.json");
+            try
+            {
+                elementalCatalog = Config.ConfigLoader.LoadElementalCatalog(elementalPath);
+                var errors = ElementalCatalogValidator.Validate(elementalCatalog);
+                if (errors.Count != 0)
+                    throw new InvalidOperationException(string.Join("; ", errors));
+                elementalEnabled = true;
+                Console.WriteLine($"Elemental catalog: {elementalCatalog.Weapons.Count} weapons, fingerprint="
+                    + ElementalCatalogHasher.Compute(elementalCatalog));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Elemental catalog disabled: {ex.Message}");
+            }
+
+            _server = new Server3C(logger, spawn, elementalCatalog, elementalEnabled);
 
             // bot 必须先于 StartAsync 注册（EntityStore 主循环独占——R2）
             if (botCount > 0)

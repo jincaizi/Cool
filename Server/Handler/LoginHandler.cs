@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Cool.SyncCore;
 
 namespace KcpServer
 {
@@ -11,6 +12,7 @@ namespace KcpServer
         private readonly RoomManager _roomManager;
         private readonly ILogger _logger;
         private long _nextPlayerId = 1;
+        private long _nextWeaponInstanceId = 1;
 
         public LoginHandler(Server3C server, RoomManager roomManager, ILogger logger)
         {
@@ -48,6 +50,22 @@ namespace KcpServer
 
             _logger.LogInformation($"Login attempt: {request.Username} from session {session.SessionId}");
 
+            bool wantsElemental = (request.SupportedFeatures & ProtocolFeatures.ElementalSwordQiV1) != 0;
+            if (wantsElemental && (!_server.ElementalSwordQiEnabled
+                || !string.Equals(request.ElementalCatalogFingerprint,
+                    _server.ElementalCatalogFingerprint, StringComparison.Ordinal)))
+            {
+                var reject = new LoginResponse
+                {
+                    Success = false,
+                    Message = "elemental catalog fingerprint mismatch",
+                    ServerTimestamp = DateTime.UtcNow.Ticks
+                };
+                await _server.SendToSessionAsync(session, MessageId.LoginResponse, reject);
+                _logger.LogWarning($"Rejected elemental login from session {session.SessionId}: catalog fingerprint mismatch");
+                return;
+            }
+
             long playerId = Interlocked.Increment(ref _nextPlayerId);
 
             var playerState = new PlayerState(playerId)
@@ -58,10 +76,12 @@ namespace KcpServer
             };
 
             _server.BindPlayerToSession(playerId, session);
-            _server.RegisterEntity(playerId, request.Username,
+            var storePlayer = _server.RegisterEntity(playerId, request.Username,
                 (request.SupportedFeatures & ProtocolFeatures.AuthoritativeRespawn) != 0);
 
             string zoneId = string.IsNullOrEmpty(request.ZoneId) ? "Global" : request.ZoneId;
+            storePlayer.ZoneId = zoneId;
+            if (wantsElemental) GrantStartingWeapons(storePlayer);
             _roomManager.TryAddPlayerToRoom(playerId, session, playerState, zoneId);
 
             // 发送登录响应
@@ -74,6 +94,12 @@ namespace KcpServer
                 ServerTimestamp = DateTime.UtcNow.Ticks,
                 ServerTickRateMs = 66 // 服务器 GameLoop 66ms（Server3C GameLoop ctor）——客户端据此换算插值窗口
             };
+            if (wantsElemental)
+            {
+                loginResponse.EnabledFeatures = ProtocolFeatures.ElementalSwordQiV1;
+                loginResponse.ElementalCatalogFingerprint = _server.ElementalCatalogFingerprint;
+                loginResponse.WeaponInventory = EquipHandler.BuildBaseline(storePlayer, _server.ElementalCatalog);
+            }
             await _server.SendToSessionAsync(session, MessageId.LoginResponse, loginResponse);
 
             // RoomSync 登录下发退役（P2 T3）：新玩家看已在线玩家 = EntityStore 注册标脏 →
@@ -111,6 +137,24 @@ namespace KcpServer
             }
 
             _logger.LogInformation($"Player {playerId} ({request.Username}) logged in to zone {zoneId}");
+        }
+
+        /// <summary>按共享目录发放会话内武器实例并装备默认剑。重登会重新发放（新实例 ID）。</summary>
+        public void GrantStartingWeapons(PlayerState player)
+        {
+            var catalog = _server.ElementalCatalog;
+            long defaultInstanceId = 0;
+            foreach (int templateId in catalog.StartingWeaponTemplateIds)
+            {
+                long instanceId = _nextWeaponInstanceId++;
+                player.WeaponInstanceTemplates[instanceId] = templateId;
+                if (templateId == catalog.DefaultWeaponTemplateId && defaultInstanceId == 0)
+                    defaultInstanceId = instanceId;
+            }
+
+            player.EquippedWeaponInstanceId = defaultInstanceId;
+            player.EquippedWeaponTemplateId = catalog.DefaultWeaponTemplateId;
+            player.EquipmentRevision = 0;
         }
 
         /// <summary>登录名字名册：房间内已有玩家（排除新玩家本人）→ PlayerEnterRoom 列表。

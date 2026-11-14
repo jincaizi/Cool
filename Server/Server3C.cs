@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Cool.SyncCore; // 属性剑气共享目录（ElementalCatalogDefinition/Validator/Hasher）
 using KcpServer.Monster; // P5：怪物模块（EnableMonsters/tick 接线）
 using KcpServer.Movement; // 2026-10-13：ORCA 避让（AvoidanceSystem / AvoidanceProbe）
 using KcpServer.Navigation; // 2026-11-02：地图导航（可选注入 MonsterModule）
@@ -52,6 +53,19 @@ namespace KcpServer
 
         // P4：服务端权威战斗裁决（校验/命中/掷骰/扣血；广播经 CastHandler）
         private readonly CastHandler _castHandler;
+
+        // 属性剑气 v1：共享目录、权威换装与指纹
+        private readonly ElementalCatalogDefinition _elementalCatalog;
+        private readonly string _elementalCatalogFingerprint;
+        private readonly EquipHandler _equipHandler;
+        public bool ElementalSwordQiEnabled { get; }
+        public ElementalCatalogDefinition ElementalCatalog => _elementalCatalog;
+        public string ElementalCatalogFingerprint => _elementalCatalogFingerprint;
+        public EquipHandler EquipHandler => _equipHandler;
+
+        /// <summary>测试/嵌入宿主：尚未 StartAsync（无 UDP socket）时的下行消息旁路。
+        /// 生产路径不设置；设置后 SendToSessionAsync 只在未启动网络时调用它。</summary>
+        public Action<IServerSession, MessageId, IMessage>? OfflineSendSink { get; set; }
 
         // P5：服务端权威怪物（AI 决策 + 死亡重生；攻击裁决经 CombatResolver、广播经 CastHandler——T3）
         private MonsterModule? _monsterModule;
@@ -130,7 +144,8 @@ namespace KcpServer
         /// <summary>当前主循环 tick（packet 处理时比 lambda 已推进值落后一个迭代——冷却记录与判定同基准，语义不受影响；勿'修正'为实时值）</summary>
         public uint CurrentTick { get; private set; }
 
-        public Server3C(ILogger logger, Vector3 respawnPosition = default)
+        public Server3C(ILogger logger, Vector3 respawnPosition = default,
+            ElementalCatalogDefinition? elementalCatalog = null, bool elementalEnabled = true)
         {
             _logger = logger;
             _respawnPosition = respawnPosition;
@@ -140,7 +155,18 @@ namespace KcpServer
             _positionSyncHandler = new PositionSyncHandler(this, _logger, _entityStore);
             _echoHandler = new EchoHandler(this, _logger);
             _clockSyncHandler = new ClockSyncHandler(this, _logger);
-            _castHandler = new CastHandler(this, _logger, new CombatResolver(_entityStore));
+
+            // 属性剑气：缺表/校验失败时停用该功能（登录仍可用，但不发放武器、不协商能力位）。
+            _elementalCatalog = elementalCatalog ?? ElementalCatalogDefaults.Create();
+            var catalogErrors = ElementalCatalogValidator.Validate(_elementalCatalog);
+            ElementalSwordQiEnabled = elementalEnabled && catalogErrors.Count == 0;
+            if (elementalEnabled && catalogErrors.Count != 0)
+                _logger.LogError($"Elemental catalog invalid, feature disabled: {string.Join("; ", catalogErrors)}");
+            _elementalCatalogFingerprint = ElementalSwordQiEnabled
+                ? ElementalCatalogHasher.Compute(_elementalCatalog) : string.Empty;
+            _equipHandler = new EquipHandler(_elementalCatalog);
+            _castHandler = new CastHandler(this, _logger,
+                new CombatResolver(_entityStore, null, _elementalCatalog));
 
             // 避让系统在 EnableMonsters 之前就可能建（--bots 单独跑）；模板表由模块在启用时补上，
             // 所以半径解析走**延迟查**（闭包读字段，调用时模块已就位）；未启用怪物时也走不到 Npc 分支
@@ -261,7 +287,8 @@ namespace KcpServer
             _playerIdToSession.TryRemove(playerId, out _);
         }
 
-        public void RegisterEntity(long playerId, string playerName, bool supportsAuthoritativeRespawn = false)
+        public PlayerState RegisterEntity(long playerId, string playerName,
+            bool supportsAuthoritativeRespawn = false)
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
             // P5：登录标志置在 store 实例上——怪物感知（MonsterBrain.TryAcquireBySight）与
@@ -272,7 +299,11 @@ namespace KcpServer
             // AOI：实体立即可见靠 AoiGrid 首帧 + AoiBandScheduler HasSent=false（无需标脏）——
             // MarkDirty 保留仅为 P2 测试语义（PositionSyncEntityStoreTests 断言 IsDirty）
             _entityStore.MarkDirty(player);
+            return player;
         }
+
+        /// <summary>权威实体查询（登录发放/换装/测试入口）。</summary>
+        public PlayerState? GetEntity(long playerId) => _entityStore.GetPlayer(playerId);
 
         public void UnregisterEntity(long playerId)
         {
@@ -314,7 +345,12 @@ namespace KcpServer
 
         public Task SendToSessionAsync(IServerSession session, MessageId messageId, IMessage message, MessageFlags flags = MessageFlags.Reliable)
         {
-            if (_udpServer == null || !session.IsConnected)
+            if (_udpServer == null)
+            {
+                OfflineSendSink?.Invoke(session, messageId, message);
+                return Task.CompletedTask;
+            }
+            if (!session.IsConnected)
                 return Task.CompletedTask;
 
             try
@@ -371,7 +407,7 @@ namespace KcpServer
                 if (!p.IsLoggedIn) continue;
                 var session = GetSession(p.PlayerId);
                 if (session == null) continue;
-                var notice = new RespawnNotice { Hp = p.Hp, Tick = tick };
+                var notice = new RespawnNotice { Hp = p.Hp, Tick = tick, LifeId = p.LifeId };
                 if (p.SupportsAuthoritativeRespawn)
                 {
                     notice.HasSpawnPosition = true;
@@ -550,6 +586,10 @@ namespace KcpServer
 
                     case CancelCastRequest cancel:
                         _castHandler.HandleCancel(session, cancel);
+                        break;
+
+                    case EquipWeaponRequest equip:
+                        await _equipHandler.HandleAsync(this, session, equip);
                         break;
 
                     case Heartbeat heartbeat:

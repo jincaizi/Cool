@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Cool.Protocol;
 
 namespace KcpServer
 {
@@ -60,6 +62,7 @@ namespace KcpServer
 
             Hp = MaxHp;
             DeadTick = 0;
+            LifeId++;
             return true;
         }
 
@@ -90,6 +93,26 @@ namespace KcpServer
 
         public bool IsLoggedIn { get; internal set; }
         public DateTime LastActiveTime { get; internal set; }
+
+        // 属性剑气 v1：权威武器槽、生命周期代次与请求幂等缓存
+        public long EquippedWeaponInstanceId { get; internal set; }
+        public int EquippedWeaponTemplateId { get; internal set; }
+        public uint EquipmentRevision { get; internal set; }
+        public uint LifeId { get; internal set; } = 1;
+
+        /// <summary>会话内武器实例 → 模板。</summary>
+        public readonly Dictionary<long, int> WeaponInstanceTemplates = new Dictionary<long, int>();
+
+        /// <summary>该次普攻后最早可再次出手的 tick（按施法时攻速快照固定，换装不提前解锁）。</summary>
+        public uint NextAllowedAttackTick { get; internal set; }
+
+        internal uint LastEquipSeq { get; set; }
+        internal readonly Dictionary<uint, EquipWeaponConfirm> RecentEquipConfirms =
+            new Dictionary<uint, EquipWeaponConfirm>();
+
+        internal uint LastCastSeq { get; set; }
+        internal readonly Dictionary<uint, CastConfirm> RecentCastConfirms =
+            new Dictionary<uint, CastConfirm>();
 
         public PlayerState(long playerId)
         {

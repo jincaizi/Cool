@@ -17,11 +17,19 @@ namespace KcpServer
         public Func<long, KcpServer.Monster.MonsterActionRunner?>? NpcActionRunner { get; set; }
         private readonly EntityStore _store;
         private readonly Random _rng;
+        private readonly ElementalCatalogDefinition _elementalCatalog;
+        private readonly float _defaultWeaponBaseAttack;
+        private ulong _nextCastId;
 
-        public CombatResolver(EntityStore store, Random? rng = null)
+        public CombatResolver(EntityStore store, Random? rng = null,
+            ElementalCatalogDefinition? elementalCatalog = null)
         {
             _store = store;
             _rng = rng ?? new Random();
+            _elementalCatalog = elementalCatalog ?? ElementalCatalogDefaults.Create();
+            var defaultWeapon = _elementalCatalog.Weapons.Find(
+                w => w.TemplateId == _elementalCatalog.DefaultWeaponTemplateId);
+            _defaultWeaponBaseAttack = defaultWeapon?.BaseAttack ?? 1f;
         }
 
         /// <summary>NPC 施法的判定帧 LOS 回调（参数：casterId, from, to）。由 Server3C 在
@@ -45,6 +53,14 @@ namespace KcpServer
             public string RejectReason = string.Empty;
             public CastBroadcast? Broadcast;
             public bool IsNpcCaster;
+
+            /// <summary>本人确认（接受/拒绝都带；重复序号重发原结论）。</summary>
+            public CastConfirm? Confirm;
+
+            /// <summary>重复的 ClientCastSeq：重发原确认，不重播观察者广播、不安排新判定。</summary>
+            public bool Replay;
+
+            public ulong CastId;
             public readonly List<HitEntry> Hits = new List<HitEntry>();
 
             /// <summary>LineAll 线形命中被格挡吸收时的停点（2026-10-21）</summary>
@@ -90,6 +106,11 @@ namespace KcpServer
             public Vec3 Origin;                              // 首段捕获的施法者位置
             public float Yaw;
 
+            // 属性剑气 v1：施法时冻结的武器快照与全局 CastId
+            public ulong CastId;
+            public WeaponCastSnapshot Weapon;
+            public bool Launched;
+
             public PendingCast(long casterId, CastRequest request, CastBroadcast broadcast,
                 bool isNpcCaster, ProjectileSpec? projectile, RepeatSpec? repeat, float charge, uint firstTick)
             {
@@ -119,34 +140,74 @@ namespace KcpServer
             var resolution = new CastResolution();
             var caster = _store.GetPlayer(casterId);
             if (caster == null) return Reject(resolution, "caster-not-found");
-            if (!caster.IsAlive) return Reject(resolution, "caster-dead");
+
+            // 同序号重试：重发原确认（含拒绝），不重播观察者广播、不安排新判定。
+            if (request.ClientCastSeq != 0
+                && caster.RecentCastConfirms.TryGetValue(request.ClientCastSeq, out var cached))
+            {
+                resolution.Accepted = cached.Accepted;
+                resolution.RejectReason = cached.RejectReason;
+                resolution.Confirm = cached;
+                resolution.CastId = cached.CastId;
+                resolution.Replay = true;
+                return resolution;
+            }
+
+            if (!caster.IsAlive) return Reject(resolution, caster, request, "caster-dead");
             if (!CombatRules.TryGet(request.SkillId, out var entry))
-                return Reject(resolution, "unknown-skill");
+                return Reject(resolution, caster, request, "unknown-skill");
             if (!CombatRules.ValidateShape(request.Shape, entry))
-                return Reject(resolution, "shape-tampered");
-            if (!caster.IsCastReady(request.SkillId, tick, CombatRules.CooldownTicks(entry)))
-                return Reject(resolution, "cooldown");
+                return Reject(resolution, caster, request, "shape-tampered");
+
+            // 新客户端带装备版本与生命代次；0 = 旧客户端/旧测试，跳过对应校验。
+            if (request.EquipmentRevision != caster.EquipmentRevision)
+                return Reject(resolution, caster, request, "stale-equipment");
+            if (request.CasterLifeId != 0 && request.CasterLifeId != caster.LifeId)
+                return Reject(resolution, caster, request, "stale-life");
+
+            bool isBasic = request.SkillId == 10001 || request.SkillId == 10002;
+            if (isBasic)
+            {
+                // 10001 零基础冷却仍受接续窗约束；10002 受冷却约束。两者都在施法时冻结。
+                if (NpcTickMath.IsBefore(tick, caster.NextAllowedAttackTick))
+                    return Reject(resolution, caster, request, "cooldown");
+            }
+            else if (!caster.IsCastReady(request.SkillId, tick, CombatRules.CooldownTicks(entry)))
+            {
+                return Reject(resolution, caster, request, "cooldown");
+            }
 
             // 2026-10-18：投射物落点/蓄力校验（只有 CircleAtPoint 需要落点）
             var projectileError = CombatRules.ValidateProjectileRequest(request, entry,
                 caster.Position.X, caster.Position.Z);
-            if (projectileError != null) return Reject(resolution, projectileError);
+            if (projectileError != null) return Reject(resolution, caster, request, projectileError);
             var charge = CombatRules.ClampChargeProgress(request.ChargeProgress);
-            var firstTick = tick + CombatRules.HitDelayTicks(entry)
-                + CombatRules.ProjectileTravelTicks(entry.Projectile,
-                    caster.Position.X, caster.Position.Z, request.ImpactX, request.ImpactZ);
+
+            var weapon = ResolveWeapon(caster);
+            float attackSpeed = isBasic ? weapon.AttackSpeedMultiplier : 1f;
+            var timing = FindTiming(request.SkillId);
+            uint firstTick = isBasic && timing != null
+                ? tick + SecondsToTicks(timing.WindupSeconds / attackSpeed)
+                : tick + CombatRules.HitDelayTicks(entry)
+                    + CombatRules.ProjectileTravelTicks(entry.Projectile,
+                        caster.Position.X, caster.Position.Z, request.ImpactX, request.ImpactZ);
 
             var runner = caster.Kind == (byte)EntityKind.Npc ? NpcActionRunner?.Invoke(casterId) : null;
             if (runner != null) {
                 var error = runner.Validate(request.SkillId, request.TargetPlayerId, tick);
-                if (error != null) return Reject(resolution, error);
-                if (!runner.TryBeginSkill(request.SkillId, request.TargetPlayerId, tick)) return Reject(resolution, "npc-action-busy");
+                if (error != null) return Reject(resolution, caster, request, error);
+                if (!runner.TryBeginSkill(request.SkillId, request.TargetPlayerId, tick)) return Reject(resolution, caster, request, "npc-action-busy");
             }
-            // D-3：冷却记录在决策（空挥也冷却，D-P4-5）
-            caster.RecordCast(request.SkillId, tick);
+            // D-3：冷却记录在决策（空挥也冷却，D-P4-5）。普攻用攻速缩放后的最早出手 tick。
+            if (isBasic)
+                caster.NextAllowedAttackTick = tick + NextAllowedTicks(timing, entry, attackSpeed);
+            else
+                caster.RecordCast(request.SkillId, tick);
 
+            ulong castId = ++_nextCastId;
             resolution.Accepted = true;
             resolution.IsNpcCaster = caster.Kind == (byte)EntityKind.Npc;
+            resolution.CastId = castId;
             resolution.Broadcast = new CastBroadcast
             {
                 SkillId = request.SkillId,
@@ -161,14 +222,101 @@ namespace KcpServer
                 ImpactX = request.ImpactX,
                 ImpactY = request.ImpactY,
                 ImpactZ = request.ImpactZ,
-                ChargeProgress = request.ChargeProgress
+                ChargeProgress = request.ChargeProgress,
+                CastId = castId,
+                CasterLifeId = caster.LifeId,
+                AttackSpeedMultiplier = attackSpeed,
+                ElementId = weapon.ElementId,
+                EquipmentRevision = weapon.EquipmentRevision
             };
+            resolution.Confirm = BuildConfirm(caster, request, weapon, true, "", castId, tick, attackSpeed);
+            CacheConfirm(caster, request, resolution.Confirm);
+
             // D-1/D-2：判定帧延迟由服务端表自持——判定发生在
             // tick + HitDelayTicks + ProjectileTravelTicks（CircleAtPoint 飞行延迟，见上方 firstTick）
             _pending.Add(new PendingCast(casterId, request, resolution.Broadcast, resolution.IsNpcCaster,
-                entry.Projectile, entry.Repeat, charge, firstTick) { Runner = runner, InstanceId = runner?.Current.InstanceId ?? 0 });
+                entry.Projectile, entry.Repeat, charge, firstTick)
+            {
+                Runner = runner,
+                InstanceId = runner?.Current.InstanceId ?? 0,
+                CastId = castId,
+                Weapon = weapon
+            });
             if (runner != null) { _pending[_pending.Count-1].StageTicks = runner.StageTicks(); resolution.Broadcast.NpcAction = runner.Current; }
             return resolution;
+        }
+
+        private WeaponCastSnapshot ResolveWeapon(PlayerState caster)
+        {
+            var definition = _elementalCatalog.Weapons.Find(w => w.TemplateId == caster.EquippedWeaponTemplateId)
+                ?? _elementalCatalog.Weapons.Find(w => w.TemplateId == _elementalCatalog.DefaultWeaponTemplateId);
+            if (definition == null)
+                definition = new WeaponDefinition
+                {
+                    TemplateId = 0,
+                    BaseAttack = 1f,
+                    AttackSpeedMultiplier = 1f,
+                    SwordQiDamageMultiplier = 1f
+                };
+
+            return new WeaponCastSnapshot(caster.EquippedWeaponInstanceId, definition.TemplateId,
+                definition.ElementId, caster.EquipmentRevision, definition.BaseAttack,
+                definition.AttackSpeedMultiplier, definition.SwordQiDamageMultiplier);
+        }
+
+        private AttackTimingDefinition? FindTiming(int skillId)
+        {
+            foreach (var timing in _elementalCatalog.AttackTimings)
+                if (timing.SkillId == skillId) return timing;
+            return null;
+        }
+
+        private static uint SecondsToTicks(float seconds)
+        {
+            if (!float.IsFinite(seconds) || seconds <= 0f) return 0u;
+            double ticks = Math.Ceiling(seconds * CombatRules.TickRateHz);
+            return ticks >= uint.MaxValue ? uint.MaxValue : (uint)ticks;
+        }
+
+        private static uint NextAllowedTicks(AttackTimingDefinition? timing, SkillEntry entry, float speed)
+        {
+            if (timing == null)
+                return Math.Max(1u, CombatRules.CooldownTicks(entry));
+            float seconds = Math.Max(timing.CooldownSeconds, timing.ChainWindowSeconds);
+            return Math.Max(1u, SecondsToTicks(seconds / speed));
+        }
+
+        private static CastConfirm BuildConfirm(PlayerState caster, CastRequest request,
+            WeaponCastSnapshot weapon, bool accepted, string reason, ulong castId, uint tick,
+            float attackSpeed)
+            => new CastConfirm
+            {
+                ClientCastSeq = request.ClientCastSeq,
+                Accepted = accepted,
+                RejectReason = reason,
+                CastId = castId,
+                SkillId = request.SkillId,
+                CasterLifeId = caster.LifeId,
+                EquipmentRevision = caster.EquipmentRevision,
+                AttackSpeedMultiplier = attackSpeed,
+                AcceptedTick = accepted ? tick : 0u,
+                WeaponInstanceId = caster.EquippedWeaponInstanceId,
+                TemplateId = caster.EquippedWeaponTemplateId,
+                ElementId = weapon.ElementId
+            };
+
+        private static void CacheConfirm(PlayerState caster, CastRequest request, CastConfirm confirm)
+        {
+            if (request.ClientCastSeq == 0) return;
+            caster.LastCastSeq = request.ClientCastSeq;
+            caster.RecentCastConfirms[request.ClientCastSeq] = confirm;
+            if (caster.RecentCastConfirms.Count <= 16) return;
+
+            var keys = new List<uint>(caster.RecentCastConfirms.Keys);
+            keys.Sort();
+            int remove = caster.RecentCastConfirms.Count - 16;
+            for (int i = 0; i < remove; i++)
+                caster.RecentCastConfirms.Remove(keys[i]);
         }
 
         /// <summary>取出到期（含本 tick）的待判定施法并按段裁决。单遍压缩，出队顺序 = 入队顺序（确定性）。</summary>
@@ -185,7 +333,7 @@ namespace KcpServer
                        && pending.StageTicks[pending.NextStage] <= tick)
                 {
                     if (pending.Runner != null && !pending.Runner.TryCommitStage(pending.InstanceId, tick)) { pending.Spent = true; break; }
-                    var resolution = ResolveStage(pending);
+                    var resolution = ResolveStage(pending, tick);
                     // 施法者死亡/移除：整组丢弃未到期段。只逐段返回 null 会让复活后的
                     // 后续段继续结算（B3：旋转死亡/换命后不得残留伤害实例）。
                     if (resolution == null) { pending.Spent = true; break; }
@@ -219,7 +367,7 @@ namespace KcpServer
 
         /// <summary>判定一段：复查施法者存活 → 几何（按投射物种类）→ 服务端掷骰 → 扣血。
         /// 返回 null 表示丢弃（施法者已死/已移除/表项消失）。</summary>
-        private CastResolution? ResolveStage(PendingCast pending)
+        private CastResolution? ResolveStage(PendingCast pending, uint tick)
         {
             var caster = _store.GetPlayer(pending.CasterId);
             if (caster == null || !caster.IsAlive) return null;   // 施法者已死：整组丢弃
@@ -283,7 +431,7 @@ namespace KcpServer
             if (swingHitIds != null)
             {
                 foreach (var targetId in swingHitIds)
-                    ApplyHit(pending, entry, spec, targetId, casterPos, resolution);
+                    ApplyHit(pending, entry, spec, targetId, casterPos, resolution, isProjectile: false);
             }
 
             // 剑气沿施法方向推进：按沿线距离排序，格挡者之前的先结算、之后的被吸收跳过
@@ -305,7 +453,8 @@ namespace KcpServer
                 }
                 else if (pending.Runner == null && !pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
 
-                bool blocked = ApplyHit(pending, entry, spec, targetId, lineAttackerPos, resolution);
+                bool blocked = ApplyHit(pending, entry, spec, targetId, lineAttackerPos,
+                    resolution, isProjectile: spec != null);
                 if (pending.Repeat.HasValue)
                 {
                     pending.RepeatHitCounts.TryGetValue(targetId, out int repeatHits);
@@ -370,7 +519,7 @@ namespace KcpServer
         /// <summary>对一个命中目标结算：掷骰（+蓄力倍率）→ 格挡 → 扣血 → HitEntry；返回是否格挡。
         /// 调用方决定是否先经 GroupHitIds（挥击实例不经过去重，与剑气各算一次）。</summary>
         private bool ApplyHit(PendingCast pending, SkillEntry entry, ProjectileSpec? spec,
-            long targetId, Vec3 attackerPos, CastResolution resolution)
+            long targetId, Vec3 attackerPos, CastResolution resolution, bool isProjectile)
         {
             var target = _store.GetPlayer(targetId);
             if (target == null) return false;
@@ -378,6 +527,17 @@ namespace KcpServer
             // 掷骰顺序不变：暴击照常掷，格挡只在最后乘倍率（确定性可复现——固定种子的
             // 期望值不因格挡分支错位；调换这里两句会让既有种子序列整体漂移）
             float damage = RollDamage(entry, out bool isCritical);
+            if (!pending.IsNpcCaster && IsBasicAttack(pending.Request.SkillId))
+            {
+                float weaponRatio = _defaultWeaponBaseAttack > 0f
+                    ? pending.Weapon.BaseAttack / _defaultWeaponBaseAttack
+                    : 1f;
+                damage *= weaponRatio;
+                // 剑气分支另乘共享剑气系数与武器剑气倍率；挥击分支不乘（KeepsSwing 的挥砍保持原值）。
+                if (isProjectile && spec != null && spec.Kind == ProjectileKind.LineAll)
+                    damage *= _elementalCatalog.SwordQi.SwordQiDamageCoefficient
+                              * pending.Weapon.SwordQiDamageMultiplier;
+            }
             if (spec != null && spec.ChargeScales)
                 damage *= 1f + (spec.ChargeDamageMaxScale - 1f) * pending.Charge;
 
@@ -406,10 +566,15 @@ namespace KcpServer
                 IsBlocked = blocked,
                 TargetRemainingHp = target.Hp, // 扣后权威余血（T12 甲-2）——格挡分支同样成立
                 HitX = target.Position.X,
-                HitZ = target.Position.Z
+                HitZ = target.Position.Z,
+                CastId = pending.CastId,
+                DamageKind = DamageKind.Direct,
+                TargetLifeId = target.LifeId
             });
             return blocked;
         }
+
+        private static bool IsBasicAttack(int skillId) => skillId == 10001 || skillId == 10002;
 
         /// <summary>候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
         ///  玩家施法 → 玩家 + 怪物（PvE 挥击自动目标按锥内最近者自然命中怪物——
@@ -478,6 +643,18 @@ namespace KcpServer
             resolution.RejectReason = reason;
             return resolution;
         }
+
+        /// <summary>拒绝同时补发当前装备摘要（供客户端恢复），并缓存请求序号的幂等结论。</summary>
+        private CastResolution Reject(CastResolution resolution, PlayerState caster,
+            CastRequest request, string reason)
+        {
+            resolution.RejectReason = reason;
+            var weapon = ResolveWeapon(caster);
+            resolution.Confirm = BuildConfirm(caster, request, weapon, false, reason, 0, 0,
+                weapon.AttackSpeedMultiplier);
+            CacheConfirm(caster, request, resolution.Confirm);
+            return resolution;
+        }
     }
 
     /// <summary>
@@ -526,12 +703,23 @@ namespace KcpServer
         /// 不传进来日志就只剩空 id（审计口径须可证伪）。</summary>
         public async Task BroadcastSwingAsync(long casterId, CastRequest request, CombatResolver.CastResolution decision)
         {
+            // 本人始终收到 CastConfirm（含拒绝与幂等重发）；NPC 无 session，跳过。
+            if (!decision.IsNpcCaster && decision.Confirm != null)
+            {
+                var casterSession = _server.GetSession(casterId);
+                if (casterSession != null)
+                    await _server.SendToSessionAsync(casterSession, MessageId.CastConfirm, decision.Confirm);
+            }
+
             if (!decision.Accepted || decision.Broadcast == null)
             {
                 RejectedCasts++;
                 _logger.LogWarning($"[Combat] cast rejected: caster={casterId} skill={request.SkillId} reason={decision.RejectReason}");
                 return;
             }
+
+            // 重复序号只回原确认，不再向观察者重播挥砍广播。
+            if (decision.Replay) return;
 
             var broadcast = decision.Broadcast;
             if (decision.IsNpcCaster)
