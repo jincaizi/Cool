@@ -4,10 +4,13 @@ using System.Threading;
 using Cool.Protocol;
 using Cool.SyncCore;
 using Cysharp.Threading.Tasks;
+using Hotfix.GameSystems.Bag.Data;
+using Hotfix.GameSystems.Bag.Runtime;
 using Hotfix.GameSystems.Nameplate;
 using Hotfix.GameSystems.UI;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Skills.Runtime;
 using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Input;
@@ -105,6 +108,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _entryLookedUp;
         private CombatNetworkBridge? _combatBridge;
         private RemoteCastPresenter? _remoteCastPresenter;
+        private WeaponInventoryBaseline? _pendingWeaponBaseline;
+        private bool _bagEquipSubscribed;
         private NetworkTargetSelector? _networkTargetSelector;
 
         // 联网 HUD 读数（FPS + RTT）：HUD 面板缓存与 0.5 秒统计窗口
@@ -498,6 +503,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 ? new Vector3(notice.SpawnX, notice.SpawnY, notice.SpawnZ)
                 : (Vector3?)null;
             Debug.Log("[NetHost] 服务端复活：HP=" + notice.Hp);
+            _combatBridge?.Equipment.SetLifeId(notice.LifeId);
             _localEntry.ApplyServerRespawn(notice.Hp, spawn);
         }
 
@@ -653,6 +659,16 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleEnterWorld()
         {
             _inWorld = true;
+
+            // 属性剑气登录基线：权威武器背包 + 默认装备。桥可能尚未装配（角色异步生成），
+            // 基线留到 TryAttachLocalCharacter 再应用装备版本。
+            var baseline = _manager?.WeaponInventory;
+            if (baseline != null)
+            {
+                _pendingWeaponBaseline = baseline;
+                BagManager.Instance.ApplyServerWeapons(baseline.Weapons);
+            }
+
             OnEnterWorld?.Invoke();
         }
 
@@ -736,6 +752,21 @@ namespace Hotfix.GameSystems.SyncLayer
                 (targetId, dmg, crit, dir, remainingHp, blocked, sourceIsPlayer) =>
                     _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked, sourceIsPlayer));
             _adapter!.MessageReceived += _combatBridge.OnMessage;
+            if (_pendingWeaponBaseline != null)
+            {
+                _combatBridge.Equipment.InitializeFromBaseline(_pendingWeaponBaseline);
+                _pendingWeaponBaseline = null;
+            }
+            _combatBridge.OnEquipmentChanged += HandleEquipmentChanged;
+            _combatBridge.OnEquipResult += HandleEquipResult;
+            if (!_bagEquipSubscribed)
+            {
+                BagManager.Instance.OnEquipRequested += HandleBagEquipRequested;
+                _bagEquipSubscribed = true;
+            }
+            ApplyEquipmentToLocal();
+            _localEntry.SkillCoordinator.AttackSpeedProvider = () =>
+                _combatBridge != null ? _combatBridge.Equipment.AttackSpeedMultiplier : 1f;
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
             _localEntry.SkillCoordinator.OnChargeReleased += OnLocalChargeReleased;
             _localEntry.SkillCoordinator.OnSkillCancelled += OnLocalSkillCancelled;
@@ -745,9 +776,17 @@ namespace Hotfix.GameSystems.SyncLayer
             // 远程施法表现（玩家类）。localPlayerId 取登录后由服务端分配的 id——
             // presenter 用它跳过本地施法者（本地由 SkillExecutor 播放）。
             _remoteCastPresenter = new RemoteCastPresenter(
-                _remoteEntities!, _manager!.LocalPlayerId, _skillCatalog);
+                _remoteEntities!, _manager!.LocalPlayerId, _skillCatalog,
+                sceneIdProvider: () => _manager?.ZoneId ?? "",
+                serverNowTicksProvider: () => _manager?.ServerNowTicks ?? 0);
             _combatBridge.OnDamageResult += HandleRemoteDamageResult;
+            _combatBridge.OnProjectileLaunch += _remoteCastPresenter.OnProjectileLaunch;
+            _combatBridge.OnProjectileStop += _remoteCastPresenter.OnProjectileStop;
             _remoteEntities!.ViewRemoved += _remoteCastPresenter.ClearForEntity;
+
+            // 启用属性剑气后关闭本地剑气生成：视觉统一由服务端发射描述创建。
+            NetworkSwordQiGate.SuppressLocalSpawn =
+                (_manager.EnabledFeatures & ProtocolFeatures.ElementalSwordQiV1) != 0;
 
             // 施法广播除日志外还要**路由**：NPC 由 registry 按发布者时间戳 + skillId 排成 renderAt 处的挥砍，
             // 玩家类交给 presenter 立即播攻击/施法表现（本回调已在主线程——CombatNetworkBridge.Update
@@ -810,6 +849,31 @@ namespace Hotfix.GameSystems.SyncLayer
             }
 
             Debug.Log("[NetHost] 本地角色已接入移动上报（repoter + NetMovementPolicy）");
+        }
+
+        private void HandleBagEquipRequested(ItemData item)
+            => _combatBridge?.RequestEquip(item.InstanceId);
+
+        private void HandleEquipResult(EquipWeaponConfirm confirm)
+        {
+            if (!confirm.Accepted)
+                Debug.LogWarning("[NetHost] equip rejected: " + confirm.RejectReason
+                    + " rev=" + confirm.EquipmentRevision);
+            ApplyEquipmentToLocal();
+        }
+
+        private void HandleEquipmentChanged(EquipWeaponConfirm confirm) => ApplyEquipmentToLocal();
+
+        private void ApplyEquipmentToLocal()
+        {
+            if (_localEntry == null || _combatBridge == null) return;
+            var equipment = _combatBridge.Equipment;
+            if (!equipment.HasEquipment) return;
+
+            // 攻速同时驱动本地动画与 SkillCoordinator 时序；武器模型由工厂接缝按模板切换
+            // （当前仓库没有元素武器预制体，工厂为空时只更新权威装备状态）。
+            _localEntry.SetAttackSpeed(equipment.AttackSpeedMultiplier);
+            _localEntry.AttackHandler?.EquipWeapon(equipment.TemplateId, equipment.ElementId);
         }
 
         private void OnLocalSkillCast(SkillData skillData)
@@ -881,9 +945,30 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_remoteEntities != null && _remoteCastPresenter != null)
                 _remoteEntities.ViewRemoved -= _remoteCastPresenter.ClearForEntity;
             if (_combatBridge != null)
+            {
                 _combatBridge.OnDamageResult -= HandleRemoteDamageResult;
+                if (_remoteCastPresenter != null)
+                {
+                    _combatBridge.OnProjectileLaunch -= _remoteCastPresenter.OnProjectileLaunch;
+                    _combatBridge.OnProjectileStop -= _remoteCastPresenter.OnProjectileStop;
+                }
+            }
             _remoteCastPresenter?.Clear();
             _remoteCastPresenter = null;
+            NetworkSwordQiGate.SuppressLocalSpawn = false;
+
+            if (_bagEquipSubscribed)
+            {
+                BagManager.Instance.OnEquipRequested -= HandleBagEquipRequested;
+                _bagEquipSubscribed = false;
+            }
+            if (_combatBridge != null)
+            {
+                _combatBridge.OnEquipmentChanged -= HandleEquipmentChanged;
+                _combatBridge.OnEquipResult -= HandleEquipResult;
+            }
+            if (_localEntry != null)
+                _localEntry.SkillCoordinator.AttackSpeedProvider = null;
 
             if (_combatBridge == null || _adapter == null) return;
             _adapter.MessageReceived -= _combatBridge.OnMessage;

@@ -76,6 +76,15 @@ namespace Hotfix.GameSystems.SyncLayer
             }
         }
 
+        private sealed class TrackedCast
+        {
+            public ulong CastId;
+            public long CasterId;
+            public int SkillId;
+            public int ElementId;
+            public IRemoteProjectileVisual Visual = null!;
+        }
+
         private readonly RemoteEntityRegistry? _registry;
         private readonly long _localPlayerId;
         private readonly SkillPresentationCatalog? _catalog;
@@ -83,7 +92,16 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Action<GameObject, Vector3, Quaternion>? _castVfxSpawner;
         private readonly Action<GameObject, Vector3, Quaternion>? _releaseVfxSpawner;
         private readonly Action<MeteorConfig, DamageBlock, Vector3>? _meteorSpawner;
+        private readonly Func<SkillData, Vector3, Vector3, float, IRemoteProjectileVisual?>? _launchProjectileFactory;
+        private readonly Func<string>? _sceneIdProvider;
+        private readonly Func<long>? _serverNowTicksProvider;
         private readonly List<Tracked> _tracked = new List<Tracked>();
+        private readonly Dictionary<ulong, TrackedCast> _castVisuals = new Dictionary<ulong, TrackedCast>();
+        private readonly Dictionary<ulong, int> _castSkillIds = new Dictionary<ulong, int>();
+        private readonly Dictionary<ulong, ProjectileStopBroadcast> _pendingStops =
+            new Dictionary<ulong, ProjectileStopBroadcast>();
+        private readonly HashSet<ulong> _seenLaunches = new HashSet<ulong>();
+        private readonly HashSet<ulong> _seenStops = new HashSet<ulong>();
 
         /// <param name="registry">远程视图来源；为 null 时只走测试接缝（EditMode 假视觉）</param>
         /// <param name="catalog">技能表现目录；为 null 时 OnCastBroadcast 直接返回</param>
@@ -98,7 +116,10 @@ namespace Hotfix.GameSystems.SyncLayer
             Func<SkillData, Vector3, Vector3, IRemoteProjectileVisual?>? projectileFactory = null,
             Action<GameObject, Vector3, Quaternion>? castVfxSpawner = null,
             Action<GameObject, Vector3, Quaternion>? releaseVfxSpawner = null,
-            Action<MeteorConfig, DamageBlock, Vector3>? meteorSpawner = null)
+            Action<MeteorConfig, DamageBlock, Vector3>? meteorSpawner = null,
+            Func<SkillData, Vector3, Vector3, float, IRemoteProjectileVisual?>? launchProjectileFactory = null,
+            Func<string>? sceneIdProvider = null,
+            Func<long>? serverNowTicksProvider = null)
         {
             _registry = registry;
             _localPlayerId = localPlayerId;
@@ -107,11 +128,18 @@ namespace Hotfix.GameSystems.SyncLayer
             _castVfxSpawner = castVfxSpawner;
             _releaseVfxSpawner = releaseVfxSpawner;
             _meteorSpawner = meteorSpawner;
+            _launchProjectileFactory = launchProjectileFactory;
+            _sceneIdProvider = sceneIdProvider;
+            _serverNowTicksProvider = serverNowTicksProvider;
         }
 
         /// <summary>收到远程玩家的施法广播（CombatNetworkBridge.Update 主线程调用）。</summary>
         public void OnCastBroadcast(CastBroadcast broadcast)
         {
+            // 记录 CastId → SkillId，供晚到/独立的 ProjectileLaunchBroadcast 查表现。
+            if (broadcast.CastId != 0)
+                RememberCastSkill(broadcast.CastId, broadcast.SkillId);
+
             if (_registry == null || _catalog == null) return;
             if (broadcast.CasterPlayerId == _localPlayerId) return;
 
@@ -121,7 +149,8 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // 立即播放：伤害结果可能先于下一帧到达，等它再播会让挥砍落后于受击
             view.Animator?.PlayAttack(data.AnimatorTrigger,
-                (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length ?? DefaultAttackDuration);
+                (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length ?? DefaultAttackDuration,
+                broadcast.AttackSpeedMultiplier);
 
             var presentation = GetPresentation(data);
             if (presentation?.CastVFX != null)
@@ -132,15 +161,20 @@ namespace Hotfix.GameSystems.SyncLayer
             Vector3 forward = view.Rotation * Vector3.forward;
             Vector3 origin = ComputeProjectileOrigin(data, view.Position, forward);
             Vector3 impact = new Vector3(broadcast.ImpactX, broadcast.ImpactY, broadcast.ImpactZ);
-            IRemoteProjectileVisual? visual;
-            bool hasImpact = data is ProjectileSkillData projectileData && projectileData.HoldToAim;
-            if (_projectileFactory != null)
-                visual = _projectileFactory(data, origin, forward);
-            else
-                visual = DefaultFactory(data, origin, forward, hasImpact ? impact : (Vector3?)null);
-            if (visual != null)
-                _tracked.Add(new Tracked(broadcast.CasterPlayerId, broadcast.SkillId, visual,
-                    hasImpact, impact));
+
+            // 属性剑气 v1：剑气视觉只由服务端发射描述创建（同一 CastId 只建一次）。
+            // 火球/旧服务端（CastId=0）保持原路径。
+            bool authoritativeSwordQi = broadcast.CastId != 0 && data.SwordQi != null;
+            if (!authoritativeSwordQi)
+            {
+                bool hasImpact = data is ProjectileSkillData projectileData && projectileData.HoldToAim;
+                IRemoteProjectileVisual? visual = _projectileFactory != null
+                    ? _projectileFactory(data, origin, forward)
+                    : DefaultFactory(data, origin, forward, hasImpact ? impact : (Vector3?)null);
+                if (visual != null)
+                    _tracked.Add(new Tracked(broadcast.CasterPlayerId, broadcast.SkillId, visual,
+                        hasImpact, impact));
+            }
 
             // 落点类技能没有飞行体：在服务端给定的落点直接生成表现
             if (data is ChargedSkillData && presentation?.ReleaseVFX != null)
@@ -149,6 +183,94 @@ namespace Hotfix.GameSystems.SyncLayer
             if (data.Meteor != null)
                 (_meteorSpawner ?? MeteorSpawner.Spawn)(
                     data.Meteor, data.Damage?.Clone(), impact);
+        }
+
+        /// <summary>
+        /// 权威剑气发射：按 CastId 唯一创建。晚到发射按服务器时钟补飞行进度；
+        /// 终止已先到时不再生成视觉。本人与旁观者走同一路径。
+        /// </summary>
+        public void OnProjectileLaunch(ProjectileLaunchBroadcast launch)
+        {
+            if (launch == null) return;
+            if (_sceneIdProvider != null && _sceneIdProvider() != launch.CombatSceneId) return;
+            if (_castVisuals.ContainsKey(launch.CastId) || !_seenLaunches.Add(launch.CastId)) return;
+            PruneSeenLaunches();
+
+            // 终止先到：该发剑气已经结束，不再生成。
+            if (_pendingStops.Remove(launch.CastId)) return;
+
+            if (_catalog == null || !_catalog.TryGet(launch.SkillId, out var data) || data.SwordQi == null)
+                return;
+
+            Vector3 origin = new Vector3(launch.OriginX, launch.OriginY, launch.OriginZ);
+            float radians = launch.Yaw * Mathf.Deg2Rad;
+            Vector3 direction = new Vector3(Mathf.Sin(radians), 0f, Mathf.Cos(radians));
+            float startDistance = ComputeStartDistance(launch);
+            if (startDistance >= launch.Range) return;
+
+            IRemoteProjectileVisual? visual = _launchProjectileFactory != null
+                ? _launchProjectileFactory(data, origin, direction, startDistance)
+                : DefaultFactory(data, origin, direction, null, startDistance);
+            if (visual == null) return;
+
+            _castVisuals[launch.CastId] = new TrackedCast
+            {
+                CastId = launch.CastId,
+                CasterId = launch.CasterPlayerId,
+                SkillId = launch.SkillId,
+                ElementId = launch.ElementId,
+                Visual = visual
+            };
+        }
+
+        /// <summary>权威剑气终止：只停指定 CastId；先到时缓存，后续发射直接跳过。</summary>
+        public void OnProjectileStop(ProjectileStopBroadcast stop)
+        {
+            if (stop == null) return;
+            if (_sceneIdProvider != null && _sceneIdProvider() != stop.CombatSceneId) return;
+            if (!_seenStops.Add(stop.CastId)) return;
+            PruneSeenStops();
+
+            if (_castVisuals.TryGetValue(stop.CastId, out var tracked))
+            {
+                tracked.Visual.StopAtPoint(new Vector3(stop.StopX, 0f, stop.StopZ));
+                _castVisuals.Remove(stop.CastId);
+                _castSkillIds.Remove(stop.CastId);
+                return;
+            }
+
+            _pendingStops[stop.CastId] = stop;
+            if (_pendingStops.Count > 64)
+                _pendingStops.Clear();
+        }
+
+        private float ComputeStartDistance(ProjectileLaunchBroadcast launch)
+        {
+            if (_serverNowTicksProvider == null || launch.ServerTimestamp == 0 || launch.Speed <= 0f)
+                return 0f;
+
+            long now = _serverNowTicksProvider();
+            if (now <= launch.ServerTimestamp) return 0f;
+            float elapsed = (now - launch.ServerTimestamp) / (float)System.TimeSpan.TicksPerSecond;
+            return Mathf.Clamp(elapsed * launch.Speed, 0f, launch.Range);
+        }
+
+        private void RememberCastSkill(ulong castId, int skillId)
+        {
+            if (_castSkillIds.Count > 256) _castSkillIds.Clear();
+            _castSkillIds[castId] = skillId;
+        }
+
+        private void PruneSeenLaunches()
+        {
+            if (_seenLaunches.Count <= 256) return;
+            _seenLaunches.Clear();
+        }
+
+        private void PruneSeenStops()
+        {
+            if (_seenStops.Count <= 256) return;
+            _seenStops.Clear();
         }
 
         /// <summary>远程伤害结果：对齐投射物停点/爆炸（本地施法者由本地执行器负责）。</summary>
@@ -160,6 +282,9 @@ namespace Hotfix.GameSystems.SyncLayer
             var tracked = FindEarliestActive(result.SourcePlayerId, result.SkillId);
             if (tracked == null) return;
 
+            bool authoritativeCast = result.Hits != null && result.Hits.Count > 0
+                                     && result.Hits[0].CastId != 0;
+
             if (result.SkillId == (int)SkillID.Fireball
                 && result.Hits != null && result.Hits.Count > 0)
             {
@@ -170,8 +295,10 @@ namespace Hotfix.GameSystems.SyncLayer
                 tracked.Visual.ExplodeAt(point);
                 _tracked.Remove(tracked);
             }
-            else if (result.SkillId == (int)SkillID.HeavyAttack && result.ProjectileStopped)
+            else if (result.SkillId == (int)SkillID.HeavyAttack && result.ProjectileStopped
+                     && !authoritativeCast)
             {
+                // 旧服务端兼容：没有 CastId 时仍按 (caster, skill) 停点。
                 tracked.Visual.StopAtPoint(new Vector3(result.StopX, 0f, result.StopZ));
                 _tracked.Remove(tracked);
             }
@@ -186,6 +313,16 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (visual == null || !visual.IsActive)
                     _tracked.RemoveAt(i);
             }
+
+            var finished = new List<ulong>();
+            foreach (var pair in _castVisuals)
+                if (pair.Value.Visual == null || !pair.Value.Visual.IsActive)
+                    finished.Add(pair.Key);
+            foreach (ulong castId in finished)
+            {
+                _castVisuals.Remove(castId);
+                _castSkillIds.Remove(castId);
+            }
         }
 
         /// <summary>实体视图被删除（离开 AOI/断线/重建）：该施法者的跟踪项全部作废。</summary>
@@ -194,10 +331,28 @@ namespace Hotfix.GameSystems.SyncLayer
             for (int i = _tracked.Count - 1; i >= 0; i--)
                 if (_tracked[i].CasterId == entityId)
                     _tracked.RemoveAt(i);
+
+            var casts = new List<ulong>();
+            foreach (var pair in _castVisuals)
+                if (pair.Value.CasterId == entityId)
+                    casts.Add(pair.Key);
+            foreach (ulong castId in casts)
+            {
+                _castVisuals.Remove(castId);
+                _castSkillIds.Remove(castId);
+            }
         }
 
         /// <summary>断开/重建：清空全部跟踪项。</summary>
-        public void Clear() => _tracked.Clear();
+        public void Clear()
+        {
+            _tracked.Clear();
+            _castVisuals.Clear();
+            _castSkillIds.Clear();
+            _pendingStops.Clear();
+            _seenLaunches.Clear();
+            _seenStops.Clear();
+        }
 
         internal void TrackForTest(long casterId, int skillId, IRemoteProjectileVisual visual,
             Vector3? impact = null)
@@ -207,6 +362,9 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>跟踪表条目数（测试用于验证 Update 的清理与"普通命中不消费"）。</summary>
         internal int TrackedCountForTest => _tracked.Count;
+
+        /// <summary>按 CastId 跟踪的剑气数（属性剑气测试）。</summary>
+        internal int CastVisualCountForTest => _castVisuals.Count;
 
         /// <summary>
         /// 投射物起点：与本地 `SkillExecutor` 同源（`owner.position + TransformDirection(SpawnOffset)`）。
@@ -250,11 +408,12 @@ namespace Hotfix.GameSystems.SyncLayer
                ?? (data as SpinSkillData)?.Presentation;
 
         private static IRemoteProjectileVisual? DefaultFactory(SkillData data, Vector3 origin,
-            Vector3 forward, Vector3? targetPoint = null)
+            Vector3 forward, Vector3? targetPoint = null, float startDistance = 0f)
         {
             if (data.SwordQi != null)
             {
-                var qi = SwordQiSpawner.Spawn(data.SwordQi, data.Damage?.Clone(), origin, forward);
+                var qi = SwordQiSpawner.Spawn(data.SwordQi, data.Damage?.Clone(), origin, forward,
+                    startDistance);
                 return qi != null ? new SwordQiVisual(qi) : null;
             }
             if (data is ProjectileSkillData projectile)

@@ -24,19 +24,22 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
         private ComponentPool<SwordQiProjectile> _pool;
 
         public void OnSpawn(SwordQiConfig config, DamageBlock damage, Vector3 origin, Vector3 direction,
-                            ComponentPool<SwordQiProjectile> pool)
+                            ComponentPool<SwordQiProjectile> pool, float startDistance = 0f)
         {
             _config = config;
             _damage = damage;
             _direction = direction;
             _pool = pool;
             _released = false;
-            _traveled = 0f;
             _hitIds.Clear();
             _spawnPosition = origin;
             _stopDistance = config.Range;
-            transform.position = origin;
-            transform.rotation = Quaternion.LookRotation(direction);
+            _traveled = Mathf.Clamp(startDistance, 0f, config.Range);
+            Vector3 flatDir = direction;
+            flatDir.y = 0f;
+            flatDir = flatDir.sqrMagnitude > 0.0001f ? flatDir.normalized : direction;
+            transform.position = origin + flatDir * _traveled;
+            transform.rotation = Quaternion.LookRotation(flatDir);
             gameObject.SetActive(true);
         }
 
