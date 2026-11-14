@@ -46,7 +46,7 @@ Hit 层只有 `Hit` / `DefendHit` / `Dizzy` 三态可达。`Knockback` / `Launch
 `AttackSpeed` 作为 state speed multiplier（默认 1）。`Sys3CEntry.SetAttackSpeed` /
 `CharacterAttackHandler.SetAttackSpeed` 写入 0.25–4 的倍率；`CharacterAttackHandler`
 还提供 `SetWeaponFactory` / `EquipWeapon(templateId, elementId)` 按权威装备切换武器表现
-（当前仓库没有元素武器预制体，工厂为空时只更新状态）。禁止改全局 `Animator.speed`。
+（旧工厂接缝）。联机持剑模型走 Sys3CEntry.ApplySwordView。禁止改全局 `Animator.speed`。
 
 ## 复活传送
 
@@ -148,3 +148,7 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
 - [SyncLayer](../SyncLayer/README.md) —— 联网移动与远端实体
 - [Stamina](../Stamina/README.md) —— 冲刺与格挡精力
 - [Nameplate](../Nameplate/README.md) —— 飘字与精力环
+
+## 换剑外观
+
+男女角色预制体分别绑定 MoonSword 的 M/W 版本。冰、火、雷、风剑挂到现有 weapon_r，默认剑可切回，左手与战斗组件沿用现有绑定。外观引用随角色预制体加载。

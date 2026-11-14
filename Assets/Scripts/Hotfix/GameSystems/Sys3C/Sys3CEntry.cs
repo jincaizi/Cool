@@ -112,6 +112,31 @@ namespace Hotfix.GameSystems.Sys3C
         /// <summary>攻击层组件（武器工厂/攻速参数接缝）。</summary>
         public CharacterAttackHandler AttackHandler => _attackHandler;
 
+        [SerializeField] private Transform _swordSocket;
+        [SerializeField] private Transform _defaultSwordView;
+        [SerializeField] private GameObject[] _elementalSwordViews;
+        private GameObject _equippedSwordView;
+        private int _shownSwordElement;
+
+        public void ApplySwordView(int elementId)
+        {
+            if (_swordSocket == null || _defaultSwordView == null || _shownSwordElement == elementId) return;
+            if (elementId != 0 && (_elementalSwordViews == null || elementId > _elementalSwordViews.Length
+                || elementId < 0 || _elementalSwordViews[elementId - 1] == null)) return;
+
+            if (_equippedSwordView != null)
+            {
+                _equippedSwordView.SetActive(false);
+                Destroy(_equippedSwordView);
+            }
+
+            // Keep the original socket and combat components bound to the rig.
+            // The replacement prefab supplies the visible blade.
+            _defaultSwordView.gameObject.SetActive(elementId == 0);
+            _equippedSwordView = elementId == 0 ? null : Instantiate(_elementalSwordViews[elementId - 1], _swordSocket, false);
+            _shownSwordElement = elementId;
+        }
+
         /// <summary>本地攻击 Animator 攻速参数（0.25–4；禁止全局 Animator.speed）。</summary>
         public void SetAttackSpeed(float multiplier) => _attackHandler?.SetAttackSpeed(multiplier);
         public bool CanFireHeavy => _canFireHeavy;

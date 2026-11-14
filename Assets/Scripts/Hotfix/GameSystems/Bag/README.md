@@ -35,3 +35,7 @@ bash tools/unity-tests.sh EditMode
 
 - [UI](../UI/README.md) —— 面板框架
 - [Nameplate](../Nameplate/README.md) —— 物品获得的飘字（如接入）
+
+## 简易武器背包
+
+DemoDay 联网进入后，右上角「背包」显示服务器发放的剑。点一行发起换装，服务器确认后刷新「已装备」和本地角色右手模型。角色死亡或技能执行期间暂不接受点选。

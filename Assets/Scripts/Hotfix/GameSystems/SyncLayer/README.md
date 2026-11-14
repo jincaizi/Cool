@@ -194,3 +194,7 @@ bash tools/unity-tests.sh PlayMode RemoteRenderBranchTests
 - [服务端移动](../../../../../Server/Movement/README.md) —— ORCA 避让
 - [Sys3C](../Sys3C/README.md) —— 本地角色与移动
 - [Monster](../Monster/README.md) —— 客户端怪物模块
+
+## DemoDay 简易武器背包
+
+联网宿主在装备基线可用后显示背包按钮，确认后刷新当前条目与本地持剑外观。断线时销毁面板。

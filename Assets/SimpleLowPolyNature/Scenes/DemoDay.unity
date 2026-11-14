@@ -9047,6 +9047,7 @@ MonoBehaviour:
     m_Bits: 1
   _skillCatalog: {fileID: 11400000, guid: f2904b3ea5d0866459926c99a5af7b6f, type: 2}
   _showDebugOverlay: 1
+  _weaponBagFont: {fileID: 12800000, guid: b1f26f3c9de972a4f931c3f6ea479fbb, type: 3}
 --- !u!4 &940694965
 Transform:
   m_ObjectHideFlags: 0

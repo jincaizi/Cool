@@ -851,7 +851,25 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         private void HandleBagEquipRequested(ItemData item)
-            => _combatBridge?.RequestEquip(item.InstanceId);
+        {
+            if (_localEntry == null || _localEntry.IsDead || _localEntry.SkillCoordinator.IsSkillActive) return;
+            _combatBridge?.RequestEquip(item.InstanceId);
+        }
+
+        [SerializeField] private Font _weaponBagFont;
+        private Hotfix.GameSystems.Bag.UI.WeaponBagView _weaponBag;
+
+        private void RefreshWeaponBag()
+        {
+            if (_weaponBagFont == null) return;
+            if (_weaponBag == null)
+            {
+                _weaponBag = new GameObject("WeaponBag").AddComponent<Hotfix.GameSystems.Bag.UI.WeaponBagView>();
+                _weaponBag.transform.SetParent(transform, false);
+            }
+            var equipment = _combatBridge.Equipment;
+            _weaponBag.Refresh(BagManager.Instance.Data, equipment.WeaponInstanceId, _weaponBagFont);
+        }
 
         private void HandleEquipResult(EquipWeaponConfirm confirm)
         {
@@ -869,10 +887,10 @@ namespace Hotfix.GameSystems.SyncLayer
             var equipment = _combatBridge.Equipment;
             if (!equipment.HasEquipment) return;
 
-            // 攻速同时驱动本地动画与 SkillCoordinator 时序；武器模型由工厂接缝按模板切换
-            // （当前仓库没有元素武器预制体，工厂为空时只更新权威装备状态）。
+            // 只应用已接受的装备基线或确认。
             _localEntry.SetAttackSpeed(equipment.AttackSpeedMultiplier);
-            _localEntry.AttackHandler?.EquipWeapon(equipment.TemplateId, equipment.ElementId);
+            _localEntry.ApplySwordView(equipment.ElementId);
+            RefreshWeaponBag();
         }
 
         private void OnLocalSkillCast(SkillData skillData)
@@ -955,6 +973,13 @@ namespace Hotfix.GameSystems.SyncLayer
             _remoteCastPresenter?.Clear();
             _remoteCastPresenter = null;
             NetworkSwordQiGate.SuppressLocalSpawn = false;
+
+            if (_weaponBag != null)
+            {
+                _weaponBag.gameObject.SetActive(false);
+                Destroy(_weaponBag.gameObject);
+                _weaponBag = null;
+            }
 
             if (_bagEquipSubscribed)
             {

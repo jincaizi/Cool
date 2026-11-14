@@ -2478,6 +2478,13 @@ MonoBehaviour:
   _maxHP: 100
   CharacterController: {fileID: 3433340318554783080}
   Animator: {fileID: 7413344840680693326}
+  _swordSocket: {fileID: 4745839230877426559}
+  _defaultSwordView: {fileID: 6242650426106581367}
+  _elementalSwordViews:
+  - {fileID: 1907275252520156, guid: f800fcc198377b4408a28f2715b1a60d, type: 3}
+  - {fileID: 1612738821831882, guid: fe4758ae6aa922442a8e2ddabb84ecdd, type: 3}
+  - {fileID: 1105315487503178, guid: 9e3ccb5d46edb7e4095888928abdaa2e, type: 3}
+  - {fileID: 1395729465452526, guid: d8b3796a4e3c855478f115e4766a895c, type: 3}
   GroundLayer:
     serializedVersion: 2
     m_Bits: 1
