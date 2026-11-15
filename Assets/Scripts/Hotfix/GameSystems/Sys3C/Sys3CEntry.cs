@@ -118,23 +118,45 @@ namespace Hotfix.GameSystems.Sys3C
         private GameObject _equippedSwordView;
         private int _shownSwordElement;
 
-        public void ApplySwordView(int elementId)
+        /// <summary>
+        /// 应用本地持剑外观。元素 0 或配置缺失时恢复原配剑并返回 false；
+        /// 成功应用（含重复应用同一有效元素）返回 true。每次交换先隐藏旧视觉。
+        /// </summary>
+        public bool ApplySwordView(int elementId)
         {
-            if (_swordSocket == null || _defaultSwordView == null || _shownSwordElement == elementId) return;
-            if (elementId != 0 && (_elementalSwordViews == null || elementId > _elementalSwordViews.Length
-                || elementId < 0 || _elementalSwordViews[elementId - 1] == null)) return;
+            if (_swordSocket == null || _defaultSwordView == null) return false;
 
-            if (_equippedSwordView != null)
+            bool validElement = elementId > 0
+                && _elementalSwordViews != null
+                && elementId <= _elementalSwordViews.Length
+                && _elementalSwordViews[elementId - 1] != null;
+
+            if (!validElement)
             {
-                _equippedSwordView.SetActive(false);
-                Destroy(_equippedSwordView);
+                HideEquippedSwordView();
+                _defaultSwordView.gameObject.SetActive(true);
+                _shownSwordElement = 0;
+                return false;
             }
 
+            if (_shownSwordElement == elementId && _equippedSwordView != null) return true;
+
+            HideEquippedSwordView();
             // Keep the original socket and combat components bound to the rig.
             // The replacement prefab supplies the visible blade.
-            _defaultSwordView.gameObject.SetActive(elementId == 0);
-            _equippedSwordView = elementId == 0 ? null : Instantiate(_elementalSwordViews[elementId - 1], _swordSocket, false);
+            _defaultSwordView.gameObject.SetActive(false);
+            _equippedSwordView = Instantiate(_elementalSwordViews[elementId - 1], _swordSocket, false);
             _shownSwordElement = elementId;
+            return true;
+        }
+
+        private void HideEquippedSwordView()
+        {
+            if (_equippedSwordView == null) return;
+            _equippedSwordView.SetActive(false);
+            if (Application.isPlaying) Destroy(_equippedSwordView);
+            else DestroyImmediate(_equippedSwordView);
+            _equippedSwordView = null;
         }
 
         /// <summary>本地攻击 Animator 攻速参数（0.25–4；禁止全局 Animator.speed）。</summary>

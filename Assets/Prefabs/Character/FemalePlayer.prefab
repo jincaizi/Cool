@@ -2481,10 +2481,10 @@ MonoBehaviour:
   _swordSocket: {fileID: 4745839230877426559}
   _defaultSwordView: {fileID: 6242650426106581367}
   _elementalSwordViews:
-  - {fileID: 1907275252520156, guid: f800fcc198377b4408a28f2715b1a60d, type: 3}
-  - {fileID: 1612738821831882, guid: fe4758ae6aa922442a8e2ddabb84ecdd, type: 3}
-  - {fileID: 1105315487503178, guid: 9e3ccb5d46edb7e4095888928abdaa2e, type: 3}
-  - {fileID: 1395729465452526, guid: d8b3796a4e3c855478f115e4766a895c, type: 3}
+  - {fileID: 100100000, guid: 5372d2772bc34ea4a2a70439c20b197e, type: 3}
+  - {fileID: 100100000, guid: 7de0a329492c413ca54137fd515e8bef, type: 3}
+  - {fileID: 100100000, guid: 814c1c7b70cc461e81f86492c2249721, type: 3}
+  - {fileID: 100100000, guid: e241355b0e0d42dca3560faf7d6b6cbb, type: 3}
   GroundLayer:
     serializedVersion: 2
     m_Bits: 1

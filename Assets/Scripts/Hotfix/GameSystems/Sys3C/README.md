@@ -151,4 +151,17 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
 
 ## 换剑外观
 
-男女角色预制体分别绑定 MoonSword 的 M/W 版本。冰、火、雷、风剑挂到现有 weapon_r，默认剑可切回，左手与战斗组件沿用现有绑定。外观引用随角色预制体加载。
+男女角色预制体分别绑定 `Assets/Prefabs/Character/WeaponViews/` 下的八个项目自有校准变体
+（Male/Female × Ice/Fire/Thunder/Wind）。变体根保持挂点局部恒等，视觉子对象是供应商 MoonSword
+M/W 模型的嵌套预制体，按“先缩放、再旋转、平移”写入校准变换。冰、火、雷、风剑挂到现有 weapon_r，
+默认剑可切回，左手与战斗组件沿用现有绑定。
+
+- 校准基准：默认男剑 `OHS03PBR` 剑身长度 1.4156、女剑 `OHS06PBR` 1.4881；供应商 MoonSword
+  均为 1.7367。统一缩放男 0.81511 / 女 0.85685，长度比均为 1.000；男剑保留默认 z=0.007 偏移，
+  旋转为单位四元数（两者剑身同沿 +Y，宽度轴同为 X）。
+- `Sys3CEntry.ApplySwordView(int elementId)` 返回 bool：有效元素应用成功（含重复应用）返回 true；
+  元素 0、数组越界或引用缺失时隐藏旧元素剑、恢复默认剑并返回 false。每次交换先隐藏旧视觉，
+  EditMode 下立即销毁，运行时延迟销毁。
+- 回归测试：`Assets/Scripts/Tests/Editor/Sys3C/WeaponViewFitTests.cs`；测量记录见
+  `production/verify/weapon-bag-sword-fit/measurements.csv`。握姿、穿模、拖尾的视觉签收仍待
+  Unity 交互预览补做。
