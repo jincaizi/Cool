@@ -105,6 +105,31 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void test_request_equip_returns_seq_and_reuses_connection_state()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var state = new ClientEquipmentState();
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry,
+                onDamageToLocalPlayer: null, equipment: state, nextEquipSeq: 7);
+
+            uint seq = bridge.RequestEquip(43);
+
+            Assert.AreEqual(8u, seq);
+            Assert.AreEqual(8u, bridge.NextEquipSeq);
+            Assert.AreSame(state, bridge.Equipment);
+            var request = (EquipWeaponRequest)_client.Sent[0].msg;
+            Assert.AreEqual(8u, request.ClientEquipSeq);
+            Assert.AreEqual(43L, request.WeaponInstanceId);
+
+            var rebuilt = new CombatNetworkBridge(_client, () => 1L, registry,
+                onDamageToLocalPlayer: null, equipment: state, nextEquipSeq: bridge.NextEquipSeq);
+
+            Assert.AreSame(state, rebuilt.Equipment,
+                "character rebuild must keep the same connection equipment summary");
+            Assert.AreEqual(9u, rebuilt.RequestEquip(44));
+        }
+
+        [Test]
         public void test_notify_skill_cast_carries_impact_and_charge()
         {
             // 任务 4：落点/蓄力进度必须随 CastRequest 上线（服务端 CircleAtPoint 判定依赖它们）

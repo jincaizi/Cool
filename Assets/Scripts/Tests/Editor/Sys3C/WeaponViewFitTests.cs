@@ -76,18 +76,18 @@ namespace GameSys.EditorTests
                     "missing element view must restore the default sword");
                 Assert.IsTrue(iceInstance == null || !iceInstance.activeSelf,
                     "previous elemental sword must be hidden immediately when fallback occurs");
-                Assert.AreEqual(0, CountActiveElementalSwords(socket.transform),
+                Assert.AreEqual(0, CountActiveElementalSwords(socket.transform, defaultSword.transform),
                     "fallback must leave only the default sword visible");
 
                 Assert.IsFalse(entry.ApplySwordView(0), "element 0 is a fallback, not a successful elemental application");
                 Assert.IsTrue(defaultSword.activeSelf);
-                Assert.AreEqual(0, CountActiveElementalSwords(socket.transform));
+                Assert.AreEqual(0, CountActiveElementalSwords(socket.transform, defaultSword.transform));
 
                 Assert.IsTrue(entry.ApplySwordView(1), "valid element must apply after a fallback");
                 Assert.IsFalse(defaultSword.activeSelf);
                 Assert.IsFalse(entry.ApplySwordView(2), "missing element must fall back again");
                 Assert.IsTrue(defaultSword.activeSelf);
-                Assert.AreEqual(0, CountActiveElementalSwords(socket.transform));
+                Assert.AreEqual(0, CountActiveElementalSwords(socket.transform, defaultSword.transform));
             }
             finally
             {
@@ -124,6 +124,58 @@ namespace GameSys.EditorTests
                         + " outside [0.90, 1.10] (default=" + defaultMetrics.Extent.ToString("F3", CultureInfo.InvariantCulture)
                         + ", variant=" + metrics.Extent.ToString("F3", CultureInfo.InvariantCulture) + ")");
                 }
+            }
+        }
+
+        [Test]
+        public void test_character_prefab_cycles_all_four_elemental_swords_and_default()
+        {
+            AssertCharacterSwordCycle(MaleCharacterPath, "Male");
+            AssertCharacterSwordCycle(FemaleCharacterPath, "Female");
+        }
+
+        private static void AssertCharacterSwordCycle(string characterPath, string role)
+        {
+            var contents = PrefabUtility.LoadPrefabContents(characterPath);
+            try
+            {
+                var entry = contents.GetComponentInChildren<Sys3CEntry>(true);
+                Assert.IsNotNull(entry, characterPath + " has no Sys3CEntry");
+                var socket = contents.GetComponentsInChildren<Transform>(true)
+                    .FirstOrDefault(t => t.name == "weapon_r");
+                Assert.IsNotNull(socket, characterPath + " has no weapon_r socket");
+                Assert.GreaterOrEqual(socket!.childCount, 1, characterPath + " has no default sword");
+                var defaultSword = socket.GetChild(0);
+                Assert.IsTrue(defaultSword.gameObject.activeSelf, role + " default sword must start visible");
+
+                for (int element = 1; element <= ElementNames.Length; element++)
+                {
+                    Assert.IsTrue(entry!.ApplySwordView(element),
+                        role + " element " + element + " must apply");
+                    Assert.IsFalse(defaultSword.gameObject.activeSelf,
+                        role + " element " + element + " must hide the default sword");
+
+                    var active = ActiveElementalSword(socket, defaultSword);
+                    Assert.IsNotNull(active, role + " element " + element + " must instantiate one sword");
+                    StringAssert.StartsWith(role + ElementNames[element - 1], active!.name,
+                        role + " element " + element + " must instantiate the calibrated variant");
+                    Assert.AreEqual(1, CountActiveElementalSwords(socket, defaultSword),
+                        role + " must show exactly one elemental sword");
+                }
+
+                Assert.IsFalse(entry!.ApplySwordView(0), "default sword switch is a fallback");
+                Assert.IsTrue(defaultSword.gameObject.activeSelf);
+                Assert.AreEqual(0, CountActiveElementalSwords(socket, defaultSword));
+
+                Assert.IsTrue(entry.ApplySwordView(1), "an elemental sword must still apply after default");
+                Assert.IsFalse(defaultSword.gameObject.activeSelf);
+                Assert.IsFalse(entry.ApplySwordView(0));
+                Assert.IsTrue(defaultSword.gameObject.activeSelf);
+                Assert.AreEqual(0, CountActiveElementalSwords(socket, defaultSword));
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(contents);
             }
         }
 
@@ -308,15 +360,25 @@ namespace GameSys.EditorTests
 
         private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
 
-        private static int CountActiveElementalSwords(Transform socket)
+        private static int CountActiveElementalSwords(Transform socket, Transform defaultSword)
         {
             int count = 0;
             foreach (Transform child in socket)
             {
-                if (child.gameObject.activeSelf && !child.name.StartsWith("DefaultSword", StringComparison.Ordinal))
+                if (child != defaultSword && child.gameObject.activeSelf)
                     count++;
             }
             return count;
+        }
+
+        private static GameObject? ActiveElementalSword(Transform socket, Transform defaultSword)
+        {
+            foreach (Transform child in socket)
+            {
+                if (child != defaultSword && child.gameObject.activeSelf)
+                    return child.gameObject;
+            }
+            return null;
         }
 
         private static string VariantPath(string role, string element)

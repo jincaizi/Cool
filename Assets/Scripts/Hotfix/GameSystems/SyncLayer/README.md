@@ -39,8 +39,9 @@
 - **权威换装**：`ClientEquipmentState` 按 `EquipmentRevision` 应用 `EquipWeaponConfirm`；
   旧版本忽略。拒绝确认携带的较新摘要也会应用（恢复服务器当前装备）；登录基线可把版本 0
   作为起点。`CombatNetworkBridge.RequestEquip(instanceId)` 发送会话内递增的
-  `ClientEquipSeq + KnownEquipmentRevision`，宿主把 `OnEquipmentChanged` 接到
-  `CharacterAttackHandler.EquipWeapon(templateId, elementId)` 与 `Sys3CEntry.SetAttackSpeed`。
+  `ClientEquipSeq + KnownEquipmentRevision` 并返回序号（0 = 未发送）；宿主在 `OnEquipResult`
+  里统一刷新 `WeaponBagController` 的标记与外观（`Sys3CEntry.SetAttackSpeed` / `ApplySwordView`），
+  `OnEquipmentChanged` 只在 `TryApply` 真正更新摘要时触发。
 - **权威剑气**：`CastBroadcast` 只驱动远端攻击动作；剑气视觉由
   `ProjectileLaunchBroadcast` 按 `CastId` 唯一创建（本人与旁观者同路径）。晚到发射按
   `ServerTimestamp` 与服务器时钟补飞行进度，终止先到时缓存并跳过后续生成，
