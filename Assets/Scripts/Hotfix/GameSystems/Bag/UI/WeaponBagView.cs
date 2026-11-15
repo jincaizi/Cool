@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Text;
 using Cool.SyncCore;
 using Hotfix.GameSystems.Bag.Data;
 using Hotfix.GameSystems.Bag.Runtime;
@@ -10,8 +12,9 @@ namespace Hotfix.GameSystems.Bag.UI
     {
         private RectTransform _panel;
         private Font _font;
+        private string _lastSignature = string.Empty;
 
-        public void Refresh(BagData data, long equippedId, Font font)
+        public void Refresh(BagData data, long equippedId, long pendingId, string status, Font font)
         {
             bool open = _panel != null && _panel.gameObject.activeSelf;
             if (_panel == null)
@@ -19,27 +22,81 @@ namespace Hotfix.GameSystems.Bag.UI
                 _font = font;
                 Build();
             }
-            foreach (Transform row in _panel)
+            else if (font != null)
+            {
+                _font = font;
+            }
+
+            var rows = BuildRows(data, equippedId, pendingId);
+            string signature = BuildSignature(rows, status);
+            if (_lastSignature == signature)
+            {
+                _panel!.gameObject.SetActive(open);
+                return;
+            }
+            _lastSignature = signature;
+
+            foreach (Transform row in _panel!)
             {
                 row.gameObject.SetActive(false);
                 Destroy(row.gameObject);
             }
 
             int index = 0;
+            foreach (var row in rows)
+            {
+                var button = AddButton(_panel, row.Label, new Vector2(0, -26 - index++ * 54),
+                    () =>
+                    {
+                        if (row.Item != null) BagManager.Instance.RequestEquip(row.Item);
+                    });
+                button.interactable = row.Interactable;
+            }
+
+            if (!string.IsNullOrEmpty(status))
+                CreateStatus(_panel, status, new Vector2(0, -26 - index++ * 54));
+
+            _panel.sizeDelta = new Vector2(280, 16 + index * 54);
+            _panel.gameObject.SetActive(open);
+        }
+
+        /// <summary>列表行模型：登录顺序、权威已装备标记与在途标记的唯一渲染口径。</summary>
+        internal static WeaponBagRow[] BuildRows(BagData data, long equippedId, long pendingId)
+        {
+            var rows = new List<WeaponBagRow>();
             if (data != null)
             {
                 foreach (var slot in data.Slots)
                 {
                     var item = slot.Item;
-                    if (item == null || item.Template?.EquipSlot != Hotfix.GameSystems.Bag.Core.EquipmentSlot.Weapon) continue;
+                    if (item == null
+                        || item.Template?.EquipSlot != Hotfix.GameSystems.Bag.Core.EquipmentSlot.Weapon)
+                        continue;
+
                     bool equipped = item.InstanceId == equippedId;
-                    var row = AddButton(_panel, SwordName(item.TemplateId) + (equipped ? "  [已装备]" : ""),
-                        new Vector2(0, -26 - index++ * 54), () => BagManager.Instance.RequestEquip(item));
-                    row.interactable = !equipped;
+                    bool pending = item.InstanceId == pendingId;
+                    string label = SwordName(item.TemplateId);
+                    if (equipped) label += "  [已装备]";
+                    else if (pending) label += "  [换装中]";
+
+                    rows.Add(new WeaponBagRow(item, label, equipped, pending,
+                        !equipped && pendingId == 0));
                 }
             }
-            _panel.sizeDelta = new Vector2(280, 16 + index * 54);
-            _panel.gameObject.SetActive(open);
+            return rows.ToArray();
+        }
+
+        private static string BuildSignature(WeaponBagRow[] rows, string status)
+        {
+            var builder = new StringBuilder();
+            builder.Append(status).Append('|');
+            foreach (var row in rows)
+            {
+                builder.Append(row.Item.InstanceId).Append(':')
+                    .Append(row.Label).Append(':')
+                    .Append(row.Interactable ? '1' : '0').Append(';');
+            }
+            return builder.ToString();
         }
 
         private void Build()
@@ -92,6 +149,21 @@ namespace Hotfix.GameSystems.Bag.UI
             return button;
         }
 
+        private void CreateStatus(RectTransform parent, string status, Vector2 position)
+        {
+            var obj = new GameObject("Status", typeof(RectTransform));
+            var rect = (RectTransform)obj.transform;
+            Place(rect, parent, position, new Vector2(256, 46));
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1);
+            var text = obj.AddComponent<Text>();
+            text.font = _font;
+            text.fontSize = 17;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.color = new Color(1f, 0.86f, 0.4f);
+            text.raycastTarget = false;
+            text.text = status;
+        }
+
         private static void Place(RectTransform rect, RectTransform parent, Vector2 position, Vector2 size)
         {
             rect.SetParent(parent, false);
@@ -109,5 +181,23 @@ namespace Hotfix.GameSystems.Bag.UI
             ElementalCatalogDefaults.WindSwordTemplateId => "风剑",
             _ => "武器 " + templateId
         };
+    }
+
+    internal sealed class WeaponBagRow
+    {
+        public WeaponBagRow(ItemData item, string label, bool equipped, bool pending, bool interactable)
+        {
+            Item = item;
+            Label = label;
+            Equipped = equipped;
+            Pending = pending;
+            Interactable = interactable;
+        }
+
+        public ItemData Item { get; }
+        public string Label { get; }
+        public bool Equipped { get; }
+        public bool Pending { get; }
+        public bool Interactable { get; }
     }
 }

@@ -34,7 +34,7 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 来源是否玩家或 bot（DamageResult.SourceKind——宿主据此区分玩家闪屏与怪物攻击）</summary>
         private readonly Action<long, float, bool, Vector3, float, bool, bool>? _onDamageToLocalPlayer;
         private readonly ConcurrentQueue<IMessage> _incoming = new ConcurrentQueue<IMessage>();
-        private readonly ClientEquipmentState _equipment = new ClientEquipmentState();
+        private readonly ClientEquipmentState _equipment;
         private uint _nextEquipSeq;
         private uint _nextCastSeq;
 
@@ -50,6 +50,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>权威装备状态（按 EquipmentRevision 合并）。</summary>
         public ClientEquipmentState Equipment => _equipment;
 
+        /// <summary>本连接已发出的最大换装序号（角色重建时随装备摘要一起保留）。</summary>
+        public uint NextEquipSeq => _nextEquipSeq;
+
         /// <summary>装备状态实际更新（接受或较新的拒绝摘要）。</summary>
         public event Action<EquipWeaponConfirm>? OnEquipmentChanged;
 
@@ -62,25 +65,30 @@ namespace Hotfix.GameSystems.SyncLayer
 
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
             RemoteEntityRegistry registry,
-            Action<long, float, bool, Vector3, float, bool, bool>? onDamageToLocalPlayer = null)
+            Action<long, float, bool, Vector3, float, bool, bool>? onDamageToLocalPlayer = null,
+            ClientEquipmentState? equipment = null, uint nextEquipSeq = 0)
         {
             _client = client;
             _localPlayerId = localPlayerId;
             _registry = registry;
             _onDamageToLocalPlayer = onDamageToLocalPlayer;
-            _equipment.Changed += confirm => OnEquipmentChanged?.Invoke(confirm);
+            // 连接生命周期的装备摘要可跨角色重建复用；新会话由宿主传 null。
+            _equipment = equipment ?? new ClientEquipmentState();
+            _nextEquipSeq = nextEquipSeq;
         }
 
-        /// <summary>发送换装请求（会话内序号 + 已确认版本）。</summary>
-        public void RequestEquip(long weaponInstanceId)
+        /// <summary>发送换装请求（会话内序号 + 已确认版本）；返回发送的序号，0 表示未发送。</summary>
+        public uint RequestEquip(long weaponInstanceId)
         {
-            if (weaponInstanceId == 0) return;
+            if (weaponInstanceId == 0) return 0;
+            uint seq = ++_nextEquipSeq;
             _client.Send(MessageId.EquipWeaponRequest, new EquipWeaponRequest
             {
-                ClientEquipSeq = ++_nextEquipSeq,
+                ClientEquipSeq = seq,
                 WeaponInstanceId = weaponInstanceId,
                 KnownEquipmentRevision = _equipment.Revision
             });
+            return seq;
         }
 
         /// <summary>
@@ -148,7 +156,8 @@ namespace Hotfix.GameSystems.SyncLayer
                         OnDamageResult?.Invoke(result);
                         break;
                     case EquipWeaponConfirm equip:
-                        _equipment.TryApply(equip);
+                        if (_equipment.TryApply(equip))
+                            OnEquipmentChanged?.Invoke(equip);
                         OnEquipResult?.Invoke(equip);
                         break;
                     case CastConfirm castConfirm:

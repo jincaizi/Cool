@@ -6,6 +6,7 @@ using Cool.SyncCore;
 using Cysharp.Threading.Tasks;
 using Hotfix.GameSystems.Bag.Data;
 using Hotfix.GameSystems.Bag.Runtime;
+using Hotfix.GameSystems.Bag.UI;
 using Hotfix.GameSystems.Nameplate;
 using Hotfix.GameSystems.UI;
 using Hotfix.GameSystems.Skills;
@@ -110,6 +111,10 @@ namespace Hotfix.GameSystems.SyncLayer
         private RemoteCastPresenter? _remoteCastPresenter;
         private WeaponInventoryBaseline? _pendingWeaponBaseline;
         private bool _bagEquipSubscribed;
+        private WeaponBagController? _weaponBagController;
+        private ClientEquipmentState? _connectionEquipment;
+        private uint _connectionEquipSeq;
+        private int _weaponBagRenderedRevision = -1;
         private NetworkTargetSelector? _networkTargetSelector;
 
         // 联网 HUD 读数（FPS + RTT）：HUD 面板缓存与 0.5 秒统计窗口
@@ -160,6 +165,15 @@ namespace Hotfix.GameSystems.SyncLayer
             var root = new GameObject("RemotePlayers");
             root.transform.SetParent(transform, false);
             _remoteRoot = root.transform;   // 本地角色查找要排除这棵子树（见 FindLocalEntry）
+
+            // 换装会话跟随连接（角色重建保留，Disconnect 重置）。委托在调用时读取当前装配，
+            // 因此可以在本地角色/战斗桥创建前构造。
+            _weaponBagController = new WeaponBagController(
+                isDead: () => _localEntry == null || _localEntry.IsDead,
+                isSkillActive: () => _localEntry != null && _localEntry.SkillCoordinator != null
+                    && _localEntry.SkillCoordinator.IsSkillActive,
+                requestEquip: id => _combatBridge != null ? _combatBridge.RequestEquip(id) : 0u,
+                applyAppearance: ApplySwordAppearance);
 
             // Inspector 的数组 → 查询表（registry 只吃表；空目录传 null = 球体降级，与未接线同一条路）
             var catalog = new Dictionary<int, GameObject>();
@@ -248,7 +262,14 @@ namespace Hotfix.GameSystems.SyncLayer
             var entry = e.PlayerAnimator.GetComponent<Sys3CEntry>();
             if (entry == null) return;
 
-            ResetAttachment();
+            // 同一连接的装备摘要与在途序号跨角色重建保留；外观在重新装配后重放。
+            // 桥尚未装配（连续两次 spawn）时保留上次已保存的摘要，不能用 null 覆盖。
+            if (_combatBridge != null)
+            {
+                _connectionEquipment = _combatBridge.Equipment;
+                _connectionEquipSeq = _combatBridge.NextEquipSeq;
+            }
+            ResetAttachment(preserveEquipment: true);
             _localEntry = entry;
             _entryLookedUp = true; // 已定位——Update 的重试逻辑直接装配新角色
 
@@ -261,8 +282,9 @@ namespace Hotfix.GameSystems.SyncLayer
             }
         }
 
-        /// <summary>摘除本地角色装配（移动上报/纠偏订阅/战斗桥）——重装配前调用（幂等）</summary>
-        private void ResetAttachment()
+        /// <summary>摘除本地角色装配（移动上报/纠偏订阅/战斗桥）——重装配前调用（幂等）。
+        /// preserveEquipment = 角色重建（同一连接），false = 断线/销毁。</summary>
+        private void ResetAttachment(bool preserveEquipment = false)
         {
             if (_manager != null)
             {
@@ -270,7 +292,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (_netPolicy != null)
                     _manager.OnCorrectionNeeded -= _netPolicy.ApplyServerCorrection;
             }
-            DetachCombatBridge();
+            DetachCombatBridge(preserveEquipment);
             DetachTargetSelector();
             _pendingTargetOwnerDeath = false;   // 旧装配的死亡通知不得跨会话作用到新 selector
             _netPolicy = null;
@@ -337,6 +359,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 TryAttachLocalCharacter();
 
             _combatBridge?.Update();
+            TickWeaponBag();
 
             // 死亡回调可能来自网络线程：封送到主线程后才动 selector（UI/选中环）
             if (_pendingTargetOwnerDeath)
@@ -747,23 +770,24 @@ namespace Hotfix.GameSystems.SyncLayer
             // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链
             // （blocked = 服务端格挡裁决 → 本地走格挡受击表现，见 Sys3CEntry.ApplyServerDamage；
             //  sourceIsPlayer = DamageResult.SourceKind → 宿主区分玩家来源闪屏与怪物攻击）
+            bool hasPreservedEquipment = _connectionEquipment != null;
             _combatBridge = new CombatNetworkBridge(_adapter!, () => _manager!.LocalPlayerId, _remoteEntities!,
                 (targetId, dmg, crit, dir, remainingHp, blocked, sourceIsPlayer) =>
-                    _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked, sourceIsPlayer));
+                    _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked, sourceIsPlayer),
+                _connectionEquipment, _connectionEquipSeq);
+            _connectionEquipment = null;
+            _connectionEquipSeq = 0;
             _adapter!.MessageReceived += _combatBridge.OnMessage;
-            if (_pendingWeaponBaseline != null)
-            {
+            if (!hasPreservedEquipment && _pendingWeaponBaseline != null)
                 _combatBridge.Equipment.InitializeFromBaseline(_pendingWeaponBaseline);
-                _pendingWeaponBaseline = null;
-            }
-            _combatBridge.OnEquipmentChanged += HandleEquipmentChanged;
+            _pendingWeaponBaseline = null;
             _combatBridge.OnEquipResult += HandleEquipResult;
             if (!_bagEquipSubscribed)
             {
                 BagManager.Instance.OnEquipRequested += HandleBagEquipRequested;
                 _bagEquipSubscribed = true;
             }
-            ApplyEquipmentToLocal();
+            ApplyEquipmentState();
             _localEntry.SkillCoordinator.AttackSpeedProvider = () =>
                 _combatBridge != null ? _combatBridge.Equipment.AttackSpeedMultiplier : 1f;
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
@@ -852,45 +876,72 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void HandleBagEquipRequested(ItemData item)
         {
-            if (_localEntry == null || _localEntry.IsDead || _localEntry.SkillCoordinator.IsSkillActive) return;
-            _combatBridge?.RequestEquip(item.InstanceId);
+            if (_weaponBagController == null || item == null) return;
+            _weaponBagController.TryRequest(item.InstanceId, Time.unscaledTime);
+            RefreshWeaponBag();
         }
 
         [SerializeField] private Font _weaponBagFont;
-        private Hotfix.GameSystems.Bag.UI.WeaponBagView _weaponBag;
+        private WeaponBagView _weaponBag;
 
         private void RefreshWeaponBag()
         {
-            if (_weaponBagFont == null) return;
+            if (_weaponBagFont == null || _weaponBagController == null || _combatBridge == null) return;
+            if (_weaponBagRenderedRevision == _weaponBagController.Revision) return;
             if (_weaponBag == null)
             {
-                _weaponBag = new GameObject("WeaponBag").AddComponent<Hotfix.GameSystems.Bag.UI.WeaponBagView>();
+                _weaponBag = new GameObject("WeaponBag").AddComponent<WeaponBagView>();
                 _weaponBag.transform.SetParent(transform, false);
             }
-            var equipment = _combatBridge.Equipment;
-            _weaponBag.Refresh(BagManager.Instance.Data, equipment.WeaponInstanceId, _weaponBagFont);
+            _weaponBagRenderedRevision = _weaponBagController.Revision;
+            _weaponBag.Refresh(BagManager.Instance.Data,
+                _weaponBagController.EquippedInstanceId,
+                _weaponBagController.PendingInstanceId,
+                _weaponBagController.DisplayStatus,
+                _weaponBagFont);
         }
 
         private void HandleEquipResult(EquipWeaponConfirm confirm)
         {
+            if (_weaponBagController == null || _combatBridge == null) return;
             if (!confirm.Accepted)
                 Debug.LogWarning("[NetHost] equip rejected: " + confirm.RejectReason
                     + " rev=" + confirm.EquipmentRevision);
-            ApplyEquipmentToLocal();
+            var equipment = _combatBridge.Equipment;
+            _weaponBagController.ApplyConfirm(confirm, equipment.WeaponInstanceId,
+                equipment.ElementId, equipment.AttackSpeedMultiplier);
+            RefreshWeaponBag();
         }
 
-        private void HandleEquipmentChanged(EquipWeaponConfirm confirm) => ApplyEquipmentToLocal();
-
-        private void ApplyEquipmentToLocal()
+        private void TickWeaponBag()
         {
-            if (_localEntry == null || _combatBridge == null) return;
-            var equipment = _combatBridge.Equipment;
-            if (!equipment.HasEquipment) return;
-
-            // 只应用已接受的装备基线或确认。
-            _localEntry.SetAttackSpeed(equipment.AttackSpeedMultiplier);
-            _localEntry.ApplySwordView(equipment.ElementId);
+            if (_weaponBagController == null || _combatBridge == null) return;
+            _weaponBagController.Tick(Time.unscaledTime);
             RefreshWeaponBag();
+        }
+
+        private void ApplyEquipmentState()
+        {
+            if (_weaponBagController == null || _combatBridge == null) return;
+            var equipment = _combatBridge.Equipment;
+            if (equipment.HasEquipment)
+                _weaponBagController.ApplyAuthoritative(equipment.WeaponInstanceId,
+                    equipment.ElementId, equipment.AttackSpeedMultiplier, force: true);
+            else
+                _weaponBagController.Reapply();
+            _weaponBagRenderedRevision = -1; // 基线/角色重建后强制重绘列表
+            RefreshWeaponBag();
+        }
+
+        private WeaponAppearanceResult ApplySwordAppearance(int elementId, float attackSpeed)
+        {
+            if (_localEntry == null || _combatBridge == null) return WeaponAppearanceResult.Unavailable;
+            if (!_combatBridge.Equipment.HasEquipment) return WeaponAppearanceResult.Unavailable;
+
+            _localEntry.SetAttackSpeed(attackSpeed);
+            bool applied = _localEntry.ApplySwordView(elementId);
+            if (elementId == 0) return WeaponAppearanceResult.Applied;
+            return applied ? WeaponAppearanceResult.Applied : WeaponAppearanceResult.Missing;
         }
 
         private void OnLocalSkillCast(SkillData skillData)
@@ -950,12 +1001,20 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 摘除战斗桥订阅（adapter 消息 + 本地技能事件）。Disconnect 与 OnDestroy 共用——
         /// 宿主被销毁而本地 Sys3CEntry 存活时，避免桥对已销毁宿主留下悬空委托。
         /// </summary>
-        private void DetachCombatBridge()
+        private void DetachCombatBridge(bool preserveEquipment = false)
         {
             // T12 乙-3：死亡回调也不能漏摘（它挂在本地角色上，宿主可能比角色活得久）——
             // 放在早退守卫**之前**，没有战斗桥时同样要解开
             if (_localEntry != null)
                 _localEntry.OnServerDeath -= HandleLocalPlayerDeath;
+
+            _weaponBagRenderedRevision = -1;
+            if (!preserveEquipment)
+            {
+                _weaponBagController?.Reset();
+                _connectionEquipment = null;
+                _connectionEquipSeq = 0;
+            }
 
             // 远程施法表现：断线/本地角色重建都必须退订并清空跟踪表——
             // 旧 presenter 的 ViewRemoved 委托若留在 registry 上，新会话会调进已丢弃的跟踪表。
@@ -987,10 +1046,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _bagEquipSubscribed = false;
             }
             if (_combatBridge != null)
-            {
-                _combatBridge.OnEquipmentChanged -= HandleEquipmentChanged;
                 _combatBridge.OnEquipResult -= HandleEquipResult;
-            }
             if (_localEntry != null)
                 _localEntry.SkillCoordinator.AttackSpeedProvider = null;
 

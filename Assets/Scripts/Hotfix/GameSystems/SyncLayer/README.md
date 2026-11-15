@@ -198,3 +198,13 @@ bash tools/unity-tests.sh PlayMode RemoteRenderBranchTests
 ## DemoDay 简易武器背包
 
 联网宿主在装备基线可用后显示背包按钮，确认后刷新当前条目与本地持剑外观。断线时销毁面板。
+
+- `CombatNetworkBridge.RequestEquip(long)` 返回发送的 `ClientEquipSeq`（0 = 未发送）；
+  构造时可注入连接级 `ClientEquipmentState` 与起始序号，角色重建复用同一摘要。
+  `OnEquipmentChanged` 只在 `TryApply` 真正更新时触发；宿主用 `OnEquipResult` 作为唯一刷新入口。
+- `ClientNetworkHost` 持有 `WeaponBagController`：单在途请求、5 秒超时、拒绝原因、
+  缺失外观提示、技能/死亡期间延迟应用最新外观。`PlayerSpawnedEvent` 保留装备摘要与在途序号，
+  重建后把同一份状态应用到新角色；`Disconnect` 重置会话并销毁面板。
+- 登录基线 `WeaponInventoryBaseline` 仍先 `ApplyServerWeapons` 建列表，再在本地角色装配时
+  `InitializeFromBaseline`；列表标记与持剑外观都读 `ClientEquipmentState`。
+- 回归：`WeaponBagViewTests`、`ClientEquipmentStateTests`、`BagWeaponInventoryTests`。
