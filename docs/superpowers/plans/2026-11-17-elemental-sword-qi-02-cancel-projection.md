@@ -199,10 +199,9 @@ public class CombatCancelMessagesTests
 ```csharp
         /// <summary>取消未提交施法（服务器 → 施法者与观察者；Plan 02）</summary>
         CastCancelBroadcast = 310,
-
-        /// <summary>战斗投影完整/增量更新（服务器 → 实体本人与观察者；Plan 02）</summary>
-        CombatStateUpdate = 311,
 ```
+
+`CombatStateUpdate = 311` 留到任务 6 与 `CombatProjection` 类型一起添加，避免 Part A 出现未注册的消息 ID。
 
 在 `MessageCodec.cs` 的注册表先追加（`CombatStateUpdate` 在任务 6 注册）：
 
@@ -1274,7 +1273,7 @@ namespace Cool.Protocol
         [ProtoMember(20)] public CombatProjection? Combat { get; set; }
 ```
 
-在 `MessageCodec.cs` 注册：
+在 `MessageId.cs` 战斗段追加 `CombatStateUpdate = 311`，然后在 `MessageCodec.cs` 注册：
 
 ```csharp
             RegisterMessageType(MessageId.CombatStateUpdate, typeof(CombatStateUpdate));
