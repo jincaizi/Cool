@@ -36,8 +36,9 @@
 
 ## 属性剑气 v1（2026-11-14）
 
-状态：Plan 01 已完成；Plan 02 Part A 已完成（取消广播、NpcAction 事件/AOI 基线消费、
-客户端动作存储与取消表现）；Part B 的战斗投影/带宽未开始。
+状态：Plan 01 与 Plan 02 已完成（Part A 取消广播/NpcAction；Part B 战斗投影版本合并、
+AOI 基线投影、`ActiveCast` 补播与在途剑气补发消费）。`Statuses[]` 内容、`ControlSummary`
+实际控制、元素 VFX 与远端武器模型仍属 Plan 03/04/05。
 
 - **权威换装**：`ClientEquipmentState` 按 `EquipmentRevision` 应用 `EquipWeaponConfirm`；
   旧版本忽略。拒绝确认携带的较新摘要也会应用（恢复服务器当前装备）；登录基线可把版本 0
@@ -64,6 +65,22 @@
 - **取消表现**：`RemoteCastPresenter.OnCastCancel` 把 `CastId` 记入有界取消集，只停止匹配
   `CastId` 的攻击表现（`RemoteEntityAnimator.CancelAttack(CastId)`）；已发射的剑气继续飞行，
   晚到的 `CastBroadcast` / `ProjectileLaunchBroadcast` 跳过补播。
+- **战斗投影路由与版本合并（Plan 02 Part B）**：`CombatNetworkBridge` 把
+  `CombatStateUpdate` 入队并在主线程转成 `OnCombatStateUpdate`；`ClientNetworkHost` 转交
+  `RemoteEntityRegistry.ApplyCombatStateUpdate`。`ApplyProjection` 按 `LifeId` + 单一
+  `CombatVersion` 原子合并：旧生命/旧版本丢弃，新生命先入 64 条有界缓存等基线建视图后回放，
+  相同版本视为幂等重放仍应用（基线与 `Health` 快照同版本）。HP/Dead/IsDefending 同步
+  `Targetable`/名牌/Animator；`Equipment`/`Control` 只存储（不替换远端模型、不改 3C）；
+  `Statuses` 为空列表即清空旧状态（内容属 Plan 04）。
+- **AOI 基线投影**：`EntityFieldMask.Combat` 置位的基线快照走同一条 `ApplyProjection`；
+  `EntitySnapshot.CombatVersion/LifeId` 随 `Health`/`Combat` 位下发，`Dead/Health/Defending`
+  只在对应掩码位置位时覆盖，未置位沿用 last-known（Keepalive 不再每帧带全字段）。
+- **ActiveCast 补播**：`RemoteEntityRegistry.ActiveCastApplied` 同时覆盖 `CombatStateUpdate`
+  与 AOI 基线，`RemoteCastPresenter.OnActiveCast` 按 `EndTick − ClientNetworkManager.ServerTick`
+  换算剩余时长播放远程玩家攻击，`CastId` 与 `CastBroadcast` 共用去重/取消通道。Proxy 档
+  没有 Animator 时不占去重槽，升 Full 后由 `SetTier` 用保存的 `ActiveCast` 补播一次；
+  已取消的 `CastId` 直接跳过，投影为 `null` 时不补播已结束的施法。服务端基线补发的在途剑气
+  仍走同一条 `ProjectileLaunchBroadcast` 路径，按原始 `ServerTimestamp` 补飞行进度。
 - **与攻击起手的分工**：Plan 02 保留 `CastBroadcast` → `NpcAttackSchedule` 作为 NPC 攻击起手；
   `NpcActionEvent` 只负责阶段/取消（技能动作仅跟踪实例，`Cancelled` 时停止），避免同一次施法
   挥两次。NpcAction 直接驱动攻击变体/时间轴留 Plan 04/05。

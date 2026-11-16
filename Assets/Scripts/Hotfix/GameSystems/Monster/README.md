@@ -26,6 +26,11 @@
 客户端只通过 `SyncLayer` 的 NPC 视图消费快照做位置 / 动画表现，不做本地绕障或导航；联网模式下
 不得重新启用场景内 `MonsterSpawner` 或客户端 `AIBrain`。
 
+动作表现消费服务端 `NpcActionEvent`（2004，`LifeId` 参与合并键）与 AOI 进入基线的
+`EntityFieldMask.NpcAction`：阶段/取消由 `RemoteEntityRegistry` 按 `(EntityId, LifeId,
+InstanceId, Revision)` 合并；攻击起手仍由 `CastBroadcast` → `NpcAttackSchedule` 驱动。
+事件只影响表现，本目录的本地 AI 不参与联网动作存储。
+
 ## 护栏
 
 - NPC 视图上不得挂 `IDamageable`（`NpcViewGameplayStripTests` 锁死）；本地技能不能命中断线上的 NPC 视图。

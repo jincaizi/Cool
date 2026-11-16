@@ -1330,7 +1330,7 @@ git commit -m "docs: record part a cancel and npc action wiring"
 - 修改：`Assets/Scripts/AOT/Protocol/MessageCodec.cs`
 - 测试：`Server/Server.Tests/Protocol/CombatProjectionMessagesTests.cs`（新建）
 
-- [ ] **步骤 1：编写失败的协议测试**
+- [x] **步骤 1：编写失败的协议测试**
 
 创建 `Server/Server.Tests/Protocol/CombatProjectionMessagesTests.cs`：
 
@@ -1413,13 +1413,13 @@ public class CombatProjectionMessagesTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionMessagesTests"`
 
 预期：编译失败，`CombatStateUpdate` 等类型不存在。
 
-- [ ] **步骤 3：实现投影类型与快照字段**
+- [x] **步骤 3：实现投影类型与快照字段**
 
 创建 `Assets/Scripts/AOT/Protocol/Messages/CombatProjection.cs`：
 
@@ -1514,7 +1514,7 @@ namespace Cool.Protocol
             RegisterMessageType(MessageId.CombatStateUpdate, typeof(CombatStateUpdate));
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionMessagesTests"
@@ -1523,7 +1523,7 @@ bash tools/unity-tests.sh EditMode ProtocolShapeGuardTests
 
 预期：协议测试 2/2 PASS；形状守卫 PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol/Messages/CombatProjection.cs Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs Assets/Scripts/AOT/Protocol/MessageCodec.cs Server/Server.Tests/Protocol/CombatProjectionMessagesTests.cs
@@ -1542,7 +1542,7 @@ git commit -m "feat(protocol): add combat projection envelope"
 - 测试：`Server/Server.Tests/Aoi/AoiBroadcasterTests.cs`
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/RemoteEntityRegistryTests.cs`
 
-- [ ] **步骤 1：编写失败的调度器测试**
+- [x] **步骤 1：编写失败的调度器测试**
 
 在 `AoiBandSchedulerTests` 追加：
 
@@ -1579,13 +1579,13 @@ git commit -m "feat(protocol): add combat projection envelope"
     }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~AoiBandSchedulerTests"`
 
 预期：编译失败，`AoiSendReason` 不存在。
 
-- [ ] **步骤 3：实现发送原因与条件字段**
+- [x] **步骤 3：实现发送原因与条件字段**
 
 在 `AoiBandScheduler.cs` 顶部增加：
 
@@ -1690,7 +1690,7 @@ private static bool Send(AoiBandScheduler s, long observerId, long entityId,
 
 `view.Targetable.SetVitals(view.Hp, view.MaxHp, view.Dead)` 与 `view.Animator?.ApplySnapshotState(view.Dead)` 改用存值。
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~AoiBandSchedulerTests"
@@ -1700,7 +1700,7 @@ bash tools/unity-tests.sh EditMode RemoteEntityRegistryTests
 
 预期：全部 PASS。`AoiBroadcasterTests` 中旧的“全掩码”断言按新的基线/条件字段更新。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Aoi/AoiBandScheduler.cs Server/Aoi/AoiBroadcaster.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityRegistry.cs Server/Server.Tests/Aoi/AoiBandSchedulerTests.cs Server/Server.Tests/Aoi/AoiBroadcasterTests.cs Assets/Scripts/Tests/Editor/SyncLayer/RemoteEntityRegistryTests.cs
@@ -1720,7 +1720,7 @@ git commit -m "feat(aoi): send reasons and conditional combat fields"
 - 修改：`Server/Server3C.cs`
 - 测试：`Server/Server.Tests/Aoi/CombatProjectionBuilderTests.cs`（新建）
 
-- [ ] **步骤 1：编写失败的投影构建测试**
+- [x] **步骤 1：编写失败的投影构建测试**
 
 创建 `Server/Server.Tests/Aoi/CombatProjectionBuilderTests.cs`：
 
@@ -1762,13 +1762,13 @@ public class CombatProjectionBuilderTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionBuilderTests"`
 
 预期：编译失败，`CombatProjectionBuilder`、`PlayerState.CombatVersion` 不存在。
 
-- [ ] **步骤 3：实现投影构建、活动施法与发送**
+- [x] **步骤 3：实现投影构建、活动施法与发送**
 
 在 `PlayerState` 增加：
 
@@ -1982,7 +1982,7 @@ namespace KcpServer
                     SendCombatStateUpdates();
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionBuilderTests"
@@ -1991,7 +1991,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~AoiBroadcasterT
 
 预期：全部 PASS；基线快照的 `FieldMask.Combat` 与 `Combat` 非空。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Aoi/CombatProjectionBuilder.cs Server/Player/PlayerState.cs Server/Handler/EquipHandler.cs Server/Handler/CastHandler.cs Server/Aoi/AoiBroadcaster.cs Server/Server3C.cs Server/Server.Tests/Aoi/CombatProjectionBuilderTests.cs Server/Server.Tests/Aoi/AoiBroadcasterTests.cs
@@ -2010,7 +2010,7 @@ git commit -m "feat(server): send combat projection baselines and updates"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs`
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/CombatStateProjectionTests.cs`（新建）
 
-- [ ] **步骤 1：编写失败的客户端投影测试**
+- [x] **步骤 1：编写失败的客户端投影测试**
 
 创建 `Assets/Scripts/Tests/Editor/SyncLayer/CombatStateProjectionTests.cs`：
 
@@ -2180,13 +2180,13 @@ namespace GameSys.EditorTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/unity-tests.sh EditMode CombatStateProjectionTests`
 
 预期：编译失败，`ApplyCombatStateUpdate`、`Equipment` 不存在。
 
-- [ ] **步骤 3：实现客户端投影合并**
+- [x] **步骤 3：实现客户端投影合并**
 
 在 `RemoteEntityView` 增加（`LifeId` 已在任务 4 加入，不重复）：
 
@@ -2348,7 +2348,7 @@ namespace GameSys.EditorTests
                 serverTickProvider: () => _manager?.ServerTick ?? 0);
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 ```bash
 bash tools/unity-tests.sh EditMode CombatStateProjectionTests
@@ -2357,7 +2357,7 @@ bash tools/unity-tests.sh EditMode RemoteEntityRegistryTests
 
 预期：全部 PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityRegistry.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs Assets/Scripts/Tests/Editor/SyncLayer/CombatStateProjectionTests.cs
@@ -2375,7 +2375,7 @@ git commit -m "feat(client): merge combat projection by version"
 - 修改：`Server/Server.Tests/Aoi/BandwidthBudgetTests.cs`
 - 测试：`Server/Server.Tests/Handler/CastResendTests.cs`（新建）
 
-- [ ] **步骤 1：编写失败的补发测试**
+- [x] **步骤 1：编写失败的补发测试**
 
 创建 `Server/Server.Tests/Handler/CastResendTests.cs`：
 
@@ -2440,13 +2440,13 @@ public class CastResendTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CastResendTests"`
 
 预期：编译失败，`ActiveLaunchesForTest` 不存在。
 
-- [ ] **步骤 3：实现在途剑气补发与带宽测试**
+- [x] **步骤 3：实现在途剑气补发与带宽测试**
 
 在 `CombatResolver` 增加：
 
@@ -2595,7 +2595,7 @@ public class CastResendTests
     }
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CastResendTests"
@@ -2604,7 +2604,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~BandwidthBudget
 
 预期：补发测试 PASS；带宽测试 PASS。另补：`AoiBroadcaster.OnBaselineEntity` 首帧触发/Keepalive 与 Changed 不触发/重见再触发；`ResendActiveProjectiles` 同/异 ZoneId 收件人；128 条上界收敛；带宽 fixture 用非零 Rotation/Speed/Dead/Defending，并在投影基线中填 `ActiveCast` 后重新确认预算。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Handler/CastHandler.cs Server/Aoi/AoiBroadcaster.cs Server/Server3C.cs Server/Server.Tests/Handler/CastResendTests.cs Server/Server.Tests/Aoi/BandwidthBudgetTests.cs
@@ -2615,7 +2615,7 @@ git commit -m "feat(server): resend active projectiles and gate bandwidth"
 
 ## 任务 10：Part B 回归、README 与提交
 
-- [ ] **步骤 1：跑 Part B 全部相关测试**
+- [x] **步骤 1：跑 Part B 全部相关测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionMessagesTests"
@@ -2631,7 +2631,7 @@ bash tools/unity-tests.sh EditMode ProtocolShapeGuardTests
 
 预期：全部 PASS。若有失败，先修失败用例，不得跳过。
 
-- [ ] **步骤 2：更新 README 与路线图**
+- [x] **步骤 2：更新 README 与路线图**
 
 - `Server/README.md`：Plan 01–02 已完成；列出 Plan 02 已启用项（取消、NpcAction、投影、AOI 基线/带宽）与 Plan 03–05 未启用项。
 - `Assets/Scripts/AOT/Protocol/README.md`：补 310/311、`CancelCastRequest.CastId`、`CombatProjection`、`EntityFieldMask.Combat`、`EntitySnapshot.CombatVersion/LifeId`。
@@ -2639,7 +2639,7 @@ bash tools/unity-tests.sh EditMode ProtocolShapeGuardTests
 - `Assets/Scripts/Hotfix/GameSystems/Monster/README.md`：补 `NpcActionEvent` 全链与 AOI 基线。
 - `docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md`：Plan 02 状态改为 ✅，链接本计划；明确 03–05 未开始。
 
-- [ ] **步骤 3：Commit**
+- [x] **步骤 3：Commit**
 
 ```bash
 git add Server/README.md Assets/Scripts/AOT/Protocol/README.md Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md Assets/Scripts/Hotfix/GameSystems/Monster/README.md docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md

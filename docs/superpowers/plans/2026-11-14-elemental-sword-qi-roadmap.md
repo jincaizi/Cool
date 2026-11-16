@@ -18,7 +18,7 @@
 | # | 计划 | 状态 | 说明 |
 |---|---|---|---|
 | 01 | 共享表、权威换装、普攻参数与剑气快照 | ✅ 已完成 | 50/50 步骤；服务端 512/512、Unity EditMode/PlayMode 相关测试全部通过；模块 README 已回写 |
-| 02 | B1 取消 + NpcAction 全链 + B2 战斗投影/带宽 | 🟡 Part A 完成 | Part A 取消/NpcAction 已实现并回归；Part B 战斗投影/带宽未开始 |
+| 02 | [B1 取消 + NpcAction 全链 + B2 战斗投影/带宽](2026-11-17-elemental-sword-qi-02-cancel-projection.md) | ✅ 已完成 | Part A/B 全部完成并回归：取消/NpcAction、战斗投影、AOI 基线/条件字段、在途剑气补发与 100 KB/s 门禁；模块 README 已回写 |
 | 03 | B5 位移/跳跃预算 + PvP 控制 | ❌ 未开始 | 依赖 02；尚无实现计划与代码 |
 | 04 | 状态结算 + DoT + 表现 | ❌ 未开始 | 元素状态/DoT/元素 VFX 未实现；本地持剑模型已由换装跟进补齐 |
 | 05 | 三客户端验收 + 表现收口 | ❌ 未开始 | 依赖 01–04 |
@@ -28,8 +28,8 @@
 详见 [换剑与持剑适配设计](../specs/2026-11-16-weapon-bag-sword-fit-design.md) 与
 [实现计划](2026-11-16-weapon-bag-sword-fit.md)。
 
-Plan 01 的完成只覆盖共享表、权威换装、普攻参数、`CastId` 与发射/停点；设计规格中的
-取消、战斗投影、位移/PvP、状态/DoT、元素 VFX 与三客户端验收仍属于 Plan 02–05。
+Plan 02 补齐取消、NpcAction 与战斗投影/带宽；设计规格中的位移/PvP、状态/DoT、元素 VFX
+与三客户端验收仍属于 Plan 03–05。
 
 ## 执行顺序与并行度
 
