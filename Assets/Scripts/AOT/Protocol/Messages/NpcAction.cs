@@ -49,6 +49,9 @@ namespace Cool.Protocol
         [ProtoMember(1)] public long EntityId { get; set; }
         [ProtoMember(2)] public NpcActionSnapshot Action { get; set; } = new NpcActionSnapshot();
         [ProtoMember(3)] public long ServerTimestamp { get; set; }
+
+        /// <summary>怪物生命代次（与 EntityId/InstanceId/Revision 一起作为客户端合并键）</summary>
+        [ProtoMember(4)] public uint LifeId { get; set; }
     }
 
     [ProtoContract]

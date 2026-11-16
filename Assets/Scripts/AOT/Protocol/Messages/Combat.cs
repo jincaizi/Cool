@@ -58,6 +58,9 @@ namespace Cool.Protocol
     public class CancelCastRequest : IMessage
     {
         [ProtoMember(1)] public int SkillId { get; set; }
+
+        /// <summary>可选：只取消该 CastId；0 = 取消该技能最新实例（旧客户端）。</summary>
+        [ProtoMember(2)] public ulong CastId { get; set; }
     }
 
     /// <summary>施法广播（服务器 → caster 及视野内观察者；远程表现驱动，P4 表现占位）</summary>
@@ -158,6 +161,18 @@ namespace Cool.Protocol
         [ProtoMember(6)] public ProjectileStopReason Reason { get; set; }
         [ProtoMember(7)] public float StopX { get; set; }
         [ProtoMember(8)] public float StopZ { get; set; }
+    }
+
+    /// <summary>取消尚未提交的前摇/持续施法。已发射的独立投射物继续飞行。</summary>
+    [ProtoContract]
+    public class CastCancelBroadcast : IMessage
+    {
+        [ProtoMember(1)] public ulong CastId { get; set; }
+        [ProtoMember(2)] public uint CasterLifeId { get; set; }
+        [ProtoMember(3)] public uint EffectiveTick { get; set; }
+        [ProtoMember(4)] public NpcActionCancelReason Reason { get; set; }
+        /// <summary>施法者 id（服务端收件人路由与客户端动作存储使用；只加不删 tag 5）</summary>
+        [ProtoMember(5)] public long CasterPlayerId { get; set; }
     }
 
     /// <summary>单次命中结果（D4：战斗骰只有服务器掷——伤害值随消息下发，客户端不重算）。内嵌类型非线上消息，实现标记接口仅为协议层惯例</summary>

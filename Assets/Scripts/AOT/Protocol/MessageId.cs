@@ -63,6 +63,9 @@ namespace Cool.Protocol
         /// <summary>剑气提前终止（服务器 → 已收到发射描述的会话）</summary>
         ProjectileStopBroadcast = 309,
 
+        /// <summary>取消未提交施法（服务器 → 施法者与观察者；Plan 02）</summary>
+        CastCancelBroadcast = 310,
+
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,
         BroadcastMessage = 201,

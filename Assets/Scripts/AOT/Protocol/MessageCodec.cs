@@ -216,6 +216,7 @@ namespace Cool.Protocol
             RegisterMessageType(MessageId.CastConfirm, typeof(CastConfirm));
             RegisterMessageType(MessageId.ProjectileLaunchBroadcast, typeof(ProjectileLaunchBroadcast));
             RegisterMessageType(MessageId.ProjectileStopBroadcast, typeof(ProjectileStopBroadcast));
+            RegisterMessageType(MessageId.CastCancelBroadcast, typeof(CastCancelBroadcast));
             RegisterMessageType(MessageId.ChatMessage, typeof(ChatMessage));
             RegisterMessageType(MessageId.BroadcastMessage, typeof(BroadcastMessage));
             RegisterMessageType(MessageId.RemotePlayerSync, typeof(RemotePlayerSync));
