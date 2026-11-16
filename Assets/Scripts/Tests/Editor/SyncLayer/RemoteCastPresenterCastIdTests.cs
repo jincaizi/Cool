@@ -169,5 +169,35 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             presenter.OnProjectileLaunch(Launch(600, casterId: 2L));
             Assert.AreEqual(1, calls, "本人剑气也由权威发射描述生成（本地执行器不再生成视觉）");
         }
+
+        [Test]
+        public void Cancel_Before_Launch_Skips_Later_Visual()
+        {
+            int calls = 0;
+            var presenter = new RemoteCastPresenter(null, localPlayerId: 1L, LoadCatalog(),
+                launchProjectileFactory: (_, __, ___, ____) => { calls++; return new FakeVisual(); },
+                sceneIdProvider: () => "room-a");
+
+            presenter.OnCastCancel(new CastCancelBroadcast { CastId = 500 });
+            presenter.OnProjectileLaunch(Launch(500));
+
+            Assert.AreEqual(0, calls, "cancel arrived first must suppress the later launch");
+        }
+
+        [Test]
+        public void Cancel_After_Launch_Keeps_Projectile_Flying()
+        {
+            var visual = new FakeVisual();
+            var presenter = new RemoteCastPresenter(null, localPlayerId: 1L, LoadCatalog(),
+                launchProjectileFactory: (_, __, ___, ____) => visual,
+                sceneIdProvider: () => "room-a");
+
+            presenter.OnProjectileLaunch(Launch(501));
+            presenter.OnCastCancel(new CastCancelBroadcast { CastId = 501 });
+
+            Assert.AreEqual(1, presenter.CastVisualCountForTest,
+                "an already launched projectile keeps flying after cancel");
+            Assert.AreEqual(0, visual.Stops);
+        }
     }
 }

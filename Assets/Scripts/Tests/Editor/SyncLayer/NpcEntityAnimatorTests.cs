@@ -156,5 +156,25 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 UnityEditor.AssetDatabase.DeleteAsset(path);
             }
         }
+
+        [Test]
+        public void ApplyAction_Cancel_Clears_The_Matching_Instance()
+        {
+            _driver.ApplyAction(new NpcActionSnapshot
+            {
+                InstanceId = 3, Revision = 1, Kind = NpcActionKind.Skill,
+                Phase = NpcActionPhase.Windup, PresentationVariant = 0
+            });
+            Assert.AreEqual(NpcEntityAnimator.StateAttacking,
+                _animator.GetInteger("MonsterState"));
+
+            _driver.ApplyAction(new NpcActionSnapshot
+            {
+                InstanceId = 3, Revision = 2, Kind = NpcActionKind.Skill,
+                Phase = NpcActionPhase.Cancelled
+            });
+            Assert.AreEqual(NpcEntityAnimator.StateIdle,
+                _animator.GetInteger("MonsterState"));
+        }
     }
 }

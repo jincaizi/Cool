@@ -37,6 +37,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// `ApplyState` 里的 Hit/Death 分支是唯一兜底。别让它悄悄失效。</summary>
         private bool _awaitingConfirm;
 
+        /// <summary>当前动作实例（NpcAction 取消只允许取消同一实例）</summary>
+        private ulong _actionInstanceId;
+
         private void Awake()
         {
             ResolveAnimator();
@@ -123,6 +126,39 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_animator == null) return;
             _animator.SetInteger(AttackVariantParam, variant);
             _animator.SetTrigger(AttackTrigger);
+        }
+
+        /// <summary>
+        /// 应用服务端 NpcAction 状态（阶段广播 / AOI 基线）。技能动作在起手阶段播放挥砍，
+        /// 取消阶段停止当前动作实例；受击/死亡走既有状态写入。
+        /// </summary>
+        public void ApplyAction(NpcActionSnapshot action)
+        {
+            _actionInstanceId = action.InstanceId;
+            switch (action.Kind)
+            {
+                case NpcActionKind.Skill:
+                    if (action.Phase is NpcActionPhase.Accepted or NpcActionPhase.Windup)
+                        PlayAttack(action.PresentationVariant);
+                    else if (action.Phase == NpcActionPhase.Cancelled)
+                        CancelAttack(action.InstanceId);
+                    break;
+                case NpcActionKind.HitReaction:
+                    ApplyState((byte)NpcAnimationState.Hit, false);
+                    break;
+                case NpcActionKind.Death:
+                    ApplyState((byte)NpcAnimationState.Death, true);
+                    break;
+            }
+        }
+
+        /// <summary>取消指定动作实例的挥砍表现（只匹配当前实例；不认识的实例静默忽略）。</summary>
+        public void CancelAttack(ulong instanceId)
+        {
+            if (_actionInstanceId != instanceId) return;
+            _busy = false;
+            _awaitingConfirm = false;
+            Write(StateIdle);
         }
 
         private void Write(int state)

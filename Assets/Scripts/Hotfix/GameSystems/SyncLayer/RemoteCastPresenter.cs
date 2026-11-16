@@ -98,6 +98,10 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly List<Tracked> _tracked = new List<Tracked>();
         private readonly Dictionary<ulong, TrackedCast> _castVisuals = new Dictionary<ulong, TrackedCast>();
         private readonly Dictionary<ulong, int> _castSkillIds = new Dictionary<ulong, int>();
+        /// <summary>CastId → 施法者实体 id（取消时找到攻击表现所属的玩家视图）</summary>
+        private readonly Dictionary<ulong, long> _castCasters = new Dictionary<ulong, long>();
+        /// <summary>已取消的 CastId（有界）——晚到的发射/挥砍表现据此跳过；已发射的视觉继续飞行</summary>
+        private readonly HashSet<ulong> _cancelledCasts = new HashSet<ulong>();
         private readonly Dictionary<ulong, ProjectileStopBroadcast> _pendingStops =
             new Dictionary<ulong, ProjectileStopBroadcast>();
         private readonly HashSet<ulong> _seenLaunches = new HashSet<ulong>();
@@ -136,9 +140,10 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>收到远程玩家的施法广播（CombatNetworkBridge.Update 主线程调用）。</summary>
         public void OnCastBroadcast(CastBroadcast broadcast)
         {
-            // 记录 CastId → SkillId，供晚到/独立的 ProjectileLaunchBroadcast 查表现。
+            // 记录 CastId → SkillId/施法者，供晚到/独立的 ProjectileLaunchBroadcast 查表现，
+            // 以及 CastCancelBroadcast 找到对应的攻击表现。
             if (broadcast.CastId != 0)
-                RememberCastSkill(broadcast.CastId, broadcast.SkillId);
+                RememberCastSkill(broadcast.CastId, broadcast.SkillId, broadcast.CasterPlayerId);
 
             if (_registry == null || _catalog == null) return;
             if (broadcast.CasterPlayerId == _localPlayerId) return;
@@ -147,10 +152,12 @@ namespace Hotfix.GameSystems.SyncLayer
             if (view == null || view.Kind != (byte)EntityKind.Player) return;
             if (!_catalog.TryGet(broadcast.SkillId, out var data)) return;
 
-            // 立即播放：伤害结果可能先于下一帧到达，等它再播会让挥砍落后于受击
-            view.Animator?.PlayAttack(data.AnimatorTrigger,
-                (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length ?? DefaultAttackDuration,
-                broadcast.AttackSpeedMultiplier);
+            // 立即播放：伤害结果可能先于下一帧到达，等它再播会让挥砍落后于受击。
+            // 取消先到的施法不再补播挥砍（剑气已在空中则继续飞）。
+            if (!_cancelledCasts.Contains(broadcast.CastId))
+                view.Animator?.PlayAttack(data.AnimatorTrigger,
+                    (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length ?? DefaultAttackDuration,
+                    broadcast.AttackSpeedMultiplier, broadcast.CastId);
 
             var presentation = GetPresentation(data);
             if (presentation?.CastVFX != null)
@@ -192,6 +199,7 @@ namespace Hotfix.GameSystems.SyncLayer
         public void OnProjectileLaunch(ProjectileLaunchBroadcast launch)
         {
             if (launch == null) return;
+            if (_cancelledCasts.Contains(launch.CastId)) return;
             if (_sceneIdProvider != null && _sceneIdProvider() != launch.CombatSceneId) return;
             if (_castVisuals.ContainsKey(launch.CastId) || !_seenLaunches.Add(launch.CastId)) return;
             PruneSeenLaunches();
@@ -244,6 +252,22 @@ namespace Hotfix.GameSystems.SyncLayer
                 _pendingStops.Clear();
         }
 
+        /// <summary>
+        /// 权威取消（前摇/持续施法被打断）：只停止施法者的攻击表现，已发射的剑气视觉
+        /// (<see cref="_castVisuals"/>) 继续飞行。CastId 记入有界取消集，供晚到的
+        /// CastBroadcast/ProjectileLaunchBroadcast 跳过补播。
+        /// </summary>
+        public void OnCastCancel(CastCancelBroadcast cancel)
+        {
+            if (cancel == null || cancel.CastId == 0) return;
+            _cancelledCasts.Add(cancel.CastId);
+            if (_cancelledCasts.Count > 256) _cancelledCasts.Clear();
+            if (_castCasters.TryGetValue(cancel.CastId, out var casterId)
+                && _registry?.GetView(casterId) is { } view)
+                view.Animator?.CancelAttack(cancel.CastId);
+            // 已发射的 _castVisuals 保留飞行；取消只停止攻击表现。
+        }
+
         private float ComputeStartDistance(ProjectileLaunchBroadcast launch)
         {
             if (_serverNowTicksProvider == null || launch.ServerTimestamp == 0 || launch.Speed <= 0f)
@@ -255,10 +279,15 @@ namespace Hotfix.GameSystems.SyncLayer
             return Mathf.Clamp(elapsed * launch.Speed, 0f, launch.Range);
         }
 
-        private void RememberCastSkill(ulong castId, int skillId)
+        private void RememberCastSkill(ulong castId, int skillId, long casterId)
         {
-            if (_castSkillIds.Count > 256) _castSkillIds.Clear();
             _castSkillIds[castId] = skillId;
+            _castCasters[castId] = casterId;
+            if (_castSkillIds.Count > 256)
+            {
+                _castSkillIds.Clear();
+                _castCasters.Clear();
+            }
         }
 
         private void PruneSeenLaunches()
@@ -349,6 +378,8 @@ namespace Hotfix.GameSystems.SyncLayer
             _tracked.Clear();
             _castVisuals.Clear();
             _castSkillIds.Clear();
+            _castCasters.Clear();
+            _cancelledCasts.Clear();
             _pendingStops.Clear();
             _seenLaunches.Clear();
             _seenStops.Clear();

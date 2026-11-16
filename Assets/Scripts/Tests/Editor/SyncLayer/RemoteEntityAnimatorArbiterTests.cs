@@ -211,5 +211,19 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         {
             Assert.IsFalse(_animator.applyRootMotion);
         }
+
+        [Test]
+        public void test_cancel_attack_clears_only_the_matching_cast()
+        {
+            _driver.PlayAttack("Attack", 1f, 1f, castId: 7);
+            Assert.Greater(_driver.AttackRemainingForTest, 0f);
+
+            _driver.CancelAttack(8);
+            Assert.Greater(_driver.AttackRemainingForTest, 0f,
+                "a different cast must not cancel the current attack");
+
+            _driver.CancelAttack(7);
+            Assert.AreEqual(0f, _driver.AttackRemainingForTest);
+        }
     }
 }

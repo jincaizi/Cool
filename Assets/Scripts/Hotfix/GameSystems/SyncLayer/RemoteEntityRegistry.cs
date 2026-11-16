@@ -56,6 +56,19 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly List<NpcAttackSchedule.DueAttack> _dueAttacks = new List<NpcAttackSchedule.DueAttack>();
         private bool _warnedMissingAvatar;
 
+        /// <summary>视图未建时先到的 NpcAction 事件（有界缓存，视图创建后按实体回放）</summary>
+        private sealed class PendingAction
+        {
+            public long EntityId;
+            public uint LifeId;
+            public NpcActionSnapshot Action = new NpcActionSnapshot();
+        }
+
+        /// <summary>已消费的 NpcAction，按 (EntityId, LifeId, InstanceId) 归档（有界）</summary>
+        private readonly Dictionary<(long EntityId, uint LifeId, ulong InstanceId), NpcActionSnapshot>
+            _npcActions = new Dictionary<(long, uint, ulong), NpcActionSnapshot>();
+        private readonly List<PendingAction> _pendingNpcActions = new List<PendingAction>();
+
         /// <summary>落地采样游标（每实体一份）：上次采样的 XZ + 结果，见 <see cref="GroundY"/></summary>
         private readonly Dictionary<long, GroundSample> _groundSamples = new Dictionary<long, GroundSample>();
         /// <summary>采过的那具地形碰撞体（来自物理查询本身——本类是普通类，不许 GetComponent）</summary>
@@ -176,6 +189,18 @@ namespace Hotfix.GameSystems.SyncLayer
             if (view.Tier == RemoteTier.Full)
                 view.Animator?.SetDefending(view.IsDefending);
 
+            if (snapshot.LifeId != 0) view.LifeId = snapshot.LifeId;
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.NpcAction) != 0
+                && snapshot.NpcAction != null)
+                ApplyNpcAction(snapshot.PlayerId, view, snapshot.LifeId, snapshot.NpcAction);
+            for (int i = _pendingNpcActions.Count - 1; i >= 0; i--)
+            {
+                var pending = _pendingNpcActions[i];
+                if (pending.EntityId != snapshot.PlayerId) continue;
+                _pendingNpcActions.RemoveAt(i);
+                ApplyNpcAction(pending.EntityId, view, pending.LifeId, pending.Action);
+            }
+
             if (created) ViewCreated?.Invoke(snapshot.PlayerId);
 
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Position) != 0)
@@ -191,6 +216,48 @@ namespace Hotfix.GameSystems.SyncLayer
                     snapshot.ActionState, snapshot.Dead);
                 _lastSampleTicks[snapshot.PlayerId] = serverTicks; // 只在真收到样本时刷新
             }
+        }
+
+        /// <summary>
+        /// NpcAction 事件（服务端阶段广播）——视图已建则按 (EntityId, LifeId, InstanceId, Revision)
+        /// 合并后应用；视图未建则先进有界缓存，等快照建视图时回放。
+        /// </summary>
+        public void ApplyNpcActionEvent(NpcActionEvent evt)
+        {
+            if (evt?.Action == null) return;
+            if (!_views.TryGetValue(evt.EntityId, out var view))
+            {
+                CacheNpcAction(evt);
+                return;
+            }
+            if (view.LifeId != 0 && evt.LifeId != 0 && view.LifeId != evt.LifeId) return;
+            ApplyNpcAction(evt.EntityId, view, evt.LifeId, evt.Action);
+        }
+
+        private void CacheNpcAction(NpcActionEvent evt)
+        {
+            if (_pendingNpcActions.Count >= 64) _pendingNpcActions.RemoveAt(0);
+            _pendingNpcActions.Add(new PendingAction
+            {
+                EntityId = evt.EntityId,
+                LifeId = evt.LifeId,
+                Action = evt.Action.Clone()
+            });
+        }
+
+        private void ApplyNpcAction(long entityId, RemoteEntityView view, uint lifeId,
+            NpcActionSnapshot action)
+        {
+            if (view.ActionInstanceId == action.InstanceId && action.Revision <= view.ActionRevision)
+                return;
+            view.ActionInstanceId = action.InstanceId;
+            view.ActionRevision = action.Revision;
+            if (lifeId != 0) view.LifeId = lifeId;
+            _npcActions[(entityId, lifeId, action.InstanceId)] = action.Clone();
+            if (_npcActions.Count > 256) _npcActions.Clear();
+            view.NpcAnimator?.ApplyAction(action);
+            if (action.Phase == NpcActionPhase.Cancelled)
+                view.NpcAnimator?.CancelAttack(action.InstanceId);
         }
 
         /// <summary>
@@ -752,6 +819,12 @@ namespace Hotfix.GameSystems.SyncLayer
         public int TemplateId { get; }
         /// <summary>动作/战斗状态（Npc=NpcAnimationState；玩家恒 0）</summary>
         public byte ActionState { get; set; }
+        /// <summary>最近应用的 NpcAction 实例（与 Revision 一起做同实例去重）</summary>
+        public ulong ActionInstanceId { get; set; }
+        /// <summary>最近应用的 NpcAction 版本（仅同一实例内比较）</summary>
+        public uint ActionRevision { get; set; }
+        /// <summary>实体生命代次（NpcAction 合并键；0 = 未知/旧服务端）</summary>
+        public uint LifeId { get; set; }
         /// <summary>服务端权威存活状态（D-N1：命名 Dead——protobuf 零默认让"活着"不占字节）</summary>
         public bool Dead { get; set; }
         /// <summary>服务端权威当前血量（最近一次带 Health 位的快照）</summary>

@@ -90,6 +90,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private DeathPhase _deathPhase;
         private string? _attackTrigger;
         private bool _attackTriggerApplied;
+        /// <summary>当前攻击对应的权威 CastId（0 = 无权威施法身份/旧服务端）</summary>
+        private ulong _attackCastId;
         /// <summary>本次受击事件是否已点过 Trigger `Hit`（重复 RefreshLayers 不得重复点）</summary>
         private bool _hitTriggerApplied;
         /// <summary>进入 Death / GetUp 后还没读到真实剪辑长度（下一帧 Tick 里校准）</summary>
@@ -243,9 +245,11 @@ namespace Hotfix.GameSystems.SyncLayer
         internal void PlayAttack(string trigger, float duration)
             => PlayAttack(trigger, duration, 1f);
 
-        /// <summary>带权威攻速的挥砍：动画窗口与计时都按倍率缩放（0.25–4）。</summary>
-        internal void PlayAttack(string trigger, float duration, float attackSpeed)
+        /// <summary>带权威攻速的挥砍：动画窗口与计时都按倍率缩放（0.25–4）。
+        /// castId 非 0 时该攻击可被对应 CastId 的取消消息提前结束。</summary>
+        internal void PlayAttack(string trigger, float duration, float attackSpeed, ulong castId = 0)
         {
+            _attackCastId = castId;
             if (_dead || _deathPhase == DeathPhase.Down) return;
             if (_deathPhase == DeathPhase.GettingUp) _deathPhase = DeathPhase.None;
 
@@ -254,6 +258,15 @@ namespace Hotfix.GameSystems.SyncLayer
             _attackTrigger = trigger;
             _attackTriggerApplied = false;
             RefreshLayers();
+        }
+
+        /// <summary>取消指定 CastId 的攻击表现（只匹配当前攻击；0 = 无身份，不匹配任何取消）。</summary>
+        internal void CancelAttack(ulong castId)
+        {
+            if (castId != 0 && _attackCastId != castId) return;
+            _attackCastId = 0;
+            _attackRemaining = 0f;
+            Reapply();
         }
 
         internal float AttackSpeedForTest => _attackSpeed;

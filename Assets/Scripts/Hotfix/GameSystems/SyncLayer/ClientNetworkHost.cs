@@ -805,6 +805,8 @@ namespace Hotfix.GameSystems.SyncLayer
             _combatBridge.OnDamageResult += HandleRemoteDamageResult;
             _combatBridge.OnProjectileLaunch += _remoteCastPresenter.OnProjectileLaunch;
             _combatBridge.OnProjectileStop += _remoteCastPresenter.OnProjectileStop;
+            _combatBridge.OnCastCancel += HandleCastCancel;
+            _combatBridge.OnNpcAction += HandleNpcAction;
             _remoteEntities!.ViewRemoved += _remoteCastPresenter.ClearForEntity;
 
             // 启用属性剑气后关闭本地剑气生成：视觉统一由服务端发射描述创建。
@@ -980,6 +982,14 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleRemoteDamageResult(DamageResult result)
             => _remoteCastPresenter?.OnDamageResult(result);
 
+        /// <summary>服务端取消前摇/持续施法 → 停止施法者攻击表现（已发射剑气继续飞）</summary>
+        private void HandleCastCancel(CastCancelBroadcast cancel)
+            => _remoteCastPresenter?.OnCastCancel(cancel);
+
+        /// <summary>Npc 动作阶段广播 → registry 的动作存储（视图未建先缓存，建好后回放）</summary>
+        private void HandleNpcAction(NpcActionEvent evt)
+            => _remoteEntities?.ApplyNpcActionEvent(evt);
+
         /// <summary>
         /// 摘除目标锁定（断线 / 本地角色重建 / 宿主销毁共用）：先退订 AOI 视图移除，
         /// 再让 selector 清锁解绑并断开引用——组件本身留在本地角色上（可复用），
@@ -1023,6 +1033,8 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_combatBridge != null)
             {
                 _combatBridge.OnDamageResult -= HandleRemoteDamageResult;
+                _combatBridge.OnCastCancel -= HandleCastCancel;
+                _combatBridge.OnNpcAction -= HandleNpcAction;
                 if (_remoteCastPresenter != null)
                 {
                     _combatBridge.OnProjectileLaunch -= _remoteCastPresenter.OnProjectileLaunch;

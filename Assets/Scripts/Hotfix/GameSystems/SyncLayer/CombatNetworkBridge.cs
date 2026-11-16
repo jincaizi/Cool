@@ -63,6 +63,12 @@ namespace Hotfix.GameSystems.SyncLayer
         public event Action<ProjectileLaunchBroadcast>? OnProjectileLaunch;
         public event Action<ProjectileStopBroadcast>? OnProjectileStop;
 
+        /// <summary>前摇/持续施法被服务端取消（已发射的投射物继续飞行）</summary>
+        public event Action<CastCancelBroadcast>? OnCastCancel;
+
+        /// <summary>Npc 动作阶段广播（客户端动作存储 + 取消表现）</summary>
+        public event Action<NpcActionEvent>? OnNpcAction;
+
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
             RemoteEntityRegistry registry,
             Action<long, float, bool, Vector3, float, bool, bool>? onDamageToLocalPlayer = null,
@@ -136,6 +142,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 case MessageId.CastConfirm:
                 case MessageId.ProjectileLaunchBroadcast:
                 case MessageId.ProjectileStopBroadcast:
+                case MessageId.CastCancelBroadcast:
+                case MessageId.NpcActionEvent:
                     _incoming.Enqueue(message);
                     break;
             }
@@ -168,6 +176,12 @@ namespace Hotfix.GameSystems.SyncLayer
                         break;
                     case ProjectileStopBroadcast stop:
                         OnProjectileStop?.Invoke(stop);
+                        break;
+                    case CastCancelBroadcast cancel:
+                        OnCastCancel?.Invoke(cancel);
+                        break;
+                    case NpcActionEvent npcAction:
+                        OnNpcAction?.Invoke(npcAction);
                         break;
                 }
             }
