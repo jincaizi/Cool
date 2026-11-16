@@ -259,9 +259,12 @@ namespace Hotfix.GameSystems.SyncLayer
                 return;
             if (view.ActionInstanceId == action.InstanceId && action.Revision <= view.ActionRevision)
                 return;
-            // 新实例取代旧实例（命中打断后服务端直接覆盖 _current、客户端看不到 Cancelled）：
-            // 旧排程/挥砍必须当场作废，避免新动作已经生效后旧攻击又到点起手。
-            if (view.ActionInstanceId != 0 && action.InstanceId > view.ActionInstanceId)
+            // 打断型新实例（受击/死亡）取代旧实例：命中打断后服务端直接覆盖 `_current`，
+            // 客户端看不到 Cancelled ⇒ 旧排程/挥砍必须当场作废。**普通技能 Windup 不能走这里**：
+            // CastBroadcast 先到（已排程挥砍），该技能自己的 NpcActionEvent 下一 tick 才到，
+            // 若也清排程会把正常攻击截掉。
+            if (view.ActionInstanceId != 0 && action.InstanceId > view.ActionInstanceId
+                && action.Kind is NpcActionKind.HitReaction or NpcActionKind.Death)
             {
                 _attacks.Clear(entityId);
                 view.NpcAnimator?.CancelAttack(view.ActionInstanceId);

@@ -168,66 +168,123 @@ namespace GameSys.EditorTests
         [Test]
         public void test_newer_instance_stops_the_previous_attack()
         {
-            const string controllerPath = "Assets/Tests_TempNpcActionSupersede.controller";
-            var controller = UnityEditor.Animations.AnimatorController
-                .CreateAnimatorControllerAtPath(controllerPath);
-            controller.AddParameter("MonsterState", AnimatorControllerParameterType.Int);
-            controller.AddParameter("AttackVariant", AnimatorControllerParameterType.Int);
-            controller.AddParameter("Attack", AnimatorControllerParameterType.Trigger);
+            using var fixture = new NpcAnimatorFixture(_root.transform);
+            var registry = fixture.Registry;
+            var view = fixture.View;
 
-            var prefab = new GameObject("NpcActionSupersedePrefab");
-            var prefabAnimator = prefab.AddComponent<Animator>();
-            prefabAnimator.runtimeAnimatorController = controller;
-
-            try
+            registry.ApplyNpcActionEvent(new NpcActionEvent
             {
-                var registry = new RemoteEntityRegistry(_root.transform,
-                    npcPrefabs: new Dictionary<int, GameObject> { [1] = prefab });
-                registry.ApplySnapshot(new EntitySnapshot
+                EntityId = NpcAnimatorFixture.EntityId, LifeId = 1,
+                Action = new NpcActionSnapshot
                 {
-                    PlayerId = 14, Kind = (byte)EntityKind.Npc, TemplateId = 1,
+                    InstanceId = 20, Revision = 1, Kind = NpcActionKind.Skill,
+                    Phase = NpcActionPhase.Active
+                }
+            });
+
+            view.NpcAnimator!.PlayAttack(0);   // CastBroadcast → NpcAttackSchedule 起手
+            Assert.AreEqual(NpcEntityAnimator.StateAttacking,
+                fixture.Animator.GetInteger("MonsterState"));
+
+            registry.ApplyNpcActionEvent(new NpcActionEvent
+            {
+                EntityId = NpcAnimatorFixture.EntityId, LifeId = 1,
+                Action = new NpcActionSnapshot
+                {
+                    InstanceId = 21, Revision = 1, Kind = NpcActionKind.HitReaction,
+                    Phase = NpcActionPhase.Active
+                }
+            });
+
+            Assert.AreEqual(21UL, view.ActionInstanceId);
+            Assert.AreEqual(NpcEntityAnimator.StateHit,
+                fixture.Animator.GetInteger("MonsterState"),
+                "an interrupting action must stop the superseded attack");
+        }
+
+        [Test]
+        public void test_skill_windup_after_cast_broadcast_keeps_the_scheduled_attack()
+        {
+            using var fixture = new NpcAnimatorFixture(_root.transform);
+            var registry = fixture.Registry;
+            var view = fixture.View;
+
+            registry.ApplyNpcActionEvent(new NpcActionEvent
+            {
+                EntityId = NpcAnimatorFixture.EntityId, LifeId = 1,
+                Action = new NpcActionSnapshot
+                {
+                    InstanceId = 20, Revision = 1, Kind = NpcActionKind.Skill,
+                    Phase = NpcActionPhase.Active
+                }
+            });
+
+            view.NpcAnimator!.PlayAttack(0);   // CastBroadcast → NpcAttackSchedule 起手
+            Assert.AreEqual(NpcEntityAnimator.StateAttacking,
+                fixture.Animator.GetInteger("MonsterState"));
+
+            // 同一技能的 NpcActionEvent 下一 tick 才到：普通 Windup 不得清掉已排的攻击。
+            registry.ApplyNpcActionEvent(new NpcActionEvent
+            {
+                EntityId = NpcAnimatorFixture.EntityId, LifeId = 1,
+                Action = new NpcActionSnapshot
+                {
+                    InstanceId = 21, Revision = 1, Kind = NpcActionKind.Skill,
+                    Phase = NpcActionPhase.Windup
+                }
+            });
+
+            Assert.AreEqual(21UL, view.ActionInstanceId);
+            Assert.AreEqual(NpcEntityAnimator.StateAttacking,
+                fixture.Animator.GetInteger("MonsterState"),
+                "a plain skill windup must not clear the attack scheduled by CastBroadcast");
+        }
+
+        /// <summary>
+        /// 带真 Animator/NpcEntityAnimator 的 NPC 视图夹具（EditMode 下 AddComponent 不跑 Awake，
+        /// 必须显式 ResolveAnimator）。每个用例一份临时 controller，Dispose 时整体清理。
+        /// </summary>
+        private sealed class NpcAnimatorFixture : System.IDisposable
+        {
+            public const long EntityId = 14;
+            private const string ControllerPath = "Assets/Tests_TempNpcActionSupersede.controller";
+
+            public readonly RemoteEntityRegistry Registry;
+            public readonly RemoteEntityView View;
+            public readonly Animator Animator;
+            private readonly GameObject _prefab;
+
+            public NpcAnimatorFixture(Transform root)
+            {
+                var controller = UnityEditor.Animations.AnimatorController
+                    .CreateAnimatorControllerAtPath(ControllerPath);
+                controller.AddParameter("MonsterState", AnimatorControllerParameterType.Int);
+                controller.AddParameter("AttackVariant", AnimatorControllerParameterType.Int);
+                controller.AddParameter("Attack", AnimatorControllerParameterType.Trigger);
+
+                _prefab = new GameObject("NpcActionSupersedePrefab");
+                var prefabAnimator = _prefab.AddComponent<Animator>();
+                prefabAnimator.runtimeAnimatorController = controller;
+
+                Registry = new RemoteEntityRegistry(root,
+                    npcPrefabs: new Dictionary<int, GameObject> { [1] = _prefab });
+                Registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = EntityId, Kind = (byte)EntityKind.Npc, TemplateId = 1,
                     FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead),
                     X = 0f, Z = 0f, Dead = false, LifeId = 1
                 }, 1);
 
-                var view = registry.GetView(14);
-                Assert.IsNotNull(view);
-                view!.NpcAnimator!.ResolveAnimator();   // EditMode 下 AddComponent 不触发 Awake
-
-                registry.ApplyNpcActionEvent(new NpcActionEvent
-                {
-                    EntityId = 14, LifeId = 1,
-                    Action = new NpcActionSnapshot
-                    {
-                        InstanceId = 20, Revision = 1, Kind = NpcActionKind.Skill,
-                        Phase = NpcActionPhase.Active
-                    }
-                });
-
-                view.NpcAnimator.PlayAttack(0);   // CastBroadcast → NpcAttackSchedule 起手
-                var animator = view.NpcAnimator.GetComponentInChildren<Animator>();
-                Assert.AreEqual(NpcEntityAnimator.StateAttacking,
-                    animator.GetInteger("MonsterState"));
-
-                registry.ApplyNpcActionEvent(new NpcActionEvent
-                {
-                    EntityId = 14, LifeId = 1,
-                    Action = new NpcActionSnapshot
-                    {
-                        InstanceId = 21, Revision = 1, Kind = NpcActionKind.Skill,
-                        Phase = NpcActionPhase.Active
-                    }
-                });
-
-                Assert.AreEqual(21UL, view.ActionInstanceId);
-                Assert.AreEqual(NpcEntityAnimator.StateIdle,
-                    animator.GetInteger("MonsterState"),
-                    "superseded instance's scheduled attack must be stopped");
+                View = Registry.GetView(EntityId)!;
+                View.NpcAnimator!.ResolveAnimator();
+                Animator = View.NpcAnimator.GetComponentInChildren<Animator>();
             }
-            finally
+
+            public void Dispose()
             {
-                Object.DestroyImmediate(prefab);
-                UnityEditor.AssetDatabase.DeleteAsset(controllerPath);
+                Registry.Clear();
+                Object.DestroyImmediate(_prefab);
+                UnityEditor.AssetDatabase.DeleteAsset(ControllerPath);
             }
         }
     }
