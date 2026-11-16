@@ -55,7 +55,8 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 
 `MessageId.CancelCastRequest = 304`（客户端 → 服务器）：tag1 `SkillId`，tag2 可选 `CastId`。
 携带 `CastId` 时只取消该实例；为 0 时取消该技能最新实例（旧客户端语义）。服务端丢弃对应的
-未到期判定段（旋转 20002 取消/换命）；无匹配实例幂等忽略。`ProtocolVersion` 保持 1。
+未到期判定段（旋转 20002 取消/换命）；已发射的投射物继续飞行，`CastCancelBroadcast` 只停止
+攻击表现；无匹配实例幂等忽略。`ProtocolVersion` 保持 1。
 
 ### 属性剑气 v1（2026-11-14）
 

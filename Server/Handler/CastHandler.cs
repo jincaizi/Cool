@@ -1016,7 +1016,8 @@ namespace KcpServer
             await BroadcastSwingAsync(playerId.Value, request, decision);
         }
 
-        /// <summary>取消施法（B3：旋转取消后丢弃未到期判定段）。未登录/无匹配实例幂等忽略。</summary>
+        /// <summary>取消施法（B3：旋转取消后丢弃未到期判定段；CastId=0 只取最新实例）。
+        /// 已发射投射物继续飞行，CastCancelBroadcast 只停止攻击表现；未登录/无匹配实例幂等忽略。</summary>
         public void HandleCancel(IServerSession session, CancelCastRequest request)
         {
             long? playerId = _server.GetPlayerId(session);
