@@ -76,6 +76,26 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly List<(long EntityId, CombatProjection Projection)> _pendingCombat =
             new List<(long, CombatProjection)>();
 
+        /// <summary>
+        /// 跨视图生命周期的 last-known vitals：视图因 1.2s 缺席被删后由 Keepalive/Changed
+        /// 重建时，服务端 `HasSent` 仍为 true，不会再补 Health 基线——不记住就会以
+        /// Hp=0/MaxHp=0/Dead=false 建档（C1）。Remove/UpdateExpiry 故意不清，Clear() 清。
+        /// </summary>
+        private sealed class LastKnownVitals
+        {
+            public uint LifeId;
+            public uint CombatVersion;
+            public float Hp;
+            public float MaxHp;
+            public bool Dead;
+            public bool IsDefending;
+        }
+
+        /// <summary>last-known 上限；超限整体清空（有界优先，宁可丢回填也不无界增长）</summary>
+        private const int MaxLastKnownVitals = 256;
+        private readonly Dictionary<long, LastKnownVitals> _lastKnownVitals =
+            new Dictionary<long, LastKnownVitals>();
+
         /// <summary>落地采样游标（每实体一份）：上次采样的 XZ + 结果，见 <see cref="GroundY"/></summary>
         private readonly Dictionary<long, GroundSample> _groundSamples = new Dictionary<long, GroundSample>();
         /// <summary>采过的那具地形碰撞体（来自物理查询本身——本类是普通类，不许 GetComponent）</summary>
@@ -173,13 +193,13 @@ namespace Hotfix.GameSystems.SyncLayer
             // ActionState 恒在基础字段组内（Baseline/Changed/Keepalive 都带），无条件覆盖安全。
             view.ActionState = snapshot.ActionState;
 
-            // N5b：存活是**状态**不是边沿事件（D-N1/D-N2）。任务 7 起 Dead 收窄为条件字段：
-            // 仅 Baseline/Dead 翻转置位；其余快照必须沿用 last-known（protobuf 默认 false
-            // 不代表"活着"）——否则死亡实体会被下一条保活翻回存活。
+            // N5b：存活是**状态**不是边沿事件（D-N1/D-N2）。Dead/Defending 每帧携带；
+            // 这里仍按位守卫，兼容只发条件位的旧服务端（protobuf 默认 false 不代表"活着"）。
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Dead) != 0)
                 view.Dead = snapshot.Dead;
 
-            // T6：权威 vitals 落到视图与只读 Targetable（只按 FieldMask 取新值，未置位沿用 last-known）
+            // T6：权威 vitals 落到视图与只读 Targetable（只按 FieldMask 取新值，未置位沿用 last-known）。
+            // Health 是条件字段（Baseline / 血量翻转），Dead/Defending 每帧携带。
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Health) != 0)
             {
                 view.Hp = snapshot.Hp;
@@ -189,6 +209,10 @@ namespace Hotfix.GameSystems.SyncLayer
             }
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Defending) != 0)
                 view.IsDefending = snapshot.IsDefending;
+
+            // C1：记录跨视图生命周期的 last-known——视图缺席超时被删后重建时，
+            // 后续快照可能不带 Health 位，由 CreateView 从这里回填。
+            UpdateLastKnownVitals(snapshot);
 
             view.Targetable.SetVitals(view.Hp, view.MaxHp, view.Dead);
             if (view.Kind != (byte)EntityKind.PlayerBot)
@@ -246,7 +270,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 float yaw = _lastKnownYaw.TryGetValue(snapshot.PlayerId, out var last) ? last : 0f;
                 _interpolator.AddSample(snapshot.PlayerId, serverTicks,
                     new Cool.SyncCore.Vec3(snapshot.X, snapshot.Y, snapshot.Z), yaw,
-                    snapshot.ActionState, view.Dead);   // Dead 是条件字段：样本带存值
+                    snapshot.ActionState, view.Dead);   // 样本带视图存值（Dead 每帧携带，旧服务端条件位同样安全）
                 _lastSampleTicks[snapshot.PlayerId] = serverTicks; // 只在真收到样本时刷新
             }
         }
@@ -308,8 +332,81 @@ namespace Hotfix.GameSystems.SyncLayer
             view.Animator?.ApplySnapshotState(view.Dead);
             if (view.Tier == RemoteTier.Full)
                 view.Animator?.SetDefending(view.IsDefending);
+            // 完整投影：last-known 全量对齐（重建视图时即使快照缺 Health 位也能回填）。
+            UpdateLastKnownVitals(entityId, view.LifeId, view.CombatVersion, view.Hp, view.MaxHp,
+                view.Dead, view.IsDefending);
             if (projection.ActiveCast != null)
                 ActiveCastApplied?.Invoke(entityId, projection.ActiveCast);
+        }
+
+        /// <summary>按位合并快照里的 vitals 到 last-known（新生代先清旧值）。</summary>
+        private void UpdateLastKnownVitals(EntitySnapshot snapshot)
+        {
+            bool carriesVitals =
+                (snapshot.FieldMask & (ushort)(EntityFieldMask.Health | EntityFieldMask.Dead
+                    | EntityFieldMask.Defending)) != 0;
+            if (!carriesVitals && snapshot.LifeId == 0) return;
+
+            if (!_lastKnownVitals.TryGetValue(snapshot.PlayerId, out var known))
+            {
+                if (_lastKnownVitals.Count >= MaxLastKnownVitals)
+                    _lastKnownVitals.Clear();
+                known = new LastKnownVitals();
+                _lastKnownVitals[snapshot.PlayerId] = known;
+            }
+
+            // 新生代：旧世代的 HP/死亡/防御不得沿用（复活后不应仍显示死亡）。
+            // 新世代的完整值由本快照随后的按位合并写入。
+            if (snapshot.LifeId != 0 && known.LifeId != 0 && known.LifeId != snapshot.LifeId)
+            {
+                known.Hp = 0f;
+                known.MaxHp = 0f;
+                known.Dead = false;
+                known.IsDefending = false;
+                known.CombatVersion = 0;
+            }
+            if (snapshot.LifeId != 0) known.LifeId = snapshot.LifeId;
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Health) != 0)
+            {
+                known.Hp = snapshot.Hp;
+                known.MaxHp = snapshot.MaxHp;
+                if (snapshot.CombatVersion != 0) known.CombatVersion = snapshot.CombatVersion;
+            }
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Dead) != 0)
+                known.Dead = snapshot.Dead;
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Defending) != 0)
+                known.IsDefending = snapshot.IsDefending;
+        }
+
+        /// <summary>完整投影成功合并后的全量 last-known 更新。</summary>
+        private void UpdateLastKnownVitals(long entityId, uint lifeId, uint combatVersion,
+            float hp, float maxHp, bool dead, bool isDefending)
+        {
+            if (!_lastKnownVitals.TryGetValue(entityId, out var known))
+            {
+                if (_lastKnownVitals.Count >= MaxLastKnownVitals)
+                    _lastKnownVitals.Clear();
+                known = new LastKnownVitals();
+                _lastKnownVitals[entityId] = known;
+            }
+            if (lifeId != 0) known.LifeId = lifeId;
+            known.CombatVersion = combatVersion;
+            known.Hp = hp;
+            known.MaxHp = maxHp;
+            known.Dead = dead;
+            known.IsDefending = isDefending;
+        }
+
+        /// <summary>
+        /// 可用于回填的 last-known：同 LifeId 才可用；快照未带 LifeId（Keepalive/Changed
+        /// 的 Health 位缺省）视为同世代。LifeId 不同 = 上一辈子，不能回填。
+        /// </summary>
+        private LastKnownVitals? FindLastKnownVitals(long playerId, uint snapshotLifeId)
+        {
+            if (!_lastKnownVitals.TryGetValue(playerId, out var known)) return null;
+            if (known.LifeId == 0 || snapshotLifeId == 0 || known.LifeId == snapshotLifeId)
+                return known;
+            return null;
         }
 
         /// <summary>
@@ -610,6 +707,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 _lastKnownYaw.Remove(playerId);
                 _lastSampleTicks.Remove(playerId); // 缺席追踪同步清理（UpdateExpiry 重扫不残留）
                 _groundSamples.Remove(playerId); // 落地采样游标同生共死（防重连同 ID 残留旧采样）
+                // 注意：last-known vitals 故意保留——视图缺席超时后由 Keepalive/Changed 重建
+                // 时靠它回填（C1）；真正的换世界/断线清理在 Clear()。
                 return true;
             }
             return false;
@@ -636,6 +735,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _lastSampleTicks.Clear();
             _groundSamples.Clear(); // 与视图同生共死（换世界后地形可能不同）
             _pendingCombat.Clear(); // 换世界/断线：旧会话的战斗投影不得回放到新实体
+            _lastKnownVitals.Clear(); // 换世界/断线：上个会话的 vitals 不得回填到新实体
         }
 
         /// <summary>读远程实体视图（T6 验收断言用；无视图返回 null）</summary>
@@ -784,16 +884,43 @@ namespace Hotfix.GameSystems.SyncLayer
                 displayName = _playerNameResolver?.Invoke(playerId) ?? "玩家 " + playerId;
             }
 
+            // C1：视图可能因 1.2s 缺席被删后由 Keepalive/Changed 重建（服务端 HasSent 仍为
+            // true，不会补 Health 基线）。快照带值优先；缺 Health/Dead/Defending 位时用同
+            // LifeId 的 last-known 回填，避免以 Hp=0/MaxHp=0/Dead=false 建档。
+            var lastKnown = FindLastKnownVitals(playerId, snapshot.LifeId);
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Health) != 0)
             {
                 view.Hp = snapshot.Hp;
                 view.MaxHp = snapshot.MaxHp;
             }
+            else if (lastKnown != null)
+            {
+                view.Hp = lastKnown.Hp;
+                view.MaxHp = lastKnown.MaxHp;
+            }
+
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Defending) != 0)
                 view.IsDefending = snapshot.IsDefending;
+            else if (lastKnown != null)
+                view.IsDefending = lastKnown.IsDefending;
+
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Dead) != 0)
+                view.Dead = snapshot.Dead;
+            else if (lastKnown != null)
+                view.Dead = lastKnown.Dead;
+
+            // 版本起点：快照的 CombatVersion（Health 位带版本）；缺位时沿用 last-known，
+            // 旧 CombatStateUpdate 才会被版本门正确丢弃（服务端不会再补基线）。
+            view.CombatVersion = snapshot.CombatVersion;
+            if (lastKnown != null && lastKnown.CombatVersion > view.CombatVersion)
+                view.CombatVersion = lastKnown.CombatVersion;
+            if (snapshot.LifeId != 0)
+                view.LifeId = snapshot.LifeId;
+            else if (lastKnown != null)
+                view.LifeId = lastKnown.LifeId;
 
             var targetable = new NetworkTargetable(playerId, displayName);
-            targetable.SetVitals(view.Hp, view.MaxHp, snapshot.Dead);
+            targetable.SetVitals(view.Hp, view.MaxHp, view.Dead);
             view.Targetable = targetable;
             view.DisplayName = displayName;
 
@@ -802,9 +929,6 @@ namespace Hotfix.GameSystems.SyncLayer
                 _labelSink?.Register(playerId, view.GameObject.transform, displayName);
                 _labelSink?.UpdateHp(playerId, targetable.HPPercent); // 首帧直接用快照 HP，不显示 0
             }
-
-            // 版本起点：该基线的 CombatVersion（同版本投影仍会应用——见 ApplyProjection）
-            view.CombatVersion = snapshot.CombatVersion;
 
             return view;
         }

@@ -343,6 +343,73 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         /// <summary>
+        /// C1 回归：视图因 1.2s 无快照被删后，服务端 `HasSent` 仍为 true——重建视图的下一条
+        /// Keepalive/Changed 不带 Health 位。必须用同 LifeId 的 last-known 回填，
+        /// 不能以 Hp=0/MaxHp=0/Dead=false 建档。
+        /// </summary>
+        [Test]
+        public void Recreated_View_Restores_Last_Known_Vitals_After_Expiry()
+        {
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 40,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead
+                    | EntityFieldMask.Health),
+                X = 0f, Z = 0f, Dead = true, Hp = 300f, MaxHp = 500f,
+                CombatVersion = 7, LifeId = 1, Tick = 1
+            }, serverTicks: 1_000_000L);
+            Assert.AreEqual(1, _registry.Count);
+
+            // 1.3s 无快照 → 视图删除（last-known 保留）
+            _registry.UpdateExpiry(nowServerTicks: 14_000_000L);
+            Assert.AreEqual(0, _registry.Count);
+            Assert.IsNull(_registry.GetView(40));
+
+            // 重建视图：只带位置位（Keepalive/Changed 语义），不带 Health/Dead/Defending
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 40,
+                FieldMask = (ushort)EntityFieldMask.Position,
+                X = 1f, Z = 0f, Tick = 2
+            }, serverTicks: 15_000_000L);
+
+            var view = _registry.GetView(40);
+            Assert.IsNotNull(view);
+            Assert.AreEqual(300f, view!.Hp, 0.001f, "last-known Hp 必须回填");
+            Assert.AreEqual(500f, view.MaxHp, 0.001f, "last-known MaxHp 必须回填");
+            Assert.IsTrue(view.Dead, "last-known Dead 必须回填");
+            Assert.AreEqual(1u, view.LifeId, "同 LifeId 的 last-known 才有资格回填");
+            Assert.AreEqual(7u, view.CombatVersion, "版本起点沿用 last-known，旧投影才会被版本门丢弃");
+            Assert.AreEqual(300, view.Targetable.CurrentHP);
+        }
+
+        /// <summary>Clear()（换世界/断线）必须清掉 last-known，不得回填到新实体。</summary>
+        [Test]
+        public void Clear_Drops_Last_Known_Vitals()
+        {
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 41,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead
+                    | EntityFieldMask.Health),
+                X = 0f, Z = 0f, Dead = true, Hp = 300f, MaxHp = 500f, LifeId = 1
+            }, serverTicks: 1_000_000L);
+
+            _registry.Clear();
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 41,
+                FieldMask = (ushort)EntityFieldMask.Position,
+                X = 0f, Z = 0f, Tick = 2
+            }, serverTicks: 2_000_000L);
+
+            var view = _registry.GetView(41);
+            Assert.IsNotNull(view);
+            Assert.AreEqual(0f, view!.Hp, 0.001f);
+            Assert.IsFalse(view.Dead);
+        }
+
+        /// <summary>
         /// 名牌注入点（`INetworkLabelSink`）只给**玩家与 Npc**建名牌：bot 走玩家伤害路径，
         /// 但没有名字名册（服务端不发 bot 的 PlayerEnterRoom），所以注册与注销都跳过它。
         /// 视图销毁必须注销名牌并发 ViewRemoved——表现系统靠这两个事件清理，不能靠轮询。
