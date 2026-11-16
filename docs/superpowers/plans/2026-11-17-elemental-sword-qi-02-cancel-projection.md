@@ -2143,6 +2143,39 @@ namespace GameSys.EditorTests
             Assert.AreEqual(5u, view!.CombatVersion);
             Assert.IsTrue(view.IsDefending);
         }
+
+        [Test]
+        public void test_update_before_view_is_replayed_after_baseline()
+        {
+            _registry.ApplyCombatStateUpdate(new CombatStateUpdate
+            {
+                EntityId = 20,
+                Projection = new CombatProjection
+                {
+                    CombatVersion = 3, LifeId = 1, Hp = 500f, MaxHp = 720f,
+                    Dead = false, IsDefending = false,
+                    Equipment = new EquipmentSummary
+                    {
+                        WeaponInstanceId = 42, TemplateId = 90002, ElementId = 1
+                    }
+                }
+            });
+
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 20, Kind = (byte)EntityKind.Player,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead
+                    | EntityFieldMask.Health),
+                X = 0f, Z = 0f, Dead = false, Hp = 720f, MaxHp = 720f,
+                CombatVersion = 1, LifeId = 1
+            }, 1);
+
+            var view = _registry.GetView(20);
+            Assert.IsNotNull(view);
+            Assert.AreEqual(500f, view!.Hp);
+            Assert.AreEqual(3u, view.CombatVersion);
+            Assert.AreEqual(42L, view.Equipment!.WeaponInstanceId);
+        }
     }
 }
 ```
@@ -2204,6 +2237,8 @@ namespace GameSys.EditorTests
             view.Control = projection.Control;
             view.Statuses = projection.Statuses;
             view.Targetable.SetVitals(view.Hp, view.MaxHp, view.Dead);
+            if (view.Kind != (byte)EntityKind.PlayerBot)
+                _labelSink?.UpdateHp(entityId, view.Targetable.HPPercent);
             view.Animator?.ApplySnapshotState(view.Dead);
         }
 ```
@@ -2266,6 +2301,7 @@ namespace GameSys.EditorTests
 
 ```csharp
         private readonly Func<uint>? _serverTickProvider;
+        private readonly HashSet<ulong> _activeCastPlayed = new HashSet<ulong>();
         ...
         _serverTickProvider = serverTickProvider;
 ```
@@ -2275,7 +2311,10 @@ namespace GameSys.EditorTests
 ```csharp
         public void OnActiveCast(long entityId, ActiveCastProjection activeCast)
         {
-            if (_registry == null || _catalog == null || activeCast == null) return;
+            if (activeCast == null || activeCast.CastId == 0) return;
+            if (!_activeCastPlayed.Add(activeCast.CastId)) return; // 相位推进只播一次
+            if (_activeCastPlayed.Count > 256) _activeCastPlayed.Clear();
+            if (_registry == null || _catalog == null) return;
             if (entityId == _localPlayerId) return;
             var view = _registry.GetView(entityId);
             if (view == null || view.Kind != (byte)EntityKind.Player) return;
