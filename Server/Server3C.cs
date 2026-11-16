@@ -207,7 +207,10 @@ namespace KcpServer
                             _ = _castHandler.BroadcastSwingAsync(npcId, request, decision); // 拒绝分支内部处理（日志+计数）——审计口径须可证伪
                         }
                         foreach (var npcId in _monsterModule.DrainRemovedNpcs())
+                        {
                             _aoi.RemoveEntity(npcId);
+                            _lastNpcActions.Remove(npcId);
+                        }
                     }
 
                     // 判定帧到期的施法——**与怪物无关**（玩家施法也要在这里结算，**不能放进上面的 if**），
