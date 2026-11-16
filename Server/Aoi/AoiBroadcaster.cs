@@ -7,8 +7,8 @@ namespace KcpServer
     /// per-observer 分级广播组装（spec §5-P3）——取代 SnapshotAssembler 的
     /// store 级 dirty/beacon 广播：每个 observer 每 tick 经 AoiGrid 取可见集、
     /// AoiBandScheduler 按距离带节拍 + 移动/静止判定选出应发实体，按发送原因组装快照：
-    /// Baseline 带全部条件字段（Dead/Health/Defending/NpcAction），Changed 只带翻转项，
-    /// Keepalive 只带位置/身份基础字段。
+    /// Dead/Defending 每帧携带（D-N2：存活是状态不是事件），Health 只在 Baseline 或血量
+    /// 翻转时置位，NpcAction/Combat 只在 Baseline 携带；Keepalive 只带位置/身份基础字段。
     /// 发送由 Server3C 注入（OnEntityBroadcast）；本类纯组装可单测。
     /// 主循环独占线程，无锁。实体注销经 RemoveEntity 清理 AOI 状态。
     /// </summary>
@@ -72,19 +72,16 @@ namespace KcpServer
                     entity.Hp, entity.MaxHp, entity.IsDefending);
                 if (decision.Reason == AoiSendReason.None) continue;
 
-                // 条件字段：Dead/Health/Defending 只在基线或对应翻转时置位（客户端按位沿用 last-known）。
+                // Dead/Defending 是存活/姿态状态（D-N2）：每帧携带（bandwidth 仅 2B），
+                // 保住旧客户端 `view.Dead = snapshot.Dead` 的无条件语义；Health 仍是条件字段
+                // （Baseline / 血量翻转），客户端按位沿用 last-known。
                 var mask = EntityFieldMask.Position | EntityFieldMask.Rotation
                     | EntityFieldMask.Speed | EntityFieldMask.ActionState
-                    | EntityFieldMask.Kind | EntityFieldMask.TemplateId;
-                if (decision.Reason == AoiSendReason.Baseline
-                    || (decision.Changes & AoiChangeFlags.Dead) != 0)
-                    mask |= EntityFieldMask.Dead;
+                    | EntityFieldMask.Kind | EntityFieldMask.TemplateId
+                    | EntityFieldMask.Dead | EntityFieldMask.Defending;
                 if (decision.Reason == AoiSendReason.Baseline
                     || (decision.Changes & AoiChangeFlags.Health) != 0)
                     mask |= EntityFieldMask.Health;
-                if (decision.Reason == AoiSendReason.Baseline
-                    || (decision.Changes & AoiChangeFlags.Defending) != 0)
-                    mask |= EntityFieldMask.Defending;
 
                 var snap = new EntitySnapshot
                 {
@@ -100,15 +97,13 @@ namespace KcpServer
                     ActionState = entity.ActionState,
                     Tick = tick
                 };
-                if ((mask & EntityFieldMask.Dead) != 0)
-                    snap.Dead = !entity.IsAlive;
+                snap.Dead = !entity.IsAlive;
+                snap.IsDefending = entity.IsDefending;
                 if ((mask & EntityFieldMask.Health) != 0)
                 {
                     snap.Hp = entity.Hp;
                     snap.MaxHp = entity.MaxHp;
                 }
-                if ((mask & EntityFieldMask.Defending) != 0)
-                    snap.IsDefending = entity.IsDefending;
                 if ((mask & EntityFieldMask.Health) != 0 || (mask & EntityFieldMask.Combat) != 0)
                 {
                     snap.CombatVersion = entity.CombatVersion;

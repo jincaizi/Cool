@@ -94,8 +94,7 @@ public class AoiBroadcasterTests
         Assert.Equal(4f, captured.Speed, 4);
         Assert.Equal(1U, captured.Tick);
         // P5：掩码高位追加 ActionState/Kind/TemplateId（只加不删——旧客户端忽略未知位）
-        // D-N2：Dead 是存活状态；任务 7 起随 Baseline/Dead 翻转下发
-        // T3：Health/Defending 随 Baseline 或各自翻转下发（条件字段，不是每帧全量）
+        // D-N2：Dead/Defending 每帧携带；Health 是条件字段（Baseline 含）
         Assert.Equal((ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed
             | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId
             | EntityFieldMask.Dead | EntityFieldMask.Health | EntityFieldMask.Defending), captured.FieldMask);
@@ -148,10 +147,10 @@ public class AoiBroadcasterTests
     }
 
     [Fact]
-    public void Keepalive_Snapshot_Omits_Conditional_Fields()
+    public void Keepalive_Snapshot_Carries_Dead_And_Defending_But_Omits_Health()
     {
-        // 收窄语义：静止保活只带位置/身份字段。Dead/Health/Defending 未置位时
-        // 客户端必须沿用 last-known（见 RemoteEntityRegistry 的按位守卫）。
+        // D-N2：Dead/Defending 是存活/姿态状态，每快照携带（旧客户端无条件读 Dead 的语义
+        // 必须成立）；Health 仍是条件字段（仅 Baseline / 血量翻转置位）。
         var store = new EntityStore();
         var observer = store.AddPlayer(1, "Obs");
         var idle = store.AddPlayer(2, "Idle");
@@ -172,18 +171,23 @@ public class AoiBroadcasterTests
         Assert.True((baseline.FieldMask & (ushort)EntityFieldMask.Defending) != 0);
 
         var keepalive = captured[1];
-        Assert.Equal(0, keepalive.FieldMask & (ushort)(EntityFieldMask.Dead
-            | EntityFieldMask.Health | EntityFieldMask.Defending));
+        Assert.True((keepalive.FieldMask & (ushort)EntityFieldMask.Dead) != 0,
+            "D-N2：Dead 每帧携带（旧客户端无条件读 snapshot.Dead）");
+        Assert.True((keepalive.FieldMask & (ushort)EntityFieldMask.Defending) != 0,
+            "D-N2：Defending 每帧携带");
+        Assert.True((keepalive.FieldMask & (ushort)EntityFieldMask.Health) == 0,
+            "Health 仍是条件字段（保活不带）");
         Assert.True((keepalive.FieldMask & (ushort)EntityFieldMask.Position) != 0,
             "保活仍须携带位置/身份基础字段");
         Assert.False(keepalive.Dead);
+        Assert.False(keepalive.IsDefending);
         Assert.Equal(0f, keepalive.Hp, 4);
         Assert.Equal(0f, keepalive.MaxHp, 4);
         Assert.Equal(0u, keepalive.LifeId);
     }
 
     [Fact]
-    public void Health_Change_Snapshot_Carries_Health_And_LifeId_Only()
+    public void Health_Change_Snapshot_Carries_Health_And_Current_Dead_Defending()
     {
         var store = new EntityStore();
         var observer = store.AddPlayer(1, "Obs");
@@ -198,14 +202,20 @@ public class AoiBroadcasterTests
 
         broadcaster.BuildForObserver(observer, tick: 1, store);   // Baseline（Hp 90）
         idle.ApplyDamage(10f);                                    // Hp 80
-        broadcaster.BuildForObserver(observer, tick: 2, store);   // 血量翻转：立即发
+        idle.IsDefending = true;                                  // 姿态翻转也立即发
+        broadcaster.BuildForObserver(observer, tick: 2, store);   // 血量/防御翻转：立即发
 
         Assert.Equal(2, captured.Count);
         var changed = captured[1];
         Assert.True((changed.FieldMask & (ushort)EntityFieldMask.Health) != 0);
-        Assert.Equal(0, changed.FieldMask & (ushort)(EntityFieldMask.Dead | EntityFieldMask.Defending));
+        Assert.True((changed.FieldMask & (ushort)EntityFieldMask.Dead) != 0,
+            "Dead 每帧携带（即使本次只是血量变化）");
+        Assert.True((changed.FieldMask & (ushort)EntityFieldMask.Defending) != 0,
+            "Defending 每帧携带（即使本次只是血量变化）");
         Assert.Equal(80f, changed.Hp, 4);
         Assert.Equal(100f, changed.MaxHp, 4);
+        Assert.False(changed.Dead);
+        Assert.True(changed.IsDefending);
         Assert.Equal(idle.LifeId, changed.LifeId);
         Assert.Equal(idle.CombatVersion, changed.CombatVersion);
     }

@@ -22,15 +22,20 @@ namespace Cool.Protocol
         TemplateId = 1 << 5,
         /// <summary>
         /// 实体是否已死（D-N1：用 Dead 而非 Alive——protobuf 零默认让"活着"不占字节）。
-        /// 每次快照都置位（D-N2）：存活是**状态**不是事件，新观察者首帧就要知道。
+        /// **每次快照都置位**（D-N2）：存活是**状态**不是事件，新观察者首帧就要知道；
+        /// 旧客户端 `view.Dead = snapshot.Dead` 的无条件语义依赖本口径。
         /// </summary>
         Dead = 1 << 6,
-        /// <summary>Hp / MaxHp 有效（只加不删：新字段追加高位）</summary>
+        /// <summary>
+        /// Hp / MaxHp 有效（**条件字段**：仅 Baseline 或血量翻转时置位）。
+        /// 未置位时客户端沿用 last-known，不能用 protobuf 默认 0 覆盖。
+        /// </summary>
         Health = 1 << 7,
-        /// <summary>IsDefending 有效</summary>
+        /// <summary>IsDefending 有效（**每次快照都置位**，与 Dead 同为状态而非事件）。</summary>
         Defending = 1 << 8,
         NpcAction = 1 << 9,
-        /// <summary>状态/装备/控制/活动施法投影（仅 Baseline 与 CombatStateUpdate 使用）。</summary>
+        /// <summary>状态/装备/控制/活动施法投影（仅 Baseline 与 CombatStateUpdate 使用；
+        /// 与 Dead/Defending 无关——那两位每帧携带）。</summary>
         Combat = 1 << 10
     }
 
@@ -90,15 +95,16 @@ namespace Cool.Protocol
         [ProtoMember(9)]
         public uint Tick { get; set; }
 
-        /// <summary>实体是否已死（服务器权威；仅在 FieldMask 的 Dead 位被置位时有效）</summary>
+        /// <summary>实体是否已死（服务器权威；FieldMask.Dead 每帧置位，仅在缺失该位的旧服务端
+        /// 快照上无效——此时客户端沿用 last-known）</summary>
         [ProtoMember(12)]
         public bool Dead { get; set; }
 
-        /// <summary>服务端权威血量（FieldMask.Health 置位时有效）</summary>
+        /// <summary>服务端权威血量（条件字段：FieldMask.Health 置位时有效；未置位沿用 last-known）</summary>
         [ProtoMember(13)] public float Hp { get; set; }
-        /// <summary>服务端权威最大血量（FieldMask.Health 置位时有效）</summary>
+        /// <summary>服务端权威最大血量（条件字段：FieldMask.Health 置位时有效；未置位沿用 last-known）</summary>
         [ProtoMember(14)] public float MaxHp { get; set; }
-        /// <summary>是否防御中（FieldMask.Defending 置位时有效）</summary>
+        /// <summary>是否防御中（FieldMask.Defending 每帧置位）</summary>
         [ProtoMember(15)] public bool IsDefending { get; set; }
         [ProtoMember(16)] public NpcActionSnapshot? NpcAction { get; set; }
         [ProtoMember(17)] public IList<NpcActionSnapshot> NpcActionHistory { get; set; } = new List<NpcActionSnapshot>();

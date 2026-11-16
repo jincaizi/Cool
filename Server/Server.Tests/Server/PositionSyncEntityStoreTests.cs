@@ -46,6 +46,35 @@ public class PositionSyncEntityStoreTests
     }
 
     [Fact]
+    public void Defense_Flip_Bumps_Combat_Version_And_Dirty()
+    {
+        // 防御姿态是战斗投影字段（I3 顺带）：翻转必须 bump 版本并置 CombatDirty，
+        // 否则静止玩家的姿态变化只能等下一次位置脏帧才下发 CombatStateUpdate。
+        var store = new EntityStore();
+        var player = store.AddPlayer(1, "A");
+        var handler = new PositionSyncHandler(new Server3C(new TestLogger()), new TestLogger(), store);
+
+        handler.ValidateAndApply(new PositionSyncRequest
+        {
+            X = 0f, Y = 0f, Z = 0f, Rotation = 0f, Speed = 0f,
+            Timestamp = 1_000_000L, Sequence = 1U, IsDefending = true
+        }, player);
+
+        Assert.True(player.IsDefending);
+        Assert.Equal(1u, player.CombatVersion);
+        Assert.True(player.CombatDirty);
+
+        // 姿态不变：不重复 bump
+        handler.ValidateAndApply(new PositionSyncRequest
+        {
+            X = 0f, Y = 0f, Z = 0f, Rotation = 0f, Speed = 0f,
+            Timestamp = 2_000_000L, Sequence = 2U, IsDefending = true
+        }, player);
+
+        Assert.Equal(1u, player.CombatVersion);
+    }
+
+    [Fact]
     public void NanRotation_Request_Falls_Back_To_Last_Known_Rotation()
     {
         // 守卫回退：NaN 旋转请求不得进 store（防 NaN 经快照广播扩散）——

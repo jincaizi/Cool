@@ -11,7 +11,8 @@ namespace KcpServer
         Changed = 3
     }
 
-    /// <summary>变更快照里哪些条件字段需要下发（Dead/Health/Defending；Action 驱动 NpcAction 节奏）。</summary>
+    /// <summary>变更快照的状态翻转集：翻转仍触发立即 Changed（跨端一致）；广播器只把 Health
+    /// 映射为条件位（Dead/Defending 已恢复每帧携带），Action 驱动 NpcAction 节奏。</summary>
     [System.Flags]
     public enum AoiChangeFlags
     {

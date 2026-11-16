@@ -40,8 +40,10 @@ bash tools/test-server.sh
 - **登录名册**：`LoginHandler.BuildRoster` 把房间内已有玩家以 `PlayerEnterRoom` 发给新登录者，
   并向其他人广播新玩家；断线发 `PlayerLeaveRoom`。客户端 `PlayerNameRegistry` 主线程落库，
   远程名牌据此显示玩家名（缺失回退 `玩家 {id}`）。
-- **权威 vitals 进快照**：`EntitySnapshot` 携带 Hp/MaxHp/IsDefending（掩码位 `Health`/`Defending`），
-  AOI 分带调度把血量/防御变化视为脏位立即推送；客户端据此更新远程 `Targetable` 与名牌血条。
+- **权威 vitals 进快照**：`EntitySnapshot` 携带 Hp/MaxHp/IsDefending（掩码位
+  `Health`/`Defending`）。`Dead`/`Defending` **每快照携带**（D-N2：状态不是事件；保住旧客户端
+  无条件读 `Dead` 的语义），`Health` 是条件字段（Baseline / 血量翻转）；AOI 分带调度把血量/
+  防御变化视为脏位立即推送。客户端据此更新远程 `Targetable` 与名牌血条。
   `Server.Tests/Aoi/BandwidthBudgetTests` 断言含新字段的全字段快照字节上限。
 
 ## 属性剑气 v1（2026-11-14，Plan 01–02）
@@ -66,15 +68,17 @@ bash tools/test-server.sh
 - **NpcAction 广播（Plan 02 Part A）**：`NpcActionEvent`（2004）随技能/受击/死亡阶段变化发送；
   AOI 进入基线带 `NpcAction` 与 `EntityFieldMask.NpcAction`；事件与广播一样按 `ZoneId` 过滤。
 - **AOI 发送原因与条件字段（Plan 02 Part B）**：`AoiBandScheduler.ShouldSend` 返回
-  `Baseline / Changed / Keepalive`。首帧与离开后重见为 `Baseline`（带 Dead/Health/Defending
-  与 NpcAction/Combat 投影）；字段翻转立即 `Changed`（只带翻转位并重置节拍）；
-  静止实体每 4 tick `Keepalive`（只带位置/身份基础字段）。客户端按掩码位沿用 last-known。
+  `Baseline / Changed / Keepalive`。首帧与离开后重见为 `Baseline`（带 Health 与
+  NpcAction/Combat 投影）；字段翻转立即 `Changed`（Health 只在翻转时置位并重置节拍）；
+  静止实体每 4 tick `Keepalive`（只带位置/身份基础字段）。**Dead/Defending 每帧携带**
+  （D-N2 状态语义），只有 Health 是条件字段，客户端按位沿用 last-known。
 - **战斗投影（Plan 02 Part B）**：AOI 基线快照带 `EntityFieldMask.Combat` 与完整
   `CombatProjection`（`CombatProjectionBuilder`：HP/装备/活动施法；`Statuses` 暂空、`Control`
   为默认值，`CombatVersion/LifeId` 同基线下发）。`PlayerState.CombatVersion` 在换装、受伤/
   死亡/复活、防御姿态变化与活动施法阶段推进时递增并置 `CombatDirty`；
   `Server3C.SendCombatStateUpdates` 每 tick 只对 dirty 实体发送 `CombatStateUpdate`（311），
-  收件人 = 本人 + 同 `ZoneId` 观察者（NPC 为观察者）。
+  收件人 = 本人 + 同场景观察者（NPC 为观察者）；场景过滤统一走 `IsSameCombatScene`
+  （与 NpcAction 一致，空 `ZoneId` = 广播），不再用严格 `ZoneId != scene`。
   活动施法：`Decide` 成功置 `Windup`（`EndTick` = 最后一段判定 tick），判定期推进
   `Active`/`Recovery`，段结束/取消/死亡清空。
 - **晚进观察者与带宽（Plan 02 Part B）**：`AoiBroadcaster.OnBaselineEntity` 只在基线触发，
@@ -84,12 +88,12 @@ bash tools/test-server.sh
   `BandwidthBudgetTests` 用 100 实体 × 15Hz 的快照估算锁定上限。
 
 状态：Plan 01 与 Plan 02 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽），
-服务端全量 552/552；Plan 03–05 未开始。
+服务端全量 554/554；Plan 03–05 未开始。
 未启用：元素状态结算/DoT 与 `Statuses[]` 内容（Plan 04）、`ControlSummary` 的实际控制与
 PvP 控制预算（Plan 03）、元素 VFX 与远端武器模型（Plan 04/05）。
 
 `CastCancelBroadcast`（310）、`CombatStateUpdate`（311）与 `NpcActionEvent`（2004，含 `LifeId`）
-已启用；取消/动作事件按 `ZoneId` 过滤，投影收件人见上。
+已启用；取消/动作事件/投影统一按 `IsSameCombatScene`（相对 `ZoneId`，空值广播）过滤。
 
 ## 投射物与落点判定（20003 火球）
 

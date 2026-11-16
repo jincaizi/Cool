@@ -37,6 +37,9 @@ public class EquipHandlerTests
         Assert.Equal(42L, player.EquippedWeaponInstanceId);
         Assert.Equal(ElementalCatalogDefaults.IceSwordTemplateId, player.EquippedWeaponTemplateId);
         Assert.Equal(1, confirm.ElementId);
+        // I3 顺带：换装必须 bump 战斗投影版本并置脏（CombatStateUpdate 的触发源）
+        Assert.Equal(1u, player.CombatVersion);
+        Assert.True(player.CombatDirty);
     }
 
     [Fact]

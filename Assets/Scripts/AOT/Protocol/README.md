@@ -40,11 +40,13 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 |---|---|---|---|
 | `EntitySnapshot` | `Hp` / `MaxHp` | tag 13 / 14 | 服务端权威当前/最大血量（负数合法——`ApplyDamage` 不钳制） |
 | `EntitySnapshot` | `IsDefending` | tag 15 | 服务端权威防御姿态 |
-| `EntityFieldMask` | `Health` | `1 << 7` | Hp/MaxHp 有效 |
-| `EntityFieldMask` | `Defending` | `1 << 8` | IsDefending 有效 |
+| `EntityFieldMask` | `Health` | `1 << 7` | Hp/MaxHp 有效（**条件字段**：仅 Baseline / 血量翻转置位） |
+| `EntityFieldMask` | `Defending` | `1 << 8` | IsDefending 有效（**每次快照都置位**，D-N2） |
 
-> 快照消费方必须**按掩码位**取值：未置位的字段沿用 last-known，不能用 protobuf 默认值覆盖
->（beacon 只带位置位时的 `Rotation=0` 就是同一类陷阱，见 `RemoteEntityRegistry.ApplySnapshot`）。
+> 当前服务端快照 **Dead/Defending 每帧携带**（存活/姿态是状态不是事件，D-N2），只有
+> `Health` 是条件字段。快照消费方仍须**按掩码位**取值：`Health` 未置位时沿用 last-known，
+> 不能用 protobuf 默认值覆盖（beacon 只带位置位时的 `Rotation=0` 就是同一类陷阱，见
+> `RemoteEntityRegistry.ApplySnapshot`）。
 
 | 消息 | 追加内容 | tag | 语义 |
 |---|---|---|---|
@@ -102,7 +104,7 @@ Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实
 | `NpcActionEvent` | `LifeId` | 4 | 怪物生命代次；与 `EntityId/InstanceId/Revision` 组成客户端合并键 |
 | `EntitySnapshot` | `LifeId` | 19 | 实体生命代次（NpcAction 合并键；随基线/Health 快照携带） |
 | `EntitySnapshot` | `CombatVersion` / `Combat` | 18 / 20 | 战斗版本戳与完整投影（`Combat` 仅 AOI Baseline 置位；Health 位只带版本） |
-| `EntityFieldMask` | `Combat` | `1 << 10` | 快照带完整 `CombatProjection`（仅 AOI Baseline 置位；增量走 `CombatStateUpdate`） |
+| `EntityFieldMask` | `Combat` | `1 << 10` | 快照带完整 `CombatProjection`（仅 AOI Baseline 置位；增量走 `CombatStateUpdate`；Dead/Defending 不依赖本位，每快照携带） |
 
 客户端消费 NpcAction 时以 `(EntityId, LifeId, InstanceId, Revision)` 为合并键：实例号只增，
 同实例只接受更大的 `Revision`；生命代次不匹配的事件丢弃。取消事件与 `CastCancelBroadcast`

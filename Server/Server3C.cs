@@ -476,9 +476,10 @@ namespace KcpServer
             return true;
         }
 
-        /// <summary>属性剑气 v1：把本 tick 变化的战斗投影推给实体本人与同 Zone 观察者。
-        /// 收件人语义与 CastBroadcast 一致（玩家用 AOI 可见集，NPC 用观察者反查）。</summary>
-        private void SendCombatStateUpdates()
+        /// <summary>属性剑气 v1：把本 tick 变化的战斗投影推给实体本人与同场景观察者。
+        /// 收件人语义与 CastBroadcast 一致（玩家用 AOI 可见集，NPC 用观察者反查）；
+        /// 场景过滤统一走 <see cref="IsSameCombatScene"/>（与 NpcAction 一致，空 Zone = 广播）。</summary>
+        internal void SendCombatStateUpdates()
         {
             foreach (var entity in _entityStore.All)
             {
@@ -505,11 +506,9 @@ namespace KcpServer
                     foreach (var p in GetVisiblePlayers(entity.PlayerId)) recipients.Add(p.PlayerId);
                 }
 
-                var scene = entity.ZoneId;
                 foreach (var recipientId in recipients)
                 {
-                    if (_entityStore.GetPlayer(recipientId) is { } recipient
-                        && recipient.ZoneId != scene) continue;
+                    if (!IsSameCombatScene(entity, _entityStore.GetPlayer(recipientId))) continue;
                     var session = GetSession(recipientId);
                     if (session != null)
                         _ = SendToSessionAsync(session, MessageId.CombatStateUpdate, update);
