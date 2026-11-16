@@ -105,8 +105,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Dictionary<ulong, long> _castCasters = new Dictionary<ulong, long>();
         /// <summary>已取消的 CastId（有界）——晚到的发射/挥砍表现据此跳过；已发射的视觉继续飞行</summary>
         private readonly HashSet<ulong> _cancelledCasts = new HashSet<ulong>();
-        /// <summary>已按 ActiveCast 播放过攻击的 CastId（有界）——服务端每段相位推进都会 bump 投影，
-        /// 同一 CastId 只播一次，后续 Active/Recovery 更新跳过</summary>
+        /// <summary>已按 ActiveCast/CastBroadcast（两条路径共用）播放过攻击的 CastId（有界）——
+        /// 服务端每段相位推进都会 bump 投影，同一 CastId 只播一次，后续 Active/Recovery 更新跳过</summary>
         private readonly HashSet<ulong> _activeCastPlayed = new HashSet<ulong>();
         private readonly Dictionary<ulong, ProjectileStopBroadcast> _pendingStops =
             new Dictionary<ulong, ProjectileStopBroadcast>();
@@ -307,6 +307,10 @@ namespace Hotfix.GameSystems.SyncLayer
             if (!_catalog.TryGet(activeCast.SkillId, out var data)) return;
             // Proxy 档没有 Animator：本次播不了就不占去重槽，升 Full 时由 SetTier 重放。
             if (view.Animator == null) return;
+
+            // 过期施法不补播：基线或投影可能晚于 EndTick 到达（2 tick 插值延迟 + 网络抖动），
+            // 重放早已结束的攻击只会让旁观端看到无来由的挥砍。
+            if (_serverTickProvider != null && activeCast.EndTick <= _serverTickProvider()) return;
 
             // 去重只在**确实可播**之后登记：视图尚未建立（首条更新早于基线快照）时
             // 不能把 CastId 记为已播，否则后续相位更新会被永久跳过。

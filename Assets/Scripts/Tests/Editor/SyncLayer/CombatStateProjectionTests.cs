@@ -161,6 +161,93 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_older_life_id_projection_is_ignored()
+        {
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 50, Kind = (byte)EntityKind.Player,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead
+                    | EntityFieldMask.Health),
+                X = 0f, Z = 0f, Dead = false, Hp = 720f, MaxHp = 720f,
+                CombatVersion = 5, LifeId = 2
+            }, 1);
+
+            // 上一世代（LifeId=1）迟到的投影：即使版本更高也不得覆盖当前世代
+            _registry.ApplyCombatStateUpdate(new CombatStateUpdate
+            {
+                EntityId = 50,
+                Projection = new CombatProjection
+                {
+                    CombatVersion = 99, LifeId = 1, Hp = 1f, MaxHp = 720f, Dead = true
+                }
+            });
+
+            var view = _registry.GetView(50);
+            Assert.IsNotNull(view);
+            Assert.AreEqual(720f, view!.Hp, "older life id must not overwrite hp");
+            Assert.IsFalse(view.Dead);
+            Assert.AreEqual(5u, view.CombatVersion);
+        }
+
+        [Test]
+        public void test_newer_life_id_projection_waits_for_matching_baseline()
+        {
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 51, Kind = (byte)EntityKind.Player,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead
+                    | EntityFieldMask.Health),
+                X = 0f, Z = 0f, Dead = false, Hp = 720f, MaxHp = 720f,
+                CombatVersion = 2, LifeId = 1
+            }, 1);
+            var view = _registry.GetView(51)!;
+
+            // 新世代（LifeId=2）的投影先到：视图仍属上一辈子 → 先缓存，不应用
+            _registry.ApplyCombatStateUpdate(new CombatStateUpdate
+            {
+                EntityId = 51,
+                Projection = new CombatProjection
+                {
+                    CombatVersion = 6, LifeId = 2, Hp = 500f, MaxHp = 800f,
+                    Equipment = new EquipmentSummary
+                    {
+                        WeaponInstanceId = 77, TemplateId = 90002, ElementId = 2
+                    }
+                }
+            });
+            Assert.AreEqual(720f, view.Hp, "newer life id must wait for its baseline");
+            Assert.AreEqual(1u, view.LifeId);
+            Assert.AreEqual(2u, view.CombatVersion);
+
+            // 该世代的 Health 基线到达（版本 7）：基线状态应用，缓存里较旧的投影被丢弃
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 51, Kind = (byte)EntityKind.Player,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead
+                    | EntityFieldMask.Health),
+                X = 0f, Z = 0f, Dead = false, Hp = 600f, MaxHp = 800f,
+                CombatVersion = 7, LifeId = 2
+            }, 2);
+
+            Assert.AreEqual(2u, view.LifeId);
+            Assert.AreEqual(600f, view.Hp, "matching baseline hp applies");
+            Assert.AreEqual(7u, view.CombatVersion, "cached older projection is discarded");
+
+            // 同世代的更高版本投影正常应用
+            _registry.ApplyCombatStateUpdate(new CombatStateUpdate
+            {
+                EntityId = 51,
+                Projection = new CombatProjection
+                {
+                    CombatVersion = 8, LifeId = 2, Hp = 450f, MaxHp = 800f, IsDefending = true
+                }
+            });
+            Assert.AreEqual(450f, view.Hp);
+            Assert.AreEqual(8u, view.CombatVersion);
+            Assert.IsTrue(view.IsDefending);
+        }
+
+        [Test]
         public void test_active_cast_projection_raises_applied_event()
         {
             var received = new List<(long EntityId, ulong CastId)>();

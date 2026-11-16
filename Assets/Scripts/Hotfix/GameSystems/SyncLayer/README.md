@@ -67,20 +67,30 @@ AOI 基线投影、`ActiveCast` 补播与在途剑气补发消费）。`Statuses
   晚到的 `CastBroadcast` / `ProjectileLaunchBroadcast` 跳过补播。
 - **战斗投影路由与版本合并（Plan 02 Part B）**：`CombatNetworkBridge` 把
   `CombatStateUpdate` 入队并在主线程转成 `OnCombatStateUpdate`；`ClientNetworkHost` 转交
-  `RemoteEntityRegistry.ApplyCombatStateUpdate`。`ApplyProjection` 按 `LifeId` + 单一
-  `CombatVersion` 原子合并：旧生命/旧版本丢弃，新生命先入 64 条有界缓存等基线建视图后回放，
-  相同版本视为幂等重放仍应用（基线与 `Health` 快照同版本）。HP/Dead/IsDefending 同步
-  `Targetable`/名牌/Animator；`Equipment`/`Control` 只存储（不替换远端模型、不改 3C）；
-  `Statuses` 为空列表即清空旧状态（内容属 Plan 04）。
+  `RemoteEntityRegistry.ApplyCombatStateUpdate`。**本人的投影在宿主处直接丢弃**——本地状态由
+  3C/技能执行器权威维护，不交给 registry 的未知实体缓存（本人镜像属 Plan 03/04）。
+  `ApplyProjection` 按 `LifeId` + 单一 `CombatVersion` 原子合并：旧生命/旧版本丢弃，
+  新生命先入 64 条有界缓存等该世代基线更新视图后回放，相同版本视为幂等重放仍应用
+  （基线与 `Health` 快照同版本）。HP/Dead/IsDefending 同步 `Targetable`/名牌/Animator；
+  `Equipment`/`Control` 只存储（不替换远端模型、不改 3C）；`Statuses` 为空列表即清空旧状态
+  （内容属 Plan 04）。
 - **AOI 基线投影**：`EntityFieldMask.Combat` 置位的基线快照走同一条 `ApplyProjection`；
-  `EntitySnapshot.CombatVersion/LifeId` 随 `Health`/`Combat` 位下发，`Dead/Health/Defending`
-  只在对应掩码位置位时覆盖，未置位沿用 last-known（Keepalive 不再每帧带全字段）。
+  `EntitySnapshot.CombatVersion/LifeId` 随 `Health`/`Combat` 位下发。服务端每快照携带
+  `Dead/Defending`，`Health` 是条件字段（Baseline / 血量翻转）——客户端仍按掩码位取值，
+  `Health` 未置位时沿用 last-known。
+- **视图生命周期的 last-known vitals**：视图 1.2s 无快照会被删，服务端 `HasSent` 却仍为
+  true，重建后的 Keepalive/Changed 不会补 Health 基线。`RemoteEntityRegistry` 用有界
+  （≤256）`Dictionary<long, LastKnownVitals>` 跨视图存活记录 LifeId/CombatVersion/Hp/MaxHp/
+  Dead/IsDefending：快照按位合并、投影成功时全量更新；`CreateView` 在缺 Health/Dead/
+  Defending 位时用**同 LifeId** 的 last-known 回填（快照带值优先）。`Remove`/`UpdateExpiry`
+  故意不清，`Clear()`（换世界/断线）清空。
 - **ActiveCast 补播**：`RemoteEntityRegistry.ActiveCastApplied` 同时覆盖 `CombatStateUpdate`
   与 AOI 基线，`RemoteCastPresenter.OnActiveCast` 按 `EndTick − ClientNetworkManager.ServerTick`
   换算剩余时长播放远程玩家攻击，`CastId` 与 `CastBroadcast` 共用去重/取消通道。Proxy 档
   没有 Animator 时不占去重槽，升 Full 后由 `SetTier` 用保存的 `ActiveCast` 补播一次；
   Full→Proxy→Full 的重复升档会被 `_activeCastPlayed` 去重挡住，不在补播例外内（已知限制）。
-  已取消的 `CastId` 直接跳过，投影为 `null` 时不补播已结束的施法。服务端基线补发的在途剑气
+  已取消的 `CastId` 直接跳过；`EndTick <= ServerTick` 的过期投影不补播（晚到的基线不该
+  重放早已结束的挥砍）；投影为 `null` 时不补播已结束的施法。服务端基线补发的在途剑气
   仍走同一条 `ProjectileLaunchBroadcast` 路径，按原始 `ServerTimestamp` 补飞行进度。
 - **与攻击起手的分工**：Plan 02 保留 `CastBroadcast` → `NpcAttackSchedule` 作为 NPC 攻击起手；
   `NpcActionEvent` 只负责阶段/取消（技能动作仅跟踪实例，`Cancelled` 时停止），避免同一次施法
@@ -124,9 +134,10 @@ AOI 基线投影、`ActiveCast` 补播与在途剑气补发消费）。`Statuses
 
 ## 远程战斗表现与目标锁定
 
-- **权威 vitals**：`RemoteEntityRegistry.ApplySnapshot` 只在 `FieldMask.Health` / `Defending` 置位时
-  更新 `view.Hp/MaxHp/IsDefending`，再推给 `NetworkTargetable.SetVitals`；`INetworkLabelSink`
-  同步名牌血条（bot 不注册名牌）。`NetworkTargetable.CurrentHP` 是显示口径
+- **权威 vitals**：服务端每快照携带 `Dead/Defending`（状态语义），`Health` 是条件字段；
+  `RemoteEntityRegistry.ApplySnapshot` 按掩码位更新 `view.Hp/MaxHp/IsDefending/Dead`，再推给
+  `NetworkTargetable.SetVitals`；视图因缺席超时删除后重建时，用同 LifeId 的 last-known 回填
+  （见上文）。`INetworkLabelSink` 同步名牌血条（bot 不注册名牌）。`NetworkTargetable.CurrentHP` 是显示口径
   `Max(0, CeilToInt(Hp))`——服务端余血可为负（`ApplyDamage` 不钳制），UI 口径钳到 0。
 - **远程死亡序列**：`RemoteEntityAnimator` 状态机 `Death`（倒下）→ `Down`（躺卧，霸体）→
   `GetUp` → `None`。`Dead` 是**状态**不是边沿事件，重复 `dead=true` 不重置死亡计时；

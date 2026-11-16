@@ -285,6 +285,50 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void Expired_ActiveCast_Is_Not_Replayed()
+        {
+            var root = new GameObject("ExpiredActiveCast");
+            try
+            {
+                var registry = new RemoteEntityRegistry(root.transform);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2L,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                    X = 0f, Y = 0f, Z = 0f, Kind = (byte)EntityKind.Player, Tick = 1
+                }, serverTicks: 1_000_000L);
+                var view = registry.GetView(2L);
+                Assert.IsNotNull(view);
+                var animator = root.AddComponent<RemoteEntityAnimator>();
+                view!.Animator = animator;
+
+                var presenter = new RemoteCastPresenter(registry, localPlayerId: 1L, LoadCatalog(),
+                    serverTickProvider: () => 100u);
+
+                // EndTick <= 当前服务器 tick：早已结束，不播也不占去重槽
+                presenter.OnActiveCast(2L, new ActiveCastProjection
+                {
+                    CastId = 95, SkillId = 10002, EndTick = 100
+                });
+                Assert.AreEqual(0, animator.AttackStartsForTest, "过期施法不补播");
+                Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
+                    "过期施法不占用去重槽");
+
+                // 未到期：正常起手
+                presenter.OnActiveCast(2L, new ActiveCastProjection
+                {
+                    CastId = 96, SkillId = 10002, EndTick = 130
+                });
+                Assert.AreEqual(1, animator.AttackStartsForTest);
+                Assert.AreEqual(1, presenter.ActiveCastPlayedCountForTest);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
         public void ActiveCast_Cancel_Stops_Presented_Attack()
         {
             var root = new GameObject("ActiveCastCancel");

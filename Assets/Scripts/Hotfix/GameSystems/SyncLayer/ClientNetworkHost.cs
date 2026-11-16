@@ -997,9 +997,14 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleNpcAction(NpcActionEvent evt)
             => _remoteEntities?.ApplyNpcActionEvent(evt);
 
-        /// <summary>战斗投影 → registry 版本合并（活动施法经 ActiveCastApplied 事件交 presenter）</summary>
+        /// <summary>战斗投影 → registry 版本合并（活动施法经 ActiveCastApplied 事件交 presenter）。
+        /// 本人的投影暂不消费（本地状态由 3C/技能执行器权威维护；镜像属 Plan 03/04）——
+        /// 必须在此早退，不能交给 registry 的未知实体缓存（会一直滞留到换世界）。</summary>
         private void HandleCombatStateUpdate(CombatStateUpdate update)
-            => _remoteEntities?.ApplyCombatStateUpdate(update);
+        {
+            if (update == null || update.EntityId == _manager?.LocalPlayerId) return;
+            _remoteEntities?.ApplyCombatStateUpdate(update);
+        }
 
         /// <summary>投影成功合并且携带活动施法 → 远程施法表现（presenter 内按 CastId 去重）</summary>
         private void HandleActiveCastApplied(long entityId, ActiveCastProjection activeCast)
