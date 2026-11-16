@@ -40,6 +40,9 @@ namespace Hotfix.GameSystems.SyncLayer
         public string ZoneId { get; private set; } = string.Empty;
         public long ServerTickRateMs { get; private set; } = 67;
 
+        /// <summary>最近一条世界快照的服务器 tick（活动施法剩余时长等 tick 口径读数用）。</summary>
+        public uint ServerTick { get; private set; }
+
         /// <summary>服务端启用的能力位（属性剑气只在该位开启时消费新消息）。</summary>
         public uint EnabledFeatures { get; private set; }
 
@@ -196,6 +199,7 @@ namespace Hotfix.GameSystems.SyncLayer
             // 主线程消费快照（RemoteEntityRegistry 的 Unity API 必须主线程）
             while (_pendingSnapshots.TryDequeue(out var snapshot))
             {
+                ServerTick = snapshot.Tick;
                 foreach (var entity in snapshot.Entities)
                 {
                     if (entity.PlayerId == LocalPlayerId) continue; // 本地玩家跳过

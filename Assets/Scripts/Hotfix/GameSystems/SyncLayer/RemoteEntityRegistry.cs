@@ -69,6 +69,13 @@ namespace Hotfix.GameSystems.SyncLayer
             _npcActions = new Dictionary<(long, uint, ulong), NpcActionSnapshot>();
         private readonly List<PendingAction> _pendingNpcActions = new List<PendingAction>();
 
+        /// <summary>
+        /// 视图未建时先到的战斗投影（服务端基线之前就可能发出 CombatStateUpdate）；
+        /// 有界缓存，基线建视图后按 EntityId 回放，LifeId 不匹配的由 ApplyProjection 丢弃。
+        /// </summary>
+        private readonly List<(long EntityId, CombatProjection Projection)> _pendingCombat =
+            new List<(long, CombatProjection)>();
+
         /// <summary>落地采样游标（每实体一份）：上次采样的 XZ + 结果，见 <see cref="GroundY"/></summary>
         private readonly Dictionary<long, GroundSample> _groundSamples = new Dictionary<long, GroundSample>();
         /// <summary>采过的那具地形碰撞体（来自物理查询本身——本类是普通类，不许 GetComponent）</summary>
@@ -174,6 +181,8 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 view.Hp = snapshot.Hp;
                 view.MaxHp = snapshot.MaxHp;
+                // 血量变化与战斗投影共用同一版本戳（服务端每次改血都递增）
+                if (snapshot.CombatVersion != 0) view.CombatVersion = snapshot.CombatVersion;
             }
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Defending) != 0)
                 view.IsDefending = snapshot.IsDefending;
@@ -209,6 +218,19 @@ namespace Hotfix.GameSystems.SyncLayer
                 ApplyNpcAction(pending.EntityId, view, pending.LifeId, pending.Action);
             }
 
+            // 战斗投影基线（Plan 02 Part B）：与 CombatStateUpdate 共用 ApplyProjection，
+            // 版本门/LifeId 门一致。基线先于缓存回放——缓存里的较旧版本自然被丢弃。
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Combat) != 0
+                && snapshot.Combat != null)
+                ApplyProjection(snapshot.PlayerId, view, snapshot.Combat);
+            for (int i = _pendingCombat.Count - 1; i >= 0; i--)
+            {
+                if (_pendingCombat[i].EntityId != snapshot.PlayerId) continue;
+                var projection = _pendingCombat[i].Projection;
+                _pendingCombat.RemoveAt(i);
+                ApplyProjection(snapshot.PlayerId, view, projection);
+            }
+
             if (created) ViewCreated?.Invoke(snapshot.PlayerId);
 
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Position) != 0)
@@ -224,6 +246,59 @@ namespace Hotfix.GameSystems.SyncLayer
                     snapshot.ActionState, view.Dead);   // Dead 是条件字段：样本带存值
                 _lastSampleTicks[snapshot.PlayerId] = serverTicks; // 只在真收到样本时刷新
             }
+        }
+
+        /// <summary>
+        /// 战斗投影更新（服务端可靠、完整的投影）：视图已建则按 (LifeId, CombatVersion)
+        /// 合并后应用；视图未建（AOI 基线先于基线快照到达）则先进有界缓存，
+        /// 等 ApplySnapshot 建视图后按 EntityId 回放。
+        /// </summary>
+        public void ApplyCombatStateUpdate(CombatStateUpdate update)
+        {
+            if (update?.Projection == null) return;
+            if (!_views.TryGetValue(update.EntityId, out var view))
+            {
+                CacheCombatProjection(update.EntityId, update.Projection);
+                return;
+            }
+            ApplyProjection(update.EntityId, view, update.Projection);
+        }
+
+        private void CacheCombatProjection(long entityId, CombatProjection projection)
+        {
+            if (_pendingCombat.Count >= 64) _pendingCombat.RemoveAt(0);
+            _pendingCombat.Add((entityId, projection));
+        }
+
+        /// <summary>
+        /// 单一 CombatVersion 原子合并（Plan 02 Part B；状态分版本合并留 Plan 04）：
+        ///  - 旧 LifeId 丢弃（上一世代迟到的投影）；
+        ///  - 新 LifeId 先缓存（等该世代的基线快照建/更新视图）；
+        ///  - 同 Life 下 CombatVersion 更小丢弃（相等视为幂等重放，基线同版本也要应用）。
+        /// Equipment/Control 只存储（不替换远端模型、不改 3C），HP/Dead/IsDefending 同步
+        /// Targetable 与 Animator。Statuses 为空列表即清空旧状态。
+        /// </summary>
+        private void ApplyProjection(long entityId, RemoteEntityView view, CombatProjection projection)
+        {
+            if (projection.LifeId != 0 && view.LifeId == 0) view.LifeId = projection.LifeId;
+            if (projection.LifeId != 0 && view.LifeId != 0 && projection.LifeId < view.LifeId) return;
+            if (projection.LifeId > view.LifeId)
+            {
+                CacheCombatProjection(entityId, projection);
+                return;
+            }
+            if (projection.CombatVersion < view.CombatVersion) return;
+
+            view.CombatVersion = projection.CombatVersion;
+            view.Hp = projection.Hp;
+            view.MaxHp = projection.MaxHp;
+            view.Dead = projection.Dead;
+            view.IsDefending = projection.IsDefending;
+            view.Equipment = projection.Equipment;
+            view.Control = projection.Control;
+            view.Statuses = projection.Statuses;
+            view.Targetable.SetVitals(view.Hp, view.MaxHp, view.Dead);
+            view.Animator?.ApplySnapshotState(view.Dead);
         }
 
         /// <summary>
@@ -712,6 +787,9 @@ namespace Hotfix.GameSystems.SyncLayer
                 _labelSink?.UpdateHp(playerId, targetable.HPPercent); // 首帧直接用快照 HP，不显示 0
             }
 
+            // 版本起点：该基线的 CombatVersion（同版本投影仍会应用——见 ApplyProjection）
+            view.CombatVersion = snapshot.CombatVersion;
+
             return view;
         }
 
@@ -849,6 +927,15 @@ namespace Hotfix.GameSystems.SyncLayer
         public uint ActionRevision { get; set; }
         /// <summary>实体生命代次（NpcAction 合并键；0 = 未知/旧服务端）</summary>
         public uint LifeId { get; set; }
+        /// <summary>服务端战斗投影版本（Combat 投影的单调版本戳）</summary>
+        public uint CombatVersion { get; set; }
+        /// <summary>服务端权威装备摘要（只存储——远端模型不随它替换）</summary>
+        public EquipmentSummary? Equipment { get; set; }
+        /// <summary>服务端权威控制摘要（只存储——不改 3C 行为）</summary>
+        public ControlSummary? Control { get; set; }
+        /// <summary>状态投影（与 CombatVersion 原子合并；空列表 = 清空旧状态）</summary>
+        public System.Collections.Generic.IList<StatusProjection> Statuses { get; set; }
+            = new System.Collections.Generic.List<StatusProjection>();
         /// <summary>服务端权威存活状态（D-N1：命名 Dead——protobuf 零默认让"活着"不占字节）</summary>
         public bool Dead { get; set; }
         /// <summary>服务端权威当前血量（最近一次带 Health 位的快照）</summary>

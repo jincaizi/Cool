@@ -69,6 +69,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>Npc 动作阶段广播（客户端动作存储 + 取消表现）</summary>
         public event Action<NpcActionEvent>? OnNpcAction;
 
+        /// <summary>战斗投影更新（版本合并 + 活动施法表现）</summary>
+        public event Action<CombatStateUpdate>? OnCombatStateUpdate;
+
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
             RemoteEntityRegistry registry,
             Action<long, float, bool, Vector3, float, bool, bool>? onDamageToLocalPlayer = null,
@@ -144,6 +147,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 case MessageId.ProjectileStopBroadcast:
                 case MessageId.CastCancelBroadcast:
                 case MessageId.NpcActionEvent:
+                case MessageId.CombatStateUpdate:
                     _incoming.Enqueue(message);
                     break;
             }
@@ -182,6 +186,9 @@ namespace Hotfix.GameSystems.SyncLayer
                         break;
                     case NpcActionEvent npcAction:
                         OnNpcAction?.Invoke(npcAction);
+                        break;
+                    case CombatStateUpdate combatUpdate:
+                        OnCombatStateUpdate?.Invoke(combatUpdate);
                         break;
                 }
             }

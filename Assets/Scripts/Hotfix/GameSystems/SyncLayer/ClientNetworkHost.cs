@@ -801,12 +801,14 @@ namespace Hotfix.GameSystems.SyncLayer
             _remoteCastPresenter = new RemoteCastPresenter(
                 _remoteEntities!, _manager!.LocalPlayerId, _skillCatalog,
                 sceneIdProvider: () => _manager?.ZoneId ?? "",
-                serverNowTicksProvider: () => _manager?.ServerNowTicks ?? 0);
+                serverNowTicksProvider: () => _manager?.ServerNowTicks ?? 0,
+                serverTickProvider: () => _manager?.ServerTick ?? 0);
             _combatBridge.OnDamageResult += HandleRemoteDamageResult;
             _combatBridge.OnProjectileLaunch += _remoteCastPresenter.OnProjectileLaunch;
             _combatBridge.OnProjectileStop += _remoteCastPresenter.OnProjectileStop;
             _combatBridge.OnCastCancel += HandleCastCancel;
             _combatBridge.OnNpcAction += HandleNpcAction;
+            _combatBridge.OnCombatStateUpdate += HandleCombatStateUpdate;
             _remoteEntities!.ViewRemoved += _remoteCastPresenter.ClearForEntity;
 
             // 启用属性剑气后关闭本地剑气生成：视觉统一由服务端发射描述创建。
@@ -990,6 +992,14 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleNpcAction(NpcActionEvent evt)
             => _remoteEntities?.ApplyNpcActionEvent(evt);
 
+        /// <summary>战斗投影 → registry 版本合并；活动施法另交 presenter 播放攻击表现</summary>
+        private void HandleCombatStateUpdate(CombatStateUpdate update)
+        {
+            _remoteEntities?.ApplyCombatStateUpdate(update);
+            if (update?.Projection?.ActiveCast != null)
+                _remoteCastPresenter?.OnActiveCast(update.EntityId, update.Projection.ActiveCast);
+        }
+
         /// <summary>
         /// 摘除目标锁定（断线 / 本地角色重建 / 宿主销毁共用）：先退订 AOI 视图移除，
         /// 再让 selector 清锁解绑并断开引用——组件本身留在本地角色上（可复用），
@@ -1035,6 +1045,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _combatBridge.OnDamageResult -= HandleRemoteDamageResult;
                 _combatBridge.OnCastCancel -= HandleCastCancel;
                 _combatBridge.OnNpcAction -= HandleNpcAction;
+                _combatBridge.OnCombatStateUpdate -= HandleCombatStateUpdate;
                 if (_remoteCastPresenter != null)
                 {
                     _combatBridge.OnProjectileLaunch -= _remoteCastPresenter.OnProjectileLaunch;

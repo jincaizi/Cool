@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cool.Protocol;
+using Cool.SyncCore;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Runtime.Meteor;
@@ -95,6 +96,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Func<SkillData, Vector3, Vector3, float, IRemoteProjectileVisual?>? _launchProjectileFactory;
         private readonly Func<string>? _sceneIdProvider;
         private readonly Func<long>? _serverNowTicksProvider;
+        /// <summary>最近世界快照的服务器 tick（活动施法剩余时长按 EndTick − 它换算）</summary>
+        private readonly Func<uint>? _serverTickProvider;
         private readonly List<Tracked> _tracked = new List<Tracked>();
         private readonly Dictionary<ulong, TrackedCast> _castVisuals = new Dictionary<ulong, TrackedCast>();
         private readonly Dictionary<ulong, int> _castSkillIds = new Dictionary<ulong, int>();
@@ -123,7 +126,8 @@ namespace Hotfix.GameSystems.SyncLayer
             Action<MeteorConfig, DamageBlock, Vector3>? meteorSpawner = null,
             Func<SkillData, Vector3, Vector3, float, IRemoteProjectileVisual?>? launchProjectileFactory = null,
             Func<string>? sceneIdProvider = null,
-            Func<long>? serverNowTicksProvider = null)
+            Func<long>? serverNowTicksProvider = null,
+            Func<uint>? serverTickProvider = null)
         {
             _registry = registry;
             _localPlayerId = localPlayerId;
@@ -135,6 +139,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _launchProjectileFactory = launchProjectileFactory;
             _sceneIdProvider = sceneIdProvider;
             _serverNowTicksProvider = serverNowTicksProvider;
+            _serverTickProvider = serverTickProvider;
         }
 
         /// <summary>收到远程玩家的施法广播（CombatNetworkBridge.Update 主线程调用）。</summary>
@@ -268,6 +273,30 @@ namespace Hotfix.GameSystems.SyncLayer
                 && _registry?.GetView(casterId) is { } view)
                 view.Animator?.CancelAttack(cancel.CastId);
             // 已发射的 _castVisuals 保留飞行；取消只停止攻击表现。
+        }
+
+        /// <summary>
+        /// 活动施法投影（CombatStateUpdate）：投影只是权威"正在施法"的快照，
+        /// 用 EndTick − 当前服务器 tick 计算剩余时长，播放攻击动画（与 CastBroadcast 共用
+        /// CastId 取消通道）。只处理远程玩家（本地玩家由 SkillExecutor 负责，NPC 走排程）。
+        /// </summary>
+        public void OnActiveCast(long entityId, ActiveCastProjection activeCast)
+        {
+            if (_registry == null || _catalog == null || activeCast == null) return;
+            if (entityId == _localPlayerId) return;
+            var view = _registry.GetView(entityId);
+            if (view == null || view.Kind != (byte)EntityKind.Player) return;
+            if (!_catalog.TryGet(activeCast.SkillId, out var data)) return;
+
+            float remaining = DefaultAttackDuration;
+            if (_serverTickProvider != null && activeCast.EndTick > _serverTickProvider())
+                remaining = (activeCast.EndTick - _serverTickProvider())
+                            / (float)CombatRules.TickRateHz;
+
+            float duration = (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length
+                             ?? DefaultAttackDuration;
+            view.Animator?.PlayAttack(data.AnimatorTrigger,
+                Mathf.Min(duration, Mathf.Max(0.1f, remaining)), 1f, activeCast.CastId);
         }
 
         private float ComputeStartDistance(ProjectileLaunchBroadcast launch)
