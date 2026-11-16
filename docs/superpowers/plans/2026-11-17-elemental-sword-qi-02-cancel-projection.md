@@ -658,6 +658,16 @@ public class NpcActionChainTests
                         _monsterModule.CaptureActionHistory((uint)tick);
 ```
 
+同时在既有 `DrainRemovedNpcs` 循环里追加 `_lastNpcActions.Remove(npcId)`，避免怪物死亡换 id 重生后版本缓存无界增长：
+
+```csharp
+                        foreach (var npcId in _monsterModule.DrainRemovedNpcs())
+                        {
+                            _aoi.RemoveEntity(npcId);
+                            _lastNpcActions.Remove(npcId);
+                        }
+```
+
 - [ ] **步骤 4：运行测试验证通过**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~NpcActionChainTests"`
