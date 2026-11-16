@@ -298,6 +298,26 @@ public class CastCancelBroadcastTests
     }
 
     [Fact]
+    public void Cancel_After_Launch_Keeps_Pending_And_Deduplicates()
+    {
+        var (store, resolver) = NewWorld();
+        var cast = resolver.Decide(1, Cast(), 10);
+        Assert.True(cast.Accepted);
+
+        // 10002 首段 = decide + ceil(0.35s*15) = 16；三段的段末在 16/20/23。
+        var firstStages = resolver.DrainResolved(21);
+        Assert.Contains(firstStages, r => r.Launch != null);
+        Assert.True(cast.CastId != 0);
+
+        var cancels = resolver.CancelPending(1, 10002, cast.CastId, 22,
+            NpcActionCancelReason.Hit);
+        Assert.Single(cancels);
+        Assert.Empty(resolver.CancelPending(1, 10002, cast.CastId, 23,
+            NpcActionCancelReason.Hit));
+        Assert.NotEmpty(resolver.DrainResolved(30));
+    }
+
+    [Fact]
     public void CancelPending_Without_CastId_Cancels_The_Requested_Skill()
     {
         var (store, resolver) = NewWorld();
@@ -386,6 +406,9 @@ public class CastCancelBroadcastTests
 ```csharp
         public async Task BroadcastCancelAsync(IReadOnlyList<CastCancelBroadcast> cancels)
         {
+            // 先把全部收件人取好：UnregisterEntity 在 BroadcastCancel 返回后会立刻移除实体，
+            // 首个 await 之后的 GetEntity 会返回 null，后续取消会静默丢失。
+            var sends = new List<(IServerSession Session, CastCancelBroadcast Cancel)>();
             foreach (var cancel in cancels)
             {
                 var caster = _server.GetEntity(cancel.CasterPlayerId);
@@ -395,11 +418,13 @@ public class CastCancelBroadcastTests
                 foreach (var recipientId in recipients)
                 {
                     var session = _server.GetSession(recipientId);
-                    if (session != null)
-                        await _server.SendToSessionAsync(session,
-                            MessageId.CastCancelBroadcast, cancel);
+                    if (session != null) sends.Add((session, cancel));
                 }
             }
+
+            foreach (var (session, cancel) in sends)
+                await _server.SendToSessionAsync(session,
+                    MessageId.CastCancelBroadcast, cancel);
         }
 
         public void BroadcastCancel(IReadOnlyList<CastCancelBroadcast> cancels)
