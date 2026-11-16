@@ -160,6 +160,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         [Test]
         public void ApplyAction_Cancel_Clears_The_Matching_Instance()
         {
+            _driver.PlayAttack(0); // CastBroadcast → NpcAttackSchedule 驱动起手
             _driver.ApplyAction(new NpcActionSnapshot
             {
                 InstanceId = 3, Revision = 1, Kind = NpcActionKind.Skill,

@@ -129,8 +129,9 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// 应用服务端 NpcAction 状态（阶段广播 / AOI 基线）。技能动作在起手阶段播放挥砍，
-        /// 取消阶段停止当前动作实例；受击/死亡走既有状态写入。
+        /// 应用服务端 NpcAction 状态（阶段广播 / AOI 基线）。技能动作只跟踪实例、取消时停止当前实例；
+        /// 起手仍由 CastBroadcast → NpcAttackSchedule 驱动（避免同一次施法挥两次）；
+        /// 受击/死亡走既有状态写入。
         /// </summary>
         public void ApplyAction(NpcActionSnapshot action)
         {
@@ -138,9 +139,9 @@ namespace Hotfix.GameSystems.SyncLayer
             switch (action.Kind)
             {
                 case NpcActionKind.Skill:
-                    if (action.Phase is NpcActionPhase.Accepted or NpcActionPhase.Windup)
-                        PlayAttack(action.PresentationVariant);
-                    else if (action.Phase == NpcActionPhase.Cancelled)
+                    // Plan 02 保留 CastBroadcast → NpcAttackSchedule 作为攻击起手驱动；
+                    // NpcActionEvent 只跟踪实例并在 Cancelled 时停止，避免双播。
+                    if (action.Phase == NpcActionPhase.Cancelled)
                         CancelAttack(action.InstanceId);
                     break;
                 case NpcActionKind.HitReaction:

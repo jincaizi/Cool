@@ -266,7 +266,11 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_npcActions.Count > 256) _npcActions.Clear();
             view.NpcAnimator?.ApplyAction(action);
             if (action.Phase == NpcActionPhase.Cancelled)
+            {
+                // 取消后到点的排程不得再起手（起手由 CastBroadcast → NpcAttackSchedule 驱动）。
+                _attacks.Clear(entityId);
                 view.NpcAnimator?.CancelAttack(action.InstanceId);
+            }
         }
 
         /// <summary>
