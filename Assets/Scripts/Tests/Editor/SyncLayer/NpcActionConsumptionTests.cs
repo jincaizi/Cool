@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cool.Protocol;
 using Hotfix.GameSystems.SyncLayer;
 using NUnit.Framework;
@@ -162,6 +163,72 @@ namespace GameSys.EditorTests
             Assert.IsNotNull(view);
             Assert.AreEqual(10UL, view!.ActionInstanceId,
                 "an older action instance must not cancel the newer one");
+        }
+
+        [Test]
+        public void test_newer_instance_stops_the_previous_attack()
+        {
+            const string controllerPath = "Assets/Tests_TempNpcActionSupersede.controller";
+            var controller = UnityEditor.Animations.AnimatorController
+                .CreateAnimatorControllerAtPath(controllerPath);
+            controller.AddParameter("MonsterState", AnimatorControllerParameterType.Int);
+            controller.AddParameter("AttackVariant", AnimatorControllerParameterType.Int);
+            controller.AddParameter("Attack", AnimatorControllerParameterType.Trigger);
+
+            var prefab = new GameObject("NpcActionSupersedePrefab");
+            var prefabAnimator = prefab.AddComponent<Animator>();
+            prefabAnimator.runtimeAnimatorController = controller;
+
+            try
+            {
+                var registry = new RemoteEntityRegistry(_root.transform,
+                    npcPrefabs: new Dictionary<int, GameObject> { [1] = prefab });
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 14, Kind = (byte)EntityKind.Npc, TemplateId = 1,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead),
+                    X = 0f, Z = 0f, Dead = false, LifeId = 1
+                }, 1);
+
+                var view = registry.GetView(14);
+                Assert.IsNotNull(view);
+                view!.NpcAnimator!.ResolveAnimator();   // EditMode 下 AddComponent 不触发 Awake
+
+                registry.ApplyNpcActionEvent(new NpcActionEvent
+                {
+                    EntityId = 14, LifeId = 1,
+                    Action = new NpcActionSnapshot
+                    {
+                        InstanceId = 20, Revision = 1, Kind = NpcActionKind.Skill,
+                        Phase = NpcActionPhase.Active
+                    }
+                });
+
+                view.NpcAnimator.PlayAttack(0);   // CastBroadcast → NpcAttackSchedule 起手
+                var animator = view.NpcAnimator.GetComponentInChildren<Animator>();
+                Assert.AreEqual(NpcEntityAnimator.StateAttacking,
+                    animator.GetInteger("MonsterState"));
+
+                registry.ApplyNpcActionEvent(new NpcActionEvent
+                {
+                    EntityId = 14, LifeId = 1,
+                    Action = new NpcActionSnapshot
+                    {
+                        InstanceId = 21, Revision = 1, Kind = NpcActionKind.Skill,
+                        Phase = NpcActionPhase.Active
+                    }
+                });
+
+                Assert.AreEqual(21UL, view.ActionInstanceId);
+                Assert.AreEqual(NpcEntityAnimator.StateIdle,
+                    animator.GetInteger("MonsterState"),
+                    "superseded instance's scheduled attack must be stopped");
+            }
+            finally
+            {
+                Object.DestroyImmediate(prefab);
+                UnityEditor.AssetDatabase.DeleteAsset(controllerPath);
+            }
         }
     }
 }

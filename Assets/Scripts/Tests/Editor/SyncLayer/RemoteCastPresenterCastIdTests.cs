@@ -199,5 +199,40 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 "an already launched projectile keeps flying after cancel");
             Assert.AreEqual(0, visual.Stops);
         }
+
+        [Test]
+        public void Cancel_Before_Cast_Broadcast_Skips_All_Presentation()
+        {
+            var root = new GameObject("CancelBeforeCastBroadcast");
+            try
+            {
+                var registry = new RemoteEntityRegistry(root.transform);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2L,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                    X = 0f, Y = 0f, Z = 0f, Kind = (byte)EntityKind.Player, Tick = 1
+                }, serverTicks: 1_000_000L);
+
+                int factoryCalls = 0;
+                var presenter = new RemoteCastPresenter(registry, localPlayerId: 1L, LoadCatalog(),
+                    projectileFactory: (_, __, ___) => { factoryCalls++; return new FakeVisual(); },
+                    sceneIdProvider: () => "room-a");
+
+                presenter.OnCastCancel(new CastCancelBroadcast { CastId = 700 });
+                presenter.OnCastBroadcast(new CastBroadcast
+                {
+                    CastId = 700, CasterPlayerId = 2L, SkillId = 20003,
+                    AttackSpeedMultiplier = 1f
+                });
+
+                Assert.AreEqual(0, factoryCalls,
+                    "cancel arrived first must skip the whole cast presentation");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
     }
 }

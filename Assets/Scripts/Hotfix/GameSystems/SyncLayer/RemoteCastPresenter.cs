@@ -145,6 +145,10 @@ namespace Hotfix.GameSystems.SyncLayer
             if (broadcast.CastId != 0)
                 RememberCastSkill(broadcast.CastId, broadcast.SkillId, broadcast.CasterPlayerId);
 
+            // 取消先到：整条施法表现都不补（CastVFX / 非权威剑气 / ReleaseVFX / Meteor）。
+            if (broadcast.CastId != 0 && _cancelledCasts.Contains(broadcast.CastId))
+                return;
+
             if (_registry == null || _catalog == null) return;
             if (broadcast.CasterPlayerId == _localPlayerId) return;
 
@@ -153,11 +157,9 @@ namespace Hotfix.GameSystems.SyncLayer
             if (!_catalog.TryGet(broadcast.SkillId, out var data)) return;
 
             // 立即播放：伤害结果可能先于下一帧到达，等它再播会让挥砍落后于受击。
-            // 取消先到的施法不再补播挥砍（剑气已在空中则继续飞）。
-            if (!_cancelledCasts.Contains(broadcast.CastId))
-                view.Animator?.PlayAttack(data.AnimatorTrigger,
-                    (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length ?? DefaultAttackDuration,
-                    broadcast.AttackSpeedMultiplier, broadcast.CastId);
+            view.Animator?.PlayAttack(data.AnimatorTrigger,
+                (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length ?? DefaultAttackDuration,
+                broadcast.AttackSpeedMultiplier, broadcast.CastId);
 
             var presentation = GetPresentation(data);
             if (presentation?.CastVFX != null)
@@ -260,8 +262,8 @@ namespace Hotfix.GameSystems.SyncLayer
         public void OnCastCancel(CastCancelBroadcast cancel)
         {
             if (cancel == null || cancel.CastId == 0) return;
+            if (_cancelledCasts.Count >= 256) _cancelledCasts.Clear();
             _cancelledCasts.Add(cancel.CastId);
-            if (_cancelledCasts.Count > 256) _cancelledCasts.Clear();
             if (_castCasters.TryGetValue(cancel.CastId, out var casterId)
                 && _registry?.GetView(casterId) is { } view)
                 view.Animator?.CancelAttack(cancel.CastId);
@@ -281,13 +283,13 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void RememberCastSkill(ulong castId, int skillId, long casterId)
         {
-            _castSkillIds[castId] = skillId;
-            _castCasters[castId] = casterId;
-            if (_castSkillIds.Count > 256)
+            if (_castSkillIds.Count >= 256)
             {
                 _castSkillIds.Clear();
                 _castCasters.Clear();
             }
+            _castSkillIds[castId] = skillId;
+            _castCasters[castId] = casterId;
         }
 
         private void PruneSeenLaunches()

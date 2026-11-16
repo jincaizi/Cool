@@ -260,13 +260,13 @@ namespace Hotfix.GameSystems.SyncLayer
             RefreshLayers();
         }
 
-        /// <summary>取消指定 CastId 的攻击表现（只匹配当前攻击；0 = 无身份，不匹配任何取消）。</summary>
+        /// <summary>取消指定 CastId 的攻击表现（只匹配当前攻击；0 = 不匹配任何攻击）。</summary>
         internal void CancelAttack(ulong castId)
         {
-            if (castId != 0 && _attackCastId != castId) return;
+            if (castId == 0 || _attackCastId != castId) return;
             _attackCastId = 0;
             _attackRemaining = 0f;
-            Reapply();
+            RefreshLayers();   // 只让攻击让位；不要调 Reapply()，它会清 _hitRemaining
         }
 
         internal float AttackSpeedForTest => _attackSpeed;
@@ -285,6 +285,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _hitRemaining = Mathf.Max(0.1f, duration);
             _hitBlocked = blocked;
             _attackRemaining = 0f;
+            _attackCastId = 0;            // 受击打断攻击：陈旧 CastId 不得匹配到后续取消
             _attackSpeed = 1f;
             _hitTriggerApplied = false;   // 新一次受击事件：允许再次点 Trigger `Hit`
             RefreshLayers();
@@ -307,7 +308,11 @@ namespace Hotfix.GameSystems.SyncLayer
             // 进入 Death / GetUp 后的下一帧（首个 Tick）用真实剪辑长度校准计时器。
             if (_deathDurationNeedsCalibration) TryCalibrateDeathDuration();
 
-            if (_attackRemaining > 0f) _attackRemaining = Mathf.Max(0f, _attackRemaining - deltaTime);
+            if (_attackRemaining > 0f)
+            {
+                _attackRemaining = Mathf.Max(0f, _attackRemaining - deltaTime);
+                if (_attackRemaining <= 0f) _attackCastId = 0;   // 自然到期：陈旧 CastId 不再匹配取消
+            }
             if (_hitRemaining > 0f) _hitRemaining = Mathf.Max(0f, _hitRemaining - deltaTime);
             if (_deathRemaining > 0f) _deathRemaining = Mathf.Max(0f, _deathRemaining - deltaTime);
 

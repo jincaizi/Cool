@@ -259,6 +259,13 @@ namespace Hotfix.GameSystems.SyncLayer
                 return;
             if (view.ActionInstanceId == action.InstanceId && action.Revision <= view.ActionRevision)
                 return;
+            // 新实例取代旧实例（命中打断后服务端直接覆盖 _current、客户端看不到 Cancelled）：
+            // 旧排程/挥砍必须当场作废，避免新动作已经生效后旧攻击又到点起手。
+            if (view.ActionInstanceId != 0 && action.InstanceId > view.ActionInstanceId)
+            {
+                _attacks.Clear(entityId);
+                view.NpcAnimator?.CancelAttack(view.ActionInstanceId);
+            }
             view.ActionInstanceId = action.InstanceId;
             view.ActionRevision = action.Revision;
             if (lifeId != 0) view.LifeId = lifeId;
