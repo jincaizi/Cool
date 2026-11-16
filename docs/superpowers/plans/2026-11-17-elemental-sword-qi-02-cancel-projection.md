@@ -542,6 +542,35 @@ public class NpcActionChainTests
         Assert.NotNull(snapshot.NpcAction);
         Assert.NotEqual(0, snapshot.FieldMask & (ushort)EntityFieldMask.NpcAction);
     }
+
+    [Theory]
+    [InlineData(NpcActionKind.Idle, false)]
+    [InlineData(NpcActionKind.Move, false)]
+    [InlineData(NpcActionKind.Skill, true)]
+    [InlineData(NpcActionKind.HitReaction, true)]
+    [InlineData(NpcActionKind.Death, true)]
+    public void Only_Non_Continuous_Actions_Broadcast(NpcActionKind kind, bool expected)
+        => Assert.Equal(expected, Server3C.IsNpcActionBroadcastKind(kind));
+
+    [Fact]
+    public void Same_Instance_And_Revision_Is_Deduplicated()
+    {
+        Assert.True(Server3C.IsSameNpcAction(5, 2,
+            new NpcActionSnapshot { InstanceId = 5, Revision = 2 }));
+        Assert.False(Server3C.IsSameNpcAction(5, 2,
+            new NpcActionSnapshot { InstanceId = 5, Revision = 3 }));
+        Assert.False(Server3C.IsSameNpcAction(5, 2,
+            new NpcActionSnapshot { InstanceId = 6, Revision = 2 }));
+    }
+
+    [Fact]
+    public void Different_Zone_Is_Not_The_Same_Combat_Scene()
+    {
+        var a = new PlayerState(1) { ZoneId = "room-a" };
+        var b = new PlayerState(2) { ZoneId = "room-b" };
+        Assert.True(Server3C.IsSameCombatScene(a, a));
+        Assert.False(Server3C.IsSameCombatScene(a, b));
+    }
 }
 ```
 
@@ -622,16 +651,14 @@ public class NpcActionChainTests
             if (_monsterModule == null) return;
             foreach (var (npcId, action) in _monsterModule.GetActionSnapshots())
             {
-                // Continuous Idle/Move 由 ActionState 快照驱动；事件只发技能/受击/死亡阶段。
-                if (action.Kind is NpcActionKind.Idle or NpcActionKind.Move) continue;
+                if (!IsNpcActionBroadcastKind(action.Kind)) continue;
                 if (_lastNpcActions.TryGetValue(npcId, out var last)
-                    && last.InstanceId == action.InstanceId
-                    && last.Revision == action.Revision)
+                    && IsSameNpcAction(last.InstanceId, last.Revision, action))
                     continue;
 
-                _lastNpcActions[npcId] = (action.InstanceId, action.Revision);
                 var entity = _entityStore.GetPlayer(npcId);
                 if (entity == null) continue;
+                _lastNpcActions[npcId] = (action.InstanceId, action.Revision);
 
                 var message = new NpcActionEvent
                 {
@@ -643,12 +670,23 @@ public class NpcActionChainTests
 
                 foreach (var observerId in GetObserversOf(npcId))
                 {
+                    if (!IsSameCombatScene(entity, _entityStore.GetPlayer(observerId))) continue;
                     var session = GetSession(observerId);
                     if (session != null)
                         _ = SendToSessionAsync(session, MessageId.NpcActionEvent, message);
                 }
             }
         }
+
+        internal static bool IsNpcActionBroadcastKind(NpcActionKind kind)
+            => kind is not (NpcActionKind.Idle or NpcActionKind.Move);
+
+        internal static bool IsSameNpcAction(ulong instanceId, uint revision,
+            NpcActionSnapshot action)
+            => instanceId == action.InstanceId && revision == action.Revision;
+
+        internal static bool IsSameCombatScene(PlayerState entity, PlayerState? observer)
+            => entity.ZoneId.Length == 0 || observer?.ZoneId == entity.ZoneId;
 ```
 
 在 tick lambda 的 `_monsterModule.Tick((uint)tick);` 之后、`DrainPendingCasts` 之前调用：
