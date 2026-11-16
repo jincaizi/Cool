@@ -848,6 +848,28 @@ namespace GameSys.EditorTests
             Assert.AreEqual(8UL, view!.ActionInstanceId);
             Assert.AreEqual(3u, view.ActionRevision);
         }
+
+        [Test]
+        public void test_baseline_snapshot_applies_npc_action()
+        {
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 11, Kind = (byte)EntityKind.Npc, TemplateId = 1,
+                FieldMask = (ushort)(EntityFieldMask.Position
+                    | EntityFieldMask.Dead | EntityFieldMask.NpcAction),
+                X = 0f, Z = 0f, Dead = false, LifeId = 2,
+                NpcAction = new NpcActionSnapshot
+                {
+                    InstanceId = 7, Revision = 1, Kind = NpcActionKind.Skill,
+                    Phase = NpcActionPhase.Windup
+                }
+            }, 1);
+
+            var view = _registry.GetView(11);
+            Assert.IsNotNull(view);
+            Assert.AreEqual(7UL, view!.ActionInstanceId);
+            Assert.AreEqual(1u, view.ActionRevision);
+        }
     }
 }
 ```
@@ -1006,6 +1028,9 @@ bash tools/unity-tests.sh EditMode RemoteCastPresenterCastIdTests
 
 ```csharp
             if (snapshot.LifeId != 0) view.LifeId = snapshot.LifeId;
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.NpcAction) != 0
+                && snapshot.NpcAction != null)
+                ApplyNpcAction(snapshot.PlayerId, view, snapshot.LifeId, snapshot.NpcAction);
             for (int i = _pendingNpcActions.Count - 1; i >= 0; i--)
             {
                 var pending = _pendingNpcActions[i];
