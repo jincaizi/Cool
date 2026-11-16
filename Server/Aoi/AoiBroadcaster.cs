@@ -6,7 +6,9 @@ namespace KcpServer
     /// <summary>
     /// per-observer 分级广播组装（spec §5-P3）——取代 SnapshotAssembler 的
     /// store 级 dirty/beacon 广播：每个 observer 每 tick 经 AoiGrid 取可见集、
-    /// AoiBandScheduler 按距离带节拍 + 移动/静止判定选出应发实体，组装当前全字段快照。
+    /// AoiBandScheduler 按距离带节拍 + 移动/静止判定选出应发实体，按发送原因组装快照：
+    /// Baseline 带全部条件字段（Dead/Health/Defending/NpcAction），Changed 只带翻转项，
+    /// Keepalive 只带位置/身份基础字段。
     /// 发送由 Server3C 注入（OnEntityBroadcast）；本类纯组装可单测。
     /// 主循环独占线程，无锁。实体注销经 RemoveEntity 清理 AOI 状态。
     /// </summary>
@@ -56,47 +58,67 @@ namespace KcpServer
                 float dx = entity.Position.X - ox, dz = entity.Position.Z - oz;
                 float distance = (float)System.Math.Sqrt(dx * dx + dz * dz);
 
-                // 基线判定必须先于 ShouldSend：首次发送会把 HasSent 置 true，之后再问会得到 false。
-                bool baseline = _scheduler.IsFirstSend(observer.PlayerId, entity.PlayerId);
-                if (_scheduler.ShouldSend(observer.PlayerId, entity.PlayerId, distance, tick,
+                var decision = _scheduler.ShouldSend(observer.PlayerId, entity.PlayerId, distance, tick,
                     entity.Position.X, entity.Position.Z, entity.Rotation,
                     entity.ActionState, !entity.IsAlive,
-                    entity.Hp, entity.MaxHp, entity.IsDefending))
+                    entity.Hp, entity.MaxHp, entity.IsDefending);
+                if (decision.Reason == AoiSendReason.None) continue;
+
+                // 条件字段：Dead/Health/Defending 只在基线或对应翻转时置位（客户端按位沿用 last-known）。
+                var mask = EntityFieldMask.Position | EntityFieldMask.Rotation
+                    | EntityFieldMask.Speed | EntityFieldMask.ActionState
+                    | EntityFieldMask.Kind | EntityFieldMask.TemplateId;
+                if (decision.Reason == AoiSendReason.Baseline
+                    || (decision.Changes & AoiChangeFlags.Dead) != 0)
+                    mask |= EntityFieldMask.Dead;
+                if (decision.Reason == AoiSendReason.Baseline
+                    || (decision.Changes & AoiChangeFlags.Health) != 0)
+                    mask |= EntityFieldMask.Health;
+                if (decision.Reason == AoiSendReason.Baseline
+                    || (decision.Changes & AoiChangeFlags.Defending) != 0)
+                    mask |= EntityFieldMask.Defending;
+
+                var snap = new EntitySnapshot
                 {
-                    var snap = new EntitySnapshot
-                    {
-                        PlayerId = entity.PlayerId,
-                        FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed
-                            | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId
-                            | EntityFieldMask.Dead                 // D-N2：每次快照都置位（存活是状态不是事件）
-                            | EntityFieldMask.Health | EntityFieldMask.Defending), // T3：血量/防御随每次快照下发
-                        X = entity.Position.X,
-                        Y = entity.Position.Y,
-                        Z = entity.Position.Z,
-                        Rotation = entity.Rotation,
-                        Speed = entity.Speed,
-                        Kind = entity.Kind,
-                        TemplateId = entity.TemplateId,
-                        ActionState = entity.ActionState,
-                        Dead = !entity.IsAlive,
-                        Hp = entity.Hp,
-                        MaxHp = entity.MaxHp,
-                        IsDefending = entity.IsDefending,
-                        LifeId = entity.LifeId,
-                        Tick = tick
-                    };
-                    if (baseline)
-                    {
-                        var action = NpcActionProvider?.Invoke(entity.PlayerId);
-                        if (action != null)
-                        {
-                            snap.NpcAction = action;
-                            snap.FieldMask |= (ushort)EntityFieldMask.NpcAction;
-                        }
-                    }
-                    result.Add(snap);
-                    OnEntityBroadcast?.Invoke(entity.PlayerId, snap);
+                    PlayerId = entity.PlayerId,
+                    FieldMask = (ushort)mask,
+                    X = entity.Position.X,
+                    Y = entity.Position.Y,
+                    Z = entity.Position.Z,
+                    Rotation = entity.Rotation,
+                    Speed = entity.Speed,
+                    Kind = entity.Kind,
+                    TemplateId = entity.TemplateId,
+                    ActionState = entity.ActionState,
+                    Tick = tick
+                };
+                if ((mask & EntityFieldMask.Dead) != 0)
+                    snap.Dead = !entity.IsAlive;
+                if ((mask & EntityFieldMask.Health) != 0)
+                {
+                    snap.Hp = entity.Hp;
+                    snap.MaxHp = entity.MaxHp;
                 }
+                if ((mask & EntityFieldMask.Defending) != 0)
+                    snap.IsDefending = entity.IsDefending;
+                if ((mask & EntityFieldMask.Health) != 0 || (mask & EntityFieldMask.Combat) != 0)
+                {
+                    snap.CombatVersion = entity.CombatVersion;
+                    snap.LifeId = entity.LifeId;
+                }
+
+                if (decision.Reason == AoiSendReason.Baseline)
+                {
+                    var action = NpcActionProvider?.Invoke(entity.PlayerId);
+                    if (action != null)
+                    {
+                        snap.NpcAction = action;
+                        snap.FieldMask |= (ushort)EntityFieldMask.NpcAction;
+                    }
+                    // 任务 8A：基线快照在此追加 EntityFieldMask.Combat 与 CombatProjection。
+                }
+                result.Add(snap);
+                OnEntityBroadcast?.Invoke(entity.PlayerId, snap);
             }
             return result;
         }

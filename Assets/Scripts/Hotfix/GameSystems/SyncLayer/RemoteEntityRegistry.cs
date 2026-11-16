@@ -160,14 +160,14 @@ namespace Hotfix.GameSystems.SyncLayer
             }
 
             // P5：Npc 动作状态（占位期仅存储供测试/上层观察——动画表现随真实模型 backlog）。
-            // 无条件覆盖安全前提：服务端唯一快照生产者（AoiBroadcaster.BuildForObserver）恒发全掩码；
-            // 若未来出现部分位快照，此处须改为按 FieldMask 位守卫（与 _lastKnownYaw 范式对齐）
+            // ActionState 恒在基础字段组内（Baseline/Changed/Keepalive 都带），无条件覆盖安全。
             view.ActionState = snapshot.ActionState;
 
-            // N5b：存活是**状态**不是边沿事件（D-N1/D-N2——Dead 位每次快照都置位）。
-            // 已在视野内的观察者最多要等 4 tick（≈264ms）的静止保活窗口才看到它翻位，
-            // 所以这里每次都推给动画驱动，由驱动自行幂等去重（"读状态"而不是"读变化"）。
-            view.Dead = snapshot.Dead;
+            // N5b：存活是**状态**不是边沿事件（D-N1/D-N2）。任务 7 起 Dead 收窄为条件字段：
+            // 仅 Baseline/Dead 翻转置位；其余快照必须沿用 last-known（protobuf 默认 false
+            // 不代表"活着"）——否则死亡实体会被下一条保活翻回存活。
+            if ((snapshot.FieldMask & (ushort)EntityFieldMask.Dead) != 0)
+                view.Dead = snapshot.Dead;
 
             // T6：权威 vitals 落到视图与只读 Targetable（只按 FieldMask 取新值，未置位沿用 last-known）
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Health) != 0)
@@ -178,14 +178,15 @@ namespace Hotfix.GameSystems.SyncLayer
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Defending) != 0)
                 view.IsDefending = snapshot.IsDefending;
 
-            view.Targetable.SetVitals(view.Hp, view.MaxHp, snapshot.Dead);
+            view.Targetable.SetVitals(view.Hp, view.MaxHp, view.Dead);
             if (view.Kind != (byte)EntityKind.PlayerBot)
                 _labelSink?.UpdateHp(snapshot.PlayerId, view.Targetable.HPPercent);
 
             // 玩家视图只认 Dead/Defending：ActionState 是 Npc 的语言（服务端对玩家恒 0，
-            // 写它会清掉事件驱动的受击/攻击表现）。死亡状态**无条件**同步给驱动（含 Proxy 档）：
-            // 驱动对象降档时仍存活，升档 Reapply 读的正是它锁存的 _dead。
-            view.Animator?.ApplySnapshotState(snapshot.Dead);
+            // 写它会清掉事件驱动的受击/攻击表现）。死亡状态**每次都**同步给驱动（含 Proxy 档）：
+            // 驱动对象降档时仍存活，升档 Reapply 读的正是它锁存的 _dead；传视图存值，
+            // 让缺 Dead 位的保活/变更快照沿用 last-known。
+            view.Animator?.ApplySnapshotState(view.Dead);
             if (view.Tier == RemoteTier.Full)
                 view.Animator?.SetDefending(view.IsDefending);
 
@@ -220,7 +221,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 float yaw = _lastKnownYaw.TryGetValue(snapshot.PlayerId, out var last) ? last : 0f;
                 _interpolator.AddSample(snapshot.PlayerId, serverTicks,
                     new Cool.SyncCore.Vec3(snapshot.X, snapshot.Y, snapshot.Z), yaw,
-                    snapshot.ActionState, snapshot.Dead);
+                    snapshot.ActionState, view.Dead);   // Dead 是条件字段：样本带存值
                 _lastSampleTicks[snapshot.PlayerId] = serverTicks; // 只在真收到样本时刷新
             }
         }

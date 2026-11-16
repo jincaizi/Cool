@@ -313,6 +313,36 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         /// <summary>
+        /// 任务 7：Dead 收窄为条件字段（仅 Baseline / Dead 翻转置位）。缺 Dead 位的快照
+        /// （Changed 的其余项 / Keepalive 的 protobuf 默认 false）必须沿用 last-known——
+        /// 无条件写 `snapshot.Dead` 会把死亡实体翻回存活，并污染插值器的阶梯状态样本。
+        /// </summary>
+        [Test]
+        public void Snapshot_Without_Dead_Bit_Keeps_Last_Known_Death()
+        {
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 30,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead),
+                X = 0f, Z = 0f, Dead = true, Tick = 1
+            }, serverTicks: 1_000L);
+
+            var view = _registry.GetView(30)!;
+            Assert.IsTrue(view.Dead, "Dead 位置位 ⇒ 锁存死亡");
+
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 30,
+                FieldMask = (ushort)EntityFieldMask.Position,
+                X = 1f, Z = 0f, Tick = 2
+            }, serverTicks: 2_000L);
+
+            Assert.IsTrue(view.Dead, "缺 Dead 位的快照必须沿用 last-known");
+            Assert.IsTrue(_registry.TrySampleNpcState(30, renderAt: 2_000L, out _, out var sampledDead));
+            Assert.IsTrue(sampledDead, "插值器状态样本同样沿用 last-known（Npc 死亡表现按阶梯采样）");
+        }
+
+        /// <summary>
         /// 名牌注入点（`INetworkLabelSink`）只给**玩家与 Npc**建名牌：bot 走玩家伤害路径，
         /// 但没有名字名册（服务端不发 bot 的 PlayerEnterRoom），所以注册与注销都跳过它。
         /// 视图销毁必须注销名牌并发 ViewRemoved——表现系统靠这两个事件清理，不能靠轮询。

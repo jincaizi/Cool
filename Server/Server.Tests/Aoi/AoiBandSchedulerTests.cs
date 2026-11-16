@@ -11,7 +11,8 @@ public class AoiBandSchedulerTests
     private static bool Send(AoiBandScheduler s, long o, long e, float dist, uint tick,
         float x = 0f, float z = 0f, float rot = 0f, byte actionState = 0, bool dead = false,
         float hp = 100f, float maxHp = 100f, bool defending = false)
-        => s.ShouldSend(o, e, dist, tick, x, z, rot, actionState, dead, hp, maxHp, defending);
+        => s.ShouldSend(o, e, dist, tick, x, z, rot, actionState, dead, hp, maxHp, defending)
+            .Reason != AoiSendReason.None;
 
     [Fact]
     public void Near_Band_Moving_Entity_Updates_Every_Tick()
@@ -189,5 +190,62 @@ public class AoiBandSchedulerTests
 
         scheduler.MarkOutOfSight(1, 2);
         Assert.True(scheduler.IsFirstSend(1, 2));
+    }
+
+    [Fact]
+    public void First_Send_Is_Baseline_Reentry_Is_Baseline()
+    {
+        var scheduler = new AoiBandScheduler();
+        var first = scheduler.ShouldSend(1, 2, 5f, 1, 0f, 0f, 0f, 0, false, 100f, 100f, false);
+        Assert.Equal(AoiSendReason.Baseline, first.Reason);
+
+        scheduler.MarkOutOfSight(1, 2);
+        var reentry = scheduler.ShouldSend(1, 2, 5f, 30, 0f, 0f, 0f, 0, false, 100f, 100f, false);
+        Assert.Equal(AoiSendReason.Baseline, reentry.Reason);
+    }
+
+    [Fact]
+    public void Health_Change_Is_Changed_With_Health_Flag()
+    {
+        var scheduler = new AoiBandScheduler();
+        scheduler.ShouldSend(1, 2, 5f, 1, 0f, 0f, 0f, 0, false, 100f, 100f, false);
+        var changed = scheduler.ShouldSend(1, 2, 5f, 2, 0f, 0f, 0f, 0, false, 80f, 100f, false);
+        Assert.Equal(AoiSendReason.Changed, changed.Reason);
+        Assert.True((changed.Changes & AoiChangeFlags.Health) != 0);
+    }
+
+    [Fact]
+    public void Static_Keepalive_Is_Keepalive()
+    {
+        var scheduler = new AoiBandScheduler();
+        scheduler.ShouldSend(1, 2, 5f, 1, 0f, 0f, 0f, 0, false, 100f, 100f, false);
+        var keepalive = scheduler.ShouldSend(1, 2, 5f, 5, 0f, 0f, 0f, 0, false, 100f, 100f, false);
+        Assert.Equal(AoiSendReason.Keepalive, keepalive.Reason);
+    }
+
+    [Fact]
+    public void Band_Change_Is_Changed_Not_Baseline()
+    {
+        // 带变化（观察者距离跨带）不是重见：HasSent 已为 true，不得退化为 Baseline
+        //（Baseline 会重发 NpcAction/Combat 全量投影）。
+        var scheduler = new AoiBandScheduler();
+        Assert.Equal(AoiSendReason.Baseline,
+            scheduler.ShouldSend(1, 2, 45f, 1, 0f, 0f, 0f, 0, false, 100f, 100f, false).Reason);
+
+        var bandChange = scheduler.ShouldSend(1, 2, 29f, 2, 0f, 0f, 0f, 0, false, 100f, 100f, false);
+        Assert.Equal(AoiSendReason.Changed, bandChange.Reason);
+        Assert.Equal(AoiChangeFlags.None, bandChange.Changes);
+    }
+
+    [Fact]
+    public void Band_Change_Still_Reports_State_Changes()
+    {
+        // 带变化分支先于状态翻转分支：同一 tick 里血量也翻位时必须把 Health 一并上报，
+        // 否则收窄后的条件字段会让这次掉血永久丢失。
+        var scheduler = new AoiBandScheduler();
+        scheduler.ShouldSend(1, 2, 45f, 1, 0f, 0f, 0f, 0, false, 100f, 100f, false);
+        var bandChange = scheduler.ShouldSend(1, 2, 29f, 2, 0f, 0f, 0f, 0, false, 80f, 100f, false);
+        Assert.Equal(AoiSendReason.Changed, bandChange.Reason);
+        Assert.True((bandChange.Changes & AoiChangeFlags.Health) != 0);
     }
 }

@@ -2,6 +2,34 @@ using System.Collections.Generic;
 
 namespace KcpServer
 {
+    /// <summary>本次快照的发送原因：基线（首次/重见，全条件字段）、变更（带变化/状态翻转）、静止保活。</summary>
+    public enum AoiSendReason
+    {
+        None = 0,
+        Baseline = 1,
+        Keepalive = 2,
+        Changed = 3
+    }
+
+    /// <summary>变更快照里哪些条件字段需要下发（Dead/Health/Defending；Action 驱动 NpcAction 节奏）。</summary>
+    [System.Flags]
+    public enum AoiChangeFlags
+    {
+        None = 0,
+        Health = 1,
+        Defending = 2,
+        Action = 4,
+        Dead = 8
+    }
+
+    public readonly struct AoiSendDecision
+    {
+        public readonly AoiSendReason Reason;
+        public readonly AoiChangeFlags Changes;
+        public AoiSendDecision(AoiSendReason reason, AoiChangeFlags changes)
+        { Reason = reason; Changes = changes; }
+    }
+
     /// <summary>
     /// 距离带分级节拍（spec §5-P3：近 15Hz/中 8Hz/远 4Hz）——
     /// 移动实体（坐标/旋转自上次发送变化）按带频广播；静止实体统一 4 tick 保活
@@ -38,8 +66,8 @@ namespace KcpServer
 
         /// <summary>distance 米、tick 当前服务器 tick、x/z/rotY 实体当前坐标、
         /// actionState/dead/hp/maxHp/defending 实体当前状态（翻转立即发）。
-        /// 返回 true = 本 tick 应给该观察者发该实体</summary>
-        public bool ShouldSend(long observerId, long entityId, float distance, uint tick,
+        /// 返回发送原因与条件字段变更集（None = 本 tick 不发）</summary>
+        public AoiSendDecision ShouldSend(long observerId, long entityId, float distance, uint tick,
             float x, float z, float rotY, byte actionState, bool dead,
             float hp, float maxHp, bool defending)
         {
@@ -55,13 +83,34 @@ namespace KcpServer
             if (!entities.TryGetValue(entityId, out var slot) || !slot.HasSent)
             {
                 entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, Hp = hp, MaxHp = maxHp, IsDefending = defending, HasSent = true };
-                return true; // 首帧（或带变化/重见后）立即发
+                // 首帧/重见：客户端没有任何 last-known，条件字段全量下发。
+                return new AoiSendDecision(AoiSendReason.Baseline,
+                    AoiChangeFlags.Health | AoiChangeFlags.Defending
+                    | AoiChangeFlags.Action | AoiChangeFlags.Dead);
             }
 
+            var changes = AoiChangeFlags.None;
+            if (slot.Dead != dead) changes |= AoiChangeFlags.Dead;
+            if (slot.Hp != hp || slot.MaxHp != maxHp) changes |= AoiChangeFlags.Health;
+            if (slot.IsDefending != defending) changes |= AoiChangeFlags.Defending;
+            if (slot.ActionState != actionState) changes |= AoiChangeFlags.Action;
+
+            // 带变化：重置节拍（立即发一帧），但**不是** Baseline——HasSent 保持 true，
+            // 条件字段只按 changes 逐项下发（重发全量投影会浪费带宽）。
             if (slot.Band != band)
             {
-                entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, Hp = hp, MaxHp = maxHp, IsDefending = defending, HasSent = true };
-                return true; // 带变化：重置节拍
+                slot.LastSentTick = tick;
+                slot.Band = band;
+                slot.X = x;
+                slot.Z = z;
+                slot.RotY = rotY;
+                slot.ActionState = actionState;
+                slot.Dead = dead;
+                slot.Hp = hp;
+                slot.MaxHp = maxHp;
+                slot.IsDefending = defending;
+                entities[entityId] = slot;
+                return new AoiSendDecision(AoiSendReason.Changed, changes);
             }
 
             // 状态翻转 → 立即发（跨客户端一致性与即时反馈依赖此语义：静止实体（怪物或玩家）的
@@ -69,9 +118,8 @@ namespace KcpServer
             // 客户端最多差 4 tick ≈267ms）。
             // 注意**不重置 LastSentTick** —— 重置会把位置更新推迟最多一个带间隔（近带 1 / 远带 4 tick）。
             // 坐标锚点一并写回：本 tick 若同时有位移，锚点不跟上的话下一 tick 会因 moved 再补发一帧
-            // （同一次的翻转 + 位移被拆成两帧——近带里就是重复帧）。
-            if (slot.ActionState != actionState || slot.Dead != dead
-                || slot.Hp != hp || slot.MaxHp != maxHp || slot.IsDefending != defending)
+            //（同一次的翻转 + 位移被拆成两帧——近带里就是重复帧）。
+            if (changes != AoiChangeFlags.None)
             {
                 slot.ActionState = actionState;
                 slot.Dead = dead;
@@ -82,7 +130,7 @@ namespace KcpServer
                 slot.Z = z;
                 slot.RotY = rotY;
                 entities[entityId] = slot;
-                return true;
+                return new AoiSendDecision(AoiSendReason.Changed, changes);
             }
 
             bool moved = x != slot.X || z != slot.Z || rotY != slot.RotY;
@@ -92,9 +140,11 @@ namespace KcpServer
             if (due)
             {
                 entities[entityId] = new Slot { LastSentTick = tick, Band = band, X = x, Z = z, RotY = rotY, ActionState = actionState, Dead = dead, Hp = hp, MaxHp = maxHp, IsDefending = defending, HasSent = true };
-                return true;
+                // 移动到期 = 基础字段变更；静止 4 tick = 纯保活（条件字段一律不带）。
+                return new AoiSendDecision(
+                    moved ? AoiSendReason.Changed : AoiSendReason.Keepalive, AoiChangeFlags.None);
             }
-            return false;
+            return new AoiSendDecision(AoiSendReason.None, AoiChangeFlags.None);
         }
 
         /// <summary>该 (observer, entity) 是否尚未发送过（首次/重见）。</summary>

@@ -409,6 +409,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             try
             {
                 var dead = SnapAt(10, new Vector3(5f, 0f, 0f));
+                dead.FieldMask |= (ushort)EntityFieldMask.Dead; // 任务 7：Dead 是条件字段，置位才有效
                 dead.Dead = true;
                 registry.ApplySnapshot(dead, serverTicks: 1_000_000L);
 

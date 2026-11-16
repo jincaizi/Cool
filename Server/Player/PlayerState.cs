@@ -100,6 +100,9 @@ namespace KcpServer
         public uint EquipmentRevision { get; internal set; }
         public uint LifeId { get; internal set; } = 1;
 
+        /// <summary>战斗投影版本戳（单调；任务 8A 接入递增，Health/Combat 位置位时随快照下发）。</summary>
+        public uint CombatVersion { get; internal set; }
+
         /// <summary>会话内武器实例 → 模板。</summary>
         public readonly Dictionary<long, int> WeaponInstanceTemplates = new Dictionary<long, int>();
 

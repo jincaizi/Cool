@@ -93,8 +93,8 @@ public class AoiBroadcasterTests
         Assert.Equal(4f, captured.Speed, 4);
         Assert.Equal(1U, captured.Tick);
         // P5：掩码高位追加 ActionState/Kind/TemplateId（只加不删——旧客户端忽略未知位）
-        // D-N2：本任务再追加 Dead（存活是状态不是事件，每次快照都置位）
-        // T3：再追加 Health/Defending（HP/MaxHP/IsDefending 随每次快照下发）
+        // D-N2：Dead 是存活状态；任务 7 起随 Baseline/Dead 翻转下发
+        // T3：Health/Defending 随 Baseline 或各自翻转下发（条件字段，不是每帧全量）
         Assert.Equal((ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation | EntityFieldMask.Speed
             | EntityFieldMask.ActionState | EntityFieldMask.Kind | EntityFieldMask.TemplateId
             | EntityFieldMask.Dead | EntityFieldMask.Health | EntityFieldMask.Defending), captured.FieldMask);
@@ -102,6 +102,69 @@ public class AoiBroadcasterTests
         Assert.Equal(mover.Hp, captured.Hp, 4);
         Assert.False(captured.IsDefending);
         Assert.Equal(mover.LifeId, captured!.LifeId);
+    }
+
+    [Fact]
+    public void Keepalive_Snapshot_Omits_Conditional_Fields()
+    {
+        // 收窄语义：静止保活只带位置/身份字段。Dead/Health/Defending 未置位时
+        // 客户端必须沿用 last-known（见 RemoteEntityRegistry 的按位守卫）。
+        var store = new EntityStore();
+        var observer = store.AddPlayer(1, "Obs");
+        var idle = store.AddPlayer(2, "Idle");
+        observer.UpdatePosition(new Vector3(0, 0, 0), 0f, 0f, 1L, 0U);
+        idle.UpdatePosition(new Vector3(10, 0, 0), 0f, 0f, 1L, 0U);
+
+        var broadcaster = new AoiBroadcaster();
+        var captured = new List<EntitySnapshot>();
+        broadcaster.OnEntityBroadcast = (entityId, snap) => { if (entityId == 2) captured.Add(snap); };
+
+        broadcaster.BuildForObserver(observer, tick: 1, store);   // Baseline
+        broadcaster.BuildForObserver(observer, tick: 5, store);   // 静止 4 tick 保活
+
+        Assert.Equal(2, captured.Count);
+        var baseline = captured[0];
+        Assert.True((baseline.FieldMask & (ushort)EntityFieldMask.Dead) != 0);
+        Assert.True((baseline.FieldMask & (ushort)EntityFieldMask.Health) != 0);
+        Assert.True((baseline.FieldMask & (ushort)EntityFieldMask.Defending) != 0);
+
+        var keepalive = captured[1];
+        Assert.Equal(0, keepalive.FieldMask & (ushort)(EntityFieldMask.Dead
+            | EntityFieldMask.Health | EntityFieldMask.Defending));
+        Assert.True((keepalive.FieldMask & (ushort)EntityFieldMask.Position) != 0,
+            "保活仍须携带位置/身份基础字段");
+        Assert.False(keepalive.Dead);
+        Assert.Equal(0f, keepalive.Hp, 4);
+        Assert.Equal(0f, keepalive.MaxHp, 4);
+        Assert.Equal(0u, keepalive.LifeId);
+    }
+
+    [Fact]
+    public void Health_Change_Snapshot_Carries_Health_And_LifeId_Only()
+    {
+        var store = new EntityStore();
+        var observer = store.AddPlayer(1, "Obs");
+        var idle = store.AddPlayer(2, "Idle");
+        observer.UpdatePosition(new Vector3(0, 0, 0), 0f, 0f, 1L, 0U);
+        idle.UpdatePosition(new Vector3(10, 0, 0), 0f, 0f, 1L, 0U);
+        idle.ApplyDamage(10f); // Hp 90
+
+        var broadcaster = new AoiBroadcaster();
+        var captured = new List<EntitySnapshot>();
+        broadcaster.OnEntityBroadcast = (entityId, snap) => { if (entityId == 2) captured.Add(snap); };
+
+        broadcaster.BuildForObserver(observer, tick: 1, store);   // Baseline（Hp 90）
+        idle.ApplyDamage(10f);                                    // Hp 80
+        broadcaster.BuildForObserver(observer, tick: 2, store);   // 血量翻转：立即发
+
+        Assert.Equal(2, captured.Count);
+        var changed = captured[1];
+        Assert.True((changed.FieldMask & (ushort)EntityFieldMask.Health) != 0);
+        Assert.Equal(0, changed.FieldMask & (ushort)(EntityFieldMask.Dead | EntityFieldMask.Defending));
+        Assert.Equal(80f, changed.Hp, 4);
+        Assert.Equal(100f, changed.MaxHp, 4);
+        Assert.Equal(idle.LifeId, changed.LifeId);
+        Assert.Equal(idle.CombatVersion, changed.CombatVersion);
     }
 
     [Fact]
