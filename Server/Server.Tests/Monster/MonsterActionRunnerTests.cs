@@ -96,6 +96,22 @@ public class MonsterActionRunnerTests
         Assert.InRange(f.Module.GetActionHistory(f.State.NpcId,7).Count,1,33);
     }
     [Fact]
+    public void Canceled_Npc_Action_Clears_ActiveCast()
+    {
+        // 受击打断后 runner 拒绝提交首段（TryCommitStage=false），战斗投影必须同步清空，
+        // 否则 CombatProjection.ActiveCast 会永久残留。
+        var f=Fixture();
+        Assert.True(f.Resolver.Decide(f.State.NpcId,f.Request,0).Accepted);
+        var npc=f.Store.GetPlayer(f.State.NpcId)!;
+        Assert.NotNull(npc.ActiveCast);
+        Assert.Equal(NpcActionPhase.Windup,npc.ActiveCast!.Phase);
+
+        f.State.ActionRunner!.OnDirectDamage(1); // 跑条前受击 → Cancel(Hit)
+        Assert.Empty(f.Resolver.DrainResolved(6));
+        Assert.Null(npc.ActiveCast);
+    }
+
+    [Fact]
     public void Low_hp_DogKnight_sets_up_special_then_casts_in_legal_range()
     {
         var f=Fixture(3);var self=f.Store.GetPlayer(f.State.NpcId)!;self.Hp=self.MaxHp*0.4f;f.State.LastHp=self.Hp;

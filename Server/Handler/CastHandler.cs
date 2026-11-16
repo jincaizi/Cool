@@ -362,7 +362,12 @@ namespace KcpServer
                        && pending.NextStage < pending.StageTicks.Length
                        && pending.StageTicks[pending.NextStage] <= tick)
                 {
-                    if (pending.Runner != null && !pending.Runner.TryCommitStage(pending.InstanceId, tick)) { pending.Spent = true; break; }
+                    if (pending.Runner != null && !pending.Runner.TryCommitStage(pending.InstanceId, tick))
+                    {
+                        ClearActiveCast(_store.GetPlayer(pending.CasterId), pending.CastId);
+                        pending.Spent = true;
+                        break;
+                    }
                     var resolution = ResolveStage(pending, tick);
                     // 施法者死亡/移除：整组丢弃未到期段。只逐段返回 null 会让复活后的
                     // 后续段继续结算（B3：旋转死亡/换命后不得残留伤害实例）。
