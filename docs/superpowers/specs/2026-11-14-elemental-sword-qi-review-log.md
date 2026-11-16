@@ -67,3 +67,12 @@ Prior verdict resolved: No — 定向复审的 B1/B2/B5 被 full 复审判定未
 | P1 | 元素首个有效命中与架构接线冲突；路线图的 02/03 并行口径冲突 | 设计规定同次施法的挥砍和剑气共用目标附加记录；路线图明确 03 可预先做独立位移测试，真实控制投影集成依赖 02，元素驱动由 04 接入 |
 
 对应文档见[设计规格](2026-11-14-elemental-sword-qi-design.md)、[实现路线图](../plans/2026-11-14-elemental-sword-qi-roadmap.md)及 [Plan 01](../plans/2026-11-14-elemental-sword-qi-01-foundation.md)。
+
+## 2026-11-17 实施状态回写
+
+- Plan 01 已完成：50/50 步骤；服务端 512/512、Unity EditMode/PlayMode 相关测试通过；
+  真实双客户端 `ElementalTwoClientTests` 1/1。
+- Plan 02–05 未开始：取消广播/NpcAction、战斗投影/带宽、位移/PvP 控制、状态/DoT/元素 VFX、
+  三客户端验收均未实现；路线图已加状态表。
+- 武器换装跟进（2026-11-16）：简易背包、八把男女元素剑校准变体、权威确认对账已完成并通过自动测试；
+  握姿/穿模/拖尾、DemoDay 交互冒烟与发布构建冒烟待人工验收。

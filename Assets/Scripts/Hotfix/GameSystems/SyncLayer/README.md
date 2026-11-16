@@ -36,6 +36,8 @@
 
 ## 属性剑气 v1（2026-11-14）
 
+状态：Plan 01 已完成；Plan 02–05 的取消广播、战斗投影、AOI 基线与元素状态未开始。
+
 - **权威换装**：`ClientEquipmentState` 按 `EquipmentRevision` 应用 `EquipWeaponConfirm`；
   旧版本忽略。拒绝确认携带的较新摘要也会应用（恢复服务器当前装备）；登录基线可把版本 0
   作为起点。`CombatNetworkBridge.RequestEquip(instanceId)` 发送会话内递增的

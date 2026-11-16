@@ -64,8 +64,8 @@ bash tools/test-server.sh
 - **场景隔离**：候选、挥砍/发射广播与伤害收件人统一按 `PlayerState.ZoneId` 过滤；
   跨场景同坐标不互相命中。怪物按地图实例绑定场景留到 Plan 02。
 
-未启用：元素状态结算/DoT、`CastCancelBroadcast`、`CombatStateUpdate`/`CombatProjection`、
-AOI 重入补发、PvP 控制预算（Plan 02–05）。
+状态：Plan 01 已完成；Plan 02–05 未开始。未启用：元素状态结算/DoT、`CastCancelBroadcast`、
+`CombatStateUpdate`/`CombatProjection`、AOI 重入补发、PvP 控制预算。
 
 ## 投射物与落点判定（20003 火球）
 

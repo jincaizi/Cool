@@ -1313,3 +1313,10 @@ git commit -m "docs: record elemental foundation protocol and sync behavior"
 - 未做目测项：在编辑器里逐帧播放 10001/10002 确认“动画不被截断”。等价断言已覆盖
   `AttackSpeedParameterTests`（0.25/1/4 钳制、状态机时间缩放、真实控制器 AttackSpeed 绑定），
   但缺少实际动画播放的人眼/录屏证据。
+
+## 完成状态（2026-11-17 复核）
+
+- 任务 1–8 全部勾选，完成定义已满足。
+- 验证：服务端 512/512；Unity EditMode 相关类全部通过；PlayMode `ElementalTwoClientTests` 1/1。
+- 未做目测项仍为“编辑器逐帧播放 10001/10002 确认动画不被截断”；等价断言已覆盖。
+- Plan 02–05 未开始；本地持剑模型已由 2026-11-16 换装跟进补齐，元素 VFX 仍在 Plan 04。

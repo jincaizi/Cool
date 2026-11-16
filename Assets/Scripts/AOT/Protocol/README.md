@@ -58,6 +58,8 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 
 ### 属性剑气 v1（2026-11-14）
 
+状态：Plan 01 的消息与字段已实现；Plan 02–05 的取消广播、战斗投影/DoT 消费与三客户端验收未开始。
+
 能力位 `ProtocolFeatures.ElementalSwordQiV1 = 1u << 2`。登录请求 tag9
 `ElementalCatalogFingerprint`（共享目录 SHA-256 小写十六进制）；登录响应 tag14 同指纹、
 tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<WeaponInstanceSummary>`）。

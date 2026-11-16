@@ -17,6 +17,9 @@
 
 ## 属性剑气武器背包（2026-11-14）
 
+状态：Plan 01 的权威换装已完成；2026-11-16 跟进补齐简易列表、八把模型与交互边界。
+视觉/交互/出包验收待人工。
+
 - 登录基线 `WeaponInventoryBaseline.Weapons` 经 `BagManager.ApplyServerWeapons` 重建背包：
   物品使用服务器实例 ID/模板 ID，武器模板按需注册为 `ItemType.Equipment`。
 - 背包行点击装备调用 `BagManager.RequestEquip(item)` 触发 `OnEquipRequested`；

@@ -151,6 +151,8 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
 
 ## 换剑外观
 
+状态：本地持剑模型切换已完成（2026-11-16 跟进）；元素 VFX 与状态表现留到 Plan 04。
+
 男女角色预制体分别绑定 `Assets/Prefabs/Character/WeaponViews/` 下的八个项目自有校准变体
 （Male/Female × Ice/Fire/Thunder/Wind）。变体根保持挂点局部恒等，视觉子对象是供应商 MoonSword
 M/W 模型的嵌套预制体，按“先缩放、再旋转、平移”写入校准变换。冰、火、雷、风剑挂到现有 weapon_r，

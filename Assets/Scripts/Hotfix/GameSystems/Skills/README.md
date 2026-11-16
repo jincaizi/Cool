@@ -29,6 +29,8 @@
 
 ## 属性剑气与攻速（2026-11-14）
 
+状态：Plan 01 已完成；元素状态/DoT 与元素 VFX（Plan 04）未开始。
+
 - 普攻 10001/10002 的攻速来自已确认装备：`SkillCoordinator.AttackSpeedProvider` 注入倍率
   （0.25–4），`SkillExecutor.SetTimeScale` 驱动 `SkillStateMachine.ElapsedTime`，
   冷却按 `Cooldown / attackSpeed` 起算；每段时序只缩放一次。蓄力/旋转/引导保持原计时。
