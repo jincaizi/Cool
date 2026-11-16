@@ -115,7 +115,7 @@ public class CombatCancelMessagesTests
                 CasterPlayerId = 7,
                 EffectiveTick = 77,
                 Reason = NpcActionCancelReason.Hit
-            }));
+            })).message;
 
         Assert.Equal(42UL, decoded.CastId);
         Assert.Equal(3u, decoded.CasterLifeId);
@@ -129,7 +129,7 @@ public class CombatCancelMessagesTests
     {
         var decoded = (CancelCastRequest)MessageCodec.Decode(MessageCodec.EncodeToArray(
             MessageId.CancelCastRequest,
-            new CancelCastRequest { SkillId = 20002, CastId = 99 }));
+            new CancelCastRequest { SkillId = 20002, CastId = 99 })).message;
 
         Assert.Equal(20002, decoded.SkillId);
         Assert.Equal(99UL, decoded.CastId);
@@ -146,7 +146,7 @@ public class CombatCancelMessagesTests
                 LifeId = 5,
                 Action = new NpcActionSnapshot { InstanceId = 3, Revision = 2 },
                 ServerTimestamp = 123
-            }));
+            })).message;
 
         Assert.Equal(7L, decoded.EntityId);
         Assert.Equal(5u, decoded.LifeId);
@@ -1142,7 +1142,7 @@ public class CombatProjectionMessagesTests
                         Phase = NpcActionPhase.Windup, EndTick = 44
                     }
                 }
-            }));
+            })).message;
 
         Assert.Equal(7L, decoded.EntityId);
         Assert.Equal(4u, decoded.Projection.CombatVersion);
@@ -1157,7 +1157,7 @@ public class CombatProjectionMessagesTests
     [Fact]
     public void EntitySnapshot_Carries_CombatVersion_And_LifeId()
     {
-        var decoded = (EntitySnapshot)MessageCodec.Decode(MessageCodec.EncodeToArray(
+        var decoded = ((WorldSnapshot)MessageCodec.Decode(MessageCodec.EncodeToArray(
             MessageId.WorldSnapshot,
             new WorldSnapshot
             {
@@ -1169,7 +1169,7 @@ public class CombatProjectionMessagesTests
                         CombatVersion = 9, LifeId = 3
                     }
                 }
-            })).Entities[0];
+            })).message).Entities[0];
 
         Assert.Equal(9u, decoded.CombatVersion);
         Assert.Equal(3u, decoded.LifeId);
