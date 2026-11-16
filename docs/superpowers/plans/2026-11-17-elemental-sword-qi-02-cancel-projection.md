@@ -257,7 +257,7 @@ public class CastCancelBroadcastTests
     private static CastRequest Cast(int skillId = 10002) => new CastRequest
     {
         SkillId = skillId,
-        // 10001 的 Range 上限是 2f（2.5f 会被判 shape-tampered）；CancelSeq=0 避免两次
+        // 10001 的 Range 上限是 2f（2.5f 会被判 shape-tampered）；ClientCastSeq=0 避免两次
         // Decide 共用序号触发幂等重放，确保两个取消用例都真正入队。
         Shape = new HitShape { ShapeType = 0, Range = 2f, Angle = 120f },
         ClientCastSeq = 0
@@ -471,7 +471,7 @@ public class CastCancelBroadcastTests
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CastCancelBroadcastTests"`
 
-预期：3/3 PASS。
+预期：4/4 PASS。
 
 - [ ] **步骤 5：Commit**
 
