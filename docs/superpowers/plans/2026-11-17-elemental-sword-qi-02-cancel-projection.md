@@ -1878,12 +1878,16 @@ namespace KcpServer
 
 ```csharp
                     var casterState = _store.GetPlayer(pending.CasterId);
-                    if (pending.NextStage >= pending.StageTicks.Length)
+                    if (pending.Spent || pending.NextStage >= pending.StageTicks.Length)
                         ClearActiveCast(casterState, pending.CastId);
                     else
                         SetActiveCast(casterState!, pending,
                             pending.NextStage == 1 ? NpcActionPhase.Active : NpcActionPhase.Recovery);
 ```
+
+`TryCommitStage` 返回 false 时也要在 `pending.Spent = true;` 之前 `ClearActiveCast(...)`；`ResolveStage` 内部因格挡/溅射把 `Spent` 置 true 的路径同样由上面的 `pending.Spent` 清空。测试在 `CombatResolverSwordQiBlockTests` 断言格挡后 `caster.ActiveCast == null`。
+
+另外 `MonsterBrain.ArriveHome` 直接把 `Hp = MaxHp` 时调用 `entity.BumpCombatVersion()`，否则回家回血不会推进 `CombatVersion`/`CombatDirty`。
 
 在 `DrainResolved` 的 `resolution == null` 分支 `pending.Spent = true;` 之前：
 
