@@ -193,10 +193,17 @@ namespace Hotfix.GameSystems.SyncLayer
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.NpcAction) != 0
                 && snapshot.NpcAction != null)
                 ApplyNpcAction(snapshot.PlayerId, view, snapshot.LifeId, snapshot.NpcAction);
-            for (int i = _pendingNpcActions.Count - 1; i >= 0; i--)
+            for (int i = 0; i < _pendingNpcActions.Count; )
             {
                 var pending = _pendingNpcActions[i];
-                if (pending.EntityId != snapshot.PlayerId) continue;
+                if (pending.EntityId != snapshot.PlayerId
+                    || (pending.LifeId != 0 && snapshot.LifeId != 0
+                        && pending.LifeId != snapshot.LifeId))
+                {
+                    i++;
+                    continue;
+                }
+
                 _pendingNpcActions.RemoveAt(i);
                 ApplyNpcAction(pending.EntityId, view, pending.LifeId, pending.Action);
             }
@@ -248,6 +255,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private void ApplyNpcAction(long entityId, RemoteEntityView view, uint lifeId,
             NpcActionSnapshot action)
         {
+            if (view.ActionInstanceId != 0 && action.InstanceId < view.ActionInstanceId)
+                return;
             if (view.ActionInstanceId == action.InstanceId && action.Revision <= view.ActionRevision)
                 return;
             view.ActionInstanceId = action.InstanceId;

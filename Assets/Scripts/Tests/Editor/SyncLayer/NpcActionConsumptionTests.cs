@@ -103,5 +103,65 @@ namespace GameSys.EditorTests
             Assert.AreEqual(7UL, view!.ActionInstanceId);
             Assert.AreEqual(1u, view.ActionRevision);
         }
+
+        [Test]
+        public void test_pending_action_from_old_life_is_not_replayed()
+        {
+            _registry.ApplyNpcActionEvent(new NpcActionEvent
+            {
+                EntityId = 12, LifeId = 1,
+                Action = new NpcActionSnapshot
+                {
+                    InstanceId = 3, Revision = 1, Kind = NpcActionKind.Skill,
+                    Phase = NpcActionPhase.Windup
+                }
+            });
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 12, Kind = (byte)EntityKind.Npc, TemplateId = 1,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead),
+                X = 0f, Z = 0f, Dead = false, LifeId = 2
+            }, 1);
+
+            var view = _registry.GetView(12);
+            Assert.IsNotNull(view);
+            Assert.AreEqual(0UL, view!.ActionInstanceId,
+                "a cached action from an old life must not be replayed");
+        }
+
+        [Test]
+        public void test_older_instance_does_not_override_newer()
+        {
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 13, Kind = (byte)EntityKind.Npc, TemplateId = 1,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead),
+                X = 0f, Z = 0f, Dead = false, LifeId = 1
+            }, 1);
+
+            _registry.ApplyNpcActionEvent(new NpcActionEvent
+            {
+                EntityId = 13, LifeId = 1,
+                Action = new NpcActionSnapshot
+                {
+                    InstanceId = 10, Revision = 1, Kind = NpcActionKind.Skill,
+                    Phase = NpcActionPhase.Windup
+                }
+            });
+            _registry.ApplyNpcActionEvent(new NpcActionEvent
+            {
+                EntityId = 13, LifeId = 1,
+                Action = new NpcActionSnapshot
+                {
+                    InstanceId = 9, Revision = 5, Kind = NpcActionKind.Skill,
+                    Phase = NpcActionPhase.Cancelled
+                }
+            });
+
+            var view = _registry.GetView(13);
+            Assert.IsNotNull(view);
+            Assert.AreEqual(10UL, view!.ActionInstanceId,
+                "an older action instance must not cancel the newer one");
+        }
     }
 }
