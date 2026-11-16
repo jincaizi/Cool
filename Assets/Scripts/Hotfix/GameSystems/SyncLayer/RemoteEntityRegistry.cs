@@ -298,6 +298,8 @@ namespace Hotfix.GameSystems.SyncLayer
             view.Control = projection.Control;
             view.Statuses = projection.Statuses;
             view.Targetable.SetVitals(view.Hp, view.MaxHp, view.Dead);
+            if (view.Kind != (byte)EntityKind.PlayerBot)
+                _labelSink?.UpdateHp(entityId, view.Targetable.HPPercent);
             view.Animator?.ApplySnapshotState(view.Dead);
         }
 

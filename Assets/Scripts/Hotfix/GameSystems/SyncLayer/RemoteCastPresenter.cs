@@ -105,6 +105,9 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Dictionary<ulong, long> _castCasters = new Dictionary<ulong, long>();
         /// <summary>已取消的 CastId（有界）——晚到的发射/挥砍表现据此跳过；已发射的视觉继续飞行</summary>
         private readonly HashSet<ulong> _cancelledCasts = new HashSet<ulong>();
+        /// <summary>已按 ActiveCast 播放过攻击的 CastId（有界）——服务端每段相位推进都会 bump 投影，
+        /// 同一 CastId 只播一次，后续 Active/Recovery 更新跳过</summary>
+        private readonly HashSet<ulong> _activeCastPlayed = new HashSet<ulong>();
         private readonly Dictionary<ulong, ProjectileStopBroadcast> _pendingStops =
             new Dictionary<ulong, ProjectileStopBroadcast>();
         private readonly HashSet<ulong> _seenLaunches = new HashSet<ulong>();
@@ -282,6 +285,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// </summary>
         public void OnActiveCast(long entityId, ActiveCastProjection activeCast)
         {
+            if (activeCast == null || activeCast.CastId == 0) return;
+            if (!_activeCastPlayed.Add(activeCast.CastId)) return;
+            if (_activeCastPlayed.Count > 256) _activeCastPlayed.Clear();
             if (_registry == null || _catalog == null || activeCast == null) return;
             if (entityId == _localPlayerId) return;
             var view = _registry.GetView(entityId);
@@ -411,6 +417,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _castSkillIds.Clear();
             _castCasters.Clear();
             _cancelledCasts.Clear();
+            _activeCastPlayed.Clear();
             _pendingStops.Clear();
             _seenLaunches.Clear();
             _seenStops.Clear();
@@ -427,6 +434,9 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>按 CastId 跟踪的剑气数（属性剑气测试）。</summary>
         internal int CastVisualCountForTest => _castVisuals.Count;
+
+        /// <summary>已按 ActiveCast 播放过的 CastId 数（去重回归测试）。</summary>
+        internal int ActiveCastPlayedCountForTest => _activeCastPlayed.Count;
 
         /// <summary>
         /// 投射物起点：与本地 `SkillExecutor` 同源（`owner.position + TransformDirection(SpawnOffset)`）。

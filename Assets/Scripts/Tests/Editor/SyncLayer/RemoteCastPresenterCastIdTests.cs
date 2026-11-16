@@ -234,5 +234,26 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 Object.DestroyImmediate(root);
             }
         }
+
+        [Test]
+        public void ActiveCast_Plays_Once_Per_CastId()
+        {
+            var presenter = new RemoteCastPresenter(
+                registry: null, localPlayerId: 1L, catalog: null);
+
+            presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 91, SkillId = 10002 });
+            presenter.OnActiveCast(2L, new ActiveCastProjection
+            {
+                CastId = 91, SkillId = 10002, Phase = NpcActionPhase.Recovery
+            });
+            presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 92, SkillId = 10002 });
+
+            Assert.AreEqual(2, presenter.ActiveCastPlayedCountForTest,
+                "phase updates of the same CastId must not replay the attack");
+
+            presenter.Clear();
+            Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
+                "Clear() must reset the replay dedupe set");
+        }
     }
 }

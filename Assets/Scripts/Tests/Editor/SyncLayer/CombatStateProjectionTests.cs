@@ -105,6 +105,39 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_pending_update_replays_after_baseline_snapshot()
+        {
+            // 服务端在基线快照之前就发出更新：视图未建 → 先入缓存
+            _registry.ApplyCombatStateUpdate(new CombatStateUpdate
+            {
+                EntityId = 20,
+                Projection = new CombatProjection
+                {
+                    CombatVersion = 3, LifeId = 1, Hp = 500f, MaxHp = 720f,
+                    Equipment = new EquipmentSummary
+                    {
+                        WeaponInstanceId = 42, TemplateId = 90002, ElementId = 1
+                    }
+                }
+            });
+
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 20, Kind = (byte)EntityKind.Player,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead
+                    | EntityFieldMask.Health),
+                X = 0f, Z = 0f, Dead = false, Hp = 720f, MaxHp = 720f,
+                CombatVersion = 1, LifeId = 1
+            }, 1);
+
+            var view = _registry.GetView(20);
+            Assert.IsNotNull(view);
+            Assert.AreEqual(500f, view!.Hp, "cached projection must override the baseline hp");
+            Assert.AreEqual(3u, view.CombatVersion);
+            Assert.AreEqual(42L, view.Equipment!.WeaponInstanceId);
+        }
+
+        [Test]
         public void test_baseline_snapshot_applies_projection()
         {
             _registry.ApplySnapshot(new EntitySnapshot
