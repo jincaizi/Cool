@@ -101,7 +101,7 @@ namespace Cool.Protocol
         [ProtoMember(16)] public NpcActionSnapshot? NpcAction { get; set; }
         [ProtoMember(17)] public IList<NpcActionSnapshot> NpcActionHistory { get; set; } = new List<NpcActionSnapshot>();
 
-        /// <summary>实体生命代次（随基线与 Health 快照发送；NpcAction 合并键）</summary>
+        /// <summary>实体生命代次（NpcAction 合并键；Part A 随每次 AOI 快照携带，Part B 收窄为基线/Health 快照）</summary>
         [ProtoMember(19)] public uint LifeId { get; set; }
     }
 

@@ -89,7 +89,7 @@ tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<W
 | `HitEntry` | `CastId` / `EventSeq` / `EventId` / `DamageKind` / `TargetLifeId` / `CombatVersion` | 8–13 | 命中归属与战斗投影（Plan 02 起消费 DoT 分支） |
 | `CancelCastRequest` | `CastId` | 2 | 非 0 只取消该次施法；0 = 取消该技能最新实例（兼容旧客户端） |
 | `NpcActionEvent` | `LifeId` | 4 | 怪物生命代次；与 `EntityId/InstanceId/Revision` 组成客户端合并键 |
-| `EntitySnapshot` | `LifeId` | 19 | 实体生命代次（随基线与 Health 快照发送；NpcAction 合并键） |
+| `EntitySnapshot` | `LifeId` | 19 | 实体生命代次（NpcAction 合并键；Part A 随每次 AOI 快照携带，Part B 收窄为基线/Health 快照） |
 
 客户端消费 NpcAction 时以 `(EntityId, LifeId, InstanceId, Revision)` 为合并键：实例号只增，
 同实例只接受更大的 `Revision`；生命代次不匹配的事件丢弃。取消事件与 `CastCancelBroadcast`

@@ -93,7 +93,7 @@ bash tools/unity-tests.sh EditMode CombatStateProjectionTests
 - 修改：`Assets/Scripts/AOT/Protocol/MessageCodec.cs`
 - 测试：`Server/Server.Tests/Protocol/CombatCancelMessagesTests.cs`（新建）
 
-- [ ] **步骤 1：编写失败的协议测试**
+- [x] **步骤 1：编写失败的协议测试**
 
 创建 `Server/Server.Tests/Protocol/CombatCancelMessagesTests.cs`：
 
@@ -175,13 +175,13 @@ public class CombatCancelMessagesTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatCancelMessagesTests"`
 
 预期：编译失败，`CastCancelBroadcast`、`CasterPlayerId`、`CastId`、`LifeId` 不存在。
 
-- [ ] **步骤 3：添加协议字段与消息**
+- [x] **步骤 3：添加协议字段与消息**
 
 在 `Combat.cs` 的 `CancelCastRequest` 增加：
 
@@ -235,13 +235,13 @@ public class CombatCancelMessagesTests
             RegisterMessageType(MessageId.CastCancelBroadcast, typeof(CastCancelBroadcast));
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatCancelMessagesTests"`
 
 预期：4/4 PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol/Messages/Combat.cs Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs Assets/Scripts/AOT/Protocol/MessageId.cs Assets/Scripts/AOT/Protocol/MessageCodec.cs Server/Server.Tests/Protocol/CombatCancelMessagesTests.cs
@@ -258,7 +258,7 @@ git commit -m "feat(protocol): add cast cancel and npc action life id"
 - 测试：`Server/Server.Tests/Handler/CastCancelBroadcastTests.cs`（新建）
 - 修改：`Server/Server.Tests/Combat/CombatResolverSpinTests.cs`（`CancelPending` 返回类型从 int 改为 List，旧断言需改为 `Assert.Single`）
 
-- [ ] **步骤 1：编写失败的服务端测试**
+- [x] **步骤 1：编写失败的服务端测试**
 
 创建 `Server/Server.Tests/Handler/CastCancelBroadcastTests.cs`：
 
@@ -364,13 +364,13 @@ public class CastCancelBroadcastTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CastCancelBroadcastTests"`
 
 预期：编译失败，`CancelPending` 仍返回 `int`。
 
-- [ ] **步骤 3：实现取消 API 与广播**
+- [x] **步骤 3：实现取消 API 与广播**
 
 在 `PendingCast` 增加 `public bool CancelBroadcast;`（已发射且已广播过取消的实例不重复广播）。
 
@@ -499,13 +499,13 @@ public class CastCancelBroadcastTests
             _castHandler.BroadcastCancel(cancels);
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CastCancelBroadcastTests"`
 
 预期：4/4 PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Handler/CastHandler.cs Server/Server3C.cs Server/Server.Tests/Combat/CombatResolverSpinTests.cs Server/Server.Tests/Handler/CastCancelBroadcastTests.cs
@@ -521,9 +521,10 @@ git commit -m "feat(server): broadcast cast cancellation by cast id"
 - 修改：`Server/Aoi/AoiBandScheduler.cs`
 - 修改：`Server/Aoi/AoiBroadcaster.cs`
 - 修改：`Server/Server3C.cs`
+- 修改：`Server/Handler/CastHandler.cs`（`SetNpcActionRunner`）
 - 测试：`Server/Server.Tests/Monster/NpcActionChainTests.cs`（新建）
 
-- [ ] **步骤 1：编写失败的服务端测试**
+- [x] **步骤 1：编写失败的服务端测试**
 
 创建 `Server/Server.Tests/Monster/NpcActionChainTests.cs`：
 
@@ -617,13 +618,13 @@ public class NpcActionChainTests
 }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~NpcActionChainTests"`
 
 预期：编译失败，`NpcActionProvider`、`GetActionSnapshot` 不存在。
 
-- [ ] **步骤 3：实现服务端动作快照与基线**
+- [x] **步骤 3：实现服务端动作快照与基线**
 
 在 `MonsterModule` 增加：
 
@@ -767,13 +768,13 @@ public class NpcActionChainTests
                         }
 ```
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~NpcActionChainTests"`
 
-预期：2/2 PASS。
+预期：10/10（2 原始 + 5 Theory + 3 新增）。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Monster/MonsterModule.cs Server/Aoi/AoiBandScheduler.cs Server/Aoi/AoiBroadcaster.cs Server/Server3C.cs Server/Server.Tests/Monster/NpcActionChainTests.cs
@@ -796,7 +797,7 @@ git commit -m "feat(server): broadcast npc action phases and aoi baseline"
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/RemoteEntityAnimatorArbiterTests.cs`（追加）
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/NpcEntityAnimatorTests.cs`（追加）
 
-- [ ] **步骤 1：编写失败的客户端测试**
+- [x] **步骤 1：编写失败的客户端测试**
 
 创建 `Assets/Scripts/Tests/Editor/SyncLayer/NpcActionConsumptionTests.cs`：
 
@@ -1047,7 +1048,7 @@ namespace GameSys.EditorTests
         }
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：
 
@@ -1058,7 +1059,7 @@ bash tools/unity-tests.sh EditMode RemoteCastPresenterCastIdTests
 
 预期：编译失败，`ApplyNpcActionEvent`、`ActionInstanceId`、`OnCastCancel` 不存在。
 
-- [ ] **步骤 3：实现客户端动作存储与取消**
+- [x] **步骤 3：实现客户端动作存储与取消**
 
 在 `RemoteEntityView` 增加（`LifeId` 本任务首次加入，Part B 不重复加）：
 
@@ -1270,7 +1271,7 @@ bash tools/unity-tests.sh EditMode RemoteCastPresenterCastIdTests
 
 并在 `DetachCombatBridge` 退订。
 
-- [ ] **步骤 4：运行测试验证通过**
+- [x] **步骤 4：运行测试验证通过**
 
 ```bash
 bash tools/unity-tests.sh EditMode NpcActionConsumptionTests
@@ -1281,7 +1282,7 @@ bash tools/unity-tests.sh EditMode NpcEntityAnimatorTests
 
 预期：全部 PASS（新增用例至少 4 个通过）。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityRegistry.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/NpcEntityAnimator.cs Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs Assets/Scripts/Tests/Editor/SyncLayer/NpcActionConsumptionTests.cs Assets/Scripts/Tests/Editor/SyncLayer/RemoteCastPresenterCastIdTests.cs Assets/Scripts/Tests/Editor/SyncLayer/RemoteEntityAnimatorArbiterTests.cs Assets/Scripts/Tests/Editor/SyncLayer/NpcEntityAnimatorTests.cs
@@ -1292,7 +1293,7 @@ git commit -m "feat(client): consume cast cancel and npc action events"
 
 ## 任务 5：Part A 回归与提交检查
 
-- [ ] **步骤 1：跑 Part A 服务端与 Unity 回归**
+- [x] **步骤 1：跑 Part A 服务端与 Unity 回归**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatCancelMessagesTests"
@@ -1306,11 +1307,11 @@ bash tools/unity-tests.sh EditMode NpcEntityAnimatorTests
 
 预期：全部 PASS。若既有类因 `NpcActionEvent.LifeId`/`CancelCastRequest.CastId` 的追加字段失败，先修测试夹具再继续。
 
-- [ ] **步骤 2：更新协议与 SyncLayer README**
+- [x] **步骤 2：更新协议与 SyncLayer README**
 
 在 `Assets/Scripts/AOT/Protocol/README.md` 的属性剑气段追加 `CastCancelBroadcast`（310）与 `CancelCastRequest.CastId` 的说明；在 `Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md` 的属性剑气段追加取消/NpcAction 消费口径。只写已实现内容，不写 Plan 03/04 的状态。
 
-- [ ] **步骤 3：Commit**
+- [x] **步骤 3：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol/README.md Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
