@@ -165,8 +165,7 @@ namespace Hotfix.GameSystems.SyncLayer
             if (!_catalog.TryGet(broadcast.SkillId, out var data)) return;
 
             // 立即播放：伤害结果可能先于下一帧到达，等它再播会让挥砍落后于受击。
-            view.Animator?.PlayAttack(data.AnimatorTrigger,
-                (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length ?? DefaultAttackDuration,
+            view.Animator?.PlayAttack(data.AnimatorTrigger, AttackClipDuration(data),
                 broadcast.AttackSpeedMultiplier, broadcast.CastId);
 
             var presentation = GetPresentation(data);
@@ -302,12 +301,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 remaining = (activeCast.EndTick - _serverTickProvider())
                             / (float)CombatRules.TickRateHz;
 
-            // 必须用 Unity 的 `!= null` 重载：未赋值的 AnimationClip 是 fake-null，
-            // `?.length` 会绕过重载并抛 UnassignedReferenceException（10002/20001 等技能无剪辑）。
-            var clip = data is ChargedSkillData ? data.ReleaseClip : data.CastClip;
-            float duration = clip != null ? clip.length : DefaultAttackDuration;
             view.Animator?.PlayAttack(data.AnimatorTrigger,
-                Mathf.Min(duration, Mathf.Max(0.1f, remaining)), 1f, activeCast.CastId);
+                Mathf.Min(AttackClipDuration(data), Mathf.Max(0.1f, remaining)), 1f, activeCast.CastId);
         }
 
         private float ComputeStartDistance(ProjectileLaunchBroadcast launch)
@@ -473,6 +468,18 @@ namespace Hotfix.GameSystems.SyncLayer
                 return tracked;
             }
             return null;
+        }
+
+        /// <summary>
+        /// 攻击动画时长：蓄力技能用释放剪辑，其余用施法剪辑；未赋值时退回默认时长。
+        /// **必须用 Unity 的 `!= null` 重载**：未赋值的 AnimationClip 是 fake-null
+        /// （如 10002/20001 的 `_castClip: {fileID: 0}`），`?.length` 会绕过重载并抛
+        /// UnassignedReferenceException。OnCastBroadcast 与 OnActiveCast 共用本方法。
+        /// </summary>
+        private static float AttackClipDuration(SkillData data)
+        {
+            var clip = data is ChargedSkillData ? data.ReleaseClip : data.CastClip;
+            return clip != null ? clip.length : DefaultAttackDuration;
         }
 
         /// <summary>SkillData 基类没有 Presentation 属性（只在具体子类上）；按现有类型取。</summary>

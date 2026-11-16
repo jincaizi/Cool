@@ -526,5 +526,50 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 Object.DestroyImmediate(root);
             }
         }
+
+        /// <summary>
+        /// 无剪辑技能（10002 的 `_castClip: {fileID: 0}`）在**有 Animator** 的视图上不得抛
+        /// `UnassignedReferenceException`——`view.Animator?.PlayAttack(...)` 的 null 短路只在
+        /// Animator 为 null 时避开时长求值，Proxy/占位视图测不到该缺陷。
+        /// </summary>
+        [Test]
+        public void OnCastBroadcast_Missing_Cast_Clip_Falls_Back_Without_Throwing()
+        {
+            var root = new GameObject("RemoteCastMissingClipRoot");
+            try
+            {
+                var registry = new RemoteEntityRegistry(root.transform);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2L,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                    X = 0f, Y = 0f, Z = 0f, Kind = (byte)EntityKind.Player, Tick = 1
+                }, serverTicks: 1_000_000L);
+                var view = registry.GetView(2L);
+                Assert.IsNotNull(view);
+                // EditMode AddComponent 不跑 Awake；驱动即使无 Animator 也会记录攻击状态。
+                view!.Animator = root.AddComponent<RemoteEntityAnimator>();
+
+                var catalog = LoadCatalog();
+                var data = (SkillData)null!;
+                Assert.IsTrue(catalog.TryGet(10002, out data));
+                Assert.IsTrue(data.CastClip == null, "前提：10002 的施法剪辑未赋值（fake-null）");
+
+                var presenter = new RemoteCastPresenter(registry, localPlayerId: 1L, catalog,
+                    projectileFactory: (_, __, ___) => new FakeVisual(),
+                    castVfxSpawner: null);
+
+                Assert.DoesNotThrow(() => presenter.OnCastBroadcast(new CastBroadcast
+                {
+                    CasterPlayerId = 2L, SkillId = 10002, AttackSpeedMultiplier = 1f
+                }));
+                Assert.Greater(view.Animator.AttackRemainingForTest, 0f,
+                    "缺剪辑时应退回默认时长并照常起手");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
     }
 }
