@@ -2474,7 +2474,25 @@ public class CastResendTests
         }
 ```
 
-每次加入后调用 `PruneActiveLaunches()`。
+每次加入后调用 `PruneActiveLaunches()`。另加持续过期清理，并在 `DrainResolved` 入口调用：
+
+```csharp
+        private void PruneExpiredLaunches(uint tick)
+        {
+            if (_activeLaunches.Count == 0) return;
+            var expired = new List<ulong>();
+            foreach (var pair in _activeLaunches)
+            {
+                var launch = pair.Value;
+                if (launch.Speed <= 0f || launch.Range <= 0f) continue;
+                uint travelTicks = (uint)Math.Ceiling(
+                    launch.Range / launch.Speed * CombatRules.TickRateHz);
+                if (tick - launch.LaunchTick > travelTicks + 2)
+                    expired.Add(pair.Key);
+            }
+            foreach (var castId in expired) _activeLaunches.Remove(castId);
+        }
+```
 
 在 `CastHandler` 增加：
 
@@ -2484,7 +2502,7 @@ public class CastResendTests
             var observer = _server.GetEntity(observerId);
             foreach (var launch in _resolver.ActiveLaunchesFor(casterId))
             {
-                if (observer != null && observer.ZoneId != launch.CombatSceneId) continue;
+                if (observer == null || observer.ZoneId != launch.CombatSceneId) continue;
                 var session = _server.GetSession(observerId);
                 if (session != null)
                     _ = _server.SendToSessionAsync(session,
@@ -2583,7 +2601,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CastResendTests
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~BandwidthBudgetTests"
 ```
 
-预期：补发测试 PASS；带宽测试 PASS。
+预期：补发测试 PASS；带宽测试 PASS。另补：`AoiBroadcaster.OnBaselineEntity` 首帧触发/Keepalive 与 Changed 不触发/重见再触发；`ResendActiveProjectiles` 同/异 ZoneId 收件人；128 条上界收敛；带宽 fixture 用非零 Rotation/Speed/Dead/Defending，并在投影基线中填 `ActiveCast` 后重新确认预算。
 
 - [ ] **步骤 5：Commit**
 
