@@ -73,4 +73,14 @@ public class NpcActionChainTests
         Assert.True(Server3C.IsSameCombatScene(a, a));
         Assert.False(Server3C.IsSameCombatScene(a, b));
     }
+
+    [Fact]
+    public void EnableMonsters_Wires_ActionV1_And_ActionRunner()
+    {
+        using var server = new Server3C(new TestLogger());
+        server.EnableMonsters(1);
+
+        Assert.True(server.MonsterModuleForTest!.ActionV1);
+        Assert.NotEmpty(server.MonsterModuleForTest.GetActionSnapshots());
+    }
 }

@@ -71,6 +71,8 @@ namespace KcpServer
         private MonsterModule? _monsterModule;
         private long _monsterIdSeed = MonsterModule.NpcIdSeed;
 
+        internal MonsterModule? MonsterModuleForTest => _monsterModule;
+
         private readonly Dictionary<long, (ulong InstanceId, uint Revision)> _lastNpcActions =
             new Dictionary<long, (ulong, uint)>();
 
@@ -100,9 +102,10 @@ namespace KcpServer
         public void EnableMonsters(int count, NavigationService? navigation = null)
         {
             _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed),
-                avoidance: _avoidance, navigation: navigation);
+                avoidance: _avoidance, navigation: navigation, actionV1: true);
             _monsterModule.SpawnDefaultLayout(count);
             _aoi.NpcActionProvider = id => _monsterModule?.GetActionSnapshot(id);
+            _castHandler.SetNpcActionRunner(npcId => _monsterModule?.GetState(npcId)?.ActionRunner);
 
             // P2 伤害归属（spec §5.2）：玩家命中 NPC 时把实际伤害记进该怪物的仇恨表。
             // 无条件接线（与 LOS 无关）——CombatResolver 已在 ApplyHit 里只对 NPC 目标触发。

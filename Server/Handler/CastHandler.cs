@@ -798,6 +798,9 @@ namespace KcpServer
         public void SetNpcDamageObserver(Action<long, long, float>? observer)
             => _resolver.NpcDamaged = observer;
 
+        public void SetNpcActionRunner(Func<long, KcpServer.Monster.MonsterActionRunner?>? runner)
+            => _resolver.NpcActionRunner = runner;
+
         /// <summary>接线 B1 地面高度（Server3C 在 EnableMonsters 后调用；null = 不钳制客户端 Y）。</summary>
         public void SetGroundHeight(Func<Vec3, float?>? groundHeight)
             => _resolver.GroundHeight = groundHeight;
