@@ -44,7 +44,7 @@ bash tools/test-server.sh
   AOI 分带调度把血量/防御变化视为脏位立即推送；客户端据此更新远程 `Targetable` 与名牌血条。
   `Server.Tests/Aoi/BandwidthBudgetTests` 断言含新字段的全字段快照字节上限。
 
-## 属性剑气 v1（2026-11-14，Plan 01）
+## 属性剑气 v1（2026-11-14，Plan 01–02A）
 
 - **共享目录**：启动从 `Config/elemental_catalog.json` 加载、`ElementalCatalogValidator` 校验并
   计算 SHA-256 指纹；缺表/校验失败时停用该功能（登录不发放武器）。客户端登录带指纹与
@@ -66,8 +66,9 @@ bash tools/test-server.sh
 - **NpcAction 广播（Plan 02 Part A）**：`NpcActionEvent`（2004）随技能/受击/死亡阶段变化发送；
   AOI 进入基线带 `NpcAction` 与 `EntityFieldMask.NpcAction`；事件与广播一样按 `ZoneId` 过滤。
 
-状态：Plan 01 已完成；Plan 02–05 未开始。未启用：元素状态结算/DoT、`CastCancelBroadcast`、
-`CombatStateUpdate`/`CombatProjection`、AOI 重入补发、PvP 控制预算。
+状态：Plan 01 已完成；Plan 02 Part A（取消、NpcAction 事件/AOI 基线）已完成；Part B（战斗投影/带宽）与 Plan 03–05 未开始。未启用：元素状态结算/DoT、`CombatStateUpdate`/`CombatProjection`、AOI 重入补发、PvP 控制预算。
+
+`CastCancelBroadcast`（310）与 `NpcActionEvent`（2004，含 `LifeId`）已启用；事件按 `ZoneId` 过滤。
 
 ## 投射物与落点判定（20003 火球）
 

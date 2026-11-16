@@ -9,7 +9,7 @@
 | 范围 | 状态 |
 |---|---|
 | Plan 01：共享表、权威换装、普攻参数、`CastId`、发射/停点、场景隔离 | ✅ 已完成（服务端 512/512、Unity EditMode/PlayMode 相关测试通过） |
-| Plan 02：取消广播/NpcAction、战斗投影/带宽 | ❌ 未开始 |
+| Plan 02：取消广播/NpcAction、战斗投影/带宽 | 🟡 Part A 完成，Part B 未开始 |
 | Plan 03：位移/跳跃预算、PvP 控制 | ❌ 未开始 |
 | Plan 04：状态结算/DoT/元素 VFX | ❌ 未开始 |
 | Plan 05：三客户端验收/表现收口 | ❌ 未开始 |
