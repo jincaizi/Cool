@@ -159,5 +159,54 @@ namespace GameSys.EditorTests
             Assert.AreEqual(5u, view!.CombatVersion);
             Assert.IsTrue(view.IsDefending);
         }
+
+        [Test]
+        public void test_active_cast_projection_raises_applied_event()
+        {
+            var received = new List<(long EntityId, ulong CastId)>();
+            _registry.ActiveCastApplied += (entityId, activeCast) =>
+                received.Add((entityId, activeCast.CastId));
+
+            // 基线路径：AOI 快照的 Combat.ActiveCast
+            _registry.ApplySnapshot(new EntitySnapshot
+            {
+                PlayerId = 30, Kind = (byte)EntityKind.Player,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead
+                    | EntityFieldMask.Health | EntityFieldMask.Combat),
+                X = 0f, Z = 0f, Dead = false, Hp = 720f, MaxHp = 720f,
+                CombatVersion = 2, LifeId = 1,
+                Combat = new CombatProjection
+                {
+                    CombatVersion = 2, LifeId = 1, Hp = 720f, MaxHp = 720f,
+                    ActiveCast = new ActiveCastProjection { CastId = 501, SkillId = 10002, EndTick = 40 }
+                }
+            }, 1);
+
+            // 增量路径：CombatStateUpdate
+            _registry.ApplyCombatStateUpdate(new CombatStateUpdate
+            {
+                EntityId = 30,
+                Projection = new CombatProjection
+                {
+                    CombatVersion = 3, LifeId = 1, Hp = 700f, MaxHp = 720f,
+                    ActiveCast = new ActiveCastProjection
+                    {
+                        CastId = 502, SkillId = 10002, Phase = NpcActionPhase.Active, EndTick = 50
+                    }
+                }
+            });
+
+            // 不带 ActiveCast 的投影不触发
+            _registry.ApplyCombatStateUpdate(new CombatStateUpdate
+            {
+                EntityId = 30,
+                Projection = new CombatProjection { CombatVersion = 4, LifeId = 1, Hp = 680f, MaxHp = 720f }
+            });
+
+            Assert.AreEqual(2, received.Count);
+            Assert.AreEqual(30L, received[0].EntityId);
+            Assert.AreEqual(501UL, received[0].CastId);
+            Assert.AreEqual(502UL, received[1].CastId);
+        }
     }
 }

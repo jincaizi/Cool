@@ -212,6 +212,11 @@ namespace Hotfix.GameSystems.SyncLayer
             string url = Application.absoluteURL;
             if (TierQuery.TryFull(url, out int budget)) _remoteEntities.TierPolicy.MaxFull = budget;
             if (TierQuery.TryFullDistance(url, out float distance)) _remoteEntities.TierPolicy.FullDistance = distance;
+
+            // 活动施法投影统一走 registry 事件（基线快照的 Combat.ActiveCast 与增量更新同路径）。
+            // 订阅跟随 registry 生命周期：DetachCombatBridge 不退订——角色重建/重连后同一 registry
+            // 还要继续用，退订会让新 presenter 永远收不到基线施法；handler 对 presenter 为 null 安全。
+            _remoteEntities.ActiveCastApplied += HandleActiveCastApplied;
         }
 
         /// <summary>
@@ -992,13 +997,13 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleNpcAction(NpcActionEvent evt)
             => _remoteEntities?.ApplyNpcActionEvent(evt);
 
-        /// <summary>战斗投影 → registry 版本合并；活动施法另交 presenter 播放攻击表现</summary>
+        /// <summary>战斗投影 → registry 版本合并（活动施法经 ActiveCastApplied 事件交 presenter）</summary>
         private void HandleCombatStateUpdate(CombatStateUpdate update)
-        {
-            _remoteEntities?.ApplyCombatStateUpdate(update);
-            if (update?.Projection?.ActiveCast != null)
-                _remoteCastPresenter?.OnActiveCast(update.EntityId, update.Projection.ActiveCast);
-        }
+            => _remoteEntities?.ApplyCombatStateUpdate(update);
+
+        /// <summary>投影成功合并且携带活动施法 → 远程施法表现（presenter 内按 CastId 去重）</summary>
+        private void HandleActiveCastApplied(long entityId, ActiveCastProjection activeCast)
+            => _remoteCastPresenter?.OnActiveCast(entityId, activeCast);
 
         /// <summary>
         /// 摘除目标锁定（断线 / 本地角色重建 / 宿主销毁共用）：先退订 AOI 视图移除，
@@ -1124,6 +1129,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private void OnDestroy()
         {
             HideNetStats();
+            if (_remoteEntities != null)
+                _remoteEntities.ActiveCastApplied -= HandleActiveCastApplied;
             // 先摘订阅、再 Dispose（与 Disconnect → ResetAttachment 同序）：
             // manager.Dispose 里的 registry.Clear 会发 ViewRemoved，此时 selector 若仍在订阅
             // 会去动 UI/选中环（销毁过程中的 Unity 对象操作）。

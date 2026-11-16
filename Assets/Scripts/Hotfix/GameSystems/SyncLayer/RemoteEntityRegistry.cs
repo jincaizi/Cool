@@ -125,6 +125,9 @@ namespace Hotfix.GameSystems.SyncLayer
         public event System.Action<long>? ViewCreated;
         /// <summary>视图移除（名牌已注销、Targetable 已标死亡）——表现系统据此清理，不靠轮询</summary>
         public event System.Action<long>? ViewRemoved;
+        /// <summary>战斗投影携带活动施法且**已成功合并**（基线快照或 CombatStateUpdate 同路径）——
+        /// 施法表现接线点；重复相位更新由订阅者按 CastId 去重。</summary>
+        public event System.Action<long, ActiveCastProjection>? ActiveCastApplied;
 
         /// <param name="appearances">
         /// 玩家类实体（真人与 bot）的外观目录。**省略 = 全部退化为胶囊占位**
@@ -301,6 +304,8 @@ namespace Hotfix.GameSystems.SyncLayer
             if (view.Kind != (byte)EntityKind.PlayerBot)
                 _labelSink?.UpdateHp(entityId, view.Targetable.HPPercent);
             view.Animator?.ApplySnapshotState(view.Dead);
+            if (projection.ActiveCast != null)
+                ActiveCastApplied?.Invoke(entityId, projection.ActiveCast);
         }
 
         /// <summary>

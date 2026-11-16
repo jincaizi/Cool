@@ -286,21 +286,26 @@ namespace Hotfix.GameSystems.SyncLayer
         public void OnActiveCast(long entityId, ActiveCastProjection activeCast)
         {
             if (activeCast == null || activeCast.CastId == 0) return;
-            if (!_activeCastPlayed.Add(activeCast.CastId)) return;
-            if (_activeCastPlayed.Count > 256) _activeCastPlayed.Clear();
-            if (_registry == null || _catalog == null || activeCast == null) return;
+            if (_registry == null || _catalog == null) return;
             if (entityId == _localPlayerId) return;
             var view = _registry.GetView(entityId);
             if (view == null || view.Kind != (byte)EntityKind.Player) return;
             if (!_catalog.TryGet(activeCast.SkillId, out var data)) return;
+
+            // 去重只在**确实可播**之后登记：视图尚未建立（首条更新早于基线快照）时
+            // 不能把 CastId 记为已播，否则后续相位更新会被永久跳过。
+            if (_activeCastPlayed.Count >= 256) _activeCastPlayed.Clear();
+            if (!_activeCastPlayed.Add(activeCast.CastId)) return;
 
             float remaining = DefaultAttackDuration;
             if (_serverTickProvider != null && activeCast.EndTick > _serverTickProvider())
                 remaining = (activeCast.EndTick - _serverTickProvider())
                             / (float)CombatRules.TickRateHz;
 
-            float duration = (data is ChargedSkillData ? data.ReleaseClip : data.CastClip)?.length
-                             ?? DefaultAttackDuration;
+            // 必须用 Unity 的 `!= null` 重载：未赋值的 AnimationClip 是 fake-null，
+            // `?.length` 会绕过重载并抛 UnassignedReferenceException（10002/20001 等技能无剪辑）。
+            var clip = data is ChargedSkillData ? data.ReleaseClip : data.CastClip;
+            float duration = clip != null ? clip.length : DefaultAttackDuration;
             view.Animator?.PlayAttack(data.AnimatorTrigger,
                 Mathf.Min(duration, Mathf.Max(0.1f, remaining)), 1f, activeCast.CastId);
         }

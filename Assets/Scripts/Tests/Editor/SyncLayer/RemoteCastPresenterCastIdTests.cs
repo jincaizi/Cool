@@ -238,22 +238,41 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         [Test]
         public void ActiveCast_Plays_Once_Per_CastId()
         {
-            var presenter = new RemoteCastPresenter(
-                registry: null, localPlayerId: 1L, catalog: null);
-
-            presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 91, SkillId = 10002 });
-            presenter.OnActiveCast(2L, new ActiveCastProjection
+            var root = new GameObject("ActiveCastDedupe");
+            try
             {
-                CastId = 91, SkillId = 10002, Phase = NpcActionPhase.Recovery
-            });
-            presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 92, SkillId = 10002 });
+                var registry = new RemoteEntityRegistry(root.transform);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2L,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                    X = 0f, Y = 0f, Z = 0f, Kind = (byte)EntityKind.Player, Tick = 1
+                }, serverTicks: 1_000_000L);
+                var presenter = new RemoteCastPresenter(registry, localPlayerId: 1L, LoadCatalog());
 
-            Assert.AreEqual(2, presenter.ActiveCastPlayedCountForTest,
-                "phase updates of the same CastId must not replay the attack");
+                // 视图不存在（首条更新早于基线快照）不得占用去重槽位
+                presenter.OnActiveCast(99L, new ActiveCastProjection { CastId = 90, SkillId = 10002 });
+                Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
+                    "a cast that cannot be presented yet must not consume the dedupe slot");
 
-            presenter.Clear();
-            Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
-                "Clear() must reset the replay dedupe set");
+                presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 91, SkillId = 10002 });
+                presenter.OnActiveCast(2L, new ActiveCastProjection
+                {
+                    CastId = 91, SkillId = 10002, Phase = NpcActionPhase.Recovery
+                });
+                presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 92, SkillId = 10002 });
+
+                Assert.AreEqual(2, presenter.ActiveCastPlayedCountForTest,
+                    "phase updates of the same CastId must not replay the attack");
+
+                presenter.Clear();
+                Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
+                    "Clear() must reset the replay dedupe set");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
         }
     }
 }
