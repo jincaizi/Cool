@@ -53,7 +53,11 @@ namespace KcpServer
 
             // 防御姿态随同一次位置同步刷新（格挡减伤服务端化的输入侧）。**故意不进 MovementValidator**：
             // 位置校验与防御无关；防御的信任面（客户端上报 + 服务端几何/耐久校验）登记见 CombatRules.IsBlocked
-            player.IsDefending = request.IsDefending;
+            if (player.IsDefending != request.IsDefending)
+            {
+                player.IsDefending = request.IsDefending;
+                player.BumpCombatVersion();
+            }
 
             if (result.NeedsCorrection)
             {

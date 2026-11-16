@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cool.Protocol;
+using Cool.SyncCore;
 using Xunit;
 
 namespace KcpServer.Tests;
@@ -102,6 +103,48 @@ public class AoiBroadcasterTests
         Assert.Equal(mover.Hp, captured.Hp, 4);
         Assert.False(captured.IsDefending);
         Assert.Equal(mover.LifeId, captured!.LifeId);
+    }
+
+    [Fact]
+    public void Baseline_Snapshot_Carries_Combat_Projection()
+    {
+        // 任务 8A：基线快照必须携带完整战斗投影（Combat 位 + Combat 信封 + 版本/代次）；
+        // 保活帧不带（客户端沿用 last-known）。
+        var store = new EntityStore();
+        var observer = store.AddPlayer(1, "Obs");
+        var target = store.AddPlayer(2, "Target");
+        observer.UpdatePosition(new Vector3(0, 0, 0), 0f, 0f, 1L, 0U);
+        target.UpdatePosition(new Vector3(10, 0, 0), 0f, 0f, 1L, 0U);
+        target.EquippedWeaponInstanceId = 42;
+        target.EquippedWeaponTemplateId = ElementalCatalogDefaults.IceSwordTemplateId;
+        target.CombatVersion = 5;
+
+        var broadcaster = new AoiBroadcaster
+        {
+            CombatProjectionProvider = entity =>
+                CombatProjectionBuilder.Build(entity, ElementalCatalogDefaults.Create())
+        };
+        var captured = new List<EntitySnapshot>();
+        broadcaster.OnEntityBroadcast = (entityId, snap) => { if (entityId == 2) captured.Add(snap); };
+
+        broadcaster.BuildForObserver(observer, tick: 1, store);   // Baseline
+        broadcaster.BuildForObserver(observer, tick: 5, store);   // 静止 4 tick 保活
+
+        Assert.Equal(2, captured.Count);
+        var baseline = captured[0];
+        Assert.True((baseline.FieldMask & (ushort)EntityFieldMask.Combat) != 0);
+        Assert.NotNull(baseline.Combat);
+        Assert.Equal(5u, baseline.Combat!.CombatVersion);
+        Assert.Equal(5u, baseline.CombatVersion);
+        Assert.Equal(target.LifeId, baseline.LifeId);
+        Assert.Equal(42L, baseline.Combat.Equipment!.WeaponInstanceId);
+        Assert.Equal(ElementalCatalogDefaults.IceSwordTemplateId, baseline.Combat.Equipment.TemplateId);
+        Assert.Equal(1, baseline.Combat.Equipment.ElementId);
+        Assert.Empty(baseline.Combat.Statuses);
+
+        var keepalive = captured[1];
+        Assert.Equal(0, keepalive.FieldMask & (ushort)EntityFieldMask.Combat);
+        Assert.Null(keepalive.Combat);
     }
 
     [Fact]

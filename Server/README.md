@@ -65,10 +65,17 @@ bash tools/test-server.sh
   跨场景同坐标不互相命中。怪物按地图实例绑定场景留到 Plan 02 Part B/后续。
 - **NpcAction 广播（Plan 02 Part A）**：`NpcActionEvent`（2004）随技能/受击/死亡阶段变化发送；
   AOI 进入基线带 `NpcAction` 与 `EntityFieldMask.NpcAction`；事件与广播一样按 `ZoneId` 过滤。
+- **战斗投影（Plan 02 Part B，任务 8A）**：AOI 基线快照带 `EntityFieldMask.Combat` 与完整
+  `CombatProjection`（`CombatProjectionBuilder`：HP/装备/活动施法；`Statuses` 暂空、`Control`
+  为默认值，`CombatVersion/LifeId` 同基线下发）。`PlayerState.CombatVersion` 在换装、受伤/
+  死亡/复活、防御姿态变化与活动施法阶段推进时递增并置 `CombatDirty`；
+  `Server3C.SendCombatStateUpdates` 只发 dirty 实体，收件人 = 本人 + 同 `ZoneId` 观察者。
+  活动施法：`Decide` 成功置 `Windup`（`EndTick` = 最后一段判定 tick），判定期推进
+  `Active`/`Recovery`，段结束/取消/死亡清空。
 
 状态：Plan 01 已完成；Plan 02 Part A（取消、NpcAction 事件/AOI 基线）已完成；
-Part B（战斗投影/带宽）与 Plan 03–05 未开始。未启用：元素状态结算/DoT、
-`CombatStateUpdate`/`CombatProjection`、AOI 重入补发、PvP 控制预算。
+Part B 进行中（任务 8A：服务端战斗投影基线与更新发送已接通；客户端消费/带宽预算待后续任务）。
+未启用：元素状态结算/DoT、客户端 `CombatStateUpdate` 消费、AOI 重入补发、PvP 控制预算。
 
 `CastCancelBroadcast`（310）与 `NpcActionEvent`（2004，含 `LifeId`）已启用；
 事件按 `ZoneId` 过滤。

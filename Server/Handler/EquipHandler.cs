@@ -49,6 +49,7 @@ namespace KcpServer
             player.EquippedWeaponInstanceId = request.WeaponInstanceId;
             player.EquippedWeaponTemplateId = templateId;
             player.EquipmentRevision++;
+            player.BumpCombatVersion();
 
             var confirm = new EquipWeaponConfirm
             {

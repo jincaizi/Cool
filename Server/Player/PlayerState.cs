@@ -28,7 +28,11 @@ namespace KcpServer
             new System.Collections.Generic.Dictionary<int, uint>();
 
         /// <summary>服务器权威扣血（命中裁决调用；可到负值——死亡判定唯一依据 IsAlive，复活见 D-2）</summary>
-        public void ApplyDamage(float damage) => Hp -= damage;
+        public void ApplyDamage(float damage)
+        {
+            Hp -= damage;
+            BumpCombatVersion();
+        }
 
         /// <summary>
         /// 防御姿态（客户端经 PositionSyncRequest.IsDefending 上报，每次位置同步刷新——
@@ -45,6 +49,7 @@ namespace KcpServer
         {
             if (DeadTick != 0) return;
             DeadTick = tick;
+            BumpCombatVersion();
         }
 
         /// <summary>
@@ -63,6 +68,7 @@ namespace KcpServer
             Hp = MaxHp;
             DeadTick = 0;
             LifeId++;
+            BumpCombatVersion();
             return true;
         }
 
@@ -102,6 +108,19 @@ namespace KcpServer
 
         /// <summary>战斗投影版本戳（单调；任务 8A 接入递增，Health/Combat 位置位时随快照下发）。</summary>
         public uint CombatVersion { get; internal set; }
+
+        /// <summary>战斗投影自上次 CombatStateUpdate 后是否变化（主循环独占访问）。</summary>
+        public bool CombatDirty { get; internal set; }
+
+        /// <summary>当前活动施法投影（无 = null；主循环独占访问）。</summary>
+        public ActiveCastProjection? ActiveCast { get; internal set; }
+
+        /// <summary>推进版本并标脏，供周期 CombatStateUpdate 发送。</summary>
+        public void BumpCombatVersion()
+        {
+            CombatVersion++;
+            CombatDirty = true;
+        }
 
         /// <summary>会话内武器实例 → 模板。</summary>
         public readonly Dictionary<long, int> WeaponInstanceTemplates = new Dictionary<long, int>();

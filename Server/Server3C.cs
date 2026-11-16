@@ -175,6 +175,10 @@ namespace KcpServer
             _castHandler = new CastHandler(this, _logger,
                 new CombatResolver(_entityStore, null, _elementalCatalog));
 
+            // 属性剑气 v1：基线快照携带完整战斗投影（AOI 纯组装，注入权威组装器）。
+            _aoi.CombatProjectionProvider = entity =>
+                CombatProjectionBuilder.Build(entity, _elementalCatalog);
+
             // 避让系统在 EnableMonsters 之前就可能建（--bots 单独跑）；模板表由模块在启用时补上，
             // 所以半径解析走**延迟查**（闭包读字段，调用时模块已就位）；未启用怪物时也走不到 Npc 分支
             _avoidance = new AvoidanceSystem(_entityStore,
@@ -228,6 +232,9 @@ namespace KcpServer
                     // 所以这里是联网下唯一的复活路径。放在怪物 tick 之后——本 tick 由怪物
                     // 打死的实体即时打上死亡标记，不必等下一 tick
                     TickRespawns((uint)tick);
+
+                    // 属性剑气 v1：只发 dirty 实体（本人 + 同 Zone 观察者）；基线已随 AOI 快照下发。
+                    SendCombatStateUpdates();
 
                     // 每 5s（75 tick）带宽统计日志——T7 验收口径（记录非断言）
                     if (tick % 75 == 0)
@@ -463,6 +470,47 @@ namespace KcpServer
             }
 
             return true;
+        }
+
+        /// <summary>属性剑气 v1：把本 tick 变化的战斗投影推给实体本人与同 Zone 观察者。
+        /// 收件人语义与 CastBroadcast 一致（玩家用 AOI 可见集，NPC 用观察者反查）。</summary>
+        private void SendCombatStateUpdates()
+        {
+            foreach (var entity in _entityStore.All)
+            {
+                if (!entity.CombatDirty) continue;
+                entity.CombatDirty = false;
+
+                var projection = CombatProjectionBuilder.Build(entity, _elementalCatalog);
+                var update = new CombatStateUpdate
+                {
+                    EntityId = entity.PlayerId,
+                    Projection = projection,
+                    ServerTimestamp = ServerClock.NowTicks()
+                };
+
+                var recipients = new HashSet<long>();
+                if (entity.Kind == (byte)EntityKind.Npc)
+                {
+                    foreach (var id in GetObserversOf(entity.PlayerId)) recipients.Add(id);
+                }
+                else
+                {
+                    if (_playerIdToSession.ContainsKey(entity.PlayerId))
+                        recipients.Add(entity.PlayerId);
+                    foreach (var p in GetVisiblePlayers(entity.PlayerId)) recipients.Add(p.PlayerId);
+                }
+
+                var scene = entity.ZoneId;
+                foreach (var recipientId in recipients)
+                {
+                    if (_entityStore.GetPlayer(recipientId) is { } recipient
+                        && recipient.ZoneId != scene) continue;
+                    var session = GetSession(recipientId);
+                    if (session != null)
+                        _ = SendToSessionAsync(session, MessageId.CombatStateUpdate, update);
+                }
+            }
         }
 
         private void SendNpcActionEvents(uint tick)

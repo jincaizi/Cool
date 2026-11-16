@@ -25,6 +25,9 @@ namespace KcpServer
         /// <summary>怪物动作快照提供者（Server3C 接线 MonsterModule.GetActionSnapshot）。</summary>
         public System.Func<long, NpcActionSnapshot?>? NpcActionProvider { get; set; }
 
+        /// <summary>战斗投影提供者（Server3C 接线 CombatProjectionBuilder.Build；仅基线快照使用）。</summary>
+        public System.Func<PlayerState, CombatProjection>? CombatProjectionProvider { get; set; }
+
         /// <summary>累计发送实体数（Server3C 每 tick 增量；日志统计用——T7）</summary>
         public long TotalEntitySends;
 
@@ -115,7 +118,15 @@ namespace KcpServer
                         snap.NpcAction = action;
                         snap.FieldMask |= (ushort)EntityFieldMask.NpcAction;
                     }
-                    // 任务 8A：基线快照在此追加 EntityFieldMask.Combat 与 CombatProjection。
+                    // 任务 8A：基线快照携带完整战斗投影；CombatVersion/LifeId 随条件位下发。
+                    var projection = CombatProjectionProvider?.Invoke(entity);
+                    if (projection != null)
+                    {
+                        snap.Combat = projection;
+                        snap.FieldMask |= (ushort)EntityFieldMask.Combat;
+                        snap.CombatVersion = projection.CombatVersion;
+                        snap.LifeId = projection.LifeId;
+                    }
                 }
                 result.Add(snap);
                 OnEntityBroadcast?.Invoke(entity.PlayerId, snap);

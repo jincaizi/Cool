@@ -248,6 +248,11 @@ namespace KcpServer
                 SceneId = caster.ZoneId
             });
             if (runner != null) { _pending[_pending.Count-1].StageTicks = runner.StageTicks(); resolution.Broadcast.NpcAction = runner.Current; }
+
+            // 属性剑气 v1：活动施法投影从 Windup 开始（EndTick = 最后一段判定 tick）。
+            var casterState = _store.GetPlayer(casterId);
+            if (casterState != null)
+                SetActiveCast(casterState, _pending[_pending.Count - 1], NpcActionPhase.Windup);
             return resolution;
         }
 
@@ -289,6 +294,26 @@ namespace KcpServer
                 return Math.Max(1u, CombatRules.CooldownTicks(entry));
             float seconds = Math.Max(timing.CooldownSeconds, timing.ChainWindowSeconds);
             return Math.Max(1u, SecondsToTicks(seconds / speed));
+        }
+
+        /// <summary>活动施法投影：Decide 成功 → Windup；判定期推进 → Active/Recovery；段结束/取消/死亡 → 清空。</summary>
+        private static void SetActiveCast(PlayerState caster, PendingCast pending, NpcActionPhase phase)
+        {
+            caster.ActiveCast = new ActiveCastProjection
+            {
+                CastId = pending.CastId,
+                SkillId = pending.Request.SkillId,
+                Phase = phase,
+                EndTick = pending.StageTicks.Length > 0 ? pending.StageTicks[^1] : 0u
+            };
+            caster.BumpCombatVersion();
+        }
+
+        private static void ClearActiveCast(PlayerState? caster, ulong castId)
+        {
+            if (caster == null || caster.ActiveCast == null || caster.ActiveCast.CastId != castId) return;
+            caster.ActiveCast = null;
+            caster.BumpCombatVersion();
         }
 
         private static CastConfirm BuildConfirm(PlayerState caster, CastRequest request,
@@ -343,6 +368,7 @@ namespace KcpServer
                     // 后续段继续结算（B3：旋转死亡/换命后不得残留伤害实例）。
                     if (resolution == null)
                     {
+                        ClearActiveCast(_store.GetPlayer(pending.CasterId), pending.CastId);
                         // 已发射的剑气：向已收到发射描述的会话补一条权威终止。
                         if (pending.Launched)
                         {
@@ -374,6 +400,14 @@ namespace KcpServer
                     // 单段技能的返回值，可能打破既有测试。
                     (resolved ??= new List<CastResolution>()).Add(resolution);
                     pending.NextStage++;
+
+                    // 判定期推进活动施法阶段；最后一段结算后清空（EndTick 已随每段更新）。
+                    var casterState = _store.GetPlayer(pending.CasterId);
+                    if (pending.NextStage >= pending.StageTicks.Length)
+                        ClearActiveCast(casterState, pending.CastId);
+                    else if (casterState != null)
+                        SetActiveCast(casterState, pending,
+                            pending.NextStage == 1 ? NpcActionPhase.Active : NpcActionPhase.Recovery);
                 }
                 if (!pending.Spent && pending.NextStage < pending.StageTicks.Length) keep = true;
                 if (keep) _pending[write++] = pending;
@@ -397,7 +431,11 @@ namespace KcpServer
                     if (pending.CancelBroadcast) break; // 最新实例已取消，重复取消幂等
                     pending.CancelBroadcast = true;
                 }
-                else _pending.RemoveAt(i);
+                else
+                {
+                    _pending.RemoveAt(i);
+                    ClearActiveCast(_store.GetPlayer(casterId), pending.CastId);
+                }
 
                 cancels.Add(new CastCancelBroadcast
                 {
@@ -424,7 +462,11 @@ namespace KcpServer
                     if (pending.CancelBroadcast) continue;
                     pending.CancelBroadcast = true;
                 }
-                else _pending.RemoveAt(i);
+                else
+                {
+                    _pending.RemoveAt(i);
+                    ClearActiveCast(_store.GetPlayer(casterId), pending.CastId);
+                }
                 cancels.Add(new CastCancelBroadcast
                 {
                     CastId = pending.CastId,
