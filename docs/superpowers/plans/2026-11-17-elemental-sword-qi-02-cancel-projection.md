@@ -25,6 +25,7 @@
 - 三客户端完整一致性与带宽实测收口（Plan 05）。Plan 02 只交付服务端/客户端的单点和版本合并测试，不新增 PlayMode 三端夹具。
 - 远端手持武器模型切换（元素 VFX 的一部分，Plan 04/05）。本计划只保存 `EquipmentSummary`，不替换远端模型。
 - 血量/状态分版本合并。Plan 02 的 `Statuses[]` 为空，客户端按单一 `CombatVersion` 原子合并；等到 Plan 04 引入状态运行时时再拆分为 `AppliedHealthVersion`/`AppliedStatusVersion`，否则当前拆分没有可观察行为。
+- NPC 攻击起手仍由 `CastBroadcast`→`NpcAttackSchedule` 驱动；`NpcActionEvent` 负责阶段/取消与动作存储。NpcAction 直接驱动攻击变体/时间轴留到 Plan 04/05，避免 Plan 02 内双播。
 
 ## 文件结构
 
@@ -568,6 +569,16 @@ public class NpcActionChainTests
         Assert.NotEqual(0, snapshot.FieldMask & (ushort)EntityFieldMask.NpcAction);
     }
 
+    [Fact]
+    public void EnableMonsters_Wires_ActionV1_And_ActionRunner()
+    {
+        using var server = new Server3C(new TestLogger());
+        server.EnableMonsters(1);
+
+        Assert.True(server.MonsterModuleForTest!.ActionV1);
+        Assert.NotEmpty(server.MonsterModuleForTest.GetActionSnapshots());
+    }
+
     [Theory]
     [InlineData(NpcActionKind.Idle, false)]
     [InlineData(NpcActionKind.Move, false)]
@@ -659,11 +670,27 @@ public class NpcActionChainTests
                     }
 ```
 
-在 `Server3C` 构造或 `EnableMonsters` 后接线：
+在 `Server3C.EnableMonsters` 构造 `MonsterModule` 时传 `actionV1: true`，并在其后接线：
 
 ```csharp
+            _monsterModule = new MonsterModule(_entityStore,
+                () => Interlocked.Increment(ref _monsterIdSeed),
+                avoidance: _avoidance, navigation: navigation, actionV1: true);
+            _monsterModule.SpawnDefaultLayout(count);
             _aoi.NpcActionProvider = id => _monsterModule?.GetActionSnapshot(id);
+            _castHandler.SetNpcActionRunner(npcId =>
+                _monsterModule?.GetState(npcId)?.ActionRunner);
 ```
+
+在 `CastHandler` 增加：
+
+```csharp
+        public void SetNpcActionRunner(
+            Func<long, KcpServer.Monster.MonsterActionRunner?>? runner)
+            => _resolver.NpcActionRunner = runner;
+```
+
+在 `Server3C` 增加测试接缝：`internal MonsterModule? MonsterModuleForTest => _monsterModule;`。
 
 在 `Server3C` 增加 `SendNpcActionEvents`：
 
@@ -992,6 +1019,7 @@ namespace GameSys.EditorTests
         [Test]
         public void ApplyAction_Cancel_Clears_The_Matching_Instance()
         {
+            _driver.PlayAttack(0); // CastBroadcast → NpcAttackSchedule 驱动起手
             _driver.ApplyAction(new NpcActionSnapshot
             {
                 InstanceId = 3, Revision = 1, Kind = NpcActionKind.Skill,
@@ -1082,7 +1110,10 @@ bash tools/unity-tests.sh EditMode RemoteCastPresenterCastIdTests
             if (_npcActions.Count > 256) _npcActions.Clear();
             view.NpcAnimator?.ApplyAction(action);
             if (action.Phase == NpcActionPhase.Cancelled)
+            {
+                _attacks.Clear(entityId);
                 view.NpcAnimator?.CancelAttack(action.InstanceId);
+            }
         }
 ```
 
@@ -1120,9 +1151,9 @@ bash tools/unity-tests.sh EditMode RemoteCastPresenterCastIdTests
             switch (action.Kind)
             {
                 case NpcActionKind.Skill:
-                    if (action.Phase is NpcActionPhase.Accepted or NpcActionPhase.Windup)
-                        PlayAttack(action.PresentationVariant);
-                    else if (action.Phase == NpcActionPhase.Cancelled)
+                    // Plan 02 保留 CastBroadcast → NpcAttackSchedule 作为攻击起手驱动；
+                    // NpcActionEvent 只跟踪实例并在 Cancelled 时停止，避免双播。
+                    if (action.Phase == NpcActionPhase.Cancelled)
                         CancelAttack(action.InstanceId);
                     break;
                 case NpcActionKind.HitReaction:
