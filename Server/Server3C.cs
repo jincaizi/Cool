@@ -310,6 +310,9 @@ namespace KcpServer
 
         public void UnregisterEntity(long playerId)
         {
+            var cancels = _castHandler.CancelCaster(playerId, CurrentTick,
+                NpcActionCancelReason.Forced);
+            _castHandler.BroadcastCancel(cancels);
             _entityStore.RemovePlayer(playerId);
             _aoi.RemoveEntity(playerId); // 注销清 AOI 状态：同 id 重登无残留视野迟滞/节拍
         }
@@ -404,6 +407,13 @@ namespace KcpServer
         {
             foreach (var p in _entityStore.All)
             {
+                if (!p.IsAlive && p.DeadTick == 0)
+                {
+                    p.MarkDead(tick);
+                    var cancels = _castHandler.CancelCaster(p.PlayerId, tick,
+                        NpcActionCancelReason.Death);
+                    _castHandler.BroadcastCancel(cancels);
+                }
                 if (!AdvanceRespawn(p, tick, TickIntervalMs, _respawnPosition)) continue;
 
                 // 只发给**有会话**的实体（bot 没有 session，没人可通知）

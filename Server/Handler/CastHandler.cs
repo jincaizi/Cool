@@ -112,6 +112,7 @@ namespace KcpServer
             public ulong CastId;
             public WeaponCastSnapshot Weapon;
             public bool Launched;
+            public bool CancelBroadcast;
             public string SceneId = "";
 
             public PendingCast(long casterId, CastRequest request, CastBroadcast broadcast,
@@ -381,19 +382,56 @@ namespace KcpServer
             return resolved ?? new List<CastResolution>();
         }
 
-        /// <summary>丢弃某施法者某技能的未到期判定实例（客户端取消旋转 / 换命）。
-        /// 返回移除的实例数；无匹配时幂等。</summary>
-        public int CancelPending(long casterId, int skillId)
+        public List<CastCancelBroadcast> CancelPending(long casterId, int skillId, ulong castId = 0,
+            uint tick = 0, NpcActionCancelReason reason = NpcActionCancelReason.Forced)
         {
-            int removed = 0;
+            var cancels = new List<CastCancelBroadcast>();
             for (int i = _pending.Count - 1; i >= 0; i--)
             {
                 var pending = _pending[i];
                 if (pending.CasterId != casterId || pending.Request.SkillId != skillId) continue;
-                _pending.RemoveAt(i);
-                removed++;
+                if (castId != 0 && pending.CastId != castId) continue;
+                if (pending.Launched)
+                {
+                    if (pending.CancelBroadcast) continue;
+                    pending.CancelBroadcast = true;
+                }
+                else _pending.RemoveAt(i);
+                cancels.Add(new CastCancelBroadcast
+                {
+                    CastId = pending.CastId,
+                    CasterLifeId = pending.Broadcast.CasterLifeId,
+                    CasterPlayerId = casterId,
+                    EffectiveTick = tick,
+                    Reason = reason
+                });
             }
-            return removed;
+            return cancels;
+        }
+
+        public List<CastCancelBroadcast> CancelCaster(long casterId, uint tick, NpcActionCancelReason reason)
+        {
+            var cancels = new List<CastCancelBroadcast>();
+            for (int i = _pending.Count - 1; i >= 0; i--)
+            {
+                var pending = _pending[i];
+                if (pending.CasterId != casterId) continue;
+                if (pending.Launched)
+                {
+                    if (pending.CancelBroadcast) continue;
+                    pending.CancelBroadcast = true;
+                }
+                else _pending.RemoveAt(i);
+                cancels.Add(new CastCancelBroadcast
+                {
+                    CastId = pending.CastId,
+                    CasterLifeId = pending.Broadcast.CasterLifeId,
+                    CasterPlayerId = casterId,
+                    EffectiveTick = tick,
+                    Reason = reason
+                });
+            }
+            return cancels;
         }
 
         /// <summary>判定一段：复查施法者存活 → 几何（按投射物种类）→ 服务端掷骰 → 扣血。
@@ -977,7 +1015,33 @@ namespace KcpServer
         {
             long? playerId = _server.GetPlayerId(session);
             if (!playerId.HasValue) return;
-            _resolver.CancelPending(playerId.Value, request.SkillId);
+            var cancels = _resolver.CancelPending(playerId.Value, request.SkillId,
+                request.CastId, _server.CurrentTick + 1, NpcActionCancelReason.Forced);
+            BroadcastCancel(cancels);
         }
+
+        public async Task BroadcastCancelAsync(IReadOnlyList<CastCancelBroadcast> cancels)
+        {
+            foreach (var cancel in cancels)
+            {
+                var caster = _server.GetEntity(cancel.CasterPlayerId);
+                if (caster == null) continue;
+                var recipients = CollectCastRecipients(cancel.CasterPlayerId,
+                    caster.Kind == (byte)EntityKind.Npc);
+                foreach (var recipientId in recipients)
+                {
+                    var session = _server.GetSession(recipientId);
+                    if (session != null)
+                        await _server.SendToSessionAsync(session,
+                            MessageId.CastCancelBroadcast, cancel);
+                }
+            }
+        }
+
+        public void BroadcastCancel(IReadOnlyList<CastCancelBroadcast> cancels)
+            => _ = BroadcastCancelAsync(cancels);
+
+        public List<CastCancelBroadcast> CancelCaster(long casterId, uint tick, NpcActionCancelReason reason)
+            => _resolver.CancelCaster(casterId, tick, reason);
     }
 }

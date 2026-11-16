@@ -72,7 +72,7 @@ public class CombatResolverSpinTests
         resolver.DrainResolved(DecideTick);
         Assert.Single(Assert.Single(resolver.DrainResolved(FirstStageTick)).Hits);
 
-        Assert.Equal(1, resolver.CancelPending(caster, 20002));
+        Assert.Single(resolver.CancelPending(caster, 20002));
         float hpAfterCancel = store.GetPlayer(target)!.Hp;
 
         for (uint t = FirstStageTick + StageTickStep;
