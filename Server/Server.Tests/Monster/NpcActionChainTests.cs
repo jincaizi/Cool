@@ -43,6 +43,7 @@ public class NpcActionChainTests
         var snapshot = snapshots.Single(s => s.PlayerId == id);
         Assert.NotNull(snapshot.NpcAction);
         Assert.NotEqual(0, snapshot.FieldMask & (ushort)EntityFieldMask.NpcAction);
+        Assert.Equal(store.GetPlayer(id)!.LifeId, snapshot.LifeId);
     }
 
     [Theory]

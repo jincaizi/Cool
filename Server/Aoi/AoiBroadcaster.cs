@@ -82,6 +82,7 @@ namespace KcpServer
                         Hp = entity.Hp,
                         MaxHp = entity.MaxHp,
                         IsDefending = entity.IsDefending,
+                        LifeId = entity.LifeId,
                         Tick = tick
                     };
                     if (baseline)

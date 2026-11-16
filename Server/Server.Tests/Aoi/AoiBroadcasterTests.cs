@@ -101,6 +101,7 @@ public class AoiBroadcasterTests
         Assert.Equal(100f, captured.MaxHp, 4);
         Assert.Equal(mover.Hp, captured.Hp, 4);
         Assert.False(captured.IsDefending);
+        Assert.Equal(mover.LifeId, captured!.LifeId);
     }
 
     [Fact]
