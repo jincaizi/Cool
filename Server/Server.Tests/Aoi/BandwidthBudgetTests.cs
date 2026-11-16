@@ -65,10 +65,13 @@ public class BandwidthBudgetTests
         {
             entities.Add(new EntitySnapshot
             {
-                PlayerId = i + 1, X = i, Z = i, Hp = 720f, MaxHp = 720f,
+                PlayerId = i + 1, X = i, Z = i,
+                Rotation = i * 10f, Speed = 4.5f,
+                Hp = 720f, MaxHp = 720f, Dead = true, IsDefending = true,
                 FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
-                    | EntityFieldMask.Speed | EntityFieldMask.Dead | EntityFieldMask.Health),
-                CombatVersion = 1, LifeId = 1
+                    | EntityFieldMask.Speed | EntityFieldMask.Dead | EntityFieldMask.Health
+                    | EntityFieldMask.Defending),
+                CombatVersion = (uint)(i + 1), LifeId = 1
             });
         }
         var snapshot = new WorldSnapshot
@@ -109,14 +112,20 @@ public class BandwidthBudgetTests
                         {
                             WeaponInstanceId = 42, TemplateId = 90002, ElementId = 1
                         },
-                        Control = new ControlSummary { SpeedScale = 1f }
+                        Control = new ControlSummary { SpeedScale = 1f },
+                        ActiveCast = new ActiveCastProjection
+                        {
+                            CastId = 7, SkillId = 10002,
+                            Phase = NpcActionPhase.Windup, EndTick = 100
+                        }
                     }
                 }
             }
         };
         var bytes = MessageCodec.EncodeToArray(MessageId.WorldSnapshot, baseline,
             MessageFlags.Reliable);
-        // 2026-11-17 实测 81B（含 5B 帧头）；下限挡住投影被静默丢弃，上限挡住字段膨胀。
+        // 2026-11-17 实测：基础投影 81B，补 ActiveCast 后 92B（含 5B 帧头）；
+        // 下限挡住投影被静默丢弃，上限挡住字段膨胀。
         Assert.InRange(bytes.Length, 80, 300);
     }
 }

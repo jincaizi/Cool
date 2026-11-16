@@ -233,6 +233,42 @@ public class AoiBroadcasterTests
         Assert.DoesNotContain(2L, Ids(broadcaster.BuildForObserver(observer, 3, store)));
     }
 
+    [Fact]
+    public void Baseline_Callback_Fires_On_First_Sight_And_Reentry_Only()
+    {
+        var store = new EntityStore();
+        var observer = store.AddPlayer(1, "Obs");
+        var target = store.AddPlayer(2, "Target");
+        observer.UpdatePosition(new Vector3(0, 0, 0), 0f, 0f, 1L, 0U);
+        target.UpdatePosition(new Vector3(10, 0, 0), 0f, 0f, 1L, 0U);
+
+        var broadcaster = new AoiBroadcaster();
+        var baselines = new List<(long ObserverId, long EntityId)>();
+        broadcaster.OnBaselineEntity = (observerId, entityId) =>
+            baselines.Add((observerId, entityId));
+
+        broadcaster.BuildForObserver(observer, tick: 1, store);   // Baseline 首帧
+        Assert.Single(baselines);
+        Assert.Equal((1L, 2L), baselines[0]);
+
+        broadcaster.BuildForObserver(observer, tick: 5, store);   // 静止 Keepalive
+        Assert.Single(baselines);
+
+        target.ApplyDamage(10f);                                  // 血量翻转 → Changed
+        broadcaster.BuildForObserver(observer, tick: 6, store);
+        Assert.Single(baselines);
+
+        // 移出视野（100m > 90m 迟滞出界）后回到 50m：重见按 Baseline 处理，回调再次触发。
+        target.UpdatePosition(new Vector3(100, 0, 0), 0f, 0f, 7L, 0U);
+        broadcaster.BuildForObserver(observer, tick: 7, store);
+        Assert.Single(baselines);
+
+        target.UpdatePosition(new Vector3(50, 0, 0), 0f, 0f, 8L, 0U);
+        broadcaster.BuildForObserver(observer, tick: 8, store);
+        Assert.Equal(2, baselines.Count);
+        Assert.Equal((1L, 2L), baselines[1]);
+    }
+
     private static long[] Ids(List<EntitySnapshot> snaps)
     {
         var ids = new long[snaps.Count];

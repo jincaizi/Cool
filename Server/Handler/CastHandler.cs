@@ -138,7 +138,8 @@ namespace KcpServer
         private readonly List<PendingCast> _pending = new List<PendingCast>();
 
         /// <summary>在途发射描述（按 CastId）——晚进观察者基线补发用。Stop 时移除；
-        /// 正常飞满射程不产生 Stop，靠 <see cref="PruneActiveLaunches"/> 有界回收。</summary>
+        /// 正常飞满射程不产生 Stop，由 <see cref="PruneExpiredLaunches"/> 按飞行时长清理，
+        /// 并由 <see cref="PruneActiveLaunches"/> 兜底 128 条上界。</summary>
         private readonly Dictionary<ulong, ProjectileLaunchBroadcast> _activeLaunches =
             new Dictionary<ulong, ProjectileLaunchBroadcast>();
 
@@ -161,6 +162,24 @@ namespace KcpServer
             int remove = _activeLaunches.Count - maxEntries;
             for (int i = 0; i < remove; i++)
                 _activeLaunches.Remove(oldest[i].CastId);
+        }
+
+        /// <summary>正常飞满射程的发射持续清理：tick 已超过飞行 tick 数 + 2 tick 裕量即移除。
+        /// 生产 tick 单调递增，uint 相减 wrap-safe（15Hz 下 ~9.1 年才 wrap）。</summary>
+        private void PruneExpiredLaunches(uint tick)
+        {
+            if (_activeLaunches.Count == 0) return;
+            var expired = new List<ulong>();
+            foreach (var pair in _activeLaunches)
+            {
+                var launch = pair.Value;
+                if (launch.Speed <= 0f || launch.Range <= 0f) continue;
+                uint travelTicks = (uint)Math.Ceiling(
+                    launch.Range / launch.Speed * CombatRules.TickRateHz);
+                if (tick - launch.LaunchTick > travelTicks + 2)
+                    expired.Add(pair.Key);
+            }
+            foreach (var castId in expired) _activeLaunches.Remove(castId);
         }
 
         /// <summary>决策：校验 + 冷却记录 + 生成广播 + 入队。判定（几何/掷骰/扣血）推迟到首段到期 tick
@@ -378,6 +397,7 @@ namespace KcpServer
         /// <summary>取出到期（含本 tick）的待判定施法并按段裁决。单遍压缩，出队顺序 = 入队顺序（确定性）。</summary>
         public List<CastResolution> DrainResolved(uint tick)
         {
+            PruneExpiredLaunches(tick);
             List<CastResolution>? resolved = null;
             int write = 0;
             for (int read = 0; read < _pending.Count; read++)
@@ -1082,7 +1102,7 @@ namespace KcpServer
             var observer = _server.GetEntity(observerId);
             foreach (var launch in _resolver.ActiveLaunchesFor(casterId))
             {
-                if (observer != null && observer.ZoneId != launch.CombatSceneId) continue;
+                if (observer == null || observer.ZoneId != launch.CombatSceneId) continue;
                 var session = _server.GetSession(observerId);
                 if (session != null)
                     _ = _server.SendToSessionAsync(session,
