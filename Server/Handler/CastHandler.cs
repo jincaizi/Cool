@@ -391,12 +391,14 @@ namespace KcpServer
                 var pending = _pending[i];
                 if (pending.CasterId != casterId || pending.Request.SkillId != skillId) continue;
                 if (castId != 0 && pending.CastId != castId) continue;
+
                 if (pending.Launched)
                 {
-                    if (pending.CancelBroadcast) continue;
+                    if (pending.CancelBroadcast) break; // 最新实例已取消，重复取消幂等
                     pending.CancelBroadcast = true;
                 }
                 else _pending.RemoveAt(i);
+
                 cancels.Add(new CastCancelBroadcast
                 {
                     CastId = pending.CastId,
@@ -405,6 +407,7 @@ namespace KcpServer
                     EffectiveTick = tick,
                     Reason = reason
                 });
+                break; // 只处理最新/指定这一条
             }
             return cancels;
         }

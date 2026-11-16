@@ -85,7 +85,7 @@ tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<W
 | `CastRequest` | `ClientCastSeq` / `EquipmentRevision` / `CasterLifeId` | 8 / 9 / 10 | 幂等序号、装备版本与生命代次校验 |
 | `CastBroadcast` | `CastId` / `CasterLifeId` / `AttackSpeedMultiplier` / `ElementId` / `EquipmentRevision` | 15–19 | 权威施法标识与冻结的施法快照 |
 | `HitEntry` | `CastId` / `EventSeq` / `EventId` / `DamageKind` / `TargetLifeId` / `CombatVersion` | 8–13 | 命中归属与战斗投影（Plan 02 起消费 DoT 分支） |
-| `CancelCastRequest` | `CastId` | 2 | 非 0 只取消该次施法；0 = 旧客户端语义，取消该技能所有匹配的未完成实例 |
+| `CancelCastRequest` | `CastId` | 2 | 非 0 只取消该次施法；0 = 取消该技能最新实例（兼容旧客户端） |
 | `NpcActionEvent` | `LifeId` | 4 | 怪物生命代次；与 `EntityId/InstanceId/Revision` 组成客户端合并键 |
 | `EntitySnapshot` | `LifeId` | 19 | 实体生命代次（随基线与 Health 快照发送；NpcAction 合并键） |
 

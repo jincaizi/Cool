@@ -59,17 +59,24 @@ public class CastCancelBroadcastTests
     }
 
     [Fact]
-    public void CancelPending_Without_CastId_Cancels_The_Requested_Skill()
+    public void CancelPending_Without_CastId_Cancels_Only_The_Latest_Instance()
     {
         var (store, resolver) = NewWorld();
-        var first = resolver.Decide(1, Cast(10001), 0);
-        var second = resolver.Decide(1, Cast(10002), 100);
+        var first = resolver.Decide(1, Cast(), 10);
+        var second = resolver.Decide(1, Cast(), 100);
+        Assert.True(first.Accepted);
+        Assert.True(second.Accepted);
 
-        var cancels = resolver.CancelPending(1, 10002, 0, 120, NpcActionCancelReason.Forced);
+        var cancels = resolver.CancelPending(1, 10002, 0, 120,
+            NpcActionCancelReason.Forced);
 
         Assert.Single(cancels);
         Assert.Equal(second.CastId, cancels[0].CastId);
-        Assert.NotEqual(first.CastId, cancels[0].CastId);
+
+        var older = resolver.CancelPending(1, 10002, 0, 121,
+            NpcActionCancelReason.Forced);
+        Assert.Single(older);
+        Assert.Equal(first.CastId, older[0].CastId);
     }
 
     [Fact]
