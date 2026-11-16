@@ -177,5 +177,19 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(NpcEntityAnimator.StateIdle,
                 _animator.GetInteger("MonsterState"));
         }
+
+        [Test]
+        public void ApplyAction_Windup_Does_Not_Start_An_Attack()
+        {
+            _driver.ApplyAction(new NpcActionSnapshot
+            {
+                InstanceId = 4, Revision = 1, Kind = NpcActionKind.Skill,
+                Phase = NpcActionPhase.Windup, PresentationVariant = 0
+            });
+
+            Assert.AreEqual(NpcEntityAnimator.StateIdle,
+                _animator.GetInteger("MonsterState"),
+                "windup is driven by CastBroadcast/NpcAttackSchedule; ApplyAction must not start a second attack");
+        }
     }
 }
