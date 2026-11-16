@@ -87,6 +87,7 @@ bash tools/unity-tests.sh EditMode CombatStateProjectionTests
 **文件：**
 - 修改：`Assets/Scripts/AOT/Protocol/Messages/Combat.cs`
 - 修改：`Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs`
+- 修改：`Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs`（`EntitySnapshot.LifeId` tag 19，NpcAction 合并键需要）
 - 修改：`Assets/Scripts/AOT/Protocol/MessageId.cs`
 - 修改：`Assets/Scripts/AOT/Protocol/MessageCodec.cs`
 - 测试：`Server/Server.Tests/Protocol/CombatCancelMessagesTests.cs`（新建）
@@ -96,6 +97,7 @@ bash tools/unity-tests.sh EditMode CombatStateProjectionTests
 创建 `Server/Server.Tests/Protocol/CombatCancelMessagesTests.cs`：
 
 ```csharp
+using System.Collections.Generic;
 using Cool.Protocol;
 using Xunit;
 
@@ -153,6 +155,22 @@ public class CombatCancelMessagesTests
         Assert.Equal(3UL, decoded.Action.InstanceId);
         Assert.Equal(2u, decoded.Action.Revision);
     }
+
+    [Fact]
+    public void EntitySnapshot_Carries_LifeId_For_NpcAction_Merge()
+    {
+        var decoded = ((WorldSnapshot)MessageCodec.Decode(MessageCodec.EncodeToArray(
+            MessageId.WorldSnapshot,
+            new WorldSnapshot
+            {
+                Entities = new List<EntitySnapshot>
+                {
+                    new EntitySnapshot { PlayerId = 1, LifeId = 5 }
+                }
+            })).message).Entities[0];
+
+        Assert.Equal(5u, decoded.LifeId);
+    }
 }
 ```
 
@@ -194,6 +212,13 @@ public class CombatCancelMessagesTests
         [ProtoMember(4)] public uint LifeId { get; set; }
 ```
 
+在 `WorldSnapshot.cs` 的 `EntitySnapshot` 增加（NpcAction 合并键；`CombatVersion`/`Combat` 仍在 Part B 任务 6）：
+
+```csharp
+        /// <summary>实体生命代次（随基线与 Health 快照发送；NpcAction 合并键）</summary>
+        [ProtoMember(19)] public uint LifeId { get; set; }
+```
+
 在 `MessageId.cs` 的战斗段追加：
 
 ```csharp
@@ -213,12 +238,12 @@ public class CombatCancelMessagesTests
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatCancelMessagesTests"`
 
-预期：3/3 PASS。
+预期：4/4 PASS。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Assets/Scripts/AOT/Protocol/Messages/Combat.cs Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs Assets/Scripts/AOT/Protocol/MessageId.cs Assets/Scripts/AOT/Protocol/MessageCodec.cs Server/Server.Tests/Protocol/CombatCancelMessagesTests.cs
+git add Assets/Scripts/AOT/Protocol/Messages/Combat.cs Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs Assets/Scripts/AOT/Protocol/MessageId.cs Assets/Scripts/AOT/Protocol/MessageCodec.cs Server/Server.Tests/Protocol/CombatCancelMessagesTests.cs
 git commit -m "feat(protocol): add cast cancel and npc action life id"
 ```
 
@@ -1341,11 +1366,10 @@ namespace Cool.Protocol
         Combat = 1 << 10
 ```
 
-在 `EntitySnapshot` 增加：
+在 `EntitySnapshot` 增加（`LifeId` 已在任务 1 加为 tag 19，不重复）：
 
 ```csharp
         [ProtoMember(18)] public uint CombatVersion { get; set; }
-        [ProtoMember(19)] public uint LifeId { get; set; }
         [ProtoMember(20)] public CombatProjection? Combat { get; set; }
 ```
 
