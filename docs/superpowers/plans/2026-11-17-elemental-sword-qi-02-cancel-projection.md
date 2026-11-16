@@ -573,6 +573,7 @@ public class NpcActionChainTests
         var snapshot = snapshots.Single(s => s.PlayerId == id);
         Assert.NotNull(snapshot.NpcAction);
         Assert.NotEqual(0, snapshot.FieldMask & (ushort)EntityFieldMask.NpcAction);
+        Assert.Equal(store.GetPlayer(id)!.LifeId, snapshot.LifeId);
     }
 
     [Fact]
@@ -655,6 +656,8 @@ public class NpcActionChainTests
         /// <summary>怪物动作快照提供者（Server3C 接线 MonsterModule.GetActionSnapshot）。</summary>
         public System.Func<long, NpcActionSnapshot?>? NpcActionProvider { get; set; }
 ```
+
+在 `BuildForObserver` 的 `new EntitySnapshot { ... }` 初始化里补 `LifeId = entity.LifeId`（客户端 NpcAction 合并键需要；Part B 会改成只在 Health/Combat 时携带）。
 
 在 `BuildForObserver` 调用 `_scheduler.ShouldSend(...)` **之前**记录基线（`ShouldSend` 首次发送会把 `HasSent` 置 true，之后再问会得到 false）：
 
