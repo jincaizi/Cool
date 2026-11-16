@@ -147,6 +147,11 @@ bash tools/unity-tests.sh EditMode NavMeshExportFreshnessTests
 bash tools/unity-tests.sh PlayMode MonsterWorldTests
 ```
 
+## NpcAction 广播（Plan 02 Part A）
+
+`NpcActionEvent`（2004）随技能/受击/死亡阶段变化发送；AOI 进入基线带 `NpcAction` 与
+`EntityFieldMask.NpcAction`；事件与广播一样按 `ZoneId` 过滤。
+
 ## 已知限制
 
 - **P2 不含控制 / 击退 / 状态**（Stun/Freeze/Slow/Burn/Knockback 属 P3）；Evade 到家“清状态”

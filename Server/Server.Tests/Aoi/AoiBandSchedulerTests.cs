@@ -177,4 +177,17 @@ public class AoiBandSchedulerTests
         Assert.True(Send(s, 1, entity, 10f, 102, actionState: 4));
         Assert.True(Send(s, 2, entity, 70f, 102, actionState: 4));
     }
+
+    [Fact]
+    public void Is_First_Send_Tracks_First_Send_And_Reentry()
+    {
+        var scheduler = new AoiBandScheduler();
+        Assert.True(scheduler.IsFirstSend(1, 2));
+
+        scheduler.ShouldSend(1, 2, 5f, 1, 0f, 0f, 0f, 0, false, 100f, 100f, false);
+        Assert.False(scheduler.IsFirstSend(1, 2));
+
+        scheduler.MarkOutOfSight(1, 2);
+        Assert.True(scheduler.IsFirstSend(1, 2));
+    }
 }
