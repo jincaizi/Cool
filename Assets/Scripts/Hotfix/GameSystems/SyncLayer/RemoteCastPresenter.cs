@@ -165,8 +165,22 @@ namespace Hotfix.GameSystems.SyncLayer
             if (!_catalog.TryGet(broadcast.SkillId, out var data)) return;
 
             // 立即播放：伤害结果可能先于下一帧到达，等它再播会让挥砍落后于受击。
-            view.Animator?.PlayAttack(data.AnimatorTrigger, AttackClipDuration(data),
-                broadcast.AttackSpeedMultiplier, broadcast.CastId);
+            // 攻击起手与 OnActiveCast 共用 _activeCastPlayed：同一 CastId 先到者起手，另一条
+            // 只负责 VFX/投射物（下面的 CastVFX/ReleaseVFX/Meteor 分支不受此门影响）。
+            // 没有 Animator（Proxy 档）时不起手也不占槽——升 Full 后由基线 ActiveCast 补播。
+            var animator = view.Animator;
+            bool attackAlreadyPresented = broadcast.CastId != 0
+                && _activeCastPlayed.Contains(broadcast.CastId);
+            if (!attackAlreadyPresented && animator != null)
+            {
+                if (broadcast.CastId != 0)
+                {
+                    if (_activeCastPlayed.Count >= 256) _activeCastPlayed.Clear();
+                    _activeCastPlayed.Add(broadcast.CastId);
+                }
+                animator.PlayAttack(data.AnimatorTrigger, AttackClipDuration(data),
+                    broadcast.AttackSpeedMultiplier, broadcast.CastId);
+            }
 
             var presentation = GetPresentation(data);
             if (presentation?.CastVFX != null)
@@ -285,23 +299,29 @@ namespace Hotfix.GameSystems.SyncLayer
         public void OnActiveCast(long entityId, ActiveCastProjection activeCast)
         {
             if (activeCast == null || activeCast.CastId == 0) return;
+            if (_cancelledCasts.Contains(activeCast.CastId)) return;
             if (_registry == null || _catalog == null) return;
             if (entityId == _localPlayerId) return;
             var view = _registry.GetView(entityId);
             if (view == null || view.Kind != (byte)EntityKind.Player) return;
             if (!_catalog.TryGet(activeCast.SkillId, out var data)) return;
+            // Proxy 档没有 Animator：本次播不了就不占去重槽，升 Full 时由 SetTier 重放。
+            if (view.Animator == null) return;
 
             // 去重只在**确实可播**之后登记：视图尚未建立（首条更新早于基线快照）时
             // 不能把 CastId 记为已播，否则后续相位更新会被永久跳过。
             if (_activeCastPlayed.Count >= 256) _activeCastPlayed.Clear();
             if (!_activeCastPlayed.Add(activeCast.CastId)) return;
 
+            // 记录 CastId → 施法者：服务端取消（CastCancelBroadcast）据此定位攻击表现。
+            RememberCastSkill(activeCast.CastId, activeCast.SkillId, entityId);
+
             float remaining = DefaultAttackDuration;
             if (_serverTickProvider != null && activeCast.EndTick > _serverTickProvider())
                 remaining = (activeCast.EndTick - _serverTickProvider())
                             / (float)CombatRules.TickRateHz;
 
-            view.Animator?.PlayAttack(data.AnimatorTrigger,
+            view.Animator.PlayAttack(data.AnimatorTrigger,
                 Mathf.Min(AttackClipDuration(data), Mathf.Max(0.1f, remaining)), 1f, activeCast.CastId);
         }
 

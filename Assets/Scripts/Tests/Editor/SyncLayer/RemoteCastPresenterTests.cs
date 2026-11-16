@@ -571,5 +571,70 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 Object.DestroyImmediate(root);
             }
         }
+
+        /// <summary>
+        /// Proxy 档没有 Animator：基线 ActiveCast 播不了，但必须保留在视图上；
+        /// 观察者靠近升到 Full 后由 SetTier 补播一次（且只补一次）。
+        /// </summary>
+        [Test]
+        public void Baseline_ActiveCast_Replays_After_Proxy_To_Full_Promotion()
+        {
+            var root = new GameObject("ActiveCastTierRoot");
+            var fullModel = new GameObject("FullModel");
+            try
+            {
+                var registry = new RemoteEntityRegistry(root.transform,
+                    new[] { new AppearanceEntry { Id = 0, Full = fullModel } });
+                registry.ObserverPositionProvider = () => Vector3.zero;
+
+                var presenter = new RemoteCastPresenter(registry, localPlayerId: 1L, LoadCatalog(),
+                    projectileFactory: (_, __, ___) => new FakeVisual());
+                registry.ActiveCastApplied += presenter.OnActiveCast;
+
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2L,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind
+                        | EntityFieldMask.Combat),
+                    X = 100f, Y = 0f, Z = 0f, Kind = (byte)EntityKind.Player, Tick = 1,
+                    CombatVersion = 1, LifeId = 1,
+                    Combat = new CombatProjection
+                    {
+                        CombatVersion = 1, LifeId = 1, Hp = 720f, MaxHp = 720f,
+                        ActiveCast = new ActiveCastProjection
+                        {
+                            CastId = 700, SkillId = 10002, EndTick = 50
+                        }
+                    }
+                }, serverTicks: 1_000_000L);
+
+                var view = registry.GetView(2L);
+                Assert.IsNotNull(view);
+                Assert.AreEqual(RemoteTier.Proxy, view!.Tier, "100m 外先以 Proxy 建视图");
+                Assert.IsNull(view.Animator, "Proxy 档不建 Animator");
+                Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
+                    "Proxy 档播不了，不得占用去重槽");
+
+                registry.UpdateRender(nowServerTicks: 1_000_000L, renderDelayTicks: 0L);
+                Assert.AreEqual(RemoteTier.Proxy, view.Tier);
+
+                // 观察者移到实体旁边 → 升 Full → 基线 ActiveCast 补播
+                registry.ObserverPositionProvider = () => new Vector3(100f, 0f, 0f);
+                registry.UpdateRender(nowServerTicks: 1_000_000L, renderDelayTicks: 0L);
+
+                Assert.AreEqual(RemoteTier.Full, view.Tier);
+                var animator = view.Animator;
+                Assert.IsNotNull(animator, "升 Full 后应有动画驱动");
+                Assert.AreEqual(1, animator!.AttackStartsForTest,
+                    "基线 ActiveCast 在升档后只补播一次");
+                Assert.Greater(animator.AttackRemainingForTest, 0f);
+                Assert.AreEqual(1, presenter.ActiveCastPlayedCountForTest);
+            }
+            finally
+            {
+                Object.DestroyImmediate(fullModel);
+                Object.DestroyImmediate(root);
+            }
+        }
     }
 }

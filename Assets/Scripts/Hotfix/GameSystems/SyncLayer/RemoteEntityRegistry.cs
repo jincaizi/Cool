@@ -300,10 +300,14 @@ namespace Hotfix.GameSystems.SyncLayer
             view.Equipment = projection.Equipment;
             view.Control = projection.Control;
             view.Statuses = projection.Statuses;
+            // 完整投影：无活动施法时也写 null，Proxy→Full 不会补播已结束的施法。
+            view.ActiveCast = projection.ActiveCast;
             view.Targetable.SetVitals(view.Hp, view.MaxHp, view.Dead);
             if (view.Kind != (byte)EntityKind.PlayerBot)
                 _labelSink?.UpdateHp(entityId, view.Targetable.HPPercent);
             view.Animator?.ApplySnapshotState(view.Dead);
+            if (view.Tier == RemoteTier.Full)
+                view.Animator?.SetDefending(view.IsDefending);
             if (projection.ActiveCast != null)
                 ActiveCastApplied?.Invoke(entityId, projection.ActiveCast);
         }
@@ -446,7 +450,7 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 foreach (var kv in _views)
                     if (kv.Value.Kind != (byte)EntityKind.Npc)
-                        SetTier(kv.Value, RemoteTier.Full);   // 已 Full 的走早退
+                        SetTier(kv.Value, RemoteTier.Full, kv.Key);   // 已 Full 的走早退
                 RecountTiers();
             }
 
@@ -482,7 +486,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
             for (int i = 0; i < _tierCandidates.Count; i++)
                 if (_views.TryGetValue(_tierCandidates[i].PlayerId, out var view))
-                    SetTier(view, _tierResults[i]);
+                    SetTier(view, _tierResults[i], _tierCandidates[i].PlayerId);
 
             RecountTiers();
         }
@@ -510,7 +514,7 @@ namespace Hotfix.GameSystems.SyncLayer
         /// **不销毁**（会再升回来）；升级时强制重写一次驱动参数（Animator 禁用即重置状态），
         /// 并重新归零 Attack/Hit/Defend 层权重（禁用重置含层权重——见 ResetLayerWeights）。
         /// </summary>
-        private void SetTier(RemoteEntityView view, RemoteTier tier)
+        private void SetTier(RemoteEntityView view, RemoteTier tier, long entityId)
         {
             if (view.Tier == tier && (tier == RemoteTier.Full ? view.FullRoot != null : view.ProxyRoot != null))
                 return;
@@ -546,6 +550,10 @@ namespace Hotfix.GameSystems.SyncLayer
                 view.Animator.ApplySnapshotState(view.Dead);
                 view.Animator.Reapply();
                 view.Animator.SetDefending(view.IsDefending);
+                // Proxy 档期间基线 ActiveCast 无法播放（Animator 未建）：真正升到 Full 后补播一次。
+                // 函数开头的早退保证只在换档时走到这里，不会每帧重播。
+                if (view.ActiveCast != null)
+                    ActiveCastApplied?.Invoke(entityId, view.ActiveCast);
             }
             else
             {
@@ -627,6 +635,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _lastKnownYaw.Clear();
             _lastSampleTicks.Clear();
             _groundSamples.Clear(); // 与视图同生共死（换世界后地形可能不同）
+            _pendingCombat.Clear(); // 换世界/断线：旧会话的战斗投影不得回放到新实体
         }
 
         /// <summary>读远程实体视图（T6 验收断言用；无视图返回 null）</summary>
@@ -865,7 +874,7 @@ namespace Hotfix.GameSystems.SyncLayer
             view.ProxyPrefab = entry?.Proxy;   // 留空 ⇒ Proxy 档运行时生成胶囊（见 SetTier）
             // 无观察者（测试宿主/未接线）= 不分档，直接建 Full——既有测试在 ApplySnapshot 之后
             // 立刻断言 Animator，不能等 UpdateRender。
-            SetTier(view, ObserverPositionProvider == null ? RemoteTier.Full : RemoteTier.Proxy);
+            SetTier(view, ObserverPositionProvider == null ? RemoteTier.Full : RemoteTier.Proxy, playerId);
             return view;
         }
 
@@ -943,6 +952,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>状态投影（与 CombatVersion 原子合并；空列表 = 清空旧状态）</summary>
         public System.Collections.Generic.IList<StatusProjection> Statuses { get; set; }
             = new System.Collections.Generic.List<StatusProjection>();
+        /// <summary>服务端当前活动施法（完整投影的 last-known；null = 无施法）。
+        /// 升到 Full 档后据此补播 Proxy 期间无法播放的攻击表现。</summary>
+        public ActiveCastProjection? ActiveCast { get; set; }
         /// <summary>服务端权威存活状态（D-N1：命名 Dead——protobuf 零默认让"活着"不占字节）</summary>
         public bool Dead { get; set; }
         /// <summary>服务端权威当前血量（最近一次带 Health 位的快照）</summary>

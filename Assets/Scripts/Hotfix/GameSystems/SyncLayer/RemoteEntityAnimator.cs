@@ -85,6 +85,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private float _hitRemaining;
         private bool _hitBlocked;
         private float _attackRemaining;
+        private int _attackStarts;
         private float _attackSpeed = 1f;
         private float _deathRemaining;
         private DeathPhase _deathPhase;
@@ -253,6 +254,7 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_dead || _deathPhase == DeathPhase.Down) return;
             if (_deathPhase == DeathPhase.GettingUp) _deathPhase = DeathPhase.None;
 
+            _attackStarts++;
             _attackSpeed = Mathf.Clamp(attackSpeed, 0.25f, 4f);
             _attackRemaining = Mathf.Max(0.1f, duration / _attackSpeed);
             _attackTrigger = trigger;
@@ -271,6 +273,8 @@ namespace Hotfix.GameSystems.SyncLayer
 
         internal float AttackSpeedForTest => _attackSpeed;
         internal float AttackRemainingForTest => _attackRemaining;
+        /// <summary>累计被接受的攻击起手次数（CastBroadcast/ActiveCast 去重回归测试）。</summary>
+        internal int AttackStartsForTest => _attackStarts;
 
         /// <summary>
         /// 事件驱动的受击。Death/Down 霸体期间忽略；GettingUp 非霸体，会被打断。

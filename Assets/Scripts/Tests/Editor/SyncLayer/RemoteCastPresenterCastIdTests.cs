@@ -249,12 +249,21 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     X = 0f, Y = 0f, Z = 0f, Kind = (byte)EntityKind.Player, Tick = 1
                 }, serverTicks: 1_000_000L);
                 var presenter = new RemoteCastPresenter(registry, localPlayerId: 1L, LoadCatalog());
+                var view = registry.GetView(2L);
+                Assert.IsNotNull(view);
 
                 // 视图不存在（首条更新早于基线快照）不得占用去重槽位
                 presenter.OnActiveCast(99L, new ActiveCastProjection { CastId = 90, SkillId = 10002 });
                 Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
                     "a cast that cannot be presented yet must not consume the dedupe slot");
 
+                // Proxy 档（无 Animator）同样播不了，不占槽
+                presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 91, SkillId = 10002 });
+                Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
+                    "a cast without an animator must not consume the dedupe slot");
+
+                // 升到 Full（Animator 就绪）后同一 CastId 正常起手
+                view!.Animator = root.AddComponent<RemoteEntityAnimator>();
                 presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 91, SkillId = 10002 });
                 presenter.OnActiveCast(2L, new ActiveCastProjection
                 {
@@ -268,6 +277,86 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 presenter.Clear();
                 Assert.AreEqual(0, presenter.ActiveCastPlayedCountForTest,
                     "Clear() must reset the replay dedupe set");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void ActiveCast_Cancel_Stops_Presented_Attack()
+        {
+            var root = new GameObject("ActiveCastCancel");
+            try
+            {
+                var registry = new RemoteEntityRegistry(root.transform);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2L,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                    X = 0f, Y = 0f, Z = 0f, Kind = (byte)EntityKind.Player, Tick = 1
+                }, serverTicks: 1_000_000L);
+                var view = registry.GetView(2L);
+                Assert.IsNotNull(view);
+                view!.Animator = root.AddComponent<RemoteEntityAnimator>();
+
+                var presenter = new RemoteCastPresenter(registry, localPlayerId: 1L, LoadCatalog());
+                presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 77, SkillId = 10002 });
+                Assert.Greater(view.Animator.AttackRemainingForTest, 0f,
+                    "ActiveCast 应起手攻击");
+
+                presenter.OnCastCancel(new CastCancelBroadcast { CastId = 77, CasterPlayerId = 2L });
+
+                Assert.AreEqual(0f, view.Animator.AttackRemainingForTest,
+                    "同一 CastId 的取消必须能停掉 ActiveCast 起手的攻击");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void CastBroadcast_And_ActiveCast_Start_Attack_Once_Per_CastId()
+        {
+            var root = new GameObject("AttackStartDedupe");
+            try
+            {
+                var registry = new RemoteEntityRegistry(root.transform);
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 2L,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind),
+                    X = 0f, Y = 0f, Z = 0f, Kind = (byte)EntityKind.Player, Tick = 1
+                }, serverTicks: 1_000_000L);
+                var view = registry.GetView(2L);
+                Assert.IsNotNull(view);
+                var animator = root.AddComponent<RemoteEntityAnimator>();
+                view!.Animator = animator;
+
+                var presenter = new RemoteCastPresenter(registry, localPlayerId: 1L, LoadCatalog(),
+                    projectileFactory: (_, __, ___) => new FakeVisual());
+
+                // ActiveCast 先到：起手一次；后到的 CastBroadcast 不再起手
+                presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 88, SkillId = 10002 });
+                Assert.AreEqual(1, animator.AttackStartsForTest);
+                presenter.OnCastBroadcast(new CastBroadcast
+                {
+                    CastId = 88, CasterPlayerId = 2L, SkillId = 10002, AttackSpeedMultiplier = 1f
+                });
+                Assert.AreEqual(1, animator.AttackStartsForTest,
+                    "同一 CastId 的 CastBroadcast 不得重复起手");
+
+                // 反向：新 CastId 先 CastBroadcast（起手）→ ActiveCast 不重复
+                presenter.OnCastBroadcast(new CastBroadcast
+                {
+                    CastId = 89, CasterPlayerId = 2L, SkillId = 10002, AttackSpeedMultiplier = 1f
+                });
+                Assert.AreEqual(2, animator.AttackStartsForTest);
+                presenter.OnActiveCast(2L, new ActiveCastProjection { CastId = 89, SkillId = 10002 });
+                Assert.AreEqual(2, animator.AttackStartsForTest,
+                    "同一 CastId 的 ActiveCast 不得重复起手");
             }
             finally
             {
