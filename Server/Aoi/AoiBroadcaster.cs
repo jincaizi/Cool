@@ -20,6 +20,9 @@ namespace KcpServer
         /// <summary>每发一个实体快照回调（Server3C 注入：写入该 observer 的 WorldSnapshot.Entities）</summary>
         public System.Action<long, EntitySnapshot>? OnEntityBroadcast { get; set; }
 
+        /// <summary>怪物动作快照提供者（Server3C 接线 MonsterModule.GetActionSnapshot）。</summary>
+        public System.Func<long, NpcActionSnapshot?>? NpcActionProvider { get; set; }
+
         /// <summary>累计发送实体数（Server3C 每 tick 增量；日志统计用——T7）</summary>
         public long TotalEntitySends;
 
@@ -53,6 +56,8 @@ namespace KcpServer
                 float dx = entity.Position.X - ox, dz = entity.Position.Z - oz;
                 float distance = (float)System.Math.Sqrt(dx * dx + dz * dz);
 
+                // 基线判定必须先于 ShouldSend：首次发送会把 HasSent 置 true，之后再问会得到 false。
+                bool baseline = _scheduler.IsFirstSend(observer.PlayerId, entity.PlayerId);
                 if (_scheduler.ShouldSend(observer.PlayerId, entity.PlayerId, distance, tick,
                     entity.Position.X, entity.Position.Z, entity.Rotation,
                     entity.ActionState, !entity.IsAlive,
@@ -79,6 +84,15 @@ namespace KcpServer
                         IsDefending = entity.IsDefending,
                         Tick = tick
                     };
+                    if (baseline)
+                    {
+                        var action = NpcActionProvider?.Invoke(entity.PlayerId);
+                        if (action != null)
+                        {
+                            snap.NpcAction = action;
+                            snap.FieldMask |= (ushort)EntityFieldMask.NpcAction;
+                        }
+                    }
                     result.Add(snap);
                     OnEntityBroadcast?.Invoke(entity.PlayerId, snap);
                 }

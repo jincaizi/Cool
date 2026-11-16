@@ -368,6 +368,16 @@ namespace KcpServer.Monster
         }
 
         public NpcActionSnapshot? GetActionSnapshot(long id) => GetState(id)?.ActionRunner?.Current;
+        public List<(long NpcId, NpcActionSnapshot Snapshot)> GetActionSnapshots()
+        {
+            var result = new List<(long, NpcActionSnapshot)>();
+            foreach (var pair in _monsters)
+            {
+                var action = pair.Value.ActionRunner?.Current;
+                if (action != null) result.Add((pair.Key, action));
+            }
+            return result;
+        }
         public List<NpcActionSnapshot> GetActionHistory(long id, uint afterTick) => GetState(id)?.ActionRunner?.History(afterTick) ?? new List<NpcActionSnapshot>();
         public void CaptureActionHistory(uint tick) { foreach (var state in _monsters.Values) state.ActionRunner?.Capture(tick); }
 

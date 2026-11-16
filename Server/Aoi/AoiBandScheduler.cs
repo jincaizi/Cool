@@ -97,6 +97,12 @@ namespace KcpServer
             return false;
         }
 
+        /// <summary>该 (observer, entity) 是否尚未发送过（首次/重见）。</summary>
+        public bool IsFirstSend(long observerId, long entityId)
+            => !_state.TryGetValue(observerId, out var entities)
+               || !entities.TryGetValue(entityId, out var slot)
+               || !slot.HasSent;
+
         /// <summary>实体离开视野时调用——清除节拍，重新入场从零开始</summary>
         public void MarkOutOfSight(long observerId, long entityId)
         {

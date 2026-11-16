@@ -71,6 +71,9 @@ namespace KcpServer
         private MonsterModule? _monsterModule;
         private long _monsterIdSeed = MonsterModule.NpcIdSeed;
 
+        private readonly Dictionary<long, (ulong InstanceId, uint Revision)> _lastNpcActions =
+            new Dictionary<long, (ulong, uint)>();
+
         private BotRunner? _botRunner;
 
         // 2026-10-13：ORCA 避让（怪物 + 机器人共用一份世界快照；玩家只当障碍）。
@@ -99,6 +102,7 @@ namespace KcpServer
             _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed),
                 avoidance: _avoidance, navigation: navigation);
             _monsterModule.SpawnDefaultLayout(count);
+            _aoi.NpcActionProvider = id => _monsterModule?.GetActionSnapshot(id);
 
             // P2 伤害归属（spec §5.2）：玩家命中 NPC 时把实际伤害记进该怪物的仇恨表。
             // 无条件接线（与 LOS 无关）——CombatResolver 已在 ApplyHit 里只对 NPC 目标触发。
@@ -195,6 +199,8 @@ namespace KcpServer
                     if (_monsterModule != null)
                     {
                         _monsterModule.Tick((uint)tick);
+                        SendNpcActionEvents((uint)tick);
+                        _monsterModule.CaptureActionHistory((uint)tick);
                         foreach (var (npcId, request) in _monsterModule.DrainPendingCasts())
                         {
                             var decision = _castHandler.Decide(npcId, request, (uint)tick);
@@ -451,6 +457,39 @@ namespace KcpServer
             }
 
             return true;
+        }
+
+        private void SendNpcActionEvents(uint tick)
+        {
+            if (_monsterModule == null) return;
+            foreach (var (npcId, action) in _monsterModule.GetActionSnapshots())
+            {
+                // Continuous Idle/Move 由 ActionState 快照驱动；事件只发技能/受击/死亡阶段。
+                if (action.Kind is NpcActionKind.Idle or NpcActionKind.Move) continue;
+                if (_lastNpcActions.TryGetValue(npcId, out var last)
+                    && last.InstanceId == action.InstanceId
+                    && last.Revision == action.Revision)
+                    continue;
+
+                _lastNpcActions[npcId] = (action.InstanceId, action.Revision);
+                var entity = _entityStore.GetPlayer(npcId);
+                if (entity == null) continue;
+
+                var message = new NpcActionEvent
+                {
+                    EntityId = npcId,
+                    LifeId = entity.LifeId,
+                    Action = action.Clone(),
+                    ServerTimestamp = ServerClock.NowTicks()
+                };
+
+                foreach (var observerId in GetObserversOf(npcId))
+                {
+                    var session = GetSession(observerId);
+                    if (session != null)
+                        _ = SendToSessionAsync(session, MessageId.NpcActionEvent, message);
+                }
+            }
         }
 
         /// <summary>每 tick 为各在线 observer 组装并广播其 AOI 可见快照（带节拍/静止保活）</summary>
