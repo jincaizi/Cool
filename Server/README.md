@@ -62,13 +62,16 @@ bash tools/test-server.sh
   12m / 18m/s / 3 段）；格挡、死亡/离场发布 `ProjectileStopBroadcast`，按 `CastId`
   只停指定一发。发射收件人记录在 `CastHandler`，终止时并上已通知会话。
 - **场景隔离**：候选、挥砍/发射广播与伤害收件人统一按 `PlayerState.ZoneId` 过滤；
-  跨场景同坐标不互相命中。怪物按地图实例绑定场景留到 Plan 02。
+  跨场景同坐标不互相命中。怪物按地图实例绑定场景留到 Plan 02 Part B/后续。
 - **NpcAction 广播（Plan 02 Part A）**：`NpcActionEvent`（2004）随技能/受击/死亡阶段变化发送；
   AOI 进入基线带 `NpcAction` 与 `EntityFieldMask.NpcAction`；事件与广播一样按 `ZoneId` 过滤。
 
-状态：Plan 01 已完成；Plan 02 Part A（取消、NpcAction 事件/AOI 基线）已完成；Part B（战斗投影/带宽）与 Plan 03–05 未开始。未启用：元素状态结算/DoT、`CombatStateUpdate`/`CombatProjection`、AOI 重入补发、PvP 控制预算。
+状态：Plan 01 已完成；Plan 02 Part A（取消、NpcAction 事件/AOI 基线）已完成；
+Part B（战斗投影/带宽）与 Plan 03–05 未开始。未启用：元素状态结算/DoT、
+`CombatStateUpdate`/`CombatProjection`、AOI 重入补发、PvP 控制预算。
 
-`CastCancelBroadcast`（310）与 `NpcActionEvent`（2004，含 `LifeId`）已启用；事件按 `ZoneId` 过滤。
+`CastCancelBroadcast`（310）与 `NpcActionEvent`（2004，含 `LifeId`）已启用；
+事件按 `ZoneId` 过滤。
 
 ## 投射物与落点判定（20003 火球）
 

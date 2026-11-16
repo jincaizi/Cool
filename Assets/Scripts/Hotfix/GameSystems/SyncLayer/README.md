@@ -62,8 +62,8 @@
   先入 64 条有界缓存，视图创建后按 LifeId 过滤回放。AOI 基线在
   `EntityFieldMask.NpcAction` 置位时走同一合并路径。
 - **取消表现**：`RemoteCastPresenter.OnCastCancel` 把 `CastId` 记入有界取消集，只停止匹配
-  `CastId` 的攻击表现（`Animator.CancelAttack`）；已发射的剑气继续飞行，晚到的
-  `CastBroadcast` / `ProjectileLaunchBroadcast` 跳过补播。
+  `CastId` 的攻击表现（`RemoteEntityAnimator.CancelAttack(CastId)`）；已发射的剑气继续飞行，
+  晚到的 `CastBroadcast` / `ProjectileLaunchBroadcast` 跳过补播。
 - **与攻击起手的分工**：Plan 02 保留 `CastBroadcast` → `NpcAttackSchedule` 作为 NPC 攻击起手；
   `NpcActionEvent` 只负责阶段/取消（技能动作仅跟踪实例，`Cancelled` 时停止），避免同一次施法
   挥两次。NpcAction 直接驱动攻击变体/时间轴留 Plan 04/05。
