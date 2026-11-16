@@ -2469,7 +2469,8 @@ public class CastResendTests
             const int maxEntries = 128;
             if (_activeLaunches.Count <= maxEntries) return;
             var oldest = _activeLaunches.Values.OrderBy(l => l.LaunchTick).ToList();
-            for (int i = 0; i < _activeLaunches.Count - maxEntries; i++)
+            int remove = _activeLaunches.Count - maxEntries;
+            for (int i = 0; i < remove; i++)
                 _activeLaunches.Remove(oldest[i].CastId);
         }
 ```
