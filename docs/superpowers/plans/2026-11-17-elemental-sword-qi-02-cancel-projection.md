@@ -2240,7 +2240,15 @@ namespace GameSys.EditorTests
             if (view.Kind != (byte)EntityKind.PlayerBot)
                 _labelSink?.UpdateHp(entityId, view.Targetable.HPPercent);
             view.Animator?.ApplySnapshotState(view.Dead);
+            if (projection.ActiveCast != null)
+                ActiveCastApplied?.Invoke(entityId, projection.ActiveCast);
         }
+```
+
+在 `RemoteEntityRegistry` 增加事件：
+
+```csharp
+        public event Action<long, ActiveCastProjection>? ActiveCastApplied;
 ```
 
 在 `ApplySnapshot` 的 `Health` 分支补 `if (snapshot.CombatVersion != 0) view.CombatVersion = snapshot.CombatVersion;`（血量变化与投影共用同一版本）。
@@ -2266,16 +2274,17 @@ namespace GameSys.EditorTests
             view.CombatVersion = snapshot.CombatVersion;
 ```
 
-在 `CombatNetworkBridge` 增加 `OnCombatStateUpdate` 事件与路由（同任务 4 的 `OnNpcAction` 模式）。在 `ClientNetworkHost` 订阅并转发：
+在 `CombatNetworkBridge` 增加 `OnCombatStateUpdate` 事件与路由（同任务 4 的 `OnNpcAction` 模式）。在 `ClientNetworkHost` 订阅并转发；ActiveCast 统一走 registry 的 `ActiveCastApplied` 事件（同时覆盖 `CombatStateUpdate` 与 AOI 基线）：
 
 ```csharp
         private void HandleCombatStateUpdate(CombatStateUpdate update)
-        {
-            _remoteEntities?.ApplyCombatStateUpdate(update);
-            if (update.Projection.ActiveCast != null)
-                _remoteCastPresenter?.OnActiveCast(update.EntityId, update.Projection.ActiveCast);
-        }
+            => _remoteEntities?.ApplyCombatStateUpdate(update);
+
+        private void HandleActiveCastApplied(long entityId, ActiveCastProjection activeCast)
+            => _remoteCastPresenter?.OnActiveCast(entityId, activeCast);
 ```
+
+在 `ClientNetworkHost.Awake`/`OnDestroy`（或装配/摘除）订阅与退订 `_remoteEntities.ActiveCastApplied`。
 
 在 `ClientNetworkManager` 增加：
 
@@ -2312,13 +2321,14 @@ namespace GameSys.EditorTests
         public void OnActiveCast(long entityId, ActiveCastProjection activeCast)
         {
             if (activeCast == null || activeCast.CastId == 0) return;
-            if (!_activeCastPlayed.Add(activeCast.CastId)) return; // 相位推进只播一次
-            if (_activeCastPlayed.Count > 256) _activeCastPlayed.Clear();
             if (_registry == null || _catalog == null) return;
             if (entityId == _localPlayerId) return;
             var view = _registry.GetView(entityId);
             if (view == null || view.Kind != (byte)EntityKind.Player) return;
             if (!_catalog.TryGet(activeCast.SkillId, out var data)) return;
+
+            if (_activeCastPlayed.Count >= 256) _activeCastPlayed.Clear();
+            if (!_activeCastPlayed.Add(activeCast.CastId)) return; // 相位推进只播一次
 
             float remaining = DefaultAttackDuration;
             if (_serverTickProvider != null && activeCast.EndTick > _serverTickProvider())
