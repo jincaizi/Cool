@@ -182,9 +182,8 @@ namespace GameSys.EditorTests
                 }
             });
 
-            view.NpcAnimator!.PlayAttack(0);   // CastBroadcast → NpcAttackSchedule 起手
-            Assert.AreEqual(NpcEntityAnimator.StateAttacking,
-                fixture.Animator.GetInteger("MonsterState"));
+            // CastBroadcast（同 tick 先到）→ 真实排程，到点由 UpdateRender 的 drain 起手。
+            registry.ScheduleAttack(NpcAnimatorFixture.EntityId, 100, 50001);
 
             registry.ApplyNpcActionEvent(new NpcActionEvent
             {
@@ -196,10 +195,12 @@ namespace GameSys.EditorTests
                 }
             });
 
+            registry.UpdateRender(200, 0);
+
             Assert.AreEqual(21UL, view.ActionInstanceId);
             Assert.AreEqual(NpcEntityAnimator.StateHit,
                 fixture.Animator.GetInteger("MonsterState"),
-                "an interrupting action must stop the superseded attack");
+                "an interrupting action must clear the superseded instance's scheduled attack");
         }
 
         [Test]
@@ -268,10 +269,12 @@ namespace GameSys.EditorTests
 
                 Registry = new RemoteEntityRegistry(root,
                     npcPrefabs: new Dictionary<int, GameObject> { [1] = _prefab });
+                // 刻意不带 Position 位：避免 UpdateRender 用插值样本里的 Idle 状态覆盖
+                // 用例写入的 MonsterState（supersede 用例只验证排程 drain 是否被清）。
                 Registry.ApplySnapshot(new EntitySnapshot
                 {
                     PlayerId = EntityId, Kind = (byte)EntityKind.Npc, TemplateId = 1,
-                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Dead),
+                    FieldMask = (ushort)EntityFieldMask.Dead,
                     X = 0f, Z = 0f, Dead = false, LifeId = 1
                 }, 1);
 
