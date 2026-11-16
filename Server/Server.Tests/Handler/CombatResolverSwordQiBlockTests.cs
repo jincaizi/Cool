@@ -64,6 +64,9 @@ public class CombatResolverSwordQiBlockTests
         var stop = Assert.Single(results.Where(r => r.ProjectileStopped));
         Assert.Equal(0f, stop.StopPosition.X, 0.001f);
         Assert.Equal(5f, stop.StopPosition.Z, 0.001f);
+
+        // 格挡即 Spent：段推进不得留下活动施法投影（pending 被压缩丢弃后无清理路径）。
+        Assert.Null(store.GetPlayer(Caster)!.ActiveCast);
     }
 
     [Fact]

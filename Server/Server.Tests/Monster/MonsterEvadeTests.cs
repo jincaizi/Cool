@@ -33,6 +33,8 @@ public class MonsterEvadeTests
 
         var entity = store.GetPlayer(id)!;
         entity.ApplyDamage(50f); // 100 -> 50
+        uint versionAfterDamage = entity.CombatVersion;
+        entity.CombatDirty = false;
         state.Position = new Vector3(0f, 0f, 25f); // > Slime leash 23
         state.CurrentPatrolIndex = 2; // 到家必须归零，否则空钉子
 
@@ -42,6 +44,9 @@ public class MonsterEvadeTests
 
         Assert.Equal(MonsterMode.Patrol, state.Mode);
         Assert.Equal(entity.MaxHp, entity.Hp, 3);
+        // ArriveHome 直接写 Hp 绕过 ApplyDamage，必须显式 bump 版本并标脏。
+        Assert.True(entity.CombatVersion > versionAfterDamage);
+        Assert.True(entity.CombatDirty);
         Assert.Empty(state.Threats.PlayerIds);
         Assert.Null(state.TargetId);
         Assert.Equal(0, state.CurrentPatrolIndex);

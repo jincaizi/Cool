@@ -150,6 +150,7 @@ namespace KcpServer.Monster
         public void ArriveHome(MonsterState m, PlayerState entity, uint tick)
         {
             entity.Hp = entity.MaxHp;
+            entity.BumpCombatVersion();
             entity.ActionState = (byte)NpcAnimationState.Idle;
             m.LastHp = entity.Hp;
             m.Mode = MonsterMode.Patrol;

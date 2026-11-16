@@ -406,9 +406,10 @@ namespace KcpServer
                     (resolved ??= new List<CastResolution>()).Add(resolution);
                     pending.NextStage++;
 
-                    // 判定期推进活动施法阶段；最后一段结算后清空（EndTick 已随每段更新）。
+                    // 判定期推进活动施法阶段；最后一段结算或本段提前终止（格挡/溅射命中）后清空，
+                    // 否则 Spent pending 被压缩丢弃后 ActiveCast 再无清理路径。
                     var casterState = _store.GetPlayer(pending.CasterId);
-                    if (pending.NextStage >= pending.StageTicks.Length)
+                    if (pending.Spent || pending.NextStage >= pending.StageTicks.Length)
                         ClearActiveCast(casterState, pending.CastId);
                     else if (casterState != null)
                         SetActiveCast(casterState, pending,
