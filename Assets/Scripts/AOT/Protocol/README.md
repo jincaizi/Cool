@@ -58,7 +58,8 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 
 ### 属性剑气 v1（2026-11-14）
 
-状态：Plan 01 的消息与字段已实现；Plan 02–05 的取消广播、战斗投影/DoT 消费与三客户端验收未开始。
+状态：Plan 01 的消息与字段已实现；Plan 02 Part A 已实现取消广播与 NpcAction 事件/AOI 基线的
+协议字段；Part B 的战斗投影/带宽与 Plan 03–05 的 DoT 消费、三客户端验收未开始。
 
 能力位 `ProtocolFeatures.ElementalSwordQiV1 = 1u << 2`。登录请求 tag9
 `ElementalCatalogFingerprint`（共享目录 SHA-256 小写十六进制）；登录响应 tag14 同指纹、
@@ -72,14 +73,25 @@ tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<W
 | `CastConfirm` | 307 | S→C 本人 | 1 `ClientCastSeq`、2 `Accepted`、3 原因、4 `CastId`、5 技能、6 `CasterLifeId`、7 装备版本、8 攻速、9 `AcceptedTick`、10–12 装备摘要 |
 | `ProjectileLaunchBroadcast` | 308 | S→C | 1 `CastId`、2 施法者、3 生命代次、4 场景、5 `LaunchTick`、6–8 原点、9 `Yaw`、10 速度、11 射程、12 元素、13 技能、14 服务器时间戳 |
 | `ProjectileStopBroadcast` | 309 | S→C | 1 `CastId`、2 施法者、3 生命代次、4 场景、5 `StopTick`、6 原因、7–8 停点 |
+| `CastCancelBroadcast` | 310 | S→C | 1 `CastId`、2 `CasterLifeId`、3 `EffectiveTick`、4 `Reason`（`NpcActionCancelReason`）、5 `CasterPlayerId` |
+
+`CastCancelBroadcast` 取消尚未提交的前摇/持续施法（以及 NPC 技能动作）；已发射的独立投射物
+（剑气）继续飞行。收件人为施法者本人与视野内观察者，按 `ZoneId` 过滤。
 
 追加字段（只加不删）：
 
-| 消息 | 追加内容 | tag |
-|---|---|---|
-| `CastRequest` | `ClientCastSeq` / `EquipmentRevision` / `CasterLifeId` | 8 / 9 / 10 |
-| `CastBroadcast` | `CastId` / `CasterLifeId` / `AttackSpeedMultiplier` / `ElementId` / `EquipmentRevision` | 15–19 |
-| `HitEntry` | `CastId` / `EventSeq` / `EventId` / `DamageKind` / `TargetLifeId` / `CombatVersion` | 8–13 |
+| 消息 | 追加内容 | tag | 语义 |
+|---|---|---|---|
+| `CastRequest` | `ClientCastSeq` / `EquipmentRevision` / `CasterLifeId` | 8 / 9 / 10 | 幂等序号、装备版本与生命代次校验 |
+| `CastBroadcast` | `CastId` / `CasterLifeId` / `AttackSpeedMultiplier` / `ElementId` / `EquipmentRevision` | 15–19 | 权威施法标识与冻结的施法快照 |
+| `HitEntry` | `CastId` / `EventSeq` / `EventId` / `DamageKind` / `TargetLifeId` / `CombatVersion` | 8–13 | 命中归属与战斗投影（Plan 02 起消费 DoT 分支） |
+| `CancelCastRequest` | `CastId` | 2 | 非 0 只取消该次施法；0 = 旧客户端语义，取消该技能所有匹配的未完成实例 |
+| `NpcActionEvent` | `LifeId` | 4 | 怪物生命代次；与 `EntityId/InstanceId/Revision` 组成客户端合并键 |
+| `EntitySnapshot` | `LifeId` | 19 | 实体生命代次（随基线与 Health 快照发送；NpcAction 合并键） |
+
+客户端消费 NpcAction 时以 `(EntityId, LifeId, InstanceId, Revision)` 为合并键：实例号只增，
+同实例只接受更大的 `Revision`；生命代次不匹配的事件丢弃。取消事件与 `CastCancelBroadcast`
+同义——只停攻击表现，不回收已发射的剑气。
 
 `DamageKind`：`Direct=0`、`Dot=1`（Plan 02 起消费 DoT 分支）。`EventSeq/EventId/CombatVersion`
 在 Plan 01 固定 0，由 Plan 02 的战斗投影计划启用。所有新消息已在 `MessageTypeRegistry` 注册；
@@ -103,7 +115,7 @@ tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<W
 - `EntitySnapshot` tag16/17：`NpcAction/NpcActionHistory`，同受 `NpcAction = 1 << 9` 掩码控制；缺位保留已有值。
 - `WorldSnapshot` tag4 为 `NpcExits`，tag5/6/7 为 `SnapshotSequence/PartIndex/PartCount`，tag8 为 `TickAnchorServerTimestamp`。
 - `TickAnchorServerTimestamp` 是所有观察者/分片共用的模拟状态采样时刻；旧 `ServerTimestamp` 继续表示发送时刻。
-- `CastBroadcast` tag14 为 `NpcAction`；`MessageId.NpcActionEvent = 2004` 已在 codec registry 注册，tag1/2/3 为 `EntityId/Action/ServerTimestamp`。
+- `CastBroadcast` tag14 为 `NpcAction`；`MessageId.NpcActionEvent = 2004` 已在 codec registry 注册，tag1/2/3 为 `EntityId/Action/ServerTimestamp`，tag4 为 `LifeId`（Plan 02 Part A 追加，参与客户端合并键）。
 
 `NpcActionSnapshot` 固定 tag1–20，Kind/Phase/CancelReason 是 byte 底层具名枚举；
 `Clone()` 复制全部标量，供状态冻结使用。tick 0 合法，不作缺省哨兵。所有协议序列均声明
