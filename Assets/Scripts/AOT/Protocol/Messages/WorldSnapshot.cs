@@ -29,7 +29,9 @@ namespace Cool.Protocol
         Health = 1 << 7,
         /// <summary>IsDefending 有效</summary>
         Defending = 1 << 8,
-        NpcAction = 1 << 9
+        NpcAction = 1 << 9,
+        /// <summary>状态/装备/控制/活动施法投影（仅 Baseline 与 CombatStateUpdate 使用）。</summary>
+        Combat = 1 << 10
     }
 
     /// <summary>
@@ -103,6 +105,12 @@ namespace Cool.Protocol
 
         /// <summary>实体生命代次（NpcAction 合并键；Part A 随每次 AOI 快照携带，Part B 收窄为基线/Health 快照）</summary>
         [ProtoMember(19)] public uint LifeId { get; set; }
+
+        /// <summary>实体战斗版本（Combat 投影的单调版本戳）</summary>
+        [ProtoMember(18)] public uint CombatVersion { get; set; }
+
+        /// <summary>战斗投影（仅基线快照与 FieldMask.Combat 置位时有效）</summary>
+        [ProtoMember(20)] public CombatProjection? Combat { get; set; }
     }
 
     /// <summary>

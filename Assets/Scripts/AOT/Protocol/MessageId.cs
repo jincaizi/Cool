@@ -66,6 +66,9 @@ namespace Cool.Protocol
         /// <summary>取消未提交施法（服务器 → 施法者与观察者；Plan 02）</summary>
         CastCancelBroadcast = 310,
 
+        /// <summary>战斗投影信封（服务器 → 观察者；Plan 02 可靠完整投影）</summary>
+        CombatStateUpdate = 311,
+
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,
         BroadcastMessage = 201,
