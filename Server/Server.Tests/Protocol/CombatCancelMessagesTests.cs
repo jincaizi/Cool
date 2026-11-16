@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cool.Protocol;
 using Xunit;
 
@@ -54,5 +55,21 @@ public class CombatCancelMessagesTests
         Assert.Equal(5u, decoded.LifeId);
         Assert.Equal(3UL, decoded.Action.InstanceId);
         Assert.Equal(2u, decoded.Action.Revision);
+    }
+
+    [Fact]
+    public void EntitySnapshot_Carries_LifeId_For_NpcAction_Merge()
+    {
+        var decoded = ((WorldSnapshot)MessageCodec.Decode(MessageCodec.EncodeToArray(
+            MessageId.WorldSnapshot,
+            new WorldSnapshot
+            {
+                Entities = new List<EntitySnapshot>
+                {
+                    new EntitySnapshot { PlayerId = 1, LifeId = 5 }
+                }
+            })).message).Entities[0];
+
+        Assert.Equal(5u, decoded.LifeId);
     }
 }

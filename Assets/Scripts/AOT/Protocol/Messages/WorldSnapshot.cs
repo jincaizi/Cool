@@ -100,6 +100,9 @@ namespace Cool.Protocol
         [ProtoMember(15)] public bool IsDefending { get; set; }
         [ProtoMember(16)] public NpcActionSnapshot? NpcAction { get; set; }
         [ProtoMember(17)] public IList<NpcActionSnapshot> NpcActionHistory { get; set; } = new List<NpcActionSnapshot>();
+
+        /// <summary>实体生命代次（随基线与 Health 快照发送；NpcAction 合并键）</summary>
+        [ProtoMember(19)] public uint LifeId { get; set; }
     }
 
     /// <summary>
