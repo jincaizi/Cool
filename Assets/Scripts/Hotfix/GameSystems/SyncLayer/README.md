@@ -79,6 +79,7 @@ AOI 基线投影、`ActiveCast` 补播与在途剑气补发消费）。`Statuses
   与 AOI 基线，`RemoteCastPresenter.OnActiveCast` 按 `EndTick − ClientNetworkManager.ServerTick`
   换算剩余时长播放远程玩家攻击，`CastId` 与 `CastBroadcast` 共用去重/取消通道。Proxy 档
   没有 Animator 时不占去重槽，升 Full 后由 `SetTier` 用保存的 `ActiveCast` 补播一次；
+  Full→Proxy→Full 的重复升档会被 `_activeCastPlayed` 去重挡住，不在补播例外内（已知限制）。
   已取消的 `CastId` 直接跳过，投影为 `null` 时不补播已结束的施法。服务端基线补发的在途剑气
   仍走同一条 `ProjectileLaunchBroadcast` 路径，按原始 `ServerTimestamp` 补飞行进度。
 - **与攻击起手的分工**：Plan 02 保留 `CastBroadcast` → `NpcAttackSchedule` 作为 NPC 攻击起手；

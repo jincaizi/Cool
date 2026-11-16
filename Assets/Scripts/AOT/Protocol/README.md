@@ -108,8 +108,9 @@ Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实
 同实例只接受更大的 `Revision`；生命代次不匹配的事件丢弃。取消事件与 `CastCancelBroadcast`
 同义——只停攻击表现，不回收已发射的剑气。
 
-`DamageKind`：`Direct=0`、`Dot=1`（DoT 分支属 Plan 04）。`EventSeq/EventId/CombatVersion`
-目前仍固定 0，等 DoT/状态运行时（Plan 04）启用。所有新消息已在 `MessageTypeRegistry` 注册；
+`DamageKind`：`Direct=0`、`Dot=1`（DoT 分支属 Plan 04）。`HitEntry` 的
+`EventSeq/EventId/CombatVersion` 目前仍固定 0，等 DoT/状态运行时（Plan 04）启用。
+所有新消息已在 `MessageTypeRegistry` 注册；
 新增字段沿用 `IList<T>` 规则（`WeaponInventoryBaseline.Weapons` 不是 `List<T>`）。
 
 ## 双端一致性校验（人工/CI 各跑一次）
