@@ -71,4 +71,24 @@ public class CastCancelBroadcastTests
         Assert.Equal(second.CastId, cancels[0].CastId);
         Assert.NotEqual(first.CastId, cancels[0].CastId);
     }
+
+    [Fact]
+    public void Cancel_After_Launch_Keeps_Pending_And_Deduplicates()
+    {
+        var (store, resolver) = NewWorld();
+        var cast = resolver.Decide(1, Cast(), 10);
+        Assert.True(cast.Accepted);
+
+        // 10002 首段 = decide + ceil(0.35s*15) = 16；三段的段末在 16/20/23。
+        var firstStages = resolver.DrainResolved(21);
+        Assert.Contains(firstStages, r => r.Launch != null);
+        Assert.True(cast.CastId != 0);
+
+        var cancels = resolver.CancelPending(1, 10002, cast.CastId, 22,
+            NpcActionCancelReason.Hit);
+        Assert.Single(cancels);
+        Assert.Empty(resolver.CancelPending(1, 10002, cast.CastId, 23,
+            NpcActionCancelReason.Hit));
+        Assert.NotEmpty(resolver.DrainResolved(30));
+    }
 }

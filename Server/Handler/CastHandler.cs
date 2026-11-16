@@ -1022,6 +1022,9 @@ namespace KcpServer
 
         public async Task BroadcastCancelAsync(IReadOnlyList<CastCancelBroadcast> cancels)
         {
+            // 先把全部收件人取好：UnregisterEntity 在 BroadcastCancel 返回后会立刻移除实体，
+            // 首个 await 之后的 GetEntity 会返回 null，后续取消会静默丢失。
+            var sends = new List<(IServerSession Session, CastCancelBroadcast Cancel)>();
             foreach (var cancel in cancels)
             {
                 var caster = _server.GetEntity(cancel.CasterPlayerId);
@@ -1031,11 +1034,13 @@ namespace KcpServer
                 foreach (var recipientId in recipients)
                 {
                     var session = _server.GetSession(recipientId);
-                    if (session != null)
-                        await _server.SendToSessionAsync(session,
-                            MessageId.CastCancelBroadcast, cancel);
+                    if (session != null) sends.Add((session, cancel));
                 }
             }
+
+            foreach (var (session, cancel) in sends)
+                await _server.SendToSessionAsync(session,
+                    MessageId.CastCancelBroadcast, cancel);
         }
 
         public void BroadcastCancel(IReadOnlyList<CastCancelBroadcast> cancels)
