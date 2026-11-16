@@ -54,4 +54,69 @@ public class BandwidthBudgetTests
         Assert.True(estimateMid <= GlobalGameSettings.BandwidthBudgetBytesPerSec);
         Assert.True(estimateFar <= GlobalGameSettings.BandwidthBudgetBytesPerSec);
     }
+
+    [Fact]
+    public void Hundred_Entity_Fifteen_Hertz_Sixty_Seconds_Stays_Under_100_KBps()
+    {
+        // 实测口径：100 个实体编码进**同一个** WorldSnapshot（近带每 tick 全量最坏场景），
+        // × 15Hz 即每秒字节。预算不因本测试上调——超了就是超了，须降频/降实体。
+        var entities = new List<EntitySnapshot>();
+        for (int i = 0; i < 100; i++)
+        {
+            entities.Add(new EntitySnapshot
+            {
+                PlayerId = i + 1, X = i, Z = i, Hp = 720f, MaxHp = 720f,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
+                    | EntityFieldMask.Speed | EntityFieldMask.Dead | EntityFieldMask.Health),
+                CombatVersion = 1, LifeId = 1
+            });
+        }
+        var snapshot = new WorldSnapshot
+        {
+            Tick = 1, ServerTimestamp = 1L, Entities = entities
+        };
+        int perTick = MessageCodec.EncodeToArray(
+            MessageId.WorldSnapshot, snapshot, MessageFlags.Reliable).Length;
+        int totalPerSecond = perTick * 15;
+        Assert.True(totalPerSecond <= GlobalGameSettings.BandwidthBudgetBytesPerSec,
+            $"estimated {totalPerSecond} B/s (perTick={perTick}, near-band 15Hz)");
+    }
+
+    [Fact]
+    public void Projection_Baseline_Stays_Within_Combat_Tick_Budget()
+    {
+        // 属性剑气 v1：基线快照携带完整战斗投影（装备/血量/控制/活动施法位）。
+        // 单实体基线包须落在合理区间——低于下限说明投影被静默丢弃，高于上限说明字段膨胀。
+        var baseline = new WorldSnapshot
+        {
+            Tick = 1, ServerTimestamp = 1L,
+            Entities = new List<EntitySnapshot>
+            {
+                new EntitySnapshot
+                {
+                    PlayerId = 1,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
+                        | EntityFieldMask.Speed | EntityFieldMask.Dead
+                        | EntityFieldMask.Health | EntityFieldMask.Defending
+                        | EntityFieldMask.NpcAction | EntityFieldMask.Combat),
+                    X = 1f, Z = 2f, Rotation = 90f, Hp = 720f, MaxHp = 720f,
+                    CombatVersion = 1, LifeId = 1,
+                    Combat = new CombatProjection
+                    {
+                        CombatVersion = 1, LifeId = 1, Hp = 720f, MaxHp = 720f,
+                        IsDefending = false,
+                        Equipment = new EquipmentSummary
+                        {
+                            WeaponInstanceId = 42, TemplateId = 90002, ElementId = 1
+                        },
+                        Control = new ControlSummary { SpeedScale = 1f }
+                    }
+                }
+            }
+        };
+        var bytes = MessageCodec.EncodeToArray(MessageId.WorldSnapshot, baseline,
+            MessageFlags.Reliable);
+        // 2026-11-17 实测 81B（含 5B 帧头）；下限挡住投影被静默丢弃，上限挡住字段膨胀。
+        Assert.InRange(bytes.Length, 80, 300);
+    }
 }

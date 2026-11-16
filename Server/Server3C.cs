@@ -179,6 +179,10 @@ namespace KcpServer
             _aoi.CombatProjectionProvider = entity =>
                 CombatProjectionBuilder.Build(entity, _elementalCatalog);
 
+            // 属性剑气 v1：晚进观察者首次看到施法者时补发在途剑气（原始 launch 含 ServerTimestamp）。
+            _aoi.OnBaselineEntity = (observerId, entityId) =>
+                _castHandler.ResendActiveProjectiles(observerId, entityId);
+
             // 避让系统在 EnableMonsters 之前就可能建（--bots 单独跑）；模板表由模块在启用时补上，
             // 所以半径解析走**延迟查**（闭包读字段，调用时模块已就位）；未启用怪物时也走不到 Npc 分支
             _avoidance = new AvoidanceSystem(_entityStore,

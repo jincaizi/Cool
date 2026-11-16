@@ -22,6 +22,11 @@ namespace KcpServer
         /// <summary>每发一个实体快照回调（Server3C 注入：写入该 observer 的 WorldSnapshot.Entities）</summary>
         public System.Action<long, EntitySnapshot>? OnEntityBroadcast { get; set; }
 
+        /// <summary>基线快照回调（参数：observerId, entityId）。只在 Baseline（首帧/重见）触发，
+        /// Changed/Keepalive 不触发——Server3C 接线到 CastHandler.ResendActiveProjectiles
+        /// 给晚进观察者补发在途剑气。</summary>
+        public System.Action<long, long>? OnBaselineEntity { get; set; }
+
         /// <summary>怪物动作快照提供者（Server3C 接线 MonsterModule.GetActionSnapshot）。</summary>
         public System.Func<long, NpcActionSnapshot?>? NpcActionProvider { get; set; }
 
@@ -127,6 +132,7 @@ namespace KcpServer
                         snap.CombatVersion = projection.CombatVersion;
                         snap.LifeId = projection.LifeId;
                     }
+                    OnBaselineEntity?.Invoke(observer.PlayerId, entity.PlayerId);
                 }
                 result.Add(snap);
                 OnEntityBroadcast?.Invoke(entity.PlayerId, snap);

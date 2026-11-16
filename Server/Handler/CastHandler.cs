@@ -137,6 +137,32 @@ namespace KcpServer
 
         private readonly List<PendingCast> _pending = new List<PendingCast>();
 
+        /// <summary>在途发射描述（按 CastId）——晚进观察者基线补发用。Stop 时移除；
+        /// 正常飞满射程不产生 Stop，靠 <see cref="PruneActiveLaunches"/> 有界回收。</summary>
+        private readonly Dictionary<ulong, ProjectileLaunchBroadcast> _activeLaunches =
+            new Dictionary<ulong, ProjectileLaunchBroadcast>();
+
+        /// <summary>指定施法者的在途投射物（发送**原始** launch，含 ServerTimestamp，
+        /// 客户端据此补进度）。</summary>
+        public IEnumerable<ProjectileLaunchBroadcast> ActiveLaunchesFor(long casterId)
+            => _activeLaunches.Values.Where(l => l.CasterPlayerId == casterId);
+
+        /// <summary>测试入口：同一查询的具体化列表。</summary>
+        internal List<ProjectileLaunchBroadcast> ActiveLaunchesForTest(long casterId)
+            => ActiveLaunchesFor(casterId).ToList();
+
+        /// <summary>在途发射表有界清理：按 LaunchTick 淘汰最旧，最多 128 条
+        /// （与 CastHandler 的 _projectileRecipients 窗口同口径）。</summary>
+        private void PruneActiveLaunches()
+        {
+            const int maxEntries = 128;
+            if (_activeLaunches.Count <= maxEntries) return;
+            var oldest = _activeLaunches.Values.OrderBy(l => l.LaunchTick).ToList();
+            int remove = _activeLaunches.Count - maxEntries;
+            for (int i = 0; i < remove; i++)
+                _activeLaunches.Remove(oldest[i].CastId);
+        }
+
         /// <summary>决策：校验 + 冷却记录 + 生成广播 + 入队。判定（几何/掷骰/扣血）推迟到首段到期 tick
         /// （DrainResolved → ResolveStage）。</summary>
         public CastResolution Decide(long casterId, CastRequest request, uint tick)
@@ -395,6 +421,7 @@ namespace KcpServer
                                     StopZ = pending.Origin.Z
                                 }
                             });
+                            _activeLaunches.Remove(pending.CastId);
                             pending.Launched = false;
                         }
                         pending.Spent = true;
@@ -568,6 +595,8 @@ namespace KcpServer
                     SkillId = pending.Request.SkillId,
                     ServerTimestamp = ServerClock.NowTicks()
                 };
+                _activeLaunches[resolution.Launch.CastId] = resolution.Launch;
+                PruneActiveLaunches();
             }
 
             // 挥击实例先行（单机判定帧顺序：挥击结算、同帧再生成剑气），且**不写入 GroupHitIds、
@@ -622,6 +651,7 @@ namespace KcpServer
                         StopX = resolution.StopPosition.X,
                         StopZ = resolution.StopPosition.Z
                     };
+                    _activeLaunches.Remove(resolution.Stop.CastId);
                     pending.Spent = true;
                     break;
                 }
@@ -1043,6 +1073,21 @@ namespace KcpServer
             int remove = _projectileRecipients.Count - maxEntries;
             for (int i = 0; i < remove; i++)
                 _projectileRecipients.Remove(ordered[i].Key);
+        }
+
+        /// <summary>晚进观察者基线补发：把指定施法者的在途投射物原样重发一份
+        /// （含原始 ServerTimestamp，客户端据此推导飞行进度）。只补发同 CombatSceneId 的观察者。</summary>
+        public void ResendActiveProjectiles(long observerId, long casterId)
+        {
+            var observer = _server.GetEntity(observerId);
+            foreach (var launch in _resolver.ActiveLaunchesFor(casterId))
+            {
+                if (observer != null && observer.ZoneId != launch.CombatSceneId) continue;
+                var session = _server.GetSession(observerId);
+                if (session != null)
+                    _ = _server.SendToSessionAsync(session,
+                        MessageId.ProjectileLaunchBroadcast, launch);
+            }
         }
 
         public async Task HandleCastAsync(IServerSession session, CastRequest request)
