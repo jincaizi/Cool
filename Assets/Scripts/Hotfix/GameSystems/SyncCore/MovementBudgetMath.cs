@@ -31,6 +31,8 @@ namespace Cool.SyncCore
 
         public static float DashSpeed(float distance, float duration, float startup, float recovery)
         {
+            if (!float.IsFinite(distance) || !float.IsFinite(duration)
+                || !float.IsFinite(startup) || !float.IsFinite(recovery)) return 0f;
             float active = duration - startup - recovery;
             if (!(distance > 0f) || !(active > 0f)) return 0f;
             return distance / active;
@@ -39,7 +41,10 @@ namespace Cool.SyncCore
         public static float DashDistance(float dashSpeed, float statusScale,
             float seconds, float remaining)
         {
-            if (!(dashSpeed > 0f) || !(seconds > 0f) || !(remaining > 0f)) return 0f;
+            if (!float.IsFinite(dashSpeed) || !float.IsFinite(seconds)
+                || !float.IsFinite(remaining)
+                || !(dashSpeed > 0f) || !(seconds > 0f) || !(remaining > 0f))
+                return 0f;
             float scale = float.IsFinite(statusScale) ? Math.Clamp(statusScale, 0f, 4f) : 0f;
             float granted = dashSpeed * scale * seconds;
             return Math.Min(granted, remaining);
@@ -47,12 +52,18 @@ namespace Cool.SyncCore
 
         public static float JumpInertiaDistance(float speed, float seconds, float remaining)
         {
-            if (!(speed > 0f) || !(seconds > 0f) || !(remaining > 0f)) return 0f;
+            if (!float.IsFinite(speed) || !float.IsFinite(seconds) || !float.IsFinite(remaining)
+                || !(speed > 0f) || !(seconds > 0f) || !(remaining > 0f))
+                return 0f;
             return Math.Min(speed * seconds, remaining);
         }
 
         public static Vec3 ClampHorizontal(Vec3 previous, Vec3 next, float allowedDistance)
         {
+            // 预算非有限时 fail-closed：水平冻结在 previous，Y 仍用本次上报值（重力/落地由 Y 夹取负责）。
+            if (!float.IsFinite(allowedDistance) || allowedDistance < 0f)
+                return new Vec3(previous.X, next.Y, previous.Z);
+
             float dx = next.X - previous.X;
             float dz = next.Z - previous.Z;
             float distance = (float)Math.Sqrt(dx * dx + dz * dz);
@@ -64,7 +75,9 @@ namespace Cool.SyncCore
 
         public static float MaxJumpY(float startY, float jumpForce, float gravity, float elapsedSeconds)
         {
-            if (!(gravity < 0f) || !(jumpForce > 0f)) return startY;
+            if (!float.IsFinite(jumpForce) || !float.IsFinite(gravity)
+                || !float.IsFinite(elapsedSeconds)
+                || !(gravity < 0f) || !(jumpForce > 0f)) return startY;
             float apex = jumpForce / -gravity;
             float t = Math.Clamp(elapsedSeconds, 0f, apex);
             return startY + jumpForce * t + 0.5f * gravity * t * t;

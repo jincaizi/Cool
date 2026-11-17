@@ -34,5 +34,23 @@ namespace Cool.SyncCore.Tests
             Assert.AreEqual(expected,
                 MovementBudgetMath.MaxJumpY(0.3f, 10.95f, -30f, apex), 0.0001f);
         }
+
+        [Test]
+        public void JumpInertiaDistance_Caps_At_Remaining()
+        {
+            Assert.AreEqual(2f,
+                MovementBudgetMath.JumpInertiaDistance(10f, 0.5f, 2f), 0.0001f);
+        }
+
+        [Test]
+        public void ClampHorizontal_Freezes_Horizontal_On_NonFinite_Budget_And_Keeps_Y()
+        {
+            var clamped = MovementBudgetMath.ClampHorizontal(
+                new Vec3(0f, 0f, 0f), new Vec3(3f, 1.7f, 4f), float.NaN);
+
+            Assert.AreEqual(0f, clamped.X, 0.0001f);
+            Assert.AreEqual(1.7f, clamped.Y, 0.0001f);
+            Assert.AreEqual(0f, clamped.Z, 0.0001f);
+        }
     }
 }
