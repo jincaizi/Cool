@@ -635,7 +635,12 @@ public class CombatResolverControlLockTests
 
 - [ ] **步骤 2：运行测试确认失败**
 
-运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionBuilderTests|FullyQualifiedName~PlayerControlStateTests|FullyQualifiedName~CombatResolverControlLockTests"`
+运行（in-process runner 的 `--filter` 只支持单个子串，不要用 `A|B` 复合过滤）：
+```bash
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionBuilderTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PlayerControlStateTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatResolverControlLockTests"
+```
 预期：编译失败（`ApplyControl`/`Displacement` 不存在）。
 
 - [ ] **步骤 3：实现服务端状态**
@@ -813,7 +818,9 @@ if (caster.Displacement != null && caster.Displacement.CastId == castId)
 
 运行：
 ```bash
-bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionBuilderTests|FullyQualifiedName~PlayerControlStateTests|FullyQualifiedName~CombatResolverControlLockTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectionBuilderTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PlayerControlStateTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatResolverControlLockTests"
 ```
 预期：PASS；再跑一次全量确认没有破坏 Plan 02 的取消路径。
 
@@ -1242,7 +1249,11 @@ public void Jump_Start_Is_Rejected_While_ActionLocked()
 
 - [ ] **步骤 2：运行测试确认失败**
 
-运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PvpMovementBudgetTests|FullyQualifiedName~JumpTrajectoryBudgetTests"`
+运行（分开跑，in-process runner 不做 `|` 复合过滤）：
+```bash
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PvpMovementBudgetTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~JumpTrajectoryBudgetTests"
+```
 预期：编译失败（`ValidateAndApply(..., nowTick)` 不存在）。
 
 - [ ] **步骤 3：实现 `ValidateAndApply` 预算分支**
@@ -1445,8 +1456,10 @@ _positionSyncHandler.SetGroundHeight(pos =>
 - [ ] **步骤 4：运行测试**
 
 ```bash
-bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PvpMovementBudgetTests|FullyQualifiedName~JumpTrajectoryBudgetTests"
-bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PositionSyncEntityStoreTests|FullyQualifiedName~RespawnTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PvpMovementBudgetTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~JumpTrajectoryBudgetTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PositionSyncEntityStoreTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~RespawnTests"
 ```
 预期：新测试 PASS；既有位置/复活测试保持 PASS（`StrictMovementBudget` 默认 false）。
 
@@ -1537,7 +1550,11 @@ public void Npc_Damage_To_720_Hp_Player_Is_Scaled_By_7_2()
 
 - [ ] **步骤 2：运行测试确认失败**
 
-运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~LoginCombatBaselineTests|FullyQualifiedName~PveDamageScaleTests"`
+运行（分开跑）：
+```bash
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~LoginCombatBaselineTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PveDamageScaleTests"
+```
 预期：编译失败（`ApplyLoginCombatBaseline` 不存在 / 伤害仍是 10）。
 
 - [ ] **步骤 3：实现**
@@ -1598,7 +1615,8 @@ Plan 04 的怪物 DoT 跳伤必须复用 `ScaleNpcDamageToPlayer`（同一基准
 - [ ] **步骤 4：运行测试**
 
 ```bash
-bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~LoginCombatBaselineTests|FullyQualifiedName~PveDamageScaleTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~LoginCombatBaselineTests"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PveDamageScaleTests"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatResolver"
 ```
 预期：PASS；既有的 100 HP 测试若不是 `IsLoggedIn` 或 MaxHp=100，缩放因子为 1，结果不变。
