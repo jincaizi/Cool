@@ -121,11 +121,14 @@ namespace Hotfix.GameSystems.SyncLayer
         /// speedProvider 必须反映真实移动速度（超速钳制链路依赖它——固定值会使纠偏测不到）。
         /// defendStateProvider 报"是否防御中"（格挡减伤服务端化 —— 宿主接本地 3C
         /// `CharacterController.IsDefending`；不传则恒上报 false = 未防御）。
+        /// stateProvider 报 PvP 预算字段（模式/跳跃边沿/位移技能/已确认 CastId/生命代次/控制版本；
+        /// 不传则字段全为缺省 = 旧行为）。
         /// 宿主接线：manager.OnCorrectionNeeded += (pos, rot) => policy.ApplyServerCorrection(pos, rot);
         /// </summary>
         public void AttachMovementReporter(Func<Cool.SyncCore.Vec3> positionProvider,
             Func<float> rotationProvider, Func<float> speedProvider, int injectedSendDelayMs = 0,
-            Func<bool>? defendStateProvider = null)
+            Func<bool>? defendStateProvider = null,
+            Func<MovementReportState>? stateProvider = null)
         {
             if (_reporter != null)
             {
@@ -135,7 +138,7 @@ namespace Hotfix.GameSystems.SyncLayer
             }
 
             _reporter = new MovementReporter(_client, positionProvider, rotationProvider, speedProvider,
-                injectedSendDelayMs, defendStateProvider);
+                injectedSendDelayMs, defendStateProvider, stateProvider);
             _reporter.ResetForRespawn(_respawnTick);
             _dispatcher.Subscribe(MessageId.PositionSyncResponse, OnPositionSyncResponse);
         }
@@ -183,7 +186,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 DeviceInfo = "P1",
                 ProtocolVersion = ProtocolConstants.ProtocolVersion,
                 SupportedFeatures = ProtocolFeatures.AuthoritativeRespawn
-                                   | ProtocolFeatures.ElementalSwordQiV1,
+                                   | ProtocolFeatures.ElementalSwordQiV1
+                                   | ProtocolFeatures.PvpMovementBudgetV1,
                 ElementalCatalogFingerprint = ElementalCatalogHasher.Compute(
                     ElementalCatalogDefaults.Create())
             });

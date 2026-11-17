@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Cool.Protocol;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Data;
@@ -35,6 +36,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Action<long, float, bool, Vector3, float, bool, bool>? _onDamageToLocalPlayer;
         private readonly ConcurrentQueue<IMessage> _incoming = new ConcurrentQueue<IMessage>();
         private readonly ClientEquipmentState _equipment;
+        private readonly Dictionary<int, (uint seq, ulong castId, uint lifeId)> _acceptedCasts = new();
         private uint _nextEquipSeq;
         private uint _nextCastSeq;
 
@@ -134,6 +136,30 @@ namespace Hotfix.GameSystems.SyncLayer
             _client.Send(MessageId.CancelCastRequest, new CancelCastRequest { SkillId = skillId });
         }
 
+        /// <summary>
+        /// B5：查询某技能最近一次被服务端接受的 CastId（位移上报携带）。
+        /// 生命代次不匹配返回 false——复活/重建后的旧 CastId 不得复用。
+        /// </summary>
+        public bool TryGetAcceptedCastId(int skillId, uint lifeId, out ulong castId)
+        {
+            if (skillId > 0 && _acceptedCasts.TryGetValue(skillId, out var entry)
+                && entry.lifeId == lifeId)
+            {
+                castId = entry.castId;
+                return true;
+            }
+            castId = 0;
+            return false;
+        }
+
+        private void RememberAcceptedCast(CastConfirm confirm)
+        {
+            if (!confirm.Accepted || confirm.ClientCastSeq == 0) return;
+            if (_acceptedCasts.TryGetValue(confirm.SkillId, out var last)
+                && confirm.ClientCastSeq < last.seq) return;
+            _acceptedCasts[confirm.SkillId] = (confirm.ClientCastSeq, confirm.CastId, confirm.CasterLifeId);
+        }
+
         /// <summary>网络线程回调入口（宿主接线 adapter.MessageReceived）——只入队</summary>
         public void OnMessage(MessageId messageId, IMessage message)
         {
@@ -173,6 +199,7 @@ namespace Hotfix.GameSystems.SyncLayer
                         OnEquipResult?.Invoke(equip);
                         break;
                     case CastConfirm castConfirm:
+                        RememberAcceptedCast(castConfirm);
                         OnCastConfirm?.Invoke(castConfirm);
                         break;
                     case ProjectileLaunchBroadcast launch:

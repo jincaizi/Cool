@@ -769,7 +769,29 @@ namespace Hotfix.GameSystems.SyncLayer
                     var v = controller.Data.Velocity;
                     return Mathf.Sqrt(v.x * v.x + v.z * v.z);
                 },
-                defendStateProvider: () => controller.IsDefending);
+                defendStateProvider: () => controller.IsDefending,
+                stateProvider: () =>
+                {
+                    var d = controller.Data;
+                    ulong castId = 0;
+                    if (_localEntry.IsDashing && _combatBridge != null)
+                    {
+                        _combatBridge.TryGetAcceptedCastId(_localEntry.CurrentSkillId,
+                            _combatBridge.Equipment.LifeId, out castId);
+                    }
+                    return new MovementReportState
+                    {
+                        Mode = d.IsSprint ? LocomotionMode.Sprint : LocomotionMode.Walk,
+                        JumpSeq = controller.JumpSeq,
+                        Airborne = controller.IsAirborne,
+                        Grounded = controller.IsGrounded,
+                        VerticalVelocity = controller.Data.VerticalVelocity,
+                        DisplacementSkillId = _localEntry.IsDashing ? _localEntry.CurrentSkillId : 0,
+                        CastId = castId,
+                        LifeId = _combatBridge?.Equipment.LifeId ?? 0u,
+                        ControlVersion = _localEntry.ControlVersion
+                    };
+                });
             _manager.OnCorrectionNeeded += _netPolicy.ApplyServerCorrection;
 
             // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链

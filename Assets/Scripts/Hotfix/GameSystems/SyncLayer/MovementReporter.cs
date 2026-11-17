@@ -4,6 +4,20 @@ using Cool.SyncCore;
 
 namespace Hotfix.GameSystems.SyncLayer
 {
+    /// <summary>B5 位置上报的 PvP 预算字段（宿主 stateProvider 注入；缺省 default = 旧行为）。</summary>
+    public struct MovementReportState
+    {
+        public LocomotionMode Mode;
+        public uint JumpSeq;
+        public bool Airborne;
+        public bool Grounded;
+        public float VerticalVelocity;
+        public int DisplacementSkillId;
+        public ulong CastId;
+        public uint LifeId;
+        public uint ControlVersion;
+    }
+
     /// <summary>
     /// 移动上报器 —— 本地角色即时模拟后的节流上报（spec B+）：
     /// 每 ServerTickRateMs 上报一次 PositionSyncRequest（seq 递增）；
@@ -22,17 +36,24 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly Func<float> _speedProvider;
         private readonly int _injectedSendDelayMs;
         private readonly Func<bool>? _defendStateProvider;
+        private readonly Func<MovementReportState>? _stateProvider;
         private readonly PredictionReconciler _reconciler = new PredictionReconciler();
         private float _timer;
         private uint _sequence;
         private uint? _respawnTick;
+        private uint _lastReportedJumpSeq;
+        private bool _wasAirborne;
 
         /// <summary>最近一次上报的服务器时钟（纠偏用）</summary>
         public long LastServerTimestamp { get; private set; }
 
+        /// <summary>最近一次位置确认携带的服务端控制版本（诊断/请求新基线的依据）。</summary>
+        public uint LastServerControlVersion { get; private set; }
+
         public MovementReporter(INetworkClient client,
             Func<Vec3> positionProvider, Func<float> rotationProvider, Func<float> speedProvider,
-            int injectedSendDelayMs = 0, Func<bool>? defendStateProvider = null)
+            int injectedSendDelayMs = 0, Func<bool>? defendStateProvider = null,
+            Func<MovementReportState>? stateProvider = null)
         {
             _client = client;
             _positionProvider = positionProvider;
@@ -40,6 +61,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _speedProvider = speedProvider;
             _injectedSendDelayMs = injectedSendDelayMs;
             _defendStateProvider = defendStateProvider;
+            _stateProvider = stateProvider;
         }
 
         public void ResetForRespawn(uint? tick)
@@ -63,6 +85,7 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             if (!_client.IsConnected) return;
 
+            var state = _stateProvider?.Invoke() ?? default;
             var pos = _positionProvider();
             float rot = _rotationProvider();
             uint seq = ++_sequence;
@@ -81,8 +104,34 @@ namespace Hotfix.GameSystems.SyncLayer
                 IsDefending = _defendStateProvider?.Invoke() ?? false,
                 Timestamp = DateTime.UtcNow.Ticks,
                 Sequence = seq,
-                RespawnTick = _respawnTick
+                RespawnTick = _respawnTick,
+                LocomotionMode = state.Mode,
+                JumpPhase = ResolveJumpPhase(state),
+                JumpSeq = state.JumpSeq,
+                VerticalVelocity = state.VerticalVelocity,
+                DisplacementSkillId = state.DisplacementSkillId,
+                CastId = state.CastId,
+                ClientControlVersion = state.ControlVersion,
+                LifeId = state.LifeId
             });
+        }
+
+        private PlayerJumpPhase ResolveJumpPhase(MovementReportState state)
+        {
+            if (state.JumpSeq != 0 && state.JumpSeq != _lastReportedJumpSeq)
+            {
+                _lastReportedJumpSeq = state.JumpSeq;
+                if (!state.Airborne && state.Grounded)
+                    return PlayerJumpPhase.None; // 起跳与落地落在同一上报间隔：不制造幽灵起跳
+                _wasAirborne = true;
+                return PlayerJumpPhase.Start;
+            }
+            if (_wasAirborne && state.Grounded && !state.Airborne)
+            {
+                _wasAirborne = false;
+                return PlayerJumpPhase.End;
+            }
+            return _wasAirborne || state.Airborne ? PlayerJumpPhase.Air : PlayerJumpPhase.None;
         }
 
         /// <summary>收到 PositionSyncResponse 时调用——返回是否需要纠偏（超阈值）</summary>
@@ -91,6 +140,7 @@ namespace Hotfix.GameSystems.SyncLayer
             if (response.RespawnTick != _respawnTick) return false;
 
             LastServerTimestamp = response.ServerTimestamp;
+            LastServerControlVersion = response.ControlVersion;
             _reconciler.Prune(response.AcknowledgedSequence);
             return _reconciler.TryGetCorrection(
                 response.AcknowledgedSequence,
