@@ -15,8 +15,15 @@
 | `WeaponElementConfig.cs` / `WeaponMaterialProxy.cs` / `WeaponSurfaceShader.cs` | 武器元素与材质 |
 | `PlayerHealVFX.cs` | 治疗表现 |
 | `SkillWatcher.cs` | 技能事件观察 |
+| `SwordQiEchoPresenter.cs` | 剑气回荡：4 道剑气轨迹、接触时刻、拖尾池与迟到/结束回池；`Tick` 可注入时钟 |
 
 事件来源：`Skills/Events/` 与 `Skills/EventBus.cs`。格挡火花链路见 [Combat README](../Combat/README.md)。
+
+## 剑气回荡
+
+- `SwordQiEchoPresenter` 按 `SwordQiEchoState` 或共享 `SwordQiEchoContact` 时间表驱动本地/远端轨迹；
+  单目标也生成 4 道；接触点短暂保持后进入回旋；`Stop`/到期把根节点回池并清拖尾。
+- 测试：`SwordQiEchoPresenterTests`（EditMode，注入时钟）、`SwordQiEchoPresentationTests`（PlayMode）。
 
 ## 测试
 

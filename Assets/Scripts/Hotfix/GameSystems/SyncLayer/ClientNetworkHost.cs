@@ -13,6 +13,7 @@ using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Network;
+using Hotfix.GameSystems.VFX;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WebSocketNet;
@@ -121,6 +122,16 @@ namespace Hotfix.GameSystems.SyncLayer
         private uint _lastAppliedEchoStartTick;
         private ulong _lastAppliedEchoRequestId;
         private ulong _endedEchoCastId;
+        private SwordQiEchoPresenter? _localEchoPresenter;
+
+        private sealed class RemoteEchoInstance
+        {
+            public long CasterId;
+            public SwordQiEchoPresenter Presenter = null!;
+        }
+
+        private readonly Dictionary<ulong, RemoteEchoInstance> _remoteEchoPresenters =
+            new Dictionary<ulong, RemoteEchoInstance>();
 
         // 联网 HUD 读数（FPS + RTT）：HUD 面板缓存与 0.5 秒统计窗口
         private PlayerHudPanel? _hudPanel;
@@ -902,8 +913,13 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void HandleSwordQiEchoState(SwordQiEchoState state)
         {
-            if (_manager == null || _localEntry == null) return;
-            if (state.CasterId != _manager.LocalPlayerId) return;
+            if (_manager == null) return;
+            if (state.CasterId != _manager.LocalPlayerId)
+            {
+                HandleRemoteSwordQiEchoState(state);
+                return;
+            }
+            if (_localEntry == null) return;
             if (state.EchoBindingId != 0 && state.EchoBindingId != _echoBindingId) return;
             if (_echoRequestPending
                 && _pendingEchoConnectionGeneration != _echoConnectionGeneration) return;
@@ -966,8 +982,15 @@ namespace Hotfix.GameSystems.SyncLayer
             if (remainingSeconds > 0d)
             {
                 double endLocal = Time.time + remainingSeconds;
-                _localEntry.SkillCoordinator.CommitEchoRequest(
+                bool committed = _localEntry.SkillCoordinator.CommitEchoRequest(
                     data, endLocal, cooldownTotal, cooldownElapsed, () => (double)Time.time);
+                if (committed)
+                {
+                    _localEchoPresenter = _localEntry.GetComponent<SwordQiEchoPresenter>();
+                    if (_localEchoPresenter == null)
+                        _localEchoPresenter = _localEntry.gameObject.AddComponent<SwordQiEchoPresenter>();
+                    _localEchoPresenter.Play(_localEntry.transform, state, elapsedSeconds, () => (double)Time.time);
+                }
             }
             else
             {
@@ -988,10 +1011,11 @@ namespace Hotfix.GameSystems.SyncLayer
             if (state.CastId != 0 && state.CastId == _endedEchoCastId) return;
             _endedEchoCastId = state.CastId;
 
-            if (state.CastId != 0 && state.CastId == _lastAppliedEchoCastId
-                && _localEntry.SkillCoordinator.CurrentSkill?.Data is SwordQiEchoSkillData)
+            if (state.CastId != 0 && state.CastId == _lastAppliedEchoCastId)
             {
-                _localEntry.SkillCoordinator.CurrentSkill.ForceComplete();
+                if (_localEntry.SkillCoordinator.CurrentSkill?.Data is SwordQiEchoSkillData)
+                    _localEntry.SkillCoordinator.CurrentSkill.ForceComplete();
+                _localEchoPresenter?.Stop();
             }
 
             if (state.RequestId != 0 && state.RequestId == _pendingEchoRequestId)
@@ -1011,11 +1035,57 @@ namespace Hotfix.GameSystems.SyncLayer
                     && state.CastId > _lastAppliedEchoCastId);
         }
 
+        private void HandleRemoteSwordQiEchoState(SwordQiEchoState state)
+        {
+            if (state.Phase == SwordQiEchoPhase.Rejected) return;
+            if (state.Phase == SwordQiEchoPhase.Ended)
+            {
+                if (_remoteEchoPresenters.TryGetValue(state.CastId, out var ended))
+                {
+                    ended.Presenter.Stop();
+                    _remoteEchoPresenters.Remove(state.CastId);
+                }
+                return;
+            }
+
+            if (state.Phase != SwordQiEchoPhase.Started) return;
+            if (_remoteEchoPresenters.ContainsKey(state.CastId)) return;
+
+            var view = _remoteEntities?.GetView(state.CasterId);
+            if (view == null) return;
+
+            long nowServer = _manager!.ServerNowTicks();
+            double elapsedSeconds = Math.Max(0d,
+                (nowServer - state.ServerTimestamp) / (double)TimeSpan.TicksPerSecond);
+            double durationSeconds = (state.EndTick - state.StartTick) / (double)CombatRules.TickRateHz;
+            if (elapsedSeconds >= durationSeconds) return;
+
+            var presenter = view.GameObject.GetComponent<SwordQiEchoPresenter>();
+            if (presenter == null)
+                presenter = view.GameObject.AddComponent<SwordQiEchoPresenter>();
+            presenter.Play(view.GameObject.transform, state, elapsedSeconds, () => (double)Time.time);
+            _remoteEchoPresenters[state.CastId] = new RemoteEchoInstance
+            {
+                CasterId = state.CasterId,
+                Presenter = presenter
+            };
+        }
+
         /// <summary>远程视图移除（AOI 出界/离线）：目标就是当前锁定时先清锁（ViewRemoved 在 DestroyView 之前）</summary>
         private void HandleRemoteViewRemoved(long entityId)
         {
             if (_networkTargetSelector != null && _networkTargetSelector.LockedTargetId == entityId)
                 _networkTargetSelector.ClearLock();
+
+            List<ulong>? remove = null;
+            foreach (var pair in _remoteEchoPresenters)
+            {
+                if (pair.Value.CasterId != entityId) continue;
+                pair.Value.Presenter.Stop();
+                (remove ??= new List<ulong>()).Add(pair.Key);
+            }
+            if (remove != null)
+                foreach (var castId in remove) _remoteEchoPresenters.Remove(castId);
         }
 
         private void HandleLineProjectileStopped(Vector3 point)
@@ -1064,6 +1134,11 @@ namespace Hotfix.GameSystems.SyncLayer
             _combatBridge?.ClearEchoDedupe();
             _remoteCastPresenter?.Clear();
             _remoteCastPresenter = null;
+            foreach (var instance in _remoteEchoPresenters.Values)
+                instance.Presenter.Stop();
+            _remoteEchoPresenters.Clear();
+            _localEchoPresenter?.Stop();
+            _localEchoPresenter = null;
             ClearEchoRequest();
 
             if (_combatBridge == null || _adapter == null) return;

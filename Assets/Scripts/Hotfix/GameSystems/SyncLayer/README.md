@@ -123,6 +123,8 @@
 - `SwordQiEchoState` 与 `CastBroadcast/DamageResult` 同走 `CombatNetworkBridge` 主线程队列。
   Started 按 `(StartTick, CastId)` 比较；Ended 锁存；过期 Started 只对齐冷却。
   `DamageResult.EchoCastId` 在 HP/表现消费前按 `(EchoCastId, TargetPlayerId)` 去重，窗口 64 个实例。
+- 本地施法者把 `SwordQiEchoPresenter` 挂在本地角色上；远端施法者挂在 `RemoteEntityView.GameObject`，
+  视图移除/断线时 Stop 并清实例表。`RemoteCastPresenter` 继续只处理普通 `CastBroadcast`。
 
 ## 客户端碰撞（玩家 vs 怪物）
 

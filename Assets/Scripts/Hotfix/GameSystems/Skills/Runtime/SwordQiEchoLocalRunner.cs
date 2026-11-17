@@ -5,6 +5,7 @@ using Hotfix.GameSystems.Monster;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
+using Hotfix.GameSystems.VFX;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Runtime
@@ -31,6 +32,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private double _startTime;
         private double _endTime;
         private bool _active;
+        private SwordQiEchoPresenter? _presenter;
 
         public bool IsInvulnerable => _active && Time.time < _endTime;
 
@@ -93,6 +95,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _startTime = Time.time;
             _endTime = endTime;
             _active = true;
+
+            _presenter = _owner.GetComponent<SwordQiEchoPresenter>();
+            if (_presenter == null)
+                _presenter = _owner.gameObject.AddComponent<SwordQiEchoPresenter>();
+            _presenter.Play(_owner, scheduled, SwordQiEchoRules.Spec.DurationSeconds);
             return true;
         }
 
@@ -103,6 +110,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (now >= _endTime)
             {
                 _active = false;
+                _presenter?.Stop();
                 return;
             }
 
@@ -138,6 +146,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
         }
 
-        public void Cancel() => _active = false;
+        public void Cancel()
+        {
+            _active = false;
+            _presenter?.Stop();
+        }
     }
 }

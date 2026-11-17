@@ -7,10 +7,11 @@ namespace GameSys.EditorTests
 {
     public class SkillPresentationCatalogTests
     {
-        private static readonly int[] SyncedPlayerSkills = { 10001, 10002, 20001, 20002, 20003, 20004, 30001 };
+        private static readonly int[] SyncedPlayerSkills =
+            { 10001, 10002, 20001, 20002, 20003, 20004, 20006, 30001 };
 
         [Test]
-        public void Catalog_Contains_All_Seven_Synced_Player_Skills()
+        public void Catalog_Contains_All_Eight_Synced_Player_Skills()
         {
             var catalog = AssetDatabase.LoadAssetAtPath<SkillPresentationCatalog>(
                 "Assets/PreRes/SkillsCfg/SkillPresentationCatalog.asset");
@@ -22,7 +23,7 @@ namespace GameSys.EditorTests
                 Assert.IsFalse(string.IsNullOrEmpty(data!.AnimatorTrigger), "技能 " + id + " 缺 AnimatorTrigger");
             }
             Assert.AreEqual(SyncedPlayerSkills.Length, catalog!.Skills.Count,
-                "目录只应收录 7 个同步玩家技能（怪物技能不在客户端目录）");
+                "目录只应收录 8 个同步玩家技能（怪物技能不在客户端目录）");
         }
     }
 }
