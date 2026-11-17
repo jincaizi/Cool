@@ -2476,6 +2476,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHP: 100
+  _respawnDelay: 3
+  _spawnPoint: {x: 0, y: 0, z: 0}
   CharacterController: {fileID: 3433340318554783080}
   Animator: {fileID: 7413344840680693326}
   GroundLayer:
@@ -2489,6 +2491,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 66f8b64c950c3864db7adb3e209c2f35, type: 2}
   - {fileID: 11400000, guid: dc981350929e9214884ae0f3b65f07e7, type: 2}
   - {fileID: 11400000, guid: f2ac16cf2097d684a8ce0fd669d80286, type: 2}
+  - {fileID: 11400000, guid: 186610565958c9044b966364b71c74c1, type: 2}
+  _maxStamina: 100
+  _sprintStaminaPerSecond: 20
+  _defendStaminaPerSecond: 10
+  _staminaRegenPerSecond: 33.333332
+  _staminaRegenDelay: 0.75
+  _staminaShortRegenDelay: 0.2
+  _staminaExhaustRecoverRatio: 0.2
+  _blockStaminaCost: 15
+  _aimGroundMask:
+    serializedVersion: 2
+    m_Bits: 4294966271
 --- !u!114 &1883701550781263365
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -58,6 +58,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private bool _skillFireballConsumed;
         private bool _skillChargeBlastConsumed;
         private bool _skillMeteorConsumed;
+        private bool _skillEchoConsumed;
         private bool _skillQPressedFromUI;
         private bool _skillRPressedFromUI;
         private bool _skillFireballPressedFromUI;
@@ -65,6 +66,8 @@ namespace Hotfix.GameSystems.Sys3C.Input
         private bool _skillChargeBlastPressedFromUI;
         private bool _skillChargeBlastHeldFromUI;
         private bool _skillMeteorPressedFromUI;
+        private bool _skillEchoPressedFromUI;
+        private bool _swordQiEchoEnabled = true;
 
         // 火球地面瞄准（移动端摇杆）—— 由 MobileInputBinder 帧末汇入。
         private bool _skillFireballAimActiveFromUI;
@@ -124,6 +127,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skillFireballPressedFromUI = false;
             _skillChargeBlastPressedFromUI = false;
             _skillMeteorPressedFromUI = false;
+            _skillEchoPressedFromUI = false;
             _targetSwitchPressedFromUI = false;
             _skillFireballAimActiveFromUI = false;
             _skillFireballAimFromUI = Vector2.zero;
@@ -160,6 +164,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _skillFireballConsumed = false;
             _skillChargeBlastConsumed = false;
             _skillMeteorConsumed = false;
+            _skillEchoConsumed = false;
             _skillFireballReleaseConsumed = false;
             _targetSwitchConsumed = false;
             _lastReleaseDuration = -1f;
@@ -472,6 +477,16 @@ namespace Hotfix.GameSystems.Sys3C.Input
             if (pressed) _skillMeteorConsumed = false;
         }
 
+        public void SetSkillEchoPressedFromUI(bool pressed)
+        {
+            if (pressed && InputBlockGate.IsBlocked) return;
+            _skillEchoPressedFromUI = pressed;
+            if (pressed) _skillEchoConsumed = false;
+        }
+
+        /// <summary>握手未协商 SwordQiEcho 时禁用联网入口（单机默认 true）。</summary>
+        public void SetSwordQiEchoEnabled(bool enabled) => _swordQiEchoEnabled = enabled;
+
         /// <summary>
         /// 防御键按住（持续状态）— PC/Editor 键盘 F，或手游 UI 按钮
         /// </summary>
@@ -655,6 +670,20 @@ namespace Hotfix.GameSystems.Sys3C.Input
             {
                 _skillMeteorConsumed = true;
                 _skillMeteorPressedFromUI = false;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>剑气回荡按下（键盘 4 / 移动端按钮）；未协商能力时禁用。</summary>
+        public bool IsSkillEchoPressed()
+        {
+            if (InputBlockGate.IsBlocked || !_swordQiEchoEnabled) return false;
+            bool pressed = _skillEchoPressedFromUI || UnityInput.GetKeyDown(KeyCode.Alpha4);
+            if (pressed && !_skillEchoConsumed)
+            {
+                _skillEchoConsumed = true;
+                _skillEchoPressedFromUI = false;
                 return true;
             }
             return false;

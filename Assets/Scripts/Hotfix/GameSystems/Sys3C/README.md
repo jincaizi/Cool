@@ -113,7 +113,10 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
 
 ## 移动技能输入
 
-- `InputManager` 合并键鼠与手机技能输入：Q/R/陨石是一次性按下沿，火球/炎爆同时提供 pressed 与 held/release 语义。
+- `InputManager` 合并键鼠与手机技能输入：Q/R/陨石/剑气回荡是一次性按下沿（键盘 4），火球/炎爆同时提供 pressed 与 held/release 语义。
+- 剑气回荡：`InputManager.SetSwordQiEchoEnabled(bool)` 由 `ClientNetworkHost` 按握手能力开关；
+  `Sys3CEntry` 每帧读取后交给 `SkillCoordinator`。单机由 `SwordQiEchoLocalRunner` 提交本地伤害，
+  施法窗口内 `IDamageable.TakeDamage` 走本地无敌短路。
 - `MobileInputBinder` 每帧末汇入按钮状态，并通过 `BoundEntry` 让 HUD 与同一个本地角色绑定；角色重建后会重新发现并绑定。
 - Binder 停用、关闭触控、角色销毁重建或切换绑定时会**同时释放** `InputManager` 与 `BoundEntry`，并清空按钮 held/pressed 后再重绑，避免旧角色的普攻/蓄力状态漏给新角色。
 - 失焦/关触控会无释放事件地取消攻击按住（`CancelAttackHold`），不会合成“松开 = 重击”；失焦、死亡或进入防御还会清除 `CanFireHeavy`，避免金边残留或解除状态后补放重击。

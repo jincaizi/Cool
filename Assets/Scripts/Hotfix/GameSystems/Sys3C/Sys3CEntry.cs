@@ -93,6 +93,7 @@ namespace Hotfix.GameSystems.Sys3C
         private Hotfix.GameSystems.Sys3C.Character.CharacterController _cc;
         private FSMManager _fsmManager;
         private SkillCoordinator _skillCoordinator;
+        private SwordQiEchoLocalRunner _swordQiEchoLocal;
         private SkillDashComponent _dashComponent;
         private InputManager _inputManager;
         private ThirdPersonCameraController _camera;
@@ -204,6 +205,9 @@ namespace Hotfix.GameSystems.Sys3C
                 }
             };
 
+            _swordQiEchoLocal = new SwordQiEchoLocalRunner(_skillCoordinator, transform);
+            _skillCoordinator.OnEchoOfflineRequested += HandleEchoOfflineRequested;
+
             // Register skills from Inspector-assigned SkillData assets
             int skillCount = 0;
             foreach (var skill in _characterSkills)
@@ -308,6 +312,7 @@ namespace Hotfix.GameSystems.Sys3C
             ApplyPushVector();
             _fsmManager.Update(Time.deltaTime);
             _skillCoordinator.Update(Time.deltaTime);
+            _swordQiEchoLocal?.Update();
             UpdateStamina(Time.deltaTime);
             _dashComponent.Update();
 
@@ -518,6 +523,14 @@ namespace Hotfix.GameSystems.Sys3C
                             transform.position + transform.forward * 12f);
                         _skillCoordinator.HandleInput(input);
                     }
+                }
+
+                if (_inputManager.IsSkillEchoPressed())
+                {
+                    int echoId = (int)Skills.Definition.SkillID.SwordQiEcho;
+                    var input = SkillInput.SkillToPosition(echoId,
+                        transform.position + transform.forward * 5f);
+                    _skillCoordinator.HandleInput(input);
                 }
             }
 
@@ -761,6 +774,11 @@ namespace Hotfix.GameSystems.Sys3C
                 transform.position + Vector3.up * 1.5f));
         }
 
+        private void HandleEchoOfflineRequested(SwordQiEchoSkillData data)
+        {
+            _swordQiEchoLocal?.TryCast(data);
+        }
+
         private string _lastSkillTrigger;
         private bool _cleanupInProgress;
         private Skills.Definition.SkillSubState _prevSkillSubState;
@@ -945,6 +963,7 @@ namespace Hotfix.GameSystems.Sys3C
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection, HitContact contact)
         {
             if (_currentHP <= 0) return;
+            if (_swordQiEchoLocal != null && _swordQiEchoLocal.IsInvulnerable) return;
 
             float baseDamage = (data != null && data.CalculatedDamage > 0)
                 ? data.CalculatedDamage

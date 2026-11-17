@@ -37,7 +37,7 @@ namespace KcpNet.PlayModeTests
         }
 
         [UnityTest]
-        public IEnumerator test_demo_day_has_five_radial_skill_buttons_and_attack_ready_view()
+        public IEnumerator test_demo_day_has_six_radial_skill_buttons_and_attack_ready_view()
         {
             bool previous = LogAssert.ignoreFailingMessages;
             LogAssert.ignoreFailingMessages = true;
@@ -46,9 +46,13 @@ namespace KcpNet.PlayModeTests
             yield return null;
 
             var skills = Object.FindObjectsOfType<MobileSkillButton>(true);
-            Assert.AreEqual(5, skills.Length, "应有 Q/R/火球/炎爆/陨石五个技能按钮");
+            Assert.AreEqual(6, skills.Length, "应有 Q/R/火球/炎爆/陨石/剑气回荡六个技能按钮");
             CollectionAssert.AreEquivalent(
-                new[] { (int)SkillID.SkillQ, (int)SkillID.SkillR, (int)SkillID.Fireball, (int)SkillID.ChargeBlast, (int)SkillID.Ultimate },
+                new[]
+                {
+                    (int)SkillID.SkillQ, (int)SkillID.SkillR, (int)SkillID.Fireball,
+                    (int)SkillID.ChargeBlast, (int)SkillID.Ultimate, (int)SkillID.SwordQiEcho,
+                },
                 skills.Select(x => x.SkillId).ToArray());
 
             foreach (var skill in skills)

@@ -17,12 +17,24 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// 开始技能冷却
         /// </summary>
         public void StartCooldown(int skillId, float duration)
+            => StartCooldown(skillId, duration, 0f);
+
+        /// <summary>
+        /// 按服务端权威已过时间开始冷却（剑气回荡迟到确认：Total=12、Remaining=10）。
+        /// 原双参数调用等价于 elapsedSeconds = 0。
+        /// </summary>
+        public void StartCooldown(int skillId, float totalDuration, float elapsedSeconds)
         {
+            if (!float.IsFinite(totalDuration) || totalDuration < 0f) return;
+            float elapsed = float.IsFinite(elapsedSeconds)
+                ? UnityEngine.Mathf.Max(0f, elapsedSeconds)
+                : 0f;
+
             _cooldowns[skillId] = new CooldownEntry
             {
-                StartTime = UnityEngine.Time.time,
-                Duration = duration,
-                Remaining = duration
+                StartTime = UnityEngine.Time.time - elapsed,
+                Duration = totalDuration,
+                Remaining = UnityEngine.Mathf.Max(0f, totalDuration - elapsed)
             };
         }
 

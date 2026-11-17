@@ -32,6 +32,7 @@ namespace Hotfix.GameSystems.Skills.Definition
         SkillR = 20002,
         Fireball = 20003,
         ChargeBlast = 20004,
+        SwordQiEcho = 20006,
         Ultimate = 30001,
     }
 }

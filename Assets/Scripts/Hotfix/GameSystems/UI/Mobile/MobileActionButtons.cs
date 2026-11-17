@@ -19,6 +19,7 @@ namespace Hotfix.GameSystems.UI
         public bool ChargeBlastPressed { get; private set; }
         public bool ChargeBlastHeld { get; private set; }
         public bool MeteorPressed { get; private set; }
+        public bool SwordQiEchoPressed { get; private set; }
 
         // 三个按钮在 Inspector 里各绑 OnPointerDown/Up（不在此写死 UI 结构）
         public void OnAttackDown() => AttackHeld = true;
@@ -41,6 +42,7 @@ namespace Hotfix.GameSystems.UI
         }
         public void OnChargeBlastUp() => ChargeBlastHeld = false;
         public void OnMeteorDown() => MeteorPressed = true;
+        public void OnSwordQiEchoDown() => SwordQiEchoPressed = true;
 
         /// <summary>由"切换目标"按钮的 onClick 调用，置位一次性按下。</summary>
         public void NotifyTargetSwitch() => TargetSwitchPressed = true;
@@ -58,6 +60,7 @@ namespace Hotfix.GameSystems.UI
             FireballPressed = false;
             ChargeBlastPressed = false;
             MeteorPressed = false;
+            SwordQiEchoPressed = false;
         }
 
         public void ClearCombatInput()

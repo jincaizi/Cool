@@ -113,6 +113,17 @@
   `DamageResult` 到达后用该终点 `ExplodeAt`（不退回受击者位置），与服务端落点圆判定同源。
   20004 / 30001 等落点类技能直接在广播落点生成释放/陨石表现。
 
+## 剑气回荡确认（2026-11-18）
+
+- 宿主只在握手 `EnabledFeatures` 含 `ProtocolFeatures.SwordQiEcho` 时订阅
+  `SkillCoordinator.OnEchoRequested`；否则 `InputManager.SetSwordQiEchoEnabled(false)` 关闭键盘/触控入口。
+- 请求归属由 `ClientNetworkHost` 持有：`EchoRequestId` 会话内递增、`EchoBindingId` 角色重绑递增、
+  连接代次变化清空。`CombatNetworkBridge.NotifyEchoCast` 发 CastRequest；3 秒超时释放施法锁但保留
+  归属以接住迟到 Started。
+- `SwordQiEchoState` 与 `CastBroadcast/DamageResult` 同走 `CombatNetworkBridge` 主线程队列。
+  Started 按 `(StartTick, CastId)` 比较；Ended 锁存；过期 Started 只对齐冷却。
+  `DamageResult.EchoCastId` 在 HP/表现消费前按 `(EchoCastId, TargetPlayerId)` 去重，窗口 64 个实例。
+
 ## 客户端碰撞（玩家 vs 怪物）
 
 - `NpcBodyCollider` 在运行时按模型 bounds 生成，挂在怪物视图上；预制体本身不挂碰撞体（有资产断言）。

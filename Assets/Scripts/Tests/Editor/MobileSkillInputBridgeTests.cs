@@ -57,6 +57,25 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_sword_qi_echo_press_and_feature_gate()
+        {
+            _buttons.OnSwordQiEchoDown();
+            Assert.IsTrue(_buttons.SwordQiEchoPressed);
+            _buttons.ConsumeSkillPresses();
+            Assert.IsFalse(_buttons.SwordQiEchoPressed);
+
+            _input.SetSkillEchoPressedFromUI(true);
+            Assert.IsTrue(_input.IsSkillEchoPressed());
+
+            _input.SetSkillEchoPressedFromUI(true);
+            _input.SetSwordQiEchoEnabled(false);
+            Assert.IsFalse(_input.IsSkillEchoPressed(), "未协商能力时快捷键必须禁用");
+
+            _input.SetSwordQiEchoEnabled(true);
+            _input.SetSkillEchoPressedFromUI(false);
+        }
+
+        [Test]
         public void test_clear_combat_ui_input_releases_attack_and_charge_holds()
         {
             _buttons.OnAttackDown();

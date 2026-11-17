@@ -39,6 +39,10 @@ namespace Hotfix.GameSystems.SyncLayer
         public long LocalPlayerId { get; private set; }
         public string ZoneId { get; private set; } = string.Empty;
         public long ServerTickRateMs { get; private set; } = 67;
+        public uint EnabledFeatures { get; private set; }
+
+        /// <summary>服务器同步时钟当前值（ticks，DateTime 基准）；用于剑气回荡剩余时长。</summary>
+        public long ServerNowTicks() => _clockSync.ToServerTime(System.DateTime.UtcNow.Ticks);
         /// <summary>
         /// 时钟平滑偏移（ticks）——暴露 smoothed offset（T6 抖动实测读）；
         /// 插值渲染实际经 ToServerTime（时钟算法的 min-filter offset）驱动，
@@ -163,7 +167,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 ClientVersion = BuildVersion.Raw,
                 DeviceInfo = "P1",
                 ProtocolVersion = ProtocolConstants.ProtocolVersion,
-                SupportedFeatures = ProtocolFeatures.AuthoritativeRespawn
+                SupportedFeatures = ProtocolFeatures.AuthoritativeRespawn | ProtocolFeatures.SwordQiEcho
             });
         }
 
@@ -228,6 +232,7 @@ namespace Hotfix.GameSystems.SyncLayer
             LocalPlayerId = response.PlayerId;
             ZoneId = response.ZoneId;
             ServerTickRateMs = response.ServerTickRateMs > 0 ? response.ServerTickRateMs : 67;
+            EnabledFeatures = response.EnabledFeatures;
             SpawnPosition = new Vector3(response.SpawnX, response.SpawnY, response.SpawnZ);
             CurrentState = State.InWorld;
 

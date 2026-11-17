@@ -94,6 +94,61 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
+        public void NotifyEchoCast_Sends_RequestIds()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry);
+
+            bridge.NotifyEchoCast(20006, requestId: 7UL, bindingId: 3UL);
+
+            var cast = _client.Sent.Where(x => x.id == MessageId.CastRequest)
+                                   .Select(x => (CastRequest)x.msg).Single();
+            Assert.AreEqual(20006, cast.SkillId);
+            Assert.AreEqual(7UL, cast.EchoRequestId);
+            Assert.AreEqual(3UL, cast.EchoBindingId);
+            Assert.AreEqual(0, cast.Shape.ShapeType);
+        }
+
+        [Test]
+        public void DamageResult_EchoCastId_DeduplicatesPerTarget()
+        {
+            var registry = new RemoteEntityRegistry(_root.transform);
+            var received = new List<long>();
+            var bridge = new CombatNetworkBridge(_client, () => 1L, registry,
+                (targetId, damage, critical, direction, remainingHp, blocked, sourceIsPlayer) =>
+                    received.Add(targetId));
+
+            var result = new DamageResult
+            {
+                SourcePlayerId = 2L,
+                SkillId = 20006,
+                EchoCastId = 42UL,
+                Hits = new List<HitEntry>
+                {
+                    new HitEntry { TargetPlayerId = 1L, Damage = 100f, TargetRemainingHp = 900f },
+                },
+            };
+
+            bridge.OnMessage(MessageId.DamageResult, result);
+            bridge.OnMessage(MessageId.DamageResult, result);
+            bridge.Update();
+            Assert.AreEqual(1, received.Count, "同实例同目标重复结果只消费一次");
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 2L,
+                SkillId = 20006,
+                EchoCastId = 43UL,
+                Hits = new List<HitEntry>
+                {
+                    new HitEntry { TargetPlayerId = 1L, Damage = 100f, TargetRemainingHp = 800f },
+                },
+            });
+            bridge.Update();
+            Assert.AreEqual(2, received.Count, "不同 EchoCastId 必须各自消费");
+        }
+
+        [Test]
         public void NotifySkillCast_Ignores_Non_Synced_Skill()
         {
             var registry = new RemoteEntityRegistry(_root.transform);
