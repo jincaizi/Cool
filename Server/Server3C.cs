@@ -129,6 +129,15 @@ namespace KcpServer
                         return (float?)null;
                     return projected.Y;
                 });
+
+                // Plan 03 任务 5：位置同步的跳跃接地/高度钳制与施法判定使用同一 navmesh 闭包。
+                _positionSyncHandler.SetGroundHeight(pos =>
+                {
+                    if (!navigation.TryProject(new Vector3(pos.X, pos.Y, pos.Z), 10f,
+                            out Vector3 projected, out _))
+                        return (float?)null;
+                    return projected.Y;
+                });
             }
         }
 
