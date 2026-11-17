@@ -136,7 +136,8 @@ namespace Cool.SyncCore
             return attackMin < targetMax && attackMax > targetMin;
         }
 
-        private static float SurfaceDistance(Vec3 a, Vec3 b, float radius)
+        /// <summary>表面距离 = max(0, XZ 中心距 − 目标半径)；剑气流回 / 目标锁定等共享规则复用。</summary>
+        internal static float SurfaceDistance(Vec3 a, Vec3 b, float radius)
             => Math.Max(0f, DistXZ(a, b) - radius);
 
         private static float DistXZ(Vec3 a, Vec3 b)

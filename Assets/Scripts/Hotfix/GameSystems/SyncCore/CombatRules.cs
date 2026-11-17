@@ -205,6 +205,10 @@ namespace Cool.SyncCore
                 projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint, radius: 2f,
                     maxImpactDistance: 30f, chargeScales: true,
                     chargeAreaMaxScale: 1.5f, chargeDamageMaxScale: 1.5f)),
+            // 20006：剑气回荡。基础伤害/暴击 = 10001 的 2.0 倍（SwordQiEchoRules.DefaultDamage 守护）。
+            // 圆形半径与接触时间表由 20006 专用分支读取 SwordQiEchoRules.Spec；客户端发零形状，服务端跳过 ValidateShape。
+            [20006] = new SkillEntry(20006, shapeType: 1, maxRange: 0f, maxAreaRadius: 12f, maxAngle: 0f,
+                cooldownSeconds: 12f, baseDamage: 100f, criticalRate: 0.15f, hitDelaySeconds: 0f),
             [30001] = new SkillEntry(30001, shapeType: 0, maxRange: 2f, maxAreaRadius: 0f, maxAngle: 120f,
                 cooldownSeconds: 25f, baseDamage: 80f, criticalRate: 0f, hitDelaySeconds: 0.8f,
                 projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint, radius: 4f, maxImpactDistance: 30f)),
