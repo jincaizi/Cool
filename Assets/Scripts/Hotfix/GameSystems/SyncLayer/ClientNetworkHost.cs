@@ -841,6 +841,12 @@ namespace Hotfix.GameSystems.SyncLayer
             // 启用属性剑气后关闭本地剑气生成：视觉统一由服务端发射描述创建。
             NetworkSwordQiGate.SuppressLocalSpawn =
                 (_manager.EnabledFeatures & ProtocolFeatures.ElementalSwordQiV1) != 0;
+            if (NetworkSwordQiGate.SuppressLocalSpawn)
+            {
+                // 元素会话服务端按共享表给 720 HP；这里先对齐 HUD/本地上限，
+                // 权威余血仍由 DamageResult/RespawnNotice 驱动。
+                _localEntry.SetMaxHp(ElementalCatalogDefaults.Create().Pvp.PlayerMaxHp, fill: true);
+            }
 
             // 施法广播除日志外还要**路由**：NPC 由 registry 按发布者时间戳 + skillId 排成 renderAt 处的挥砍，
             // 玩家类交给 presenter 立即播攻击/施法表现（本回调已在主线程——CombatNetworkBridge.Update
@@ -1019,12 +1025,30 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleNpcAction(NpcActionEvent evt)
             => _remoteEntities?.ApplyNpcActionEvent(evt);
 
+        /// <summary>本人投影的分流判据：登录前（localPlayerId == 0）一律不算本人——
+        /// 否则未分配的 id 会把所有实体都当成自己，投影永远进不了 registry。</summary>
+        internal static bool IsLocalProjection(long localPlayerId, long entityId)
+            => localPlayerId != 0 && localPlayerId == entityId;
+
         /// <summary>战斗投影 → registry 版本合并（活动施法经 ActiveCastApplied 事件交 presenter）。
-        /// 本人的投影暂不消费（本地状态由 3C/技能执行器权威维护；镜像属 Plan 03/04）——
-        /// 必须在此早退，不能交给 registry 的未知实体缓存（会一直滞留到换世界）。</summary>
+        /// 本人的投影**只在本地消费**（Control → 权威控制、MaxHp → 上限对齐），
+        /// 不能交给 registry 的未知实体缓存（会一直滞留到换世界）；远端仍走 registry。</summary>
         private void HandleCombatStateUpdate(CombatStateUpdate update)
         {
-            if (update == null || update.EntityId == _manager?.LocalPlayerId) return;
+            if (update == null) return;
+            if (IsLocalProjection(_manager?.LocalPlayerId ?? 0, update.EntityId))
+            {
+                var projection = update.Projection;
+                if (projection == null) return;
+                if (projection.Control != null)
+                    _localEntry?.ApplyAuthoritativeControl(
+                        projection.Control.SpeedScale,
+                        projection.Control.ActionLock,
+                        projection.Control.ControlVersion);
+                if (projection.MaxHp > 0f)
+                    _localEntry?.SetMaxHp(projection.MaxHp, fill: false);
+                return;
+            }
             _remoteEntities?.ApplyCombatStateUpdate(update);
         }
 
