@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cool.Protocol;
+using Cool.SyncCore;
 using KcpNet;
 using Hotfix.GameSystems.SyncLayer;
 using NUnit.Framework;
@@ -12,7 +13,8 @@ namespace KcpNet.PlayModeTests
     /// <summary>
     /// P5 核心验收（spec §5-P5）：
     /// ① 服务端驱动巡逻 + 仇恨追击 + 攻击：观察者看到怪物（Kind=Npc 视图）、
-    ///    巡逻怪物位置漂移、Wolf 追击至攻击距离、收到 DamageResult（dmg 15 恒值）；
+    ///    巡逻怪物位置漂移、Wolf 追击至攻击距离、收到 DamageResult（50002 基础 15 ×
+    ///    `target.MaxHp / PveDamageBaselineHp`；Plan 03 起元素会话登录即 720 HP ⇒ 108）；
     /// ② 玩家断线怪物世界持续运转：重连后同一怪物 id 仍在（HP 权威保留）、继续攻击。
     /// 服务器 --monsters 4 模式启动（固定布局：Wolf(-30,0,0) / Slime(0,0,-20) / Slime(0,0,-35) /
     /// Wolf(10,0,-15)，一律面向原点）。**2026-10-17 第三次搬迁后原点观察者的夹具语义已变**：
@@ -34,6 +36,20 @@ namespace KcpNet.PlayModeTests
         /// <summary>Wolf 的检测半径（`Server/Config/monster_config.json` 模板 2 detectionRadius=15）——
         /// PlayMode 侧没有服务端配置表的读取通道，与 dmg 15 同款硬编码，改配置时同改。</summary>
         private const float WolfDetectionRadius = 15f;
+
+        /// <summary>Wolf 技能（50002）对玩家直接伤害：基础 15 × (720 HP / 100 PvE 基准) = 108。
+        /// Plan 03 起元素会话登录即 720 HP（`Pvp.PlayerMaxHp`），测试期望必须跟随登录语义，
+        /// 不能继续断言 100 HP 时代的 15。</summary>
+        private static float ExpectedWolfDamage()
+        {
+            Assert.IsTrue(CombatRules.TryGet(50002, out SkillEntry wolfSkill),
+                "50002 必须在共享战斗表内");
+            return CombatRules.ScaleNpcDamageToPlayer(wolfSkill.BaseDamage,
+                ElementalCatalogDefaults.Create().Pvp.PlayerMaxHp);
+        }
+
+        private static float ExpectedPlayerMaxHp()
+            => ElementalCatalogDefaults.Create().Pvp.PlayerMaxHp;
 
         /// <summary>2026-10-17 布局收紧后的**观察者站位**（默认落点是原点——LoginHandler 不填 SpawnX/Y/Z）。
         /// 原点在新布局下已不在任何怪的感知可达范围：感知是**距离 + 视锥**双条件（TargetDetector：按怪物
@@ -205,8 +221,9 @@ namespace KcpNet.PlayModeTests
             var first = ctx.Damages[0];
             var hit = FindHit(first, ctx.Manager.LocalPlayerId);
             if (hit == null) return (false, $"damage result {first.SourcePlayerId} did not target local player {ctx.Manager.LocalPlayerId}");
-            if (System.Math.Abs(hit.Damage - 15f) > 0.001f)
-                return (false, $"monster damage {hit.Damage} != server-rolled 15 (wolf dmg)");
+            float expectedDamage = ExpectedWolfDamage();
+            if (System.Math.Abs(hit.Damage - expectedDamage) > 0.001f)
+                return (false, $"monster damage {hit.Damage} != expected {expectedDamage} (wolf 50002 × 720/100)");
             // 2026-10-17 布局收紧后"谁打的"不能再取"最先看到的 Wolf"：新 [0] Wolf @ (-30,0,0) 的巡逻圈
             // 最近 20m > 检测 15m，永远打不到原点观察者；实际出手的是巡逻圈压进检测半径的那只
             // （[3] Wolf @ (10,0,-15)）——按视图枚举序取 id 会必然假红（damage source 2000004 != wolf id 2000001）。
@@ -223,7 +240,7 @@ namespace KcpNet.PlayModeTests
             if (attackerDist > WolfDetectionRadius + 0.5f || attackerMin > WolfDetectionRadius + 0.5f)
                 return (false, $"Wolf {first.SourcePlayerId} hit from {attackerDist:F2}m (min sampled {attackerMin:F2}m) — " +
                                $"outside its {WolfDetectionRadius}m detection radius (aggro geometry broken?)");
-            if (System.Math.Abs(hit.TargetRemainingHp - (100f - hit.Damage)) > 0.001f)
+            if (System.Math.Abs(hit.TargetRemainingHp - (ExpectedPlayerMaxHp() - hit.Damage)) > 0.001f)
                 return (false, $"local remaining hp {hit.TargetRemainingHp} inconsistent");
 
             string summary = $"ok: {monsterIds.Count} monsters seen, max slime patrol drift {maxSlimeDrift:F2}m " +
@@ -287,7 +304,7 @@ namespace KcpNet.PlayModeTests
                 if (ctxB.Damages.Count > 0)
                 {
                     var hit = FindHit(ctxB.Damages[0], ctxB.Manager.LocalPlayerId);
-                    if (hit != null && System.Math.Abs(hit.TargetRemainingHp - (100f - hit.Damage)) > 0.001f)
+                    if (hit != null && System.Math.Abs(hit.TargetRemainingHp - (ExpectedPlayerMaxHp() - hit.Damage)) > 0.001f)
                         return (false, "reconnect damage hp inconsistent");
                 }
                 return (true, $"ok: wolf {wolfId} persisted across disconnect (local {localId} → B), " +
