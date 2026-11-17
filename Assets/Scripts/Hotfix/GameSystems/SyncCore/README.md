@@ -10,17 +10,19 @@
 | `PredictionReconciler.cs` | 客户端预测帧对账；位置阈值 0.5m、旋转 5°、最多 60 帧 |
 | `HitResolver.cs` | 服务端权威命中裁决；几何与客户端 `AttackShape` 对齐；锥形按目标半径扩展（圆-锥相交）；可选高度重叠过滤 |
 | `CombatRules.cs` | 投射物判定种类与参数（剑气 / 火球 / 落点圆）、旋转重复判定（`RepeatSpec`）、攻击高度带（`AttackHeightSpec`） |
+| `MovementBudgetMath.cs` | PvP 位移预算纯函数：接收 tick 差、普通/突进/跳跃惯性距离、水平钳制、跳跃抛物线 |
 | `Vec3.cs` | 共享向量 |
 
 ## 属性剑气共享目录（2026-11-14）
 
-状态：Plan 01 已完成；Plan 02–05 的状态/投影/位移预算未开始。
+状态：Plan 01–03 已完成（Plan 03 增加 `Displacements`/`Jump` 共享表与 `MovementBudgetMath`）；
+Plan 04–05 未开始。
 
 `Elemental/` 是 Plan 01 的双端共享真值：
 
 | 文件 | 职责 |
 |---|---|
-| `ElementalCatalogDefinition.cs` | 武器/元素/状态/普攻时序/剑气几何/PvP 参数 DTO（`[Serializable]` 公共字段） |
+| `ElementalCatalogDefinition.cs` | 武器/元素/状态/普攻时序/剑气几何/位移/跳跃/PvP 参数 DTO（`[Serializable]` 公共字段） |
 | `ElementalCatalogValidator.cs` | 纯函数校验：重复 ID、缺失引用、数值区间、默认剑在初始清单、剑气 `Length/Speed == TotalFlightSeconds` |
 | `ElementalCatalogDefaults.cs` | 首版默认表与稳定 ID（90001–90005；10001/10002 时序；12m/2m/18m/s/3 段） |
 | `ElementalCatalogHasher.cs` | 稳定排序 + little-endian 语义流 SHA-256；排除 `ContentHash` 自身 |
@@ -35,6 +37,37 @@
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~ElementalCatalogValidatorTests"
 bash tools/unity-tests.sh EditMode ElementalCatalogTests
 ```
+
+## 位移预算与 PvP 基准（Plan 03，2026-11-18）
+
+`MovementBudgetMath` 是双端共享的纯函数；**客户端时间戳不参与计算**，服务端只信
+相邻两包到达 tick 的差。`CombatRules.TickRateHz = 15`。
+
+| 函数 | 公式 / 语义 |
+|---|---|
+| `ClampDeltaSeconds(now, last)` | `(now − last) / 15`，单次上限 `MaxAccumulatedSeconds = 0.5s`；`last == 0` 或 `now <= last` 返回 0 |
+| `NormalDistance(mode, defending, statusScale, dt)` | `基础速度 × 防御倍率 × 状态倍率 × dt`；基础速度 Walk 5 / Sprint 8（`CombatRules.WalkSpeed/SprintSpeed`），防御 0.4（`DefendSpeedMultiplier`），状态倍率钳到 `[0,4]`（非有限按 0） |
+| `DashSpeed(distance, duration, startup, recovery)` | `distance / (duration − startup − recovery)`；非有限或活动窗 ≤ 0 返回 0 |
+| `DashDistance(speed, statusScale, dt, remaining)` | `min(speed × clamp(statusScale,0,4) × dt, remaining)` |
+| `JumpInertiaDistance(speed, dt, remaining)` | `min(speed × dt, remaining)` |
+| `ClampHorizontal(previous, next, allowed)` | XZ 位移按 `allowed` 等比例截断，Y 保留本次上报；`allowed` 非有限/负值时水平冻结在 `previous`（fail-closed） |
+| `MaxJumpY(startY, jumpForce, gravity, elapsed)` | `startY + J·t + ½·G·t²`，`t` 钳到上升顶点 `J / −G`；参数非法时返回 `startY` |
+
+共享目录（`ElementalCatalogDefinition`，作者数据 `Server/Config/elemental_catalog.json`）追加：
+
+- `Displacements[]`：`SkillId / DashDistance / DashDuration / StartupSeconds / RecoverySeconds`。
+  首版 20001 = 2m / 0.3s / 起手 0.05s / 收尾 0.05s；客户端 `ResolveDashDistance(skillId, assetFallback)`
+  **共享表优先**，资产字段只在表里没有该技能时回退。
+- `Jump`：`JumpForce = 10.95`、`Gravity = −30`、`MaxRiseSeconds = 0.5`（服务端 Y 轴抛物线上限、
+  客户端跳跃惯性共用）。
+- `Pvp.PlayerMaxHp = 720`（元素会话登录基线）。
+
+`CombatRules.PveDamageBaselineHp = 100f`：`ScaleNpcDamageToPlayer(damage, target.MaxHp)`
+= `damage × target.MaxHp / 100`（`MaxHp ≤ 0`/非有限时原样返回）。NPC → 720 HP 玩家 = ×7.2，
+保持原 PvE TTK；Plan 04 的 DoT 必须复用同一函数。
+
+验证：服务端 `MovementBudgetFormulaTests`（11 项）锁定上述公式与 fail-closed；
+Unity `MovementBudgetMathTests`（5 项）锁定双端同源编译下的同一批断言。
 
 ## 约束
 
@@ -72,7 +105,7 @@ NPC CombatRules 接线由服务端从共享发布定义注册；玩家规则及�
 ## 测试
 
 `Assets/Scripts/Tests/Editor/SyncCore/`：`ClockSyncAlgorithmTests`、`MovementValidatorTests`、
-`PredictionReconcilerTests`、`HitResolverTests`、`CombatRulesTests`。
+`PredictionReconcilerTests`、`HitResolverTests`、`CombatRulesTests`、`MovementBudgetMathTests`。
 
 ```bash
 bash tools/unity-tests.sh EditMode HitResolverTests

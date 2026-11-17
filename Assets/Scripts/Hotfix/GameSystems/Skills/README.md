@@ -29,7 +29,8 @@
 
 ## 属性剑气与攻速（2026-11-14）
 
-状态：Plan 01 已完成；元素状态/DoT 与元素 VFX（Plan 04）未开始。
+状态：Plan 01 与 Plan 03 已完成（Plan 03 接通共享突进行为与状态倍率）；元素状态/DoT 与
+元素 VFX（Plan 04）未开始。
 
 - 普攻 10001/10002 的攻速来自已确认装备：`SkillCoordinator.AttackSpeedProvider` 注入倍率
   （0.25–4），`SkillExecutor.SetTimeScale` 驱动 `SkillStateMachine.ElapsedTime`，
@@ -40,11 +41,25 @@
   `SkillExecutor.OnSwordQiFrame` 不生成剑气视觉，由 `ProjectileLaunchBroadcast` 统一创建。
   离线路径不变（`SwordQiSpawner` 仍支持 `startDistance` 供晚到补进度）。
 
+## 突进位移（Plan 03，2026-11-18）
+
+- 突进的起手/活动/收尾窗口来自共享表 `ElementalCatalogDefinition.Displacements`
+  （首版 20001 = 2m / 0.3s / 起手 0.05s / 收尾 0.05s），不在技能资产里各写一套。
+- `SkillExecutor` 进入 `Execution` 时用 `ElementalCatalogDefaults.ResolveDashDistance(skillId, 资产值)`
+  解析距离——**共享表优先，资产字段只在表里没有该技能时回退**；`DashDuration/Startup/Recovery`
+  同样按表取值后交给 `SkillDashComponent.StartDash`。
+- `SkillDashComponent` 的有效活动窗 = `duration − startup − recovery`，`DashSpeed = distance / 活动窗`；
+  `CurrentFrameSpeed(dt) = DashSpeed × StatusSpeedScaleProvider() × dt`，即突进乘权威状态倍率
+  （冰减速等）；普通移动的 `Base × Defend × Skill × Status` 合成见
+  [Sys3C](../Sys3C/README.md)。状态倍率由 `Sys3CEntry` 注入
+  `() => CharacterController.StatusSpeedScale`。
+
 ## 测试
 
 Editor：`SkillCoordinator*Tests`、`SkillExecutor*Tests`、`SkillStateMachine*Tests`、`SkillDataMeteorTests`、
 `SkillInterruptionMatrixSpinTests`、`StatusEffect*Tests`、`Fireball*Tests`、`Meteor*Tests`、`SwordQi*Tests`、
 `BurnEffectDataTests`、`ProjectileSkillDataTests`、`SkillPresentationCatalogTests`、`RemoteProjectileApiTests`。
+突进回归在 Sys3C：`SkillDashComponentTests`（共享窗口距离/起手收尾/状态倍率）。
 
 ```bash
 bash tools/unity-tests.sh EditMode SkillExecutorMeteorTests

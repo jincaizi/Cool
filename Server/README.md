@@ -74,7 +74,8 @@ bash tools/test-server.sh
   （D-N2 状态语义），只有 Health 是条件字段，客户端按位沿用 last-known。
 - **战斗投影（Plan 02 Part B）**：AOI 基线快照带 `EntityFieldMask.Combat` 与完整
   `CombatProjection`（`CombatProjectionBuilder`：HP/装备/活动施法；`Statuses` 暂空、`Control`
-  为默认值，`CombatVersion/LifeId` 同基线下发）。`PlayerState.CombatVersion` 在换装、受伤/
+  为默认值——控制注入入口属 Plan 03，实际来源由 Plan 04 状态运行时提供；`CombatVersion/LifeId`
+  同基线下发）。`PlayerState.CombatVersion` 在换装、受伤/
   死亡/复活、防御姿态变化与活动施法阶段推进时递增并置 `CombatDirty`；
   `Server3C.SendCombatStateUpdates` 每 tick 只对 dirty 实体发送 `CombatStateUpdate`（311），
   收件人 = 本人 + 同场景观察者（NPC 为观察者）；场景过滤统一走 `IsSameCombatScene`
@@ -86,11 +87,48 @@ bash tools/test-server.sh
   `LaunchTick/ServerTimestamp`，客户端据此推导飞行进度）；`PruneExpiredLaunches` 按飞行时长
   清理过期条目。`GlobalGameSettings.BandwidthBudgetBytesPerSec = 100_000`（≈100 KB/s），
   `BandwidthBudgetTests` 用 100 实体 × 15Hz 的快照估算锁定上限。
+- **接收 tick 位移预算（Plan 03）**：登录响应始终下发 `ProtocolFeatures.PvpMovementBudgetV1`；
+  客户端在 `LoginRequest.SupportedFeatures` 携带该位时 `PlayerState.StrictMovementBudget = true`，
+  `PositionSyncHandler.ValidateWithBudget` 生效。预算只看**服务端接收 tick**
+  （`MovementBudgetMath.ClampDeltaSeconds`，15Hz，单次上限 0.5s），同一 tick 的第二包额度为 0；
+  普通移动 = `Walk 5 / Sprint 8 × 防御 0.4 × clamp(StatusScale,0,4) × dt`，
+  `ControlActionLock` 时为 0。`ClientControlVersion < player.ControlVersion` 的包直接纠偏且
+  不消耗预算，`LifeId` 不匹配同样纠偏。未携带能力位的旧客户端继续走原 `MovementValidator`
+  （不按接收 tick 收紧）。
+- **突进 `DisplacementWindow`**：`CastHandler.Decide` 对共享表 `Displacements` 命中的技能建立
+  窗口：`CastId`、`SkillId`、`StartTick` = 接受到达 tick、`EndTick = StartTick + DashDuration × 4`
+  （覆盖减速把同一段距离拉长）、`TotalDistance` = 表值、
+  `Speed = distance / (duration − 起手 − 收尾)`。位置同步必须同时匹配 `CastId` 与
+  `DisplacementSkillId` 且 `StartTick ≤ nowTick < EndTick` 才发放；额度 =
+  `min(Speed × clamp(StatusScale,0,4) × dt, TotalDistance + Speed×1tick − GrantedDistance)`，
+  重发不能叠加。
+- **跳跃轨迹**：`JumpPhase.Start` 以 `JumpSeq` 去重，动作锁时拒绝新起跳，`End` 结束。服务端
+  记录起跳接收 tick 与起跳水平速度（按 `SprintSpeed = 8` 封顶）。普通空中移动由 normal 预算
+  覆盖，只有动作锁的空中段额外发 `JumpInertiaDistance`（总上限
+  `JumpHorizontalSpeed × 2 × MaxRiseSeconds`），不双算。有导航时 Y 轴按共享
+  `JumpForce/Gravity/MaxRiseSeconds` 的抛物线 + 0.05m 容差封顶，并夹在地面 −1m 以上。
+- **PvP 基线**：元素会话登录时 `SetMaxHp(720)`（`Pvp.PlayerMaxHp`），旧客户端保持 100 HP；
+  NPC → 已登录玩家的**直接伤害**按 `target.MaxHp / CombatRules.PveDamageBaselineHp`（基准 100）
+  缩放——720 HP 会话 ×7.2，保持原 PvE TTK；玩家/bot 来源与打怪不缩放。
+- **控制注入入口**：`Server3C.ApplyPlayerControl(playerId, speedScale, actionLock)` 写权威控制
+  状态，变化时递增 `ControlVersion` 并 bump `CombatVersion`（触发 311）；首次 `ActionLock` 取消
+  施法者未提交段（已发射剑气照飞）。动作锁期间 `CastHandler.Decide` 以 `control-lock` 拒绝新施法，
+  位置同步不发普通移动预算。**当前没有生产调用者——元素状态运行时未实现（Plan 04）**；
+  `ApplyPlayerControl` 是 Plan 04 的唯一注入入口，不要在别处直接写
+  `ControlSpeedScale/ControlActionLock`。
 
-状态：Plan 01 与 Plan 02 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽），
-服务端全量 554/554；Plan 03–05 未开始。
-未启用：元素状态结算/DoT 与 `Statuses[]` 内容（Plan 04）、`ControlSummary` 的实际控制与
-PvP 控制预算（Plan 03）、元素 VFX 与远端武器模型（Plan 04/05）。
+状态：Plan 01–03 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
+PvP 基线），服务端全量 587/587；Plan 04–05 未开始。
+未启用：元素状态结算/DoT 与 `Statuses[]` 内容、实际控制来源（`ApplyPlayerControl` 无生产调用）、
+元素 VFX 与远端武器模型（Plan 04/05）。
+
+Plan 03 验收证据（可证伪）：
+
+- 预算：`PvpMovementBudgetTests` 覆盖同 tick 第二包零额度、冲刺×防御×状态合成、
+  旧控制版本拒绝、突进 CastId 匹配。
+- 跳跃：`JumpTrajectoryBudgetTests` 覆盖麻痹起跳拒绝、空中惯性按起跳水平速度发放。
+- PvP：`LoginCombatBaselineTests` 断言 720 HP；`PveDamageScaleTests` 断言 NPC→720 HP
+  玩家伤害 ×7.2，保持原 PvE TTK。
 
 `CastCancelBroadcast`（310）、`CombatStateUpdate`（311）与 `NpcActionEvent`（2004，含 `LifeId`）
 已启用；取消/动作事件/投影统一按 `IsSameCombatScene`（相对 `ZoneId`，空值广播）过滤。

@@ -62,8 +62,9 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 
 ### 属性剑气 v1（2026-11-14）
 
-状态：Plan 01 与 Plan 02 已完成（Part A 取消/NpcAction；Part B 战斗投影/AOI 发送原因/带宽）；
-Plan 03–05 见路线图。`Statuses[]` 内容、`ControlSummary` 的实际控制与 DoT 尚未启用。
+状态：Plan 01–03 已完成（Part A 取消/NpcAction；Part B 战斗投影/AOI 发送原因/带宽；
+Plan 03 位移/跳跃预算与 PvP 控制基线）。Plan 04–05 未开始，见路线图。
+`Statuses[]` 内容、实际控制来源与 DoT 尚未启用（Plan 04）。
 
 能力位 `ProtocolFeatures.ElementalSwordQiV1 = 1u << 2`。登录请求 tag9
 `ElementalCatalogFingerprint`（共享目录 SHA-256 小写十六进制）；登录响应 tag14 同指纹、
@@ -90,8 +91,10 @@ tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<W
 DamagePerTick/IntervalTicks/IncomingDamageMultiplier`；`EquipmentSummary` 1–3
 `WeaponInstanceId/TemplateId/ElementId`；`ControlSummary` 1–3 `SpeedScale/ActionLock/
 ControlVersion`；`ActiveCastProjection` 1–4 `CastId/SkillId/Phase/EndTick`。
-Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实际状态属 Plan 04），
-`Control` 固定 `SpeedScale=1 / ActionLock=false / ControlVersion=0`（实际控制属 Plan 03）。
+Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实际状态属 Plan 04）。
+`Control` 取 `PlayerState.ControlSpeedScale/ControlActionLock/ControlVersion`（Plan 03 接线）；
+当前没有生产调用者（状态运行时属 Plan 04），因此运行时仍恒为
+`SpeedScale=1 / ActionLock=false / ControlVersion=0`。
 
 追加字段（只加不删）：
 
@@ -119,8 +122,14 @@ Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实
 tag10 `LocomotionMode`、tag11 `JumpPhase`、tag12 `JumpSeq`、tag13 `VerticalVelocity`、
 tag14 `DisplacementSkillId`、tag15 `CastId`、tag16 `ClientControlVersion`、tag17 `LifeId`；
 `PositionSyncResponse` tag9 `ControlVersion`。能力位
-`ProtocolFeatures.PvpMovementBudgetV1 = 1u << 3`；未携带该位的旧客户端继续走旧
-`MovementValidator` 路径（不按接收 tick 收紧）。
+`ProtocolFeatures.PvpMovementBudgetV1 = 1u << 3`。
+
+**Plan 03 已启用**：携带该能力位的会话由服务端按接收 tick 发位移预算，上述字段实际参与
+校验（`LocomotionMode` 决定 Walk 5 / Sprint 8；`JumpPhase/JumpSeq` 只在每个新序号发一次
+`Start`；`DisplacementSkillId/CastId` 须匹配服务端突进窗口；`ClientControlVersion` 低于当前
+权威版本整包纠偏；`LifeId` 非 0 且不匹配整包纠偏）。未携带该位的旧客户端继续走旧
+`MovementValidator` 路径（不按接收 tick 收紧）；新字段缺省为零：`None/Walk`、`JumpSeq=0`、
+`DisplacementSkillId=0`、`CastId=0`、`LifeId=0`（不校验生命代次）、`ClientControlVersion=0`。
 
 ## 双端一致性校验（人工/CI 各跑一次）
 

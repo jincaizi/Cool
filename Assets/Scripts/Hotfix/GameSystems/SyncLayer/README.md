@@ -36,9 +36,9 @@
 
 ## 属性剑气 v1（2026-11-14）
 
-状态：Plan 01 与 Plan 02 已完成（Part A 取消广播/NpcAction；Part B 战斗投影版本合并、
-AOI 基线投影、`ActiveCast` 补播与在途剑气补发消费）。`Statuses[]` 内容、`ControlSummary`
-实际控制、元素 VFX 与远端武器模型仍属 Plan 03/04/05。
+状态：Plan 01–03 已完成（Part A 取消广播/NpcAction；Part B 战斗投影版本合并、AOI 基线投影、
+`ActiveCast` 补播与在途剑气补发消费；Plan 03 位移上报、跳跃边沿与本人控制消费）。
+`Statuses[]` 内容与实际控制来源属 Plan 04；元素 VFX 与远端武器模型仍属 Plan 04/05。
 
 - **权威换装**：`ClientEquipmentState` 按 `EquipmentRevision` 应用 `EquipWeaponConfirm`；
   旧版本忽略。拒绝确认携带的较新摘要也会应用（恢复服务器当前装备）；登录基线可把版本 0
@@ -66,9 +66,12 @@ AOI 基线投影、`ActiveCast` 补播与在途剑气补发消费）。`Statuses
   `CastId` 的攻击表现（`RemoteEntityAnimator.CancelAttack(CastId)`）；已发射的剑气继续飞行，
   晚到的 `CastBroadcast` / `ProjectileLaunchBroadcast` 跳过补播。
 - **战斗投影路由与版本合并（Plan 02 Part B）**：`CombatNetworkBridge` 把
-  `CombatStateUpdate` 入队并在主线程转成 `OnCombatStateUpdate`；`ClientNetworkHost` 转交
-  `RemoteEntityRegistry.ApplyCombatStateUpdate`。**本人的投影在宿主处直接丢弃**——本地状态由
-  3C/技能执行器权威维护，不交给 registry 的未知实体缓存（本人镜像属 Plan 03/04）。
+  `CombatStateUpdate` 入队并在主线程转成 `OnCombatStateUpdate`。`ClientNetworkHost` 先按
+  `IsLocalProjection(localPlayerId, entityId)` 分流：**本人的投影在本地消费**——`ControlSummary`
+  → `Sys3CEntry.ApplyAuthoritativeControl(SpeedScale, ActionLock, ControlVersion)`，
+  `MaxHp > 0` → `SetMaxHp(fill:false)`；不再进 registry 的未知实体缓存。其余实体转交
+  `RemoteEntityRegistry.ApplyCombatStateUpdate`。登录前 `localPlayerId == 0` 一律不算本人
+  （否则未分配 id 会把所有实体当成自己）。
   `ApplyProjection` 按 `LifeId` + 单一 `CombatVersion` 原子合并：旧生命/旧版本丢弃，
   新生命先入 64 条有界缓存等该世代基线更新视图后回放，相同版本视为幂等重放仍应用
   （基线与 `Health` 快照同版本）。HP/Dead/IsDefending 同步 `Targetable`/名牌/Animator；
@@ -95,6 +98,31 @@ AOI 基线投影、`ActiveCast` 补播与在途剑气补发消费）。`Statuses
 - **与攻击起手的分工**：Plan 02 保留 `CastBroadcast` → `NpcAttackSchedule` 作为 NPC 攻击起手；
   `NpcActionEvent` 只负责阶段/取消（技能动作仅跟踪实例，`Cancelled` 时停止），避免同一次施法
   挥两次。NpcAction 直接驱动攻击变体/时间轴留 Plan 04/05。
+
+## 位移预算上报与控制消费（Plan 03，2026-11-18）
+
+`MovementReporter` 通过宿主注入的 `Func<MovementReportState>` 读取本地 B5 状态；缺省
+`default` 即旧上报（全零 → 服务端按 `None/Walk` 处理）。
+
+- `MovementReportState`：`Mode`（Walk/Sprint）、`JumpSeq`、`Airborne`、`Grounded`、
+  `VerticalVelocity`、`DisplacementSkillId`、`CastId`、`LifeId`、`ControlVersion`。
+  `ClientNetworkHost` 的接线：模式来自 `CharacterController.Data.IsSprint`，跳跃来自
+  `JumpSeq/IsAirborne/IsGrounded`，`DisplacementSkillId` 只在 `IsDashing` 时取当前技能，
+  `CastId` 由 `CombatNetworkBridge.TryGetAcceptedCastId(skillId, LifeId)` 取服务端已确认值
+  （生命代次不匹配返回 0），`LifeId/ControlVersion` 来自装备摘要与 `LocalControlState`。
+- **跳跃 Start 边沿只发一次**：`ResolveJumpPhase` 用 `JumpSeq` 去重（非 0 且变化才发 Start）；
+  起跳与落地落在同一上报间隔时发 `None`（不制造幽灵起跳）；`_wasAirborne` 在真正接地时发一次
+  `End`，空中发 `Air`。
+- **CastConfirm 映射**：`CombatNetworkBridge` 只记录 `Accepted=true` 且 `ClientCastSeq != 0` 的
+  确认；同一技能只接受更大 `ClientCastSeq` 的确认，按技能保存 `(seq, CastId, CasterLifeId)`，
+  供突进上报复用。
+- **本人 311 消费**：`ControlSummary` → `ApplyAuthoritativeControl`，`MaxHp` → `SetMaxHp`；
+  旧 `ControlVersion` 由 `LocalControlState` 忽略，“变为锁”的边沿清输入缓冲、打断技能、停突进。
+- **位置响应**：`PositionSyncResponse.ControlVersion` 写入
+  `MovementReporter.LastServerControlVersion`（诊断与后续基线判断的依据）。
+
+回归：`MovementReporterFieldsTests`（字段逐项）、`CombatNetworkBridgeTests`（CastConfirm 记忆）、
+`ClientLocalControlRoutingTests`（本人/远端分流）。
 
 ## 联网复活
 
@@ -189,7 +217,8 @@ AOI 基线投影、`ActiveCast` 补播与在途剑气补发消费）。`Statuses
 Editor：`Assets/Scripts/Tests/Editor/SyncLayer/`（`RemoteTierPolicyTests`、`RemoteInterpolatorTests`、
 `RemoteEntityRegistryTests`、`NpcBodyColliderTests`、`AppearanceCatalogTests`、`TierQueryTests`、
 `NpcViewGameplayStripTests`、`MonsterBodyRadiusTests`、`RemoteEntityAnimatorContractTests`
-（真实 `Character3C.controller`：Hit/DefendHit/Death/Down/GetUp 状态与剪辑时长）等）。
+（真实 `Character3C.controller`：Hit/DefendHit/Death/Down/GetUp 状态与剪辑时长）、
+`MovementReporterFieldsTests`、`ClientLocalControlRoutingTests`、`CombatNetworkBridgeTests` 等）。
 PlayMode：`RemoteRenderBranchTests`、`RemoteHitSnapshotPersistenceTests`（D6：`ActionState=0`
 快照不清受击表现）、`MovementSyncTests`、`CombatSyncTests`、`TwoClientWorldTests`、
 `ThreeClientCombatConsistencyTests`（A 打 B、C 旁观的 DamageResult 与 Targetable 余血一致性）。

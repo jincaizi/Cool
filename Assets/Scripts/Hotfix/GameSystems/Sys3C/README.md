@@ -48,6 +48,22 @@ Hit 层只有 `Hit` / `DefendHit` / `Dizzy` 三态可达。`Knockback` / `Launch
 还提供 `SetWeaponFactory` / `EquipWeapon(templateId, elementId)` 按权威装备切换武器表现
 （旧工厂接缝）。联机持剑模型走 Sys3CEntry.ApplySwordView。禁止改全局 `Animator.speed`。
 
+## 速度合成与状态控制（Plan 03，2026-11-18）
+
+- **单点合成**：`CharacterController.ComposeMoveSpeed(baseSpeed, defending, skillScale, statusScale)
+  = baseSpeed × (defending ? 0.4 : 1) × skillScale × statusScale`。`SkillSpeedScale`（技能）与
+  `StatusSpeedScale`（权威状态）分开存储，禁止互相覆写；合成后的倍率非有限或为负时按 0 处理
+  （fail-closed）。`ApplyHorizontalMovement` 与 `SkillDashComponent.CurrentFrameSpeed` 都走这一合成。
+- **动作锁（麻痹）**：`StatusActionLock` 为真时拒绝新的水平输入与 `RequestJump`，但空中保留
+  **起跳瞬间**的水平惯性 `_jumpStartHorizontalVelocity`（消费跳跃时从 `CharacterController.velocity`
+  捕获，不乘状态倍率），落地或解除锁且在地面时清零。`SetStatusActionLock` 只在锁状态翻转时动作。
+- **权威控制合并**：`LocalControlState.Apply(speedScale, actionLock, version)` 做版本门
+  （`version < Version` 忽略）、倍率钳到 `[0,4]`（非有限按 0），并返回“由未锁变为锁”的边沿。
+  `Sys3CEntry.ApplyAuthoritativeControl` 在边沿上清空输入缓冲、以 `Stun` 打断当前技能并 `StopDash`；
+  `ControlVersion` 供位置上报携带。状态运行时（谁在何时调用）属 Plan 04，当前只有服务端投影入口。
+- **跳跃序号**：`CharacterController.JumpSeq` 每次消费跳跃请求 +1，`MovementReporter` 据此只发一次
+  `JumpPhase.Start`；跳跃起跳判定仍受 `StatusActionLock` 与接地证据门控。
+
 ## 复活传送
 
 联网复活按服务端下发的坐标传送。单机和旧版服务端通知使用场景出生点。
@@ -69,7 +85,8 @@ NpcBody（层 10）贴边时提供跳跃支撑（0.25m 容差）——贴边/交
 
 - Editor：`Assets/Scripts/Tests/Editor/Sys3C/`、`FSMManagerHitFeedbackTests`、`JumpTransitionTableTests`、
   `HitAnimatorContractTests`、`CharacterSelectionServiceTests`、`MobileInputAdapterTests`、
-  `InputBlockGateTests`、`InputManagerAttackSourceTests`。
+  `InputBlockGateTests`、`InputManagerAttackSourceTests`、`MovementCompositionTests`、
+  `SkillDashComponentTests`、`LocalControlStateTests`。
 - PlayMode：`PlayerSpawnerFeedbackWiringTests`、`PlayerDeathRespawnTests`、`MovementSyncTests`、`HitJudgmentAlignmentTests`。
 
 ```bash

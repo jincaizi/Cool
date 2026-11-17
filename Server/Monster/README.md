@@ -30,6 +30,11 @@
 - **命中按目标表面距离**：玩家施法命中 NPC 时 `CombatCandidate.Radius` 取 `PlayerState.BodyRadius`，
   `HitResolver` 用 `max(0, 中心距 - 半径)` 比较射程 / 面积，并按表面距离取最近；玩家与 bot
   半径为 0，PvP 行为不变；锥形方向同样按目标半径扩展（圆-锥相交），半径 0 时逐值不变。
+- **PvE 伤害基准缩放（Plan 03，2026-11-18）**：NPC → 已登录玩家的**直接伤害**按
+  `target.MaxHp / CombatRules.PveDamageBaselineHp`（基准 100 HP）缩放——元素会话 720 HP
+  时 ×7.2，保持原 100 HP 下的 PvE TTK；玩家/bot 来源、以及打怪物的伤害不缩放。
+  唯一实现是 `CombatRules.ScaleNpcDamageToPlayer`；Plan 04 的灼烧/DoT 每跳必须复用同一函数，
+  另写一套缩放在 720 HP 会话会直接打穿 TTK。
 
 ## 导航（P1）
 

@@ -13,13 +13,13 @@
 | 04 | 状态结算 + DoT + 表现 | PvE/PvP 共用冰/火/雷/风状态运行时、同次挥砍和剑气只附加一次、同 tick 顺序、DoT 末跳、`DamageKind` 分流、元素 VFX | 01、02；PvP 端到端验收还需要 03 |
 | 05 | 三客户端验收 + 表现收口 | 三端一致性、带宽实测、麻痹惯性/推挤纠偏、KCP/WebSocket 注入延迟、Addressables 元素特效、AOI 观察者反查索引（`GetObserversOf` O(N²)） | 01–04 |
 
-## 当前状态（2026-11-17）
+## 当前状态（2026-11-18）
 
 | # | 计划 | 状态 | 说明 |
 |---|---|---|---|
 | 01 | 共享表、权威换装、普攻参数与剑气快照 | ✅ 已完成 | 50/50 步骤；服务端 512/512、Unity EditMode/PlayMode 相关测试全部通过；模块 README 已回写 |
 | 02 | [B1 取消 + NpcAction 全链 + B2 战斗投影/带宽](2026-11-17-elemental-sword-qi-02-cancel-projection.md) | ✅ 已完成 | Part A/B 全部完成并回归：取消/NpcAction、战斗投影、AOI 基线/条件字段、在途剑气补发与 100 KB/s 门禁；模块 README 已回写 |
-| 03 | [B5 位移/跳跃预算 + PvP 控制](2026-11-18-elemental-sword-qi-03-displacement-pvp.md) | 📝 计划已编写（2026-11-18） | 依赖 02；实现尚未开始 |
+| 03 | [B5 位移/跳跃预算 + PvP 控制](2026-11-18-elemental-sword-qi-03-displacement-pvp.md) | ✅ 已完成 | 10/10 任务；服务端 587/587；Unity 目标测试类通过（`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败，基线可复现，不计回归）；模块 README 已回写 |
 | 04 | 状态结算 + DoT + 表现 | ❌ 未开始 | 元素状态/DoT/元素 VFX 未实现；本地持剑模型已由换装跟进补齐 |
 | 05 | 三客户端验收 + 表现收口 | ❌ 未开始 | 依赖 01–04 |
 
@@ -28,8 +28,8 @@
 详见 [换剑与持剑适配设计](../specs/2026-11-16-weapon-bag-sword-fit-design.md) 与
 [实现计划](2026-11-16-weapon-bag-sword-fit.md)。
 
-Plan 02 补齐取消、NpcAction 与战斗投影/带宽；设计规格中的位移/PvP、状态/DoT、元素 VFX
-与三客户端验收仍属于 Plan 03–05。
+Plan 03 补齐位移/跳跃预算与 PvP 基线（720 HP、接收 tick 预算、突进窗口、控制投影消费）；
+设计规格中的状态/DoT、元素 VFX 与三客户端验收仍属于 Plan 04–05。
 
 ## 执行顺序与并行度
 
