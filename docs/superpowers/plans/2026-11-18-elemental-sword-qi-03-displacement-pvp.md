@@ -1179,12 +1179,12 @@ public class PvpMovementBudgetTests
 
         var result = handler.ValidateAndApply(new PositionSyncRequest
         {
-            X = 0.33f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 1,
+            X = 0.32f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 1,
             LocomotionMode = LocomotionMode.Walk, LifeId = player.LifeId
         }, player, nowTick: 1);
 
         Assert.NotNull(result);
-        Assert.False(result!.NeedsCorrection);
+        Assert.False(result.Value.NeedsCorrection);
     }
 
     [Fact]
@@ -1194,18 +1194,18 @@ public class PvpMovementBudgetTests
 
         handler.ValidateAndApply(new PositionSyncRequest
         {
-            X = 0.33f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 1,
+            X = 0.32f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 1,
             LocomotionMode = LocomotionMode.Walk, LifeId = player.LifeId
         }, player, nowTick: 1);
 
         var second = handler.ValidateAndApply(new PositionSyncRequest
         {
-            X = 0.66f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 2,
+            X = 0.64f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 2,
             LocomotionMode = LocomotionMode.Walk, LifeId = player.LifeId
         }, player, nowTick: 1);
 
-        Assert.True(second!.NeedsCorrection);
-        Assert.Equal(0.33f, second.AuthoritativePosition.X, 3);
+        Assert.True(second.Value.NeedsCorrection);
+        Assert.Equal(0.32f, second.Value.AuthoritativePosition.X, 3);
     }
 
     [Fact]
@@ -1222,8 +1222,8 @@ public class PvpMovementBudgetTests
         }, player, nowTick: 1);
 
         // 8 × 0.4 × 0.7 × 0.066 = 0.14784m
-        Assert.True(result!.NeedsCorrection);
-        Assert.Equal(0.14784f, result.AuthoritativePosition.Z, 3);
+        Assert.True(result.Value.NeedsCorrection);
+        Assert.Equal(0.14784f, result.Value.AuthoritativePosition.Z, 3);
     }
 
     [Fact]
@@ -1238,16 +1238,16 @@ public class PvpMovementBudgetTests
             ClientControlVersion = 0, LifeId = player.LifeId
         }, player, nowTick: 1);
 
-        Assert.True(stale!.NeedsCorrection);
-        Assert.Equal(0f, stale.AuthoritativePosition.X, 3);
+        Assert.True(stale.Value.NeedsCorrection);
+        Assert.Equal(0f, stale.Value.AuthoritativePosition.X, 3);
 
         var fresh = handler.ValidateAndApply(new PositionSyncRequest
         {
-            X = 0.33f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 2,
+            X = 0.23f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 2,
             ClientControlVersion = player.ControlVersion, LifeId = player.LifeId
         }, player, nowTick: 2);
 
-        Assert.False(fresh!.NeedsCorrection);
+        Assert.False(fresh.Value.NeedsCorrection);
     }
 
     [Fact]
@@ -1265,14 +1265,14 @@ public class PvpMovementBudgetTests
             X = 0.5f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 1,
             DisplacementSkillId = 20001, CastId = 41, LifeId = player.LifeId
         }, player, nowTick: 2);
-        Assert.True(mismatch!.NeedsCorrection);
+        Assert.True(mismatch.Value.NeedsCorrection);
 
         var match = handler.ValidateAndApply(new PositionSyncRequest
         {
             X = 0.5f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 2,
             DisplacementSkillId = 20001, CastId = 42, LifeId = player.LifeId
         }, player, nowTick: 3);
-        Assert.False(match!.NeedsCorrection);
+        Assert.False(match.Value.NeedsCorrection);
     }
 }
 ```
@@ -1284,7 +1284,6 @@ public class PvpMovementBudgetTests
 public void Jump_Start_Records_Sequence_And_Air_Inertia_Under_ActionLock()
 {
     var handler = MovementBudgetTestHost.Create(out var player, out _);
-    player.ApplyControl(0f, true); // 麻痹
 
     handler.ValidateAndApply(new PositionSyncRequest
     {
@@ -1297,6 +1296,8 @@ public void Jump_Start_Records_Sequence_And_Air_Inertia_Under_ActionLock()
     Assert.Equal(3u, player.Movement.LastJumpSeq);
     Assert.Equal(6f, player.Movement.JumpHorizontalSpeed, 4);
 
+    player.ApplyControl(0f, true); // 麻痹发生在起跳之后：保留已有空中惯性
+
     var air = handler.ValidateAndApply(new PositionSyncRequest
     {
         X = 0.4f, Y = 0.7f, Z = 0f, Speed = 6f, Sequence = 2,
@@ -1304,7 +1305,7 @@ public void Jump_Start_Records_Sequence_And_Air_Inertia_Under_ActionLock()
         ClientControlVersion = player.ControlVersion
     }, player, nowTick: 2);
 
-    Assert.False(air!.NeedsCorrection); // 6 × 1/15 = 0.4m
+    Assert.False(air.Value.NeedsCorrection); // 6 × 1/15 = 0.4m
 }
 
 [Fact]
