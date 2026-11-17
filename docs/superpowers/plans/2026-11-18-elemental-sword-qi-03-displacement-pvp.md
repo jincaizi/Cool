@@ -65,7 +65,7 @@
 - 测试：`Server/Server.Tests/Elemental/ElementalCatalogValidatorTests.cs`
 - 测试：`Assets/Scripts/Tests/Editor/SyncCore/ElementalCatalogTests.cs`
 
-- [ ] **步骤 1：写服务端失败测试**
+- [x] **步骤 1：写服务端失败测试**
 
 在 `ElementalCatalogValidatorTests` 追加：
 
@@ -121,12 +121,12 @@ public void Validator_Rejects_Non_Finite_Jump_Gravity()
 }
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~ElementalCatalogValidatorTests"`
 预期：编译失败（`Displacements`/`Jump` 不存在）。
 
-- [ ] **步骤 3：实现共享表与常量**
+- [x] **步骤 3：实现共享表与常量**
 
 `ElementalCatalogDefinition.cs` 追加：
 
@@ -262,7 +262,7 @@ public const float PveDamageBaselineHp = 100f;
 "Jump": { "JumpForce": 10.95, "Gravity": -30.0, "MaxRiseSeconds": 0.5 },
 ```
 
-- [ ] **步骤 4：补 Unity 默认表断言**
+- [x] **步骤 4：补 Unity 默认表断言**
 
 在 `ElementalCatalogTests.cs` 追加：
 
@@ -285,7 +285,7 @@ public void Defaults_Contain_Shared_Displacement_And_Jump_Parameters()
 }
 ```
 
-- [ ] **步骤 5：运行测试**
+- [x] **步骤 5：运行测试**
 
 运行：
 ```bash
@@ -294,7 +294,7 @@ bash tools/unity-tests.sh EditMode ElementalCatalogTests
 ```
 预期：全部 PASS。
 
-- [ ] **步骤 6：Commit**
+- [x] **步骤 6：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncCore Server/Config/elemental_catalog.json \
@@ -315,7 +315,7 @@ git commit -m "feat(sync): share displacement and jump parameters"
 - 测试：`Server/Server.Tests/Protocol/CodecRoundtripTests.cs`
 - 测试：`Assets/Scripts/Tests/Editor/Protocol/ProtocolShapeGuardTests.cs`
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 服务端 `CodecRoundtripTests` 追加：
 
@@ -381,7 +381,7 @@ public void PositionSyncRequest_PvpMovement_Tags_Are_Pinned()
 }
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：
 ```bash
@@ -390,7 +390,7 @@ bash tools/unity-tests.sh EditMode ProtocolShapeGuardTests
 ```
 预期：编译失败（新属性不存在）。
 
-- [ ] **步骤 3：实现协议**
+- [x] **步骤 3：实现协议**
 
 创建 `MovementMode.cs`：
 
@@ -457,7 +457,7 @@ namespace Cool.Protocol
 public const uint PvpMovementBudgetV1 = 1u << 3;
 ```
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 运行：
 ```bash
@@ -466,7 +466,7 @@ bash tools/unity-tests.sh EditMode ProtocolShapeGuardTests
 ```
 预期：PASS。
 
-- [ ] **步骤 5：更新协议 README**
+- [x] **步骤 5：更新协议 README**
 
 在 `Assets/Scripts/AOT/Protocol/README.md` 的“属性剑气 v1”表格后追加：
 
@@ -479,7 +479,7 @@ tag14 `DisplacementSkillId`、tag15 `CastId`、tag16 `ClientControlVersion`、ta
 `MovementValidator` 路径（不按接收 tick 收紧）。
 ```
 
-- [ ] **步骤 6：Commit**
+- [x] **步骤 6：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol
@@ -503,7 +503,7 @@ git commit -m "feat(protocol): add pvp movement budget fields"
 - 测试：`Server/Server.Tests/Handler/PlayerControlStateTests.cs`（新建）
 - 测试：`Server/Server.Tests/Combat/CombatResolverControlLockTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `CombatProjectionBuilderTests` 追加：
 
@@ -633,7 +633,7 @@ public class CombatResolverControlLockTests
 }
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行（in-process runner 的 `--filter` 只支持单个子串，不要用 `A|B` 复合过滤）：
 ```bash
@@ -643,7 +643,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatResolverC
 ```
 预期：编译失败（`ApplyControl`/`Displacement` 不存在）。
 
-- [ ] **步骤 3：实现服务端状态**
+- [x] **步骤 3：实现服务端状态**
 
 `MovementBudgetState.cs`：
 
@@ -814,7 +814,7 @@ if (caster.Displacement != null && caster.Displacement.CastId == castId)
     caster.Displacement = null;
 ```
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 运行：
 ```bash
@@ -824,7 +824,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatResolverC
 ```
 预期：PASS；再跑一次全量确认没有破坏 Plan 02 的取消路径。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Player Server/Aoi/CombatProjectionBuilder.cs Server/Server3C.cs Server/Handler/CastHandler.cs
@@ -841,7 +841,7 @@ git commit -m "feat(server): expose authoritative control and displacement windo
 - 测试：`Server/Server.Tests/SyncCore/MovementBudgetFormulaTests.cs`（新建）
 - 测试：`Assets/Scripts/Tests/Editor/SyncCore/MovementBudgetMathTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 服务端 `MovementBudgetFormulaTests`：
 
@@ -1018,7 +1018,7 @@ namespace Cool.SyncCore.Tests
 }
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：
 ```bash
@@ -1027,7 +1027,7 @@ bash tools/unity-tests.sh EditMode MovementBudgetMathTests
 ```
 预期：编译失败（`MovementBudgetMath` 不存在）。
 
-- [ ] **步骤 3：实现 `MovementBudgetMath`**
+- [x] **步骤 3：实现 `MovementBudgetMath`**
 
 ```csharp
 using System;
@@ -1118,7 +1118,7 @@ namespace Cool.SyncCore
 }
 ```
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MovementBudgetFormulaTests"
@@ -1126,7 +1126,7 @@ bash tools/unity-tests.sh EditMode MovementBudgetMathTests
 ```
 预期：PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncCore/MovementBudgetMath.cs
@@ -1144,7 +1144,7 @@ git commit -m "feat(sync): add displacement budget math"
 - 测试：`Server/Server.Tests/Server/PvpMovementBudgetTests.cs`（新建）
 - 测试：`Server/Server.Tests/Server/JumpTrajectoryBudgetTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `PvpMovementBudgetTests`（节选；每个用例都 `player.StrictMovementBudget = true`）：
 
@@ -1329,7 +1329,7 @@ public void Jump_Start_Is_Rejected_While_ActionLocked()
 （`MovementBudgetTestHost` 与 `TestLogger` 都是本仓库现有测试类型；没有 ground provider 时
 `IsGrounded` 返回 true，跳跃测试不需要导航。）
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行（分开跑，in-process runner 不做 `|` 复合过滤）：
 ```bash
@@ -1338,7 +1338,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~JumpTrajectoryB
 ```
 预期：编译失败（`ValidateAndApply(..., nowTick)` 不存在）。
 
-- [ ] **步骤 3：实现 `ValidateAndApply` 预算分支**
+- [x] **步骤 3：实现 `ValidateAndApply` 预算分支**
 
 在 `PositionSyncHandler` 追加：
 
@@ -1535,7 +1535,7 @@ _positionSyncHandler.SetGroundHeight(pos =>
 });
 ```
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PvpMovementBudgetTests"
@@ -1545,7 +1545,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~RespawnTests"
 ```
 预期：新测试 PASS；既有位置/复活测试保持 PASS（`StrictMovementBudget` 默认 false）。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Handler/PositionSyncHandler.cs Server/Server3C.cs
@@ -1563,7 +1563,7 @@ git commit -m "feat(server): validate movement with receive-tick budgets"
 - 测试：`Server/Server.Tests/Handler/LoginCombatBaselineTests.cs`（新建）
 - 测试：`Server/Server.Tests/Combat/PveDamageScaleTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `LoginCombatBaselineTests`：
 
@@ -1630,7 +1630,7 @@ public void Npc_Damage_To_720_Hp_Player_Is_Scaled_By_7_2()
 }
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行（分开跑）：
 ```bash
@@ -1639,7 +1639,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PveDamageScaleT
 ```
 预期：编译失败（`ApplyLoginCombatBaseline` 不存在 / 伤害仍是 10）。
 
-- [ ] **步骤 3：实现**
+- [x] **步骤 3：实现**
 
 `LoginHandler` 添加静态方法与调用：
 
@@ -1694,7 +1694,7 @@ if (pending.IsNpcCaster && target.Kind == (byte)EntityKind.Player && target.IsLo
 
 Plan 04 的怪物 DoT 跳伤必须复用 `ScaleNpcDamageToPlayer`（同一基准），否则 720 HP 下灼烧会相对变弱。
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~LoginCombatBaselineTests"
@@ -1703,7 +1703,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatResolver"
 ```
 预期：PASS；既有的 100 HP 测试若不是 `IsLoggedIn` 或 MaxHp=100，缩放因子为 1，结果不变。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Handler/LoginHandler.cs Server/Handler/CastHandler.cs \
@@ -1727,7 +1727,7 @@ git commit -m "feat(server): apply pvp hp baseline and pve damage scale"
 - 测试：`Assets/Scripts/Tests/Editor/Sys3C/SkillDashComponentTests.cs`（新建）
 - 测试：`Assets/Scripts/Tests/Editor/Sys3C/LocalControlStateTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `MovementCompositionTests`：
 
@@ -1819,12 +1819,12 @@ public void Apply_Clamps_Invalid_Scale()
 }
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`bash tools/unity-tests.sh EditMode MovementCompositionTests` 与 `bash tools/unity-tests.sh EditMode SkillDashComponentTests`
 预期：编译失败（`ComposeMoveSpeed`/新签名不存在）。
 
-- [ ] **步骤 3：实现客户端移动**
+- [x] **步骤 3：实现客户端移动**
 
 `CharacterController`（同时把既有的 `MoveSpeed = 5.0f` / `SprintSpeed = 8.0f` 改为引用
 `CombatRules.WalkSpeed` / `CombatRules.SprintSpeed`，消除服务端预算与客户端实际速度的双源）：
@@ -2013,7 +2013,7 @@ public void SetMaxHp(float maxHp, bool fill)
 }
 ```
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/unity-tests.sh EditMode MovementCompositionTests
@@ -2023,7 +2023,7 @@ bash tools/unity-tests.sh EditMode SkillCoordinatorSpinTests
 ```
 预期：PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/Sys3C/Character/CharacterController.cs \
@@ -2050,7 +2050,7 @@ git commit -m "feat(client): compose movement speed and share dash windows"
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/MovementReporterFieldsTests.cs`（新建）
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeCastConfirmTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `MovementReporterFieldsTests` 文件内定义 `RecordingClient`（与现有 SyncLayer 测试同形）：
 
@@ -2129,12 +2129,12 @@ public void Accepted_CastConfirm_Is_Queryable_By_Skill_And_Life()
 }
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`bash tools/unity-tests.sh EditMode MovementReporterFieldsTests` 与 `bash tools/unity-tests.sh EditMode CombatNetworkBridgeCastConfirmTests`
 预期：编译失败（`MovementReportState`/`TryGetAcceptedCastId` 不存在）。
 
-- [ ] **步骤 3：实现上报与确认映射**
+- [x] **步骤 3：实现上报与确认映射**
 
 在 `MovementReporter.cs` 的命名空间内、`MovementReporter` 类外定义上报状态；类内追加 provider 与跳跃边沿状态机：
 
@@ -2246,7 +2246,7 @@ stateProvider: () =>
 
 `ClientNetworkManager.AttachMovementReporter` 签名追加 `Func<MovementReportState>? stateProvider = null` 并透传。
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/unity-tests.sh EditMode MovementReporterFieldsTests
@@ -2255,7 +2255,7 @@ bash tools/unity-tests.sh EditMode CombatNetworkBridgeTests
 ```
 预期：PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs \
@@ -2275,7 +2275,7 @@ git commit -m "feat(client): report pvp movement state and accepted cast ids"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/ClientLocalControlRoutingTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `ClientLocalControlRoutingTests` 测静态分流：
 
@@ -2288,12 +2288,12 @@ public void Local_Projection_Is_Not_Forwarded_To_Remote_Registry()
 }
 ```
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 运行：`bash tools/unity-tests.sh EditMode ClientLocalControlRoutingTests`
 预期：编译失败（`IsLocalProjection` 不存在）。
 
-- [ ] **步骤 3：实现本人投影路由**
+- [x] **步骤 3：实现本人投影路由**
 
 `ClientNetworkHost`：
 
@@ -2332,7 +2332,7 @@ if (NetworkSwordQiGate.SuppressLocalSpawn)
 }
 ```
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/unity-tests.sh EditMode ClientLocalControlRoutingTests
@@ -2340,7 +2340,7 @@ bash tools/unity-tests.sh EditMode CombatNetworkBridgeTests
 ```
 预期：PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
@@ -2363,7 +2363,7 @@ git commit -m "feat(client): consume local authoritative control projection"
 - 修改：`docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md`
 - 修改：`docs/superpowers/specs/2026-11-14-elemental-sword-qi-design.md`
 
-- [ ] **步骤 1：回写模块 README**
+- [x] **步骤 1：回写模块 README**
 
 每个 README 必须写清：已打通什么、未启用什么、怎么验证。最低内容：
 
@@ -2376,7 +2376,7 @@ git commit -m "feat(client): consume local authoritative control projection"
 - Skills：突进起手/收尾窗口来自共享表、`SkillDashComponent` 乘状态倍率。
 - Roadmap/设计规格：Plan 03 标 ✅（只在全量测试通过后），Plan 04/05 仍未开始。
 
-- [ ] **步骤 2：全量回归**
+- [x] **步骤 2：全量回归**
 
 ```bash
 bash tools/test-server-inprocess.sh
@@ -2394,7 +2394,7 @@ bash tools/unity-tests.sh EditMode ProtocolShapeGuardTests
 预期：服务端全绿；Unity 各目标类全绿。`RemoteEntityRegistryTests` 若仍只有已知
 `Bot_Radius` PPtr 环境失败，按既有口径登记，不算回归；其他任何失败都必须修。
 
-- [ ] **步骤 3：写验收记录**
+- [x] **步骤 3：写验收记录**
 
 在 `Server/README.md` 的 Plan 03 段落下补三行可证伪证据：
 
@@ -2406,7 +2406,7 @@ bash tools/unity-tests.sh EditMode ProtocolShapeGuardTests
   玩家伤害 ×7.2，保持原 PvE TTK。
 ```
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol/README.md \
