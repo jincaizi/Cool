@@ -372,7 +372,7 @@ namespace KcpServer
             caster.BumpCombatVersion();
         }
 
-        private static void ClearActiveCast(PlayerState? caster, ulong castId)
+        private static void ClearActiveCast(PlayerState? caster, ulong castId, bool clearDisplacement = true)
         {
             if (caster == null) return;
             bool changed = false;
@@ -381,7 +381,10 @@ namespace KcpServer
                 caster.ActiveCast = null;
                 changed = true;
             }
-            if (caster.Displacement != null && caster.Displacement.CastId == castId)
+            // 正常完成最后一段时保留位移窗口：窗口寿命由 EndTick（DashDuration×4）限界，
+            // 而不是施法判定结束（20001 判定 ~5 tick，窗口 18 tick）。
+            // 取消/死亡/复活/新位移施法仍然清窗口。
+            if (clearDisplacement && caster.Displacement != null && caster.Displacement.CastId == castId)
             {
                 caster.Displacement = null;
                 changed = true;
@@ -483,8 +486,11 @@ namespace KcpServer
 
                     // 判定期推进活动施法阶段；最后一段结算或本段提前终止（格挡/溅射命中）后清空，
                     // 否则 Spent pending 被压缩丢弃后 ActiveCast 再无清理路径。
+                    // 最后一段是正常完成：保留位移窗口（按 EndTick 限界）；提前终止按取消处理清窗口。
                     var casterState = _store.GetPlayer(pending.CasterId);
-                    if (pending.Spent || pending.NextStage >= pending.StageTicks.Length)
+                    if (pending.NextStage >= pending.StageTicks.Length)
+                        ClearActiveCast(casterState, pending.CastId, clearDisplacement: false);
+                    else if (pending.Spent)
                         ClearActiveCast(casterState, pending.CastId);
                     else if (casterState != null)
                         SetActiveCast(casterState, pending,

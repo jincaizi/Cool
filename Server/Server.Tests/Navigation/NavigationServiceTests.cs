@@ -79,6 +79,37 @@ public class NavigationServiceTests
     }
 
     [Fact]
+    public void TryGetGroundY_Returns_Mesh_Y_For_Flat_Grid()
+    {
+        NavigationService service = MakeService();
+        Assert.True(service.TryGetGroundY(new Vector3(2.5f, 7f, 3.5f), 0.5f, out float groundY));
+        Assert.Equal(0f, groundY, 4);
+    }
+
+    [Fact]
+    public void TryGetGroundY_Interpolates_Sloped_Triangle_And_Misses_Off_Mesh()
+    {
+        // 斜三角形：Y 随 X 变化（A/B 两点 X=0/1 对应 Y=0/1，C 点 X=0,Z=1,Y=0）。
+        NavMeshGraph graph = NavMeshGraph.FromTriangles(
+            new[]
+            {
+                new Vector3(0f, 0f, 0f),
+                new Vector3(1f, 1f, 0f),
+                new Vector3(0f, 0f, 1f)
+            },
+            new[] { 0, 1, 2 },
+            new byte[] { 0 },
+            new[] { 1f });
+        var service = new NavigationService(graph, "slope");
+
+        Assert.True(service.TryGetGroundY(new Vector3(0.25f, 9f, 0.25f), 0.5f, out float groundY));
+        Assert.Equal(0.25f, groundY, 4); // 重心权重 wa=0.5/wb=0.25/wc=0.25
+
+        Assert.False(service.TryGetGroundY(new Vector3(50f, 9f, 50f), 0.5f, out float missY));
+        Assert.Equal(9f, missY); // 未命中时回填输入 Y
+    }
+
+    [Fact]
     public void LoadMaps_With_Null_Array_Returns_Empty_List()
     {
         string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".json");

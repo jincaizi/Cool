@@ -244,6 +244,36 @@ namespace KcpServer.Navigation
             return false;
         }
 
+        /// <summary>最近三角形上的真实地面 Y（重心插值；XZ 在三角形外时钳到最近边/顶点）。
+        /// <see cref="FindNearestPoint"/> 是 XZ-only 投影，projected.Y 恒等于输入 Y，不能当地面高度用。</summary>
+        public bool TryGetGroundY(Vector3 point, float maxDistance, out float groundY)
+        {
+            groundY = point.Y;
+            if (!FindNearestTriangle(point, maxDistance, out int triangle, out _)) return false;
+            Triangle t = _triangles[triangle];
+            Vector3 a = _vertices[t.A], b = _vertices[t.B], c = _vertices[t.C];
+            float denom = (b.Z - c.Z) * (a.X - c.X) + (c.X - b.X) * (a.Z - c.Z);
+            if (MathF.Abs(denom) < 0.000001f)
+            {
+                groundY = (a.Y + b.Y + c.Y) / 3f;
+                return true;
+            }
+            float wa = ((b.Z - c.Z) * (point.X - c.X) + (c.X - b.X) * (point.Z - c.Z)) / denom;
+            float wb = ((c.Z - a.Z) * (point.X - c.X) + (a.X - c.X) * (point.Z - c.Z)) / denom;
+            float wc = 1f - wa - wb;
+            if (wa < 0f || wb < 0f || wc < 0f)
+            {
+                wa = Math.Clamp(wa, 0f, 1f);
+                wb = Math.Clamp(wb, 0f, 1f);
+                wc = Math.Clamp(wc, 0f, 1f);
+                float sum = wa + wb + wc;
+                if (sum <= 0f) { groundY = (a.Y + b.Y + c.Y) / 3f; return true; }
+                wa /= sum; wb /= sum; wc /= sum;
+            }
+            groundY = wa * a.Y + wb * b.Y + wc * c.Y;
+            return true;
+        }
+
         public bool FindNearestPoint(Vector3 point, float maxDistance, out Vector3 projected,
             out float distance, out int triangle)
         {

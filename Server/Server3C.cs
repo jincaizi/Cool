@@ -122,22 +122,19 @@ namespace KcpServer
 
                 // B1：高度判定以客户端自报 Y 为候选，再用 navmesh 地面钳制（地面−1m .. 地面+MaxJumpHeight）。
                 // 无导航宿主不接线（ResolveCombatHeight 直接用客户端 Y）。
-                _castHandler.SetGroundHeight(pos =>
+                // 2026-11-18：TryProject 是 XZ-only（projected.Y = 输入 Y），地面高度必须用最近三角形的
+                // 重心插值 Y；否则接地校验/Y 夹取恒为空操作。
+                Func<Vec3, float?> groundHeight = pos =>
                 {
-                    if (!navigation.TryProject(new Vector3(pos.X, pos.Y, pos.Z), 10f,
-                            out Vector3 projected, out _))
+                    if (!navigation.TryGetGroundY(new Vector3(pos.X, pos.Y, pos.Z), 10f,
+                            out float groundY))
                         return (float?)null;
-                    return projected.Y;
-                });
+                    return groundY;
+                };
+                _castHandler.SetGroundHeight(groundHeight);
 
                 // Plan 03 任务 5：位置同步的跳跃接地/高度钳制与施法判定使用同一 navmesh 闭包。
-                _positionSyncHandler.SetGroundHeight(pos =>
-                {
-                    if (!navigation.TryProject(new Vector3(pos.X, pos.Y, pos.Z), 10f,
-                            out Vector3 projected, out _))
-                        return (float?)null;
-                    return projected.Y;
-                });
+                _positionSyncHandler.SetGroundHeight(groundHeight);
             }
         }
 
@@ -346,6 +343,8 @@ namespace KcpServer
         {
             var player = _entityStore.GetPlayer(playerId);
             if (player == null) return;
+            // 死亡期间不接受控制注入（Plan 04 状态运行时可能在死亡/复活窗口继续 tick）。
+            if (!player.IsAlive) return;
             bool wasLocked = player.ControlActionLock;
             player.ApplyControl(speedScale, actionLock);
             if (!wasLocked && actionLock)

@@ -135,9 +135,17 @@ namespace KcpServer
         private float GrantDash(PositionSyncRequest request, PlayerState player, uint nowTick, float dt)
         {
             var window = player.Displacement;
-            if (window == null || request.CastId != window.CastId
+            if (window == null) return 0f;
+            // 窗口正常完成施法判定后仍保留（发放额度按 EndTick 限界）；到期即清，
+            // 防止旧 CastId 在很久以后被复用。
+            if (nowTick >= window.EndTick)
+            {
+                player.Displacement = null;
+                return 0f;
+            }
+            if (request.CastId != window.CastId
                 || request.DisplacementSkillId != window.SkillId
-                || nowTick < window.StartTick || nowTick >= window.EndTick)
+                || nowTick < window.StartTick)
                 return 0f;
 
             float remaining = window.TotalDistance
@@ -160,7 +168,7 @@ namespace KcpServer
             {
                 m.LastJumpSeq = request.JumpSeq;
                 // 麻痹禁止新起跳；无导航宿主沿用客户端自报（IsGrounded 默认 true）。
-                if (!player.ControlActionLock && IsGrounded(request))
+                if (!player.ControlActionLock && IsGrounded(request, player))
                 {
                     m.JumpActive = true;
                     m.JumpStartTick = nowTick;
@@ -198,11 +206,13 @@ namespace KcpServer
             return granted;
         }
 
-        private bool IsGrounded(PositionSyncRequest request)
+        private bool IsGrounded(PositionSyncRequest request, PlayerState player)
         {
-            var ground = GroundHeight?.Invoke(new Vec3(request.X, request.Y, request.Z));
+            var ground = GroundHeight?.Invoke(new Vec3(request.X, player.Position.Y, request.Z));
             // 出生点 Y=0.3（胶囊中心），navmesh 地面为 0；0.5m 容差覆盖皮肤宽度/台阶。
-            return !ground.HasValue || request.Y <= ground.Value + 0.5f;
+            // 用**上一包已接受位置**的 Y 判定：15Hz 上报下 Start 相位在离开地面后才能被采样到
+            // （客户端在起跳瞬间标记），用 request.Y 会把合法起跳拒掉；request.Y 仍参与 ClampY。
+            return !ground.HasValue || player.Position.Y <= ground.Value + 0.5f;
         }
 
         private float ClampY(PositionSyncRequest request, PlayerState player, uint nowTick)

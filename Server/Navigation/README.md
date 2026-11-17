@@ -42,6 +42,9 @@
   窄通道/墙角用例全部保留。取舍：极薄（<0.25m）的几何缝隙可能被跳过——DemoDay 不适用。
 - `IsPointNavigable` 的 clearance 封顶 2.5m（覆盖 Boss 1.74×1.1）；三角面级 clearance 仍按 8m 计算。
 - `TryProject` 返回**点级** clearance（到最近边界边的精确距离），巡逻点判断可站立空间用它。
+- `TryGetGroundY` 返回**最近三角形重心插值**的真实地面 Y（点到三角形 XZ 外时按最近边/顶点钳制；
+  未命中返回 false 并回填输入 Y）。位置同步的跳跃接地/Y 夹取与施法判定共用这一个查询；
+  不要用 `TryProject` 的 `projected.Y` 当地面高度（它是 XZ-only，Y 恒等于输入值）。
 - `HasLineOfSight` 沿线段每 0.25m 采样，要求点在图内且 clearance ≥ `bodyRadius`。
 - 预算拒绝返回 `FailReason="budget"`，调用方下 tick 立刻重试；真正的失败由
   `PathFollower` 退避 30 tick。单条查询被预算中止时，已完成的门缓存仍保留，重试会更快。

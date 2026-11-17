@@ -123,6 +123,10 @@ namespace KcpServer.Navigation
             return true;
         }
 
+        /// <summary>最近三角形上的真实地面 Y（供位置同步接地/施法高度共用；非投影 Y）。</summary>
+        public bool TryGetGroundY(Vector3 point, float maxDistance, out float groundY)
+            => _graph.TryGetGroundY(point, maxDistance, out groundY);
+
         public bool HasLineOfSight(Vector3 from, Vector3 to, float bodyRadius)
             => _graph.HasLineOfSight(from, to, bodyRadius);
     }

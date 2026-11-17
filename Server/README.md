@@ -103,7 +103,9 @@ bash tools/test-server.sh
   `Speed = distance / (duration − 起手 − 收尾)`。位置同步必须同时匹配 `CastId` 与
   `DisplacementSkillId` 且 `StartTick ≤ nowTick < EndTick` 才发放；额度 =
   `min(Speed × clamp(StatusScale,0,4) × dt, TotalDistance + Speed×1tick − GrantedDistance)`，
-  重发不能叠加。
+  重发不能叠加。**窗口寿命**：施法判定正常完成**不清**窗口；窗口在 `EndTick`（`GrantDash`
+  首次看到 `nowTick >= EndTick` 时清 `player.Displacement`）或取消/死亡/复活/新位移施法时结束。
+  `EndTick = tick + SecondsToTicks(DashDuration × 4)`（15Hz 下 20001 = 18 ticks）。
 - **跳跃轨迹**：`JumpPhase.Start` 以 `JumpSeq` 去重，动作锁时拒绝新起跳，`End` 结束。服务端
   记录起跳接收 tick 与起跳水平速度（按 `SprintSpeed = 8` 封顶）。普通空中移动由 normal 预算
   覆盖，只有动作锁的空中段额外发 `JumpInertiaDistance`（总上限
@@ -120,7 +122,7 @@ bash tools/test-server.sh
   `ControlSpeedScale/ControlActionLock`。
 
 状态：Plan 01–03 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
-PvP 基线），服务端全量 587/587；Plan 04–05 未开始。
+PvP 基线），服务端全量 595/595；Plan 04–05 未开始。
 未启用：元素状态结算/DoT 与 `Statuses[]` 内容、实际控制来源（`ApplyPlayerControl` 无生产调用）、
 元素 VFX 与远端武器模型（Plan 04/05）。
 
