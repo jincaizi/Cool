@@ -32,4 +32,19 @@ public class CombatProjectionBuilderTests
         Assert.Empty(projection.Statuses);
         Assert.Equal(1f, projection.Control!.SpeedScale);
     }
+
+    [Fact]
+    public void Projection_Carries_Authoritative_Control_State()
+    {
+        var store = new EntityStore();
+        var player = store.AddPlayer(1, "P1");
+        player.ApplyControl(0.7f, true);
+
+        var projection = CombatProjectionBuilder.Build(player, ElementalCatalogDefaults.Create());
+
+        Assert.NotNull(projection.Control);
+        Assert.Equal(0.7f, projection.Control!.SpeedScale, 4);
+        Assert.True(projection.Control.ActionLock);
+        Assert.Equal(player.ControlVersion, projection.Control.ControlVersion);
+    }
 }

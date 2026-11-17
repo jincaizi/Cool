@@ -203,6 +203,7 @@ namespace KcpServer
             }
 
             if (!caster.IsAlive) return Reject(resolution, caster, request, "caster-dead");
+            if (caster.ControlActionLock) return Reject(resolution, caster, request, "control-lock");
             if (!CombatRules.TryGet(request.SkillId, out var entry))
                 return Reject(resolution, caster, request, "unknown-skill");
             if (!CombatRules.ValidateShape(request.Shape, entry))
@@ -254,6 +255,24 @@ namespace KcpServer
                 caster.RecordCast(request.SkillId, tick);
 
             ulong castId = ++_nextCastId;
+            var casterState = _store.GetPlayer(casterId);
+            var displacement = _elementalCatalog.Displacements.Find(d => d.SkillId == request.SkillId);
+            if (displacement != null && casterState != null)
+            {
+                float activeSeconds = displacement.DashDuration
+                    - displacement.StartupSeconds - displacement.RecoverySeconds;
+                casterState.Displacement = new DisplacementWindow
+                {
+                    CastId = castId,
+                    SkillId = request.SkillId,
+                    StartTick = tick,
+                    // 状态减速会把同一段距离拉长；4× 窗口覆盖 SlowRatio ≤ 0.75，总距离仍按
+                    // DashDistance + 1 帧封顶——窗口只防旧 CastId 在很久以后被复用。
+                    EndTick = tick + SecondsToTicks(displacement.DashDuration * 4f),
+                    TotalDistance = displacement.DashDistance,
+                    Speed = activeSeconds > 0f ? displacement.DashDistance / activeSeconds : 0f
+                };
+            }
             resolution.Accepted = true;
             resolution.IsNpcCaster = caster.Kind == (byte)EntityKind.Npc;
             resolution.CastId = castId;
@@ -295,7 +314,6 @@ namespace KcpServer
             if (runner != null) { _pending[_pending.Count-1].StageTicks = runner.StageTicks(); resolution.Broadcast.NpcAction = runner.Current; }
 
             // 属性剑气 v1：活动施法投影从 Windup 开始（EndTick = 最后一段判定 tick）。
-            var casterState = _store.GetPlayer(casterId);
             if (casterState != null)
                 SetActiveCast(casterState, _pending[_pending.Count - 1], NpcActionPhase.Windup);
             return resolution;
@@ -356,9 +374,19 @@ namespace KcpServer
 
         private static void ClearActiveCast(PlayerState? caster, ulong castId)
         {
-            if (caster == null || caster.ActiveCast == null || caster.ActiveCast.CastId != castId) return;
-            caster.ActiveCast = null;
-            caster.BumpCombatVersion();
+            if (caster == null) return;
+            bool changed = false;
+            if (caster.ActiveCast != null && caster.ActiveCast.CastId == castId)
+            {
+                caster.ActiveCast = null;
+                changed = true;
+            }
+            if (caster.Displacement != null && caster.Displacement.CastId == castId)
+            {
+                caster.Displacement = null;
+                changed = true;
+            }
+            if (changed) caster.BumpCombatVersion();
         }
 
         private static CastConfirm BuildConfirm(PlayerState caster, CastRequest request,

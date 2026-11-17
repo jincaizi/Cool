@@ -331,6 +331,21 @@ namespace KcpServer
         /// <summary>权威实体查询（登录发放/换装/测试入口）。</summary>
         public PlayerState? GetEntity(long playerId) => _entityStore.GetPlayer(playerId);
 
+        /// <summary>Plan 03/04 的状态运行时入口：写权威控制状态；ActionLock 首次生效时取消未提交施法。
+        /// 已发射的独立投射物继续飞行（CancelCaster 只清未提交段，Plan 02 语义）。</summary>
+        public void ApplyPlayerControl(long playerId, float speedScale, bool actionLock)
+        {
+            var player = _entityStore.GetPlayer(playerId);
+            if (player == null) return;
+            bool wasLocked = player.ControlActionLock;
+            player.ApplyControl(speedScale, actionLock);
+            if (!wasLocked && actionLock)
+            {
+                var cancels = _castHandler.CancelCaster(playerId, CurrentTick, NpcActionCancelReason.Hit);
+                _castHandler.BroadcastCancel(cancels);
+            }
+        }
+
         public void UnregisterEntity(long playerId)
         {
             var cancels = _castHandler.CancelCaster(playerId, CurrentTick,

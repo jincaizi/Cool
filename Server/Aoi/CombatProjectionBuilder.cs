@@ -27,7 +27,12 @@ namespace KcpServer
                         ElementId = weapon?.ElementId ?? 0
                     }
                     : null,
-                Control = new ControlSummary { SpeedScale = 1f, ActionLock = false, ControlVersion = 0 },
+                Control = new ControlSummary
+                {
+                    SpeedScale = entity.ControlSpeedScale,
+                    ActionLock = entity.ControlActionLock,
+                    ControlVersion = entity.ControlVersion
+                },
                 ActiveCast = entity.ActiveCast
             };
         }

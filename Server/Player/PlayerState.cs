@@ -49,6 +49,12 @@ namespace KcpServer
         {
             if (DeadTick != 0) return;
             DeadTick = tick;
+            // 死亡立即关闭突进/跳跃窗口并重置控制（直接写字段，不经 ApplyControl——避免二次 bump）
+            ControlSpeedScale = 1f;
+            ControlActionLock = false;
+            ControlVersion++;
+            Displacement = null;
+            Movement.Reset();
             BumpCombatVersion();
         }
 
@@ -68,6 +74,12 @@ namespace KcpServer
             Hp = MaxHp;
             DeadTick = 0;
             LifeId++;
+            // 复活同样重置控制与突进/跳跃窗口（直接写字段，不经 ApplyControl——避免二次 bump）
+            ControlSpeedScale = 1f;
+            ControlActionLock = false;
+            ControlVersion++;
+            Displacement = null;
+            Movement.Reset();
             BumpCombatVersion();
             return true;
         }
@@ -120,6 +132,39 @@ namespace KcpServer
         {
             CombatVersion++;
             CombatDirty = true;
+        }
+
+        /// <summary>该会话是否启用接收 tick 位移预算（登录能力位 PvpMovementBudgetV1）。</summary>
+        public bool StrictMovementBudget { get; internal set; }
+
+        /// <summary>权威控制状态（Plan 03 由 ApplyPlayerControl 注入；Plan 04 由状态运行时写）。</summary>
+        public float ControlSpeedScale { get; internal set; } = 1f;
+        public bool ControlActionLock { get; internal set; }
+        public uint ControlVersion { get; internal set; }
+
+        public MovementBudgetState Movement { get; } = new MovementBudgetState();
+
+        /// <summary>当前权威突进窗口；null = 无。</summary>
+        public DisplacementWindow? Displacement { get; internal set; }
+
+        public void ApplyControl(float speedScale, bool actionLock)
+        {
+            if (!float.IsFinite(speedScale)) speedScale = 0f;
+            speedScale = Math.Clamp(speedScale, 0f, 4f);
+            if (speedScale == ControlSpeedScale && actionLock == ControlActionLock) return;
+            ControlSpeedScale = speedScale;
+            ControlActionLock = actionLock;
+            ControlVersion++;
+            BumpCombatVersion();
+        }
+
+        /// <summary>登录基线用：设置上限并回满（只在会话初始化调用；中途改上限不heal）。</summary>
+        public void SetMaxHp(float maxHp)
+        {
+            if (!float.IsFinite(maxHp) || maxHp <= 0f) return;
+            MaxHp = maxHp;
+            Hp = maxHp;
+            BumpCombatVersion();
         }
 
         /// <summary>会话内武器实例 → 模板。</summary>
