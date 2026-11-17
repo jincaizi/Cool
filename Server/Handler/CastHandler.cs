@@ -397,10 +397,11 @@ namespace KcpServer
             }
         }
 
+        public bool HasEndedEchoCasts => _endedEchoCasts.Count > 0;
+
         /// <summary>取出已结束的剑气回荡实例（宿主负责广播 Ended 并更新请求缓存）。</summary>
         public List<SwordQiEchoCast> DrainEndedEchoCasts()
         {
-            if (_endedEchoCasts.Count == 0) return new List<SwordQiEchoCast>();
             var ended = new List<SwordQiEchoCast>(_endedEchoCasts);
             _endedEchoCasts.Clear();
             return ended;
@@ -739,8 +740,11 @@ namespace KcpServer
         public List<CombatResolver.CastResolution> DrainResolved(uint tick)
         {
             var resolved = _resolver.DrainResolved(tick);
-            foreach (var cast in _resolver.DrainEndedEchoCasts())
-                OnEchoCastEnded(cast);
+            if (_resolver.HasEndedEchoCasts)
+            {
+                foreach (var cast in _resolver.DrainEndedEchoCasts())
+                    OnEchoCastEnded(cast);
+            }
             return resolved;
         }
 
