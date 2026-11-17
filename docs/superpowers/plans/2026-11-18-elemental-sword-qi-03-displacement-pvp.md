@@ -904,6 +904,56 @@ public class MovementBudgetFormulaTests
         float after = MovementBudgetMath.MaxJumpY(0.3f, 10.95f, -30f, 10f);
         Assert.Equal(y, after, 4);
     }
+
+    [Fact]
+    public void DeltaSeconds_Uses_Tick_Rate_Below_The_Cap()
+    {
+        Assert.Equal(3f / 15f, MovementBudgetMath.ClampDeltaSeconds(4u, 1u), 4);
+    }
+
+    [Fact]
+    public void NormalDistance_Covers_Sprint_Status_Clamp_And_Zero_Seconds()
+    {
+        Assert.Equal(8f * 0.7f * 0.5f,
+            MovementBudgetMath.NormalDistance(LocomotionMode.Sprint, false, 0.7f, 0.5f), 4);
+        Assert.Equal(8f * 4f * 0.5f,
+            MovementBudgetMath.NormalDistance(LocomotionMode.Sprint, false, 99f, 0.5f), 4);
+        Assert.Equal(0f,
+            MovementBudgetMath.NormalDistance(LocomotionMode.Walk, false, 1f, 0f), 4);
+    }
+
+    [Fact]
+    public void DashDistance_Uses_Product_When_Not_Capped()
+    {
+        Assert.Equal(10f * 0.7f * 0.1f,
+            MovementBudgetMath.DashDistance(10f, 0.7f, 0.1f, remaining: 5f), 4);
+    }
+
+    [Fact]
+    public void JumpInertiaDistance_Caps_At_Remaining()
+    {
+        Assert.Equal(2f, MovementBudgetMath.JumpInertiaDistance(10f, 0.5f, 2f), 4);
+    }
+
+    [Fact]
+    public void NonFinite_Budget_Inputs_Return_Zero()
+    {
+        Assert.Equal(0f, MovementBudgetMath.DashDistance(
+            float.PositiveInfinity, 0f, 0.1f, remaining: 2f), 4);
+        Assert.Equal(0f, MovementBudgetMath.JumpInertiaDistance(
+            float.PositiveInfinity, 0.1f, 2f), 4);
+    }
+
+    [Fact]
+    public void ClampHorizontal_Freezes_Horizontal_On_NonFinite_Budget_And_Keeps_Y()
+    {
+        var clamped = MovementBudgetMath.ClampHorizontal(
+            new Vec3(0f, 0f, 0f), new Vec3(3f, 1.7f, 4f), float.NaN);
+
+        Assert.Equal(0f, clamped.X, 4);
+        Assert.Equal(1.7f, clamped.Y, 4);
+        Assert.Equal(0f, clamped.Z, 4);
+    }
 }
 ```
 
@@ -945,6 +995,24 @@ namespace Cool.SyncCore.Tests
 
             Assert.AreEqual(expected,
                 MovementBudgetMath.MaxJumpY(0.3f, 10.95f, -30f, apex), 0.0001f);
+        }
+
+        [Test]
+        public void JumpInertiaDistance_Caps_At_Remaining()
+        {
+            Assert.AreEqual(2f,
+                MovementBudgetMath.JumpInertiaDistance(10f, 0.5f, 2f), 0.0001f);
+        }
+
+        [Test]
+        public void ClampHorizontal_Freezes_Horizontal_On_NonFinite_Budget_And_Keeps_Y()
+        {
+            var clamped = MovementBudgetMath.ClampHorizontal(
+                new Vec3(0f, 0f, 0f), new Vec3(3f, 1.7f, 4f), float.NaN);
+
+            Assert.AreEqual(0f, clamped.X, 0.0001f);
+            Assert.AreEqual(1.7f, clamped.Y, 0.0001f);
+            Assert.AreEqual(0f, clamped.Z, 0.0001f);
         }
     }
 }
@@ -995,6 +1063,8 @@ namespace Cool.SyncCore
 
         public static float DashSpeed(float distance, float duration, float startup, float recovery)
         {
+            if (!float.IsFinite(distance) || !float.IsFinite(duration)
+                || !float.IsFinite(startup) || !float.IsFinite(recovery)) return 0f;
             float active = duration - startup - recovery;
             if (!(distance > 0f) || !(active > 0f)) return 0f;
             return distance / active;
@@ -1003,7 +1073,10 @@ namespace Cool.SyncCore
         public static float DashDistance(float dashSpeed, float statusScale,
             float seconds, float remaining)
         {
-            if (!(dashSpeed > 0f) || !(seconds > 0f) || !(remaining > 0f)) return 0f;
+            if (!float.IsFinite(dashSpeed) || !float.IsFinite(seconds)
+                || !float.IsFinite(remaining)
+                || !(dashSpeed > 0f) || !(seconds > 0f) || !(remaining > 0f))
+                return 0f;
             float scale = float.IsFinite(statusScale) ? Math.Clamp(statusScale, 0f, 4f) : 0f;
             float granted = dashSpeed * scale * seconds;
             return Math.Min(granted, remaining);
@@ -1011,12 +1084,18 @@ namespace Cool.SyncCore
 
         public static float JumpInertiaDistance(float speed, float seconds, float remaining)
         {
-            if (!(speed > 0f) || !(seconds > 0f) || !(remaining > 0f)) return 0f;
+            if (!float.IsFinite(speed) || !float.IsFinite(seconds) || !float.IsFinite(remaining)
+                || !(speed > 0f) || !(seconds > 0f) || !(remaining > 0f))
+                return 0f;
             return Math.Min(speed * seconds, remaining);
         }
 
         public static Vec3 ClampHorizontal(Vec3 previous, Vec3 next, float allowedDistance)
         {
+            // 预算非有限时 fail-closed：水平冻结在 previous，Y 仍用本次上报值（重力/落地由 Y 夹取负责）。
+            if (!float.IsFinite(allowedDistance) || allowedDistance < 0f)
+                return new Vec3(previous.X, next.Y, previous.Z);
+
             float dx = next.X - previous.X;
             float dz = next.Z - previous.Z;
             float distance = (float)Math.Sqrt(dx * dx + dz * dz);
@@ -1028,7 +1107,9 @@ namespace Cool.SyncCore
 
         public static float MaxJumpY(float startY, float jumpForce, float gravity, float elapsedSeconds)
         {
-            if (!(gravity < 0f) || !(jumpForce > 0f)) return startY;
+            if (!float.IsFinite(jumpForce) || !float.IsFinite(gravity)
+                || !float.IsFinite(elapsedSeconds)
+                || !(gravity < 0f) || !(jumpForce > 0f)) return startY;
             float apex = jumpForce / -gravity;
             float t = Math.Clamp(elapsedSeconds, 0f, apex);
             return startY + jumpForce * t + 0.5f * gravity * t * t;
