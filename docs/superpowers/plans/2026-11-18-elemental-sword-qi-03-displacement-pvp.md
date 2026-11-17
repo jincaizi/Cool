@@ -1777,6 +1777,15 @@ public void DashSpeed_Applies_Status_Scale()
 
     Assert.AreEqual(7f, component.CurrentFrameSpeed(1f), 0.0001f);
 }
+
+[Test]
+public void ResolveDashDistance_Prefers_Shared_Catalog_Over_Asset_Fallback()
+{
+    Assert.AreEqual(2f,
+        Cool.SyncCore.ElementalCatalogDefaults.ResolveDashDistance(20001, 0f), 0.0001f);
+    Assert.AreEqual(3f,
+        Cool.SyncCore.ElementalCatalogDefaults.ResolveDashDistance(99999, 3f), 0.0001f);
+}
 ```
 
 `LocalControlStateTests`：
@@ -1919,11 +1928,27 @@ public void StartDash(Vector3 direction, float distance, float duration,
 
 ```csharp
 var displacement = Cool.SyncCore.ElementalCatalogDefaults.FindDisplacement(_skillData.SkillId);
-float distance = displacement?.DashDistance ?? _skillData.DashDistance;
+float distance = Cool.SyncCore.ElementalCatalogDefaults.ResolveDashDistance(
+    _skillData.SkillId, _skillData.DashDistance);
 float duration = displacement?.DashDuration ?? _skillData.DashDuration;
 float startup = displacement?.StartupSeconds ?? 0.05f;
 float recovery = displacement?.RecoverySeconds ?? 0.05f;
-_dashComponent.StartDash(dashDir, distance, duration, startup, recovery);
+
+// 起突进门也用解析后的 distance，而不是旧资产字段：
+// 共享表是权威来源；资产只在共享表缺失时作旧兼容回退。
+if (newState == SkillSubState.Execution && _dashComponent != null && distance > 0f)
+{
+    Vector3 dashDir = _owner.transform.forward;
+    _dashComponent.StartDash(dashDir, distance, duration, startup, recovery);
+}
+```
+
+`ElementalCatalogDefaults` 追加（Task 7 的共享表权威门）：
+
+```csharp
+/// <summary>突进距离解析：共享表优先；只有共享表没有该技能时才回退旧资产字段。</summary>
+public static float ResolveDashDistance(int skillId, float assetFallback)
+    => FindDisplacement(skillId)?.DashDistance ?? assetFallback;
 ```
 
 `LocalControlState.cs`：
