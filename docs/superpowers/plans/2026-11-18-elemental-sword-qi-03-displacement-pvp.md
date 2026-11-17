@@ -109,6 +109,16 @@ public void Validator_Rejects_Jump_Rise_Cap_Below_Natural_Rise()
     Assert.Contains(ElementalCatalogValidator.Validate(catalog),
         e => e.Contains("jump settings"));
 }
+
+[Fact]
+public void Validator_Rejects_Non_Finite_Jump_Gravity()
+{
+    var catalog = ElementalCatalogDefaults.Create();
+    catalog.Jump.Gravity = float.NegativeInfinity;
+
+    Assert.Contains(ElementalCatalogValidator.Validate(catalog),
+        e => e.Contains("jump settings"));
+}
 ```
 
 - [ ] **步骤 2：运行测试确认失败**
@@ -201,10 +211,17 @@ foreach (var d in catalog.Displacements)
 }
 
 var jump = catalog.Jump;
-if (jump == null || !Positive(jump.JumpForce) || !(jump.Gravity < 0f)
+if (jump == null || !Positive(jump.JumpForce) || !NegativeFinite(jump.Gravity)
     || !Positive(jump.MaxRiseSeconds)
     || jump.MaxRiseSeconds < jump.JumpForce / -jump.Gravity)
     errors.Add("jump settings out of range");
+```
+
+并在 `ElementalCatalogValidator` 的私有 helper 区追加：
+
+```csharp
+private static bool NegativeFinite(float v)
+    => !float.IsNaN(v) && !float.IsInfinity(v) && v < 0f;
 ```
 
 `ElementalCatalogHasher.cs` 在写入 `timings` 之后、`g` 之前加入：
@@ -1699,9 +1716,12 @@ public void Apply_Clamps_Invalid_Scale()
 
 - [ ] **步骤 3：实现客户端移动**
 
-`CharacterController`：
+`CharacterController`（同时把既有的 `MoveSpeed = 5.0f` / `SprintSpeed = 8.0f` 改为引用
+`CombatRules.WalkSpeed` / `CombatRules.SprintSpeed`，消除服务端预算与客户端实际速度的双源）：
 
 ```csharp
+public float MoveSpeed { get; set; } = Cool.SyncCore.CombatRules.WalkSpeed;
+public float SprintSpeed { get; set; } = Cool.SyncCore.CombatRules.SprintSpeed;
 public const float DefendSpeedMultiplier = Cool.SyncCore.CombatRules.DefendSpeedMultiplier;
 
 /// <summary>技能侧速度倍率（旋转等）；与状态倍率分开，禁止互相覆写。</summary>
