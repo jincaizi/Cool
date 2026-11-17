@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Hotfix.GameSystems.Skills.Runtime;
 
@@ -18,15 +19,20 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         private Vector3 _dashDirection;
         private float _dashSpeed;
 
-        // 阶段时间（秒）
-        private const float STARTUP_TIME = 0.05f;
-        private const float RECOVERY_TIME = 0.05f;
+        // 阶段时间（秒），起手/收尾由共享位移配置传入
+        private float _startupSeconds = 0.05f;
+        private float _recoverySeconds = 0.05f;
 
         // 碰撞检测参数
         private float _checkRadius = 0.3f;
         private int _obstacleLayerMask;
 
+        public Func<float> StatusSpeedScaleProvider { get; set; } = () => 1f;
         public bool IsDashing => _isDashing;
+        public float DashSpeed => _dashSpeed;
+
+        public float CurrentFrameSpeed(float deltaSeconds)
+            => _isDashing ? _dashSpeed * StatusSpeedScaleProvider() * deltaSeconds : 0f;
 
         public SkillDashComponent(UnityEngine.CharacterController controller, Transform transform)
         {
@@ -43,10 +49,16 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         /// <param name="direction">突进方向（单位向量）</param>
         /// <param name="distance">突进距离（米）</param>
         /// <param name="duration">突进持续时间（秒）</param>
-        public void StartDash(Vector3 direction, float distance, float duration)
+        /// <param name="startupSeconds">起手阶段时长（秒）</param>
+        /// <param name="recoverySeconds">收尾阶段时长（秒）</param>
+        public void StartDash(Vector3 direction, float distance, float duration,
+            float startupSeconds, float recoverySeconds)
         {
+            _startupSeconds = Mathf.Max(0f, startupSeconds);
+            _recoverySeconds = Mathf.Max(0f, recoverySeconds);
+
             // 参数校验
-            float effectiveDuration = duration - STARTUP_TIME - RECOVERY_TIME;
+            float effectiveDuration = duration - _startupSeconds - _recoverySeconds;
             if (effectiveDuration <= 0 || distance <= 0)
             {
                 return;
@@ -88,19 +100,19 @@ namespace Hotfix.GameSystems.Sys3C.Skill
             float movedDistance = 0f;
 
             // 起手阶段：不动
-            if (_dashTimer < STARTUP_TIME)
+            if (_dashTimer < _startupSeconds)
             {
                 return 0f;
             }
 
             // 突进阶段：移动
-            float dashTime = _dashTimer - STARTUP_TIME;
-            float maxDashTime = _dashDuration - STARTUP_TIME - RECOVERY_TIME;
+            float dashTime = _dashTimer - _startupSeconds;
+            float maxDashTime = _dashDuration - _startupSeconds - _recoverySeconds;
 
             if (dashTime < maxDashTime)
             {
                 // 计算本帧移动量
-                float frameMove = _dashSpeed * Time.deltaTime;
+                float frameMove = CurrentFrameSpeed(Time.deltaTime);
 
                 // 碰撞检测
                 Vector3 targetPos = _transform.position + _dashDirection * frameMove;

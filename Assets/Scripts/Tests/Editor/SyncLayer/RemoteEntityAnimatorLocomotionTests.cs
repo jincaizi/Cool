@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Hotfix.GameSystems.SyncLayer;
 using NUnit.Framework;
@@ -139,15 +140,26 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 "走跑分界必须是两个标称速度的中点——偏了会让远端在某档用错标称速度（步频错、脚步滑步）");
         }
 
-        /// <summary>从源码文本里抠出 `public float X { get; set; } = 1f;` 的默认值。</summary>
+        /// <summary>从源码文本里抠出 `public float X { get; set; } = 1f;` 的默认值；
+        /// 写作 `= Cool.SyncCore.CombatRules.Y;` 时解析该共享常量。</summary>
         private static float ParseFloatDefault(string source, string propertyName)
         {
             var match = Regex.Match(source,
                 @"float\s+" + Regex.Escape(propertyName) + @"\s*\{[^}]*\}\s*=\s*(-?[0-9]*\.?[0-9]+)f");
-            Assert.IsTrue(match.Success,
+            if (match.Success)
+                return float.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+
+            var constant = Regex.Match(source,
+                @"float\s+" + Regex.Escape(propertyName)
+                + @"\s*\{[^}]*\}\s*=\s*Cool\.SyncCore\.CombatRules\.(\w+)");
+            Assert.IsTrue(constant.Success,
                 "没在 CharacterController.cs 里解析到 " + propertyName + " 的默认值——"
                 + "属性写法变了就要同步改本守护用例的正则，别让它静默失效");
-            return float.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            string fieldName = constant.Groups[1].Value;
+            var field = typeof(Cool.SyncCore.CombatRules).GetField(fieldName,
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(field, "CombatRules 缺少常量 " + fieldName);
+            return (float)field.GetValue(null);
         }
     }
 }

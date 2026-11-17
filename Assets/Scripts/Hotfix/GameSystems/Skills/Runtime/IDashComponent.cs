@@ -4,6 +4,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
 {
     public interface IDashComponent
     {
-        void StartDash(Vector3 direction, float distance, float duration);
+        void StartDash(Vector3 direction, float distance, float duration,
+            float startupSeconds, float recoverySeconds);
     }
 }

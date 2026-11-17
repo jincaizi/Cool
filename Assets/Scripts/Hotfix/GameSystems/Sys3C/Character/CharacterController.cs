@@ -11,8 +11,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
         private readonly Transform _transform;
         private readonly GroundDetector _groundDetector;
 
-        public float MoveSpeed { get; set; } = 5.0f;
-        public float SprintSpeed { get; set; } = 8.0f;
+        public float MoveSpeed { get; set; } = Cool.SyncCore.CombatRules.WalkSpeed;
+        public float SprintSpeed { get; set; } = Cool.SyncCore.CombatRules.SprintSpeed;
         public float RotationSpeed { get; set; } = 10.0f;
         public float Gravity { get; set; } = -30f;
         public float JumpForce { get; set; } = 10.95f;
@@ -40,12 +40,39 @@ namespace Hotfix.GameSystems.Sys3C.Character
         private bool _isDefending;
         public bool IsDefending => _isDefending;
 
-        public const float DefendSpeedMultiplier = 0.4f;
+        public const float DefendSpeedMultiplier = Cool.SyncCore.CombatRules.DefendSpeedMultiplier;
 
-        /// <summary>
-        /// 技能/状态移动速度倍率（旋转减速等），每帧由外部设置
-        /// </summary>
-        public float MoveSpeedScale { get; set; } = 1f;
+        /// <summary>技能侧速度倍率（旋转等）；与状态倍率分开，禁止互相覆写。</summary>
+        public float SkillSpeedScale { get; set; } = 1f;
+
+        /// <summary>权威状态侧速度倍率（冰减速等）；由 ApplyAuthoritativeControl 写。</summary>
+        public float StatusSpeedScale { get; set; } = 1f;
+
+        /// <summary>权威动作锁（麻痹）：禁止主动水平输入与新起跳，保留空中惯性。</summary>
+        public bool StatusActionLock { get; private set; }
+
+        /// <summary>起跳序号（每次消费跳跃请求 +1；MovementReporter 用）。</summary>
+        public uint JumpSeq { get; private set; }
+
+        public bool IsAirborne => _data.BaseState == BaseState.JumpStart
+            || _data.BaseState == BaseState.JumpAir || !_data.IsGrounded;
+
+        public static float ComposeMoveSpeed(float baseSpeed, bool defending,
+            float skillScale, float statusScale)
+        {
+            float scale = skillScale * statusScale;
+            if (!float.IsFinite(scale) || scale < 0f) scale = 0f;
+            return baseSpeed * (defending ? DefendSpeedMultiplier : 1f) * scale;
+        }
+
+        public void SetStatusActionLock(bool locked)
+        {
+            if (locked == StatusActionLock) return;
+            StatusActionLock = locked;
+            if (!locked && _data.IsGrounded) _jumpStartHorizontalVelocity = Vector3.zero;
+        }
+
+        private Vector3 _jumpStartHorizontalVelocity; // 起跳瞬间的水平速度；麻痹空中沿用
 
         public CharacterData Data => _data;
         public bool IsGrounded => _groundDetector.IsGrounded();
@@ -167,7 +194,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
         {
             JumpRequests++;
             bool support = HasJumpSupport();
-            if (support && !_data.IsDead
+            if (support && !_data.IsDead && !StatusActionLock
                 && _data.BaseState != BaseState.JumpStart && _data.BaseState != BaseState.JumpAir)
             {
                 _jumpRequested = true;
@@ -289,6 +316,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
             _data.BaseState = BaseState.Idle;
             _velocity.y = 0f;
             _data.VerticalVelocity = 0f;
+            JumpSeq = 0;
+            _jumpStartHorizontalVelocity = Vector3.zero;
         }
 
         /// <summary>
@@ -307,20 +336,18 @@ namespace Hotfix.GameSystems.Sys3C.Character
         /// </summary>
         private void ApplyHorizontalMovement(MoveCommand command)
         {
-            // 突进时不允许普通移动
-            if (LockMovement)
+            if (LockMovement) return;
+            if (StatusActionLock)
             {
+                // 麻痹：不再接受新水平输入；空中保留起跳时的水平惯性到落地（不乘状态倍率）。
+                if (IsAirborne && _jumpStartHorizontalVelocity.sqrMagnitude > 0.0001f)
+                    LastMoveFlags = _controller.Move(_jumpStartHorizontalVelocity * Time.deltaTime);
                 return;
             }
 
             float currentSpeed = command.IsSprint ? SprintSpeed : MoveSpeed;
-
-            // 防御中减速
-            if (_isDefending)
-                currentSpeed *= DefendSpeedMultiplier;
-
-            // 技能/状态速度倍率（旋转减速等）
-            currentSpeed *= MoveSpeedScale;
+            currentSpeed = ComposeMoveSpeed(currentSpeed, _isDefending,
+                SkillSpeedScale, StatusSpeedScale);
 
             Vector3 moveVelocity = command.MoveDir * currentSpeed;
             moveVelocity.y = _velocity.y;
@@ -355,6 +382,8 @@ namespace Hotfix.GameSystems.Sys3C.Character
             if (support)
             {
                 JumpsConsumed++;
+                JumpSeq++;
+                _jumpStartHorizontalVelocity = new Vector3(_controller.velocity.x, 0f, _controller.velocity.z);
                 _velocity.y = JumpForce;
                 _jumpRequested = false;
                 SetBaseState(BaseState.JumpStart);
@@ -475,6 +504,7 @@ namespace Hotfix.GameSystems.Sys3C.Character
                 {
                     SetBaseState(BaseState.JumpEnd);
                     _velocity.y = 0f;
+                    _jumpStartHorizontalVelocity = Vector3.zero;
                     OnLanded?.Invoke();
                 }
             }

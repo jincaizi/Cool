@@ -584,7 +584,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 _skillData.DashDistance > 0)
             {
                 Vector3 dashDir = _owner.transform.forward;
-                _dashComponent.StartDash(dashDir, _skillData.DashDistance, _skillData.DashDuration);
+                var displacement = Cool.SyncCore.ElementalCatalogDefaults.FindDisplacement(_skillData.SkillId);
+                float distance = displacement?.DashDistance ?? _skillData.DashDistance;
+                float duration = displacement?.DashDuration ?? _skillData.DashDuration;
+                float startup = displacement?.StartupSeconds ?? 0.05f;
+                float recovery = displacement?.RecoverySeconds ?? 0.05f;
+                _dashComponent.StartDash(dashDir, distance, duration, startup, recovery);
             }
 
             if (newState == SkillSubState.Execution && _projectileData != null && !_projectileSpawned)

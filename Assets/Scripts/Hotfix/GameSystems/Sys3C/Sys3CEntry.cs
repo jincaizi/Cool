@@ -106,6 +106,31 @@ namespace Hotfix.GameSystems.Sys3C
         /// <summary>本地角色控制器（网络宿主装配上报数据源用）</summary>
         public Hotfix.GameSystems.Sys3C.Character.CharacterController CoreController => _cc;
 
+        private readonly LocalControlState _control = new LocalControlState();
+        public uint ControlVersion => _control.Version;
+        public bool IsDashing => _dashComponent != null && _dashComponent.IsDashing;
+        public int CurrentSkillId => _skillCoordinator?.CurrentSkill?.SkillId ?? 0;
+
+        public void ApplyAuthoritativeControl(float speedScale, bool actionLock, uint version)
+        {
+            bool becameLocked = _control.Apply(speedScale, actionLock, version);
+            _cc.StatusSpeedScale = _control.SpeedScale;
+            _cc.SetStatusActionLock(_control.ActionLock);
+            if (becameLocked)
+            {
+                _skillCoordinator.ClearInputBuffer();
+                _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
+                _dashComponent.StopDash();
+            }
+        }
+
+        public void SetMaxHp(float maxHp, bool fill)
+        {
+            if (!(maxHp > 0f)) return;
+            _maxHP = maxHp;
+            if (fill || _currentHP > maxHp) _currentHP = maxHp;
+        }
+
         /// <summary>技能协调器（P4 网络宿主装配战斗桥接入点）</summary>
         public SkillCoordinator SkillCoordinator => _skillCoordinator;
 
@@ -227,6 +252,8 @@ namespace Hotfix.GameSystems.Sys3C
 
             _cc = new Hotfix.GameSystems.Sys3C.Character.CharacterController(
                 transform, CharacterController, GroundLayer);
+            _cc.JumpForce = Cool.SyncCore.ElementalCatalogDefaults.Jump.JumpForce;
+            _cc.Gravity = Cool.SyncCore.ElementalCatalogDefaults.Jump.Gravity;
 
             _defendModifier = new DefendModifier(_defendConfig, transform, () => _cc.IsDefending);
 
@@ -234,6 +261,7 @@ namespace Hotfix.GameSystems.Sys3C
             _fsmManager.OnAttackAnimationCompleted += HandleAttackAnimationCompleted;
 
             _dashComponent = new SkillDashComponent(CharacterController, transform);
+            _dashComponent.StatusSpeedScaleProvider = () => _cc.StatusSpeedScale;
 
             _skillCoordinator = new SkillCoordinator(new SkillOwnerProxy(
                 transform,
@@ -370,7 +398,7 @@ namespace Hotfix.GameSystems.Sys3C
             // P6 ⑦：死亡也必须锁移动。StateCoordinator.CanMove 是全项目无消费者的死属性
             // （D-P6-6），不能指望它；这里显式并入 _isDead。
             _cc.LockMovement = _isDead || !_skillCoordinator.CanMove();
-            _cc.MoveSpeedScale = _skillCoordinator.GetMoveSpeedMultiplier();
+            _cc.SkillSpeedScale = _skillCoordinator.GetMoveSpeedMultiplier();
 
             // Detect when skill leaves looping state (Charging/Channeling → Execution)
             var curSubState = _skillCoordinator.CurrentSubState;
