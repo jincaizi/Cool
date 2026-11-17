@@ -24,5 +24,14 @@ namespace Hotfix.GameSystems.Tests.Sys3C
 
             Assert.AreEqual(7f, component.CurrentFrameSpeed(1f), 0.0001f);
         }
+
+        [Test]
+        public void ResolveDashDistance_Prefers_Shared_Catalog_Over_Asset_Fallback()
+        {
+            Assert.AreEqual(2f,
+                Cool.SyncCore.ElementalCatalogDefaults.ResolveDashDistance(20001, 0f), 0.0001f);
+            Assert.AreEqual(3f,
+                Cool.SyncCore.ElementalCatalogDefaults.ResolveDashDistance(99999, 3f), 0.0001f);
+        }
     }
 }

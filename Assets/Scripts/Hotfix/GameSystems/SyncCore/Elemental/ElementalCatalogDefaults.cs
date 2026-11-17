@@ -22,6 +22,10 @@ namespace Cool.SyncCore
             return null;
         }
 
+        /// <summary>突进距离解析：共享表优先；只有共享表没有该技能时才回退旧资产字段。</summary>
+        public static float ResolveDashDistance(int skillId, float assetFallback)
+            => FindDisplacement(skillId)?.DashDistance ?? assetFallback;
+
         public static JumpSettings Jump => Shared.Jump;
 
         private static ElementalCatalogDefinition Build() => new ElementalCatalogDefinition

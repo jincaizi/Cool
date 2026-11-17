@@ -579,16 +579,18 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 }
             }
 
-            if (newState == SkillSubState.Execution &&
-                _dashComponent != null &&
-                _skillData.DashDistance > 0)
+            var displacement = Cool.SyncCore.ElementalCatalogDefaults.FindDisplacement(_skillData.SkillId);
+            float distance = Cool.SyncCore.ElementalCatalogDefaults.ResolveDashDistance(
+                _skillData.SkillId, _skillData.DashDistance);
+            float duration = displacement?.DashDuration ?? _skillData.DashDuration;
+            float startup = displacement?.StartupSeconds ?? 0.05f;
+            float recovery = displacement?.RecoverySeconds ?? 0.05f;
+
+            // 起突进门也用解析后的 distance，而不是旧资产字段：
+            // 共享表是权威来源；资产只在共享表缺失时作旧兼容回退。
+            if (newState == SkillSubState.Execution && _dashComponent != null && distance > 0f)
             {
                 Vector3 dashDir = _owner.transform.forward;
-                var displacement = Cool.SyncCore.ElementalCatalogDefaults.FindDisplacement(_skillData.SkillId);
-                float distance = displacement?.DashDistance ?? _skillData.DashDistance;
-                float duration = displacement?.DashDuration ?? _skillData.DashDuration;
-                float startup = displacement?.StartupSeconds ?? 0.05f;
-                float recovery = displacement?.RecoverySeconds ?? 0.05f;
                 _dashComponent.StartDash(dashDir, distance, duration, startup, recovery);
             }
 
