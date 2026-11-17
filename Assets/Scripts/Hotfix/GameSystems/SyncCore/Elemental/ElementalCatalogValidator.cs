@@ -119,7 +119,7 @@ namespace Cool.SyncCore
             }
 
             var jump = catalog.Jump;
-            if (jump == null || !Positive(jump.JumpForce) || !(jump.Gravity < 0f)
+            if (jump == null || !Positive(jump.JumpForce) || !NegativeFinite(jump.Gravity)
                 || !Positive(jump.MaxRiseSeconds)
                 || jump.MaxRiseSeconds < jump.JumpForce / -jump.Gravity)
                 errors.Add("jump settings out of range");
@@ -134,6 +134,8 @@ namespace Cool.SyncCore
         }
 
         private static bool Positive(float v) => !float.IsNaN(v) && !float.IsInfinity(v) && v > 0f;
+        private static bool NegativeFinite(float v)
+            => !float.IsNaN(v) && !float.IsInfinity(v) && v < 0f;
         private static bool Nonnegative(params float[] values)
         {
             foreach (float v in values)

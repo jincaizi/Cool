@@ -107,4 +107,14 @@ public class ElementalCatalogValidatorTests
         Assert.Contains(ElementalCatalogValidator.Validate(catalog),
             e => e.Contains("jump settings"));
     }
+
+    [Fact]
+    public void Validator_Rejects_Non_Finite_Jump_Gravity()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        catalog.Jump.Gravity = float.NegativeInfinity;
+
+        Assert.Contains(ElementalCatalogValidator.Validate(catalog),
+            e => e.Contains("jump settings"));
+    }
 }
