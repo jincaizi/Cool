@@ -41,6 +41,12 @@ namespace Cool.Protocol
         /// <summary>蓄力进度 [0,1]：20004 用于半径/伤害缩放；20003 释放时也随包发送
         /// （服务端忽略，仅 20004 的 ChargeScales 消费）。服务端钳制，NaN 视为 0。</summary>
         [ProtoMember(7)] public float ChargeProgress { get; set; }
+
+        /// <summary>剑气回荡请求序号（会话内递增；0 = 旧客户端/非剑气回荡技能）。</summary>
+        [ProtoMember(8)] public ulong EchoRequestId { get; set; }
+
+        /// <summary>剑气回荡角色绑定代次（角色重绑递增；服务端原样回显）。</summary>
+        [ProtoMember(9)] public ulong EchoBindingId { get; set; }
     }
 
     /// <summary>取消施法（客户端 → 服务器）。B3：旋转（20002）取消后必须丢弃未到期的
@@ -118,5 +124,11 @@ namespace Cool.Protocol
         /// 只加不删：tag 8，老客户端读默认 0。客户端据此区分玩家来源闪屏与怪物攻击。
         /// </summary>
         [ProtoMember(8)] public int SourceKind { get; set; }
+
+        /// <summary>
+        /// 剑气回荡施法实例（tag 9；0 = 旧技能/旧服务端）。客户端按
+        /// (连接代次, EchoCastId, TargetPlayerId) 去重。
+        /// </summary>
+        [ProtoMember(9)] public ulong EchoCastId { get; set; }
     }
 }

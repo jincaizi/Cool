@@ -18,6 +18,12 @@ namespace KcpServer
         internal bool SupportsAuthoritativeRespawn { get; set; }
         internal uint? RespawnTick { get; set; }
 
+        /// <summary>登录协商位（ProtocolFeatures；剑气回荡等能力的收件人过滤依据）。</summary>
+        public uint Features { get; internal set; }
+
+        /// <summary>本次生命代次（复活递增）；剑气回荡接触锁定此值，换命后旧接触失效。</summary>
+        public uint CombatLifeId { get; internal set; } = 1;
+
         /// <summary>P4 战斗状态（服务器权威；登录重建 PlayerState 即满血——复活另见 D-2 的 8 秒计时）</summary>
         public float Hp { get; internal set; } = 100f;
         public float MaxHp { get; internal set; } = 100f;
@@ -35,6 +41,27 @@ namespace KcpServer
         /// </summary>
         public bool IsDefending { get; internal set; }
 
+        /// <summary>服务端权威无敌窗口 `[Start, End)`；无窗口时 Start == End == 0。</summary>
+        public uint InvulnerableStartTick { get; internal set; }
+        public uint InvulnerableEndTick { get; internal set; }
+
+        /// <summary>窗口内命中在掷骰/格挡/扣血之前结束；tick 与服务器主循环同一基准。</summary>
+        public bool IsInvulnerableAt(uint tick)
+            => InvulnerableEndTick > InvulnerableStartTick
+               && tick - InvulnerableStartTick < InvulnerableEndTick - InvulnerableStartTick;
+
+        public void SetInvulnerable(uint startTick, uint endTick)
+        {
+            InvulnerableStartTick = startTick;
+            InvulnerableEndTick = endTick > startTick ? endTick : startTick;
+        }
+
+        public void ClearInvulnerability()
+        {
+            InvulnerableStartTick = 0;
+            InvulnerableEndTick = 0;
+        }
+
         /// <summary>死亡发生的 tick（0 = 活着）。复活计时从它起算（D-2：8 秒）</summary>
         public long DeadTick { get; private set; }
 
@@ -43,6 +70,7 @@ namespace KcpServer
         {
             if (DeadTick != 0) return;
             DeadTick = tick;
+            ClearInvulnerability();
         }
 
         /// <summary>
@@ -60,6 +88,8 @@ namespace KcpServer
 
             Hp = MaxHp;
             DeadTick = 0;
+            CombatLifeId++;
+            ClearInvulnerability();
             return true;
         }
 

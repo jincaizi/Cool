@@ -48,6 +48,9 @@ namespace Cool.Protocol
         /// <summary>取消施法（客户端 → 服务器；B3 旋转多段：取消/换命后丢弃未到期判定段）</summary>
         CancelCastRequest = 304,
 
+        /// <summary>剑气回荡状态（服务器 → 施法者/目标/观察者；2026-11-18）</summary>
+        SwordQiEchoState = 305,
+
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,
         BroadcastMessage = 201,

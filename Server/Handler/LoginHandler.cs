@@ -57,11 +57,13 @@ namespace KcpServer
                 Position = new Vector3(0f, 0f, 0f)
             };
 
+            string zoneId = string.IsNullOrEmpty(request.ZoneId) ? "Global" : request.ZoneId;
+            uint features = request.SupportedFeatures;
+
             _server.BindPlayerToSession(playerId, session);
             _server.RegisterEntity(playerId, request.Username,
-                (request.SupportedFeatures & ProtocolFeatures.AuthoritativeRespawn) != 0);
+                (features & ProtocolFeatures.AuthoritativeRespawn) != 0, features, zoneId);
 
-            string zoneId = string.IsNullOrEmpty(request.ZoneId) ? "Global" : request.ZoneId;
             _roomManager.TryAddPlayerToRoom(playerId, session, playerState, zoneId);
 
             // 发送登录响应
@@ -72,7 +74,8 @@ namespace KcpServer
                 PlayerId = playerId,
                 ZoneId = zoneId,
                 ServerTimestamp = DateTime.UtcNow.Ticks,
-                ServerTickRateMs = 66 // 服务器 GameLoop 66ms（Server3C GameLoop ctor）——客户端据此换算插值窗口
+                ServerTickRateMs = 66, // 服务器 GameLoop 66ms（Server3C GameLoop ctor）——客户端据此换算插值窗口
+                EnabledFeatures = features & (ProtocolFeatures.AuthoritativeRespawn | ProtocolFeatures.SwordQiEcho)
             };
             await _server.SendToSessionAsync(session, MessageId.LoginResponse, loginResponse);
 

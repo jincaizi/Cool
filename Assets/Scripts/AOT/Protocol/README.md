@@ -56,6 +56,25 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 `MessageId.CancelCastRequest = 304`（客户端 → 服务器）：tag1 `SkillId`。服务端丢弃该玩家该技能的
 未到期判定段（旋转 20002 取消/换命）；无匹配实例幂等忽略。`ProtocolVersion` 保持 1。
 
+### 剑气回荡（2026-11-18）
+
+`MessageId.SwordQiEchoState = 305`（服务器 → 施法者/目标/观察者）；能力位
+`ProtocolFeatures.SwordQiEcho = 1u << 2`，登录请求 tag7 `SupportedFeatures` / 响应 tag12
+`EnabledFeatures` 协商。旧客户端不收 305，旧服务端不置该位时客户端禁用联网入口。
+
+| 消息 | 追加内容 | tag | 语义 |
+|---|---|---|---|
+| `CastRequest` | `EchoRequestId` / `EchoBindingId` | 8 / 9（`ulong`） | 会话内递增请求号 / 角色绑定代次；0 = 旧请求 |
+| `DamageResult` | `EchoCastId` | 9（`ulong`） | 同一次剑气回荡实例；0 = 其他技能 |
+| `SwordQiEchoState` | `Phase` / `CasterId` / `CastId` / `RequestId` / `EchoBindingId` / `RejectReason` | 1–6 | Rejected=1 / Started=2 / Ended=3；结束优先于同实例重放开始 |
+| `SwordQiEchoState` | `StartTick` / `EndTick` / `ServerTimestamp` / `CooldownTicks` | 7–10 | 服务器权威时间轴（15Hz）与剩余冷却 |
+| `SwordQiEchoState` | `OriginX/Y/Z` / `Rotation` / `Radius` / `SwordCount` / `OvershootMeters` | 11–17 | 固定圆心与表现参数 |
+| `SwordQiEchoState` | `Contacts`（`IList<SwordQiEchoContactMessage>`） | 18 | 目标 ID / 剑气编号 / 相对 tick / 初始 XYZ |
+
+`SwordQiEchoState` 的接触列表必须声明为 `IList<T>`（IL2CPP tuple 探测约束）。
+开始/结束按 `(连接代次, CastId)` 去重；伤害按 `(连接代次, EchoCastId, TargetPlayerId)` 去重。
+视觉结束后保留有界接收窗口（首版 2s / 64 个 `EchoCastId`）。
+
 ## 双端一致性校验（人工/CI 各跑一次）
 
 ### 权威复活

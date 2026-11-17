@@ -261,7 +261,8 @@ namespace KcpServer
             _playerIdToSession.TryRemove(playerId, out _);
         }
 
-        public void RegisterEntity(long playerId, string playerName, bool supportsAuthoritativeRespawn = false)
+        public void RegisterEntity(long playerId, string playerName, bool supportsAuthoritativeRespawn = false,
+            uint features = 0, string zoneId = "")
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
             // P5：登录标志置在 store 实例上——怪物感知（MonsterBrain.TryAcquireBySight）与
@@ -269,13 +270,19 @@ namespace KcpServer
             // BotRunner 不经此路径（直接 AddPlayer）——压测 bot 保持非登录态（D-P5-3 语义）
             player.IsLoggedIn = true;
             player.SupportsAuthoritativeRespawn = supportsAuthoritativeRespawn;
+            player.Features = features;
+            if (!string.IsNullOrEmpty(zoneId)) player.ZoneId = zoneId;
             // AOI：实体立即可见靠 AoiGrid 首帧 + AoiBandScheduler HasSent=false（无需标脏）——
             // MarkDirty 保留仅为 P2 测试语义（PositionSyncEntityStoreTests 断言 IsDirty）
             _entityStore.MarkDirty(player);
         }
 
+        /// <summary>按实体 ID 读权威状态（收件人能力/区域过滤、测试与调试用）。</summary>
+        public PlayerState? GetEntity(long entityId) => _entityStore.GetPlayer(entityId);
+
         public void UnregisterEntity(long playerId)
         {
+            _castHandler.OnPlayerRemoved(playerId); // 清剑气回荡实例与请求缓存
             _entityStore.RemovePlayer(playerId);
             _aoi.RemoveEntity(playerId); // 注销清 AOI 状态：同 id 重登无残留视野迟滞/节拍
         }

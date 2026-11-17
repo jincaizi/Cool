@@ -64,6 +64,26 @@ bash tools/test-server.sh
   `RepeatHitCounts` 每目标独立计数，**不走** `GroupHitIds` 的每施法一次去重。
 - 施法者死亡/移除，或收到 `CancelCastRequest`，丢弃未到期段；复活后不会继续结算旧旋转。
 
+## 剑气回荡（20006，2026-11-18）
+
+- `CombatResolver.Decide` 对 20006 走专用分支：跳过客户端形状校验（客户端发零形状），按
+  `SwordQiEchoRules.Spec` 选最近 8 个同区目标；空名单返回 `no-target` 且不记冷却。接受时
+  在决策 tick 记录 12s 冷却、提交 `[StartTick, EndTick)` 无敌窗口，并锁定目标的
+  `PlayerState` 对象身份与 `CombatLifeId`。
+- 首次接触时间表由 `SwordQiEchoRules.BuildContacts` 生成；`DrainResolved` 先处理普通
+  pending，再按固定顺序处理 Echo。到点重查存活、同区、圆心/半径与生命代次；失效跳过、
+  不补排期。即使全部目标失效，施法与无敌仍持续到原定 `EndTick`。
+- 伤害走与普通 PvE/PvP 共用的结算入口（无敌检查在掷骰/格挡/扣血之前）；Echo 的格挡方向
+  固定使用接受施法时的圆心，不随施法者移动。NPC 受击仍走 `NpcDamaged` 仇恨回调。
+- 请求按玩家缓存最近 `EchoRequestId`：重复序号重放决定，较旧序号回 `stale-request` 且不改状态；
+  已结束时重放 `Ended`。断线/离场经 `Server3C.UnregisterEntity → CastHandler.OnPlayerRemoved`
+  清除实例与缓存。
+- 登录握手把 `SupportedFeatures` 写入权威 `PlayerState.Features`，`LoginResponse.EnabledFeatures`
+  回显协商结果；`SwordQiEchoState` 只发给同区且已协商 `ProtocolFeatures.SwordQiEcho` 的收件人。
+  `EntityStore.AddNpc` 将 NPC `ZoneId` 固定为 `Global`。
+- 测试：`Server.Tests/Combat/SwordQiEchoCombatTests`（无敌边界、换命、格挡方向、区域/能力过滤）、
+  `Server.Tests/Protocol/SwordQiEchoProtocolTests`（往返、tag 钉死、旧字段缺省）。
+
 ## 攻击高度与跳跃规避（B1，2026-11-10）
 
 - `CombatRules` 的地面近战（10001/10002 挥击、50001–50005）带 `AttackHeightSpec [-0.3, 1.2]`；
