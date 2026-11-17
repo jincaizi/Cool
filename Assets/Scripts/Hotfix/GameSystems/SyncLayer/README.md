@@ -109,13 +109,14 @@
   `ClientNetworkHost` 的接线：模式来自 `CharacterController.Data.IsSprint`，跳跃来自
   `JumpSeq/IsAirborne/IsGrounded`，`DisplacementSkillId` 只在 `IsDashing` 时取当前技能，
   `CastId` 由 `CombatNetworkBridge.TryGetAcceptedCastId(skillId, LifeId)` 取服务端已确认值
-  （生命代次不匹配返回 0），`LifeId/ControlVersion` 来自装备摘要与 `LocalControlState`。
+  （仅 `IsDashing` 时查询，否则为 0；生命代次不匹配也返回 0），`LifeId/ControlVersion`
+  来自装备摘要与 `LocalControlState`。
 - **跳跃 Start 边沿只发一次**：`ResolveJumpPhase` 用 `JumpSeq` 去重（非 0 且变化才发 Start）；
   起跳与落地落在同一上报间隔时发 `None`（不制造幽灵起跳）；`_wasAirborne` 在真正接地时发一次
   `End`，空中发 `Air`。
 - **CastConfirm 映射**：`CombatNetworkBridge` 只记录 `Accepted=true` 且 `ClientCastSeq != 0` 的
-  确认；同一技能只接受更大 `ClientCastSeq` 的确认，按技能保存 `(seq, CastId, CasterLifeId)`，
-  供突进上报复用。
+  确认；同一技能只接受不小于当前 `ClientCastSeq` 的确认（同序号幂等覆盖），按技能保存
+  `(seq, CastId, CasterLifeId)`，供突进上报复用。
 - **本人 311 消费**：`ControlSummary` → `ApplyAuthoritativeControl`，`MaxHp` → `SetMaxHp`；
   旧 `ControlVersion` 由 `LocalControlState` 忽略，“变为锁”的边沿清输入缓冲、打断技能、停突进。
 - **位置响应**：`PositionSyncResponse.ControlVersion` 写入

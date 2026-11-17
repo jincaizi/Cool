@@ -96,8 +96,10 @@ bash tools/test-server.sh
   不消耗预算，`LifeId` 不匹配同样纠偏。未携带能力位的旧客户端继续走原 `MovementValidator`
   （不按接收 tick 收紧）。
 - **突进 `DisplacementWindow`**：`CastHandler.Decide` 对共享表 `Displacements` 命中的技能建立
-  窗口：`CastId`、`SkillId`、`StartTick` = 接受到达 tick、`EndTick = StartTick + DashDuration × 4`
-  （覆盖减速把同一段距离拉长）、`TotalDistance` = 表值、
+  窗口：`CastId`、`SkillId`、`StartTick` = 接受到达 tick、
+  `EndTick = StartTick + SecondsToTicks(DashDuration × 4)`
+  （`SecondsToTicks = ⌈秒 × TickRateHz⌉`，15Hz 下 20001 的窗口为 18 ticks；窗口按 4× 时长
+  覆盖减速把同一段距离拉长）、`TotalDistance` = 表值、
   `Speed = distance / (duration − 起手 − 收尾)`。位置同步必须同时匹配 `CastId` 与
   `DisplacementSkillId` 且 `StartTick ≤ nowTick < EndTick` 才发放；额度 =
   `min(Speed × clamp(StatusScale,0,4) × dt, TotalDistance + Speed×1tick − GrantedDistance)`，

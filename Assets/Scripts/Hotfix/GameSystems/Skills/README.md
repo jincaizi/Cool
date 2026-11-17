@@ -46,8 +46,9 @@
 - 突进的起手/活动/收尾窗口来自共享表 `ElementalCatalogDefinition.Displacements`
   （首版 20001 = 2m / 0.3s / 起手 0.05s / 收尾 0.05s），不在技能资产里各写一套。
 - `SkillExecutor` 进入 `Execution` 时用 `ElementalCatalogDefaults.ResolveDashDistance(skillId, 资产值)`
-  解析距离——**共享表优先，资产字段只在表里没有该技能时回退**；`DashDuration/Startup/Recovery`
-  同样按表取值后交给 `SkillDashComponent.StartDash`。
+  解析距离——**共享表优先，资产字段只在表里没有该技能时回退**；`DashDuration` 共享表优先、
+  缺表回退资产 `DashDuration`，`Startup/Recovery` 缺表回退默认 `0.05s`，再交给
+  `SkillDashComponent.StartDash`。
 - `SkillDashComponent` 的有效活动窗 = `duration − startup − recovery`，`DashSpeed = distance / 活动窗`；
   `CurrentFrameSpeed(dt) = DashSpeed × StatusSpeedScaleProvider() × dt`，即突进乘权威状态倍率
   （冰减速等）；普通移动的 `Base × Defend × Skill × Status` 合成见

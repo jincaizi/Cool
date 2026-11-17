@@ -38,7 +38,7 @@ Plan 03 补齐位移/跳跃预算与 PvP 基线（720 HP、接收 tick 预算、
 3. **04 依赖 02**。状态变更走 `CombatStateUpdate`，DoT 事件走 `DamageResult/HitEntry`。PvE 链路可先验收，真实 PvP 冰雷对局须合入 03 的移动与施法控制。
 4. **05 最后做**：它验证 01–04 的三端一致性，不再新增机制。
 
-## Plan 05 已登记收口项（实现计划待 03/04 完成后编写）
+## Plan 05 已登记收口项（实现计划待 04 完成后编写）
 
 - **AOI 观察者反查 O(N²)**（2026-11-18 登记）：`Server3C.GetObserversOf(entityId)`
   是 NPC 各类广播的收件人反查——`CastHandler.BroadcastSwingAsync`（NPC 攻击起手）、

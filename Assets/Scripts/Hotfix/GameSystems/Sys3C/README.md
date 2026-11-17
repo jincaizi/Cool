@@ -53,7 +53,8 @@ Hit 层只有 `Hit` / `DefendHit` / `Dizzy` 三态可达。`Knockback` / `Launch
 - **单点合成**：`CharacterController.ComposeMoveSpeed(baseSpeed, defending, skillScale, statusScale)
   = baseSpeed × (defending ? 0.4 : 1) × skillScale × statusScale`。`SkillSpeedScale`（技能）与
   `StatusSpeedScale`（权威状态）分开存储，禁止互相覆写；合成后的倍率非有限或为负时按 0 处理
-  （fail-closed）。`ApplyHorizontalMovement` 与 `SkillDashComponent.CurrentFrameSpeed` 都走这一合成。
+  （fail-closed）。普通移动（`ApplyHorizontalMovement`）走完整合成；突进只乘状态倍率
+  （`SkillDashComponent.CurrentFrameSpeed`），详见 [Skills](../Skills/README.md)。
 - **动作锁（麻痹）**：`StatusActionLock` 为真时拒绝新的水平输入与 `RequestJump`，但空中保留
   **起跳瞬间**的水平惯性 `_jumpStartHorizontalVelocity`（消费跳跃时从 `CharacterController.velocity`
   捕获，不乘状态倍率），落地或解除锁且在地面时清零。`SetStatusActionLock` 只在锁状态翻转时动作。
