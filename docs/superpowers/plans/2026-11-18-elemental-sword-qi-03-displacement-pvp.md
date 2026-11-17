@@ -786,6 +786,8 @@ var casterState = _store.GetPlayer(casterId);
 var displacement = _elementalCatalog.Displacements.Find(d => d.SkillId == request.SkillId);
 if (displacement != null && casterState != null)
 {
+    float activeSeconds = displacement.DashDuration
+        - displacement.StartupSeconds - displacement.RecoverySeconds;
     casterState.Displacement = new DisplacementWindow
     {
         CastId = castId,
@@ -795,8 +797,7 @@ if (displacement != null && casterState != null)
         // DashDistance + 1 帧封顶——窗口只防旧 CastId 在很久以后被复用。
         EndTick = tick + SecondsToTicks(displacement.DashDuration * 4f),
         TotalDistance = displacement.DashDistance,
-        Speed = MovementBudgetMath.DashSpeed(displacement.DashDistance,
-            displacement.DashDuration, displacement.StartupSeconds, displacement.RecoverySeconds)
+        Speed = activeSeconds > 0f ? displacement.DashDistance / activeSeconds : 0f
     };
 }
 ```
