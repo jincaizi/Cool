@@ -788,6 +788,11 @@ namespace KcpServer
             if (blocked)
                 damage *= CombatRules.BlockDamageScale;
 
+            // Plan 03：元素会话玩家 720 HP；NPC 直接伤害按同一基准缩放，保持原 PvE TTK。
+            // 玩家对玩家/怪物、bot（MaxHp=100）不缩放。
+            if (pending.IsNpcCaster && target.Kind == (byte)EntityKind.Player && target.IsLoggedIn)
+                damage = CombatRules.ScaleNpcDamageToPlayer(damage, target.MaxHp);
+
             target.ApplyDamage(damage);
             if (target.Kind == (byte)EntityKind.Npc)
                 NpcDamaged?.Invoke(target.PlayerId, pending.CasterId, damage);

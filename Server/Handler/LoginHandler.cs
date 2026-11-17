@@ -84,6 +84,7 @@ namespace KcpServer
 
             string zoneId = string.IsNullOrEmpty(request.ZoneId) ? "Global" : request.ZoneId;
             storePlayer.ZoneId = zoneId;
+            ApplyLoginCombatBaseline(storePlayer, _server.ElementalCatalog, request.SupportedFeatures);
             if (wantsElemental) GrantStartingWeapons(storePlayer);
             _roomManager.TryAddPlayerToRoom(playerId, session, playerState, zoneId);
 
@@ -97,9 +98,10 @@ namespace KcpServer
                 ServerTimestamp = DateTime.UtcNow.Ticks,
                 ServerTickRateMs = 66 // 服务器 GameLoop 66ms（Server3C GameLoop ctor）——客户端据此换算插值窗口
             };
+            loginResponse.EnabledFeatures = ProtocolFeatures.PvpMovementBudgetV1;
             if (wantsElemental)
             {
-                loginResponse.EnabledFeatures = ProtocolFeatures.ElementalSwordQiV1;
+                loginResponse.EnabledFeatures |= ProtocolFeatures.ElementalSwordQiV1;
                 loginResponse.ElementalCatalogFingerprint = _server.ElementalCatalogFingerprint;
                 loginResponse.WeaponInventory = EquipHandler.BuildBaseline(storePlayer, _server.ElementalCatalog);
             }
@@ -140,6 +142,16 @@ namespace KcpServer
             }
 
             _logger.LogInformation($"Player {playerId} ({request.Username}) logged in to zone {zoneId}");
+        }
+
+        /// <summary>登录战斗基线：能力位决定严格预算；元素会话按共享表给 720 HP。</summary>
+        public static void ApplyLoginCombatBaseline(PlayerState player,
+            ElementalCatalogDefinition catalog, uint supportedFeatures)
+        {
+            player.StrictMovementBudget =
+                (supportedFeatures & ProtocolFeatures.PvpMovementBudgetV1) != 0;
+            if ((supportedFeatures & ProtocolFeatures.ElementalSwordQiV1) != 0)
+                player.SetMaxHp(catalog.Pvp.PlayerMaxHp);
         }
 
         /// <summary>按共享目录发放会话内武器实例并装备默认剑。重登会重新发放（新实例 ID）。</summary>

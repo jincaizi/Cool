@@ -171,6 +171,12 @@ namespace Cool.SyncCore
         /// <summary>PvE 伤害基准生命：NPC 对玩家的伤害按 target.MaxHp / 该值缩放，保持原 TTK。</summary>
         public const float PveDamageBaselineHp = 100f;
 
+        /// <summary>NPC 对玩家直接伤害的 PvE 基准缩放：保持 100→720 HP 后的 TTK 不变。</summary>
+        public static float ScaleNpcDamageToPlayer(float damage, float targetMaxHp)
+            => targetMaxHp > 0f && float.IsFinite(targetMaxHp)
+                ? damage * (targetMaxHp / PveDamageBaselineHp)
+                : damage;
+
         /// <summary>玩家受击体积高度（米，脚底起算）；B1 高度重叠判定用。</summary>
         public const float PlayerBodyHeight = 1.8f;
 
