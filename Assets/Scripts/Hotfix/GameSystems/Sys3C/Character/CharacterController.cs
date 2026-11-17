@@ -376,6 +376,13 @@ namespace Hotfix.GameSystems.Sys3C.Character
         private void ProcessJumpRequest()
         {
             if (!_jumpRequested) return; // 无请求时不跑物理探针
+            if (StatusActionLock)
+            {
+                // RequestJump 已在入口拒绝锁定中的请求；这里覆盖"请求后同一帧才上锁"的边沿，
+                // 防止锁定期间消费掉一个排队中的起跳。
+                _jumpRequested = false;
+                return;
+            }
             bool support = HasJumpSupport();
             LastConsumeGrounded = _data.IsGrounded;
             LastConsumeBodySupport = support && !_data.IsGrounded;

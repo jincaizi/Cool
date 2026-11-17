@@ -54,11 +54,11 @@ namespace Hotfix.GameSystems.Sys3C.Skill
         public void StartDash(Vector3 direction, float distance, float duration,
             float startupSeconds, float recoverySeconds)
         {
-            _startupSeconds = Mathf.Max(0f, startupSeconds);
-            _recoverySeconds = Mathf.Max(0f, recoverySeconds);
-
-            // 参数校验
-            float effectiveDuration = duration - _startupSeconds - _recoverySeconds;
+            // 先按入参校验，无效突进不得覆盖已生效突进的阶段时长（否则下一次 Update 的
+            // 阶段边界会被坏参数改写）。
+            float startup = Mathf.Max(0f, startupSeconds);
+            float recovery = Mathf.Max(0f, recoverySeconds);
+            float effectiveDuration = duration - startup - recovery;
             if (effectiveDuration <= 0 || distance <= 0)
             {
                 return;
@@ -69,6 +69,8 @@ namespace Hotfix.GameSystems.Sys3C.Skill
                 return;
             }
 
+            _startupSeconds = startup;
+            _recoverySeconds = recovery;
             _isDashing = true;
             _dashTimer = 0f;
             _dashDuration = duration;

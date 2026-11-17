@@ -14,6 +14,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         {
             Assert.IsTrue(ClientNetworkHost.IsLocalProjection(7, 7));
             Assert.IsFalse(ClientNetworkHost.IsLocalProjection(7, 8));
+            // 登录前 localPlayerId == 0：未分配的 id 不能把所有实体（含 id 0 自己）当成本人。
+            Assert.IsFalse(ClientNetworkHost.IsLocalProjection(0, 0));
+            Assert.IsFalse(ClientNetworkHost.IsLocalProjection(0, 7));
         }
     }
 }

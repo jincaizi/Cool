@@ -248,6 +248,21 @@ namespace Cool.Protocol.Tests
             Assert.AreEqual(9, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncResponse).GetProperty("ControlVersion")!));
         }
 
+        [Test]
+        public void PvpMovement_Feature_Bit_And_Enums_Are_Pinned()
+        {
+            // 只加不删的机器化防线：按位协商的旧客户端把枚举值当整数理解，
+            // 任何一位/一个值被挪动都会让预算字段静默解错。
+            Assert.AreEqual(8u, Cool.Protocol.ProtocolFeatures.PvpMovementBudgetV1,
+                "PvpMovementBudgetV1 必须精确占 1 << 3");
+            Assert.AreEqual(0, (int)Cool.Protocol.LocomotionMode.Walk);
+            Assert.AreEqual(1, (int)Cool.Protocol.LocomotionMode.Sprint);
+            Assert.AreEqual(0, (int)Cool.Protocol.PlayerJumpPhase.None);
+            Assert.AreEqual(1, (int)Cool.Protocol.PlayerJumpPhase.Start);
+            Assert.AreEqual(2, (int)Cool.Protocol.PlayerJumpPhase.Air);
+            Assert.AreEqual(3, (int)Cool.Protocol.PlayerJumpPhase.End);
+        }
+
         /// <summary>
         /// 按名字认 [ProtoMember]：本测试程序集引用不到 protobuf-net 插件（Unity 不给它自动引用
         /// 预编译 DLL，GameSys.EditorTests.csproj 里没有该 Reference），所以不能写 ProtoBuf.ProtoMemberAttribute。

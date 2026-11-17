@@ -69,6 +69,10 @@ namespace Hotfix.GameSystems.SyncLayer
             _respawnTick = tick;
             _reconciler.Clear();
             _timer = 0f;
+            // 复活后跳跃边沿从零重建：否则沿用死亡前的 JumpSeq 会把复活后第一次起跳
+            // 当成本地已知序号而漏报 Start（也可能残留 _wasAirborne 报成 Air）。
+            _lastReportedJumpSeq = 0;
+            _wasAirborne = false;
         }
 
         /// <summary>每帧驱动；reportIntervalSeconds = ServerTickRateMs/1000（默认 66ms）</summary>

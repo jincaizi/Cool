@@ -114,6 +114,9 @@
 - **跳跃 Start 边沿只发一次**：`ResolveJumpPhase` 用 `JumpSeq` 去重（非 0 且变化才发 Start）；
   起跳与落地落在同一上报间隔时发 `None`（不制造幽灵起跳）；`_wasAirborne` 在真正接地时发一次
   `End`，空中发 `Air`。
+- **复活清跳跃上报边沿**：`ResetForRespawn` 清零 `_lastReportedJumpSeq` 与 `_wasAirborne`。
+  复活后控制器是重建的新角色（`JumpSeq` 从头计数），不清零会把第一次起跳压成 `Air`、漏报
+  `Start`，服务端因此拿不到起跳 tick/水平速度。
 - **CastConfirm 映射**：`CombatNetworkBridge` 只记录 `Accepted=true` 且 `ClientCastSeq != 0` 的
   确认；同一技能只接受不小于当前 `ClientCastSeq` 的确认（同序号幂等覆盖），按技能保存
   `(seq, CastId, CasterLifeId)`，供突进上报复用。

@@ -126,7 +126,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         public void SetMaxHp(float maxHp, bool fill)
         {
-            if (!(maxHp > 0f)) return;
+            if (!(maxHp > 0f) || float.IsInfinity(maxHp)) return;
             _maxHP = maxHp;
             if (fill || _currentHP > maxHp) _currentHP = maxHp;
         }
