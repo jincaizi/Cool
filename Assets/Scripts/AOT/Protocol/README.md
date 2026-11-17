@@ -115,6 +115,13 @@ Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实
 所有新消息已在 `MessageTypeRegistry` 注册；
 新增字段沿用 `IList<T>` 规则（`WeaponInventoryBaseline.Weapons` 不是 `List<T>`）。
 
+`PositionSyncRequest` 追加（Plan 03，全部高位 tag）：
+tag10 `LocomotionMode`、tag11 `JumpPhase`、tag12 `JumpSeq`、tag13 `VerticalVelocity`、
+tag14 `DisplacementSkillId`、tag15 `CastId`、tag16 `ClientControlVersion`、tag17 `LifeId`；
+`PositionSyncResponse` tag9 `ControlVersion`。能力位
+`ProtocolFeatures.PvpMovementBudgetV1 = 1u << 3`；未携带该位的旧客户端继续走旧
+`MovementValidator` 路径（不按接收 tick 收紧）。
+
 ## 双端一致性校验（人工/CI 各跑一次）
 
 ### 权威复活

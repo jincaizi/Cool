@@ -234,6 +234,20 @@ namespace Cool.Protocol.Tests
             Assert.AreEqual(13, GetProtoMemberTag(c!));
         }
 
+        [Test]
+        public void PositionSyncRequest_PvpMovement_Tags_Are_Pinned()
+        {
+            Assert.AreEqual(10, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncRequest).GetProperty("LocomotionMode")!));
+            Assert.AreEqual(11, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncRequest).GetProperty("JumpPhase")!));
+            Assert.AreEqual(12, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncRequest).GetProperty("JumpSeq")!));
+            Assert.AreEqual(13, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncRequest).GetProperty("VerticalVelocity")!));
+            Assert.AreEqual(14, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncRequest).GetProperty("DisplacementSkillId")!));
+            Assert.AreEqual(15, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncRequest).GetProperty("CastId")!));
+            Assert.AreEqual(16, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncRequest).GetProperty("ClientControlVersion")!));
+            Assert.AreEqual(17, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncRequest).GetProperty("LifeId")!));
+            Assert.AreEqual(9, GetProtoMemberTag(typeof(Cool.Protocol.PositionSyncResponse).GetProperty("ControlVersion")!));
+        }
+
         /// <summary>
         /// 按名字认 [ProtoMember]：本测试程序集引用不到 protobuf-net 插件（Unity 不给它自动引用
         /// 预编译 DLL，GameSys.EditorTests.csproj 里没有该 Reference），所以不能写 ProtoBuf.ProtoMemberAttribute。

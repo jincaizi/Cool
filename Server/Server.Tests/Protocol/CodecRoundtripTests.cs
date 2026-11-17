@@ -215,4 +215,46 @@ public class CodecRoundtripTests
         Assert.Equal(9f, cast.ImpactZ, 4);
         Assert.Equal(0.75f, cast.ChargeProgress, 4);
     }
+
+    [Fact]
+    public void Roundtrip_PositionSyncRequest_Preserves_PvpMovement_Fields()
+    {
+        var source = new PositionSyncRequest
+        {
+            X = 1f, Y = 2f, Z = 3f, Rotation = 45f, Speed = 6f,
+            Sequence = 9,
+            LocomotionMode = LocomotionMode.Sprint,
+            JumpPhase = PlayerJumpPhase.Air,
+            JumpSeq = 7,
+            VerticalVelocity = -4.5f,
+            DisplacementSkillId = 20001,
+            CastId = 123456789UL,
+            ClientControlVersion = 3,
+            LifeId = 5
+        };
+
+        var encoded = MessageCodec.EncodeToArray(MessageId.PositionSyncRequest, source);
+        var decoded = MessageCodec.Decode(encoded);
+
+        var got = Assert.IsType<PositionSyncRequest>(decoded.message);
+        Assert.Equal(1f, got.X);
+        Assert.Equal(LocomotionMode.Sprint, got.LocomotionMode);
+        Assert.Equal(PlayerJumpPhase.Air, got.JumpPhase);
+        Assert.Equal(7u, got.JumpSeq);
+        Assert.Equal(-4.5f, got.VerticalVelocity);
+        Assert.Equal(20001, got.DisplacementSkillId);
+        Assert.Equal(123456789UL, got.CastId);
+        Assert.Equal(3u, got.ClientControlVersion);
+        Assert.Equal(5u, got.LifeId);
+    }
+
+    [Fact]
+    public void Roundtrip_PositionSyncResponse_Carries_ControlVersion()
+    {
+        var source = new PositionSyncResponse { AcknowledgedSequence = 4, ControlVersion = 12 };
+        var encoded = MessageCodec.EncodeToArray(MessageId.PositionSyncResponse, source);
+        var decoded = MessageCodec.Decode(encoded);
+        var got = Assert.IsType<PositionSyncResponse>(decoded.message);
+        Assert.Equal(12u, got.ControlVersion);
+    }
 }

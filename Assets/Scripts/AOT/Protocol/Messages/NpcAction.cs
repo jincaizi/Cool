@@ -9,6 +9,9 @@ namespace Cool.Protocol
 
         /// <summary>属性剑气 v1：权威换装、施法确认与按 CastId 的发射/终止。</summary>
         public const uint ElementalSwordQiV1 = 1u << 2;
+
+        /// <summary>PvP 位移预算 v1：位置包携带运动/跳跃/突进/控制版本字段。</summary>
+        public const uint PvpMovementBudgetV1 = 1u << 3;
     }
 
     public enum NpcActionKind : byte { Idle = 0, Move = 1, Skill = 2, HitReaction = 3, Death = 4 }

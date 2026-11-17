@@ -44,6 +44,30 @@ namespace Cool.Protocol
         public bool IsDefending { get; set; }
 
         [ProtoMember(9)] public uint? RespawnTick { get; set; }
+
+        /// <summary>水平运动模式（Plan 03；缺省 0 = Walk，旧客户端不会发送）。</summary>
+        [ProtoMember(10)] public LocomotionMode LocomotionMode { get; set; }
+
+        /// <summary>跳跃阶段（Start 只在每个新 JumpSeq 出现一次）。</summary>
+        [ProtoMember(11)] public PlayerJumpPhase JumpPhase { get; set; }
+
+        /// <summary>起跳序号：服务端按首次收到的新序号记录起跳 tick；重复 Start 不重置。</summary>
+        [ProtoMember(12)] public uint JumpSeq { get; set; }
+
+        /// <summary>垂直速度（只用于区分上升/下落，不参与预算）。</summary>
+        [ProtoMember(13)] public float VerticalVelocity { get; set; }
+
+        /// <summary>正在释放的位移技能 ID；0 = 无位移技能。</summary>
+        [ProtoMember(14)] public int DisplacementSkillId { get; set; }
+
+        /// <summary>位移技能对应的已确认 CastId；0 = 未确认/非位移。</summary>
+        [ProtoMember(15)] public ulong CastId { get; set; }
+
+        /// <summary>客户端最后应用的控制版本；服务端拒绝低于当前权威版本的包。</summary>
+        [ProtoMember(16)] public uint ClientControlVersion { get; set; }
+
+        /// <summary>生命代次；非 0 且与服务端不一致时整包丢弃。</summary>
+        [ProtoMember(17)] public uint LifeId { get; set; }
     }
 
     /// <summary>位置同步响应（含权威纠偏数据）</summary>
@@ -79,5 +103,8 @@ namespace Cool.Protocol
         public bool HasPositionCorrection { get; set; }
 
         [ProtoMember(8)] public uint? RespawnTick { get; set; }
+
+        /// <summary>服务端当前控制版本（客户端据此识别旧输入；解除以 CombatStateUpdate 为准）。</summary>
+        [ProtoMember(9)] public uint ControlVersion { get; set; }
     }
 }
