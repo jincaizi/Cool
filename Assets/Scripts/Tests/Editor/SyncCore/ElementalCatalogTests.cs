@@ -47,5 +47,22 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             Assert.AreEqual(g.Speed, spec.Speed, 0.001f);
             Assert.AreEqual(g.Length / g.Speed, spec.TotalFlightSeconds, 0.001f);
         }
+
+        [Test]
+        public void Defaults_Contain_Shared_Displacement_And_Jump_Parameters()
+        {
+            var catalog = ElementalCatalogDefaults.Create();
+
+            Assert.AreEqual(1, catalog.Displacements.Count);
+            Assert.AreEqual(20001, catalog.Displacements[0].SkillId);
+            Assert.AreEqual(2f, catalog.Displacements[0].DashDistance, 0.0001f);
+            Assert.AreEqual(0.3f, catalog.Displacements[0].DashDuration, 0.0001f);
+
+            Assert.AreEqual(10.95f, catalog.Jump.JumpForce, 0.0001f);
+            Assert.AreEqual(-30f, catalog.Jump.Gravity, 0.0001f);
+            Assert.AreEqual(0.5f, catalog.Jump.MaxRiseSeconds, 0.0001f);
+            Assert.IsNotNull(ElementalCatalogDefaults.FindDisplacement(20001));
+            Assert.IsNull(ElementalCatalogDefaults.FindDisplacement(10002));
+        }
     }
 }

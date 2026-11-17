@@ -99,6 +99,31 @@ namespace Cool.SyncCore
                 || Math.Abs(g.Length / g.Speed - g.TotalFlightSeconds) > 0.001f)
                 errors.Add("sword qi flight mismatch");
 
+            var displacementIds = new HashSet<int>();
+            foreach (var d in catalog.Displacements)
+            {
+                if (d == null) { errors.Add("displacement missing"); continue; }
+                if (d.SkillId <= 0 || !displacementIds.Add(d.SkillId))
+                    errors.Add("displacement duplicate/invalid id");
+                if (!Positive(d.DashDistance) || !Positive(d.DashDuration)
+                    || !Nonnegative(d.StartupSeconds, d.RecoverySeconds)
+                    || d.DashDuration <= d.StartupSeconds + d.RecoverySeconds)
+                {
+                    errors.Add("displacement timing out of range");
+                    continue;
+                }
+                float active = d.DashDuration - d.StartupSeconds - d.RecoverySeconds;
+                float speed = d.DashDistance / active;
+                if (!Positive(speed) || speed > 60f)
+                    errors.Add("displacement speed out of range");
+            }
+
+            var jump = catalog.Jump;
+            if (jump == null || !Positive(jump.JumpForce) || !(jump.Gravity < 0f)
+                || !Positive(jump.MaxRiseSeconds)
+                || jump.MaxRiseSeconds < jump.JumpForce / -jump.Gravity)
+                errors.Add("jump settings out of range");
+
             var p = catalog.Pvp;
             if (p == null || !Positive(p.PlayerMaxHp) || !Positive(p.WindVulnerabilityMultiplier)
                 || !Positive(p.ControlImmunitySeconds) || !Positive(p.SameGroupVulnerabilityNoRefreshSeconds)

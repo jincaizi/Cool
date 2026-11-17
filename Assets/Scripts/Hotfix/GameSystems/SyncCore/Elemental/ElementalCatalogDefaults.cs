@@ -11,7 +11,20 @@ namespace Cool.SyncCore
         public const int ThunderSwordTemplateId = 90004;
         public const int WindSwordTemplateId = 90005;
 
-        public static ElementalCatalogDefinition Create() => new ElementalCatalogDefinition
+        private static readonly ElementalCatalogDefinition Shared = Build();
+
+        public static ElementalCatalogDefinition Create() => Build();
+
+        public static DisplacementDefinition? FindDisplacement(int skillId)
+        {
+            foreach (var d in Shared.Displacements)
+                if (d.SkillId == skillId) return d;
+            return null;
+        }
+
+        public static JumpSettings Jump => Shared.Jump;
+
+        private static ElementalCatalogDefinition Build() => new ElementalCatalogDefinition
         {
             DefaultWeaponTemplateId = DefaultSwordTemplateId,
             StartingWeaponTemplateIds = new List<int>
@@ -47,6 +60,15 @@ namespace Cool.SyncCore
                 new AttackTimingDefinition { SkillId = 10002, WindupSeconds = 0.35f, ActiveSeconds = 0.10f, RecoverySeconds = 0.25f, ChainWindowSeconds = 0.30f, CooldownSeconds = 0.5f },
             },
             SwordQi = new ProjectileGeometryDefinition { Length = 12f, HalfWidth = 2f, Speed = 18f, Stages = 3, TotalFlightSeconds = 12f / 18f, SwordQiDamageCoefficient = 1f },
+            Displacements = new List<DisplacementDefinition>
+            {
+                new DisplacementDefinition
+                {
+                    SkillId = 20001, DashDistance = 2f, DashDuration = 0.3f,
+                    StartupSeconds = 0.05f, RecoverySeconds = 0.05f
+                },
+            },
+            Jump = new JumpSettings { JumpForce = 10.95f, Gravity = -30f, MaxRiseSeconds = 0.5f },
             Pvp = new PvpCombatSettings()
         };
     }

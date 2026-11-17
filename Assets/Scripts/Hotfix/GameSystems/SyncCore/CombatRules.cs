@@ -161,6 +161,16 @@ namespace Cool.SyncCore
         public const float CritMultiplier = 1.5f;
         public const float TickRateHz = 15f;
 
+        /// <summary>普通移动/冲刺基础速度（与 CharacterController 默认值同源）。</summary>
+        public const float WalkSpeed = 5f;
+        public const float SprintSpeed = 8f;
+
+        /// <summary>防御姿态水平速度倍率（客户端与服务端预算共用）。</summary>
+        public const float DefendSpeedMultiplier = 0.4f;
+
+        /// <summary>PvE 伤害基准生命：NPC 对玩家的伤害按 target.MaxHp / 该值缩放，保持原 TTK。</summary>
+        public const float PveDamageBaselineHp = 100f;
+
         /// <summary>玩家受击体积高度（米，脚底起算）；B1 高度重叠判定用。</summary>
         public const float PlayerBodyHeight = 1.8f;
 

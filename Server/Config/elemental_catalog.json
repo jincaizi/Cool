@@ -34,6 +34,10 @@
     "TotalFlightSeconds": 0.6666667,
     "SwordQiDamageCoefficient": 1.0
   },
+  "Displacements": [
+    { "SkillId": 20001, "DashDistance": 2.0, "DashDuration": 0.3, "StartupSeconds": 0.05, "RecoverySeconds": 0.05 }
+  ],
+  "Jump": { "JumpForce": 10.95, "Gravity": -30.0, "MaxRiseSeconds": 0.5 },
   "Pvp": {
     "PlayerMaxHp": 720.0,
     "WindVulnerabilityMultiplier": 1.28,

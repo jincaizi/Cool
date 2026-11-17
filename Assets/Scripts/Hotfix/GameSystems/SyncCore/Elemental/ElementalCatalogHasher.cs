@@ -67,6 +67,17 @@ namespace Cool.SyncCore
                         timing.ChainWindowSeconds, timing.CooldownSeconds);
                 }
 
+                var displacements = new List<DisplacementDefinition>(catalog.Displacements);
+                displacements.Sort((a, b) => a.SkillId.CompareTo(b.SkillId));
+                w.Write(displacements.Count);
+                foreach (var d in displacements)
+                {
+                    w.Write(d.SkillId);
+                    F(w, d.DashDistance, d.DashDuration, d.StartupSeconds, d.RecoverySeconds);
+                }
+
+                F(w, catalog.Jump.JumpForce, catalog.Jump.Gravity, catalog.Jump.MaxRiseSeconds);
+
                 var g = catalog.SwordQi;
                 F(w, g.Length, g.HalfWidth, g.Speed);
                 w.Write(g.Stages);

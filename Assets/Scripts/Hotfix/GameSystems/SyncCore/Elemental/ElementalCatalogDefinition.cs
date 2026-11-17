@@ -16,6 +16,8 @@ namespace Cool.SyncCore
         public List<StatusEffectDefinition> Statuses = new List<StatusEffectDefinition>();
         public List<AttackTimingDefinition> AttackTimings = new List<AttackTimingDefinition>();
         public ProjectileGeometryDefinition SwordQi = new ProjectileGeometryDefinition();
+        public List<DisplacementDefinition> Displacements = new List<DisplacementDefinition>();
+        public JumpSettings Jump = new JumpSettings();
         public PvpCombatSettings Pvp = new PvpCombatSettings();
     }
 
@@ -82,5 +84,23 @@ namespace Cool.SyncCore
         public float ControlImmunitySeconds = 0.5f;
         public float SameGroupVulnerabilityNoRefreshSeconds = 4f;
         public float ThunderDurationSeconds = 0.8f;
+    }
+
+    [Serializable]
+    public sealed class DisplacementDefinition
+    {
+        public int SkillId;
+        public float DashDistance;
+        public float DashDuration;
+        public float StartupSeconds = 0.05f;
+        public float RecoverySeconds = 0.05f;
+    }
+
+    [Serializable]
+    public sealed class JumpSettings
+    {
+        public float JumpForce = 10.95f;
+        public float Gravity = -30f;
+        public float MaxRiseSeconds = 0.5f;
     }
 }

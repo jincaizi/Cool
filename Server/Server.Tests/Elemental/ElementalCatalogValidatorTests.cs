@@ -67,4 +67,44 @@ public class ElementalCatalogValidatorTests
         Assert.Equal(g.Speed, spec.Speed);
         Assert.Equal(g.Length / g.Speed, spec.TotalFlightSeconds, 3);
     }
+
+    [Fact]
+    public void Defaults_Carry_20001_Displacement_And_Jump_Settings()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+
+        var dash = Assert.Single(catalog.Displacements);
+        Assert.Equal(20001, dash.SkillId);
+        Assert.Equal(2f, dash.DashDistance);
+        Assert.Equal(0.3f, dash.DashDuration, 4);
+        Assert.Equal(0.05f, dash.StartupSeconds, 4);
+        Assert.Equal(0.05f, dash.RecoverySeconds, 4);
+
+        Assert.Equal(10.95f, catalog.Jump.JumpForce, 4);
+        Assert.Equal(-30f, catalog.Jump.Gravity, 4);
+        Assert.Equal(0.5f, catalog.Jump.MaxRiseSeconds, 4);
+        Assert.Empty(ElementalCatalogValidator.Validate(catalog));
+    }
+
+    [Fact]
+    public void Validator_Rejects_Displacement_Whose_Windows_Consume_The_Duration()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        catalog.Displacements[0].StartupSeconds = 0.2f;
+        catalog.Displacements[0].RecoverySeconds = 0.2f;
+
+        Assert.Contains(ElementalCatalogValidator.Validate(catalog),
+            e => e.Contains("displacement timing"));
+    }
+
+    [Fact]
+    public void Validator_Rejects_Jump_Rise_Cap_Below_Natural_Rise()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        // natural rise = 10.95 / 30 = 0.365s
+        catalog.Jump.MaxRiseSeconds = 0.3f;
+
+        Assert.Contains(ElementalCatalogValidator.Validate(catalog),
+            e => e.Contains("jump settings"));
+    }
 }
