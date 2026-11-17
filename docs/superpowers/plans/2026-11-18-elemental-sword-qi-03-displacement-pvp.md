@@ -2359,6 +2359,7 @@ git commit -m "feat(client): consume local authoritative control projection"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/README.md`
 - 修改：`Server/README.md`
+- 修改：`Server/Monster/README.md`
 - 修改：`docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md`
 - 修改：`docs/superpowers/specs/2026-11-14-elemental-sword-qi-design.md`
 
@@ -2369,6 +2370,7 @@ git commit -m "feat(client): consume local authoritative control projection"
 - Protocol：任务 2 字段表 + `PvpMovementBudgetV1` 能力位；旧客户端缺省语义。
 - SyncCore：`MovementBudgetMath` 公式、`Displacements`/`Jump` 表项、`PveDamageBaselineHp`。
 - Server：接收 tick 预算、`DisplacementWindow`、720 HP/PvE 缩放、`ApplyPlayerControl` 是 Plan 04 入口；**明确状态运行时未实现**。
+- Monster：NPC→玩家直接伤害按 `target.MaxHp / PveDamageBaselineHp` 缩放（720 HP 会话 ×7.2，保持 PvE TTK）；Plan 04 的 DoT 必须复用同一函数。
 - SyncLayer：`MovementReportState`、跳跃 Start 边沿只发一次、本人 311 消费 Control/MaxHp、`CastConfirm` 映射。
 - Sys3C：`ComposeMoveSpeed = Base × Defend × Skill × Status`、`StatusActionLock` 保留空中起跳水平惯性、`SetStatusActionLock` 捕获速度。
 - Skills：突进起手/收尾窗口来自共享表、`SkillDashComponent` 乘状态倍率。
@@ -2412,7 +2414,8 @@ git add Assets/Scripts/AOT/Protocol/README.md \
   Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md \
   Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md \
   Assets/Scripts/Hotfix/GameSystems/Skills/README.md \
-  Server/README.md docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md \
+  Server/README.md Server/Monster/README.md \
+  docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md \
   docs/superpowers/specs/2026-11-14-elemental-sword-qi-design.md
 git commit -m "docs: record pvp movement budget and control status"
 ```
