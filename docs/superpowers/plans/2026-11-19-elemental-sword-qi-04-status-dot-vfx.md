@@ -977,13 +977,15 @@ git commit -m "feat(server): apply status control to monsters"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs`（新增 `PlayerDotDamageEvent`）
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Nameplate/DisplayEventBridge.cs`（只让飘字消费新事件）
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/DotDamageRoutingTests.cs`（新建）
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs`（补充）
 
 - [ ] **步骤 1：写失败测试**
 
-- 本地玩家收到 `DamageKind=Dot`：HP 变为 `TargetRemainingHp`、飘字一次，不触发受击 FSM/格挡/击退/命中特效。
-- 远程玩家/怪物 Dot：`Targetable` 血条更新 + 对应飘字事件；不调用 `PlayHit`、不发 `MonsterTakeDamageEvent`（避免命中特效/震屏），怪物改用 `MonsterDotDamageEvent`。
+- 本地玩家收到 `DamageKind=Dot`：HP 变为 `TargetRemainingHp`、只发 `PlayerDotDamageEvent` 飘字，不触发受击 FSM/格挡/击退/命中火花/受击泛红。
+- 远程玩家/怪物 Dot：`Targetable` 血条更新 + 对应飘字事件；不调用 `PlayHit`、不发 `MonsterTakeDamageEvent`（避免命中特效/震屏），怪物改用 `MonsterDotDamageEvent`，玩家改用 `PlayerDotDamageEvent`。
 - 直接伤害（`DamageKind=Direct`）行为完全不变。
 
 - [ ] **步骤 2：实现**
@@ -999,13 +1001,15 @@ if (hit.DamageKind == DamageKind.Dot)
         _onDotDamageToLocalPlayer?.Invoke(hit.TargetPlayerId, hit.Damage, hit.TargetRemainingHp);
         continue;
     }
-    // 远程：更新 Targetable；NPC 发 MonsterDotDamageEvent，玩家发 PlayerTakeDamageEvent；
-    // 绝不调用 PlayHit/BlockSucceededEvent/MonsterTakeDamageEvent。
+    // 远程：更新 Targetable；NPC 发 MonsterDotDamageEvent，玩家发 PlayerDotDamageEvent；
+    // 绝不调用 PlayHit/BlockSucceededEvent/MonsterTakeDamageEvent/PlayerTakeDamageEvent。
     continue;
 }
 ```
 
-`ClientNetworkHost` 把 `onDotDamageToLocalPlayer` 接到 `Sys3CEntry.ApplyDotDamage(damage, remainingHp)`；后者只改 `_currentHP`、发 `PlayerTakeDamageEvent` 飘字、必要时 `EvaluateLocalDeath`，不调用 `_fsmManager.HandleDamage`/格挡/击退/Flash。
+`PlayerDotDamageEvent` 只被 `DisplayEventBridge` 订阅（飘字），不能被 `HitFeedbackSystem`/`PlayerBodyTint` 消费；`PlayerTakeDamageEvent` 的语义仍是“直接受击”。
+
+`ClientNetworkHost` 把 `onDotDamageToLocalPlayer` 接到 `Sys3CEntry.ApplyDotDamage(damage, remainingHp)`；后者只改 `_currentHP`、发 `PlayerDotDamageEvent` 飘字、必要时 `EvaluateLocalDeath`，不调用 `_fsmManager.HandleDamage`/格挡/击退/Flash。
 
 - [ ] **步骤 3：运行测试**
 
@@ -1020,7 +1024,9 @@ MCP 不可用则直接 batchmode（不加 `-quit`），还原 `Assets/Packages/*
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs \
   Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs \
-  Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+  Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs \
+  Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs \
+  Assets/Scripts/Hotfix/GameSystems/Nameplate/DisplayEventBridge.cs
 git add Assets/Scripts/Tests/Editor/SyncLayer/DotDamageRoutingTests.cs
 git commit -m "feat(client): route dot damage without hit reactions"
 ```
