@@ -40,6 +40,35 @@ public class GameLoopOrderingTests
     }
 
     [Fact]
+    public async Task Action_PreTick_AfterPreTick_Packet_And_OnTick_Run_In_Order()
+    {
+        var order = new List<string>();
+        var done = new ManualResetEventSlim();
+        var loop = new GameLoop<FakePacket>(TimeSpan.FromMilliseconds(200),
+            _ => order.Add("packet"), new TestLogger(),
+            onTick: tick =>
+            {
+                order.Add("post:" + tick);
+                if (tick == 1) done.Set();
+            },
+            onPreTick: tick => order.Add("pre:" + tick));
+
+        loop.EnqueueAction(() => order.Add("action"));
+        loop.EnqueueAfterPreTick(() => order.Add("after-pre"));
+        loop.Enqueue(new FakePacket());
+        loop.Start();
+        try
+        {
+            Assert.True(done.Wait(TimeSpan.FromSeconds(2)));
+            Assert.Equal(new[] { "action", "pre:1", "after-pre", "packet", "post:1" }, order);
+        }
+        finally
+        {
+            await loop.Stop();
+        }
+    }
+
+    [Fact]
     public async Task TickCount_Advances_Only_After_PreTick_And_Packet()
     {
         long preCounter = -1, packetCounter = -1, postCounter = -1;

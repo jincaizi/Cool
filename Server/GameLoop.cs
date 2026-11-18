@@ -19,6 +19,7 @@ namespace KcpServer
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
         private readonly ConcurrentQueue<Action> _actionQueue = new ConcurrentQueue<Action>();
+        private readonly ConcurrentQueue<Action> _postPreTickQueue = new ConcurrentQueue<Action>();
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private Task? _loopTask;
         private long _tickCount;
@@ -59,6 +60,17 @@ namespace KcpServer
             _actionQueue.Enqueue(action);
         }
 
+        /// <summary>
+        /// 入队一个**必须在状态预 tick 之后**执行的动作（WebSocket 入站包走这里）。
+        /// 直接走 <see cref="EnqueueAction"/> 会在预 tick 之前消费，造成 KCP（预 tick 后）
+        /// 与 WS 的 1 tick 时序分裂。
+        /// </summary>
+        public void EnqueueAfterPreTick(Action action)
+        {
+            if (_disposed) return;
+            _postPreTickQueue.Enqueue(action);
+        }
+
         public async Task Stop()
         {
             _cts.Cancel();
@@ -84,6 +96,13 @@ namespace KcpServer
                 long nextTick = Interlocked.Read(ref _tickCount) + 1;
                 try { _onPreTick?.Invoke(nextTick); }
                 catch (Exception ex) { _logger.LogError(ex, "GameLoop pre-tick error"); }
+
+                // 预 tick 之后、网络包之前：WebSocket 入站包（与 KCP 包同基准）
+                while (_postPreTickQueue.TryDequeue(out var afterPreTickAction))
+                {
+                    try { afterPreTickAction(); }
+                    catch (Exception ex) { _logger.LogError(ex, "GameLoop post-pre-tick error"); }
+                }
 
                 // 清空当前数据队列（单线程独占语义：处理期间新入队留待下一 tick）
                 while (_queue.TryDequeue(out var packet))

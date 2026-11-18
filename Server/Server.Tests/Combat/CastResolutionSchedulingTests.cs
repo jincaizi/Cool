@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Cool.Protocol;
 using Cool.SyncCore;
 using Xunit;
@@ -141,10 +143,8 @@ public class CastResolutionSchedulingTests
         // 钉住"决策 tick → 判定 tick"的**差值关系**：`decideTick = T` ⇒ 判定恰在
         // `T + CombatRules.HitDelayTicks(entry)` 那一 tick 到期——**早一 tick 也不行**
         //（既有用例只抓得住"晚"）。期望 tick 由表推导（`HitDelayTicks(EntryOf(10001))`），不是硬编码常数。
-        // **已知覆盖缺口**：包路径里 `CastHandler.HandleCastAsync` 的 `_server.CurrentTick + 1`
-        //（Server/Handler/CastHandler.cs:269）**没有**自动化守护——删掉那个 `+ 1`（正是 F17 修掉的回归），
-        // 本用例与全量服务端套件仍全绿（实测 229/229）；包路径的守护需要假 Server3C/session 装置，
-        // 属计划的已知缺口，只能靠代码审查与端到端手测兜住。
+        // 包路径的 tick 基准由 Packet_Path_Uses_CurrentTick_As_DecideTick 守护：preTick 已把
+        // Server3C.CurrentTick 写成当前 tick，HandleCastAsync 直接用 CurrentTick（F17 的 +1 已删除）。
         var (store, resolver, caster, target) = World(1.5f);
         const uint decideTick = 37;
         resolver.Decide(caster, Swing(), decideTick);
@@ -154,9 +154,50 @@ public class CastResolutionSchedulingTests
         Assert.Single(one.Hits);
     }
 
+    [Fact]
+    public async Task Packet_Path_Uses_CurrentTick_As_DecideTick()
+    {
+        // preTick 在网络包之前把 CurrentTick 写成当前 tick；包路径不得再 +1 补偿。
+        using var server = new Server3C(new TestLogger());
+        var store = new EntityStore();
+        var caster = store.AddPlayer(1, "Caster");
+        caster.IsLoggedIn = true;
+        caster.UpdatePosition(new Vector3(0f, 0f, 0f), 0f, 0f, 1L, 0U);
+        var resolver = new CombatResolver(store, new System.Random(42));
+        var handler = new CastHandler(server, new TestLogger(), resolver);
+        var session = new FakeSession(101);
+        server.BindPlayerToSession(1, session);
+        var sent = new List<(MessageId Id, IMessage Message)>();
+        server.OfflineSendSink = (_, id, message) => sent.Add((id, message));
+
+        Assert.Equal(0u, server.CurrentTick);   // 未启动主循环：preTick 尚未写入更高 tick
+        await handler.HandleCastAsync(session, Swing());
+
+        var confirm = Assert.IsType<CastConfirm>(
+            Assert.Single(sent, m => m.Id == MessageId.CastConfirm).Message);
+        Assert.True(confirm.Accepted);
+        Assert.Equal(server.CurrentTick, confirm.AcceptedTick);
+    }
+
     private static SkillEntry EntryOf(int skillId)
     {
         CombatRules.TryGet(skillId, out var entry);
         return entry!;
+    }
+
+    private sealed class FakeSession : IServerSession
+    {
+        public FakeSession(long sessionId) => SessionId = sessionId;
+        public long SessionId { get; }
+        public bool IsConnected => true;
+        public DateTime LastActivityTime => DateTime.UtcNow;
+        public event EventHandler<byte[]>? DataReceived;
+        public event EventHandler? Disconnected;
+        public event EventHandler<Exception>? Error;
+        public void Send(MessageId messageId, IMessage message, MessageFlags flags = MessageFlags.Reliable) { }
+        public void UpdateActivity() { }
+        public bool IsTimedOut(TimeSpan timeout) => false;
+        public Task CloseAsync(string reason = "Normal") => Task.CompletedTask;
+        public void Dispose() { }
     }
 }

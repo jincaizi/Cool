@@ -106,6 +106,50 @@ public class ServerStatusManagerTests
     }
 
     [Fact]
+    public void Control_Change_Goes_Through_Sink_Instead_Of_Direct_Write()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        var player = new PlayerState(1);
+        var sinkCalls = new System.Collections.Generic.List<(float Speed, bool Locked)>();
+        // 假 sink 不写回：若管理器绕过 sink 直写，PlayerState 字段会变成 0.7。
+        player.ConfigureStatuses(catalog, (speed, locked) => sinkCalls.Add((speed, locked)));
+        var slow = catalog.Statuses.Find(s => s.EffectId == 101)!;
+
+        player.Statuses!.Apply(slow, sourceId: 2, skillId: 10002, castId: 7, tick: 0, catalog);
+
+        var applied = Assert.Single(sinkCalls);
+        Assert.Equal(0.7f, applied.Speed, 4);
+        Assert.False(applied.Locked);
+        Assert.Equal(1f, player.ControlSpeedScale, 4);   // 直写分支未执行
+        Assert.False(player.ControlActionLock);
+    }
+
+    [Fact]
+    public void Expiry_Restores_Control_Through_Sink()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        var player = new PlayerState(1);
+        var sinkCalls = new System.Collections.Generic.List<(float Speed, bool Locked)>();
+        // 写回型 sink（模拟 Server3C.ApplyPlayerControl）：保证到期时的派生值确实变化。
+        player.ConfigureStatuses(catalog, (speed, locked) =>
+        {
+            sinkCalls.Add((speed, locked));
+            player.ApplyControl(speed, locked);
+        });
+        var slow = catalog.Statuses.Find(s => s.EffectId == 101)!;
+        player.Statuses!.Apply(slow, sourceId: 2, skillId: 10002, castId: 7, tick: 0, catalog);
+        Assert.Equal(0.7f, player.ControlSpeedScale, 4);
+        sinkCalls.Clear();
+
+        player.Statuses.RemoveExpired(30);
+
+        var expired = Assert.Single(sinkCalls);
+        Assert.Equal(1f, expired.Speed, 4);
+        Assert.False(expired.Locked);
+        Assert.Equal(1f, player.ControlSpeedScale, 4);
+    }
+
+    [Fact]
     public void ConfigureStatuses_Is_Idempotent_And_Null_Until_Configured()
     {
         var catalog = ElementalCatalogDefaults.Create();

@@ -1159,12 +1159,10 @@ namespace KcpServer
                 return;
             }
 
-            // F17：包在 tick 之间处理，此刻 CurrentTick 仍是上一 tick 的值——
-            // 本次决策归属"本轮即将运行的 tick"，+1 后与怪物路径（tick 内决策）口径一致。
-            // 语义出处：Server3C.CurrentTick 的注释（"packet 处理时比 lambda 已推进值落后一个迭代——勿'修正'为实时值"）。
-            // **本行是本分支最易被误删的一处**：删掉 `+ 1` 不会让任何测试变红（已知覆盖缺口，
-            // 见 CastResolutionSchedulingTests.Judgment_Lands_Exactly_On_DecideTick_Plus_HitDelay_Ticks 的注释）。
-            var decision = _resolver.Decide(playerId.Value, request, _server.CurrentTick + 1);
+            // preTick 已在包处理之前把 CurrentTick 写成当前 tick（KCP 包与 WS after-pre-tick
+            // 动作同基准）——决策直接取 CurrentTick，与怪物路径（tick 内决策）口径一致。
+            // 守护：CastResolutionSchedulingTests.Packet_Path_Uses_CurrentTick_As_DecideTick。
+            var decision = _resolver.Decide(playerId.Value, request, _server.CurrentTick);
             await BroadcastSwingAsync(playerId.Value, request, decision);
         }
 
@@ -1175,7 +1173,7 @@ namespace KcpServer
             long? playerId = _server.GetPlayerId(session);
             if (!playerId.HasValue) return;
             var cancels = _resolver.CancelPending(playerId.Value, request.SkillId,
-                request.CastId, _server.CurrentTick + 1, NpcActionCancelReason.Forced);
+                request.CastId, _server.CurrentTick, NpcActionCancelReason.Forced);
             BroadcastCancel(cancels);
         }
 

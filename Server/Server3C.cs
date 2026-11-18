@@ -158,7 +158,8 @@ namespace KcpServer
         public int PlayerCount => _roomManager.TotalPlayerCount;
         public int ActiveSessionCount => _sessionManager.SessionCount;
 
-        /// <summary>当前主循环 tick（packet 处理时比 lambda 已推进值落后一个迭代——冷却记录与判定同基准，语义不受影响；勿'修正'为实时值）</summary>
+        /// <summary>当前主循环 tick：preTick 在网络包消费前写入本 tick，KCP 包与 WS after-pre-tick
+        /// 动作、onTick 使用同一基准；包 handler 直接使用本值（F17 的 +1 补偿已删除）。</summary>
         public uint CurrentTick { get; private set; }
 
         public Server3C(ILogger logger, Vector3 respawnPosition = default,
@@ -335,8 +336,10 @@ namespace KcpServer
             bool supportsAuthoritativeRespawn = false)
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
-            // Plan 04：登录实体持有权威状态运行时（延迟初始化，bot 不配置）
-            player.ConfigureStatuses(_elementalCatalog);
+            // Plan 04：登录实体持有权威状态运行时（延迟初始化，bot 不配置）。
+            // 控制变化走 ApplyPlayerControl 唯一入口（首次 ActionLock 取消未提交施法、死亡拒绝写入）。
+            player.ConfigureStatuses(_elementalCatalog,
+                (speed, locked) => ApplyPlayerControl(player.PlayerId, speed, locked));
             // P5：登录标志置在 store 实例上——怪物感知（MonsterBrain.TryAcquireBySight）与
             // 怪物施法候选（CastHandler）过滤读的是本实例；LoginHandler 自建实例只进 RoomManager。
             // BotRunner 不经此路径（直接 AddPlayer）——压测 bot 保持非登录态（D-P5-3 语义）
@@ -706,7 +709,8 @@ namespace KcpServer
         {
             if (sender is IServerSession session)
             {
-                _gameLoop.EnqueueAction(() => { _ = ProcessPacket(session, data); });
+                // 必须在状态预 tick 之后执行，与 KCP 包（preTick 之后 drain）同一时序。
+                _gameLoop.EnqueueAfterPreTick(() => { _ = ProcessPacket(session, data); });
             }
         }
 
