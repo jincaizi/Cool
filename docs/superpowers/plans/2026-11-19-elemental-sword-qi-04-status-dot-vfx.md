@@ -570,6 +570,16 @@ public sealed class ServerStatusManager
         }
     }
 
+    /// <summary>DoT 到 EndTick 且没有排定跳时移除；必须 bump，否则客户端不会收到撤下投影。</summary>
+    public void RemoveExpiredDots(uint tick)
+    {
+        if (Runtime.RemoveExpiredDots(tick) > 0)
+        {
+            SyncControl();
+            _owner.BumpCombatVersion();
+        }
+    }
+
     public void ClearAll(uint tick)
     {
         if (Runtime.Count == 0) return;
@@ -761,6 +771,7 @@ git commit -m "feat(server): apply elemental status on first valid hit"
 覆盖：
 - 灼烧按间隔掉血，`DamageKind=Dot`，每跳 `EventSeq/EventId/CombatVersion` 正确；目标死亡后不再跳。
 - 末跳在 `EndTick` 结算且只一次；风同 `EndTick` 不放大末跳。
+- off-phase 到期（EndTick 无排定跳）移除时 `CombatVersion` 必须递增，客户端才能收到撤下投影。
 - 怪物 DoT 走 `MonsterModule.OnDamageTaken(Dot)`：不进入 `HitStartTick/ActionState=Hit`，仇恨按 `damage × ThreatPerDamage`。
 - 玩家 DoT 死亡后清状态；复活清状态；Evade 到家清状态并回满血。
 - `DamageResult` 收件人 = 来源 + 目标 + 观察者，与直接伤害同规则。
@@ -817,7 +828,7 @@ public sealed class StatusTickService
                 entity.Statuses.AdvanceDot(status, tick);
                 if (!entity.IsAlive) entity.Statuses.ClearAll(tick);
             }
-            entity.Statuses.Runtime.RemoveExpiredDots(tick);
+            entity.Statuses.RemoveExpiredDots(tick);
         }
     }
 }
