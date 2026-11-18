@@ -883,22 +883,29 @@ git commit -m "feat(server): tick burn damage and publish dot results"
 - 修改：`Server/Monster/MonsterModule.cs`
 - 修改：`Server/Monster/MonsterBtActions.cs`
 - 修改：`Server/Monster/MonsterActionRunner.cs`
+- 修改：`Server/Monster/MonsterState.cs`
+- 修改：`Server/Monster/SimpleMoveSystem.cs`
 - 修改：`Server/Server3C.cs`
+- 修改：`Server/Player/ServerStatusManager.cs` / `PlayerState.cs`（如需补装 sink）
 - 测试：`Server/Server.Tests/Monster/MonsterStatusControlTests.cs`（新建）
 
 - [ ] **步骤 1：写失败测试**
 
 覆盖：
-- 冰减速后怪物 `UpdatePosition.Speed` = `Config.moveSpeed × SpeedScale`。
+- 冰减速后怪物**真实位移**与 `UpdatePosition.Speed` 都按 `Config.moveSpeed × SpeedScale`（不是只改广播；`SimpleMoveSystem.MoveTowards` 的期望位移与 ORCA `maxStep` 同缩）。
 - 雷 `ActionLock` 时行为树不再发起新攻击/移动；未霸体前摇被 `Cancel`，霸体（SpiderBoss）不被取消但状态仍挂上。
 - 麻痹结束恢复移动/攻击；Evade 到家清状态并回满血。
+- **重生怪**（死亡展示到期/Evade 超时重生）也获得 control sink：麻痹首次生效会取消其未提交前摇。
 - 玩家 DoT/控制不受怪物霸体逻辑影响。
 
 - [ ] **步骤 2：实现**
 
+`MonsterState` 增加 `public float SpeedScale { get; set; } = 1f;`；`SimpleMoveSystem.MoveTowards` 用 `float speed = m.Config.moveSpeed * m.SpeedScale;`，期望位移与 ORCA `configuredLength/maxStep` 都用 `speed`（`SpeedScale=1` 时与旧表达式逐位一致）。
+
 `MonsterModule.Tick`：
 
 ```csharp
+m.SpeedScale = entity.ControlSpeedScale;
 bool actionLocked = entity.ControlActionLock;
 ...
 if (!inHitWindow && !actionLocked && (m.ActionRunner == null || m.ActionRunner.CanStartSkill))
@@ -906,8 +913,26 @@ if (!inHitWindow && !actionLocked && (m.ActionRunner == null || m.ActionRunner.C
 else m.Moving = false;
 
 entity.UpdatePosition(m.Position, YawOf(m.Rotation),
-    m.Moving ? m.Config.moveSpeed * entity.ControlSpeedScale : 0f, tick * 10_000L + 1L, tick);
+    m.Moving ? m.Config.moveSpeed * m.SpeedScale : 0f, tick * 10_000L + 1L, tick);
 ```
+
+生成回调：
+
+```csharp
+public Action<PlayerState>? OnMonsterSpawned;
+// SpawnMonster 末尾：
+OnMonsterSpawned?.Invoke(entity);
+```
+
+`Server3C.EnableMonsters` 在 `SpawnDefaultLayout` 之前设置：
+
+```csharp
+_monsterModule.OnMonsterSpawned = entity =>
+    entity.ConfigureStatuses(_elementalCatalog,
+        (speed, locked) => ApplyPlayerControl(entity.PlayerId, speed, locked));
+```
+
+并对已在场怪物补同款配置（`ConfigureStatuses` 的补装 sink 分支保证重生/懒配置不会空）。
 
 `MonsterBtActions` 的攻击入口开头：`if (entity.ControlActionLock) { m.Moving=false; return BtStatus.Failure; }`。
 
@@ -938,7 +963,8 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterEvadeTes
 
 ```bash
 git add Server/Monster/MonsterModule.cs Server/Monster/MonsterBtActions.cs \
-  Server/Monster/MonsterActionRunner.cs Server/Server3C.cs
+  Server/Monster/MonsterActionRunner.cs Server/Monster/MonsterState.cs \
+  Server/Monster/SimpleMoveSystem.cs Server/Server3C.cs
 git add Server/Server.Tests/Monster/MonsterStatusControlTests.cs
 git commit -m "feat(server): apply status control to monsters"
 ```
