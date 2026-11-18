@@ -42,6 +42,16 @@ namespace KcpServer
             }
         }
 
+        /// <summary>DoT 推进下一跳；末跳/到期被移除时同步投影版本（客户端据此撤状态表现）。</summary>
+        public void AdvanceDot(ActiveStatus status, uint tick)
+        {
+            bool removed = status.PendingRemoval || tick >= status.EndTick;
+            Runtime.AdvanceDot(status, tick);
+            if (!removed) return;
+            SyncControl();
+            _owner.BumpCombatVersion();
+        }
+
         public void ClearAll(uint tick)
         {
             if (Runtime.Count == 0) return;

@@ -101,7 +101,11 @@ namespace KcpServer.Monster
             if (attacker == null || attacker.Kind != (byte)EntityKind.Player
                 || !attacker.IsAlive || !attacker.IsLoggedIn) return;
 
-            m.Threats.AddDamage(attackerId, damage);
+            // Plan 04：DoT 每跳只按伤害计仇恨，不叠加 ThreatFlat（避免每跳固定 +10 抢仇恨）。
+            if (kind == MonsterDamageKind.Dot)
+                m.Threats.Add(attackerId, damage * ThreatTable.ThreatPerDamage);
+            else
+                m.Threats.AddDamage(attackerId, damage);
             if (m.Mode == MonsterMode.Patrol) m.Mode = MonsterMode.Combat;
             m.NoValidTargetSinceTick = null;
 
@@ -150,6 +154,8 @@ namespace KcpServer.Monster
         public void ArriveHome(MonsterState m, PlayerState entity, uint tick)
         {
             entity.Hp = entity.MaxHp;
+            // Plan 04：脱战到家重置所有状态（血已回满，控制派生恢复）。
+            entity.Statuses?.ClearAll(tick);
             entity.BumpCombatVersion();
             entity.ActionState = (byte)NpcAnimationState.Idle;
             m.LastHp = entity.Hp;

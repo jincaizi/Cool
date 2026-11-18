@@ -54,6 +54,9 @@ namespace KcpServer
         // P4：服务端权威战斗裁决（校验/命中/掷骰/扣血；广播经 CastHandler）
         private readonly CastHandler _castHandler;
 
+        // Plan 04：preTick 的权威状态推进（到期修饰 → 灼烧跳数 → 死亡清理）
+        private readonly StatusTickService _statusTickService;
+
         // 属性剑气 v1：共享目录、权威换装与指纹
         private readonly ElementalCatalogDefinition _elementalCatalog;
         private readonly string _elementalCatalogFingerprint;
@@ -185,6 +188,9 @@ namespace KcpServer
             _equipHandler = new EquipHandler(_elementalCatalog);
             _castHandler = new CastHandler(this, _logger,
                 new CombatResolver(_entityStore, null, _elementalCatalog));
+            // 怪物模块在 EnableMonsters 才出现——用延迟查闭包，未启用怪物时为空。
+            _statusTickService = new StatusTickService(_entityStore, _castHandler,
+                () => _monsterModule, _elementalCatalog);
 
             // 属性剑气 v1：基线快照携带完整战斗投影（AOI 纯组装，注入权威组装器）。
             _aoi.CombatProjectionProvider = entity =>
@@ -207,11 +213,9 @@ namespace KcpServer
                 logger,
                 onPreTick: tick =>
                 {
-                    // 状态预 tick 先于网络包：handler 看到新 tick 前到期修饰已移除。
-                    // DoT 结算与状态 tick 服务在 Plan 04 后续任务接入本钩子。
+                    // 状态预 tick 先于网络包：handler 看到新 tick 前到期修饰已移除、灼烧跳已结算。
                     CurrentTick = (uint)tick;
-                    foreach (var entity in _entityStore.All)
-                        entity.Statuses?.RemoveExpired((uint)tick);
+                    _statusTickService.Tick((uint)tick);
                 },
                 onTick: tick =>
                 {

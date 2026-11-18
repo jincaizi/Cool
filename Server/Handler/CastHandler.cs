@@ -1066,6 +1066,33 @@ namespace KcpServer
             return recipients;
         }
 
+        /// <summary>全局事件 ID（Plan 04 灼烧跳数填 <see cref="HitEntry.EventId"/>）——复用判定器的分配器。</summary>
+        public ulong AllocateEventId() => _resolver.AllocateEventId();
+
+        /// <summary>Plan 04：灼烧跳数的伤害广播。收件人与直接伤害同规则
+        /// （来源 + 目标 + 双方观察者）；来源恒为玩家施法者（怪物不施加元素状态）。</summary>
+        public Task BroadcastDotDamageAsync(long sourceId, int skillId, HitEntry hit)
+        {
+            var result = new DamageResult
+            {
+                SourcePlayerId = sourceId,
+                SkillId = skillId,
+                ServerTimestamp = ServerClock.NowTicks(),
+                Hits = new List<HitEntry> { hit },
+                SourceKind = (int)EntityKind.Player
+            };
+            var recipients = CollectDamageRecipients(
+                new[] { hit.TargetPlayerId }, sourceId, npcCaster: false,
+                id => _server.GetObserversOf(id), id => _server.GetVisiblePlayers(id));
+            foreach (var id in recipients)
+            {
+                var s = _server.GetSession(id);
+                if (s != null)
+                    _ = _server.SendToSessionAsync(s, MessageId.DamageResult, result);
+            }
+            return Task.CompletedTask;
+        }
+
         /// <summary>判定阶段广播伤害（D-P4-6）。收件人含施法者、受击者与双方观察者（去重）；
         /// 怪物施法者无 session，由 GetSession 自然跳过。</summary>
         public async Task BroadcastDamageAsync(CombatResolver.CastResolution resolution)

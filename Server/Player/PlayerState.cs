@@ -56,6 +56,8 @@ namespace KcpServer
             ControlVersion++;
             Displacement = null;
             Movement.Reset();
+            // Plan 04：死亡立即清状态（控制派生已重置，SyncControl 不会二次写入）。
+            Statuses?.ClearAll((uint)tick);
             BumpCombatVersion();
         }
 
@@ -81,6 +83,8 @@ namespace KcpServer
             ControlVersion++;
             Displacement = null;
             Movement.Reset();
+            // Plan 04：新生命周期从干净状态开始（死亡后可能仍有写入口）。
+            Statuses?.ClearAll((uint)nowTick);
             BumpCombatVersion();
             return true;
         }
