@@ -20,6 +20,7 @@ namespace KcpServer
         private readonly ElementalCatalogDefinition _elementalCatalog;
         private readonly float _defaultWeaponBaseAttack;
         private ulong _nextCastId;
+        private ulong _nextEventId;
 
         public CombatResolver(EntityStore store, Random? rng = null,
             ElementalCatalogDefinition? elementalCatalog = null)
@@ -31,6 +32,9 @@ namespace KcpServer
                 w => w.TemplateId == _elementalCatalog.DefaultWeaponTemplateId);
             _defaultWeaponBaseAttack = defaultWeapon?.BaseAttack ?? 1f;
         }
+
+        /// <summary>全局事件 ID（跨重试去重；Plan 04 填入 <see cref="HitEntry.EventId"/>）。</summary>
+        public ulong AllocateEventId() => ++_nextEventId;
 
         /// <summary>NPC 施法的判定帧 LOS 回调（参数：casterId, from, to）。由 Server3C 在
         /// EnableMonsters 后接线到 AttackLineOfSight.HasLineOfSight（0.25m 探针）；null = 不做 LOS（无导航宿主）。
@@ -114,6 +118,9 @@ namespace KcpServer
             public bool Launched;
             public bool CancelBroadcast;
             public string SceneId = "";
+
+            // Plan 04：元素状态每目标每次施法只附加一次（挥砍 + 剑气两个伤害实例同组）
+            public readonly HashSet<(long TargetId, uint LifeId)> ElementAppliedTargets = new();
 
             public PendingCast(long casterId, CastRequest request, CastBroadcast broadcast,
                 bool isNpcCaster, ProjectileSpec? projectile, RepeatSpec? repeat, float charge, uint firstTick)
@@ -658,7 +665,7 @@ namespace KcpServer
             if (swingHitIds != null)
             {
                 foreach (var targetId in swingHitIds)
-                    ApplyHit(pending, entry, spec, targetId, casterPos, resolution, isProjectile: false);
+                    ApplyHit(pending, entry, spec, targetId, casterPos, resolution, isProjectile: false, tick);
             }
 
             // 剑气沿施法方向推进：按沿线距离排序，格挡者之前的先结算、之后的被吸收跳过
@@ -681,7 +688,7 @@ namespace KcpServer
                 else if (pending.Runner == null && !pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
 
                 bool blocked = ApplyHit(pending, entry, spec, targetId, lineAttackerPos,
-                    resolution, isProjectile: spec != null);
+                    resolution, isProjectile: spec != null, tick);
                 if (pending.Repeat.HasValue)
                 {
                     pending.RepeatHitCounts.TryGetValue(targetId, out int repeatHits);
@@ -758,7 +765,7 @@ namespace KcpServer
         /// <summary>对一个命中目标结算：掷骰（+蓄力倍率）→ 格挡 → 扣血 → HitEntry；返回是否格挡。
         /// 调用方决定是否先经 GroupHitIds（挥击实例不经过去重，与剑气各算一次）。</summary>
         private bool ApplyHit(PendingCast pending, SkillEntry entry, ProjectileSpec? spec,
-            long targetId, Vec3 attackerPos, CastResolution resolution, bool isProjectile)
+            long targetId, Vec3 attackerPos, CastResolution resolution, bool isProjectile, uint tick)
         {
             var target = _store.GetPlayer(targetId);
             if (target == null) return false;
@@ -799,9 +806,39 @@ namespace KcpServer
             if (pending.IsNpcCaster && target.Kind == (byte)EntityKind.Player && target.IsLoggedIn)
                 damage = CombatRules.ScaleNpcDamageToPlayer(damage, target.MaxHp);
 
+            // Plan 04：风易伤在扣血前读取——本次命中自身不吃刚附加的倍率，
+            // 同次施法的后续命中（挥砍之后的剑气等）才读取新倍率。
+            bool pvp = target.Kind == (byte)EntityKind.Player && !pending.IsNpcCaster;
+            if (target.Statuses != null)
+                damage *= target.Statuses.Runtime.IncomingDamageMultiplier(pvp,
+                    _elementalCatalog.Pvp.WindVulnerabilityMultiplier);
+
             target.ApplyDamage(damage);
             if (target.Kind == (byte)EntityKind.Npc)
                 NpcDamaged?.Invoke(target.PlayerId, pending.CasterId, damage);
+
+            // Plan 04：10002 首个有效命中附加武器元素状态；每目标每次施法只附加一次
+            // （挥砍先结算 ⇒ 同组剑气不再附加；剑气先命中则由剑气附加）。
+            if (!pending.IsNpcCaster && pending.Request.SkillId == 10002
+                && pending.Weapon.ElementId > 0 && damage > 0f && !blocked && target.IsAlive)
+            {
+                var key = (targetId, target.LifeId);
+                if (pending.ElementAppliedTargets.Add(key))
+                {
+                    target.ConfigureStatuses(_elementalCatalog);
+                    var element = _elementalCatalog.Elements.Find(e => e.ElementId == pending.Weapon.ElementId);
+                    if (element != null)
+                        foreach (int effectId in element.StatusEffectIds)
+                        {
+                            var def = _elementalCatalog.Statuses.Find(s => s.EffectId == effectId);
+                            if (def != null)
+                                target.Statuses!.Apply(def, pending.CasterId, pending.Request.SkillId,
+                                    pending.CastId, tick, _elementalCatalog);
+                        }
+                }
+            }
+
+            uint seq = target.AllocateEventSeq();
             resolution.Hits.Add(new HitEntry
             {
                 TargetPlayerId = targetId,
@@ -813,7 +850,10 @@ namespace KcpServer
                 HitZ = target.Position.Z,
                 CastId = pending.CastId,
                 DamageKind = DamageKind.Direct,
-                TargetLifeId = target.LifeId
+                TargetLifeId = target.LifeId,
+                EventSeq = seq,
+                EventId = AllocateEventId(),
+                CombatVersion = target.CombatVersion // 状态/伤害 bump 之后的目标当前版本
             });
             return blocked;
         }
