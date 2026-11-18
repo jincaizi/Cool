@@ -101,8 +101,64 @@ public class StatusRuntimeTests
             runtime.Apply(thunder, 2, 10002, 8, tick: 15, targetIsPlayer: true, sourceIsPlayer: true)); // 0.5s 免疫
 
         runtime.Apply(wind, 1, 10002, 7, 0, targetIsPlayer: true, sourceIsPlayer: true);
+        runtime.RemoveExpiredModifiers(23);           // wind 1.5s 已到期移除
         Assert.Equal(StatusApplyResult.Ignored,
-            runtime.Apply(wind, 2, 10002, 8, tick: 30, targetIsPlayer: true, sourceIsPlayer: true)); // 4s 内不刷新
+            runtime.Apply(wind, 2, 10002, 8, tick: 30, targetIsPlayer: true, sourceIsPlayer: true)); // 4s 内仍不刷新
+        Assert.Equal(StatusApplyResult.Applied,
+            runtime.Apply(wind, 2, 10002, 8, tick: 61, targetIsPlayer: true, sourceIsPlayer: true)); // 4s 后可再施加
+    }
+
+    [Fact]
+    public void Burn_OffPhase_Refresh_Is_Removed_At_EndTick_Without_Extra_Tick()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
+        var runtime = new StatusRuntime();
+        runtime.Configure(catalog.Pvp);
+        runtime.Apply(burn, 1, 10002, 7, tick: 0, targetIsPlayer: false, sourceIsPlayer: true);
+        Advance(runtime, 15);
+        Advance(runtime, 30);
+        runtime.Apply(burn, 2, 10002, 8, tick: 32, targetIsPlayer: false, sourceIsPlayer: true); // EndTick 77
+
+        Advance(runtime, 45);
+        Advance(runtime, 60);
+        Advance(runtime, 75);
+        Advance(runtime, 77);                          // 无排定跳：直接移除，不额外补一跳
+        Assert.Empty(runtime.Active);
+    }
+
+    [Fact]
+    public void Burn_NonDividing_Interval_Removed_At_EndTick_Without_Extra_Tick()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
+        burn = new StatusEffectDefinition
+        {
+            EffectId = burn.EffectId, EffectKind = burn.EffectKind, StackGroupId = burn.StackGroupId,
+            DurationSeconds = 3f, IntervalSeconds = 1.1f, DamagePerTick = burn.DamagePerTick
+        };
+        var runtime = new StatusRuntime();
+        runtime.Configure(catalog.Pvp);
+        runtime.Apply(burn, 1, 10002, 7, tick: 0, targetIsPlayer: false, sourceIsPlayer: true);
+
+        Advance(runtime, 17);
+        Advance(runtime, 34);
+        runtime.RemoveExpiredDots(45);
+        Assert.Empty(runtime.Active);
+    }
+
+    [Fact]
+    public void Pve_Paralyze_Does_Not_Grant_Control_Immunity()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        var thunder = catalog.Statuses.Find(s => s.EffectId == 301)!;
+        var runtime = new StatusRuntime();
+        runtime.Configure(catalog.Pvp);
+        runtime.Apply(thunder, 1, 10002, 7, 0, targetIsPlayer: false, sourceIsPlayer: true);
+        runtime.Remove(301, tick: 12);
+
+        Assert.Equal(StatusApplyResult.Applied,
+            runtime.Apply(thunder, 2, 10002, 8, tick: 15, targetIsPlayer: false, sourceIsPlayer: true));
     }
 
     [Fact]
@@ -140,7 +196,7 @@ public class StatusRuntimeTests
         runtime.Configure(catalog.Pvp);
 
         runtime.Apply(wind, 1, 10002, 7, tick: 0, targetIsPlayer: false, sourceIsPlayer: true);
-        runtime.Apply(thunder, 1, 10002, 7, tick: 0, targetIsPlayer: false, sourceIsPlayer: true);
+        runtime.Apply(thunder, 1, 10002, 7, tick: 0, targetIsPlayer: true, sourceIsPlayer: true);
         runtime.Remove(301, tick: 12);
         Assert.True(runtime.ControlImmuneUntilTick > 0u);
 
@@ -165,5 +221,13 @@ public class StatusRuntimeTests
         Assert.Equal(8u, StatusRuntime.SecondsToTicks(0.5f));
         Assert.Equal(0u, StatusRuntime.SecondsToTicks(0f));
         Assert.Equal(0u, StatusRuntime.SecondsToTicks(float.NaN));
+    }
+
+    private static void Advance(StatusRuntime runtime, uint tick)
+    {
+        var due = new List<ActiveStatus>();
+        runtime.CollectDueDots(tick, due);
+        foreach (var status in due) runtime.AdvanceDot(status, tick);
+        runtime.RemoveExpiredDots(tick);
     }
 }

@@ -16,6 +16,7 @@ namespace Cool.SyncCore
         public uint EndTick;
         public uint NextTick;
         public bool PendingRemoval;
+        public bool IsPvpControl;
 
         public int EffectId => Definition.EffectId;
         public int GroupId => Definition.StackGroupId;
@@ -30,6 +31,7 @@ namespace Cool.SyncCore
         private readonly Dictionary<int, ActiveStatus> _byGroup = new();
         private uint _controlImmunityTicks;
         private uint _vulnerabilityNoRefreshTicks;
+        private uint? _lastVulnerableAppliedTick;
 
         public IEnumerable<ActiveStatus> Active => _byEffect.Values;
         public int Count => _byEffect.Count;
@@ -51,12 +53,11 @@ namespace Cool.SyncCore
 
             if (kind == StatusEffectKind.Paralyze && tick < ControlImmuneUntilTick)
                 return StatusApplyResult.Ignored;
-            if (kind == StatusEffectKind.Vulnerable && targetIsPlayer && sourceIsPlayer)
-            {
-                var existingWind = _byGroup.TryGetValue(def.StackGroupId, out var old) ? old : null;
-                if (existingWind != null && tick - existingWind.AppliedTick < _vulnerabilityNoRefreshTicks)
-                    return StatusApplyResult.Ignored;
-            }
+            // 4s 窗口跨状态移除保存：不能只看 _byGroup 里是否仍有活跃 wind。
+            if (kind == StatusEffectKind.Vulnerable && targetIsPlayer && sourceIsPlayer
+                && _lastVulnerableAppliedTick.HasValue
+                && tick - _lastVulnerableAppliedTick.Value < _vulnerabilityNoRefreshTicks)
+                return StatusApplyResult.Ignored;
 
             if (_byGroup.TryGetValue(def.StackGroupId, out var existing))
             {
@@ -68,6 +69,9 @@ namespace Cool.SyncCore
                 {
                     existing.Definition = def;
                     existing.EndTick = AddTicks(tick, duration);
+                    existing.PendingRemoval = false;
+                    existing.IsPvpControl = kind == StatusEffectKind.Paralyze
+                        && targetIsPlayer && sourceIsPlayer;
                     if (existing.IsDot)
                     {
                         uint next = AddTicks(tick, SecondsToTicks(def.IntervalSeconds));
@@ -81,6 +85,7 @@ namespace Cool.SyncCore
                         existing.SourceCastId = castId;
                         existing.AppliedTick = tick;
                     }
+                    if (kind == StatusEffectKind.Vulnerable) _lastVulnerableAppliedTick = tick;
                     return StatusApplyResult.Refreshed;
                 }
             }
@@ -90,17 +95,19 @@ namespace Cool.SyncCore
                 Definition = def, SourceId = sourceId, SourceSkillId = skillId, SourceCastId = castId,
                 AppliedTick = tick, EndTick = AddTicks(tick, duration),
                 NextTick = kind == StatusEffectKind.Burn
-                    ? AddTicks(tick, SecondsToTicks(def.IntervalSeconds)) : 0u
+                    ? AddTicks(tick, SecondsToTicks(def.IntervalSeconds)) : 0u,
+                IsPvpControl = kind == StatusEffectKind.Paralyze && targetIsPlayer && sourceIsPlayer
             };
             _byEffect[def.EffectId] = status;
             _byGroup[def.StackGroupId] = status;
+            if (kind == StatusEffectKind.Vulnerable) _lastVulnerableAppliedTick = tick;
             return StatusApplyResult.Applied;
         }
 
         public bool Remove(int effectId, uint tick)
         {
             if (!_byEffect.Remove(effectId, out var status)) return false;
-            if (status.Kind == StatusEffectKind.Paralyze)
+            if (status.IsPvpControl)
                 ControlImmuneUntilTick = AddTicks(tick, _controlImmunityTicks);
             if (_byGroup.TryGetValue(status.GroupId, out var group) && ReferenceEquals(group, status))
                 _byGroup.Remove(status.GroupId);
@@ -120,10 +127,20 @@ namespace Cool.SyncCore
         {
             foreach (var s in _byEffect.Values)
             {
-                if (!s.IsDot || s.NextTick == 0 || tick < s.NextTick || tick > s.EndTick) continue;
+                if (!s.IsDot || s.NextTick == 0 || tick < s.NextTick) continue;
                 due.Add(s);
                 s.PendingRemoval = tick >= s.EndTick;
             }
+        }
+
+        /// <summary>没有排定跳落在 EndTick 时（刷新错相/间隔不整除）到期移除；必须在 CollectDueDots/AdvanceDot 之后调用。</summary>
+        public int RemoveExpiredDots(uint tick)
+        {
+            var expired = new List<int>();
+            foreach (var s in _byEffect.Values)
+                if (s.IsDot && tick >= s.EndTick) expired.Add(s.EffectId);
+            foreach (var id in expired) Remove(id, tick);
+            return expired.Count;
         }
 
         public void AdvanceDot(ActiveStatus status, uint tick)
@@ -162,6 +179,7 @@ namespace Cool.SyncCore
             _byEffect.Clear();
             _byGroup.Clear();
             ControlImmuneUntilTick = 0;
+            _lastVulnerableAppliedTick = null;
         }
 
         public static uint SecondsToTicks(float seconds)
