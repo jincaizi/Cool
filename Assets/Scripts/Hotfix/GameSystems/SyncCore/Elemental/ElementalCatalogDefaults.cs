@@ -26,6 +26,20 @@ namespace Cool.SyncCore
         public static float ResolveDashDistance(int skillId, float assetFallback)
             => FindDisplacement(skillId)?.DashDistance ?? assetFallback;
 
+        public static StatusEffectDefinition? FindStatus(int effectId)
+        {
+            foreach (var s in Shared.Statuses)
+                if (s.EffectId == effectId) return s;
+            return null;
+        }
+
+        public static ElementDefinition? FindElement(int elementId)
+        {
+            foreach (var e in Shared.Elements)
+                if (e.ElementId == elementId) return e;
+            return null;
+        }
+
         public static JumpSettings Jump => Shared.Jump;
 
         private static ElementalCatalogDefinition Build() => new ElementalCatalogDefinition
