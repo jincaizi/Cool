@@ -680,7 +680,8 @@ public readonly HashSet<(long TargetId, uint LifeId)> ElementAppliedTargets = ne
 
 ```csharp
 bool targetIsPlayer = target.Kind == (byte)EntityKind.Player;
-bool pvp = targetIsPlayer; // 元素只由玩家武器施加；target 玩家即 PvP
+// PvP = 玩家打玩家；怪物打玩家仍走 PvE 2.0（否则 1.28 会把 PvE 伤害压低）。
+bool pvp = targetIsPlayer && !pending.IsNpcCaster;
 if (target.Statuses != null)
     damage *= target.Statuses.Runtime.IncomingDamageMultiplier(pvp,
         _elementalCatalog.Pvp.WindVulnerabilityMultiplier);
