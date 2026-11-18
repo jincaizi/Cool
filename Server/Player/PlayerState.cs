@@ -143,10 +143,15 @@ namespace KcpServer
         public ServerStatusManager? Statuses { get; private set; }
 
         /// <summary>延迟初始化：登录 / 怪物生成 / 首次命中时配置，避免改所有构造函数。
-        /// controlSink = 宿主唯一控制入口（玩家传 Server3C.ApplyPlayerControl；null 直写）。</summary>
+        /// controlSink = 宿主唯一控制入口（玩家传 Server3C.ApplyPlayerControl；null 直写）。
+        /// 已配置后再传非 null sink 走 <see cref="ServerStatusManager.SetControlSink"/> 补装
+        /// （不会用 null 覆盖玩家登录时已接的入口）。</summary>
         public void ConfigureStatuses(ElementalCatalogDefinition catalog,
             System.Action<float, bool>? controlSink = null)
-            => Statuses ??= new ServerStatusManager(this, catalog, controlSink);
+        {
+            if (Statuses == null) Statuses = new ServerStatusManager(this, catalog, controlSink);
+            else if (controlSink != null) Statuses.SetControlSink(controlSink);
+        }
 
         /// <summary>事件序号（按目标单调；Plan 04 填充 HitEntry.EventSeq）。</summary>
         public uint NextEventSeq { get; private set; }

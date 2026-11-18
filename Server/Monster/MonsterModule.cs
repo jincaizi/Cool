@@ -211,6 +211,7 @@ namespace KcpServer.Monster
                 var m=_tickOrder[(start+order)%_tickOrder.Count];
                 var entity = _store.GetPlayer(m.NpcId);
                 if (entity == null) { done.Add(m.NpcId); continue; }
+                bool actionLocked = entity.ControlActionLock;
 
                 if (m.DeathTick.HasValue)
                 {
@@ -249,14 +250,16 @@ namespace KcpServer.Monster
                         continue;
                     }
 
-                    if (!inHitWindow && (m.ActionRunner == null || m.ActionRunner.CanStartSkill))
+                    // Plan 04：麻痹（ControlActionLock）与受击硬直同样整段跳过行为树——
+                    // 不移动、不施法；锁生效瞬间的未提交前摇由宿主 sink 走 CancelAction 取消。
+                    if (!inHitWindow && !actionLocked && (m.ActionRunner == null || m.ActionRunner.CanStartSkill))
                     {
                         var ctx = new MonsterTickContext(m, entity, this, _mover, TickDeltaSeconds, tick);
                         m.BehaviorTree?.Tick(ctx);
                     }
                     else
                     {
-                        m.Moving = false; // 受击硬直：跳过行为树（ActionState 保持 Hit 不被 BT 覆盖）
+                        m.Moving = false; // 受击硬直 / 麻痹：跳过行为树（ActionState 不被 BT 覆盖）
                     }
                 }
                 else
@@ -280,8 +283,10 @@ namespace KcpServer.Monster
                 if (hitWindowJustExpired && entity.ActionState == (byte)NpcAnimationState.Hit)
                     entity.ActionState = (byte)(m.Moving ? NpcAnimationState.Run : NpcAnimationState.Idle);
 
-                // 位置/朝向/速度 flush（AOI 节拍由调度器按坐标判定——每 tick 写与 BotRunner 同惯例）
-                entity.UpdatePosition(m.Position, YawOf(m.Rotation), m.Moving ? m.Config.moveSpeed : 0f,
+                // 位置/朝向/速度 flush（AOI 节拍由调度器按坐标判定——每 tick 写与 BotRunner 同惯例）。
+                // 速度按权威控制派生缩放（Plan 04 冰减速）；ActionLock 时 BT 已被跳过，m.Moving=false。
+                entity.UpdatePosition(m.Position, YawOf(m.Rotation),
+                    m.Moving ? m.Config.moveSpeed * entity.ControlSpeedScale : 0f,
                     tick * 10_000L + 1L, tick);
             }
             foreach (var id in done) _monsters.Remove(id);
@@ -339,6 +344,16 @@ namespace KcpServer.Monster
                     }
                 }
             }
+        }
+
+        /// <summary>宿主控制入口（Plan 04）：状态运行时首次 ActionLock 时取消未提交动作。
+        /// 霸体（<see cref="MonsterActionRunner.IsArmored"/>）首版只免打断——动作照常跑完，
+        /// 状态/伤害仍然生效。</summary>
+        public void CancelAction(long npcId, NpcActionCancelReason reason, uint tick)
+        {
+            if (!_monsters.TryGetValue(npcId, out var m) || m.ActionRunner == null) return;
+            if (m.ActionRunner.IsArmored) return;
+            m.ActionRunner.Cancel(reason, tick);
         }
 
         /// <summary>嘲讽 API（v1 无玩家技能，仅单测）。</summary>

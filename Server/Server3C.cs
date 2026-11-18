@@ -107,10 +107,16 @@ namespace KcpServer
             _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed),
                 avoidance: _avoidance, navigation: navigation, actionV1: true);
             _monsterModule.SpawnDefaultLayout(count);
-            // Plan 04：怪物持有权威状态运行时（重生新实体由首次命中路径配置）
+            // Plan 04：怪物持有权威状态运行时（重生新实体由首次命中路径配置）。
+            // 控制变化走与玩家相同的唯一入口：首次 ActionLock 经 ApplyPlayerControl 的 NPC 分支
+            // 进入 MonsterModule.CancelAction（霸体规则在那里判定）。
             foreach (var entity in _entityStore.All)
                 if (entity.Kind == (byte)EntityKind.Npc)
-                    entity.ConfigureStatuses(_elementalCatalog);
+                {
+                    long npcId = entity.PlayerId;
+                    entity.ConfigureStatuses(_elementalCatalog,
+                        (speed, locked) => ApplyPlayerControl(npcId, speed, locked));
+                }
             _aoi.NpcActionProvider = id => _monsterModule?.GetActionSnapshot(id);
             _castHandler.SetNpcActionRunner(npcId => _monsterModule?.GetState(npcId)?.ActionRunner);
 
@@ -370,8 +376,16 @@ namespace KcpServer
             player.ApplyControl(speedScale, actionLock);
             if (!wasLocked && actionLock)
             {
-                var cancels = _castHandler.CancelCaster(playerId, CurrentTick, NpcActionCancelReason.Hit);
-                _castHandler.BroadcastCancel(cancels);
+                if (player.Kind == (byte)EntityKind.Npc)
+                {
+                    // Plan 04：怪物控制走动作运行器（霸体在 CancelAction 内判定——首版只免打断）。
+                    _monsterModule?.CancelAction(playerId, NpcActionCancelReason.Hit, CurrentTick);
+                }
+                else
+                {
+                    var cancels = _castHandler.CancelCaster(playerId, CurrentTick, NpcActionCancelReason.Hit);
+                    _castHandler.BroadcastCancel(cancels);
+                }
             }
         }
 

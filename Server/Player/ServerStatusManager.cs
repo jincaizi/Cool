@@ -9,7 +9,7 @@ namespace KcpServer
     public sealed class ServerStatusManager
     {
         private readonly PlayerState _owner;
-        private readonly System.Action<float, bool>? _controlSink;
+        private System.Action<float, bool>? _controlSink;
         public StatusRuntime Runtime { get; } = new();
 
         public ServerStatusManager(PlayerState owner, ElementalCatalogDefinition catalog,
@@ -19,6 +19,10 @@ namespace KcpServer
             _controlSink = controlSink;
             Runtime.Configure(catalog.Pvp);
         }
+
+        /// <summary>补装/替换控制 sink。延迟配置（<see cref="PlayerState.ConfigureStatuses"/> 的
+        /// first-configure-wins 语义）的实体在宿主接线后靠这里接上唯一控制入口。</summary>
+        public void SetControlSink(System.Action<float, bool>? controlSink) => _controlSink = controlSink;
 
         public StatusApplyResult Apply(StatusEffectDefinition def, long sourceId, int skillId,
             ulong castId, uint tick, ElementalCatalogDefinition catalog)

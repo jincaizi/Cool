@@ -20,6 +20,8 @@ namespace KcpServer.Monster
         public MonsterActionRunner(MonsterState owner, EntityStore store, NpcCatalogDefinition catalog)
         { _owner = owner; _store = store; _catalog = catalog; SetContinuous(false, 0); }
         public NpcActionSnapshot Current => Copy(_current);
+        /// <summary>本次技能前摇是否霸体（首版：只免打断，不免疫状态/伤害）。</summary>
+        public bool IsArmored => _armor;
         public bool CanStartSkill => _current.Kind != NpcActionKind.Death &&
             (_current.Kind == NpcActionKind.Idle || _current.Kind == NpcActionKind.Move);
         public NpcSkillDefinition? FindSkill(int id) => _catalog.Skills.Find(s => s.SkillId == id);

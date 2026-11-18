@@ -94,6 +94,14 @@ namespace KcpServer.Monster
             var m = ctx.State;
             var entity = ctx.Entity;
 
+            // Plan 04：麻痹（ControlActionLock）期间不发起任何新攻击（模块 tick 已整段跳过 BT；
+            // 这里兜住直接调用 BT 动作的宿主/测试）。
+            if (entity.ControlActionLock)
+            {
+                m.Moving = false;
+                return BtStatus.Failure;
+            }
+
             if (m.AttackResolveTick.HasValue)
             {
                 m.Moving = false;
