@@ -1010,6 +1010,30 @@ namespace Hotfix.GameSystems.Sys3C
             EvaluateLocalDeath();
         }
 
+        /// <summary>
+        /// 服务端 DoT 跳伤入口（<c>DamageKind.Dot</c>）：只对齐权威余血并发飘字事件，
+        /// **不**调用 <c>_fsmManager.HandleDamage</c>、不进格挡/击退/HitFlash/震屏——
+        /// 周期伤害每跳都把角色打进受击硬直是错的。
+        /// 血量以 <paramref name="remainingHp"/>（<c>HitEntry.TargetRemainingHp</c>）为真相，本地不做减法。
+        /// </summary>
+        public void ApplyDotDamage(float damage, float remainingHp)
+        {
+            // 已死且服务端仍判死 → 没有新表现可做（与 ApplyServerDamage 同款守卫）
+            if (_currentHP <= 0f && remainingHp <= 0f) return;
+            _currentHP = Mathf.Max(0f, remainingHp);
+            if (_currentHP > 0f)
+            {
+                EventBus.Emit(new PlayerTakeDamageEvent(
+                    gameObject.GetInstanceID(),
+                    transform.position + Vector3.up * 1.5f,
+                    HitZonePart.Torso,
+                    Vector3.zero,
+                    Mathf.CeilToInt(damage),
+                    Color.white));
+            }
+            EvaluateLocalDeath();
+        }
+
         public void Heal(float amount)
         {
             if (amount <= 0f || _currentHP <= 0f) return; // 死亡不可治疗；负数/零忽略

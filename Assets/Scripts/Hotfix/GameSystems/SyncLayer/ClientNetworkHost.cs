@@ -796,12 +796,15 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链
             // （blocked = 服务端格挡裁决 → 本地走格挡受击表现，见 Sys3CEntry.ApplyServerDamage；
-            //  sourceIsPlayer = DamageResult.SourceKind → 宿主区分玩家来源闪屏与怪物攻击）
+            //  sourceIsPlayer = DamageResult.SourceKind → 宿主区分玩家来源闪屏与怪物攻击；
+            //  DoT = DamageKind.Dot → 只对齐权威血量 + 飘字，见 Sys3CEntry.ApplyDotDamage）
             bool hasPreservedEquipment = _connectionEquipment != null;
             _combatBridge = new CombatNetworkBridge(_adapter!, () => _manager!.LocalPlayerId, _remoteEntities!,
-                (targetId, dmg, crit, dir, remainingHp, blocked, sourceIsPlayer) =>
+                onDamageToLocalPlayer: (targetId, dmg, crit, dir, remainingHp, blocked, sourceIsPlayer) =>
                     _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked, sourceIsPlayer),
-                _connectionEquipment, _connectionEquipSeq);
+                onDotDamageToLocalPlayer: (targetId, dmg, remainingHp) =>
+                    _localEntry.ApplyDotDamage(dmg, remainingHp),
+                equipment: _connectionEquipment, nextEquipSeq: _connectionEquipSeq);
             _connectionEquipment = null;
             _connectionEquipSeq = 0;
             _adapter!.MessageReceived += _combatBridge.OnMessage;

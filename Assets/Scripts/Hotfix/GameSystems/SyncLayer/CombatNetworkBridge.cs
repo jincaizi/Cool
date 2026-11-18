@@ -23,6 +23,9 @@ namespace Hotfix.GameSystems.SyncLayer
     ///    远程 **玩家/bot** 视图 Emit PlayerTakeDamageEvent（走玩家灰字），
     ///    被格挡时改发 BlockSucceededEvent（格挡飘字 + 火花），不再飘伤害数字；
     ///    由 DisplayEventBridge/FloatText 链自动飘字。
+    ///    `DamageKind=Dot` 单独分流：只对齐权威余血 + 飘字（本地走 onDotDamageToLocalPlayer，
+    ///    远程 Npc 发 MonsterDotDamageEvent、玩家发 PlayerTakeDamageEvent）——不得触发
+    ///    受击动画/格挡/击退/命中特效/震屏（DoT 每跳都跳受击硬直是错的）。
     /// 线程模型：adapter 回调线程只入队，Update（主线程）消费——与 ClientNetworkManager 同纪律。
     /// </summary>
     public sealed class CombatNetworkBridge
@@ -34,6 +37,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 是否被格挡（服务端裁决——宿主据此走格挡受击表现）/
         /// 来源是否玩家或 bot（DamageResult.SourceKind——宿主据此区分玩家闪屏与怪物攻击）</summary>
         private readonly Action<long, float, bool, Vector3, float, bool, bool>? _onDamageToLocalPlayer;
+        /// <summary>本地 DoT 跳伤注入点：targetId / damage / 服务端权威余血——只更新血量与飘字，
+        /// 不触发受击 FSM/格挡/击退/闪屏（宿主接 Sys3CEntry.ApplyDotDamage）</summary>
+        private readonly Action<long, float, float>? _onDotDamageToLocalPlayer;
         private readonly ConcurrentQueue<IMessage> _incoming = new ConcurrentQueue<IMessage>();
         private readonly ClientEquipmentState _equipment;
         private readonly Dictionary<int, (uint seq, ulong castId, uint lifeId)> _acceptedCasts = new();
@@ -77,12 +83,14 @@ namespace Hotfix.GameSystems.SyncLayer
         public CombatNetworkBridge(INetworkClient client, Func<long> localPlayerId,
             RemoteEntityRegistry registry,
             Action<long, float, bool, Vector3, float, bool, bool>? onDamageToLocalPlayer = null,
+            Action<long, float, float>? onDotDamageToLocalPlayer = null,
             ClientEquipmentState? equipment = null, uint nextEquipSeq = 0)
         {
             _client = client;
             _localPlayerId = localPlayerId;
             _registry = registry;
             _onDamageToLocalPlayer = onDamageToLocalPlayer;
+            _onDotDamageToLocalPlayer = onDotDamageToLocalPlayer;
             // 连接生命周期的装备摘要可跨角色重建复用；新会话由宿主传 null。
             _equipment = equipment ?? new ClientEquipmentState();
             _nextEquipSeq = nextEquipSeq;
@@ -226,6 +234,42 @@ namespace Hotfix.GameSystems.SyncLayer
             long localId = _localPlayerId();
             foreach (var hit in result.Hits)
             {
+                // DoT 跳伤：只更新权威血量与飘字。绝不走受击 FSM/格挡/击退/PlayHit/
+                // MonsterTakeDamageEvent（后两者会带出命中粒子/震屏），也不发红屏事件。
+                if (hit.DamageKind == DamageKind.Dot)
+                {
+                    if (hit.TargetPlayerId == localId)
+                    {
+                        var localView = _registry.GetView(hit.TargetPlayerId);
+                        localView?.Targetable?.SetVitals(hit.TargetRemainingHp, localView.MaxHp,
+                            hit.TargetRemainingHp <= 0f);
+                        _onDotDamageToLocalPlayer?.Invoke(hit.TargetPlayerId, hit.Damage,
+                            hit.TargetRemainingHp);
+                        continue;
+                    }
+
+                    var dotView = _registry.GetView(hit.TargetPlayerId);
+                    if (dotView == null) continue; // 视野外无视图（与直接命中同款防御跳过）
+
+                    Vector3 dotHitPos = dotView.Position + Vector3.up * 1.5f;
+                    dotView.Targetable?.SetVitals(hit.TargetRemainingHp, dotView.MaxHp,
+                        hit.TargetRemainingHp <= 0f);
+                    if (dotView.Kind == (byte)EntityKind.Npc)
+                    {
+                        // 怪物 DoT 走专用事件：只飘红字，不触发顿帧/震屏/命中粒子。
+                        EventBus.Emit(new MonsterDotDamageEvent(
+                            dotView.GameObject.GetInstanceID(), dotHitPos,
+                            Mathf.CeilToInt(hit.Damage)));
+                    }
+                    else
+                    {
+                        EventBus.Emit(new PlayerTakeDamageEvent(
+                            dotView.GameObject.GetInstanceID(), dotHitPos, HitZonePart.Torso,
+                            Vector3.zero, Mathf.CeilToInt(hit.Damage), Color.white));
+                    }
+                    continue;
+                }
+
                 // P4：协议无方向字段——飘字/受击不依赖朝向（方向字段留待命中细节阶段，偏差记录）
                 if (hit.TargetPlayerId == localId)
                 {
