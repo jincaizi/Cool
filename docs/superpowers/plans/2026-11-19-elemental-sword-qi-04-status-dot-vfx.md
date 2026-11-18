@@ -504,15 +504,19 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~ServerStatusMan
 
 - [ ] **步骤 3：实现 GameLoop 预 tick**
 
-`GameLoop` 构造函数追加 `Action<long>? onPreTick = null`，LoopAsync：
+`GameLoop` 构造函数追加 `Action<long>? onPreTick = null` 与 `ConcurrentQueue<Action> _postPreTickQueue`；LoopAsync：
 
 ```csharp
-// 先 drain 动作队列
+// 先 drain 动作队列（断开/清理等世界状态变更）
 while (_actionQueue.TryDequeue(out var action)) { ... }
 
 long nextTick = Interlocked.Read(ref _tickCount) + 1;
 try { _onPreTick?.Invoke(nextTick); }
 catch (Exception ex) { _logger.LogError(ex, "GameLoop pre-tick error"); }
+
+// WebSocket 等“必须在状态 tick 之后”的入站包走这个队列：
+// 先于状态 tick 会复现 WS/KCP 的 1 tick 时序分裂。
+while (_postPreTickQueue.TryDequeue(out var action)) { ... }
 
 // 再 drain 网络包：handler 看到的是 nextTick（Server3C 在 preTick 里写 CurrentTick）
 while (_queue.TryDequeue(out var packet)) { ... }
@@ -521,7 +525,9 @@ Interlocked.Exchange(ref _tickCount, nextTick);
 try { _onTick?.Invoke(nextTick); } ...
 ```
 
-`Server3C` 构造时传 `onPreTick: tick => { CurrentTick = (uint)tick; _statusManager?.Tick((uint)tick); }`；onTick 里的 `CurrentTick = (uint)tick` 保留但同值。
+`Server3C.OnSessionDataReceivedEnqueued` 改为 `_gameLoop.EnqueueAfterPreTick(() => { _ = ProcessPacket(session, data); });`；KCP 路径仍走 `GameLoop.Enqueue`。`Server3C` preTick 先 `CurrentTick = tick`，再逐实体 `Statuses?.RemoveExpired(tick)`。
+
+**同 tick 基准统一**：preTick 已把 `CurrentTick` 写成当前 tick，所有包 handler 直接用它。删除 `CastHandler.HandleCastAsync`/`HandleCancel` 里的 `_server.CurrentTick + 1`（改为 `_server.CurrentTick`），并更新 `Server3C.CurrentTick` / `CastHandler` 的旧 F17 注释（“包处理落后一个迭代”已不成立）。补一个包路径测试：`HandleCastAsync` 的 `CastConfirm.AcceptedTick` 必须等于 `Server3C.CurrentTick`，不是 +1。
 
 - [ ] **步骤 4：实现 `ServerStatusManager` 与 `PlayerState`**
 
@@ -531,11 +537,14 @@ try { _onTick?.Invoke(nextTick); } ...
 public sealed class ServerStatusManager
 {
     private readonly PlayerState _owner;
+    private readonly Action<float, bool>? _controlSink;
     public StatusRuntime Runtime { get; } = new();
 
-    public ServerStatusManager(PlayerState owner, ElementalCatalogDefinition catalog)
+    public ServerStatusManager(PlayerState owner, ElementalCatalogDefinition catalog,
+        Action<float, bool>? controlSink = null)
     {
         _owner = owner;
+        _controlSink = controlSink;
         Runtime.Configure(catalog.Pvp);
     }
 
@@ -572,8 +581,9 @@ public sealed class ServerStatusManager
     public void SyncControl()
     {
         Runtime.DeriveControl(out float speed, out bool locked);
-        if (speed != _owner.ControlSpeedScale || locked != _owner.ControlActionLock)
-            _owner.ApplyControl(speed, locked);
+        if (speed == _owner.ControlSpeedScale && locked == _owner.ControlActionLock) return;
+        if (_controlSink != null) _controlSink(speed, locked);
+        else _owner.ApplyControl(speed, locked);
     }
 }
 ```
@@ -589,9 +599,12 @@ public uint AllocateEventSeq() => ++NextEventSeq;
 构造函数 `Statuses = new ServerStatusManager(this, catalog)` 需要 catalog；`PlayerState` 构造函数当前只有 playerId。改为 `PlayerState(long playerId, ElementalCatalogDefinition? catalog = null)` 并使用默认目录；所有测试构造兼容。`EntityStore.AddPlayer` 传入默认/服务器目录？`EntityStore` 没有 catalog；`Server3C` 可在 `RegisterEntity` 后 `player.ConfigureStatuses(_elementalCatalog)`。更简单：`PlayerState.Statuses` 延迟初始化，`ConfigureStatuses(catalog)` 在登录/怪物生成时调用。Plan 04 task 2 can add:
 ```csharp
 public ServerStatusManager? Statuses { get; private set; }
-public void ConfigureStatuses(ElementalCatalogDefinition catalog)
-    => Statuses ??= new ServerStatusManager(this, catalog);
+public void ConfigureStatuses(ElementalCatalogDefinition catalog,
+    Action<float, bool>? controlSink = null)
+    => Statuses ??= new ServerStatusManager(this, catalog, controlSink);
 ```
+
+`Server3C.RegisterEntity` 传 `(speed, locked) => ApplyPlayerControl(player.PlayerId, speed, locked)`，让状态控制走 Plan 03 的唯一入口（含首次 ActionLock 取消未提交施法）；`ServerStatusManagerTests` 可用假 sink 断言。怪物在 Task 5 接线时传同一 sink。
 `CombatProjectionBuilder` uses `entity.Statuses?.Runtime.Active ?? empty`. `CombatResolver` ensures `target.ConfigureStatuses(_elementalCatalog)` before apply. `Server3C.RegisterEntity` and `MonsterModule.Spawn` configure. This avoids changing all constructors. Good.
 
 `CombatProjectionBuilder`:
