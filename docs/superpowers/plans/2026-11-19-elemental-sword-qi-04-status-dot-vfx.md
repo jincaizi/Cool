@@ -279,7 +279,7 @@ namespace Cool.SyncCore
         private readonly Dictionary<int, ActiveStatus> _byGroup = new();
         private uint _controlImmunityTicks;
         private uint _vulnerabilityNoRefreshTicks;
-        private uint _lastVulnerableAppliedTick;
+        private uint? _lastVulnerableAppliedTick;
 
         public IEnumerable<ActiveStatus> Active => _byEffect.Values;
         public int Count => _byEffect.Count;
@@ -303,8 +303,8 @@ namespace Cool.SyncCore
                 return StatusApplyResult.Ignored;
             // 4s 窗口跨状态移除保存：不能只看 _byGroup 里是否仍有活跃 wind。
             if (kind == StatusEffectKind.Vulnerable && targetIsPlayer && sourceIsPlayer
-                && _lastVulnerableAppliedTick != 0
-                && tick - _lastVulnerableAppliedTick < _vulnerabilityNoRefreshTicks)
+                && _lastVulnerableAppliedTick.HasValue
+                && tick - _lastVulnerableAppliedTick.Value < _vulnerabilityNoRefreshTicks)
                 return StatusApplyResult.Ignored;
 
             if (_byGroup.TryGetValue(def.StackGroupId, out var existing))
@@ -427,7 +427,7 @@ namespace Cool.SyncCore
             _byEffect.Clear();
             _byGroup.Clear();
             ControlImmuneUntilTick = 0;
-            _lastVulnerableAppliedTick = 0;
+            _lastVulnerableAppliedTick = null;
         }
 
         public static uint SecondsToTicks(float seconds)
