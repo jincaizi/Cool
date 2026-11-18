@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cool.Protocol;
+using Cool.SyncCore;
 
 namespace KcpServer
 {
@@ -133,6 +134,18 @@ namespace KcpServer
             CombatVersion++;
             CombatDirty = true;
         }
+
+        /// <summary>权威状态运行时包装（Plan 04）；未配置时 null（bot/未接入实体）。</summary>
+        public ServerStatusManager? Statuses { get; private set; }
+
+        /// <summary>延迟初始化：登录 / 怪物生成 / 首次命中时配置，避免改所有构造函数。</summary>
+        public void ConfigureStatuses(ElementalCatalogDefinition catalog)
+            => Statuses ??= new ServerStatusManager(this, catalog);
+
+        /// <summary>事件序号（按目标单调；Plan 04 填充 HitEntry.EventSeq）。</summary>
+        public uint NextEventSeq { get; private set; }
+
+        public uint AllocateEventSeq() => ++NextEventSeq;
 
         /// <summary>该会话是否启用接收 tick 位移预算（登录能力位 PvpMovementBudgetV1）。</summary>
         public bool StrictMovementBudget { get; internal set; }

@@ -104,6 +104,10 @@ namespace KcpServer
             _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed),
                 avoidance: _avoidance, navigation: navigation, actionV1: true);
             _monsterModule.SpawnDefaultLayout(count);
+            // Plan 04：怪物持有权威状态运行时（重生新实体由首次命中路径配置）
+            foreach (var entity in _entityStore.All)
+                if (entity.Kind == (byte)EntityKind.Npc)
+                    entity.ConfigureStatuses(_elementalCatalog);
             _aoi.NpcActionProvider = id => _monsterModule?.GetActionSnapshot(id);
             _castHandler.SetNpcActionRunner(npcId => _monsterModule?.GetState(npcId)?.ActionRunner);
 
@@ -200,7 +204,15 @@ namespace KcpServer
                 TimeSpan.FromMilliseconds(TickIntervalMs),   // ~15Hz
                 packet => HandlePacket(packet.Item1, packet.Item2),
                 logger,
-                tick =>
+                onPreTick: tick =>
+                {
+                    // 状态预 tick 先于网络包：handler 看到新 tick 前到期修饰已移除。
+                    // DoT 结算与状态 tick 服务在 Plan 04 后续任务接入本钩子。
+                    CurrentTick = (uint)tick;
+                    foreach (var entity in _entityStore.All)
+                        entity.Statuses?.RemoveExpired((uint)tick);
+                },
+                onTick: tick =>
                 {
                     CurrentTick = (uint)tick;
 
@@ -323,6 +335,8 @@ namespace KcpServer
             bool supportsAuthoritativeRespawn = false)
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
+            // Plan 04：登录实体持有权威状态运行时（延迟初始化，bot 不配置）
+            player.ConfigureStatuses(_elementalCatalog);
             // P5：登录标志置在 store 实例上——怪物感知（MonsterBrain.TryAcquireBySight）与
             // 怪物施法候选（CastHandler）过滤读的是本实例；LoginHandler 自建实例只进 RoomManager。
             // BotRunner 不经此路径（直接 AddPlayer）——压测 bot 保持非登录态（D-P5-3 语义）

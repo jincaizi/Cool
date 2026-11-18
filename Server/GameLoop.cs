@@ -15,6 +15,7 @@ namespace KcpServer
         private readonly TimeSpan _tickInterval;
         private readonly Action<T> _handler;
         private readonly Action<long>? _onTick;
+        private readonly Action<long>? _onPreTick;
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
         private readonly ConcurrentQueue<Action> _actionQueue = new ConcurrentQueue<Action>();
@@ -26,12 +27,14 @@ namespace KcpServer
         /// <summary>已执行 tick 数（供 WorldSnapshot.Tick 复用）</summary>
         public long TickCount => Interlocked.Read(ref _tickCount);
 
-        public GameLoop(TimeSpan tickInterval, Action<T> handler, ILogger logger, Action<long>? onTick = null)
+        public GameLoop(TimeSpan tickInterval, Action<T> handler, ILogger logger,
+            Action<long>? onTick = null, Action<long>? onPreTick = null)
         {
             _tickInterval = tickInterval;
             _handler = handler;
             _logger = logger;
             _onTick = onTick;
+            _onPreTick = onPreTick;
         }
 
         public void Start()
@@ -76,6 +79,12 @@ namespace KcpServer
                     catch (Exception ex) { _logger.LogError(ex, "GameLoop action error"); }
                 }
 
+                // 状态预 tick：先于网络包消费（到期/DoT 在 handler 看到新 tick 前结算）。
+                // 传入的是**将要提交**的 tick——TickCount 此时仍是上一 tick。
+                long nextTick = Interlocked.Read(ref _tickCount) + 1;
+                try { _onPreTick?.Invoke(nextTick); }
+                catch (Exception ex) { _logger.LogError(ex, "GameLoop pre-tick error"); }
+
                 // 清空当前数据队列（单线程独占语义：处理期间新入队留待下一 tick）
                 while (_queue.TryDequeue(out var packet))
                 {
@@ -83,8 +92,9 @@ namespace KcpServer
                     catch (Exception ex) { _logger.LogError(ex, "GameLoop handler error"); }
                 }
 
-                long tick = Interlocked.Increment(ref _tickCount);
-                try { _onTick?.Invoke(tick); }
+                // 包处理完成后才把 TickCount 推进到本 tick，再进 onTick
+                Interlocked.Exchange(ref _tickCount, nextTick);
+                try { _onTick?.Invoke(nextTick); }
                 catch (Exception ex) { _logger.LogError(ex, "GameLoop onTick error"); }
 
                 var elapsed = DateTime.UtcNow - started;

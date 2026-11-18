@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
 using Cool.Protocol;
 using Cool.SyncCore;
 
 namespace KcpServer
 {
-    /// <summary>权威战斗投影组装（Plan 02：HP/装备/活动施法；状态与控制留待后续任务）。</summary>
+    /// <summary>权威战斗投影组装（Plan 02：HP/装备/活动施法/控制；Plan 04：状态）。</summary>
     public static class CombatProjectionBuilder
     {
         public static CombatProjection Build(PlayerState entity, ElementalCatalogDefinition catalog)
@@ -18,7 +19,19 @@ namespace KcpServer
                 MaxHp = entity.MaxHp,
                 Dead = !entity.IsAlive,
                 IsDefending = entity.IsDefending,
-                Statuses = new List<StatusProjection>(),
+                Statuses = entity.Statuses == null
+                    ? new List<StatusProjection>()
+                    : entity.Statuses.Runtime.Active.Select(s => new StatusProjection
+                    {
+                        EffectId = s.EffectId,
+                        GroupId = s.GroupId,
+                        EndTick = s.EndTick,
+                        SourceId = s.SourceId,
+                        SlowRatio = s.Definition.SlowRatio,
+                        DamagePerTick = s.Definition.DamagePerTick,
+                        IntervalTicks = StatusRuntime.SecondsToTicks(s.Definition.IntervalSeconds),
+                        IncomingDamageMultiplier = s.Definition.IncomingDamageMultiplier
+                    }).ToList(),
                 Equipment = entity.EquippedWeaponInstanceId != 0
                     ? new EquipmentSummary
                     {
