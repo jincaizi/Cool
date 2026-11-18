@@ -46,6 +46,10 @@ namespace KcpServer.Monster
         /// <summary>活跃怪物数（测试/统计口径）</summary>
         public int Count => _monsters.Count;
 
+        /// <summary>怪物生成回调（Plan 04）：每次 <see cref="SpawnMonster"/>（含死亡/Evade 超时重生）
+        /// 末尾触发，宿主据此给新实体接权威状态运行时与控制 sink（重生代次不能漏）。</summary>
+        public Action<PlayerState>? OnMonsterSpawned;
+
         /// <param name="avoidance">ORCA 避让系统（Server3C 注入以与 BotRunner 共用一份世界快照）。
         /// null = 本模块自建一个只看得见自己的（单测/独立宿主就是这条路径）。</param>
         /// <param name="navigation">navmesh 寻路服务；null = 无导航（巡逻/追击/回巢走直线，行为与旧版一致）。</param>
@@ -165,6 +169,7 @@ namespace KcpServer.Monster
             if (_actionCatalog != null) state.ActionRunner = new MonsterActionRunner(state, _store, _actionCatalog);
             state.BehaviorTree = BuildBehaviorTree();
             _monsters[npcId] = state;
+            OnMonsterSpawned?.Invoke(entity);
             return npcId;
         }
 
@@ -211,6 +216,8 @@ namespace KcpServer.Monster
                 var m=_tickOrder[(start+order)%_tickOrder.Count];
                 var entity = _store.GetPlayer(m.NpcId);
                 if (entity == null) { done.Add(m.NpcId); continue; }
+                // Plan 04：本 tick 的权威控制派生 —— 移动系统与速度 flush 都读这份快照。
+                m.SpeedScale = entity.ControlSpeedScale;
                 bool actionLocked = entity.ControlActionLock;
 
                 if (m.DeathTick.HasValue)
@@ -286,7 +293,7 @@ namespace KcpServer.Monster
                 // 位置/朝向/速度 flush（AOI 节拍由调度器按坐标判定——每 tick 写与 BotRunner 同惯例）。
                 // 速度按权威控制派生缩放（Plan 04 冰减速）；ActionLock 时 BT 已被跳过，m.Moving=false。
                 entity.UpdatePosition(m.Position, YawOf(m.Rotation),
-                    m.Moving ? m.Config.moveSpeed * entity.ControlSpeedScale : 0f,
+                    m.Moving ? m.Config.moveSpeed * m.SpeedScale : 0f,
                     tick * 10_000L + 1L, tick);
             }
             foreach (var id in done) _monsters.Remove(id);

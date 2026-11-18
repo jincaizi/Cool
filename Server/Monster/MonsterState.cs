@@ -67,6 +67,11 @@ namespace KcpServer.Monster
         public Quaternion Rotation;
         public bool Moving; // 本 tick 是否在移动（快照 Speed 取值）
 
+        /// <summary>权威控制派生的移动速度缩放（Plan 04 冰减速）：模块每 tick 从
+        /// `PlayerState.ControlSpeedScale` 写入；<see cref="SimpleMoveSystem"/> 的期望位移与
+        /// ORCA 最大步长同缩。1 = 未减速（与接线前逐位一致）。</summary>
+        public float SpeedScale { get; set; } = 1f;
+
         /// <summary>上一 tick 的实际位移（米/tick）——ORCA 当"当前速度"用（半平面的锚点）。
         /// 单位是**每 tick 位移**不是 m/s：解算器与各移动系统统一在这个单位里工作，
         /// 好处是无邻居时解出的期望位移可以原样积分（逐位不变）。</summary>

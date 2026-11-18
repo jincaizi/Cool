@@ -106,10 +106,15 @@ namespace KcpServer
         {
             _monsterModule = new MonsterModule(_entityStore, () => Interlocked.Increment(ref _monsterIdSeed),
                 avoidance: _avoidance, navigation: navigation, actionV1: true);
+            // Plan 04：怪物持有权威状态运行时。生成回调必须早于 SpawnDefaultLayout——死亡展示到期 /
+            // Evade 超时重生都在模块内部直接 SpawnMonster，重生代次同样要接控制 sink，
+            // 否则麻痹只冻结 BT、不取消进行中的前摇。控制变化走与玩家相同的唯一入口：
+            // 首次 ActionLock 经 ApplyPlayerControl 的 NPC 分支进入 MonsterModule.CancelAction。
+            _monsterModule.OnMonsterSpawned = entity =>
+                entity.ConfigureStatuses(_elementalCatalog,
+                    (speed, locked) => ApplyPlayerControl(entity.PlayerId, speed, locked));
             _monsterModule.SpawnDefaultLayout(count);
-            // Plan 04：怪物持有权威状态运行时（重生新实体由首次命中路径配置）。
-            // 控制变化走与玩家相同的唯一入口：首次 ActionLock 经 ApplyPlayerControl 的 NPC 分支
-            // 进入 MonsterModule.CancelAction（霸体规则在那里判定）。
+            // 已在场怪物补同款配置（ConfigureStatuses 的补装 sink 分支幂等）。
             foreach (var entity in _entityStore.All)
                 if (entity.Kind == (byte)EntityKind.Npc)
                 {

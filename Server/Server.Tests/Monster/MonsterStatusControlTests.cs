@@ -59,10 +59,17 @@ public class MonsterStatusControlTests
 
         float moveSpeed = module.GetState(id)!.Config.moveSpeed;
         uint t = 0;
-        while (t < 29 && npc.Speed == 0f) { module.Tick(t); t++; } // 巡逻起步（本 tick 未动时 Speed=0）
+        var before = npc.Position;
+        // 巡逻起步（本 tick 未动时 Speed=0）
+        while (t < 29 && npc.Speed == 0f) { before = npc.Position; module.Tick(t); t++; }
 
         Assert.True(npc.Speed > 0f, "precondition: 怪物应在巡逻移动");
         Assert.Equal(moveSpeed * 0.7f, npc.Speed, 3);
+
+        // 不是只缩广播字段：SimpleMoveSystem 实际积分出的位移也按 SpeedScale 缩小
+        //（ORCA 无邻居时期望位移逐字返回）。
+        float step = Vector3.Distance(before, npc.Position);
+        Assert.Equal(moveSpeed * 0.7f * MonsterModule.TickDeltaSeconds, step, 3);
     }
 
     // ---------- 雷：ActionLock 冻结行为树，到期恢复 ----------
@@ -107,6 +114,18 @@ public class MonsterStatusControlTests
         Assert.True(casted, "paralysis expired: monster should attack again (target 1m away)");
         Assert.Equal(1L, state.TargetId);
         Assert.Equal(player.PlayerId, state.TargetId!.Value);
+
+        // 移动同样恢复：把玩家移出感知、回 Patrol，下一 tick 应有实际位移且速度回到未缩放的 moveSpeed。
+        player.UpdatePosition(new Vector3(0f, 0f, 100f), 0f, 0f, 2L, 0U);
+        state.Mode = MonsterMode.Patrol;
+        state.TargetId = null;
+        state.LastKnownTargetPosition = null;
+        state.Threats.Clear();
+        var beforeMove = npc.Position;
+        module.Tick(25);
+        Assert.True(Vector3.Distance(beforeMove, npc.Position) > 0.01f,
+            "paralysis expired: patrol movement should resume");
+        Assert.Equal(state.Config.moveSpeed, npc.Speed, 3);
     }
 
     // ---------- 麻痹打断：宿主 sink → CancelAction（霸体只免打断） ----------
@@ -152,6 +171,45 @@ public class MonsterStatusControlTests
         Assert.True(boss.ControlActionLock);                       // 状态仍挂上（同步控制）
         Assert.Equal(1, boss.Statuses!.Runtime.Count);
         Assert.Equal(NpcActionPhase.Windup, runner.Current.Phase); // 首版：霸体只免打断
+    }
+
+    // ---------- 重生代次：生成回调接 sink，麻痹仍能取消未提交前摇 ----------
+
+    [Fact]
+    public void Respawned_Monster_Gets_Control_Sink_And_Paralyze_Cancels_Windup()
+    {
+        using var server = new Server3C(new TestLogger());
+        server.EnableMonsters(1); // 布局 [0]：Wolf (-30,0,0)
+        var player = server.RegisterEntity(1, "P");
+        player.UpdatePosition(new Vector3(-30f, 0f, 1f), 0f, 0f, 1L, 0U);
+
+        var module = server.MonsterModuleForTest!;
+        long firstId = MonsterModule.NpcIdSeed + 1;
+        var first = server.GetEntity(firstId)!;
+        first.ApplyDamage(first.MaxHp + 1f); // 致死 → 下一 tick 进死亡展示
+
+        // 死亡展示 30 tick + 重生 450 tick（与 MonsterModuleTests 同口径）
+        for (uint t = 0; t <= MonsterModule.DeathDisplayTicks + MonsterModule.RespawnTicks; t++)
+            module.Tick(t);
+
+        long respawnId = MonsterModule.NpcIdSeed + 2;
+        var npc = server.GetEntity(respawnId);
+        Assert.NotNull(npc);                                   // 重生完成
+        Assert.Equal(2, npc!.TemplateId);                      // 同模板新 id
+        Assert.Null(module.GetState(firstId));                 // 旧代次已移除（防假绿）
+        Assert.NotNull(npc.Statuses);                          // OnMonsterSpawned 已配置状态运行时
+
+        uint castTick = MonsterModule.DeathDisplayTicks + MonsterModule.RespawnTicks + 1;
+        var runner = module.GetState(respawnId)!.ActionRunner!;
+        player.UpdatePosition(new Vector3(-30f, 0f, 1f), 0f, 0f, 2L, 0U);
+        Assert.True(runner.TryBeginSkill(50002, 1, castTick));
+        Assert.Equal(NpcActionPhase.Windup, runner.Current.Phase);
+
+        ApplyParalyze(server, npc, sourceId: 1, tick: castTick + 1);
+
+        Assert.True(npc.ControlActionLock);
+        Assert.Equal(NpcActionPhase.Cancelled, runner.Current.Phase); // 重生代次同样走 CancelAction
+        Assert.Equal(NpcActionCancelReason.Hit, runner.Current.CancelReason);
     }
 
     // ---------- Evade 到家：清状态、回满血、恢复移动 ----------

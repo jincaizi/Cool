@@ -43,14 +43,17 @@ namespace KcpServer.Monster
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             m.Rotation = RotateTowards(m.Rotation, targetRotation, RotationSpeed * deltaTime);
 
-            // 期望位移：**结合顺序与接线前逐字相同**（direction*moveSpeed 先算、再乘 deltaTime）——
-            // 换成 direction*(moveSpeed*deltaTime) 会差最后一位浮点，"无邻居逐位不变"的护栏就没了
-            Vector3 movement = direction * m.Config.moveSpeed * deltaTime;
+            // 期望位移：**结合顺序与接线前逐字相同**（direction*speed 先算、再乘 deltaTime）——
+            // 换成 direction*(speed*deltaTime) 会差最后一位浮点，"无邻居逐位不变"的护栏就没了。
+            // Plan 04：speed 乘状态减速（SpeedScale=1 时 multiplication 精确等于 moveSpeed，
+            // 与接线前逐位一致）；期望位移与 ORCA maxStep 同缩，冰减速才真正拖慢怪物。
+            float speed = m.Config.moveSpeed * m.SpeedScale;
+            Vector3 movement = direction * speed * deltaTime;
 
             if (_avoidance != null)
             {
                 float movementLength = (float)Math.Sqrt(movement.X * movement.X + movement.Z * movement.Z);
-                float configuredLength = m.Config.moveSpeed * deltaTime;
+                float configuredLength = speed * deltaTime;
                 float maxStep = movementLength > configuredLength ? movementLength : configuredLength;
                 movement = _avoidance.Solve(m.NpcId, m.TargetId, m.Position, m.CurrentVelocity,
                     movement, m.Config.bodyRadius, maxStep);
