@@ -52,6 +52,17 @@ namespace KcpServer
             _owner.BumpCombatVersion();
         }
 
+        /// <summary>DoT 到期移除（EndTick 无排定跳：刷新错相/间隔不整除）；删除也须 bump 版本，
+        /// 否则无 dirty 的实体不发 CombatStateUpdate，客户端旧状态表现会滞留。</summary>
+        public void RemoveExpiredDots(uint tick)
+        {
+            if (Runtime.RemoveExpiredDots(tick) > 0)
+            {
+                SyncControl();
+                _owner.BumpCombatVersion();
+            }
+        }
+
         public void ClearAll(uint tick)
         {
             if (Runtime.Count == 0) return;

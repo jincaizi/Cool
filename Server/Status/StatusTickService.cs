@@ -67,7 +67,7 @@ namespace KcpServer
                     entity.Statuses.AdvanceDot(status, tick);
                     if (!entity.IsAlive) entity.Statuses.ClearAll(tick);
                 }
-                entity.Statuses.Runtime.RemoveExpiredDots(tick);
+                entity.Statuses.RemoveExpiredDots(tick);
             }
         }
 

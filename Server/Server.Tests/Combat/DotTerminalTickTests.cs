@@ -68,11 +68,18 @@ public class DotTerminalTickTests
         service.Tick(15);
         service.Tick(30);
         DotDamageTests.Attach(target, catalog, burn, sourceId: 1, tick: 32); // EndTick 77，NextTick 仍 45
-        foreach (uint tick in new uint[] { 45, 60, 75, 76, 77, 78 }) service.Tick(tick);
+        foreach (uint tick in new uint[] { 45, 60, 75, 76 }) service.Tick(tick);
 
         // 45/60/75 三跳，77（EndTick）没有排定跳 → 直接移除，不补跳。
         Assert.Equal(5, h.DotHits().Count);
+        uint versionBeforeRemoval = target.CombatVersion;
+        service.Tick(77);
+        Assert.True(target.CombatVersion > versionBeforeRemoval,
+            "off-phase 到期移除必须 bump CombatVersion，否则客户端收不到撤下投影");
         Assert.Empty(target.Statuses!.Runtime.Active);
+
+        service.Tick(78);
+        Assert.Equal(5, h.DotHits().Count);
     }
 
     [Fact]
@@ -96,7 +103,11 @@ public class DotTerminalTickTests
         h.Bind(target.PlayerId, sessionId: 102);
 
         var service = h.NewService();
-        foreach (uint tick in new uint[] { 17, 34, 44, 45, 46 }) service.Tick(tick);
+        foreach (uint tick in new uint[] { 17, 34, 44 }) service.Tick(tick);
+        uint versionBeforeRemoval = target.CombatVersion;
+        service.Tick(45);                                  // 无排定跳 → RemoveExpiredDots 移除
+        Assert.True(target.CombatVersion > versionBeforeRemoval);
+        service.Tick(46);
 
         Assert.Equal(2, h.DotHits().Count);
         Assert.Empty(target.Statuses!.Runtime.Active);

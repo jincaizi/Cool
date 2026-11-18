@@ -110,6 +110,41 @@ public class DotDamageTests
     }
 
     [Fact]
+    public void Player_Target_With_Wind_Does_Not_Amplify_Burn()
+    {
+        using var h = new DotTestHarness();
+        var catalog = h.Catalog;
+        var target = h.Store.AddPlayer(2, "Target");
+        target.SetMaxHp(100f);
+        Attach(target, catalog, WindOf(catalog), sourceId: 1, tick: 0);
+        Attach(target, catalog, BurnOf(catalog), sourceId: 1, tick: 0);
+        h.Bind(target.PlayerId, sessionId: 102);
+
+        h.NewService().Tick(15);
+
+        // PvP：风 1.28 只作用于直接命中，灼烧不放大。
+        Assert.Equal(8f, Assert.Single(h.DotHits()).Damage, 3);
+    }
+
+    [Fact]
+    public void Npc_Source_Burn_On_Player_With_Wind_Uses_Pve_Multiplier()
+    {
+        using var h = new DotTestHarness();
+        var catalog = h.Catalog;
+        h.Store.AddNpc(3, "NpcSource", templateId: 1, hp: 100f, position: new Vector3(0f, 0f, 0f));
+        var target = h.Store.AddPlayer(2, "Target");
+        target.SetMaxHp(100f);
+        Attach(target, catalog, WindOf(catalog), sourceId: 3, tick: 0);
+        Attach(target, catalog, BurnOf(catalog), sourceId: 3, tick: 0);
+        h.Bind(target.PlayerId, sessionId: 102);
+
+        h.NewService().Tick(15);
+
+        // PvE（来源 NPC）：吃状态表 IncomingDamageMultiplier = 2.0。
+        Assert.Equal(16f, Assert.Single(h.DotHits()).Damage, 3);
+    }
+
+    [Fact]
     public void Monster_Dot_Uses_OnDamageTaken_Without_Hit_Reaction_And_Threat_By_Damage()
     {
         using var h = new DotTestHarness(monsters: true);
@@ -189,6 +224,8 @@ public class DotDamageTests
         var entity = store.GetPlayer(id)!;
         var state = module.GetState(id)!;
         Attach(entity, catalog, WindOf(catalog), sourceId: 1, tick: 0);
+        entity.ApplyDamage(entity.MaxHp * 0.5f);           // 先掉血，回满断言才有意义
+        Assert.True(entity.Hp < entity.MaxHp);
 
         state.Mode = MonsterMode.Combat;
         state.TargetId = null;
