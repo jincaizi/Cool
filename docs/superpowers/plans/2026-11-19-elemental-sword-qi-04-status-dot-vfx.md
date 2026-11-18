@@ -165,8 +165,72 @@ public void Pvp_Control_Immunity_And_Vulnerability_NoRefresh()
         runtime.Apply(thunder, 2, 10002, 8, tick: 15, targetIsPlayer: true, sourceIsPlayer: true)); // 0.5s 免疫
 
     runtime.Apply(wind, 1, 10002, 7, 0, targetIsPlayer: true, sourceIsPlayer: true);
+    runtime.RemoveExpiredModifiers(23);           // wind 1.5s 已到期移除
     Assert.Equal(StatusApplyResult.Ignored,
-        runtime.Apply(wind, 2, 10002, 8, tick: 30, targetIsPlayer: true, sourceIsPlayer: true)); // 4s 内不刷新
+        runtime.Apply(wind, 2, 10002, 8, tick: 30, targetIsPlayer: true, sourceIsPlayer: true)); // 4s 内仍不刷新
+    Assert.Equal(StatusApplyResult.Applied,
+        runtime.Apply(wind, 2, 10002, 8, tick: 61, targetIsPlayer: true, sourceIsPlayer: true)); // 4s 后可再施加
+}
+
+[Fact]
+public void Burn_OffPhase_Refresh_Is_Removed_At_EndTick_Without_Extra_Tick()
+{
+    var catalog = ElementalCatalogDefaults.Create();
+    var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
+    var runtime = new StatusRuntime();
+    runtime.Configure(catalog.Pvp);
+    runtime.Apply(burn, 1, 10002, 7, tick: 0, targetIsPlayer: false, sourceIsPlayer: true);
+    Advance(runtime, 15);
+    Advance(runtime, 30);
+    runtime.Apply(burn, 2, 10002, 8, tick: 32, targetIsPlayer: false, sourceIsPlayer: true); // EndTick 77
+
+    Advance(runtime, 45);
+    Advance(runtime, 60);
+    Advance(runtime, 75);
+    Advance(runtime, 77);                          // 无排定跳：直接移除，不额外补一跳
+    Assert.Empty(runtime.Active);
+}
+
+[Fact]
+public void Burn_NonDividing_Interval_Removed_At_EndTick_Without_Extra_Tick()
+{
+    var catalog = ElementalCatalogDefaults.Create();
+    var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
+    burn = new StatusEffectDefinition
+    {
+        EffectId = burn.EffectId, EffectKind = burn.EffectKind, StackGroupId = burn.StackGroupId,
+        DurationSeconds = 3f, IntervalSeconds = 1.1f, DamagePerTick = burn.DamagePerTick
+    };
+    var runtime = new StatusRuntime();
+    runtime.Configure(catalog.Pvp);
+    runtime.Apply(burn, 1, 10002, 7, tick: 0, targetIsPlayer: false, sourceIsPlayer: true);
+
+    Advance(runtime, 17);
+    Advance(runtime, 34);
+    runtime.RemoveExpiredDots(45);
+    Assert.Empty(runtime.Active);
+}
+
+[Fact]
+public void Pve_Paralyze_Does_Not_Grant_Control_Immunity()
+{
+    var catalog = ElementalCatalogDefaults.Create();
+    var thunder = catalog.Statuses.Find(s => s.EffectId == 301)!;
+    var runtime = new StatusRuntime();
+    runtime.Configure(catalog.Pvp);
+    runtime.Apply(thunder, 1, 10002, 7, 0, targetIsPlayer: false, sourceIsPlayer: true);
+    runtime.Remove(301, tick: 12);
+
+    Assert.Equal(StatusApplyResult.Applied,
+        runtime.Apply(thunder, 2, 10002, 8, tick: 15, targetIsPlayer: false, sourceIsPlayer: true));
+}
+
+private static void Advance(StatusRuntime runtime, uint tick)
+{
+    var due = new List<ActiveStatus>();
+    runtime.CollectDueDots(tick, due);
+    foreach (var status in due) runtime.AdvanceDot(status, tick);
+    runtime.RemoveExpiredDots(tick);
 }
 ```
 
@@ -200,6 +264,7 @@ namespace Cool.SyncCore
         public uint EndTick;
         public uint NextTick;
         public bool PendingRemoval;
+        public bool IsPvpControl;
 
         public int EffectId => Definition.EffectId;
         public int GroupId => Definition.StackGroupId;
@@ -214,6 +279,7 @@ namespace Cool.SyncCore
         private readonly Dictionary<int, ActiveStatus> _byGroup = new();
         private uint _controlImmunityTicks;
         private uint _vulnerabilityNoRefreshTicks;
+        private uint _lastVulnerableAppliedTick;
 
         public IEnumerable<ActiveStatus> Active => _byEffect.Values;
         public int Count => _byEffect.Count;
@@ -235,12 +301,11 @@ namespace Cool.SyncCore
 
             if (kind == StatusEffectKind.Paralyze && tick < ControlImmuneUntilTick)
                 return StatusApplyResult.Ignored;
-            if (kind == StatusEffectKind.Vulnerable && targetIsPlayer && sourceIsPlayer)
-            {
-                var existingWind = _byGroup.TryGetValue(def.StackGroupId, out var old) ? old : null;
-                if (existingWind != null && tick - existingWind.AppliedTick < _vulnerabilityNoRefreshTicks)
-                    return StatusApplyResult.Ignored;
-            }
+            // 4s 窗口跨状态移除保存：不能只看 _byGroup 里是否仍有活跃 wind。
+            if (kind == StatusEffectKind.Vulnerable && targetIsPlayer && sourceIsPlayer
+                && _lastVulnerableAppliedTick != 0
+                && tick - _lastVulnerableAppliedTick < _vulnerabilityNoRefreshTicks)
+                return StatusApplyResult.Ignored;
 
             if (_byGroup.TryGetValue(def.StackGroupId, out var existing))
             {
@@ -252,6 +317,9 @@ namespace Cool.SyncCore
                 {
                     existing.Definition = def;
                     existing.EndTick = AddTicks(tick, duration);
+                    existing.PendingRemoval = false;
+                    existing.IsPvpControl = kind == StatusEffectKind.Paralyze
+                        && targetIsPlayer && sourceIsPlayer;
                     if (existing.IsDot)
                     {
                         uint next = AddTicks(tick, SecondsToTicks(def.IntervalSeconds));
@@ -265,6 +333,7 @@ namespace Cool.SyncCore
                         existing.SourceCastId = castId;
                         existing.AppliedTick = tick;
                     }
+                    if (kind == StatusEffectKind.Vulnerable) _lastVulnerableAppliedTick = tick;
                     return StatusApplyResult.Refreshed;
                 }
             }
@@ -274,17 +343,19 @@ namespace Cool.SyncCore
                 Definition = def, SourceId = sourceId, SourceSkillId = skillId, SourceCastId = castId,
                 AppliedTick = tick, EndTick = AddTicks(tick, duration),
                 NextTick = kind == StatusEffectKind.Burn
-                    ? AddTicks(tick, SecondsToTicks(def.IntervalSeconds)) : 0u
+                    ? AddTicks(tick, SecondsToTicks(def.IntervalSeconds)) : 0u,
+                IsPvpControl = kind == StatusEffectKind.Paralyze && targetIsPlayer && sourceIsPlayer
             };
             _byEffect[def.EffectId] = status;
             _byGroup[def.StackGroupId] = status;
+            if (kind == StatusEffectKind.Vulnerable) _lastVulnerableAppliedTick = tick;
             return StatusApplyResult.Applied;
         }
 
         public bool Remove(int effectId, uint tick)
         {
             if (!_byEffect.Remove(effectId, out var status)) return false;
-            if (status.Kind == StatusEffectKind.Paralyze)
+            if (status.IsPvpControl)
                 ControlImmuneUntilTick = AddTicks(tick, _controlImmunityTicks);
             if (_byGroup.TryGetValue(status.GroupId, out var group) && ReferenceEquals(group, status))
                 _byGroup.Remove(status.GroupId);
@@ -304,10 +375,20 @@ namespace Cool.SyncCore
         {
             foreach (var s in _byEffect.Values)
             {
-                if (!s.IsDot || s.NextTick == 0 || tick < s.NextTick || tick > s.EndTick) continue;
+                if (!s.IsDot || s.NextTick == 0 || tick < s.NextTick) continue;
                 due.Add(s);
                 s.PendingRemoval = tick >= s.EndTick;
             }
+        }
+
+        /// <summary>没有排定跳落在 EndTick 时（刷新错相/间隔不整除）到期移除；必须在 CollectDueDots/AdvanceDot 之后调用。</summary>
+        public int RemoveExpiredDots(uint tick)
+        {
+            var expired = new List<int>();
+            foreach (var s in _byEffect.Values)
+                if (s.IsDot && tick >= s.EndTick) expired.Add(s.EffectId);
+            foreach (var id in expired) Remove(id, tick);
+            return expired.Count;
         }
 
         public void AdvanceDot(ActiveStatus status, uint tick)
@@ -346,6 +427,7 @@ namespace Cool.SyncCore
             _byEffect.Clear();
             _byGroup.Clear();
             ControlImmuneUntilTick = 0;
+            _lastVulnerableAppliedTick = 0;
         }
 
         public static uint SecondsToTicks(float seconds)
@@ -721,6 +803,7 @@ public sealed class StatusTickService
                 entity.Statuses.AdvanceDot(status, tick);
                 if (!entity.IsAlive) entity.Statuses.ClearAll(tick);
             }
+            entity.Statuses.Runtime.RemoveExpiredDots(tick);
         }
     }
 }
