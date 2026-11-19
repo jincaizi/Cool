@@ -395,7 +395,7 @@ public static class ElementVfxFallback
 
 - 路线图 Plan 05 ✅（写明服务端 654+、PlayMode 三客户端、带宽、注入、AOI 基准）。
 - 设计规格 Plan 05 ✅。
-- **修正 Plan 04 文档中“离线共享运行时属 Plan 05”**：改为“Plan 06/backlog；Plan 05 不新增机制”。在路线图新增 Plan 06 登记项：离线单机四元素共享运行时、Addressables 美术资源签收、Plan 04 final review 的 M2/M4/M6–M11/M16–M19。
+- **修正 Plan 04 文档中“离线共享运行时属 Plan 05”**：改为“Plan 06/backlog；Plan 05 不新增机制”。在路线图新增 Plan 06 登记项：离线单机四元素共享运行时、Addressables 美术资源签收、Plan 04 final review 的 M2/M4/M6–M11/M16–M19、`_pushVector` 对远程 NpcBody 不生效。
 - Server README 写验收数字与已知失败（Bot_Radius PPtr、MonsterWorld 导航模式导航债）。
 
 - [ ] **步骤 5：全量回归**
