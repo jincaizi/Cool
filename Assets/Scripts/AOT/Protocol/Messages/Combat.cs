@@ -42,14 +42,21 @@ namespace Cool.Protocol
         /// （服务端忽略，仅 20004 的 ChargeScales 消费）。服务端钳制，NaN 视为 0。</summary>
         [ProtoMember(7)] public float ChargeProgress { get; set; }
 
+        /// <summary>剑气回荡请求序号（会话内递增；0 = 旧客户端/非剑气回荡技能）。</summary>
+        [ProtoMember(8)] public ulong EchoRequestId { get; set; }
+
+        /// <summary>剑气回荡角色绑定代次（角色重绑递增；服务端原样回显）。</summary>
+        [ProtoMember(9)] public ulong EchoBindingId { get; set; }
+
+        // 属性剑气 v1 的 tag 在合并剑气回荡（8/9）后顺延到 10–12。
         /// <summary>客户端施法序号（同一序号重试只返回原结论；0 = 旧客户端，不做幂等缓存）</summary>
-        [ProtoMember(8)] public uint ClientCastSeq { get; set; }
+        [ProtoMember(10)] public uint ClientCastSeq { get; set; }
 
         /// <summary>客户端已确认的装备版本；不匹配时服务端拒绝并补发摘要</summary>
-        [ProtoMember(9)] public uint EquipmentRevision { get; set; }
+        [ProtoMember(11)] public uint EquipmentRevision { get; set; }
 
         /// <summary>客户端当前生命代次（0 = 旧客户端，跳过代次校验）</summary>
-        [ProtoMember(10)] public uint CasterLifeId { get; set; }
+        [ProtoMember(12)] public uint CasterLifeId { get; set; }
     }
 
     /// <summary>取消施法（客户端 → 服务器）。B3：旋转（20002）取消后必须丢弃未到期的
@@ -245,5 +252,11 @@ namespace Cool.Protocol
         /// 只加不删：tag 8，老客户端读默认 0。客户端据此区分玩家来源闪屏与怪物攻击。
         /// </summary>
         [ProtoMember(8)] public int SourceKind { get; set; }
+
+        /// <summary>
+        /// 剑气回荡施法实例（tag 9；0 = 旧技能/旧服务端）。客户端按
+        /// (连接代次, EchoCastId, TargetPlayerId) 去重。
+        /// </summary>
+        [ProtoMember(9)] public ulong EchoCastId { get; set; }
     }
 }

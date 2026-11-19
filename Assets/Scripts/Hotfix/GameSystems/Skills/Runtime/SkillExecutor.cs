@@ -166,6 +166,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return started;
         }
 
+        /// <summary>剑气回荡：在 TryStart 之后绑定权威结束时刻（单机/联网共用）。</summary>
+        public bool StartEcho(double endTimeSeconds, Func<double> nowSeconds)
+            => _stateMachine.StartEcho(endTimeSeconds, nowSeconds);
+
         /// <summary>
         /// 旋转技能：当前是否在可取消窗口内
         /// </summary>

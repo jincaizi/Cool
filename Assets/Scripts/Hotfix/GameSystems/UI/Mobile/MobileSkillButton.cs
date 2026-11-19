@@ -26,6 +26,7 @@ namespace Hotfix.GameSystems.UI
                 case SkillID.SkillR: _buttons.OnSkillRDown(); break;
                 case SkillID.Fireball: _buttons.OnFireballDown(); break;
                 case SkillID.ChargeBlast: _buttons.OnChargeBlastDown(); break;
+                case SkillID.SwordQiEcho: _buttons.OnSwordQiEchoDown(); break;
                 case SkillID.Ultimate: _buttons.OnMeteorDown(); break;
             }
         }

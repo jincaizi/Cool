@@ -68,20 +68,26 @@ AOI 反查/三客户端/带宽/注入验收）。验收证据见路线图与 `Se
 `Statuses[]`、实际控制来源（状态运行时）与 `DamageKind=Dot`
 均已在 Plan 04 启用；Plan 05 未改动协议，`ProtocolVersion` 保持 1，仅消费既有字段。
 
-能力位 `ProtocolFeatures.ElementalSwordQiV1 = 1u << 2`。登录请求 tag9
+能力位 `ProtocolFeatures.ElementalSwordQiV1 = 1u << 4`（合并 mainline 剑气回荡的
+`SwordQiEcho = 1u << 2` 后从 bit2 顺延；`PvpMovementBudgetV1` 仍为 `1u << 3`）。登录请求 tag9
 `ElementalCatalogFingerprint`（共享目录 SHA-256 小写十六进制）；登录响应 tag14 同指纹、
 tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<WeaponInstanceSummary>`）。
 指纹不匹配时服务器拒绝登录。`RespawnNotice` tag7 追加 `LifeId`，客户端复活后继续用新生命代次施法。
 
 | 消息 | ID | 方向 | 关键 tag |
 |---|---|---|---|
-| `EquipWeaponRequest` | 305 | C→S | 1 `ClientEquipSeq`、2 `WeaponInstanceId`、3 `KnownEquipmentRevision` |
-| `EquipWeaponConfirm` | 306 | S→C | 1 seq、2 `Accepted`、3 `RejectReason`、4 版本、5 实例、6 模板、7 元素；拒绝也带当前摘要 |
-| `CastConfirm` | 307 | S→C 本人 | 1 `ClientCastSeq`、2 `Accepted`、3 原因、4 `CastId`、5 技能、6 `CasterLifeId`、7 装备版本、8 攻速、9 `AcceptedTick`、10–12 装备摘要 |
-| `ProjectileLaunchBroadcast` | 308 | S→C | 1 `CastId`、2 施法者、3 生命代次、4 场景、5 `LaunchTick`、6–8 原点、9 `Yaw`、10 速度、11 射程、12 元素、13 技能、14 服务器时间戳 |
-| `ProjectileStopBroadcast` | 309 | S→C | 1 `CastId`、2 施法者、3 生命代次、4 场景、5 `StopTick`、6 原因、7–8 停点 |
-| `CastCancelBroadcast` | 310 | S→C | 1 `CastId`、2 `CasterLifeId`、3 `EffectiveTick`、4 `Reason`（`NpcActionCancelReason`）、5 `CasterPlayerId` |
-| `CombatStateUpdate` | 311 | S→C | 1 `EntityId`、2 `CombatProjection`、3 `ServerTimestamp` |
+> 合并说明（2026-11-20）：mainline 剑气回荡已占用 `SwordQiEchoState = 305`，属性剑气 7 条消息
+> 顺延到 312–318；`CastRequest` 的 8/9 被回声占用，属性剑气字段顺延到 10–12。
+
+| 消息 | ID | 方向 | 关键 tag |
+|---|---|---|---|
+| `EquipWeaponRequest` | 312 | C→S | 1 `ClientEquipSeq`、2 `WeaponInstanceId`、3 `KnownEquipmentRevision` |
+| `EquipWeaponConfirm` | 313 | S→C | 1 seq、2 `Accepted`、3 `RejectReason`、4 版本、5 实例、6 模板、7 元素；拒绝也带当前摘要 |
+| `CastConfirm` | 314 | S→C 本人 | 1 `ClientCastSeq`、2 `Accepted`、3 原因、4 `CastId`、5 技能、6 `CasterLifeId`、7 装备版本、8 攻速、9 `AcceptedTick`、10–12 装备摘要 |
+| `ProjectileLaunchBroadcast` | 315 | S→C | 1 `CastId`、2 施法者、3 生命代次、4 场景、5 `LaunchTick`、6–8 原点、9 `Yaw`、10 速度、11 射程、12 元素、13 技能、14 服务器时间戳 |
+| `ProjectileStopBroadcast` | 316 | S→C | 1 `CastId`、2 施法者、3 生命代次、4 场景、5 `StopTick`、6 原因、7–8 停点 |
+| `CastCancelBroadcast` | 317 | S→C | 1 `CastId`、2 `CasterLifeId`、3 `EffectiveTick`、4 `Reason`（`NpcActionCancelReason`）、5 `CasterPlayerId` |
+| `CombatStateUpdate` | 318 | S→C | 1 `EntityId`、2 `CombatProjection`、3 `ServerTimestamp` |
 
 `CastCancelBroadcast` 取消尚未提交的前摇/持续施法（以及 NPC 技能动作）；已发射的独立投射物
 （剑气）继续飞行。收件人为施法者本人与视野内观察者，按 `ZoneId` 过滤。
@@ -98,13 +104,13 @@ Plan 04 起：`Statuses` 由服务端状态运行时（`ServerStatusManager`）�
 （`SlowRatio`、`DamagePerTick/IntervalTicks`、`IncomingDamageMultiplier`）均为权威值；
 `Control` 取 `PlayerState.ControlSpeedScale/ControlActionLock/ControlVersion`，
 由 `Server3C.ApplyPlayerControl` 在状态变化时写入，冰使 `SpeedScale` 变 0.7、雷使
-`ActionLock=true`，`ControlVersion` 随之递增。本人 311 与 AOI 基线走同一份投影。
+`ActionLock=true`，`ControlVersion` 随之递增。本人 318 与 AOI 基线走同一份投影。
 
 追加字段（只加不删）：
 
 | 消息 | 追加内容 | tag | 语义 |
 |---|---|---|---|
-| `CastRequest` | `ClientCastSeq` / `EquipmentRevision` / `CasterLifeId` | 8 / 9 / 10 | 幂等序号、装备版本与生命代次校验 |
+| `CastRequest` | `ClientCastSeq` / `EquipmentRevision` / `CasterLifeId` | 10 / 11 / 12 | 幂等序号、装备版本与生命代次校验（8/9 为剑气回声字段） |
 | `CastBroadcast` | `CastId` / `CasterLifeId` / `AttackSpeedMultiplier` / `ElementId` / `EquipmentRevision` | 15–19 | 权威施法标识与冻结的施法快照 |
 | `HitEntry` | `CastId` / `EventSeq` / `EventId` / `DamageKind` / `TargetLifeId` / `CombatVersion` | 8–13 | 命中归属与战斗投影；Plan 04 起逐事件填充 `EventSeq/EventId/CombatVersion`，`DamageKind=Dot` 用于灼烧跳 |
 | `CancelCastRequest` | `CastId` | 2 | 非 0 只取消该次施法；0 = 取消该技能最新实例（兼容旧客户端） |
@@ -136,6 +142,25 @@ tag14 `DisplacementSkillId`、tag15 `CastId`、tag16 `ClientControlVersion`、ta
 权威版本整包纠偏；`LifeId` 非 0 且不匹配整包纠偏）。未携带该位的旧客户端继续走旧
 `MovementValidator` 路径（不按接收 tick 收紧）；新字段缺省为零：`None/Walk`、`JumpSeq=0`、
 `DisplacementSkillId=0`、`CastId=0`、`LifeId=0`（不校验生命代次）、`ClientControlVersion=0`。
+
+### 剑气回荡（2026-11-18）
+
+`MessageId.SwordQiEchoState = 305`（服务器 → 施法者/目标/观察者）；能力位
+`ProtocolFeatures.SwordQiEcho = 1u << 2`，登录请求 tag7 `SupportedFeatures` / 响应 tag12
+`EnabledFeatures` 协商。旧客户端不收 305，旧服务端不置该位时客户端禁用联网入口。
+
+| 消息 | 追加内容 | tag | 语义 |
+|---|---|---|---|
+| `CastRequest` | `EchoRequestId` / `EchoBindingId` | 8 / 9（`ulong`） | 会话内递增请求号 / 角色绑定代次；0 = 旧请求 |
+| `DamageResult` | `EchoCastId` | 9（`ulong`） | 同一次剑气回荡实例；0 = 其他技能 |
+| `SwordQiEchoState` | `Phase` / `CasterId` / `CastId` / `RequestId` / `EchoBindingId` / `RejectReason` | 1–6 | Rejected=1 / Started=2 / Ended=3；结束优先于同实例重放开始 |
+| `SwordQiEchoState` | `StartTick` / `EndTick` / `ServerTimestamp` / `CooldownTicks` | 7–10 | 服务器权威时间轴（15Hz）与剩余冷却 |
+| `SwordQiEchoState` | `OriginX/Y/Z` / `Rotation` / `Radius` / `SwordCount` / `OvershootMeters` | 11–17 | 固定圆心与表现参数 |
+| `SwordQiEchoState` | `Contacts`（`IList<SwordQiEchoContactMessage>`） | 18 | 目标 ID / 剑气编号 / 相对 tick / 初始 XYZ |
+
+`SwordQiEchoState` 的接触列表必须声明为 `IList<T>`（IL2CPP tuple 探测约束）。
+开始/结束按 `(连接代次, CastId)` 去重；伤害按 `(连接代次, EchoCastId, TargetPlayerId)` 去重。
+视觉结束后保留有界接收窗口（首版 2s / 64 个 `EchoCastId`）。
 
 ## 双端一致性校验（人工/CI 各跑一次）
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Sys3C.Core.Combat;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -27,12 +28,34 @@ namespace Hotfix.GameSystems.Monster
         private readonly Dictionary<int, Vector3> _respawnOrigins = new();
         private readonly Queue<MonsterEntity> _pool = new();
 
+        /// <summary>单机场景最近的 MonsterSpawner（联网模式会被 ClientNetworkHost 禁用）。</summary>
+        public static MonsterSpawner? Active { get; private set; }
+
         private void Awake()
         {
+            Active = this;
             // Create a dedicated container node for organization in the hierarchy
             var containerGo = new GameObject("Monsters");
             containerGo.transform.SetParent(transform);
             _container = containerGo.transform;
+        }
+
+        private void OnDestroy()
+        {
+            if (ReferenceEquals(Active, this)) Active = null;
+        }
+
+        /// <summary>当前存活怪物快照（过滤死亡、非激活与池中对象）。</summary>
+        public List<MonsterEntity> SnapshotAlive()
+        {
+            var result = new List<MonsterEntity>(_aliveMonsters.Count);
+            foreach (var entity in _aliveMonsters)
+            {
+                if (entity == null || !entity.gameObject.activeInHierarchy) continue;
+                if (!((IDamageable)entity).IsAlive) continue;
+                result.Add(entity);
+            }
+            return result;
         }
 
         private void Start()

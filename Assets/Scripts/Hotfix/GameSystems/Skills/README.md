@@ -8,8 +8,8 @@
 | 目录 | 内容 |
 |---|---|
 | `Definition/` | `SkillState` / `SkillType` / 技能子状态枚举 |
-| `Data/` | `SkillData` 与技能类型数据：`InstantSkillData` / `ProjectileSkillData` / `ComboSkillData` / `ChargedSkillData` / `ChanneledSkillData` / `SpinSkillData`；`MeteorConfig` / `SwordQiConfig`；`EffectBlock` / `ShapeBlock` / `DamageBlock` / `PresentationBlock`；`SkillPresentationCatalog`（7 个同步玩家技能，与本地职业无关的远程表现目录） |
-| `Runtime/` | `SkillCoordinator` / `SkillStateMachine` / `SkillExecutor` / `SkillInputBuffer` / `CooldownManager` / `SkillInterruptionMatrix` / `SkillDamageHelper` / `SpinHitTracker` |
+| `Data/` | `SkillData` 与技能类型数据：`InstantSkillData` / `ProjectileSkillData` / `ComboSkillData` / `ChargedSkillData` / `ChanneledSkillData` / `SpinSkillData` / `SwordQiEchoSkillData`；`MeteorConfig` / `SwordQiConfig`；`EffectBlock` / `ShapeBlock` / `DamageBlock` / `PresentationBlock`；`SkillPresentationCatalog`（同步玩家技能远程表现目录） |
+| `Runtime/` | `SkillCoordinator` / `SkillStateMachine` / `SkillExecutor` / `SkillInputBuffer` / `CooldownManager` / `SkillInterruptionMatrix` / `SkillDamageHelper` / `SpinHitTracker` / `SwordQiEchoLocalRunner` |
 | `Effect/` | `StatusEffectManager` / `StatusEffectRegistry` / `EffectData` / `BurnEffectData` |
 | `Events/` | 火球、陨石、剑气、状态效果与 VFX 事件 |
 | `EventBus.cs` | 静态事件总线；跨模块事件都走这里 |
@@ -79,6 +79,18 @@ bash tools/unity-tests.sh EditMode SkillExecutorMeteorTests
 ```
 
 ## 相关模块
+
+## 剑气回荡（20006，2026-11-18）
+
+- `SwordQiEchoSkillData` 只承载 `ConfirmationTimeoutSeconds`；半径/目标上限/剑气数/伤害倍率在共享
+  `SyncCore.SwordQiEchoRules.Spec`。资产 `_skillType=Instant`、`_canBeInterruptedByMovement=false`。
+- `SkillCoordinator` 两阶段：联网时发 `OnEchoRequested`（宿主负责 requestId/bindingId 与发送），
+  单机发 `OnEchoOfflineRequested`（`SwordQiEchoLocalRunner` 选敌并提交）。待确认期间锁新主动施法；
+  `CommitEchoRequest` 接迟到有效接受并结束冲突动作，`ApplyAuthoritativeCooldown` 只对齐冷却。
+- `SkillStateMachine.StartEcho(endTime, now)` 让 Execution 按权威时刻完成，剪辑长度只影响表现；
+  `CanMove`/`CanRotate` 为真，`IsAnimationCompletionIgnored` 为真。
+- `SkillCastReporter.ReportActivation` 跳过 20006；`CombatNetworkBridge.NotifyEchoCast` 发送带
+  `EchoRequestId/EchoBindingId` 的 CastRequest。
 
 ## 移动端显示契约
 

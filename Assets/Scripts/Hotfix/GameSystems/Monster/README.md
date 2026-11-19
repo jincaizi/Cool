@@ -10,10 +10,10 @@
 |---|---|
 | `AI/` | `AIBrain`（唯一入口）→ `AIContext` + `AIStateMachine`；状态：Idle / Patrol / Chase / Attack / Hit / Defend / Taunt / Death |
 | `Damage/` | `DamagePipeline`、`DamageContext` / `DamageResult`、`IDamageModifier`、`DefendModifier` / `IFrameModifier` |
-| `MonsterEntity.cs` | 怪物实体，实现 `IDamageable` / `ITargetable` / `IEffectTarget` |
+| `MonsterEntity.cs` | 怪物实体，实现 `IDamageable` / `ITargetable` / `IEffectTarget`；`BodyRadius` 供表面距离选敌 |
 | `MonsterStats.cs` / `MonsterConfig.cs` | 属性与配置 |
 | `MonsterMovement.cs` | 客户端移动 |
-| `MonsterSpawner.cs` / `SpawnLedger.cs` | 生成与生成账本（防重复生成） |
+| `MonsterSpawner.cs` / `SpawnLedger.cs` | 生成与生成账本（防重复生成）；`Active` / `SnapshotAlive()` 供单机剑气回荡选敌 |
 | `MonsterLootTable.cs` | 掉落表 |
 | `MonsterEvents.cs` | 怪物事件 |
 

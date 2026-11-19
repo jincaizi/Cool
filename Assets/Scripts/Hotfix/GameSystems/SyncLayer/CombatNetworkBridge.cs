@@ -56,11 +56,19 @@ namespace Hotfix.GameSystems.SyncLayer
         private uint _nextEquipSeq;
         private uint _nextCastSeq;
 
+        private const int MaxEchoCastIds = 64;
+        private readonly Dictionary<ulong, HashSet<long>> _echoSeenTargets =
+            new Dictionary<ulong, HashSet<long>>();
+        private readonly Queue<ulong> _echoCastOrder = new Queue<ulong>();
+
         /// <summary>收到其他玩家施法（表现接线点；P4 宿主仅日志占位——远程实体为胶囊）</summary>
         public event Action<CastBroadcast>? OnCastBroadcast;
 
         /// <summary>收到伤害结果（扣血/飘字已内部处理；测试与上层观察用）</summary>
         public event Action<DamageResult>? OnDamageResult;
+
+        /// <summary>收到剑气回荡状态（Started/Rejected/Ended；主线程）。</summary>
+        public event Action<SwordQiEchoState>? OnSwordQiEchoState;
 
         /// <summary>本机施放的 LineAll 剑气被格挡吸收（旧服务端兼容；新服务端走 ProjectileStopBroadcast）</summary>
         public event Action<Vector3>? OnLineProjectileStopped;
@@ -147,6 +155,19 @@ namespace Hotfix.GameSystems.SyncLayer
             _client.Send(MessageId.CastRequest, request);
         }
 
+        /// <summary>剑气回荡请求（会话内递增 requestId + 角色绑定代次）。</summary>
+        public void NotifyEchoCast(int skillId, ulong requestId, ulong bindingId)
+        {
+            if (!Cool.SyncCore.CombatRules.IsSynced(skillId)) return;
+            _client.Send(MessageId.CastRequest, new CastRequest
+            {
+                SkillId = skillId,
+                EchoRequestId = requestId,
+                EchoBindingId = bindingId,
+                Shape = new HitShape(),
+            });
+        }
+
         /// <summary>取消施法（B3：旋转多段取消后，服务端丢弃未到期判定段）。</summary>
         public void NotifySkillCancel(int skillId)
         {
@@ -185,6 +206,7 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 case MessageId.CastBroadcast:
                 case MessageId.DamageResult:
+                case MessageId.SwordQiEchoState:
                 case MessageId.EquipWeaponConfirm:
                 case MessageId.CastConfirm:
                 case MessageId.ProjectileLaunchBroadcast:
@@ -239,6 +261,9 @@ namespace Hotfix.GameSystems.SyncLayer
                     case CombatStateUpdate combatUpdate:
                         OnCombatStateUpdate?.Invoke(combatUpdate);
                         break;
+                    case SwordQiEchoState echoState:
+                        OnSwordQiEchoState?.Invoke(echoState);
+                        break;
                 }
             }
         }
@@ -285,8 +310,18 @@ namespace Hotfix.GameSystems.SyncLayer
                 // 传输层重试/重投的同一命中只生效一次：否则本地受击 FSM/飘字会二次触发，
                 // 远程红字/灰字会重影。旧服务端 EventId=0 保持不去重的既有行为。
                 // EventId 先登记、后判视图：视图未建时事件已被消费，后续同 EventId 的补包
-                // 不再补表现；血量由后续快照/311 纠正（表现可丢，权威数值不丢）。
+                // 不再补表现；血量由后续快照/318 纠正（表现可丢，权威数值不丢）。
                 if (!MarkEventSeen(hit.EventId)) continue;
+
+                // 剑气回荡按 (EchoCastId, TargetPlayerId) 再挡一次：服务端逐目标重投时
+                // EventId 可能不同，但同一目标本次施法只允许一次表现/扣血。
+                if (result.EchoCastId != 0)
+                {
+                    if (IsDuplicateEchoHit(result.EchoCastId, hit.TargetPlayerId))
+                        continue;
+                    RememberEchoHit(result.EchoCastId, hit.TargetPlayerId);
+                }
+
                 anyNewHit = true;
 
                 // DoT 跳伤：只更新权威血量与飘字。绝不走受击 FSM/格挡/击退/PlayHit/
@@ -398,6 +433,30 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // 无 hit（旧服务端停点/空结果）没有可去重的命中，不是"重复消息"。
             return anyNewHit || result.Hits.Count == 0;
+        }
+
+        private bool IsDuplicateEchoHit(ulong castId, long targetId)
+            => _echoSeenTargets.TryGetValue(castId, out var targets) && targets.Contains(targetId);
+
+        private void RememberEchoHit(ulong castId, long targetId)
+        {
+            if (!_echoSeenTargets.TryGetValue(castId, out var targets))
+            {
+                targets = new HashSet<long>();
+                _echoSeenTargets[castId] = targets;
+                _echoCastOrder.Enqueue(castId);
+
+                while (_echoCastOrder.Count > MaxEchoCastIds)
+                    _echoSeenTargets.Remove(_echoCastOrder.Dequeue());
+            }
+            targets.Add(targetId);
+        }
+
+        /// <summary>连接清理/测试：清空剑气回荡接收窗口。</summary>
+        public void ClearEchoDedupe()
+        {
+            _echoSeenTargets.Clear();
+            _echoCastOrder.Clear();
         }
     }
 

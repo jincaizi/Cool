@@ -73,6 +73,12 @@ namespace KcpServer
             public bool ProjectileStopped;
             public Vec3 StopPosition;
 
+            /// <summary>剑气回荡决策结果（Accepted 时非 null；接触判定时只带 CastId）。</summary>
+            public SwordQiEchoCast? Echo;
+
+            /// <summary>下行 DamageResult 的剑气回荡实例 ID（非本技能为 0）。</summary>
+            public ulong EchoCastId;
+
             /// <summary>下行 DamageResult 的来源种类（值同 EntityKind）</summary>
             public int SourceKind => IsNpcCaster ? (int)EntityKind.Npc : (int)EntityKind.Player;
 
@@ -86,7 +92,8 @@ namespace KcpServer
                 Hits = Hits,
                 ProjectileStopped = ProjectileStopped,
                 StopX = StopPosition.X,
-                StopZ = StopPosition.Z
+                StopZ = StopPosition.Z,
+                EchoCastId = EchoCastId
             };
         }
 
@@ -189,6 +196,11 @@ namespace KcpServer
             foreach (var castId in expired) _activeLaunches.Remove(castId);
         }
 
+        private const int SwordQiEchoSkillId = 20006;
+        private readonly List<SwordQiEchoCast> _echoCasts = new List<SwordQiEchoCast>();
+        private readonly List<SwordQiEchoCast> _endedEchoCasts = new List<SwordQiEchoCast>();
+        private ulong _nextEchoCastId;
+
         /// <summary>决策：校验 + 冷却记录 + 生成广播 + 入队。判定（几何/掷骰/扣血）推迟到首段到期 tick
         /// （DrainResolved → ResolveStage）。</summary>
         public CastResolution Decide(long casterId, CastRequest request, uint tick)
@@ -213,6 +225,8 @@ namespace KcpServer
             if (caster.ControlActionLock) return Reject(resolution, caster, request, "control-lock");
             if (!CombatRules.TryGet(request.SkillId, out var entry))
                 return Reject(resolution, caster, request, "unknown-skill");
+            if (request.SkillId == SwordQiEchoSkillId)
+                return DecideEcho(caster, request, tick, entry);
             if (!CombatRules.ValidateShape(request.Shape, entry))
                 return Reject(resolution, caster, request, "shape-tampered");
 
@@ -432,6 +446,103 @@ namespace KcpServer
                 caster.RecentCastConfirms.Remove(keys[i]);
         }
 
+        /// <summary>20006 决策：选敌、锁定生命、记录冷却、提交无敌窗口、生成首次接触时间表。</summary>
+        private CastResolution DecideEcho(PlayerState caster, CastRequest request, uint tick, SkillEntry entry)
+        {
+            var resolution = new CastResolution();
+            if (caster.Kind != (byte)EntityKind.Player)
+                return Reject(resolution, "not-player");
+            if (!caster.IsCastReady(request.SkillId, tick, CombatRules.CooldownTicks(entry)))
+                return Reject(resolution, "cooldown");
+
+            var origin = new Vec3(caster.Position.X, ResolveCombatHeight(caster), caster.Position.Z);
+            var targets = SwordQiEchoRules.SelectTargets(origin, SwordQiEchoRules.Spec.Radius,
+                SwordQiEchoRules.Spec.MaxTargets, BuildEchoCandidates(caster));
+            if (targets.Count == 0)
+                return Reject(resolution, "no-target");
+
+            uint durationTicks = (uint)Math.Ceiling(
+                SwordQiEchoRules.Spec.DurationSeconds * CombatRules.TickRateHz);
+            if (durationTicks < 2) return Reject(resolution, "bad-duration");
+            uint endTick = tick + durationTicks;
+
+            var contacts = SwordQiEchoRules.BuildContacts(origin, targets,
+                SwordQiEchoRules.Spec.SwordCount, durationTicks);
+            var cast = new SwordQiEchoCast
+            {
+                CasterId = caster.PlayerId,
+                Caster = caster,
+                CasterLifeId = caster.LifeId,
+                ZoneId = caster.ZoneId,
+                CastId = ++_nextEchoCastId,
+                RequestId = request.EchoRequestId,
+                BindingId = request.EchoBindingId,
+                StartTick = tick,
+                EndTick = endTick,
+                CooldownTicks = CombatRules.CooldownTicks(entry),
+                Origin = origin,
+                Rotation = caster.Rotation,
+                BaseDamage = SwordQiEchoRules.DefaultDamage,
+                CriticalRate = entry.CriticalRate,
+                Broadcast = new CastBroadcast
+                {
+                    SkillId = request.SkillId,
+                    CasterPlayerId = caster.PlayerId,
+                    CasterX = origin.X,
+                    CasterY = origin.Y,
+                    CasterZ = origin.Z,
+                    CasterRotation = caster.Rotation,
+                    Shape = request.Shape,
+                    ServerTimestamp = ServerClock.NowTicks()
+                }
+            };
+
+            foreach (var contact in contacts)
+            {
+                var target = _store.GetPlayer(contact.TargetId);
+                if (target == null) continue;
+                cast.Contacts.Add(new SwordQiEchoCast.Contact
+                {
+                    TargetId = target.PlayerId,
+                    Target = target,
+                    TargetLifeId = target.LifeId,
+                    SwordIndex = contact.SwordIndex,
+                    OffsetTicks = contact.OffsetTicks,
+                    Position = contact.Position
+                });
+            }
+
+            if (cast.Contacts.Count == 0)
+                return Reject(resolution, "no-target");
+
+            caster.RecordCast(request.SkillId, tick);
+            caster.SetInvulnerable(tick, endTick);
+            _echoCasts.Add(cast);
+
+            resolution.Accepted = true;
+            resolution.IsNpcCaster = false;
+            resolution.Broadcast = cast.Broadcast;
+            resolution.Echo = cast;
+            return resolution;
+        }
+
+        private List<CombatCandidate> BuildEchoCandidates(PlayerState caster)
+        {
+            var candidates = new List<CombatCandidate>();
+            foreach (var entity in _store.All)
+            {
+                if (entity.PlayerId == caster.PlayerId) continue;
+                bool formalPlayer = entity.Kind == (byte)EntityKind.Player && entity.IsLoggedIn;
+                bool npc = entity.Kind == (byte)EntityKind.Npc;
+                if (!formalPlayer && !npc) continue;
+                if (!string.Equals(entity.ZoneId, caster.ZoneId, StringComparison.Ordinal)) continue;
+                candidates.Add(new CombatCandidate(entity.PlayerId,
+                    new Vec3(entity.Position.X, ResolveCombatHeight(entity), entity.Position.Z),
+                    entity.IsAlive, entity.BodyRadius, BodyHeightOf(entity)));
+            }
+            return candidates;
+        }
+
         /// <summary>取出到期（含本 tick）的待判定施法并按段裁决。单遍压缩，出队顺序 = 入队顺序（确定性）。</summary>
         public List<CastResolution> DrainResolved(uint tick)
         {
@@ -507,7 +618,101 @@ namespace KcpServer
                 if (keep) _pending[write++] = pending;
             }
             if (write < _pending.Count) _pending.RemoveRange(write, _pending.Count - write);
+            ResolveEchoCasts(tick, ref resolved);
             return resolved ?? new List<CastResolution>();
+        }
+
+        /// <summary>按固定顺序处理剑气回荡：普通 pending 先、Echo 后（同 tick 可复现）。</summary>
+        private void ResolveEchoCasts(uint tick, ref List<CastResolution>? resolved)
+        {
+            int write = 0;
+            for (int read = 0; read < _echoCasts.Count; read++)
+            {
+                var cast = _echoCasts[read];
+                var caster = _store.GetPlayer(cast.CasterId);
+                bool casterValid = caster != null
+                    && ReferenceEquals(caster, cast.Caster)
+                    && caster.LifeId == cast.CasterLifeId
+                    && caster.IsAlive;
+                if (!casterValid)
+                {
+                    EndEchoCast(cast);
+                    continue;
+                }
+
+                foreach (var contact in cast.Contacts)
+                {
+                    if (contact.Resolved) continue;
+                    uint dueTick = cast.StartTick + contact.OffsetTicks;
+                    if (dueTick > tick) continue;
+
+                    contact.Resolved = true;
+                    var target = _store.GetPlayer(contact.TargetId);
+                    bool targetValid = target != null
+                        && ReferenceEquals(target, contact.Target)
+                        && target.LifeId == contact.TargetLifeId
+                        && target.IsAlive
+                        && string.Equals(target.ZoneId, cast.ZoneId, StringComparison.Ordinal)
+                        && HitResolver.SurfaceDistance(cast.Origin,
+                            new Vec3(target.Position.X, target.Position.Y, target.Position.Z),
+                            target.BodyRadius) <= SwordQiEchoRules.Spec.Radius;
+                    if (!targetValid) continue;
+
+                    var contactResolution = new CastResolution
+                    {
+                        Accepted = true,
+                        IsNpcCaster = false,
+                        Broadcast = cast.Broadcast,
+                        EchoCastId = cast.CastId
+                    };
+                    ApplyHit(cast.CasterId, cast.BaseDamage, cast.CriticalRate,
+                        null, 0f, target.PlayerId, cast.Origin, tick, contactResolution);
+                    if (contactResolution.Hits.Count > 0)
+                        (resolved ??= new List<CastResolution>()).Add(contactResolution);
+                }
+
+                // 即使全部目标都已失效/结算，施法与无敌仍持续到原定 EndTick（规格 §无敌与联机时序）。
+                if (tick >= cast.EndTick)
+                {
+                    EndEchoCast(cast);
+                    continue;
+                }
+
+                _echoCasts[write++] = cast;
+            }
+
+            if (write < _echoCasts.Count) _echoCasts.RemoveRange(write, _echoCasts.Count - write);
+        }
+
+        private void EndEchoCast(SwordQiEchoCast cast)
+        {
+            var caster = _store.GetPlayer(cast.CasterId);
+            if (caster != null && ReferenceEquals(caster, cast.Caster)
+                && caster.LifeId == cast.CasterLifeId)
+                caster.ClearInvulnerability();
+            _endedEchoCasts.Add(cast);
+        }
+
+        /// <summary>玩家断开/移除时清掉其剑气回荡实例；已结束实例交给宿主发 Ended。</summary>
+        public void RemoveEchoCastsFor(long playerId)
+        {
+            for (int i = _echoCasts.Count - 1; i >= 0; i--)
+            {
+                var cast = _echoCasts[i];
+                if (cast.CasterId != playerId) continue;
+                EndEchoCast(cast);
+                _echoCasts.RemoveAt(i);
+            }
+        }
+
+        public bool HasEndedEchoCasts => _endedEchoCasts.Count > 0;
+
+        /// <summary>取出已结束的剑气回荡实例（宿主负责广播 Ended 并更新请求缓存）。</summary>
+        public List<SwordQiEchoCast> DrainEndedEchoCasts()
+        {
+            var ended = new List<SwordQiEchoCast>(_endedEchoCasts);
+            _endedEchoCasts.Clear();
+            return ended;
         }
 
         public List<CastCancelBroadcast> CancelPending(long casterId, int skillId, ulong castId = 0,
@@ -671,7 +876,9 @@ namespace KcpServer
             if (swingHitIds != null)
             {
                 foreach (var targetId in swingHitIds)
-                    ApplyHit(pending, entry, spec, targetId, casterPos, resolution, isProjectile: false, tick);
+                    ApplyHit(pending.CasterId, entry.BaseDamage, entry.CriticalRate,
+                        spec, pending.Charge, targetId, casterPos, tick, resolution,
+                        pending, isProjectile: false);
             }
 
             // 剑气沿施法方向推进：按沿线距离排序，格挡者之前的先结算、之后的被吸收跳过
@@ -693,8 +900,9 @@ namespace KcpServer
                 }
                 else if (pending.Runner == null && !pending.GroupHitIds.Add(targetId)) continue;   // 组内每目标一次
 
-                bool blocked = ApplyHit(pending, entry, spec, targetId, lineAttackerPos,
-                    resolution, isProjectile: spec != null, tick);
+                bool blocked = ApplyHit(pending.CasterId, entry.BaseDamage, entry.CriticalRate,
+                    spec, pending.Charge, targetId, lineAttackerPos, tick, resolution,
+                    pending, isProjectile: spec != null);
                 if (pending.Repeat.HasValue)
                 {
                     pending.RepeatHitCounts.TryGetValue(targetId, out int repeatHits);
@@ -768,18 +976,21 @@ namespace KcpServer
             => HitResolver.Resolve(casterPos, caster.Rotation, request.TargetPlayerId,
                 request.Shape, candidates, entry.AttackHeight);
 
-        /// <summary>对一个命中目标结算：掷骰（+蓄力倍率）→ 格挡 → 扣血 → HitEntry；返回是否格挡。
+        /// <summary>对一个命中目标结算：无敌检查 → 掷骰（+蓄力倍率）→ 格挡 → 扣血 → HitEntry；返回是否格挡。
+        /// 普通 PvE/PvP、属性剑气与剑气回荡共用；pending 非空时附带武器倍率/元素附加。
         /// 调用方决定是否先经 GroupHitIds（挥击实例不经过去重，与剑气各算一次）。</summary>
-        private bool ApplyHit(PendingCast pending, SkillEntry entry, ProjectileSpec? spec,
-            long targetId, Vec3 attackerPos, CastResolution resolution, bool isProjectile, uint tick)
+        private bool ApplyHit(long casterId, float baseDamage, float criticalRate,
+            ProjectileSpec? spec, float charge, long targetId, Vec3 attackerPos, uint tick,
+            CastResolution resolution, PendingCast? pending = null, bool isProjectile = false)
         {
             var target = _store.GetPlayer(targetId);
             if (target == null) return false;
+            if (target.IsInvulnerableAt(tick)) return false;
 
             // 掷骰顺序不变：暴击照常掷，格挡只在最后乘倍率（确定性可复现——固定种子的
             // 期望值不因格挡分支错位；调换这里两句会让既有种子序列整体漂移）
-            float damage = RollDamage(entry, out bool isCritical);
-            if (!pending.IsNpcCaster && IsBasicAttack(pending.Request.SkillId))
+            float damage = RollDamage(baseDamage, criticalRate, out bool isCritical);
+            if (pending != null && !pending.IsNpcCaster && IsBasicAttack(pending.Request.SkillId))
             {
                 float weaponRatio = _defaultWeaponBaseAttack > 0f
                     ? pending.Weapon.BaseAttack / _defaultWeaponBaseAttack
@@ -791,7 +1002,7 @@ namespace KcpServer
                               * pending.Weapon.SwordQiDamageMultiplier;
             }
             if (spec != null && spec.ChargeScales)
-                damage *= 1f + (spec.ChargeDamageMaxScale - 1f) * pending.Charge;
+                damage *= 1f + (spec.ChargeDamageMaxScale - 1f) * charge;
 
             // 格挡减伤（D-P4-8 服务端化）：防御中 + 攻击者落在受击者正面 BlockHalfAngleDeg 锥内
             // ⇒ 伤害 × BlockDamageScale、命中条目标记 IsBlocked。盾资源只由客户端精力控制
@@ -809,23 +1020,23 @@ namespace KcpServer
 
             // Plan 03：元素会话玩家 720 HP；NPC 直接伤害按同一基准缩放，保持原 PvE TTK。
             // 玩家对玩家/怪物、bot（MaxHp=100）不缩放。
-            if (pending.IsNpcCaster && target.Kind == (byte)EntityKind.Player && target.IsLoggedIn)
+            if (pending?.IsNpcCaster == true && target.Kind == (byte)EntityKind.Player && target.IsLoggedIn)
                 damage = CombatRules.ScaleNpcDamageToPlayer(damage, target.MaxHp);
 
             // Plan 04：风易伤在扣血前读取——本次命中自身不吃刚附加的倍率，
             // 同次施法的后续命中（挥砍之后的剑气等）才读取新倍率。
-            bool pvp = target.Kind == (byte)EntityKind.Player && !pending.IsNpcCaster;
+            bool pvp = target.Kind == (byte)EntityKind.Player && pending?.IsNpcCaster != true;
             if (target.Statuses != null)
                 damage *= target.Statuses.Runtime.IncomingDamageMultiplier(pvp,
                     _elementalCatalog.Pvp.WindVulnerabilityMultiplier);
 
             target.ApplyDamage(damage);
             if (target.Kind == (byte)EntityKind.Npc)
-                NpcDamaged?.Invoke(target.PlayerId, pending.CasterId, damage);
+                NpcDamaged?.Invoke(target.PlayerId, casterId, damage);
 
             // Plan 04：10002 首个有效命中附加武器元素状态；每目标每次施法只附加一次
             // （挥砍先结算 ⇒ 同组剑气不再附加；剑气先命中则由剑气附加）。
-            if (!pending.IsNpcCaster && pending.Request.SkillId == 10002
+            if (pending != null && !pending.IsNpcCaster && pending.Request.SkillId == 10002
                 && pending.Weapon.ElementId > 0 && damage > 0f && !blocked && target.IsAlive)
             {
                 var key = (targetId, target.LifeId);
@@ -854,7 +1065,7 @@ namespace KcpServer
                 TargetRemainingHp = target.Hp, // 扣后权威余血（T12 甲-2）——格挡分支同样成立
                 HitX = target.Position.X,
                 HitZ = target.Position.Z,
-                CastId = pending.CastId,
+                CastId = pending?.CastId ?? 0,
                 DamageKind = DamageKind.Direct,
                 TargetLifeId = target.LifeId,
                 EventSeq = seq,
@@ -926,10 +1137,10 @@ namespace KcpServer
         }
 
         /// <summary>D4：战斗骰只有服务器掷——暴击 ×1.5；波动 0 与客户端 GameSettings.DamageFluctuation 默认对齐（D-P4-4）</summary>
-        private float RollDamage(SkillEntry entry, out bool isCritical)
+        private float RollDamage(float baseDamage, float criticalRate, out bool isCritical)
         {
-            isCritical = entry.CriticalRate > 0f && _rng.NextDouble() < entry.CriticalRate;
-            return entry.BaseDamage * (isCritical ? CombatRules.CritMultiplier : 1f);
+            isCritical = criticalRate > 0f && _rng.NextDouble() < criticalRate;
+            return baseDamage * (isCritical ? CombatRules.CritMultiplier : 1f);
         }
 
         private static CastResolution Reject(CastResolution resolution, string reason)
@@ -966,6 +1177,16 @@ namespace KcpServer
         private readonly Dictionary<ulong, (HashSet<long> recipients, uint launchTick)> _projectileRecipients =
             new Dictionary<ulong, (HashSet<long>, uint)>();
 
+        private sealed class EchoRequestRecord
+        {
+            public ulong LastRequestId;
+            public SwordQiEchoState? LastResponse;
+            public ulong LastCastId;
+        }
+
+        private readonly Dictionary<long, EchoRequestRecord> _echoRequests =
+            new Dictionary<long, EchoRequestRecord>();
+
         /// <summary>拒绝计数（验收/统计口径，与 AoiBroadcaster.TotalEntitySends 同惯例）</summary>
         public long RejectedCasts { get; private set; }
 
@@ -997,7 +1218,15 @@ namespace KcpServer
 
         /// <summary>到期取出（Server3C 每 tick 在 TickRespawns 之前调用）</summary>
         public List<CombatResolver.CastResolution> DrainResolved(uint tick)
-            => _resolver.DrainResolved(tick);
+        {
+            var resolved = _resolver.DrainResolved(tick);
+            if (_resolver.HasEndedEchoCasts)
+            {
+                foreach (var cast in _resolver.DrainEndedEchoCasts())
+                    OnEchoCastEnded(cast);
+            }
+            return resolved;
+        }
 
         /// <summary>决策阶段广播"挥砍开始"（F7：时间戳 = 剪辑起始时刻）。拒绝分支内部处理（日志 + 计数）。
         /// casterId/request 只有拒绝日志用得到——拒绝时 <c>decision.Broadcast</c> 恒为 null，
@@ -1021,6 +1250,8 @@ namespace KcpServer
 
             // 重复序号只回原确认，不再向观察者重播挥砍广播。
             if (decision.Replay) return;
+            // 剑气回荡走 SwordQiEchoState，不发普通 CastBroadcast（老客户端不认识 20006）。
+            if (decision.Echo != null) return;
 
             var broadcast = decision.Broadcast;
             var caster = _server.GetEntity(broadcast.CasterPlayerId);
@@ -1236,12 +1467,179 @@ namespace KcpServer
                 return;
             }
 
+            if (request.SkillId == 20006)
+            {
+                await HandleEchoCastAsync(session, playerId.Value, request);
+                return;
+            }
+
             // preTick 已在包处理之前把 CurrentTick 写成当前 tick（KCP 包与 WS after-pre-tick
             // 动作同基准）——决策直接取 CurrentTick，与怪物路径（tick 内决策）口径一致。
             // 守护：CastResolutionSchedulingTests.Packet_Path_Uses_CurrentTick_As_DecideTick。
             var decision = _resolver.Decide(playerId.Value, request, _server.CurrentTick);
             await BroadcastSwingAsync(playerId.Value, request, decision);
         }
+
+        /// <summary>剑气回荡：请求缓存/重放 → 决策 → Started 广播。旧序号拒绝且不改变状态。</summary>
+        private async Task HandleEchoCastAsync(IServerSession session, long playerId, CastRequest request)
+        {
+            var record = GetEchoRecord(playerId);
+
+            if (request.EchoRequestId != 0 && request.EchoRequestId < record.LastRequestId)
+            {
+                await SendEchoStateAsync(session, BuildRejected(playerId, request, "stale-request"));
+                return;
+            }
+
+            if (request.EchoRequestId != 0 && request.EchoRequestId == record.LastRequestId
+                && record.LastResponse != null)
+            {
+                await SendEchoStateAsync(session, record.LastResponse);
+                return;
+            }
+
+            // preTick 后的包路径与普通施法同基准：决策直接取 CurrentTick，不再 +1。
+            var decision = _resolver.Decide(playerId, request, _server.CurrentTick);
+            if (!decision.Accepted)
+            {
+                var rejected = BuildRejected(playerId, request, decision.RejectReason);
+                record.LastRequestId = request.EchoRequestId;
+                record.LastResponse = rejected;
+                await SendEchoStateAsync(session, rejected);
+                return;
+            }
+
+            var cast = decision.Echo!;
+            var started = BuildStarted(cast);
+            record.LastRequestId = request.EchoRequestId;
+            record.LastResponse = started;
+            record.LastCastId = cast.CastId;
+            cast.Recipients.UnionWith(CollectEchoRecipients(cast));
+            await BroadcastEchoStateAsync(cast.Recipients, started);
+        }
+
+        private EchoRequestRecord GetEchoRecord(long playerId)
+        {
+            if (!_echoRequests.TryGetValue(playerId, out var record))
+            {
+                record = new EchoRequestRecord();
+                _echoRequests[playerId] = record;
+            }
+            return record;
+        }
+
+        /// <summary>玩家断开/移除：清请求缓存与未结算实例；已结束实例由下一 tick 发 Ended。</summary>
+        public void OnPlayerRemoved(long playerId)
+        {
+            _resolver.RemoveEchoCastsFor(playerId);
+            _echoRequests.Remove(playerId);
+        }
+
+        private void OnEchoCastEnded(SwordQiEchoCast cast)
+        {
+            var ended = BuildEnded(cast);
+            if (_echoRequests.TryGetValue(cast.CasterId, out var record)
+                && record.LastCastId == cast.CastId)
+                record.LastResponse = ended;
+            _ = BroadcastEchoStateAsync(cast.Recipients, ended);
+        }
+
+        private static SwordQiEchoState BuildStarted(SwordQiEchoCast cast)
+        {
+            var state = BuildBase(cast, SwordQiEchoPhase.Started);
+            state.ServerTimestamp = ServerClock.NowTicks();
+            foreach (var contact in cast.Contacts)
+            {
+                state.Contacts.Add(new SwordQiEchoContactMessage
+                {
+                    TargetId = contact.TargetId,
+                    SwordIndex = contact.SwordIndex,
+                    OffsetTicks = contact.OffsetTicks,
+                    X = contact.Position.X,
+                    Y = contact.Position.Y,
+                    Z = contact.Position.Z
+                });
+            }
+            return state;
+        }
+
+        private static SwordQiEchoState BuildEnded(SwordQiEchoCast cast)
+        {
+            var state = BuildBase(cast, SwordQiEchoPhase.Ended);
+            state.ServerTimestamp = ServerClock.NowTicks();
+            return state;
+        }
+
+        private static SwordQiEchoState BuildRejected(long casterId, CastRequest request, string reason)
+            => new SwordQiEchoState
+            {
+                Phase = SwordQiEchoPhase.Rejected,
+                CasterId = casterId,
+                RequestId = request.EchoRequestId,
+                EchoBindingId = request.EchoBindingId,
+                RejectReason = reason,
+                ServerTimestamp = ServerClock.NowTicks()
+            };
+
+        private static SwordQiEchoState BuildBase(SwordQiEchoCast cast, SwordQiEchoPhase phase)
+            => new SwordQiEchoState
+            {
+                Phase = phase,
+                CasterId = cast.CasterId,
+                CastId = cast.CastId,
+                RequestId = cast.RequestId,
+                EchoBindingId = cast.BindingId,
+                StartTick = cast.StartTick,
+                EndTick = cast.EndTick,
+                CooldownTicks = cast.CooldownTicks,
+                OriginX = cast.Origin.X,
+                OriginY = cast.Origin.Y,
+                OriginZ = cast.Origin.Z,
+                Rotation = cast.Rotation,
+                Radius = SwordQiEchoRules.Spec.Radius,
+                SwordCount = SwordQiEchoRules.Spec.SwordCount,
+                OvershootMeters = SwordQiEchoRules.Spec.OvershootMeters
+            };
+
+        private HashSet<long> CollectEchoRecipients(SwordQiEchoCast cast)
+        {
+            var targetIds = new List<long>(cast.Contacts.Count);
+            foreach (var contact in cast.Contacts) targetIds.Add(contact.TargetId);
+
+            var recipients = CollectDamageRecipients(targetIds, cast.CasterId, npcCaster: false,
+                id => _server.GetObserversOf(id),
+                id => _server.GetVisiblePlayers(id));
+            return FilterEchoRecipients(recipients, id => _server.GetEntity(id), cast.ZoneId);
+        }
+
+        /// <summary>同区 + 已协商 SwordQiEcho 的收件人过滤（纯函数，便于单测）。</summary>
+        internal static HashSet<long> FilterEchoRecipients(IEnumerable<long> candidateIds,
+            Func<long, PlayerState?> lookup, string zoneId)
+        {
+            var result = new HashSet<long>();
+            foreach (var id in candidateIds)
+            {
+                var entity = lookup(id);
+                if (entity == null) continue;
+                if (!string.Equals(entity.ZoneId, zoneId, StringComparison.Ordinal)) continue;
+                if ((entity.Features & ProtocolFeatures.SwordQiEcho) == 0) continue;
+                result.Add(id);
+            }
+            return result;
+        }
+
+        private async Task BroadcastEchoStateAsync(IEnumerable<long> recipients, SwordQiEchoState state)
+        {
+            foreach (var recipientId in recipients)
+            {
+                var session = _server.GetSession(recipientId);
+                if (session != null)
+                    await _server.SendToSessionAsync(session, MessageId.SwordQiEchoState, state);
+            }
+        }
+
+        private Task SendEchoStateAsync(IServerSession session, SwordQiEchoState state)
+            => _server.SendToSessionAsync(session, MessageId.SwordQiEchoState, state);
 
         /// <summary>取消施法（B3：旋转取消后丢弃未到期判定段；CastId=0 只取最新实例）。
         /// 已发射投射物继续飞行，CastCancelBroadcast 只停止攻击表现；未登录/无匹配实例幂等忽略。</summary>

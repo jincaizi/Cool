@@ -23,6 +23,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         private int _executionTimingCursor;
 
+        /// <summary>剑气回荡：执行分支按权威结束时刻保持活动，不受剪辑长度影响。</summary>
+        private bool _echoActive;
+        private double _echoEndTime;
+        private Func<double>? _echoNow;
+
         // Cached type checks
         private readonly bool _isCharged;
         private readonly bool _isChanneled;
@@ -88,6 +93,25 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _currentState = SkillSubState.Ready;
             _stateStartTime = -1f;
             _nextTickTime = -1f;
+        }
+
+        /// <summary>
+        /// 剑气回荡：由协调器在正式提交时调用。endTimeSeconds 与 nowSeconds 必须在同一时钟域
+        /// （单机 = Time.time；联网 = 服务器同步时钟）。执行分支到点直接完成。
+        /// </summary>
+        public bool StartEcho(double endTimeSeconds, Func<double> nowSeconds)
+        {
+            if (!double.IsFinite(endTimeSeconds) || nowSeconds == null) return false;
+            if (_currentState != SkillSubState.Ready && _currentState != SkillSubState.Execution)
+                return false;
+
+            if (_currentState == SkillSubState.Ready)
+                TransitionTo(SkillSubState.Execution);
+
+            _echoActive = true;
+            _echoEndTime = endTimeSeconds;
+            _echoNow = nowSeconds;
+            return true;
         }
 
         public bool TryStart()
@@ -298,6 +322,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void UpdateExecution()
         {
+            if (_echoActive)
+            {
+                double now = _echoNow != null ? _echoNow() : GetCurrentTime();
+                if (now >= _echoEndTime)
+                    Complete();
+                return;
+            }
+
             float[] hitboxTimings = GetHitboxTimings();
             if (hitboxTimings != null)
             {

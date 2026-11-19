@@ -211,6 +211,7 @@ namespace Cool.Protocol
             RegisterMessageType(MessageId.DamageResult, typeof(DamageResult));
             RegisterMessageType(MessageId.RespawnNotice, typeof(RespawnNotice));
             RegisterMessageType(MessageId.CancelCastRequest, typeof(CancelCastRequest));
+            RegisterMessageType(MessageId.SwordQiEchoState, typeof(SwordQiEchoState));
             RegisterMessageType(MessageId.EquipWeaponRequest, typeof(EquipWeaponRequest));
             RegisterMessageType(MessageId.EquipWeaponConfirm, typeof(EquipWeaponConfirm));
             RegisterMessageType(MessageId.CastConfirm, typeof(CastConfirm));

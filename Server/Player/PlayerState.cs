@@ -21,6 +21,9 @@ namespace KcpServer
         internal bool SupportsAuthoritativeRespawn { get; set; }
         internal uint? RespawnTick { get; set; }
 
+        /// <summary>登录协商位（ProtocolFeatures；剑气回荡等能力的收件人过滤依据）。</summary>
+        public uint Features { get; internal set; }
+
         /// <summary>P4 战斗状态（服务器权威；登录重建 PlayerState 即满血——复活另见 D-2 的 8 秒计时）</summary>
         public float Hp { get; internal set; } = 100f;
         public float MaxHp { get; internal set; } = 100f;
@@ -42,6 +45,27 @@ namespace KcpServer
         /// </summary>
         public bool IsDefending { get; internal set; }
 
+        /// <summary>服务端权威无敌窗口 `[Start, End)`；无窗口时 Start == End == 0。</summary>
+        public uint InvulnerableStartTick { get; internal set; }
+        public uint InvulnerableEndTick { get; internal set; }
+
+        /// <summary>窗口内命中在掷骰/格挡/扣血之前结束；tick 与服务器主循环同一基准。</summary>
+        public bool IsInvulnerableAt(uint tick)
+            => InvulnerableEndTick > InvulnerableStartTick
+               && tick - InvulnerableStartTick < InvulnerableEndTick - InvulnerableStartTick;
+
+        public void SetInvulnerable(uint startTick, uint endTick)
+        {
+            InvulnerableStartTick = startTick;
+            InvulnerableEndTick = endTick > startTick ? endTick : startTick;
+        }
+
+        public void ClearInvulnerability()
+        {
+            InvulnerableStartTick = 0;
+            InvulnerableEndTick = 0;
+        }
+
         /// <summary>死亡发生的 tick（0 = 活着）。复活计时从它起算（D-2：8 秒）</summary>
         public long DeadTick { get; private set; }
 
@@ -58,6 +82,8 @@ namespace KcpServer
             Movement.Reset();
             // Plan 04：死亡立即清状态（控制派生已重置，SyncControl 不会二次写入）。
             Statuses?.ClearAll((uint)tick);
+            // 剑气回荡：死亡使当前无敌窗口失效。
+            ClearInvulnerability();
             BumpCombatVersion();
         }
 
@@ -85,6 +111,8 @@ namespace KcpServer
             Movement.Reset();
             // Plan 04：新生命周期从干净状态开始（死亡后可能仍有写入口）。
             Statuses?.ClearAll((uint)nowTick);
+            // 剑气回荡：复活清空旧生命代次的无敌窗口。
+            ClearInvulnerability();
             BumpCombatVersion();
             return true;
         }

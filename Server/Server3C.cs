@@ -348,7 +348,7 @@ namespace KcpServer
         }
 
         public PlayerState RegisterEntity(long playerId, string playerName,
-            bool supportsAuthoritativeRespawn = false)
+            bool supportsAuthoritativeRespawn = false, uint features = 0, string zoneId = "")
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
             // Plan 04：登录实体持有权威状态运行时（延迟初始化，bot 不配置）。
@@ -360,6 +360,8 @@ namespace KcpServer
             // BotRunner 不经此路径（直接 AddPlayer）——压测 bot 保持非登录态（D-P5-3 语义）
             player.IsLoggedIn = true;
             player.SupportsAuthoritativeRespawn = supportsAuthoritativeRespawn;
+            player.Features = features;
+            if (!string.IsNullOrEmpty(zoneId)) player.ZoneId = zoneId;
             // AOI：实体立即可见靠 AoiGrid 首帧 + AoiBandScheduler HasSent=false（无需标脏）——
             // MarkDirty 保留仅为 P2 测试语义（PositionSyncEntityStoreTests 断言 IsDirty）
             _entityStore.MarkDirty(player);
@@ -399,6 +401,7 @@ namespace KcpServer
             var cancels = _castHandler.CancelCaster(playerId, CurrentTick,
                 NpcActionCancelReason.Forced);
             _castHandler.BroadcastCancel(cancels);
+            _castHandler.OnPlayerRemoved(playerId); // 清剑气回荡实例与请求缓存
             _entityStore.RemovePlayer(playerId);
             _aoi.RemoveEntity(playerId); // 注销清 AOI 状态：同 id 重登无残留视野迟滞/节拍
         }

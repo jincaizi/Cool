@@ -36,7 +36,8 @@ namespace KcpServer
                 PlayerName = name,
                 Kind = (byte)EntityKind.Npc,
                 TemplateId = templateId,
-                BodyRadius = bodyRadius
+                BodyRadius = bodyRadius,
+                ZoneId = "Global" // 当前地图生成的 NPC 归属 Global 战斗区
             };
             state.MaxHp = hp;
             state.Hp = hp;

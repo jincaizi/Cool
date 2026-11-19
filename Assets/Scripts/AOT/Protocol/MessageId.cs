@@ -48,26 +48,31 @@ namespace Cool.Protocol
         /// <summary>取消施法（客户端 → 服务器；B3 旋转多段：取消/换命后丢弃未到期判定段）</summary>
         CancelCastRequest = 304,
 
+        /// <summary>剑气回荡状态（服务器 → 施法者/目标/观察者；2026-11-18）</summary>
+        SwordQiEchoState = 305,
+
+        // 属性剑气 v1 的 7 条消息在合并 mainline 剑气回荡（305）后顺延到 312–318。
+        // 符号名不变；线上编号是本次合并的集成结果。
         /// <summary>换装请求（客户端 → 服务器；属性剑气 v1）</summary>
-        EquipWeaponRequest = 305,
+        EquipWeaponRequest = 312,
 
         /// <summary>换装确认（服务器 → 客户端；含权威装备版本与武器摘要）</summary>
-        EquipWeaponConfirm = 306,
+        EquipWeaponConfirm = 313,
 
         /// <summary>施法确认（服务器 → 施法者本人；按 ClientCastSeq 幂等重发）</summary>
-        CastConfirm = 307,
+        CastConfirm = 314,
 
         /// <summary>剑气权威发射描述（服务器 → 施法者与同场景观察者）</summary>
-        ProjectileLaunchBroadcast = 308,
+        ProjectileLaunchBroadcast = 315,
 
         /// <summary>剑气提前终止（服务器 → 已收到发射描述的会话）</summary>
-        ProjectileStopBroadcast = 309,
+        ProjectileStopBroadcast = 316,
 
         /// <summary>取消未提交施法（服务器 → 施法者与观察者；Plan 02）</summary>
-        CastCancelBroadcast = 310,
+        CastCancelBroadcast = 317,
 
         /// <summary>战斗投影信封（服务器 → 观察者；Plan 02 可靠完整投影）</summary>
-        CombatStateUpdate = 311,
+        CombatStateUpdate = 318,
 
         // ========== 聊天 (200-299) ==========
         ChatMessage = 200,

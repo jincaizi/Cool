@@ -78,11 +78,12 @@ namespace KcpServer
                 Position = new Vector3(0f, 0f, 0f)
             };
 
+            string zoneId = string.IsNullOrEmpty(request.ZoneId) ? "Global" : request.ZoneId;
+            uint features = request.SupportedFeatures;
+
             _server.BindPlayerToSession(playerId, session);
             var storePlayer = _server.RegisterEntity(playerId, request.Username,
-                (request.SupportedFeatures & ProtocolFeatures.AuthoritativeRespawn) != 0);
-
-            string zoneId = string.IsNullOrEmpty(request.ZoneId) ? "Global" : request.ZoneId;
+                (features & ProtocolFeatures.AuthoritativeRespawn) != 0, features, zoneId);
             storePlayer.ZoneId = zoneId;
             ApplyLoginCombatBaseline(storePlayer, _server.ElementalCatalog, request.SupportedFeatures);
             if (wantsElemental) GrantStartingWeapons(storePlayer);
@@ -96,9 +97,11 @@ namespace KcpServer
                 PlayerId = playerId,
                 ZoneId = zoneId,
                 ServerTimestamp = DateTime.UtcNow.Ticks,
-                ServerTickRateMs = 66 // 服务器 GameLoop 66ms（Server3C GameLoop ctor）——客户端据此换算插值窗口
+                ServerTickRateMs = 66, // 服务器 GameLoop 66ms（Server3C GameLoop ctor）——客户端据此换算插值窗口
+                EnabledFeatures = (features & (ProtocolFeatures.AuthoritativeRespawn
+                                              | ProtocolFeatures.SwordQiEcho))
+                                   | ProtocolFeatures.PvpMovementBudgetV1
             };
-            loginResponse.EnabledFeatures = ProtocolFeatures.PvpMovementBudgetV1;
             if (wantsElemental)
             {
                 loginResponse.EnabledFeatures |= ProtocolFeatures.ElementalSwordQiV1;

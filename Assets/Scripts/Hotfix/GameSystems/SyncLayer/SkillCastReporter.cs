@@ -30,6 +30,7 @@ namespace Hotfix.GameSystems.SyncLayer
             Vector3 targetPosition, Transform owner, long targetId = 0)
         {
             if (bridge == null || data == null || IsChargeable(data)) return;
+            if (data is SwordQiEchoSkillData || data.SkillId == (int)SkillID.SwordQiEcho) return;
 
             Vector3? impactPoint = null;
             if (data.SkillId == (int)SkillID.Ultimate)
@@ -53,6 +54,14 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             if (bridge == null || data == null || data is not SpinSkillData) return;
             bridge.NotifySkillCancel(data.SkillId);
+        }
+
+        /// <summary>剑气回荡请求：由宿主在请求阶段发送；激活上报不重复发。</summary>
+        public static void ReportEchoRequest(CombatNetworkBridge bridge, SwordQiEchoSkillData data,
+            ulong requestId, ulong bindingId)
+        {
+            if (bridge == null || data == null) return;
+            bridge.NotifyEchoCast(data.SkillId, requestId, bindingId);
         }
 
         /// <summary>释放时上报：可蓄力技能发一次（落点 + 进度）；取消蓄力不会走到这里</summary>

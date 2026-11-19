@@ -78,7 +78,7 @@ bash tools/test-server.sh
   `ControlSpeedScale/ControlActionLock/ControlVersion`；`CombatVersion/LifeId`
   同基线下发）。`PlayerState.CombatVersion` 在换装、受伤/
   死亡/复活、防御姿态变化与活动施法阶段推进时递增并置 `CombatDirty`；
-  `Server3C.SendCombatStateUpdates` 每 tick 只对 dirty 实体发送 `CombatStateUpdate`（311），
+  `Server3C.SendCombatStateUpdates` 每 tick 只对 dirty 实体发送 `CombatStateUpdate`（318），
   收件人 = 本人 + 同场景观察者（NPC 为观察者）；场景过滤统一走 `IsSameCombatScene`
   （与 NpcAction 一致，空 `ZoneId` = 广播），不再用严格 `ZoneId != scene`。
   活动施法：`Decide` 成功置 `Windup`（`EndTick` = 最后一段判定 tick），判定期推进
@@ -116,7 +116,7 @@ bash tools/test-server.sh
   NPC → 已登录玩家的**直接伤害**按 `target.MaxHp / CombatRules.PveDamageBaselineHp`（基准 100）
   缩放——720 HP 会话 ×7.2，保持原 PvE TTK；玩家/bot 来源与打怪不缩放。
 - **控制注入入口**：`Server3C.ApplyPlayerControl(playerId, speedScale, actionLock)` 写权威控制
-  状态，变化时递增 `ControlVersion` 并 bump `CombatVersion`（触发 311）；首次 `ActionLock` 取消
+  状态，变化时递增 `ControlVersion` 并 bump `CombatVersion`（触发 318）；首次 `ActionLock` 取消
   施法者未提交段（已发射剑气照飞）；NPC 首次 `ActionLock` 走
   `MonsterModule.CancelAction`（霸体免打断）。动作锁期间 `CastHandler.Decide` 以
   `control-lock` 拒绝新施法，位置同步不发普通移动预算。**Plan 04 起生产调用者 =
@@ -190,7 +190,7 @@ Plan 05 验收证据（2026-11-20；服务端项均在 667/667 内，Unity 结�
   固定 180 帧落地等待不足）。backlog：`_pushVector` 对远程 `NpcBody` 不生效（`IDamageable`
   门槛，见路线图 Plan 06 登记）。
 
-`CastCancelBroadcast`（310）、`CombatStateUpdate`（311）与 `NpcActionEvent`（2004，含 `LifeId`）
+`CastCancelBroadcast`（317）、`CombatStateUpdate`（318）与 `NpcActionEvent`（2004，含 `LifeId`）
 已启用；取消/动作事件/投影统一按 `IsSameCombatScene`（相对 `ZoneId`，空值广播）过滤。
 
 ## 投射物与落点判定（20003 火球）
@@ -212,6 +212,26 @@ Plan 05 验收证据（2026-11-20；服务端项均在 667/667 内，Unity 结�
 - `CombatResolver.ResolveStage` 每段按当时的施法者位置与存活目标重新判定 2.5m 圆；
   `RepeatHitCounts` 每目标独立计数，**不走** `GroupHitIds` 的每施法一次去重。
 - 施法者死亡/移除，或收到 `CancelCastRequest`，丢弃未到期段；复活后不会继续结算旧旋转。
+
+## 剑气回荡（20006，2026-11-18）
+
+- `CombatResolver.Decide` 对 20006 走专用分支：跳过客户端形状校验（客户端发零形状），按
+  `SwordQiEchoRules.Spec` 选最近 8 个同区目标；空名单返回 `no-target` 且不记冷却。接受时
+  在决策 tick 记录 12s 冷却、提交 `[StartTick, EndTick)` 无敌窗口，并锁定目标的
+  `PlayerState` 对象身份与 `LifeId`。
+- 首次接触时间表由 `SwordQiEchoRules.BuildContacts` 生成；`DrainResolved` 先处理普通
+  pending，再按固定顺序处理 Echo。到点重查存活、同区、圆心/半径与生命代次；失效跳过、
+  不补排期。即使全部目标失效，施法与无敌仍持续到原定 `EndTick`。
+- 伤害走与普通 PvE/PvP 共用的结算入口（无敌检查在掷骰/格挡/扣血之前）；Echo 的格挡方向
+  固定使用接受施法时的圆心，不随施法者移动。NPC 受击仍走 `NpcDamaged` 仇恨回调。
+- 请求按玩家缓存最近 `EchoRequestId`：重复序号重放决定，较旧序号回 `stale-request` 且不改状态；
+  已结束时重放 `Ended`。断线/离场经 `Server3C.UnregisterEntity → CastHandler.OnPlayerRemoved`
+  清除实例与缓存。
+- 登录握手把 `SupportedFeatures` 写入权威 `PlayerState.Features`，`LoginResponse.EnabledFeatures`
+  回显协商结果；`SwordQiEchoState` 只发给同区且已协商 `ProtocolFeatures.SwordQiEcho` 的收件人。
+  `EntityStore.AddNpc` 将 NPC `ZoneId` 固定为 `Global`。
+- 测试：`Server.Tests/Combat/SwordQiEchoCombatTests`（无敌边界、换命、格挡方向、区域/能力过滤）、
+  `Server.Tests/Protocol/SwordQiEchoProtocolTests`（往返、tag 钉死、旧字段缺省）。
 
 ## 攻击高度与跳跃规避（B1，2026-11-10）
 

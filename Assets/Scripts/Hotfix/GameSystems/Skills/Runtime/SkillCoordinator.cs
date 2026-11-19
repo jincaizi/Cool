@@ -45,6 +45,14 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// 让服务端丢弃未到期判定段。单段技能不触发。</summary>
         public event Action<SkillData> OnSkillCancelled;
 
+        /// <summary>联网剑气回荡请求（宿主订阅后发送 CastRequest；无人订阅 = 单机本地路径）。</summary>
+        public event Action<SwordQiEchoSkillData>? OnEchoRequested;
+
+        /// <summary>单机剑气回荡请求（本地选敌/伤害宿主订阅）。</summary>
+        public event Action<SwordQiEchoSkillData>? OnEchoOfflineRequested;
+
+        public bool IsEchoRequestPending { get; private set; }
+
         // 属性
         /// <summary>已确认装备的攻速倍率（联网宿主注入；null = 1）。只作用于普攻 10001/10002。</summary>
         public Func<float> AttackSpeedProvider { get; set; }
@@ -164,6 +172,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public void HandleInput(SkillInput input)
         {
+            if (IsEchoRequestPending) return;
+
             // R 同键取消特例：旋转期间再按同技能键 = 取消（必须位于冷却检查之前，
             // 因为旋转中技能自身处于冷却；永不入缓冲，防延迟重施放）
             if (_currentSkill != null
@@ -183,6 +193,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // 检查技能是否存在
             if (!_skillDatabase.TryGetValue(input.SkillId, out var skillData))
             {
+                return;
+            }
+
+            if (skillData is SwordQiEchoSkillData echoData)
+            {
+                HandleEchoInput(echoData);
                 return;
             }
 
@@ -227,6 +243,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public void HandleLightAttack()
         {
+            if (IsEchoRequestPending) return;
+
             int skillId = (int)Definition.SkillID.LightAttack;
             if (!_skillDatabase.TryGetValue(skillId, out var skillData))
                 return;
@@ -255,6 +273,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public void HandleHeavyFire()
         {
+            if (IsEchoRequestPending) return;
+
             int skillId = (int)Definition.SkillID.HeavyAttack;
             if (!_skillDatabase.TryGetValue(skillId, out var skillData))
                 return;
@@ -518,6 +538,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void ProcessInputBuffer()
         {
+            if (IsEchoRequestPending) return;
+
             while (_inputBuffer.TryPeek(out var buffered))
             {
                 // 检查冷却是否已好
@@ -661,6 +683,106 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return _cooldownManager.GetCooldownInfo(skillId);
         }
 
+        /// <summary>剑气回荡输入：联网走请求/确认两阶段；单机交给本地选敌宿主。</summary>
+        private void HandleEchoInput(SwordQiEchoSkillData data)
+        {
+            if (_cooldownManager.IsOnCooldown(data.SkillId)) return;
+            if (!HasEnoughResources(data)) return;
+
+            if (_currentSkill != null && _currentSkill.IsActive)
+            {
+                if (_currentSkill.CurrentSubState == SkillSubState.Charging)
+                    CancelCharge(_currentSkill.SkillId);
+                else
+                    TryCancelCurrentSkill(InterruptionSource.AnotherSkill);
+
+                if (_currentSkill != null && _currentSkill.IsActive) return;
+            }
+
+            if (OnEchoRequested != null)
+            {
+                BeginEchoRequest(data);
+                OnEchoRequested(data);
+                return;
+            }
+
+            OnEchoOfflineRequested?.Invoke(data);
+        }
+
+        public void BeginEchoRequest(SwordQiEchoSkillData data)
+        {
+            IsEchoRequestPending = true;
+        }
+
+        public void CancelEchoRequest()
+        {
+            IsEchoRequestPending = false;
+        }
+
+        /// <summary>有效 Started：仅剩余窗口 > 0 时提交；冷却按权威已过时间对齐。</summary>
+        public bool CommitEchoRequest(SwordQiEchoSkillData data, double endTimeSeconds,
+            float cooldownTotal, float cooldownElapsed, Func<double> nowSeconds)
+        {
+            CancelEchoRequest();
+            EndConflictingActionForEcho();
+            return StartEchoInternal(data, endTimeSeconds, cooldownTotal, cooldownElapsed, nowSeconds);
+        }
+
+        /// <summary>迟到有效接受：按现有取消/完成入口结束冲突动作，再切入剩余权威窗口。</summary>
+        private void EndConflictingActionForEcho()
+        {
+            if (_currentSkill == null || !_currentSkill.IsActive) return;
+            if (_currentSkill.CurrentSubState == SkillSubState.Charging)
+                CancelCharge(_currentSkill.SkillId);
+            else
+                TryCancelCurrentSkill(InterruptionSource.AnotherSkill);
+
+            if (_currentSkill != null && _currentSkill.IsActive)
+                _currentSkill.ForceComplete();
+        }
+
+        /// <summary>已过期接受：只对齐剩余冷却，不启动执行器。</summary>
+        public void ApplyAuthoritativeCooldown(int skillId, float totalDuration, float elapsedSeconds)
+            => _cooldownManager.StartCooldown(skillId, totalDuration, elapsedSeconds);
+
+        /// <summary>单机：本地选敌成功后启动执行器；零目标/超时不走这里。</summary>
+        public bool StartOfflineEcho(SwordQiEchoSkillData data, double endTimeSeconds,
+            Func<double> nowSeconds)
+        {
+            CancelEchoRequest();
+            return StartEchoInternal(data, endTimeSeconds, data.Cooldown, 0f, nowSeconds);
+        }
+
+        private bool StartEchoInternal(SwordQiEchoSkillData data, double endTimeSeconds,
+            float cooldownTotal, float cooldownElapsed, Func<double> nowSeconds)
+        {
+            var executor = new SkillExecutor(_owner, data, _interruptionMatrix);
+            if (_dashComponent != null) executor.SetDashComponent(_dashComponent);
+            executor.OnSkillCompleted += () => OnExecutorCompleted(data.SkillId);
+            executor.OnSkillInterrupted += source => OnExecutorInterrupted(data.SkillId, source);
+            executor.OnTargetHit += target => OnTargetHit?.Invoke(target);
+
+            _activeExecutors[data.SkillId] = executor;
+            _currentSkill = executor;
+            _chargeReleaseReported = false;
+            ConsumeResources(data);
+
+            if (!executor.TryStart())
+            {
+                CleanupExecutor(data.SkillId);
+                return false;
+            }
+            if (!executor.StartEcho(endTimeSeconds, nowSeconds))
+            {
+                executor.ForceComplete();
+                return false;
+            }
+
+            _cooldownManager.StartCooldown(data.SkillId, cooldownTotal, cooldownElapsed);
+            OnSkillActivated?.Invoke(data);
+            return true;
+        }
+
         /// <summary>
         /// 是否在安全施法状态（可以切换目标等）
         /// </summary>
@@ -693,6 +815,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     ComboSkillData combo => combo.EnableMovement,
                     ChargedSkillData => true,
                     InstantSkillData => true,
+                    SwordQiEchoSkillData => true,
                     _ => false
                 },
                 SkillSubState.Recovery => _currentSkill.Data is ChargedSkillData
@@ -722,7 +845,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
             return _currentSkill.CurrentSubState switch
             {
                 SkillSubState.Casting => true,
-                SkillSubState.Execution => _currentSkill.Data is ChargedSkillData,
+                SkillSubState.Execution => _currentSkill.Data is ChargedSkillData
+                                       || _currentSkill.Data is SwordQiEchoSkillData,
                 SkillSubState.Recovery => _currentSkill.Data is ChargedSkillData,
                 SkillSubState.Charging => _currentSkill.Data switch
                 {
@@ -755,6 +879,9 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public bool IsAnimationCompletionIgnored()
         {
+            if (_currentSkill != null && _currentSkill.Data is SwordQiEchoSkillData)
+                return true;
+
             return CurrentSubState switch
             {
                 SkillSubState.Charging => true,

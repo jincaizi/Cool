@@ -172,6 +172,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             _inputManager.SetSkillFireballPressedFromUI(_buttons.FireballPressed);
             _inputManager.SetSkillChargeBlastPressedFromUI(_buttons.ChargeBlastPressed);
             _inputManager.SetSkillMeteorPressedFromUI(_buttons.MeteorPressed);
+            _inputManager.SetSkillEchoPressedFromUI(_buttons.SwordQiEchoPressed);
             _inputManager.SetSkillFireballHeldFromUI(_buttons.FireballHeld);
             _inputManager.SetSkillChargeBlastHeldFromUI(_buttons.ChargeBlastHeld);
             _buttons.ConsumeSkillPresses();
@@ -271,6 +272,7 @@ namespace Hotfix.GameSystems.Sys3C.Input
             inputManager.SetSkillChargeBlastPressedFromUI(false);
             inputManager.SetSkillChargeBlastHeldFromUI(false);
             inputManager.SetSkillMeteorPressedFromUI(false);
+            inputManager.SetSkillEchoPressedFromUI(false);
         }
     }
 }

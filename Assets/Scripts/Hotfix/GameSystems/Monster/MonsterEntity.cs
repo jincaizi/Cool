@@ -26,6 +26,9 @@ namespace Hotfix.GameSystems.Monster
 
         private MonsterConfig _config;
         public MonsterConfig Config => _config;
+
+        /// <summary>受击体积半径（XZ，米）；单机剑气回荡等表面距离选敌使用。</summary>
+        public float BodyRadius { get; private set; }
         private MonsterStats _stats;
         private MonsterMovement _movement;
         private DamagePipeline _damagePipeline;
@@ -52,6 +55,11 @@ namespace Hotfix.GameSystems.Monster
             if (HitZone == null) HitZone = GetComponent<HitZone>();
             if (_collider == null) _collider = GetComponent<Collider>();
             if (AttackHitbox == null) AttackHitbox = GetComponentInChildren<AttackHitbox>();
+            if (_collider != null)
+            {
+                var extents = _collider.bounds.extents;
+                BodyRadius = Mathf.Max(extents.x, extents.z);
+            }
         }
 
         private void OnEnable()

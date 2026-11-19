@@ -37,6 +37,26 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
 `StatusEffectManager` 的冰冻/灼烧（仅怪物、独立计时），四元素共享运行时、离线去重与
 元素 VFX 资源化属于 Plan 06/backlog。
 
+## mainline 合并集成（2026-11-20）
+
+`codex/elemental-sword-qi-foundation` 已合入 mainline 的“剑气回荡”（`2026-11-17-sword-qi-echo`）。
+两条线都改了协议、`CastHandler`、`PlayerState`、`CombatNetworkBridge` 与 `ClientNetworkHost`，集成裁定如下：
+
+- **协议编号**：mainline `SwordQiEchoState = 305` 保持不变；属性剑气 7 条消息由 305–311 顺延到
+  **312–318**（符号名不变）。`CastRequest` 的 tag 8/9 被回声占用，属性剑气 `ClientCastSeq /
+  EquipmentRevision / CasterLifeId` 顺延到 **10/11/12**。能力位 `SwordQiEcho = 1u << 2` 保持不变，
+  `ElementalSwordQiV1` 由 bit2 改为 **`1u << 4`**（`PvpMovementBudgetV1` 仍为 `1u << 3`）。
+- **生命代次统一**：mainline 的 `PlayerState.CombatLifeId` 与属性剑气的 `LifeId` 是同一概念，
+  合并后只保留 `LifeId`；回声的锁定/无敌窗口与伤害包统一读 `LifeId`。
+- **包路径决策 tick 统一**：mainline 旧注释假设包处理时 `CurrentTick` 落后一 tick（`+1`）；
+  属性剑气 Plan 04 已让 `GameLoop` 在包处理前推进 `CurrentTick`。合并后普通施法与回声都直接取
+  `_server.CurrentTick`，不再 `+1`。
+- **验证**：服务端 **689/689**；Unity EditMode **955/959**（4 个环境失败：`NpcCatalogAssetTests`
+  缺发布资产、`PlayerBodyTintTargetTests`/`ResourceAsyncLifecycleTests` 的 batchmode PPtr 与异步
+  完成时序）；PlayMode 定向 **剑气回声表现 3/3、三客户端元素验收 1/1（真实 Server3C:8000）、
+  麻痹惯性 3/3、移动端技能 HUD 1/1**。
+- 合并提交为 merge commit；`backup/elemental-pre-merge-20261120` 保留合并前分支头。
+
 ## 执行顺序与并行度
 
 1. **01 必须先做**：它定义共享 DTO、协议字段与 `CastId`，后续计划的类型都以它为准。

@@ -122,7 +122,7 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
 - **CastConfirm 映射**：`CombatNetworkBridge` 只记录 `Accepted=true` 且 `ClientCastSeq != 0` 的
   确认；同一技能只接受不小于当前 `ClientCastSeq` 的确认（同序号幂等覆盖），按技能保存
   `(seq, CastId, CasterLifeId)`，供突进上报复用。
-- **本人 311 消费**：`ControlSummary` → `ApplyAuthoritativeControl`，`MaxHp` → `SetMaxHp`；
+- **本人 318 消费**：`ControlSummary` → `ApplyAuthoritativeControl`，`MaxHp` → `SetMaxHp`；
   旧 `ControlVersion` 由 `LocalControlState` 忽略，“变为锁”的边沿清输入缓冲、打断技能、停突进。
 - **位置响应**：`PositionSyncResponse.ControlVersion` 写入
   `MovementReporter.LastServerControlVersion`（诊断与后续基线判断的依据）。
@@ -139,7 +139,7 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   把事件交给 `VFX/AuthoritativeStatusVfx`，
   由它按 `(EntityId, GroupId)` diff 后发 `StatusEffectAppliedEvent/RemovedEvent`；
   重复投影零事件，同组换效果先移除再应用。
-- **本人状态**：311 的本人分支除 `Control`/`MaxHp` 外缓存 `projection.Statuses` 并对本地
+- **本人状态**：318 的本人分支除 `Control`/`MaxHp` 外缓存 `projection.Statuses` 并对本地
   角色根 `Apply`；本地角色重建（新 transform）后 `ReplayLocalStatuses()` 用缓存重放，
   断开连接时清空缓存。渲染根变化（Proxy↔Full / 角色重建）由 `AuthoritativeStatusVfx`
   先对旧根发 Removed、再对新根发 Applied，染色不会留在已隐藏/销毁的旧模型上。
@@ -155,7 +155,7 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   权威余血写入。
 
 回归：`DotDamageRoutingTests`（7 项，本地/远程 DoT 事件隔离）；重复/乱序收包
-（同 `EventId` 重投、旧版本 311、终止先于发射、重复 CastBroadcast）由
+（同 `EventId` 重投、旧版本 318、终止先于发射、重复 CastBroadcast）由
 `NetworkConsumptionInjectionTests` 覆盖；换根重放由
 `AuthoritativeStatusVfxTests.test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`
 覆盖；投影版本合并（高版本应用/低版本丢弃、空状态清空、LifeId 基线等待）由
@@ -240,6 +240,19 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   `ProjectileSkillData.HoldToAim` 时把 `CastBroadcast.ImpactX/Y/Z` 记为投射物终点；
   `DamageResult` 到达后用该终点 `ExplodeAt`（不退回受击者位置），与服务端落点圆判定同源。
   20004 / 30001 等落点类技能直接在广播落点生成释放/陨石表现。
+
+## 剑气回荡确认（2026-11-18）
+
+- 宿主只在握手 `EnabledFeatures` 含 `ProtocolFeatures.SwordQiEcho` 时订阅
+  `SkillCoordinator.OnEchoRequested`；否则 `InputManager.SetSwordQiEchoEnabled(false)` 关闭键盘/触控入口。
+- 请求归属由 `ClientNetworkHost` 持有：`EchoRequestId` 会话内递增、`EchoBindingId` 角色重绑递增、
+  连接代次变化清空。`CombatNetworkBridge.NotifyEchoCast` 发 CastRequest；3 秒超时释放施法锁但保留
+  归属以接住迟到 Started。
+- `SwordQiEchoState` 与 `CastBroadcast/DamageResult` 同走 `CombatNetworkBridge` 主线程队列。
+  Started 按 `(StartTick, CastId)` 比较；Ended 锁存；过期 Started 只对齐冷却。
+  `DamageResult.EchoCastId` 在 HP/表现消费前按 `(EchoCastId, TargetPlayerId)` 去重，窗口 64 个实例。
+- 本地施法者把 `SwordQiEchoPresenter` 挂在本地角色上；远端施法者挂在 `RemoteEntityView.GameObject`，
+  视图移除/断线时 Stop 并清实例表。`RemoteCastPresenter` 继续只处理普通 `CastBroadcast`。
 
 ## 客户端碰撞（玩家 vs 怪物）
 

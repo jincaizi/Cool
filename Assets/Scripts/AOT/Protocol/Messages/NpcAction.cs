@@ -6,9 +6,12 @@ namespace Cool.Protocol
     {
         public const uint NpcActionTimelineV1 = 1u;
         public const uint AuthoritativeRespawn = 1u << 1;
+        /// <summary>剑气回荡（mainline 2026-11-18）：服务端回显施法与接触时间表。</summary>
+        public const uint SwordQiEcho = 1u << 2;
 
-        /// <summary>属性剑气 v1：权威换装、施法确认与按 CastId 的发射/终止。</summary>
-        public const uint ElementalSwordQiV1 = 1u << 2;
+        /// <summary>属性剑气 v1：权威换装、施法确认与按 CastId 的发射/终止。
+        /// 合并剑气回荡后从 1u&lt;&lt;2 顺延到 1u&lt;&lt;4，避免能力位冲突。</summary>
+        public const uint ElementalSwordQiV1 = 1u << 4;
 
         /// <summary>PvP 位移预算 v1：位置包携带运动/跳跃/突进/控制版本字段。</summary>
         public const uint PvpMovementBudgetV1 = 1u << 3;
