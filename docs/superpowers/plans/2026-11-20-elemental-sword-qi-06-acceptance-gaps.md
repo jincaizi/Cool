@@ -31,7 +31,16 @@
 
 ---
 
-### 任务 1：三端 DoT 每跳与末跳致死
+### 任务 1：三端 DoT 每跳一致与死亡投影一致
+
+**范围裁定（2026-11-20）：** 端到端“末跳致死”无法在不引入服务器 HP 注入/测试钩子的前提下稳定构造：
+B 为 720 HP 的联机玩家，10002 每次直伤 90×2（暴击 15%），灼烧仅 8/秒；把 B 打到最后一跳必死
+需要精确控制直伤/跳伤顺序，生产数值下不可确定复现。因此本任务拆成两层：
+
+1. **服务端末跳致死**由既有 `DotDamageTests.Burn_Tick_That_Kills_Player_Clears_Statuses_And_Stops`
+   证明（`MaxHp=8`，一跳致死，断言 HP=0、只有一条 DotHit、状态清空、死后不再跳）。
+2. **三端**只证明每跳数值一致与死亡投影一致（致死来源不限）；不得用方法名或文档宣称
+   “三端末跳致死时刻”已验收。该端到端场景登记 Plan 07，需要服务器测试钩子或可注入低血量。
 
 **文件：**
 - 修改：`Assets/Scripts/Tests/PlayMode/ThreeClientElementalAcceptanceTests.cs`
@@ -40,7 +49,7 @@
 - [ ] **步骤 1：写失败的三端 DoT 场景**
 
 在 `ThreeClientElementalAcceptanceTests` 增加第二个 `[UnityTest]`，方法名：
-`FireDot_Ticks_Are_Consistent_And_Terminal_Tick_Kills_All_Views`。
+`FireDot_Ticks_Are_Consistent_And_Death_Projection_Is_Consistent`。
 
 复用 `NewClient` 与 `RunAsync` 的三客户端登录/装备模式，但 A 装备火剑（`ElementId=2`），施放 `10002` 命中 B。断言：
 
@@ -49,9 +58,10 @@
 2. DoT 跳伤不产生 `IsBlocked=true`，且不推进 B 的 `ControlVersion`/`ActionLock`（跳伤不触发受击硬直）。
 3. 跳数 = `3`（火 3 秒 / 1 秒间隔，末跳在 `EndTick`），相邻跳 `ServerTimestamp` 间隔在
    `0.85–1.15s`；末跳后 B/C 的 311 投影中 `EffectId=201` 恰好移除一次。
-4. 末跳致死：让 A 连续火剑命中直到 B 死亡（每轮等 `CastConfirm` + DoT 跳），断言 A/B/C
-   观察到 B 的 `CombatStateUpdate.Dead=true` 的 `CombatVersion`/`LifeId` 严格相等，
-   且死亡后不再收到 B 的 DoT 命中。
+4. 死亡投影一致：让 A 连续火剑命中直到 B 死亡（每轮等 `CastConfirm` + DoT 跳），断言 A/B/C
+   观察到 B 的 `CombatStateUpdate.Dead=true` 的 `CombatVersion`/`LifeId` 严格相等；
+   记录致死 `HitEntry`（可能是直伤或 DoT），三端逐字段一致；死亡后不再收到 B 的 DoT 命中。
+   不要求致死来源为 DoT——末跳致死由服务端用例单独证明（见范围裁定）。
 
 失败判据：当前没有三端 DoT 场景，测试不存在。
 
@@ -314,8 +324,9 @@ git commit -m "test(monster): assert orca max step scales with status slow"
 ## 完成定义
 
 - 六个任务的验收测试全部存在并通过；失败必须由生产缺陷修复，不得放宽断言。
-- 三端 DoT、麻痹取消、延迟/断线/模型未加载、AOI 版本连续、移动 NpcBody、ORCA 邻居用例
-  均在路线图标记完成并附证据。
+- 三端 DoT（每跳/死亡投影）、麻痹取消、延迟/断线/模型未加载、AOI 版本连续、移动 NpcBody、
+  ORCA 邻居用例均在路线图标记完成并附证据。
+- **明确未验收**：三端同一次末跳致死的死亡时刻（需要服务器 HP 注入/测试钩子），登记 Plan 07。
 - 未把离线共享运行时、Addressables 美术、远端武器模型、`NpcBody` 推离写成已完成。
 - 服务端全量、Unity 目标类与 PlayMode 目标类通过（环境失败单独列出）。
 - Unity batchmode 副作用未提交。
