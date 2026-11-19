@@ -28,8 +28,9 @@ namespace KcpNet.PlayModeTests
     ///    的投影，且 EffectId=301 的移除只发生一次（按 CombatVersion 递增）。
     ///
     /// 火场景（Plan 06 任务 1）：一条 10002 的 3 跳灼烧（EffectId=201）在三端逐值一致、
-    /// 无格挡/无控制推进，末跳后 201 恰好移除一次；随后连续火剑命中致死，
-    /// A/B/C 的死讯投影 CombatVersion/LifeId 严格相等，死后不再收到 B 的 DoT 命中。
+    /// 无格挡/无控制推进，末跳后 201 恰好移除一次；随后连续火剑命中直到 B 死亡
+    /// （致死来源不限），A/B/C 的死讯投影 CombatVersion/LifeId 与致死 HitEntry 严格相等，
+    /// 死后不再收到 B 的 DoT 命中。三端“末跳致死时刻”本身不在本用例范围（见方法注释）。
     ///
     /// 三客户端同出生点，等待 C 的 AOI 先看到 B 再施法。
     /// 运行前需先启动：dotnet Server/bin/Debug/net8.0/Server3C.dll 8000
@@ -55,8 +56,8 @@ namespace KcpNet.PlayModeTests
 
         /// <summary>
         /// 共享运行闸门：120s 总 deadline（内层等待全部受它约束）、取消标志与当前阶段。
-        /// 外层协程超时先 <see cref="Cancel"/>，等 RunAsync 退出后才 Dispose，
-        /// 避免后台任务继续 Pump 已释放的 manager。
+        /// 外层协程超时先 <see cref="Cancel"/>，等场景任务（RunThunderAsync / RunFireAsync）
+        /// 退出后才 Dispose，避免后台任务继续 Pump 已释放的 manager。
         /// </summary>
         private sealed class RunGate
         {
@@ -88,8 +89,16 @@ namespace KcpNet.PlayModeTests
         public IEnumerator Thunder_Status_Is_Consistent_Across_Caster_Victim_And_Observer_And_Expires()
             => RunScenario("ThreeClientElementalRoot", "Elem", RunThunderAsync);
 
+        /// <summary>
+        /// 分层覆盖（Plan 06 范围裁定）：
+        /// ① 服务端“末跳致死”由 `DotDamageTests.Burn_Tick_That_Kills_Player_Clears_Statuses_And_Stops`
+        ///    单独证明（MaxHp=8、一跳致死、状态清空、死后不再跳）；
+        /// ② 本三端用例只证明每跳数值一致与死亡投影一致，**致死来源不限**（直伤或 DoT 均可）；
+        /// ③ 三端“末跳致死时刻”需要服务器测试钩子/可注入低血量，生产数值下不可确定复现，
+        ///    登记为 Plan 07 gap，本用例不宣称覆盖。
+        /// </summary>
         [UnityTest]
-        public IEnumerator FireDot_Ticks_Are_Consistent_And_Terminal_Tick_Kills_All_Views()
+        public IEnumerator FireDot_Ticks_Are_Consistent_And_Death_Projection_Is_Consistent()
             => RunScenario("ThreeClientFireRoot", "Fire", RunFireAsync);
 
         /// <summary>
@@ -496,49 +505,13 @@ namespace KcpNet.PlayModeTests
 
             for (int i = 0; i < aDots.Count; i++)
             {
-                var aResult = aDots[i].Result;
-                var bResult = bDots[i].Result;
-                var cResult = cDots[i].Result;
-                var aHit = aDots[i].Hit;
-                var bHit = bDots[i].Hit;
-                var cHit = cDots[i].Hit;
-                if (aHit.EventId != bHit.EventId || aHit.EventId != cHit.EventId)
-                    return (false, "fire/dot-ticks: EventId differs across clients at tick " + i
-                        + " (A=" + aHit.EventId + " B=" + bHit.EventId + " C=" + cHit.EventId + ")");
-                if (aHit.Damage != bHit.Damage || aHit.Damage != cHit.Damage)
-                    return (false, "fire/dot-ticks: Damage differs across clients at tick " + i
-                        + " (A=" + aHit.Damage + " B=" + bHit.Damage + " C=" + cHit.Damage + ")");
-                if (aHit.TargetRemainingHp != bHit.TargetRemainingHp
-                    || aHit.TargetRemainingHp != cHit.TargetRemainingHp)
-                    return (false, "fire/dot-ticks: TargetRemainingHp differs across clients at tick " + i
-                        + " (A=" + aHit.TargetRemainingHp + " B=" + bHit.TargetRemainingHp
-                        + " C=" + cHit.TargetRemainingHp + ")");
-                if (aHit.TargetLifeId != bHit.TargetLifeId || aHit.TargetLifeId != cHit.TargetLifeId)
-                    return (false, "fire/dot-ticks: TargetLifeId differs across clients at tick " + i
-                        + " (A=" + aHit.TargetLifeId + " B=" + bHit.TargetLifeId
-                        + " C=" + cHit.TargetLifeId + ")");
-                if (aHit.CombatVersion != bHit.CombatVersion || aHit.CombatVersion != cHit.CombatVersion)
-                    return (false, "fire/dot-ticks: CombatVersion differs across clients at tick " + i
-                        + " (A=" + aHit.CombatVersion + " B=" + bHit.CombatVersion
-                        + " C=" + cHit.CombatVersion + ")");
-                if (aHit.EventSeq != bHit.EventSeq || aHit.EventSeq != cHit.EventSeq)
-                    return (false, "fire/dot-ticks: EventSeq differs across clients at tick " + i
-                        + " (A=" + aHit.EventSeq + " B=" + bHit.EventSeq + " C=" + cHit.EventSeq + ")");
-                if (aHit.CastId != bHit.CastId || aHit.CastId != cHit.CastId)
-                    return (false, "fire/dot-ticks: CastId differs across clients at tick " + i
-                        + " (A=" + aHit.CastId + " B=" + bHit.CastId + " C=" + cHit.CastId + ")");
-                if (aResult.SourcePlayerId != bResult.SourcePlayerId
-                    || aResult.SourcePlayerId != cResult.SourcePlayerId)
-                    return (false, "fire/dot-ticks: SourcePlayerId differs across clients at tick " + i
-                        + " (A=" + aResult.SourcePlayerId + " B=" + bResult.SourcePlayerId
-                        + " C=" + cResult.SourcePlayerId + ")");
+                string? mismatch = CompareDotHitsAcrossClients("fire/dot-ticks", i,
+                    aDots[i], bDots[i], cDots[i], aId);
+                if (mismatch != null) return (false, mismatch);
                 // 这一批跳伤必须属于首刀的施法实例（灼烧保留首次来源 CastId）。
-                if (aHit.CastId != firstCastId)
-                    return (false, "fire/dot-ticks: tick " + i + " CastId=" + aHit.CastId
+                if (aDots[i].Hit.CastId != firstCastId)
+                    return (false, "fire/dot-ticks: tick " + i + " CastId=" + aDots[i].Hit.CastId
                         + " != first cast " + firstCastId);
-                // 跳伤不得带格挡标记（格挡只属于直接命中）。
-                if (aHit.IsBlocked || bHit.IsBlocked || cHit.IsBlocked)
-                    return (false, "fire/dot-ticks: DoT tick " + i + " carries IsBlocked=true");
             }
 
             // 相邻跳 ServerTimestamp 间隔 0.85–1.15s（1s ± 0.15s）。
@@ -551,6 +524,22 @@ namespace KcpNet.PlayModeTests
                         + gap.ToString("F3", CultureInfo.InvariantCulture)
                         + "s outside [0.850, 1.150]s at tick " + i);
             }
+
+            // EndTick 对齐：末跳必须落在施加投影 201 的 EndTick 上。施加 311 与施加同 tick
+            // （tick 末发送），末跳在 EndTick 的 pre-tick；EndTick − 施加 tick = 服务的
+            // ceil(DurationSeconds × 15Hz)，因此两端墙钟差必须等于该时长（±1 个服务端 tick）。
+            var burnProjection = bApply.Projection.Statuses.First(s => s.EffectId == FireEffectId);
+            uint burnTicks = Cool.SyncCore.StatusRuntime.SecondsToTicks(
+                Cool.SyncCore.ElementalCatalogDefaults.FindStatus(FireEffectId)!.DurationSeconds);
+            double tickSeconds = a.Manager.ServerTickRateMs / 1000.0;
+            double endTickOffset = (aDots[ExpectedFireDotTicks - 1].Result.ServerTimestamp
+                    - bApply.ServerTimestamp) / (double)TimeSpan.TicksPerSecond
+                - burnTicks * tickSeconds;
+            if (burnTicks == 0 || endTickOffset < -tickSeconds || endTickOffset > tickSeconds)
+                return (false, "fire/dot-ticks: terminal tick is "
+                    + endTickOffset.ToString("F3", CultureInfo.InvariantCulture)
+                    + "s off the apply projection EndTick=" + burnProjection.EndTick
+                    + " (±" + tickSeconds.ToString("F3", CultureInfo.InvariantCulture) + "s)");
 
             // 末跳（EndTick）后移除：B/C 都收到“无 201”的更高版本投影。
             gate.SetStage("fire/status-remove");
@@ -571,6 +560,17 @@ namespace KcpNet.PlayModeTests
                 return (false, "fire/status-remove: B/C received no projection without EffectId="
                     + FireEffectId + " after apply version " + bApply!.Projection.CombatVersion
                     + SummarizeFire(a, b, c, bId));
+
+            // EndTick 与末跳同一 tick：末跳在 EndTick 的 pre-tick，移除投影在 EndTick 末发送，
+            // 两者墙钟差必须落在 [0, 1 tick]——即末跳确实发生在 EndTick 这个 tick。
+            double removalDelay = (bRemove!.ServerTimestamp
+                    - aDots[ExpectedFireDotTicks - 1].Result.ServerTimestamp)
+                / (double)TimeSpan.TicksPerSecond;
+            if (removalDelay < 0 || removalDelay > tickSeconds)
+                return (false, "fire/status-remove: removal arrives "
+                    + removalDelay.ToString("F3", CultureInfo.InvariantCulture)
+                    + "s after the terminal tick (expected within one tick "
+                    + tickSeconds.ToString("F3", CultureInfo.InvariantCulture) + "s)");
 
             // 201 只施加一次、只移除一次。
             int bApplies = CountEffectApplications(b, bId, FireEffectId);
@@ -598,14 +598,16 @@ namespace KcpNet.PlayModeTests
                         + update.Projection.CombatVersion);
             }
 
-            // 末跳后不得补跳：移除投影到达后再确认仍是 3 条。
-            aDots = DotHitsFor(a, bId);
-            bDots = DotHitsFor(b, bId);
-            cDots = DotHitsFor(c, bId);
-            if (aDots.Count != ExpectedFireDotTicks || bDots.Count != ExpectedFireDotTicks
-                || cDots.Count != ExpectedFireDotTicks)
-                return (false, "fire/dot-ticks: extra ticks after removal A=" + aDots.Count
-                    + " B=" + bDots.Count + " C=" + cDots.Count + SummarizeFire(a, b, c, bId));
+            // 末跳后不得补跳：移除投影到达后再确认仍是 3 条（首刀跳数快照，供后续延续性比较）。
+            var aPhaseOneDots = DotHitsFor(a, bId);
+            var bPhaseOneDots = DotHitsFor(b, bId);
+            var cPhaseOneDots = DotHitsFor(c, bId);
+            if (aPhaseOneDots.Count != ExpectedFireDotTicks
+                || bPhaseOneDots.Count != ExpectedFireDotTicks
+                || cPhaseOneDots.Count != ExpectedFireDotTicks)
+                return (false, "fire/dot-ticks: extra ticks after removal A=" + aPhaseOneDots.Count
+                    + " B=" + bPhaseOneDots.Count + " C=" + cPhaseOneDots.Count
+                    + SummarizeFire(a, b, c, bId));
 
             // 击杀阶段：连续火剑命中 B，直到三端都观察到 Dead=true。
             gate.SetStage("fire/kill");
@@ -673,14 +675,47 @@ namespace KcpNet.PlayModeTests
                     + deadOnA.Projection.LifeId + " B=" + deadOnB.Projection.LifeId
                     + " C=" + deadOnC.Projection.LifeId + ")");
             // 死亡发生在与 DoT 跳伤相同的生命代次（未复活）。
-            if (deadOnA.Projection.LifeId != aDots[0].Hit.TargetLifeId)
+            if (deadOnA.Projection.LifeId != aPhaseOneDots[0].Hit.TargetLifeId)
                 return (false, "fire/death: Dead LifeId=" + deadOnA.Projection.LifeId
-                    + " != DoT TargetLifeId=" + aDots[0].Hit.TargetLifeId);
+                    + " != DoT TargetLifeId=" + aPhaseOneDots[0].Hit.TargetLifeId);
             // 死亡立即清状态：死讯投影不得再携带 201。
             if (HasEffect(deadOnA.Projection, FireEffectId)
                 || HasEffect(deadOnB.Projection, FireEffectId)
                 || HasEffect(deadOnC.Projection, FireEffectId))
                 return (false, "fire/death: Dead projection still carries EffectId=" + FireEffectId);
+
+            // 致死命中（来源不限：直伤或 DoT）——三端逐字段一致，来源钉死为 A。
+            var fatalA = FatalHitFor(a, bId);
+            var fatalB = FatalHitFor(b, bId);
+            var fatalC = FatalHitFor(c, bId);
+            if (!fatalA.HasValue || !fatalB.HasValue || !fatalC.HasValue)
+                return (false, "fire/death: no fatal hit (TargetRemainingHp<=0) for B on A/B/C"
+                    + SummarizeFire(a, b, c, bId));
+            string? fatalMismatch = CompareFatalHitsAcrossClients(fatalA.Value, fatalB.Value,
+                fatalC.Value, aId);
+            if (fatalMismatch != null) return (false, fatalMismatch);
+            Debug.Log("[ElementalAcceptance] fatal hit kind=" + fatalA.Value.Hit.DamageKind
+                + " event=" + fatalA.Value.Hit.EventId + " hp=" + fatalA.Value.Hit.TargetRemainingHp);
+
+            // 击杀阶段的跳伤同样纳入三端逐字段比较：EventId 序必须是首刀 3 跳的延续。
+            var aAllDots = DotHitsFor(a, bId);
+            var bAllDots = DotHitsFor(b, bId);
+            var cAllDots = DotHitsFor(c, bId);
+            if (aAllDots.Count < ExpectedFireDotTicks || aAllDots.Count != bAllDots.Count
+                || aAllDots.Count != cAllDots.Count)
+                return (false, "fire/kill-dots: tick counts A=" + aAllDots.Count
+                    + " B=" + bAllDots.Count + " C=" + cAllDots.Count + SummarizeFire(a, b, c, bId));
+            for (int i = 0; i < ExpectedFireDotTicks; i++)
+                if (aAllDots[i].Hit.EventId != aPhaseOneDots[i].Hit.EventId)
+                    return (false, "fire/kill-dots: EventId sequence is not a continuation of the "
+                        + "first cast's ticks at index " + i + " (all=" + aAllDots[i].Hit.EventId
+                        + " first-cast=" + aPhaseOneDots[i].Hit.EventId + ")");
+            for (int i = 0; i < aAllDots.Count; i++)
+            {
+                string? mismatch = CompareDotHitsAcrossClients("fire/kill-dots", i,
+                    aAllDots[i], bAllDots[i], cAllDots[i], aId);
+                if (mismatch != null) return (false, mismatch);
+            }
 
             // 死后不再收到 B 的 DoT 命中：跨两个跳间隔复核 EventId 集合不变。
             gate.SetStage("fire/post-death");
@@ -842,6 +877,122 @@ namespace KcpNet.PlayModeTests
             var ids = new HashSet<ulong>();
             foreach (var (_, hit) in DotHitsFor(ctx, targetId)) ids.Add(hit.EventId);
             return ids;
+        }
+
+        /// <summary>三端同一跳 DoT 逐字段相等（按 EventId 对齐）；来源必须钉死为施法者 A；
+        /// 返回 null = 一致，否则返回失败原因。</summary>
+        private static string? CompareDotHitsAcrossClients(string phase, int index,
+            (DamageResult Result, HitEntry Hit) aDot,
+            (DamageResult Result, HitEntry Hit) bDot,
+            (DamageResult Result, HitEntry Hit) cDot,
+            long sourceId)
+        {
+            var aHit = aDot.Hit;
+            var bHit = bDot.Hit;
+            var cHit = cDot.Hit;
+            if (aHit.EventId != bHit.EventId || aHit.EventId != cHit.EventId)
+                return phase + ": EventId differs across clients at tick " + index
+                    + " (A=" + aHit.EventId + " B=" + bHit.EventId + " C=" + cHit.EventId + ")";
+            if (aHit.Damage != bHit.Damage || aHit.Damage != cHit.Damage)
+                return phase + ": Damage differs across clients at tick " + index
+                    + " (A=" + aHit.Damage + " B=" + bHit.Damage + " C=" + cHit.Damage + ")";
+            if (aHit.TargetRemainingHp != bHit.TargetRemainingHp
+                || aHit.TargetRemainingHp != cHit.TargetRemainingHp)
+                return phase + ": TargetRemainingHp differs across clients at tick " + index
+                    + " (A=" + aHit.TargetRemainingHp + " B=" + bHit.TargetRemainingHp
+                    + " C=" + cHit.TargetRemainingHp + ")";
+            if (aHit.TargetLifeId != bHit.TargetLifeId || aHit.TargetLifeId != cHit.TargetLifeId)
+                return phase + ": TargetLifeId differs across clients at tick " + index
+                    + " (A=" + aHit.TargetLifeId + " B=" + bHit.TargetLifeId
+                    + " C=" + cHit.TargetLifeId + ")";
+            if (aHit.CombatVersion != bHit.CombatVersion || aHit.CombatVersion != cHit.CombatVersion)
+                return phase + ": CombatVersion differs across clients at tick " + index
+                    + " (A=" + aHit.CombatVersion + " B=" + bHit.CombatVersion
+                    + " C=" + cHit.CombatVersion + ")";
+            if (aHit.EventSeq != bHit.EventSeq || aHit.EventSeq != cHit.EventSeq)
+                return phase + ": EventSeq differs across clients at tick " + index
+                    + " (A=" + aHit.EventSeq + " B=" + bHit.EventSeq + " C=" + cHit.EventSeq + ")";
+            if (aHit.CastId != bHit.CastId || aHit.CastId != cHit.CastId)
+                return phase + ": CastId differs across clients at tick " + index
+                    + " (A=" + aHit.CastId + " B=" + bHit.CastId + " C=" + cHit.CastId + ")";
+            if (aDot.Result.SourcePlayerId != sourceId || bDot.Result.SourcePlayerId != sourceId
+                || cDot.Result.SourcePlayerId != sourceId)
+                return phase + ": SourcePlayerId is not the caster A(" + sourceId + ") at tick "
+                    + index + " (A=" + aDot.Result.SourcePlayerId + " B=" + bDot.Result.SourcePlayerId
+                    + " C=" + cDot.Result.SourcePlayerId + ")";
+            // 跳伤不得带格挡标记（格挡只属于直接命中）。
+            if (aHit.IsBlocked || bHit.IsBlocked || cHit.IsBlocked)
+                return phase + ": DoT hit " + index + " carries IsBlocked=true";
+            return null;
+        }
+
+        /// <summary>致死命中（直伤或 DoT）三端逐字段一致，来源钉死为 A。</summary>
+        private static string? CompareFatalHitsAcrossClients(
+            (DamageResult Result, HitEntry Hit) aFatal,
+            (DamageResult Result, HitEntry Hit) bFatal,
+            (DamageResult Result, HitEntry Hit) cFatal,
+            long sourceId)
+        {
+            var a = aFatal.Hit;
+            var b = bFatal.Hit;
+            var c = cFatal.Hit;
+            if (a.EventId != b.EventId || a.EventId != c.EventId)
+                return "fire/death: fatal EventId differs across clients (A=" + a.EventId
+                    + " B=" + b.EventId + " C=" + c.EventId + ")";
+            if (a.Damage != b.Damage || a.Damage != c.Damage)
+                return "fire/death: fatal Damage differs across clients (A=" + a.Damage
+                    + " B=" + b.Damage + " C=" + c.Damage + ")";
+            if (a.IsCritical != b.IsCritical || a.IsCritical != c.IsCritical)
+                return "fire/death: fatal IsCritical differs across clients";
+            if (a.IsBlocked != b.IsBlocked || a.IsBlocked != c.IsBlocked)
+                return "fire/death: fatal IsBlocked differs across clients";
+            if (a.TargetRemainingHp != b.TargetRemainingHp
+                || a.TargetRemainingHp != c.TargetRemainingHp)
+                return "fire/death: fatal TargetRemainingHp differs across clients (A="
+                    + a.TargetRemainingHp + " B=" + b.TargetRemainingHp
+                    + " C=" + c.TargetRemainingHp + ")";
+            if (a.HitX != b.HitX || a.HitX != c.HitX || a.HitZ != b.HitZ || a.HitZ != c.HitZ)
+                return "fire/death: fatal HitX/HitZ differs across clients";
+            if (a.CastId != b.CastId || a.CastId != c.CastId)
+                return "fire/death: fatal CastId differs across clients (A=" + a.CastId
+                    + " B=" + b.CastId + " C=" + c.CastId + ")";
+            if (a.EventSeq != b.EventSeq || a.EventSeq != c.EventSeq)
+                return "fire/death: fatal EventSeq differs across clients (A=" + a.EventSeq
+                    + " B=" + b.EventSeq + " C=" + c.EventSeq + ")";
+            if (a.DamageKind != b.DamageKind || a.DamageKind != c.DamageKind)
+                return "fire/death: fatal DamageKind differs across clients";
+            if (a.TargetLifeId != b.TargetLifeId || a.TargetLifeId != c.TargetLifeId)
+                return "fire/death: fatal TargetLifeId differs across clients (A=" + a.TargetLifeId
+                    + " B=" + b.TargetLifeId + " C=" + c.TargetLifeId + ")";
+            if (a.CombatVersion != b.CombatVersion || a.CombatVersion != c.CombatVersion)
+                return "fire/death: fatal CombatVersion differs across clients (A="
+                    + a.CombatVersion + " B=" + b.CombatVersion + " C=" + c.CombatVersion + ")";
+            if (aFatal.Result.SourcePlayerId != sourceId || bFatal.Result.SourcePlayerId != sourceId
+                || cFatal.Result.SourcePlayerId != sourceId)
+                return "fire/death: fatal SourcePlayerId is not the caster A(" + sourceId
+                    + ") (A=" + aFatal.Result.SourcePlayerId + " B=" + bFatal.Result.SourcePlayerId
+                    + " C=" + cFatal.Result.SourcePlayerId + ")";
+            return null;
+        }
+
+        /// <summary>致死命中：目标全部命中（直伤或 DoT）中按全局 EventId 序第一条
+        /// TargetRemainingHp≤0 的记录（跨零的那一击）。</summary>
+        private static (DamageResult Result, HitEntry Hit)? FatalHitFor(Ctx ctx, long targetId)
+        {
+            var byEvent = new Dictionary<ulong, (DamageResult Result, HitEntry Hit)>();
+            foreach (var result in ctx.Damages.ToArray())
+            {
+                if (result.Hits == null) continue;
+                foreach (var hit in result.Hits)
+                {
+                    if (hit.TargetPlayerId != targetId) continue;
+                    if (!byEvent.ContainsKey(hit.EventId)) byEvent[hit.EventId] = (result, hit);
+                }
+            }
+            var ordered = byEvent.Values.OrderBy(x => x.Hit.EventId).ToList();
+            foreach (var entry in ordered)
+                if (entry.Hit.TargetRemainingHp <= 0f) return entry;
+            return null;
         }
 
         private static List<HitEntry> HitsFor(Ctx ctx, ulong castId, long targetId)
