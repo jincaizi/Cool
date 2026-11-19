@@ -410,15 +410,26 @@ namespace KcpServer
         public List<PlayerState> GetVisiblePlayers(long observerId) => _aoi.GetVisible(observerId, _entityStore);
 
         /// <summary>能看到指定实体的在线观察者（P5 怪物 CastBroadcast 范围——AoiGrid 迟滞视野复用）。
-        /// 有观察者快照时走 AoiGrid 反向索引 O(1) 反查并过滤无 session 观察者；尚无快照
-        /// （首 tick，SendNpcActionEvents/SendCombatStateUpdates 早于 BroadcastWorldSnapshot）
-        /// 保留旧暴力扫描兜底，避免漏发第一条 311。</summary>
+        /// 有观察者快照时走 AoiGrid 反向索引 O(1) 反查，过滤无 session 观察者，并按当前距离
+        /// 丢弃 &gt;LeaveRadius 的陈旧索引边（实体单 tick 跳出观察者候选格时 GetVisible 不会
+        /// 评估它，翻转不发生；索引边蕴含 seen=true，距离 ≤90m 时旧暴力必可见，所以该过滤
+        /// 对"多报"方向精确）。尚无快照（首 tick，SendNpcActionEvents/SendCombatStateUpdates
+        /// 早于 BroadcastWorldSnapshot）保留旧暴力扫描兜底，避免漏发第一条 311。</summary>
         public List<long> GetObserversOf(long entityId)
         {
             if (_aoi.HasSightState)
             {
                 var indexed = _aoi.GetObserversOf(entityId);
-                indexed.RemoveAll(id => !_playerIdToSession.ContainsKey(id));
+                var target = _entityStore.GetPlayer(entityId);
+                indexed.RemoveAll(id =>
+                {
+                    if (!_playerIdToSession.ContainsKey(id)) return true;
+                    var observer = _entityStore.GetPlayer(id);
+                    if (observer == null || target == null) return true;
+                    float dx = observer.Position.X - target.Position.X;
+                    float dz = observer.Position.Z - target.Position.Z;
+                    return dx * dx + dz * dz > AoiGrid.LeaveRadius * AoiGrid.LeaveRadius;
+                });
                 return indexed;
             }
 

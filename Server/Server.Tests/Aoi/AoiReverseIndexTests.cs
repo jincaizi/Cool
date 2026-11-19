@@ -226,6 +226,53 @@ public class AoiReverseIndexTests
     }
 
     [Fact]
+    public void Index_Radius_Filter_Drops_Observer_That_Left_Candidate_Cells()
+    {
+        // 审查反例：观察者 (29.99,0) 的 colMax = floor(119.99/40) = 2。
+        // 实体 119.0（89.01m，迟滞可见，cell 2 被评估）；下一 tick 到 120.0（90.01m，cell 3）
+        // 被候选格 continue 跳过——翻转不发生，flip-only 索引保留观察者。
+        // 旧暴力 GetVisible 此时返回集不含该实体 → GetObserversOf 必须按半径过滤掉。
+        using var server = new Server3C(new TestLogger());
+        var observer = server.RegisterEntity(1, "Obs");
+        observer.UpdatePosition(new Vector3(29.99f, 0, 0), 0f, 0f, 1L, 0U);
+        var target = server.RegisterEntity(2, "Target");
+        target.UpdatePosition(new Vector3(108.99f, 0, 0), 0f, 0f, 1L, 0U);
+        server.BindPlayerToSession(1, new FakeSession(11));
+
+        server.GetVisiblePlayers(1); // 79m 可见 → 索引建立
+        Assert.Equal(new[] { 1L }, Sorted(server.GetObserversOf(2)));
+
+        target.UpdatePosition(new Vector3(119f, 0, 0), 0f, 0f, 2L, 1U); // 89.01m 迟滞保持
+        server.GetVisiblePlayers(1);
+        Assert.Equal(new[] { 1L }, Sorted(server.GetObserversOf(2)));
+
+        target.UpdatePosition(new Vector3(120f, 0, 0), 0f, 0f, 3L, 2U); // 90.01m，跳出候选格
+        server.GetVisiblePlayers(1); // 本轮扫描不会评估到该实体
+        Assert.Empty(server.GetObserversOf(2)); // 旧实现返回 [1]；半径过滤兜底
+    }
+
+    [Fact]
+    public void Index_Radius_Filter_Drops_Stale_Entry_After_Authoritative_Teleport()
+    {
+        // 权威复活/传送直接 UpdatePosition：死亡点可见、传送后 >90m，且本 tick 没人重新
+        // 评估该实体（超出观察者候选格）→ 索引边残留。查询必须按当前距离丢弃。
+        using var server = new Server3C(new TestLogger());
+        var observer = server.RegisterEntity(1, "Obs");
+        observer.UpdatePosition(new Vector3(0, 0, 0), 0f, 0f, 1L, 0U);
+        var target = server.RegisterEntity(2, "Target");
+        target.UpdatePosition(new Vector3(50, 0, 0), 0f, 0f, 1L, 0U);
+        server.BindPlayerToSession(1, new FakeSession(11));
+
+        server.GetVisiblePlayers(1);
+        Assert.Equal(new[] { 1L }, Sorted(server.GetObserversOf(2)));
+
+        target.ApplyDamage(200f); // 死亡点仍可见（索引保留）
+        target.MarkDead(5);
+        target.UpdatePosition(new Vector3(500, 0, 0), 0f, 0f, 2L, 1U); // 权威复活传送
+        Assert.Empty(server.GetObserversOf(2));
+    }
+
+    [Fact]
     public void GetObserversOf_Median_Under_One_Millisecond_For_1000_Entities_100_Observers()
     {
         const int observerCount = 100;
@@ -246,8 +293,12 @@ public class AoiReverseIndexTests
         for (long id = 102; id <= entityCount; id++)
         {
             var e = store.AddPlayer(id, "E" + id);
-            e.UpdatePosition(new Vector3((float)(rng.NextDouble() * 4000 - 2000), 0,
-                (float)(rng.NextDouble() * 4000 - 2000)), 0f, 0f, 1L, 0U);
+            // 901..1000 固定在远处的空查询样本；其余随机散布
+            if (id >= 901)
+                e.UpdatePosition(new Vector3(1500 + (id - 901) * 2, 0, 1500), 0f, 0f, 1L, 0U);
+            else
+                e.UpdatePosition(new Vector3((float)(rng.NextDouble() * 4000 - 2000), 0,
+                    (float)(rng.NextDouble() * 4000 - 2000)), 0f, 0f, 1L, 0U);
         }
 
         var broadcaster = new AoiBroadcaster();
@@ -257,24 +308,36 @@ public class AoiReverseIndexTests
         Assert.True(broadcaster.HasSightState);
         Assert.Equal(observerCount, broadcaster.GetObserversOf(101).Count); // 非空最坏路径：复制 100 个 id
 
-        for (int i = 0; i < 10; i++) broadcaster.GetObserversOf(101); // 预热（JIT/首次分配）
+        // 预热（JIT/首次分配；两种路径都预热）
+        for (int i = 0; i < 10; i++)
+        {
+            broadcaster.GetObserversOf(101);
+            broadcaster.GetObserversOf(901);
+        }
 
-        var samples = new List<double>(100);
+        // 空/非空查询分开取中位数——不许只测非空，也不许让空路径稀释中位数
+        var nonEmpty = new List<double>(100);
+        var empty = new List<double>(100);
         for (int i = 0; i < 100; i++)
         {
-            // 每 10 次混入一次非空目标（100 个观察者），其余为空集合快路径——
-            // 不许改成只测非空：两种查询都必须是亚毫秒
-            long id = i % 10 == 0 ? 101 : 500 + i % 400;
             long start = Stopwatch.GetTimestamp();
-            var ids = broadcaster.GetObserversOf(id);
-            double ms = (Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency;
-            samples.Add(ms);
-            if (id == 101) Assert.NotEmpty(ids);
+            var ids = broadcaster.GetObserversOf(101);
+            nonEmpty.Add((Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency);
+            Assert.Equal(observerCount, ids.Count);
+
+            start = Stopwatch.GetTimestamp();
+            ids = broadcaster.GetObserversOf(901 + i);
+            empty.Add((Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency);
+            Assert.Empty(ids);
         }
-        samples.Sort();
-        double median = samples[samples.Count / 2];
-        Assert.True(median <= 1.0,
-            "GetObserversOf 中位耗时 " + median.ToString("F4") + "ms 超过 1ms（Debug 回归护栏）");
+        nonEmpty.Sort();
+        empty.Sort();
+        double medianNonEmpty = nonEmpty[nonEmpty.Count / 2];
+        double medianEmpty = empty[empty.Count / 2];
+        Assert.True(medianNonEmpty <= 1.0,
+            "非空 GetObserversOf 中位耗时 " + medianNonEmpty.ToString("F4") + "ms 超过 1ms（Debug 回归护栏）");
+        Assert.True(medianEmpty <= 1.0,
+            "空 GetObserversOf 中位耗时 " + medianEmpty.ToString("F4") + "ms 超过 1ms（Debug 回归护栏）");
     }
 
     private sealed class FakeSession : IServerSession
