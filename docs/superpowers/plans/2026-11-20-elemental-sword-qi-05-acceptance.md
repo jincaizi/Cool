@@ -179,7 +179,9 @@ git commit -m "perf(aoi): index observers by entity"
    - A/B/C 同一 `HitEntry` 的 `CastId`、`EventSeq`、`CombatVersion`、`TargetRemainingHp` 逐项相等。
    - B 本人 311：`Projection.Statuses` 含 `EffectId=301`，`Control.ActionLock == true`，`ControlVersion > 0`。
    - C 把 B 的 311 喂给 `c.Registry.ApplyCombatStateUpdate` 后，`GetView(B).Statuses` 同样含 301 且 `Control.ActionLock` 为真。
-   - 0.8s（12 tick + 余量）后，B/C 收到 `Statuses` 空、`ActionLock == false` 的投影；断言只发生一次 `EffectId=301` 的移除（按 `CombatVersion` 递增）。
+   - 施加/移除两条 311 的 `ServerTimestamp` 差值必须落在 0.7–1.05s（0.8s ± 0.25s）；施加后约 0.7s 时仍必须锁定（防“立即清空”也通过）。B/C 收到“无 301 且 `ActionLock == false`”的投影；断言只发生一次 `301` 移除（按 `CombatVersion` 递增）。
+   - 内层等待共用一个 120s deadline/取消标志；外层超时先 cancel，再等待 `RunAsync` 退出（≤1s），最后 Dispose，避免后台任务继续 Pump 已释放的 manager。
+   - `HitEntry.TargetRemainingHp` 用严格相等；311 识别额外断言 `StatusProjection.SourceId == A.LocalPlayerId`。
 
 - [ ] **步骤 2：运行测试确认失败/超时**
 
