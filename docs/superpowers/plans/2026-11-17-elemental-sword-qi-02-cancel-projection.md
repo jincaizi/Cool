@@ -24,7 +24,7 @@
 - PvP 控制规则与移动预算（Plan 03）。`ControlSummary` 首版固定 `SpeedScale=1 / ActionLock=false / ControlVersion=0`。
 - 三客户端完整一致性与带宽实测收口（Plan 05）。Plan 02 只交付服务端/客户端的单点和版本合并测试，不新增 PlayMode 三端夹具。
 - 远端手持武器模型切换（元素 VFX 的一部分，Plan 04/05）。本计划只保存 `EquipmentSummary`，不替换远端模型。
-- 血量/状态分版本合并。Plan 02 的 `Statuses[]` 为空，客户端按单一 `CombatVersion` 原子合并；等到 Plan 04 引入状态运行时时再拆分为 `AppliedHealthVersion`/`AppliedStatusVersion`，否则当前拆分没有可观察行为。
+- 血量/状态分版本合并。Plan 02 的 `Statuses[]` 为空，客户端按单一 `CombatVersion` 原子合并；等到 Plan 04 引入状态运行时时再拆分为 `AppliedHealthVersion`/`AppliedStatusVersion`，否则当前拆分没有可观察行为。**2026-11-19 实施注记：Plan 04 已完成，仍采用单一 `CombatVersion` 原子合并（低版本投影整条丢弃）；字段级分版本合并不再承诺，见设计规格“2026-11-19 实施备注（血量/状态合并）”。**
 - NPC 攻击起手仍由 `CastBroadcast`→`NpcAttackSchedule` 驱动；`NpcActionEvent` 负责阶段/取消与动作存储。NpcAction 直接驱动攻击变体/时间轴留到 Plan 04/05，避免 Plan 02 内双播。
 
 ## 文件结构

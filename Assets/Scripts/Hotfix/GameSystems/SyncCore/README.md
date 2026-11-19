@@ -76,7 +76,8 @@ Unity `MovementBudgetMathTests`（5 项）锁定双端同源编译下的同一�
 ## 权威状态运行时（Plan 04，2026-11-19）
 
 `Elemental/StatusRuntime.cs` 是双端共享的纯 C# 状态机（零 `UnityEngine`），
-服务端每个实体一份；Plan 04 只有服务端接线，离线单机尚未接入。
+服务端每个已配置状态运行时的权威实体（登录玩家/怪物）一份；Plan 04 只有服务端接线，
+离线单机尚未接入。
 
 | 类型 | 内容 |
 |---|---|
@@ -103,7 +104,8 @@ Unity `MovementBudgetMathTests`（5 项）锁定双端同源编译下的同一�
 - `IncomingDamageMultiplier(pvp, pvpMultiplier)`：PvE 使用状态表
   `IncomingDamageMultiplier`（首版风 = 2.0），PvP 使用共享 `Pvp.WindVulnerabilityMultiplier`
   （首版 1.28）；PvP 首版不放大灼烧（调用方按目标/来源选 `pvp` 并跳过灼烧）。
-- `ClearAll` 清空状态、控制免疫与易伤窗口；死亡、Evade 到家、复活/离场复用。
+- `ClearAll` 清空状态、控制免疫与易伤窗口；调用点为 `MarkDead` / `TryRespawn` /
+  `MonsterBrain.ArriveHome`（Evade 到家）与 `StatusTickService` 的死亡路径。
 
 首版默认表（`ElementalCatalogDefaults` / `Server/Config/elemental_catalog.json`）：
 冰 `101` 减速 30% / 2s；火 `201` 3s、每 1s 8 点；雷 `301` 0.8s；风 `401` 1.5s、

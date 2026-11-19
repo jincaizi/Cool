@@ -149,9 +149,10 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   不发 `BlockSucceededEvent`/`MonsterTakeDamageEvent`/`PlayerTakeDamageEvent`，
   因此没有受击硬直、格挡、击退、命中火花、泛红或震屏；直接命中（缺省 `Direct=0`）路径不变。
 
-回归：`DotDamageRoutingTests`（7 项，本地/远程 DoT 事件隔离）、
-`AuthoritativeStatusVfxTests`（9 项，diff/换根重放）、`RemoteEntityRegistryTests`
-（`StatusesChanged` 与投影版本合并）。
+回归：`DotDamageRoutingTests`（7 项，本地/远程 DoT 事件隔离）；换根重放由
+`AuthoritativeStatusVfxTests.test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`
+覆盖；投影版本合并（高版本应用/低版本丢弃、空状态清空、LifeId 基线等待）由
+`CombatStateProjectionTests` 覆盖。
 
 ## 联网复活
 

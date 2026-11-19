@@ -1694,6 +1694,8 @@ if (pending.IsNpcCaster && target.Kind == (byte)EntityKind.Player && target.IsLo
 
 Plan 04 的怪物 DoT 跳伤必须复用 `ScaleNpcDamageToPlayer`（同一基准），否则 720 HP 下灼烧会相对变弱。
 
+**2026-11-19 实施注记**：Plan 04 的玩家来源灼烧每跳实际取状态表 `DamagePerTick`（PvE 乘风易伤、PvP 不放大），**未**复用 `ScaleNpcDamageToPlayer`；只有未来新增 **NPC 来源** DoT 时，每跳才必须复用该缩放。
+
 - [x] **步骤 4：运行测试**
 
 ```bash

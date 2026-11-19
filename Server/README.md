@@ -156,15 +156,16 @@ Plan 03 验收证据（可证伪）：
 
 Plan 04 验收证据（服务端，全部在 652/652 内）：
 
-- 状态运行时：`StatusRuntimeTests`（8 项）锁定刷新/末跳/控制派生/PvP 免疫与 4s 不刷新；
-  `ServerStatusManagerTests`（7 项）锁定控制 sink 与投影版本；`GameLoopOrderingTests`
+- 状态运行时：`StatusRuntimeTests`（11 项）锁定刷新/末跳/控制派生/PvP 免疫与 4s 不刷新；
+  `ServerStatusManagerTests`（9 项）锁定控制 sink 与投影版本；`GameLoopOrderingTests`
   锁定 pre-tick 顺序与 WS 输入顺序。
 - 元素附加：`ElementalApplicationTests`（9 项）锁定同次施法每目标一次、挥砍/剑气先后、
   格挡与死亡不附加、PvE/PvP 风倍率；`EventIdentityTests`（2 项）锁定事件序号。
-- DoT：`DotDamageTests`（7 项）与 `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、
+- DoT：`DotDamageTests`（9 项）与 `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、
   `DamageKind=Dot`、末跳只结算一次、到期/死亡清理。
-- 怪物控制：`MonsterStatusControlTests`（6 项）锁定减速作用于真实移动/ORCA、麻痹打断与
-  霸体、Evade 到家清状态；`MonsterEvadeTests` 覆盖清状态后的仇恨/回巢。
+- 怪物控制：`MonsterStatusControlTests`（7 项）锁定减速作用于真实移动/ORCA、麻痹打断与
+  霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
+  `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
 
 `CastCancelBroadcast`（310）、`CombatStateUpdate`（311）与 `NpcActionEvent`（2004，含 `LifeId`）
 已启用；取消/动作事件/投影统一按 `IsSameCombatScene`（相对 `ZoneId`，空值广播）过滤。

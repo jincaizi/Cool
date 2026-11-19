@@ -154,7 +154,8 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 `MonsterBodyRadiusTests`（含 `SpawnMonster → AddNpc` 的 `BodyRadius` 接线）、`AttackLineOfSightTests`、
 `MonsterWindupTests`、`MonsterNavigationTests`、`ThreatTableTests`、
 `SkillSelectorTests`、`MonsterCastBuilderTests`、`BrainTests`、`MonsterEvadeTests`、
-`MonsterSkillCombatTests`、`P2ConfigTests`、`MonsterP2AcceptanceTests`）；
+`MonsterStatusControlTests`（减速/麻痹/霸体/Evade 清状态）、`MonsterSkillCombatTests`、
+`P2ConfigTests`、`MonsterP2AcceptanceTests`）；
 `Server/Server.Tests/Navigation/`（`NavDataFormatTests`、`NavMeshGraphTests`、`NavMeshPathfinderTests`、
 `NavigationServiceTests`、`PathFollowerTests`、`DemoDayNavBinTests`、`NavMeshBenchmarkTests`）；
 PlayMode `MonsterWorldTests`、`AoiWorldTests`。
@@ -164,6 +165,7 @@ PlayMode `MonsterWorldTests`、`AoiWorldTests`。
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Monster"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~BrainTests"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterEvade"
+bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterStatusControlTests"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterP2Acceptance"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~Navigation"
 # Unity EditMode（需 Editor；新鲜度测试会临时打开 DemoDay）
