@@ -517,6 +517,7 @@ namespace KcpServer
             for (int i = _pending.Count - 1; i >= 0; i--)
             {
                 var pending = _pending[i];
+                if (pending.Spent) continue; // 已取消/已结算，等 DrainResolved 压缩
                 if (pending.CasterId != casterId || pending.Request.SkillId != skillId) continue;
                 if (castId != 0 && pending.CastId != castId) continue;
 
@@ -527,7 +528,10 @@ namespace KcpServer
                 }
                 else
                 {
-                    _pending.RemoveAt(i);
+                    // 不能在迭代中 RemoveAt：CancelCaster 可能由状态附加 → 控制 sink 在
+                    // DrainResolved 单遍压缩途中重入（C1）。标 Spent 由压缩在本次/下一 tick 丢弃；
+                    // 已写入压缩目标的 Spent 项多留一 tick 无害。
+                    pending.Spent = true;
                     ClearActiveCast(_store.GetPlayer(casterId), pending.CastId);
                 }
 
@@ -550,6 +554,7 @@ namespace KcpServer
             for (int i = _pending.Count - 1; i >= 0; i--)
             {
                 var pending = _pending[i];
+                if (pending.Spent) continue; // 已取消/已结算，等 DrainResolved 压缩
                 if (pending.CasterId != casterId) continue;
                 if (pending.Launched)
                 {
@@ -558,7 +563,8 @@ namespace KcpServer
                 }
                 else
                 {
-                    _pending.RemoveAt(i);
+                    // 同 CancelPending：重入安全——不在 DrainResolved 迭代中改 _pending。
+                    pending.Spent = true;
                     ClearActiveCast(_store.GetPlayer(casterId), pending.CastId);
                 }
                 cancels.Add(new CastCancelBroadcast
@@ -1070,7 +1076,9 @@ namespace KcpServer
         public ulong AllocateEventId() => _resolver.AllocateEventId();
 
         /// <summary>Plan 04：灼烧跳数的伤害广播。收件人与直接伤害同规则
-        /// （来源 + 目标 + 双方观察者）；来源恒为玩家施法者（怪物不施加元素状态）。</summary>
+        /// （来源 + 目标 + 双方观察者）；来源恒为玩家施法者（怪物不施加元素状态）。
+        /// 场景过滤与 <see cref="BroadcastDamageAsync"/> 一致（<see cref="Server3C.IsSameCombatScene"/>；
+        /// 目标实体缺失时保持旧行为不过滤）。</summary>
         public Task BroadcastDotDamageAsync(long sourceId, int skillId, HitEntry hit)
         {
             var result = new DamageResult
@@ -1084,8 +1092,10 @@ namespace KcpServer
             var recipients = CollectDamageRecipients(
                 new[] { hit.TargetPlayerId }, sourceId, npcCaster: false,
                 id => _server.GetObserversOf(id), id => _server.GetVisiblePlayers(id));
+            var target = _server.GetEntity(hit.TargetPlayerId);
             foreach (var id in recipients)
             {
+                if (target != null && !Server3C.IsSameCombatScene(target, _server.GetEntity(id))) continue;
                 var s = _server.GetSession(id);
                 if (s != null)
                     _ = _server.SendToSessionAsync(s, MessageId.DamageResult, result);

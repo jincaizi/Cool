@@ -35,7 +35,8 @@ namespace KcpServer
             var monsters = _monsters();
             foreach (var entity in _store.All)
             {
-                if (entity.Statuses == null) continue;
+                // 早退：无状态实体不分配缓冲/不遍历（缓冲复用留 Plan 05）。
+                if (entity.Statuses == null || entity.Statuses.Runtime.Count == 0) continue;
                 entity.Statuses.RemoveExpired(tick);
                 var due = new List<ActiveStatus>();
                 entity.Statuses.Runtime.CollectDueDots(tick, due);

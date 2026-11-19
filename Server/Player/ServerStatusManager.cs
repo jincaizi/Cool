@@ -69,7 +69,8 @@ namespace KcpServer
 
         public void ClearAll(uint tick)
         {
-            if (Runtime.Count == 0) return;
+            // 不去 Runtime.Count == 0 早退：PvP 控制窗口/免疫重置不体现在 Count 上，
+            // 早退会跳过它们（死亡/复活/Evade 时多一次 bump 可接受）。
             Runtime.ClearAll();
             SyncControl();
             _owner.BumpCombatVersion();
