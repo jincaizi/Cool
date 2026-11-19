@@ -136,7 +136,7 @@ public class AoiVersionContinuityTests
         Assert.True((death.FieldMask & (ushort)EntityFieldMask.Health) != 0);
         Assert.Equal(1u, death.LifeId);
         Assert.True(death.CombatVersion > versionAtBaseline);
-        Assert.Null(death.Combat); // 增量帧不带完整投影（投影走基线 / 311 可靠更新）
+        Assert.Null(death.Combat); // 增量帧不带完整投影（投影走基线与 CombatStateUpdate 可靠更新）
 
         // 离开视野后复活并换装：基线必须重建为当前生命，而不是旧生命 last-known。
         MoveTo(target, 91f);
@@ -234,10 +234,12 @@ public class AoiVersionContinuityTests
     }
 
     [Fact]
-    public void Evade_Pooled_Respawn_New_Baseline_Is_A_New_Entity_And_Old_Id_Stops()
+    public void Evade_Pooled_Respawn_Starts_New_Entity_And_Old_Id_Stops()
     {
         // 回巢超时 → despawn → 30 tick 后回池以**新 id** 重生。
-        // 旧 id 不得再有任何增量；新 id 首帧基线是干净的完整投影。
+        // 本用例锁定当前生产语义（revised brief 任务 4 第 3 条）：新实体 LifeId=1、
+        // CombatVersion=0；**不承诺跨实体 id 的 CombatVersion 单调**（客户端按实体 id
+        // 重建视图）。旧 id 必须立即停止投递，新 id 首帧是完整基线。
         var catalog = ElementalCatalogDefaults.Create();
         var store = new EntityStore();
         var observer = store.AddPlayer(1, "Obs");
@@ -262,7 +264,7 @@ public class AoiVersionContinuityTests
         Assert.Equal(oldId, oldBaseline.PlayerId);
         Assert.Contains(201, oldBaseline.Combat!.Statuses.Select(s => s.EffectId));
 
-        // 回不到家 → 300 tick 超时 despawn，330 tick 回池重生在巡逻中心。
+        // 回不到家 → ReturnTimeoutTicks 超时 despawn，EvadeRespawnDelayTicks 后回池重生于巡逻中心。
         state.Mode = MonsterMode.Evade;
         state.EvadeStartTick = 0;
         state.SpawnPosition = new Vector3(0f, 0f, 1000f);
@@ -273,25 +275,28 @@ public class AoiVersionContinuityTests
 
         broadcaster.RemoveEntity(oldId); // Server3C.DrainRemovedNpcs 的 AOI 清理接线
         int frozen = capture.Sent.Count;
-        broadcaster.BuildForObserver(observer, tick: 301, store);
+        uint removedTick = MonsterBrain.ReturnTimeoutTicks;
+        broadcaster.BuildForObserver(observer, tick: removedTick + 1, store);
         Assert.Equal(frozen, capture.Sent.Count); // 旧 id 已注销：不得再发
 
-        for (uint t = 301; t < 330; t++)
+        uint respawnTick = removedTick + MonsterModule.EvadeRespawnDelayTicks;
+        for (uint t = removedTick + 1; t < respawnTick; t++)
         {
             module.Tick(t);
             Assert.Equal(0, module.Count);
         }
-        module.Tick(330);
+        module.Tick(respawnTick);
         Assert.Equal(1, module.Count);
 
         var newNpc = Assert.Single(store.All, p => p.Kind == (byte)EntityKind.Npc);
         long newId = newNpc.PlayerId;
         Assert.NotEqual(oldId, newId);
-        Assert.Equal(1u, newNpc.LifeId); // 新生成实体 = 新生命
+        Assert.Equal(1u, newNpc.LifeId); // 新生成实体 = 新生命（生产语义）
+        Assert.Equal(0u, newNpc.CombatVersion); // 新实体 CV 从 0 开始（不承诺跨 id 单调）
         Assert.Equal(newNpc.MaxHp, newNpc.Hp, 4);
         Assert.Empty(newNpc.Statuses!.Runtime.Active);
 
-        broadcaster.BuildForObserver(observer, tick: 331, store);
+        broadcaster.BuildForObserver(observer, tick: respawnTick + 1, store);
         Assert.Equal(frozen + 1, capture.Sent.Count);
         var reborn = capture.Last;
         Assert.Equal(newId, reborn.PlayerId);
@@ -355,14 +360,16 @@ public class AoiVersionContinuityTests
         Assert.Equal(ElementalCatalogDefaults.FireSwordTemplateId, fresh.Equipment.TemplateId);
         Assert.Equal(2, fresh.Equipment.ElementId);
         Assert.Empty(fresh.Statuses);
-        Assert.NotEqual(oldView.CombatVersion, fresh.CombatVersion);
+        Assert.True(fresh.CombatVersion > oldView.CombatVersion,
+            "断线期间状态推进后，新会话基线版本必须严格大于旧视图");
     }
 
     [Fact]
     public void Old_Life_CombatStateUpdate_Stops_At_Exit_And_New_Life_Update_Follows_Reentry()
     {
-        // 311（CombatStateUpdate）可靠增量走 AOI 收件人：目标离开视野后旧生命的更新
-        // 不得投递；重进后的可靠更新必须是新生命/新装备（基线之外的二次确认）。
+        // CombatStateUpdate 可靠增量走 AOI 收件人：先在同一视野内**真实构造**旧生命
+        // （LifeId=1）的存活与死亡两条 CombatStateUpdate，再出界推进旧生命并断言零投递；
+        // 复活（LifeId=2）重进后，下一条可靠增量必须是新生命/新装备。
         using var server = new Server3C(new TestLogger());
         var sent = new List<(long SessionId, MessageId Id, IMessage Message)>();
         server.OfflineSendSink = (session, id, message) => sent.Add((session.SessionId, id, message));
@@ -373,39 +380,53 @@ public class AoiVersionContinuityTests
         target.UpdatePosition(new Vector3(50f, 0f, 0f), 0f, 0f, 0L, 0U);
         server.BindPlayerToSession(1, new FakeSession(11));
 
-        // 正面控制：目标在视野内且变脏 → 观察者收到当前生命（LifeId=1）的 311。
+        // 正面控制 1：视野内存活且变脏 → 观察者收到 LifeId=1 的 CombatStateUpdate。
         target.ApplyDamage(10f);
         server.GetVisiblePlayers(1);
         server.SendCombatStateUpdates();
         var first = Assert.Single(sent, m => m.Id == MessageId.CombatStateUpdate);
         Assert.Equal(11L, first.SessionId); // 收件人 = 观察者会话
-        var firstUpdate = (CombatStateUpdate)first.Message;
-        Assert.Equal(1u, firstUpdate.Projection.LifeId);
-        Assert.Equal(90f, firstUpdate.Projection.Hp, 4);
+        var aliveUpdate = (CombatStateUpdate)first.Message;
+        Assert.Equal(1u, aliveUpdate.Projection.LifeId);
+        Assert.Equal(90f, aliveUpdate.Projection.Hp, 4);
+        Assert.False(aliveUpdate.Projection.Dead);
+        sent.Clear();
 
-        // 死亡 → 视野外复活（LifeId++）→ 换装：旧生命的增量不得再投递。
+        // 正面控制 2：视野内死亡仍变脏 → 旧生命的死亡投影也必须真实投递过一条。
         target.ApplyDamage(200f);
         target.MarkDead(100);
-        Assert.True(target.TryRespawn(222, 66));
-        target.EquippedWeaponInstanceId = 99;
-        target.EquippedWeaponTemplateId = ElementalCatalogDefaults.FireSwordTemplateId;
+        Assert.False(target.IsAlive);
+        server.SendCombatStateUpdates();
+        var death = Assert.Single(sent, m => m.Id == MessageId.CombatStateUpdate);
+        Assert.Equal(11L, death.SessionId);
+        var deathUpdate = (CombatStateUpdate)death.Message;
+        Assert.Equal(1u, deathUpdate.Projection.LifeId);
+        Assert.True(deathUpdate.Projection.Dead);
+        Assert.Equal(-110f, deathUpdate.Projection.Hp, 4);
+        sent.Clear();
+
+        // 出界后旧生命继续推进：新的旧-LifeId 脏状态不得投递给观察者。
         target.UpdatePosition(new Vector3(91f, 0f, 0f), 0f, 0f, 1L, 1U);
         server.GetVisiblePlayers(1); // 观察者侧 AOI 刷新：目标出界
-        sent.Clear();
-        target.ApplyDamage(1f); // 新生命推进（脏位在视野外被清掉）
+        target.BumpCombatVersion(); // 旧生命脏位（若仍收件，会产生 LifeId=1 的增量）
+        Assert.True(target.CombatDirty);
         server.SendCombatStateUpdates();
-        Assert.Empty(sent); // 视野外零 311
+        Assert.Empty(sent); // 旧生命 CombatStateUpdate 在出界后停止
 
-        // 重进视野：下一次可靠 311 必须是新生命/新装备。
+        // 视野外复活（LifeId++）→ 换装；重进后可靠增量必须是新生命/新装备。
+        Assert.True(target.TryRespawn(222, 66)); // (222-100)*66ms ≥ 8s
+        Assert.Equal(2u, target.LifeId);
+        target.EquippedWeaponInstanceId = 99;
+        target.EquippedWeaponTemplateId = ElementalCatalogDefaults.FireSwordTemplateId;
         target.UpdatePosition(new Vector3(50f, 0f, 0f), 0f, 0f, 2L, 2U);
         server.GetVisiblePlayers(1);
-        target.ApplyDamage(1f);
+        target.ApplyDamage(1f); // Hp 100 -> 99，新生命脏位
         server.SendCombatStateUpdates();
         var update = Assert.Single(sent, m => m.Id == MessageId.CombatStateUpdate);
         Assert.Equal(11L, update.SessionId);
         var reborn = (CombatStateUpdate)update.Message;
         Assert.Equal(2u, reborn.Projection.LifeId);
-        Assert.Equal(98f, reborn.Projection.Hp, 4);
+        Assert.Equal(99f, reborn.Projection.Hp, 4);
         Assert.Equal(99L, reborn.Projection.Equipment!.WeaponInstanceId);
         Assert.Equal(ElementalCatalogDefaults.FireSwordTemplateId, reborn.Projection.Equipment.TemplateId);
     }
@@ -464,10 +485,17 @@ public class AoiVersionContinuityTests
         Assert.Equal(!server.IsAlive, projection.Dead);
         Assert.Equal(server.IsDefending, projection.IsDefending);
 
+        // 状态列表逐项对齐（不只 EffectId）：组别/结束 tick/来源也必须是服务器当前值。
         var expectedStatuses = server.Statuses == null
-            ? new List<int>()
-            : server.Statuses.Runtime.Active.Select(s => s.EffectId).OrderBy(id => id).ToList();
-        var actualStatuses = projection.Statuses.Select(s => s.EffectId).OrderBy(id => id).ToList();
+            ? new List<(int EffectId, int GroupId, uint EndTick, long SourceId)>()
+            : server.Statuses.Runtime.Active
+                .Select(s => (s.EffectId, s.GroupId, s.EndTick, s.SourceId))
+                .OrderBy(s => s.EffectId)
+                .ToList();
+        var actualStatuses = projection.Statuses
+            .Select(s => (s.EffectId, s.GroupId, s.EndTick, s.SourceId))
+            .OrderBy(s => s.EffectId)
+            .ToList();
         Assert.Equal(expectedStatuses, actualStatuses);
 
         if (server.EquippedWeaponInstanceId == 0)
