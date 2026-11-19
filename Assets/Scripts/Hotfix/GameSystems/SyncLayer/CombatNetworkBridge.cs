@@ -47,7 +47,12 @@ namespace Hotfix.GameSystems.SyncLayer
         /// 有界：只保留最近 1024 条，重投只来自传输重试窗口。</summary>
         private readonly HashSet<ulong> _seenEventIds = new HashSet<ulong>();
         private readonly Queue<ulong> _eventIdOrder = new Queue<ulong>();
-        private const int MaxSeenEventIds = 1024;
+        /// <summary>施法广播去重窗口（非零 CastId；0 = 旧服务端）。桥层统一挡住重复包，
+        /// NPC 排程/玩家 presenter/CastVFX/投射物工厂等所有下游都只消费一次。</summary>
+        private readonly HashSet<ulong> _seenCastIds = new HashSet<ulong>();
+        private readonly Queue<ulong> _seenCastOrder = new Queue<ulong>();
+        /// <summary>有界去重窗口上限（命中事件与施法 ID 共用）。</summary>
+        private const int MaxSeenIds = 1024;
         private uint _nextEquipSeq;
         private uint _nextCastSeq;
 
@@ -200,11 +205,15 @@ namespace Hotfix.GameSystems.SyncLayer
                 switch (message)
                 {
                     case CastBroadcast broadcast:
+                        // 重复包不得触发下游任何表现（玩家攻击/怪物排程/施法特效/投射物）。
+                        if (!MarkCastSeen(broadcast.CastId)) break;
                         OnCastBroadcast?.Invoke(broadcast);
                         break;
                     case DamageResult result:
-                        ApplyDamageResult(result);
-                        OnDamageResult?.Invoke(result);
+                        // 整条命中全被判重 = 重复消息：连观察事件也不再触发（宿主会用它
+                        // 消费下一发投射物视觉——重复火球消息会把下一发提前停掉）。
+                        if (ApplyDamageResult(result))
+                            OnDamageResult?.Invoke(result);
                         break;
                     case EquipWeaponConfirm equip:
                         if (_equipment.TryApply(equip))
@@ -234,11 +243,13 @@ namespace Hotfix.GameSystems.SyncLayer
             }
         }
 
-        /// <summary>断线/新会话：清空命中去重窗口（旧会话的 EventId 不得影响新会话）。</summary>
+        /// <summary>断线/新会话：清空命中和施法的去重窗口（旧会话的 Id 不得影响新会话）。</summary>
         public void ClearDedupe()
         {
             _seenEventIds.Clear();
             _eventIdOrder.Clear();
+            _seenCastIds.Clear();
+            _seenCastOrder.Clear();
         }
 
         /// <summary>登记一条命中事件；同 EventId 的重复投递返回 false（0 = 旧服务端，不去重）。</summary>
@@ -247,19 +258,34 @@ namespace Hotfix.GameSystems.SyncLayer
             if (eventId == 0) return true;
             if (!_seenEventIds.Add(eventId)) return false;
             _eventIdOrder.Enqueue(eventId);
-            if (_eventIdOrder.Count > MaxSeenEventIds)
+            if (_eventIdOrder.Count > MaxSeenIds)
                 _seenEventIds.Remove(_eventIdOrder.Dequeue());
             return true;
         }
 
-        private void ApplyDamageResult(DamageResult result)
+        /// <summary>登记一次施法广播；同 CastId 的重复投递返回 false（0 = 旧服务端，不去重）。</summary>
+        private bool MarkCastSeen(ulong castId)
+        {
+            if (castId == 0) return true;
+            if (!_seenCastIds.Add(castId)) return false;
+            _seenCastOrder.Enqueue(castId);
+            if (_seenCastOrder.Count > MaxSeenIds)
+                _seenCastIds.Remove(_seenCastOrder.Dequeue());
+            return true;
+        }
+
+        /// <summary>应用一条 DamageResult；返回是否含新的命中（整条全重复返回 false）。
+        /// 无 hit 的消息没有可去重的命中，仍视为"需要交给上层"（旧服务端停点/空结果）。</summary>
+        private bool ApplyDamageResult(DamageResult result)
         {
             long localId = _localPlayerId();
+            bool anyNewHit = false;
             foreach (var hit in result.Hits)
             {
                 // 传输层重试/重投的同一命中只生效一次：否则本地受击 FSM/飘字会二次触发，
                 // 远程红字/灰字会重影。旧服务端 EventId=0 保持不去重的既有行为。
                 if (!MarkEventSeen(hit.EventId)) continue;
+                anyNewHit = true;
 
                 // DoT 跳伤：只更新权威血量与飘字。绝不走受击 FSM/格挡/击退/PlayHit/
                 // MonsterTakeDamageEvent（后两者会带出命中粒子/震屏），也不发红屏事件。
@@ -367,6 +393,9 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 OnLineProjectileStopped?.Invoke(new Vector3(result.StopX, 0f, result.StopZ));
             }
+
+            // 无 hit（旧服务端停点/空结果）没有可去重的命中，不是"重复消息"。
+            return anyNewHit || result.Hits.Count == 0;
         }
     }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cool.Protocol;
 using Hotfix.GameSystems.Skills;
@@ -232,23 +233,105 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
-        public void test_clear_dedupe_resets_window_for_reconnect()
+        public void test_clear_dedupe_resets_event_and_cast_windows()
         {
-            // 断线/重建会换新桥；ClearDedupe 保证即使桥对象被复用，旧会话的 EventId 也不再拦截
+            // 断线/重建会换新桥；ClearDedupe 保证即使桥对象被复用，旧会话的
+            // EventId / CastId 窗口都不再拦截。
             var registry = new RemoteEntityRegistry(_root.transform);
-            int calls = 0;
+            int calls = 0, castEvents = 0;
             var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry,
                 (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) => calls++);
+            bridge.OnCastBroadcast += _ => castEvents++;
 
             bridge.OnMessage(MessageId.DamageResult, DirectHit(eventId: 9301));
+            bridge.OnMessage(MessageId.CastBroadcast,
+                new CastBroadcast { CastId = 930, CasterPlayerId = 2L, SkillId = 10002 });
+            bridge.OnMessage(MessageId.CastBroadcast,
+                new CastBroadcast { CastId = 930, CasterPlayerId = 2L, SkillId = 10002 });
             bridge.Update();
             Assert.AreEqual(1, calls);
+            Assert.AreEqual(1, castEvents, "重复 CastBroadcast 在 ClearDedupe 前只触发一次");
 
             bridge.ClearDedupe();
             bridge.OnMessage(MessageId.DamageResult, DirectHit(eventId: 9301));
+            bridge.OnMessage(MessageId.CastBroadcast,
+                new CastBroadcast { CastId = 930, CasterPlayerId = 2L, SkillId = 10002 });
             bridge.Update();
 
             Assert.AreEqual(2, calls, "ClearDedupe 后同一 EventId 必须重新生效");
+            Assert.AreEqual(2, castEvents, "ClearDedupe 后同一 CastId 必须重新生效");
+        }
+
+        [Test]
+        public void test_duplicate_damage_result_raises_bridge_event_once()
+        {
+            // 宿主把 OnDamageResult 转给 presenter 做投射物停点对齐；整条命中的重投
+            // 不得再次触发（重复火球消息会把下一发视觉消费掉）。
+            var registry = new RemoteEntityRegistry(_root.transform);
+            int events = 0;
+            var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry);
+            bridge.OnDamageResult += _ => events++;
+
+            bridge.OnMessage(MessageId.DamageResult, DirectHit(eventId: 9401));
+            bridge.OnMessage(MessageId.DamageResult, DirectHit(eventId: 9401));
+            bridge.Update();
+            Assert.AreEqual(1, events, "整条命中全重复时不得触发 OnDamageResult");
+
+            bridge.OnMessage(MessageId.DamageResult, DirectHit(eventId: 9402));
+            bridge.Update();
+            Assert.AreEqual(2, events, "出现新 EventId 时 OnDamageResult 必须再次触发");
+        }
+
+        [Test]
+        public void test_damage_result_with_one_new_hit_still_raises_event()
+        {
+            // 同一消息里既有重复 hit 又有新 hit：消息仍须交给上层，且只跳过重复的那条
+            var registry = new RemoteEntityRegistry(_root.transform);
+            int calls = 0, events = 0;
+            var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry,
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) => calls++);
+            bridge.OnDamageResult += _ => events++;
+
+            bridge.OnMessage(MessageId.DamageResult, DirectHit(eventId: 9501, damage: 10f, remainingHp: 90f));
+            bridge.Update();
+            Assert.AreEqual(1, calls);
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 1L,
+                SkillId = 20001,
+                Hits =
+                {
+                    new HitEntry { TargetPlayerId = LocalPlayerId, Damage = 10f, TargetRemainingHp = 90f, EventId = 9501 },
+                    new HitEntry { TargetPlayerId = LocalPlayerId, Damage = 5f, TargetRemainingHp = 85f, EventId = 9502 }
+                }
+            });
+            bridge.Update();
+
+            Assert.AreEqual(2, calls, "重复 hit 跳过，新 hit 仍须生效");
+            Assert.AreEqual(2, events, "含新 hit 的消息仍须触发 OnDamageResult");
+        }
+
+        [Test]
+        public void test_hitless_damage_result_still_raises_bridge_event()
+        {
+            // 无 hit 的消息没有可去重的命中（旧服务端停点/空结果），不得被“全重复”判据吞掉
+            var registry = new RemoteEntityRegistry(_root.transform);
+            int events = 0;
+            var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry);
+            bridge.OnDamageResult += _ => events++;
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SourcePlayerId = 2L,
+                SkillId = 10002,
+                ProjectileStopped = true,
+                StopX = 0f,
+                StopZ = 6f
+            });
+            bridge.Update();
+
+            Assert.AreEqual(1, events, "无 hit 的消息不是重复消息，仍须交给上层");
         }
 
         [Test]
@@ -443,6 +526,109 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             bridge.Update();
 
             Assert.AreEqual(2, animator.AttackStartsForTest, "不同 CastId 必须各自起手");
+        }
+
+        [Test]
+        public void test_duplicate_cast_broadcast_raises_bridge_event_once()
+        {
+            // 桥层门：重复包不再触发 OnCastBroadcast——NPC 排程、玩家 presenter、
+            // CastVFX/投射物工厂/environment 表现全部只消费一次。
+            var registry = new RemoteEntityRegistry(_root.transform);
+            int raised = 0;
+            var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry);
+            bridge.OnCastBroadcast += _ => raised++;
+
+            CastBroadcast Cast(ulong castId) => new CastBroadcast
+            {
+                CastId = castId, CasterPlayerId = 2L, SkillId = 10002
+            };
+
+            bridge.OnMessage(MessageId.CastBroadcast, Cast(800));
+            bridge.OnMessage(MessageId.CastBroadcast, Cast(800));
+            bridge.Update();
+            Assert.AreEqual(1, raised, "同一非零 CastId 只能触发一次 OnCastBroadcast");
+
+            bridge.OnMessage(MessageId.CastBroadcast, Cast(801));
+            bridge.Update();
+            Assert.AreEqual(2, raised, "不同 CastId 必须各自触发");
+        }
+
+        [Test]
+        public void test_duplicate_cast_broadcast_reaches_npc_registry_once()
+        {
+            // NPC 分支：重复 CastBroadcast 不得给怪物排第二次挥砍（跨帧重排会把正在播的攻击
+            // 重新起手）。真预制体 + 真 Animator，与 DemoDay 的 templateId 4 接线同款。
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Monstor/fantasySpider/SpiderMonster.prefab");
+            Assert.IsNotNull(prefab, "真预制体未找到");
+            var root = new GameObject("NpcCastDedupeRoot");
+            var registry = new RemoteEntityRegistry(root.transform, null,
+                new Dictionary<int, GameObject> { { 4, prefab } });
+            try
+            {
+                long npcId = 2_000_006L;
+                long baseTicks = 638_000_000_000_000_000L;
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = npcId,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Kind
+                        | EntityFieldMask.TemplateId | EntityFieldMask.ActionState),
+                    X = 1f, Y = 0f, Z = 2f,
+                    Kind = (byte)EntityKind.Npc, TemplateId = 4,
+                    ActionState = (byte)NpcAnimationState.Idle, Tick = 1
+                }, serverTicks: baseTicks);
+
+                var view = registry.GetView(npcId);
+                Assert.IsNotNull(view?.NpcAnimator, "怪物视图应带驱动");
+                view!.NpcAnimator!.ResolveAnimator();
+                var animator = view.GameObject.GetComponentInChildren<Animator>();
+                Assert.IsNotNull(animator);
+
+                var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry);
+                int scheduled = 0;
+                // 宿主同款接线：CastBroadcast → registry 排程
+                bridge.OnCastBroadcast += b =>
+                {
+                    scheduled++;
+                    registry.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp, b.SkillId);
+                };
+
+                long castTicks = baseTicks + 2L * NpcAttackSchedule.VariantBucketTicks;
+                int variant = NpcAttackSchedule.VariantOf(castTicks, 50006);
+                string expected = variant == 0 ? "Attack01" : "Attack02";
+                CastBroadcast NpcCast() => new CastBroadcast
+                {
+                    CastId = 900, CasterPlayerId = npcId, SkillId = 50006, ServerTimestamp = castTicks
+                };
+
+                bridge.OnMessage(MessageId.CastBroadcast, NpcCast());
+                bridge.OnMessage(MessageId.CastBroadcast, NpcCast());
+                bridge.Update();
+
+                Assert.AreEqual(1, scheduled,
+                    "重复 CastBroadcast 不得给 NPC 排第二次挥砍（registry 分支必须收到一次）");
+
+                // 唯一一次排程真的播到 NpcAnimator 上（证明 NPC 分支确实被执行，而不是被跳过）
+                registry.UpdateRender(nowServerTicks: castTicks + 1L, renderDelayTicks: 0L);
+                Settle(animator!);
+                Assert.IsTrue(animator!.GetCurrentAnimatorStateInfo(0).IsName(expected),
+                    "唯一一次排程必须真的播到 NpcAnimator 上");
+            }
+            finally
+            {
+                registry.Clear();
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        /// <summary>推帧直到过渡落定（与 CombatNetworkBridgeTests.Settle 同款）。</summary>
+        private static void Settle(Animator animator)
+        {
+            int guard = 0;
+            do
+            {
+                animator.Update(0.05f);
+            } while (++guard < 20 && animator.IsInTransition(0));
         }
     }
 }
