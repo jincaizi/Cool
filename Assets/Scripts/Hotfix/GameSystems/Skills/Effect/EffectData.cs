@@ -39,7 +39,10 @@ namespace Hotfix.GameSystems.Skills.Effect
         Freeze,
         // 灼烧目标(按施法者攻击力持续掉血)
         [Tooltip("灼烧目标(按施法者攻击力持续掉血)")]
-        Burn
+        Burn,
+        // 易伤目标(受到的伤害提高)
+        [Tooltip("易伤目标(受到的伤害提高)")]
+        Vulnerable
     }
 
     public enum StackingRule

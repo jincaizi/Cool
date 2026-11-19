@@ -16,6 +16,7 @@ using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Input;
 using Hotfix.GameSystems.Sys3C.Network;
+using Hotfix.GameSystems.VFX;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WebSocketNet;
@@ -109,6 +110,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _entryLookedUp;
         private CombatNetworkBridge? _combatBridge;
         private RemoteCastPresenter? _remoteCastPresenter;
+        /// <summary>权威状态投影 → 染色事件（远端经 registry.StatusesChanged，本人经 311 本地分支）</summary>
+        private AuthoritativeStatusVfx? _statusVfx;
         private WeaponInventoryBaseline? _pendingWeaponBaseline;
         private bool _bagEquipSubscribed;
         private WeaponBagController? _weaponBagController;
@@ -217,6 +220,19 @@ namespace Hotfix.GameSystems.SyncLayer
             // 订阅跟随 registry 生命周期：DetachCombatBridge 不退订——角色重建/重连后同一 registry
             // 还要继续用，退订会让新 presenter 永远收不到基线施法；handler 对 presenter 为 null 安全。
             _remoteEntities.ActiveCastApplied += HandleActiveCastApplied;
+
+            // 权威状态表现：投影成功合并且状态列表变化才发（远端）。本人投影在 311
+            // 本地分支直接消费（见 HandleCombatStateUpdate）。
+            _statusVfx = new AuthoritativeStatusVfx();
+            _remoteEntities.StatusesChanged += HandleRemoteStatusesChanged;
+        }
+
+        /// <summary>远端状态列表变化 → diff 后按组发应用/移除事件（AuthoritativeStatusVfx）。</summary>
+        private void HandleRemoteStatusesChanged(long entityId, GameObject target,
+            IList<StatusProjection> statuses)
+        {
+            if (target == null) return;
+            _statusVfx?.Apply(entityId, target.transform, statuses);
         }
 
         /// <summary>
@@ -1009,6 +1025,8 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>远程视图移除（AOI 出界/离线）：目标就是当前锁定时先清锁（ViewRemoved 在 DestroyView 之前）</summary>
         private void HandleRemoteViewRemoved(long entityId)
         {
+            // 视图销毁前清掉状态表现（ViewRemoved 在 DestroyView 之前触发）
+            _statusVfx?.Remove(entityId);
             if (_networkTargetSelector != null && _networkTargetSelector.LockedTargetId == entityId)
                 _networkTargetSelector.ClearLock();
         }
@@ -1050,6 +1068,8 @@ namespace Hotfix.GameSystems.SyncLayer
                         projection.Control.ControlVersion);
                 if (projection.MaxHp > 0f)
                     _localEntry?.SetMaxHp(projection.MaxHp, fill: false);
+                if (_localEntry != null)
+                    _statusVfx?.Apply(update.EntityId, _localEntry.transform, projection.Statuses);
                 return;
             }
             _remoteEntities?.ApplyCombatStateUpdate(update);
@@ -1184,7 +1204,11 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             HideNetStats();
             if (_remoteEntities != null)
+            {
                 _remoteEntities.ActiveCastApplied -= HandleActiveCastApplied;
+                _remoteEntities.StatusesChanged -= HandleRemoteStatusesChanged;
+            }
+            _statusVfx = null;
             // 先摘订阅、再 Dispose（与 Disconnect → ResetAttachment 同序）：
             // manager.Dispose 里的 registry.Clear 会发 ViewRemoved，此时 selector 若仍在订阅
             // 会去动 UI/选中环（销毁过程中的 Unity 对象操作）。

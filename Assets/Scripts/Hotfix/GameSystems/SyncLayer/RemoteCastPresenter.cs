@@ -241,7 +241,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
             IRemoteProjectileVisual? visual = _launchProjectileFactory != null
                 ? _launchProjectileFactory(data, origin, direction, startDistance)
-                : DefaultFactory(data, origin, direction, null, startDistance);
+                : DefaultFactory(data, origin, direction, null, startDistance, launch.ElementId);
             if (visual == null) return;
 
             _castVisuals[launch.CastId] = new TrackedCast
@@ -516,12 +516,12 @@ namespace Hotfix.GameSystems.SyncLayer
                ?? (data as SpinSkillData)?.Presentation;
 
         private static IRemoteProjectileVisual? DefaultFactory(SkillData data, Vector3 origin,
-            Vector3 forward, Vector3? targetPoint = null, float startDistance = 0f)
+            Vector3 forward, Vector3? targetPoint = null, float startDistance = 0f, int elementId = 0)
         {
             if (data.SwordQi != null)
             {
                 var qi = SwordQiSpawner.Spawn(data.SwordQi, data.Damage?.Clone(), origin, forward,
-                    startDistance);
+                    startDistance, elementId);
                 return qi != null ? new SwordQiVisual(qi) : null;
             }
             if (data is ProjectileSkillData projectile)

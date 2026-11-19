@@ -148,6 +148,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>战斗投影携带活动施法且**已成功合并**（基线快照或 CombatStateUpdate 同路径）——
         /// 施法表现接线点；重复相位更新由订阅者按 CastId 去重。</summary>
         public event System.Action<long, ActiveCastProjection>? ActiveCastApplied;
+        /// <summary>投影成功合并且状态列表**发生变化**（新增/移除/同组替换）——
+        /// 状态表现接线点；重复投影不触发（按 (EffectId, GroupId) 逐条比较）。</summary>
+        public event System.Action<long, GameObject, IList<StatusProjection>>? StatusesChanged;
 
         /// <param name="appearances">
         /// 玩家类实体（真人与 bot）的外观目录。**省略 = 全部退化为胶囊占位**
@@ -323,6 +326,7 @@ namespace Hotfix.GameSystems.SyncLayer
             view.IsDefending = projection.IsDefending;
             view.Equipment = projection.Equipment;
             view.Control = projection.Control;
+            bool statusesChanged = !StatusesEqual(view.Statuses, projection.Statuses);
             view.Statuses = projection.Statuses;
             // 完整投影：无活动施法时也写 null，Proxy→Full 不会补播已结束的施法。
             view.ActiveCast = projection.ActiveCast;
@@ -335,8 +339,33 @@ namespace Hotfix.GameSystems.SyncLayer
             // 完整投影：last-known 全量对齐（重建视图时即使快照缺 Health 位也能回填）。
             UpdateLastKnownVitals(entityId, view.LifeId, view.CombatVersion, view.Hp, view.MaxHp,
                 view.Dead, view.IsDefending);
+            if (statusesChanged)
+                StatusesChanged?.Invoke(entityId, view.GameObject, projection.Statuses);
             if (projection.ActiveCast != null)
                 ActiveCastApplied?.Invoke(entityId, projection.ActiveCast);
+        }
+
+        /// <summary>
+        /// 状态列表逐条比较 (EffectId, GroupId)：顺序无关可接受——顺序变化只会多算一次"变化"，
+        /// 下游 AuthoritativeStatusVfx 按组 diff 后不产生重复事件。
+        /// </summary>
+        private static bool StatusesEqual(IList<StatusProjection>? a, IList<StatusProjection>? b)
+        {
+            int countA = a?.Count ?? 0;
+            int countB = b?.Count ?? 0;
+            if (countA != countB) return false;
+            for (int i = 0; i < countA; i++)
+            {
+                var x = a![i];
+                var y = b![i];
+                if (x == null || y == null)
+                {
+                    if (x != y) return false;
+                    continue;
+                }
+                if (x.EffectId != y.EffectId || x.GroupId != y.GroupId) return false;
+            }
+            return true;
         }
 
         /// <summary>按位合并快照里的 vitals 到 last-known（新生代先清旧值）。</summary>

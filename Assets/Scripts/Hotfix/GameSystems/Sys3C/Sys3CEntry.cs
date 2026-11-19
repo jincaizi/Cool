@@ -143,6 +143,10 @@ namespace Hotfix.GameSystems.Sys3C
         private GameObject _equippedSwordView;
         private int _shownSwordElement;
 
+        /// <summary>当前实际应用的元素外观（0 = 原配剑）。ApplySwordView 更新；
+        /// 供后续离线/本地剑气元素 provider 读取（Plan 05 接入）。</summary>
+        public int CurrentElementId { get; private set; }
+
         /// <summary>
         /// 应用本地持剑外观。元素 0 或配置缺失时恢复原配剑并返回 false；
         /// 成功应用（含重复应用同一有效元素）返回 true。每次交换先隐藏旧视觉。
@@ -161,10 +165,15 @@ namespace Hotfix.GameSystems.Sys3C
                 HideEquippedSwordView();
                 _defaultSwordView.gameObject.SetActive(true);
                 _shownSwordElement = 0;
+                CurrentElementId = 0;
                 return false;
             }
 
-            if (_shownSwordElement == elementId && _equippedSwordView != null) return true;
+            if (_shownSwordElement == elementId && _equippedSwordView != null)
+            {
+                CurrentElementId = elementId;
+                return true;
+            }
 
             HideEquippedSwordView();
             // Keep the original socket and combat components bound to the rig.
@@ -172,6 +181,7 @@ namespace Hotfix.GameSystems.Sys3C
             _defaultSwordView.gameObject.SetActive(false);
             _equippedSwordView = Instantiate(_elementalSwordViews[elementId - 1], _swordSocket, false);
             _shownSwordElement = elementId;
+            CurrentElementId = elementId;
             return true;
         }
 

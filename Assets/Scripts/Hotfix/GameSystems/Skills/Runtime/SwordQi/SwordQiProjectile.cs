@@ -22,9 +22,14 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
         private readonly HashSet<int> _hitIds = new HashSet<int>();
         private bool _released;
         private ComponentPool<SwordQiProjectile> _pool;
+        private SwordQiElementTint _tint;
+
+        /// <summary>本次飞行的元素（0 = 无元素/默认外观）。</summary>
+        public int ElementId { get; private set; }
 
         public void OnSpawn(SwordQiConfig config, DamageBlock damage, Vector3 origin, Vector3 direction,
-                            ComponentPool<SwordQiProjectile> pool, float startDistance = 0f)
+                            ComponentPool<SwordQiProjectile> pool, float startDistance = 0f,
+                            int elementId = 0)
         {
             _config = config;
             _damage = damage;
@@ -35,6 +40,16 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
             _spawnPosition = origin;
             _stopDistance = config.Range;
             _traveled = Mathf.Clamp(startDistance, 0f, config.Range);
+            ElementId = elementId;
+            if (_tint == null)
+            {
+                // 池化实例只解析一次（MonoBehaviour 允许 GetComponent；本类是组件，不是普通类）
+                _tint = new SwordQiElementTint(
+                    GetComponentsInChildren<TrailRenderer>(true),
+                    GetComponentsInChildren<ParticleSystem>(true),
+                    GetComponentsInChildren<Renderer>(true));
+            }
+            _tint.Apply(elementId);
             Vector3 flatDir = direction;
             flatDir.y = 0f;
             flatDir = flatDir.sqrMagnitude > 0.0001f ? flatDir.normalized : direction;
@@ -135,6 +150,92 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
             // 场景销毁时置位，防止后续 Release 回池已销毁实例
             _released = true;
             _pool = null;
+        }
+    }
+
+    /// <summary>元素配色：0 = 白（默认），1 冰蓝 / 2 火橙 / 3 雷紫 / 4 风青。</summary>
+    public static class ElementPalette
+    {
+        public static readonly Color Neutral = Color.white;
+        public static readonly Color Ice = new Color(0.55f, 0.75f, 1f);
+        public static readonly Color Fire = new Color(1f, 0.35f, 0.1f);
+        public static readonly Color Thunder = new Color(0.7f, 0.4f, 1f);
+        public static readonly Color Wind = new Color(0.3f, 1f, 0.9f);
+
+        public static Color ColorOf(int elementId) => elementId switch
+        {
+            1 => Ice,
+            2 => Fire,
+            3 => Thunder,
+            4 => Wind,
+            _ => Neutral
+        };
+    }
+
+    /// <summary>
+    /// 剑气元素染色：拖尾/粒子的 startColor 与渲染器材质 `_Color`（MaterialPropertyBlock，
+    /// 不污染共享材质）。元素 0 恢复预制体原色——池化实例上一发可能是别的元素。
+    /// </summary>
+    public sealed class SwordQiElementTint
+    {
+        private static readonly int ColorId = Shader.PropertyToID("_Color");
+
+        private readonly TrailRenderer[] _trails;
+        private readonly ParticleSystem[] _particles;
+        private readonly Renderer[] _renderers;
+        private readonly Color[] _trailColors;
+        private readonly ParticleSystem.MinMaxGradient[] _particleColors;
+        private readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
+
+        public SwordQiElementTint(TrailRenderer[] trails, ParticleSystem[] particles, Renderer[] renderers)
+        {
+            _trails = trails ?? System.Array.Empty<TrailRenderer>();
+            _particles = particles ?? System.Array.Empty<ParticleSystem>();
+            _renderers = renderers ?? System.Array.Empty<Renderer>();
+            _trailColors = new Color[_trails.Length];
+            for (int i = 0; i < _trails.Length; i++)
+                _trailColors[i] = _trails[i].startColor;
+            _particleColors = new ParticleSystem.MinMaxGradient[_particles.Length];
+            for (int i = 0; i < _particles.Length; i++)
+                _particleColors[i] = _particles[i].main.startColor;
+        }
+
+        public void Apply(int elementId)
+        {
+            bool tinted = elementId is >= 1 and <= 4;
+            Color color = ElementPalette.ColorOf(elementId);
+
+            for (int i = 0; i < _trails.Length; i++)
+            {
+                Color original = _trailColors[i];
+                _trails[i].startColor = tinted
+                    ? new Color(color.r, color.g, color.b, original.a)
+                    : original;
+            }
+
+            for (int i = 0; i < _particles.Length; i++)
+            {
+                var main = _particles[i].main;
+                main.startColor = tinted
+                    ? new ParticleSystem.MinMaxGradient(color)
+                    : _particleColors[i];
+            }
+
+            for (int i = 0; i < _renderers.Length; i++)
+            {
+                var renderer = _renderers[i];
+                if (renderer == null || renderer.sharedMaterial == null
+                    || !renderer.sharedMaterial.HasProperty(ColorId))
+                    continue;
+                if (!tinted)
+                {
+                    renderer.SetPropertyBlock(null);
+                    continue;
+                }
+                Color original = renderer.sharedMaterial.GetColor(ColorId);
+                _block.SetColor(ColorId, new Color(color.r, color.g, color.b, original.a));
+                renderer.SetPropertyBlock(_block);
+            }
         }
     }
 }
