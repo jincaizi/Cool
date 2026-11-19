@@ -195,6 +195,41 @@ public class AoiReverseIndexTests
     }
 
     [Fact]
+    public void GetObserversOf_Npc_Target_Matches_Brute_Force()
+    {
+        // 反向索引不得收窄成“仅玩家目标”：怪物（AddNpc）作为目标时，
+        // GetObserversOf(npcId) 必须与逐玩家观察者 GetVisible 的暴力反查逐项相等。
+        var store = new EntityStore();
+        var near = store.AddPlayer(1, "Near");
+        var far = store.AddPlayer(2, "Far");
+        near.UpdatePosition(new Vector3(0, 0, 0), 0f, 0f, 1L, 0U);
+        far.UpdatePosition(new Vector3(200, 0, 0), 0f, 0f, 1L, 0U);
+        var npc = store.AddNpc(10, "Slime#10", templateId: 1, hp: 100f,
+            position: new Vector3(50, 0, 0));
+
+        var broadcaster = new AoiBroadcaster();
+        broadcaster.BuildForObserver(near, 1, store);
+        broadcaster.BuildForObserver(far, 2, store);
+
+        // 旧暴力反查：逐玩家观察者查可见集成员
+        var expected = new List<long>();
+        foreach (var observer in new[] { near, far })
+            foreach (var entity in broadcaster.GetVisible(observer.PlayerId, store))
+                if (entity.PlayerId == npc.PlayerId)
+                {
+                    expected.Add(observer.PlayerId);
+                    break;
+                }
+        expected.Sort();
+
+        var actual = broadcaster.GetObserversOf(npc.PlayerId);
+        actual.Sort();
+
+        Assert.Equal(new[] { 1L }, expected);   // 夹具必须产生非空观察关系
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
     public void Server3C_Falls_Back_On_First_Call_Then_Uses_Index_And_Filters_Sessionless()
     {
         using var server = new Server3C(new TestLogger());

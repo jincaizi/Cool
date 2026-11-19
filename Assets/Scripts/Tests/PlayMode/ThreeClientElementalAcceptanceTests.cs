@@ -243,6 +243,27 @@ namespace KcpNet.PlayModeTests
             if (broadcast!.ElementId != ThunderElementId)
                 return (false, "cast-broadcast: ElementId=" + broadcast.ElementId + " != " + ThunderElementId);
 
+            // 受击者 B 与旁观者 C 收到同一条广播：同一 CastId 且同样携带雷元素。
+            gate.SetStage("cast-broadcast-victim-observer");
+            CastBroadcast? victimBroadcast = null;
+            CastBroadcast? observerBroadcast = null;
+            if (!await WaitUntil(all, gate, () =>
+                {
+                    victimBroadcast = b.Broadcasts.ToArray().FirstOrDefault(x => x.CastId == castId);
+                    observerBroadcast = c.Broadcasts.ToArray().FirstOrDefault(x => x.CastId == castId);
+                    return victimBroadcast != null && observerBroadcast != null;
+                }, 10f))
+                return (false, "cast-broadcast: B/C did not both receive CastBroadcast for CastId "
+                    + castId + " (B=" + (victimBroadcast != null) + " C="
+                    + (observerBroadcast != null) + ")" + Summarize(a, b, c, bId));
+            if (victimBroadcast!.CastId != castId || observerBroadcast!.CastId != castId)
+                return (false, "cast-broadcast: B/C CastId differs from A's " + castId
+                    + " (B=" + victimBroadcast.CastId + " C=" + observerBroadcast.CastId + ")");
+            if (victimBroadcast.ElementId != ThunderElementId
+                || observerBroadcast.ElementId != ThunderElementId)
+                return (false, "cast-broadcast: B/C ElementId=(" + victimBroadcast.ElementId + ","
+                    + observerBroadcast.ElementId + ") != " + ThunderElementId);
+
             gate.SetStage("damage-result");
             var aHits = new List<HitEntry>();
             var bHits = new List<HitEntry>();

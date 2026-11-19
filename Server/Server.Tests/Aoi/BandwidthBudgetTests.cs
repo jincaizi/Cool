@@ -280,6 +280,12 @@ public class BandwidthBudgetTests
             if (tickBytes > perTickMax) perTickMax = tickBytes;
         }
 
+        // 状态/DoT 流下限（最坏变体：60 轮 × 100 实体 = 6000 条 311 + 6000 条 DoT）：
+        // 回放块整体消失时总字节/单 tick 断言都不会红——镜像常规变体按 6000 条缩放，
+        // 用实测值（311≈182B/条、DoT≈56B/条）留约 20% 余量兜底。
+        Assert.InRange(statusUpdateTotal, 6000L * 150, 6000L * 400);
+        Assert.InRange(damageResultTotal, 6000L * 40, 6000L * 120);
+
         long budgetTotal = (long)(GlobalGameSettings.BandwidthBudgetBytesPerSec * 60f);
         double avgBytesPerSec = totalBytes / 60.0;
         double kBps = avgBytesPerSec / 1000.0;
