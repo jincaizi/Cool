@@ -123,7 +123,16 @@ public List<long> GetObserversOf(long entityId)
     if (_aoi.HasSightState)
     {
         var indexed = _aoi.GetObserversOf(entityId);
-        indexed.RemoveAll(id => !_playerIdToSession.ContainsKey(id));
+        var target = _entityStore.GetPlayer(entityId);
+        indexed.RemoveAll(id =>
+        {
+            if (!_playerIdToSession.ContainsKey(id)) return true;
+            var observer = _entityStore.GetPlayer(id);
+            if (observer == null || target == null) return true;
+            float dx = observer.Position.X - target.Position.X;
+            float dz = observer.Position.Z - target.Position.Z;
+            return dx * dx + dz * dz > AoiGrid.LeaveRadius * AoiGrid.LeaveRadius;
+        });
         return indexed;
     }
     // 首 tick/尚无观察者快照：保留旧暴力路径，避免漏发第一条 311。
