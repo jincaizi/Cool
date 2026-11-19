@@ -35,6 +35,7 @@ namespace Hotfix.GameSystems.Nameplate
         {
             EventBus.Subscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
             EventBus.Subscribe<PlayerTakeDamageEvent>(OnPlayerDamaged);
+            EventBus.Subscribe<PlayerDotDamageEvent>(OnPlayerDotDamaged);
             EventBus.Subscribe<MonsterDotDamageEvent>(OnMonsterDotDamaged);
             EventBus.Subscribe<BlockSucceededEvent>(OnBlockSucceeded);
         }
@@ -43,6 +44,7 @@ namespace Hotfix.GameSystems.Nameplate
         {
             EventBus.Unsubscribe<MonsterTakeDamageEvent>(OnMonsterDamaged);
             EventBus.Unsubscribe<PlayerTakeDamageEvent>(OnPlayerDamaged);
+            EventBus.Unsubscribe<PlayerDotDamageEvent>(OnPlayerDotDamaged);
             EventBus.Unsubscribe<MonsterDotDamageEvent>(OnMonsterDotDamaged);
             EventBus.Unsubscribe<BlockSucceededEvent>(OnBlockSucceeded);
             _lastBlockTime.Clear();
@@ -58,6 +60,12 @@ namespace Hotfix.GameSystems.Nameplate
         {
             var settings = e.IsCritical ? _critDamageSettings : _damageSettings;
             _floatText.ShowDamageText(e.EntityId, e.HitPosition, settings, e.Damage);
+        }
+
+        private void OnPlayerDotDamaged(PlayerDotDamageEvent e)
+        {
+            // 与直接受击同款玩家灰字配置：DoT 只出飘字，不走火花/泛红（那是 PlayerTakeDamageEvent）
+            _floatText.ShowDamageText(e.EntityId, e.HitPosition, _playerDamageSettings, e.Damage);
         }
 
         private void OnMonsterDotDamaged(MonsterDotDamageEvent e)

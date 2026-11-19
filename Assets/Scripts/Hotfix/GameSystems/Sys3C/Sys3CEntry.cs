@@ -1014,6 +1014,8 @@ namespace Hotfix.GameSystems.Sys3C
         /// 服务端 DoT 跳伤入口（<c>DamageKind.Dot</c>）：只对齐权威余血并发飘字事件，
         /// **不**调用 <c>_fsmManager.HandleDamage</c>、不进格挡/击退/HitFlash/震屏——
         /// 周期伤害每跳都把角色打进受击硬直是错的。
+        /// 飘字走 <see cref="PlayerDotDamageEvent"/>（只有 DisplayEventBridge 消费），
+        /// 不走 <see cref="PlayerTakeDamageEvent"/>——后者会触发命中火花与本地受击泛红。
         /// 血量以 <paramref name="remainingHp"/>（<c>HitEntry.TargetRemainingHp</c>）为真相，本地不做减法。
         /// </summary>
         public void ApplyDotDamage(float damage, float remainingHp)
@@ -1023,13 +1025,10 @@ namespace Hotfix.GameSystems.Sys3C
             _currentHP = Mathf.Max(0f, remainingHp);
             if (_currentHP > 0f)
             {
-                EventBus.Emit(new PlayerTakeDamageEvent(
+                EventBus.Emit(new PlayerDotDamageEvent(
                     gameObject.GetInstanceID(),
                     transform.position + Vector3.up * 1.5f,
-                    HitZonePart.Torso,
-                    Vector3.zero,
-                    Mathf.CeilToInt(damage),
-                    Color.white));
+                    Mathf.CeilToInt(damage)));
             }
             EvaluateLocalDeath();
         }

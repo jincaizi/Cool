@@ -24,8 +24,8 @@ namespace Hotfix.GameSystems.SyncLayer
     ///    被格挡时改发 BlockSucceededEvent（格挡飘字 + 火花），不再飘伤害数字；
     ///    由 DisplayEventBridge/FloatText 链自动飘字。
     ///    `DamageKind=Dot` 单独分流：只对齐权威余血 + 飘字（本地走 onDotDamageToLocalPlayer，
-    ///    远程 Npc 发 MonsterDotDamageEvent、玩家发 PlayerTakeDamageEvent）——不得触发
-    ///    受击动画/格挡/击退/命中特效/震屏（DoT 每跳都跳受击硬直是错的）。
+    ///    远程 Npc 发 MonsterDotDamageEvent、玩家发 PlayerDotDamageEvent）——不得触发
+    ///    受击动画/格挡/击退/命中火花/泛红/震屏（DoT 每跳都跳受击硬直或持续泛红是错的）。
     /// 线程模型：adapter 回调线程只入队，Update（主线程）消费——与 ClientNetworkManager 同纪律。
     /// </summary>
     public sealed class CombatNetworkBridge
@@ -263,9 +263,11 @@ namespace Hotfix.GameSystems.SyncLayer
                     }
                     else
                     {
-                        EventBus.Emit(new PlayerTakeDamageEvent(
-                            dotView.GameObject.GetInstanceID(), dotHitPos, HitZonePart.Torso,
-                            Vector3.zero, Mathf.CeilToInt(hit.Damage), Color.white));
+                        // 玩家 DoT 走独立飘字事件：PlayerTakeDamageEvent 会触发
+                        // HitFeedbackSystem 火花与 PlayerBodyTint 受击泛红。
+                        EventBus.Emit(new PlayerDotDamageEvent(
+                            dotView.GameObject.GetInstanceID(), dotHitPos,
+                            Mathf.CeilToInt(hit.Damage)));
                     }
                     continue;
                 }

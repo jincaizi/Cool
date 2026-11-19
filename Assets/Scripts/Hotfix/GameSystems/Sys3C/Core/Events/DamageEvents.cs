@@ -106,6 +106,25 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
     }
 
     /// <summary>
+    /// 玩家持续伤害事件（灼烧等）。与 PlayerTakeDamageEvent 分离：**只给飘字消费**，
+    /// 不能被 HitFeedbackSystem（命中火花）/PlayerBodyTint（本地受击泛红）消费——
+    /// DoT 每跳都触发命中反馈会让角色持续泛红/冒火花。
+    /// </summary>
+    public struct PlayerDotDamageEvent : IEvent
+    {
+        public int EntityId;
+        public Vector3 HitPosition;
+        public int Damage;
+
+        public PlayerDotDamageEvent(int entityId, Vector3 hitPosition, int damage)
+        {
+            EntityId = entityId;
+            HitPosition = hitPosition;
+            Damage = damage;
+        }
+    }
+
+    /// <summary>
     /// 击退事件
     /// </summary>
     public struct KnockbackEvent : IEvent
