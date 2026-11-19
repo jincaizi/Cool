@@ -15,7 +15,9 @@ using UnityEngine.TestTools;
 namespace KcpNet.PlayModeTests
 {
     /// <summary>
-    /// Plan 05 任务 2 三客户端元素一致性验收（A 装雷剑施法、B 受击本人、C 旁观）：
+    /// 属性元素三客户端验收（A 装元素剑施法、B 受击本人、C 旁观）。
+    ///
+    /// 雷场景（Plan 05 任务 2）：
     /// ① A 的 CastBroadcast 必须携带雷元素（ElementId=3）且 CastConfirm 接受；
     /// ② A/B/C 收到的同一 HitEntry 的 CastId/EventSeq/CombatVersion/TargetRemainingHp 逐值相等
     ///    （挥击 + 剑气两个独立伤害实例，共两条命中）；
@@ -24,6 +26,11 @@ namespace KcpNet.PlayModeTests
     /// ④ 施加与清空两条 311 的 ServerTimestamp 差值必须落在 0.7–1.05s（0.8s ± 0.25s），
     ///    施加后约 0.65s 仍必须锁定（防“立即清空”也通过）；B/C 收到“无 301 且 ActionLock=false”
     ///    的投影，且 EffectId=301 的移除只发生一次（按 CombatVersion 递增）。
+    ///
+    /// 火场景（Plan 06 任务 1）：一条 10002 的 3 跳灼烧（EffectId=201）在三端逐值一致、
+    /// 无格挡/无控制推进，末跳后 201 恰好移除一次；随后连续火剑命中致死，
+    /// A/B/C 的死讯投影 CombatVersion/LifeId 严格相等，死后不再收到 B 的 DoT 命中。
+    ///
     /// 三客户端同出生点，等待 C 的 AOI 先看到 B 再施法。
     /// 运行前需先启动：dotnet Server/bin/Debug/net8.0/Server3C.dll 8000
     /// </summary>
@@ -34,6 +41,14 @@ namespace KcpNet.PlayModeTests
         private const int SkillId = 10002;
         private const int ThunderElementId = 3;
         private const int ThunderEffectId = 301;
+        private const int FireElementId = 2;
+        private const int FireEffectId = 201;
+
+        /// <summary>火焰 3s / 1s 间隔，末跳排在 EndTick ⇒ 恰好 3 跳。</summary>
+        private const int ExpectedFireDotTicks = 3;
+
+        /// <summary>击杀阶段施法轮数上界（每刀 180 直伤 + 8/秒灼烧；B 720 HP）。</summary>
+        private const int MaxKillRounds = 12;
 
         /// <summary>10002 的挥击与剑气是两个独立伤害实例，同一目标各结算一次。</summary>
         private const int ExpectedHitsPerTarget = 2;
@@ -71,14 +86,26 @@ namespace KcpNet.PlayModeTests
 
         [UnityTest]
         public IEnumerator Thunder_Status_Is_Consistent_Across_Caster_Victim_And_Observer_And_Expires()
+            => RunScenario("ThreeClientElementalRoot", "Elem", RunThunderAsync);
+
+        [UnityTest]
+        public IEnumerator FireDot_Ticks_Are_Consistent_And_Terminal_Tick_Kills_All_Views()
+            => RunScenario("ThreeClientFireRoot", "Fire", RunFireAsync);
+
+        /// <summary>
+        /// 共用三客户端外壳：建场景根/三个 manager → 跑场景 → 120s 外层超时（先取消再等待）
+        /// → 断言结果 → 统一 Dispose。场景内部的所有等待都受同一 <see cref="RunGate"/> 约束。
+        /// </summary>
+        private static IEnumerator RunScenario(string rootName, string namePrefix,
+            Func<Ctx, Ctx, Ctx, RunGate, Task<(bool ok, string reason)>> scenario)
         {
-            var root = new GameObject("ThreeClientElementalRoot");
-            var a = NewClient(root, "Elem_A");
-            var b = NewClient(root, "Elem_B");
-            var c = NewClient(root, "Elem_C");
+            var root = new GameObject(rootName);
+            var a = NewClient(root, namePrefix + "_A");
+            var b = NewClient(root, namePrefix + "_B");
+            var c = NewClient(root, namePrefix + "_C");
             var gate = new RunGate();
 
-            var task = RunAsync(a, b, c, gate);
+            var task = scenario(a, b, c, gate);
             float elapsed = 0f;
             while (!task.IsCompleted && elapsed < 120f)
             {
@@ -88,7 +115,7 @@ namespace KcpNet.PlayModeTests
 
             if (!task.IsCompleted)
             {
-                // 先取消：内层等待每 ≤50ms 检查一次取消标志，退出后 RunAsync 不再触碰 Unity 对象。
+                // 先取消：内层等待每 ≤50ms 检查一次取消标志，退出后场景不再触碰 Unity 对象。
                 gate.Cancel();
                 float grace = 0f;
                 while (!task.IsCompleted && grace < 1f)
@@ -142,91 +169,31 @@ namespace KcpNet.PlayModeTests
             return ctx;
         }
 
-        private static async Task<(bool ok, string reason)> RunAsync(Ctx a, Ctx b, Ctx c, RunGate gate)
+        private static async Task<(bool ok, string reason)> RunThunderAsync(Ctx a, Ctx b, Ctx c, RunGate gate)
         {
             var all = new[] { a, b, c };
 
-            gate.SetStage("login-A");
-            a.Manager.ConnectAndLogin(Host, Port);
-            if (!await WaitInWorld(new[] { a }, gate, a, 10f))
-                return (false, "login-A: A failed to enter world");
-            long aId = a.Manager.LocalPlayerId;
+            var login = await LoginThreeAsync(a, b, c, gate);
+            if (!login.ok) return (false, login.reason);
+            long aId = login.aId;
+            long bId = login.bId;
+            var baseline = login.inventory!;
 
-            gate.SetStage("login-B");
-            b.Manager.ConnectAndLogin(Host, Port);
-            if (!await WaitInWorld(new[] { a, b }, gate, b, 10f))
-                return (false, "login-B: B failed to enter world");
-
-            gate.SetStage("login-C");
-            c.Manager.ConnectAndLogin(Host, Port);
-            if (!await WaitInWorld(all, gate, c, 10f))
-                return (false, "login-C: C failed to enter world");
-
-            long bId = b.Manager.LocalPlayerId;
-
-            // 三客户端同出生点；等 C 的 AOI 看到 B（C 的 311/DamageResult 依赖观察者关系）。
-            gate.SetStage("aoi-c-sees-b");
-            if (!await WaitUntil(all, gate, () => c.Registry.GetView(bId) != null, 15f))
-                return (false, "aoi: C never saw B (bId=" + bId + ")");
-
-            gate.SetStage("baseline");
-            var baseline = a.Manager.WeaponInventory;
-            if (baseline == null)
-                return (false, "baseline: A has no weapon inventory (ElementalSwordQiV1 disabled?)");
-            WeaponInstanceSummary? thunder = null;
-            foreach (var weapon in baseline.Weapons)
-            {
-                if (weapon.ElementId == ThunderElementId)
-                {
-                    thunder = weapon;
-                    break;
-                }
-            }
+            gate.SetStage("baseline-weapon");
+            var thunder = FindWeapon(baseline, ThunderElementId);
             if (thunder == null)
                 return (false, "baseline: A has no thunder (ElementId=3) weapon");
 
-            gate.SetStage("equip-request");
-            a.Adapter.Send(MessageId.EquipWeaponRequest, new EquipWeaponRequest
-            {
-                ClientEquipSeq = 1,
-                WeaponInstanceId = thunder.InstanceId,
-                KnownEquipmentRevision = baseline.EquipmentRevision
-            });
+            var equip = await EquipElementAsync(all, a, gate, ThunderElementId, 1);
+            if (!equip.ok) return (false, equip.reason);
+            var equipConfirm = equip.confirm!;
 
-            gate.SetStage("equip-confirm");
-            EquipWeaponConfirm? equipConfirm = null;
-            if (!await WaitUntil(all, gate, () =>
-                {
-                    equipConfirm = a.EquipConfirms.ToArray()
-                        .FirstOrDefault(x => x.ClientEquipSeq == 1);
-                    return equipConfirm != null;
-                }, 10f))
-                return (false, "equip-confirm: A received no EquipWeaponConfirm seq=1");
-            if (!equipConfirm!.Accepted)
-                return (false, "equip-confirm: rejected: " + equipConfirm.RejectReason);
-            if (equipConfirm.ElementId != ThunderElementId)
-                return (false, "equip-confirm: ElementId=" + equipConfirm.ElementId + " != " + ThunderElementId);
-
-            gate.SetStage("cast-request");
-            a.Adapter.Send(MessageId.CastRequest, new CastRequest
-            {
-                SkillId = SkillId,
-                TargetPlayerId = bId,
-                Shape = new HitShape { ShapeType = 0, Range = 2.5f, Angle = 120f },
-                ClientCastSeq = 1,
-                EquipmentRevision = equipConfirm.EquipmentRevision,
-                CasterLifeId = baseline.LifeId
-            });
-
-            gate.SetStage("cast-confirm");
-            CastConfirm? castConfirm = null;
-            if (!await WaitUntil(all, gate, () =>
-                {
-                    castConfirm = a.Confirms.ToArray().FirstOrDefault(x => x.ClientCastSeq == 1);
-                    return castConfirm != null;
-                }, 10f))
-                return (false, "cast-confirm: A received no CastConfirm seq=1");
-            if (!castConfirm!.Accepted)
+            var cast = await CastAsync(all, a, gate, bId, 1,
+                equipConfirm.EquipmentRevision, baseline.LifeId,
+                "cast-request", "cast-confirm");
+            if (!cast.ok) return (false, cast.reason);
+            var castConfirm = cast.confirm!;
+            if (!castConfirm.Accepted)
                 return (false, "cast-confirm: rejected: " + castConfirm.RejectReason);
             ulong castId = castConfirm.CastId;
             if (castId == 0)
@@ -452,6 +419,431 @@ namespace KcpNet.PlayModeTests
             return (true, "ok");
         }
 
+        /// <summary>
+        /// 火场景：A 装火剑（ElementId=2）→ 10002 命中 B → 一条施法的 3 跳灼烧三端一致 →
+        /// 末跳后 201 恰好移除一次 → 连续火剑命中致死，三端死讯一致且死后不再有 B 的 DoT 命中。
+        /// </summary>
+        private static async Task<(bool ok, string reason)> RunFireAsync(Ctx a, Ctx b, Ctx c, RunGate gate)
+        {
+            var all = new[] { a, b, c };
+
+            var login = await LoginThreeAsync(a, b, c, gate);
+            if (!login.ok) return (false, login.reason);
+            long aId = login.aId;
+            long bId = login.bId;
+            var baseline = login.inventory!;
+
+            // A 也必须是 B 的观察者：DoT 广播与死亡投影都要到达施法端。
+            gate.SetStage("fire/aoi-a-sees-b");
+            if (!await WaitUntil(all, gate, () => a.Registry.GetView(bId) != null, 15f))
+                return (false, "fire/aoi: A never saw B (bId=" + bId + ")");
+
+            gate.SetStage("fire/baseline");
+            var fire = FindWeapon(baseline, FireElementId);
+            if (fire == null)
+                return (false, "baseline: A has no fire (ElementId=2) weapon");
+
+            var equip = await EquipElementAsync(all, a, gate, FireElementId, 1);
+            if (!equip.ok) return (false, equip.reason);
+            uint equipmentRevision = equip.confirm!.EquipmentRevision;
+
+            gate.SetStage("fire/first-cast");
+            var first = await CastAsync(all, a, gate, bId, 1, equipmentRevision, baseline.LifeId,
+                "fire/cast-request-1", "fire/cast-confirm-1");
+            if (!first.ok) return (false, first.reason);
+            if (!first.confirm!.Accepted)
+                return (false, "fire/cast-confirm: rejected: " + first.confirm.RejectReason);
+            if (first.confirm.CastId == 0)
+                return (false, "fire/cast-confirm: accepted but CastId=0");
+            ulong firstCastId = first.confirm.CastId;
+
+            // 施加投影：B 本人与旁观者 C 都收到 201（来源 A）后才开始计跳。
+            gate.SetStage("fire/status-apply");
+            CombatStateUpdate? bApply = null;
+            CombatStateUpdate? cApply = null;
+            if (!await WaitUntil(all, gate, () =>
+                {
+                    bApply = UpdatesFor(b, bId).FirstOrDefault(u =>
+                        HasEffectFrom(u.Projection, FireEffectId, aId));
+                    cApply = UpdatesFor(c, bId).FirstOrDefault(u =>
+                        HasEffectFrom(u.Projection, FireEffectId, aId));
+                    return bApply != null && cApply != null;
+                }, 15f))
+                return (false, "fire/status-apply: B/C did not both receive EffectId="
+                    + FireEffectId + " from A(source=" + aId + ")" + SummarizeFire(a, b, c, bId));
+
+            // 3 跳 DoT：三端都收到后再逐条核对（绝不因“最终一致”放宽）。
+            gate.SetStage("fire/dot-ticks");
+            var aDots = new List<(DamageResult Result, HitEntry Hit)>();
+            var bDots = new List<(DamageResult Result, HitEntry Hit)>();
+            var cDots = new List<(DamageResult Result, HitEntry Hit)>();
+            if (!await WaitUntil(all, gate, () =>
+                {
+                    aDots = DotHitsFor(a, bId);
+                    bDots = DotHitsFor(b, bId);
+                    cDots = DotHitsFor(c, bId);
+                    return aDots.Count >= ExpectedFireDotTicks
+                        && bDots.Count >= ExpectedFireDotTicks
+                        && cDots.Count >= ExpectedFireDotTicks;
+                }, 15f))
+                return (false, "fire/dot-ticks: caster/victim/observer did not all receive "
+                    + ExpectedFireDotTicks + " DoT ticks for B" + SummarizeFire(a, b, c, bId));
+            if (aDots.Count != ExpectedFireDotTicks || bDots.Count != ExpectedFireDotTicks
+                || cDots.Count != ExpectedFireDotTicks)
+                return (false, "fire/dot-ticks: tick counts A=" + aDots.Count + " B=" + bDots.Count
+                    + " C=" + cDots.Count + " != " + ExpectedFireDotTicks
+                    + SummarizeFire(a, b, c, bId));
+
+            for (int i = 0; i < aDots.Count; i++)
+            {
+                var aResult = aDots[i].Result;
+                var bResult = bDots[i].Result;
+                var cResult = cDots[i].Result;
+                var aHit = aDots[i].Hit;
+                var bHit = bDots[i].Hit;
+                var cHit = cDots[i].Hit;
+                if (aHit.EventId != bHit.EventId || aHit.EventId != cHit.EventId)
+                    return (false, "fire/dot-ticks: EventId differs across clients at tick " + i
+                        + " (A=" + aHit.EventId + " B=" + bHit.EventId + " C=" + cHit.EventId + ")");
+                if (aHit.Damage != bHit.Damage || aHit.Damage != cHit.Damage)
+                    return (false, "fire/dot-ticks: Damage differs across clients at tick " + i
+                        + " (A=" + aHit.Damage + " B=" + bHit.Damage + " C=" + cHit.Damage + ")");
+                if (aHit.TargetRemainingHp != bHit.TargetRemainingHp
+                    || aHit.TargetRemainingHp != cHit.TargetRemainingHp)
+                    return (false, "fire/dot-ticks: TargetRemainingHp differs across clients at tick " + i
+                        + " (A=" + aHit.TargetRemainingHp + " B=" + bHit.TargetRemainingHp
+                        + " C=" + cHit.TargetRemainingHp + ")");
+                if (aHit.TargetLifeId != bHit.TargetLifeId || aHit.TargetLifeId != cHit.TargetLifeId)
+                    return (false, "fire/dot-ticks: TargetLifeId differs across clients at tick " + i
+                        + " (A=" + aHit.TargetLifeId + " B=" + bHit.TargetLifeId
+                        + " C=" + cHit.TargetLifeId + ")");
+                if (aHit.CombatVersion != bHit.CombatVersion || aHit.CombatVersion != cHit.CombatVersion)
+                    return (false, "fire/dot-ticks: CombatVersion differs across clients at tick " + i
+                        + " (A=" + aHit.CombatVersion + " B=" + bHit.CombatVersion
+                        + " C=" + cHit.CombatVersion + ")");
+                if (aHit.EventSeq != bHit.EventSeq || aHit.EventSeq != cHit.EventSeq)
+                    return (false, "fire/dot-ticks: EventSeq differs across clients at tick " + i
+                        + " (A=" + aHit.EventSeq + " B=" + bHit.EventSeq + " C=" + cHit.EventSeq + ")");
+                if (aHit.CastId != bHit.CastId || aHit.CastId != cHit.CastId)
+                    return (false, "fire/dot-ticks: CastId differs across clients at tick " + i
+                        + " (A=" + aHit.CastId + " B=" + bHit.CastId + " C=" + cHit.CastId + ")");
+                if (aResult.SourcePlayerId != bResult.SourcePlayerId
+                    || aResult.SourcePlayerId != cResult.SourcePlayerId)
+                    return (false, "fire/dot-ticks: SourcePlayerId differs across clients at tick " + i
+                        + " (A=" + aResult.SourcePlayerId + " B=" + bResult.SourcePlayerId
+                        + " C=" + cResult.SourcePlayerId + ")");
+                // 这一批跳伤必须属于首刀的施法实例（灼烧保留首次来源 CastId）。
+                if (aHit.CastId != firstCastId)
+                    return (false, "fire/dot-ticks: tick " + i + " CastId=" + aHit.CastId
+                        + " != first cast " + firstCastId);
+                // 跳伤不得带格挡标记（格挡只属于直接命中）。
+                if (aHit.IsBlocked || bHit.IsBlocked || cHit.IsBlocked)
+                    return (false, "fire/dot-ticks: DoT tick " + i + " carries IsBlocked=true");
+            }
+
+            // 相邻跳 ServerTimestamp 间隔 0.85–1.15s（1s ± 0.15s）。
+            for (int i = 1; i < aDots.Count; i++)
+            {
+                double gap = (aDots[i].Result.ServerTimestamp - aDots[i - 1].Result.ServerTimestamp)
+                    / (double)TimeSpan.TicksPerSecond;
+                if (gap < 0.85 || gap > 1.15)
+                    return (false, "fire/dot-ticks: tick interval "
+                        + gap.ToString("F3", CultureInfo.InvariantCulture)
+                        + "s outside [0.850, 1.150]s at tick " + i);
+            }
+
+            // 末跳（EndTick）后移除：B/C 都收到“无 201”的更高版本投影。
+            gate.SetStage("fire/status-remove");
+            CombatStateUpdate? bRemove = null;
+            CombatStateUpdate? cRemove = null;
+            if (!await WaitUntil(all, gate, () =>
+                {
+                    bRemove = UpdatesFor(b, bId).FirstOrDefault(u =>
+                        u.Projection.CombatVersion > bApply!.Projection.CombatVersion
+                        && !HasEffect(u.Projection, FireEffectId)
+                        && u.Projection.Control != null && !u.Projection.Control.ActionLock);
+                    cRemove = UpdatesFor(c, bId).FirstOrDefault(u =>
+                        u.Projection.CombatVersion > cApply!.Projection.CombatVersion
+                        && !HasEffect(u.Projection, FireEffectId)
+                        && u.Projection.Control != null && !u.Projection.Control.ActionLock);
+                    return bRemove != null && cRemove != null;
+                }, 10f))
+                return (false, "fire/status-remove: B/C received no projection without EffectId="
+                    + FireEffectId + " after apply version " + bApply!.Projection.CombatVersion
+                    + SummarizeFire(a, b, c, bId));
+
+            // 201 只施加一次、只移除一次。
+            int bApplies = CountEffectApplications(b, bId, FireEffectId);
+            int cApplies = CountEffectApplications(c, bId, FireEffectId);
+            int bRemovals = CountEffectRemovals(b, bId, FireEffectId);
+            int cRemovals = CountEffectRemovals(c, bId, FireEffectId);
+            if (bApplies != 1 || cApplies != 1 || bRemovals != 1 || cRemovals != 1)
+                return (false, "fire/status-remove: apply/remove counts B=(" + bApplies + ","
+                    + bRemovals + ") C=(" + cApplies + "," + cRemovals + "), expected (1,1)"
+                    + SummarizeFire(a, b, c, bId));
+
+            // 跳伤不触发受击硬直：施加→移除之间 B 的 ControlVersion 不变且 ActionLock=false。
+            uint applyControlVersion = bApply.Projection.Control!.ControlVersion;
+            foreach (var update in UpdatesFor(b, bId))
+            {
+                if (update.Projection.CombatVersion < bApply.Projection.CombatVersion
+                    || update.Projection.CombatVersion > bRemove!.Projection.CombatVersion) continue;
+                var control = update.Projection.Control;
+                if (control == null || control.ActionLock)
+                    return (false, "fire/control: B ActionLock during DoT at version "
+                        + update.Projection.CombatVersion + SummarizeFire(a, b, c, bId));
+                if (control.ControlVersion != applyControlVersion)
+                    return (false, "fire/control: B ControlVersion advanced from " + applyControlVersion
+                        + " to " + control.ControlVersion + " during DoT at version "
+                        + update.Projection.CombatVersion);
+            }
+
+            // 末跳后不得补跳：移除投影到达后再确认仍是 3 条。
+            aDots = DotHitsFor(a, bId);
+            bDots = DotHitsFor(b, bId);
+            cDots = DotHitsFor(c, bId);
+            if (aDots.Count != ExpectedFireDotTicks || bDots.Count != ExpectedFireDotTicks
+                || cDots.Count != ExpectedFireDotTicks)
+                return (false, "fire/dot-ticks: extra ticks after removal A=" + aDots.Count
+                    + " B=" + bDots.Count + " C=" + cDots.Count + SummarizeFire(a, b, c, bId));
+
+            // 击杀阶段：连续火剑命中 B，直到三端都观察到 Dead=true。
+            gate.SetStage("fire/kill");
+            CombatStateUpdate? deadA = null;
+            CombatStateUpdate? deadB = null;
+            CombatStateUpdate? deadC = null;
+            uint castSeq = 1;
+            int acceptedCasts = 1;
+            for (int round = 0; round < MaxKillRounds; round++)
+            {
+                if (FindDeadProjections(a, b, c, bId, out deadA, out deadB, out deadC)) break;
+
+                castSeq++;
+                var cast = await CastAsync(all, a, gate, bId, castSeq, equipmentRevision,
+                    baseline.LifeId, "fire/cast-request", "fire/cast-confirm");
+                if (!cast.ok) return (false, cast.reason);
+                var confirm = cast.confirm!;
+                if (!confirm.Accepted)
+                {
+                    if (confirm.RejectReason == "cooldown")
+                    {
+                        // 上一跳恰好落在施法决策附近：等下一跳（或死讯）后重试，仍受共享 deadline 约束。
+                        int before = DotHitsFor(a, bId).Count;
+                        await WaitUntil(all, gate, () =>
+                            DotHitsFor(a, bId).Count > before
+                            || FindDeadProjections(a, b, c, bId, out deadA, out deadB, out deadC), 2.5f);
+                        continue;
+                    }
+                    return (false, "fire/kill: cast seq " + castSeq + " rejected: "
+                        + confirm.RejectReason);
+                }
+                acceptedCasts++;
+
+                // 每轮等一个 DoT 跳（或死讯）：跳伤覆盖 + 自然越过 10002 的 0.5s 冷却。
+                int dotsBefore = DotHitsFor(a, bId).Count;
+                if (!await WaitUntil(all, gate, () =>
+                    {
+                        if (FindDeadProjections(a, b, c, bId, out deadA, out deadB, out deadC))
+                            return true;
+                        return DotHitsFor(a, bId).Count > dotsBefore;
+                    }, 5f))
+                    return (false, "fire/kill: no DoT tick or death after accepted cast seq="
+                        + castSeq + SummarizeFire(a, b, c, bId));
+            }
+
+            gate.SetStage("fire/death");
+            if (!FindDeadProjections(a, b, c, bId, out deadA, out deadB, out deadC))
+                return (false, "fire/kill: B did not die within " + MaxKillRounds + " rounds ("
+                    + acceptedCasts + " accepted casts)" + SummarizeFire(a, b, c, bId));
+
+            var deadOnA = deadA!;
+            var deadOnB = deadB!;
+            var deadOnC = deadC!;
+            // 三端死讯逐值一致（同一条 311 解码）。
+            if (!deadOnA.Projection.Dead || !deadOnB.Projection.Dead || !deadOnC.Projection.Dead)
+                return (false, "fire/death: Dead projection is not Dead=true on all clients");
+            if (deadOnA.Projection.CombatVersion != deadOnB.Projection.CombatVersion
+                || deadOnA.Projection.CombatVersion != deadOnC.Projection.CombatVersion)
+                return (false, "fire/death: Dead CombatVersion differs across clients (A="
+                    + deadOnA.Projection.CombatVersion + " B=" + deadOnB.Projection.CombatVersion
+                    + " C=" + deadOnC.Projection.CombatVersion + ")");
+            if (deadOnA.Projection.LifeId != deadOnB.Projection.LifeId
+                || deadOnA.Projection.LifeId != deadOnC.Projection.LifeId)
+                return (false, "fire/death: Dead LifeId differs across clients (A="
+                    + deadOnA.Projection.LifeId + " B=" + deadOnB.Projection.LifeId
+                    + " C=" + deadOnC.Projection.LifeId + ")");
+            // 死亡发生在与 DoT 跳伤相同的生命代次（未复活）。
+            if (deadOnA.Projection.LifeId != aDots[0].Hit.TargetLifeId)
+                return (false, "fire/death: Dead LifeId=" + deadOnA.Projection.LifeId
+                    + " != DoT TargetLifeId=" + aDots[0].Hit.TargetLifeId);
+            // 死亡立即清状态：死讯投影不得再携带 201。
+            if (HasEffect(deadOnA.Projection, FireEffectId)
+                || HasEffect(deadOnB.Projection, FireEffectId)
+                || HasEffect(deadOnC.Projection, FireEffectId))
+                return (false, "fire/death: Dead projection still carries EffectId=" + FireEffectId);
+
+            // 死后不再收到 B 的 DoT 命中：跨两个跳间隔复核 EventId 集合不变。
+            gate.SetStage("fire/post-death");
+            var aAfter = DotEventIds(a, bId);
+            var bAfter = DotEventIds(b, bId);
+            var cAfter = DotEventIds(c, bId);
+            await WaitSeconds(all, gate, 1.6f);
+            if (gate.Cancelled || gate.DeadlineExpired)
+                return (false, "fire/post-death: gate closed during post-death window");
+            if (!aAfter.SetEquals(DotEventIds(a, bId))
+                || !bAfter.SetEquals(DotEventIds(b, bId))
+                || !cAfter.SetEquals(DotEventIds(c, bId)))
+                return (false, "fire/post-death: new DoT hits arrived for B after death"
+                    + SummarizeFire(a, b, c, bId));
+
+            return (true, "ok");
+        }
+
+        // —— 共用三客户端夹具（雷/火场景一致）：登录 → 换装 → 施法。——
+
+        private static async Task<(bool ok, string reason, long aId, long bId,
+            WeaponInventoryBaseline? inventory)> LoginThreeAsync(
+            Ctx a, Ctx b, Ctx c, RunGate gate)
+        {
+            var all = new[] { a, b, c };
+
+            gate.SetStage("login-A");
+            a.Manager.ConnectAndLogin(Host, Port);
+            if (!await WaitInWorld(new[] { a }, gate, a, 10f))
+                return (false, "login-A: A failed to enter world", 0, 0, null);
+            long aId = a.Manager.LocalPlayerId;
+
+            gate.SetStage("login-B");
+            b.Manager.ConnectAndLogin(Host, Port);
+            if (!await WaitInWorld(new[] { a, b }, gate, b, 10f))
+                return (false, "login-B: B failed to enter world", 0, 0, null);
+
+            gate.SetStage("login-C");
+            c.Manager.ConnectAndLogin(Host, Port);
+            if (!await WaitInWorld(all, gate, c, 10f))
+                return (false, "login-C: C failed to enter world", 0, 0, null);
+
+            long bId = b.Manager.LocalPlayerId;
+
+            // 三客户端同出生点；等 C 的 AOI 看到 B（C 的 311/DamageResult 依赖观察者关系）。
+            gate.SetStage("aoi-c-sees-b");
+            if (!await WaitUntil(all, gate, () => c.Registry.GetView(bId) != null, 15f))
+                return (false, "aoi: C never saw B (bId=" + bId + ")", 0, 0, null);
+
+            gate.SetStage("baseline");
+            var inventory = a.Manager.WeaponInventory;
+            if (inventory == null)
+                return (false, "baseline: A has no weapon inventory (ElementalSwordQiV1 disabled?)",
+                    0, 0, null);
+
+            return (true, string.Empty, aId, bId, inventory);
+        }
+
+        private static WeaponInstanceSummary? FindWeapon(WeaponInventoryBaseline inventory, int elementId)
+        {
+            foreach (var weapon in inventory.Weapons)
+                if (weapon.ElementId == elementId) return weapon;
+            return null;
+        }
+
+        private static async Task<(bool ok, string reason, EquipWeaponConfirm? confirm)>
+            EquipElementAsync(Ctx[] ctxs, Ctx a, RunGate gate, int elementId, uint clientEquipSeq)
+        {
+            var inventory = a.Manager.WeaponInventory!;
+            var weapon = FindWeapon(inventory, elementId);
+            if (weapon == null)
+                return (false, "equip-request: A has no element " + elementId + " weapon", null);
+
+            gate.SetStage("equip-request");
+            a.Adapter.Send(MessageId.EquipWeaponRequest, new EquipWeaponRequest
+            {
+                ClientEquipSeq = clientEquipSeq,
+                WeaponInstanceId = weapon.InstanceId,
+                KnownEquipmentRevision = inventory.EquipmentRevision
+            });
+
+            gate.SetStage("equip-confirm");
+            EquipWeaponConfirm? confirm = null;
+            if (!await WaitUntil(ctxs, gate, () =>
+                {
+                    confirm = a.EquipConfirms.ToArray()
+                        .FirstOrDefault(x => x.ClientEquipSeq == clientEquipSeq);
+                    return confirm != null;
+                }, 10f))
+                return (false, "equip-confirm: A received no EquipWeaponConfirm seq="
+                    + clientEquipSeq, null);
+            if (!confirm!.Accepted)
+                return (false, "equip-confirm: rejected: " + confirm.RejectReason, null);
+            if (confirm.ElementId != elementId)
+                return (false, "equip-confirm: ElementId=" + confirm.ElementId + " != " + elementId, null);
+            return (true, string.Empty, confirm);
+        }
+
+        private static async Task<(bool ok, string reason, CastConfirm? confirm)> CastAsync(
+            Ctx[] ctxs, Ctx a, RunGate gate, long targetId, uint clientCastSeq,
+            uint equipmentRevision, uint casterLifeId, string requestStage, string confirmStage)
+        {
+            gate.SetStage(requestStage);
+            a.Adapter.Send(MessageId.CastRequest, new CastRequest
+            {
+                SkillId = SkillId,
+                TargetPlayerId = targetId,
+                Shape = new HitShape { ShapeType = 0, Range = 2.5f, Angle = 120f },
+                ClientCastSeq = clientCastSeq,
+                EquipmentRevision = equipmentRevision,
+                CasterLifeId = casterLifeId
+            });
+
+            gate.SetStage(confirmStage);
+            CastConfirm? confirm = null;
+            if (!await WaitUntil(ctxs, gate, () =>
+                {
+                    confirm = a.Confirms.ToArray().FirstOrDefault(x => x.ClientCastSeq == clientCastSeq);
+                    return confirm != null;
+                }, 10f))
+                return (false, "cast-confirm: A received no CastConfirm seq=" + clientCastSeq, null);
+            return (true, string.Empty, confirm);
+        }
+
+        private static CombatStateUpdate? FindDeadProjection(Ctx ctx, long entityId)
+            => UpdatesFor(ctx, entityId).FirstOrDefault(u => u.Projection.Dead);
+
+        /// <summary>三端都收到目标 Dead=true 投影时返回 true（任一端缺失即继续等待）。</summary>
+        private static bool FindDeadProjections(Ctx a, Ctx b, Ctx c, long entityId,
+            out CombatStateUpdate? deadA, out CombatStateUpdate? deadB, out CombatStateUpdate? deadC)
+        {
+            deadA = FindDeadProjection(a, entityId);
+            deadB = FindDeadProjection(b, entityId);
+            deadC = FindDeadProjection(c, entityId);
+            return deadA != null && deadB != null && deadC != null;
+        }
+
+        /// <summary>目标收到的 DoT 跳伤：按全局 EventId 去重（传输重复投递只算一次）并按 EventId
+        /// 升序排列（分配序 = 时间序）。</summary>
+        private static List<(DamageResult Result, HitEntry Hit)> DotHitsFor(Ctx ctx, long targetId)
+        {
+            var byEvent = new Dictionary<ulong, (DamageResult Result, HitEntry Hit)>();
+            foreach (var result in ctx.Damages.ToArray())
+            {
+                if (result.Hits == null) continue;
+                foreach (var hit in result.Hits)
+                {
+                    if (hit.DamageKind != DamageKind.Dot || hit.TargetPlayerId != targetId) continue;
+                    if (!byEvent.ContainsKey(hit.EventId)) byEvent[hit.EventId] = (result, hit);
+                }
+            }
+            var hits = byEvent.Values.ToList();
+            hits.Sort((x, y) => x.Hit.EventId.CompareTo(y.Hit.EventId));
+            return hits;
+        }
+
+        private static HashSet<ulong> DotEventIds(Ctx ctx, long targetId)
+        {
+            var ids = new HashSet<ulong>();
+            foreach (var (_, hit) in DotHitsFor(ctx, targetId)) ids.Add(hit.EventId);
+            return ids;
+        }
+
         private static List<HitEntry> HitsFor(Ctx ctx, ulong castId, long targetId)
         {
             var hits = new List<HitEntry>();
@@ -476,32 +868,35 @@ namespace KcpNet.PlayModeTests
             return updates;
         }
 
-        private static bool HasThunder(CombatProjection projection)
+        private static bool HasEffect(CombatProjection projection, int effectId)
+            => HasEffect(projection.Statuses, effectId);
+
+        private static bool HasEffect(IList<StatusProjection>? statuses, int effectId)
+        {
+            if (statuses == null) return false;
+            foreach (var status in statuses)
+                if (status.EffectId == effectId) return true;
+            return false;
+        }
+
+        /// <summary>311 识别：状态必须存在且来源是施法者 A（防把别人/客户端的同 ID 状态当成本次施加）。</summary>
+        private static bool HasEffectFrom(CombatProjection projection, int effectId, long sourceId)
         {
             var statuses = projection.Statuses;
             if (statuses == null) return false;
             foreach (var status in statuses)
-                if (status.EffectId == ThunderEffectId) return true;
+                if (status.EffectId == effectId) return status.SourceId == sourceId;
             return false;
         }
+
+        private static bool HasThunder(CombatProjection projection)
+            => HasEffect(projection, ThunderEffectId);
 
         private static bool HasThunder(IList<StatusProjection>? statuses)
-        {
-            if (statuses == null) return false;
-            foreach (var status in statuses)
-                if (status.EffectId == ThunderEffectId) return true;
-            return false;
-        }
+            => HasEffect(statuses, ThunderEffectId);
 
-        /// <summary>311 识别：301 必须存在且来源是施法者 A（防把别人/客户端的 301 当成本次施加）。</summary>
         private static bool HasThunderFrom(CombatProjection projection, long sourceId)
-        {
-            var statuses = projection.Statuses;
-            if (statuses == null) return false;
-            foreach (var status in statuses)
-                if (status.EffectId == ThunderEffectId) return status.SourceId == sourceId;
-            return false;
-        }
+            => HasEffectFrom(projection, ThunderEffectId, sourceId);
 
         private static bool HasThunderFrom(IList<StatusProjection>? statuses, long sourceId)
         {
@@ -511,31 +906,37 @@ namespace KcpNet.PlayModeTests
             return false;
         }
 
-        private static int CountThunderApplications(Ctx ctx, long entityId)
+        private static int CountEffectApplications(Ctx ctx, long entityId, int effectId)
         {
             bool previous = false;
             int count = 0;
             foreach (var update in UpdatesFor(ctx, entityId))
             {
-                bool has = HasThunder(update.Projection);
+                bool has = HasEffect(update.Projection, effectId);
                 if (!previous && has) count++;
                 previous = has;
             }
             return count;
         }
 
-        private static int CountThunderRemovals(Ctx ctx, long entityId)
+        private static int CountEffectRemovals(Ctx ctx, long entityId, int effectId)
         {
             bool previous = false;
             int count = 0;
             foreach (var update in UpdatesFor(ctx, entityId))
             {
-                bool has = HasThunder(update.Projection);
+                bool has = HasEffect(update.Projection, effectId);
                 if (previous && !has) count++;
                 previous = has;
             }
             return count;
         }
+
+        private static int CountThunderApplications(Ctx ctx, long entityId)
+            => CountEffectApplications(ctx, entityId, ThunderEffectId);
+
+        private static int CountThunderRemovals(Ctx ctx, long entityId)
+            => CountEffectRemovals(ctx, entityId, ThunderEffectId);
 
         /// <summary>失败诊断：CastBroadcast 的 CastId:ElementId、DamageResult 命中、B 实体 311 摘要。</summary>
         private static string Summarize(Ctx a, Ctx b, Ctx c, long bId)
@@ -563,15 +964,37 @@ namespace KcpNet.PlayModeTests
             return "[" + string.Join(" ", parts) + "]";
         }
 
+        /// <summary>火场景失败诊断：三端 DoT 命中与 B 的完整投影摘要。</summary>
+        private static string SummarizeFire(Ctx a, Ctx b, Ctx c, long bId)
+            => " | dot(A)=" + DescribeDots(a, bId)
+                + " dot(B)=" + DescribeDots(b, bId)
+                + " dot(C)=" + DescribeDots(c, bId)
+                + " 311(B)=" + Describe(b, bId)
+                + " 311(C)=" + Describe(c, bId);
+
+        private static string DescribeDots(Ctx ctx, long targetId)
+        {
+            var parts = new List<string>();
+            foreach (var (_, hit) in DotHitsFor(ctx, targetId))
+                parts.Add(hit.EventId + ":seq" + hit.EventSeq + ":v" + hit.CombatVersion
+                    + ":hp" + hit.TargetRemainingHp + ":cast" + hit.CastId);
+            return "[" + string.Join(" ", parts) + "]";
+        }
+
         private static string Describe(Ctx ctx, long entityId)
         {
             var parts = new List<string>();
             foreach (var update in UpdatesFor(ctx, entityId))
             {
                 var control = update.Projection.Control;
+                string effects = "-";
+                if (update.Projection.Statuses != null && update.Projection.Statuses.Count > 0)
+                    effects = string.Join("+",
+                        update.Projection.Statuses.Select(s => s.EffectId.ToString(CultureInfo.InvariantCulture)));
                 parts.Add("v" + update.Projection.CombatVersion
-                    + (HasThunder(update.Projection) ? ":301" : ":-")
-                    + (control != null && control.ActionLock ? ":lock" : ":free"));
+                    + ":" + effects
+                    + (control != null && control.ActionLock ? ":lock" : ":free")
+                    + (update.Projection.Dead ? ":dead" : ""));
             }
             return "[" + string.Join(" ", parts) + "]";
         }
@@ -595,6 +1018,18 @@ namespace KcpNet.PlayModeTests
             if (gate.Cancelled) return false;
             Pump(ctxs);
             return condition();
+        }
+
+        /// <summary>泵固定时长（受共享 deadline/取消约束）——用于“死后不再有新命中”的观察窗。</summary>
+        private static async Task WaitSeconds(Ctx[] ctxs, RunGate gate, float seconds)
+        {
+            float elapsed = 0f;
+            while (!gate.Cancelled && !gate.DeadlineExpired && elapsed < seconds)
+            {
+                Pump(ctxs);
+                await Task.Delay(50);
+                elapsed += 0.05f;
+            }
         }
 
         /// <summary>泵到本地墙钟越过 targetTicks（同机验收：ServerTimestamp = DateTime.UtcNow.Ticks）。</summary>
