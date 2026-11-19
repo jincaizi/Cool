@@ -12,7 +12,7 @@
 | Plan 02：取消广播/NpcAction、战斗投影/带宽 | ✅ 已完成（Part A/B 全部完成；服务端 552/552、Unity 相关测试通过） |
 | Plan 03：位移/跳跃预算、PvP 控制 | ✅ 已完成（服务端 587/587；Unity 位移/跳跃/控制/协议目标测试类通过；`RemoteEntityRegistryTests.Bot_Radius` 为既有 PPtr 环境失败） |
 | Plan 04：状态结算/DoT/元素 VFX | ✅ 已完成（服务端 654/654；Unity 目标 EditMode 类通过，`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败；在线 PvE/PvP 权威状态、DoT、`DamageKind` 分流与状态/剑气表现已启用。**离线单机共享状态运行时未接入**，本地冰冻/灼烧保持独立，留给 Plan 06/backlog） |
-| Plan 05：三客户端验收/表现收口 | ✅ 已完成（2026-11-20）：服务端 667/667；AOI 反查索引 N=1000 ≤1ms；三客户端元素/战斗一致性 PlayMode 各 1/1（真实服务器）；带宽常规 53.4 KB/s、100 实体同时 DoT 最坏 76.9 KB/s（预算 100 KB/s）；收包注入目标类 72/72；麻痹惯性/推挤纠偏 3/3；`ElementVfxFallback` 5/5（仅判定顺序，未接 Addressables）。未新增战斗机制/协议字段 |
+| Plan 05：三客户端验收/表现收口 | ✅ 已完成（2026-11-20）：服务端 668/668；AOI 反查索引 N=1000 ≤1ms；三客户端元素/战斗一致性 PlayMode 各 1/1（真实服务器）；带宽常规 53.4 KB/s、100 实体同时 DoT 最坏 76.9 KB/s（预算 100 KB/s）；收包注入目标类 72/72；麻痹惯性/推挤稳定性（静态盒）3/3；`ElementVfxFallback` 5/5（仅判定顺序，未接 Addressables）。移动 NpcBody + 纠偏联测与未执行设计验收场景登记 Plan 06/backlog；未新增战斗机制/协议字段 |
 | 简易武器背包与八把持剑模型（2026-11-16 跟进） | ✅ 代码与自动测试完成；视觉/交互/出包验收待人工 |
 
 下文“验收场景”是 01–05 的完整目标。Plan 04 交付的是
