@@ -43,6 +43,11 @@ namespace Hotfix.GameSystems.SyncLayer
         private readonly ConcurrentQueue<IMessage> _incoming = new ConcurrentQueue<IMessage>();
         private readonly ClientEquipmentState _equipment;
         private readonly Dictionary<int, (uint seq, ulong castId, uint lifeId)> _acceptedCasts = new();
+        /// <summary>命中事件去重窗口（服务端分配跨重试唯一的 EventId；0 = 旧服务端未分配）。
+        /// 有界：只保留最近 1024 条，重投只来自传输重试窗口。</summary>
+        private readonly HashSet<ulong> _seenEventIds = new HashSet<ulong>();
+        private readonly Queue<ulong> _eventIdOrder = new Queue<ulong>();
+        private const int MaxSeenEventIds = 1024;
         private uint _nextEquipSeq;
         private uint _nextCastSeq;
 
@@ -229,11 +234,33 @@ namespace Hotfix.GameSystems.SyncLayer
             }
         }
 
+        /// <summary>断线/新会话：清空命中去重窗口（旧会话的 EventId 不得影响新会话）。</summary>
+        public void ClearDedupe()
+        {
+            _seenEventIds.Clear();
+            _eventIdOrder.Clear();
+        }
+
+        /// <summary>登记一条命中事件；同 EventId 的重复投递返回 false（0 = 旧服务端，不去重）。</summary>
+        private bool MarkEventSeen(ulong eventId)
+        {
+            if (eventId == 0) return true;
+            if (!_seenEventIds.Add(eventId)) return false;
+            _eventIdOrder.Enqueue(eventId);
+            if (_eventIdOrder.Count > MaxSeenEventIds)
+                _seenEventIds.Remove(_eventIdOrder.Dequeue());
+            return true;
+        }
+
         private void ApplyDamageResult(DamageResult result)
         {
             long localId = _localPlayerId();
             foreach (var hit in result.Hits)
             {
+                // 传输层重试/重投的同一命中只生效一次：否则本地受击 FSM/飘字会二次触发，
+                // 远程红字/灰字会重影。旧服务端 EventId=0 保持不去重的既有行为。
+                if (!MarkEventSeen(hit.EventId)) continue;
+
                 // DoT 跳伤：只更新权威血量与飘字。绝不走受击 FSM/格挡/击退/PlayHit/
                 // MonsterTakeDamageEvent（后两者会带出命中粒子/震屏），也不发红屏事件。
                 if (hit.DamageKind == DamageKind.Dot)

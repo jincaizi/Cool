@@ -1181,6 +1181,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _localEntry.SkillCoordinator.OnSkillCancelled -= OnLocalSkillCancelled;
             }
             _combatBridge.OnLineProjectileStopped -= HandleLineProjectileStopped;
+            _combatBridge.ClearDedupe();   // 断线/重建：新会话不得沿用旧连接的 EventId 窗口
             _combatBridge = null;
         }
 

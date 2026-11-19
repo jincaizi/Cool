@@ -148,8 +148,14 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   `PlayerDotDamageEvent`，并同步 `Targetable` 余血/死亡。Dot 分支**不**调用 `PlayHit`、
   不发 `BlockSucceededEvent`/`MonsterTakeDamageEvent`/`PlayerTakeDamageEvent`，
   因此没有受击硬直、格挡、击退、命中火花、泛红或震屏；直接命中（缺省 `Direct=0`）路径不变。
+- **重复命中只生效一次**：`CombatNetworkBridge.ApplyDamageResult` 按 `HitEntry.EventId`
+  （服务端跨重试唯一；0 = 旧服务端未分配，不去重）做有界去重（最近 1024 条）；
+  `ClearDedupe()` 在断线/重建桥的路径清空窗口。同一命中的重投不会二次触发受击/飘字/
+  权威余血写入。
 
-回归：`DotDamageRoutingTests`（7 项，本地/远程 DoT 事件隔离）；换根重放由
+回归：`DotDamageRoutingTests`（7 项，本地/远程 DoT 事件隔离）；重复/乱序收包
+（同 `EventId` 重投、旧版本 311、终止先于发射、重复 CastBroadcast）由
+`NetworkConsumptionInjectionTests` 覆盖；换根重放由
 `AuthoritativeStatusVfxTests.test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`
 覆盖；投影版本合并（高版本应用/低版本丢弃、空状态清空、LifeId 基线等待）由
 `CombatStateProjectionTests` 覆盖。
