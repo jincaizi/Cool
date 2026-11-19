@@ -9,6 +9,8 @@ namespace KcpServer
     /// 迟滞状态按 observer 维度存 _sightState；实体注销须经 RemoveEntity 清除——playerId
     /// 单调递增不重用，但登录-注销-再登录同 id 若无清除会残留 seen=true，凭旧状态在迟滞带
     /// 内错误可见。
+    /// GetVisible 在 visibleNow 翻转时同步维护反向索引 _observersByEntity，供
+    /// GetObserversOf O(1) 反查（取代逐 observer 重扫）；可见性/迟滞结果不受影响。
     /// </summary>
     public sealed class AoiGrid
     {
@@ -18,6 +20,19 @@ namespace KcpServer
 
         private readonly Dictionary<long, Dictionary<long, bool>> _sightState =
             new Dictionary<long, Dictionary<long, bool>>();
+
+        // 反向索引 entityId → 能看到它的 observer 集合。只在 GetVisible 的 visibleNow 翻转时
+        // 维护（进入加入、离开移除）；实体侧清理走 RemoveEntity，观察者侧走 RemoveObserver。
+        private readonly Dictionary<long, HashSet<long>> _observersByEntity =
+            new Dictionary<long, HashSet<long>>();
+
+        /// <summary>已建立视野状态的观察者数（&gt;0 表示反向索引已可用）。</summary>
+        public int TrackedObservers => _sightState.Count;
+
+        /// <summary>能看到指定实体的观察者（索引快照；顺序不保证，调用方不依赖）</summary>
+        public List<long> GetObserversOf(long entityId)
+            => _observersByEntity.TryGetValue(entityId, out var set)
+                ? new List<long>(set) : new List<long>();
 
         /// <summary>观察者可见实体列表（实体自身；顺序 = allPlayers 遍历序，调用方不依赖）</summary>
         public List<PlayerState> GetVisible(long observerId, IReadOnlyCollection<PlayerState> allPlayers)
@@ -57,21 +72,53 @@ namespace KcpServer
                 bool visibleNow = distSqr <= SightRadius * SightRadius
                     || (wasVisible && distSqr <= LeaveRadius * LeaveRadius);
                 seen[p.PlayerId] = visibleNow;
+
+                // 只在翻转时维护反向索引——逐 tick 的可见性判定保持不变。
+                if (wasVisible != visibleNow)
+                {
+                    if (visibleNow)
+                    {
+                        if (!_observersByEntity.TryGetValue(p.PlayerId, out var observers))
+                        {
+                            observers = new HashSet<long>();
+                            _observersByEntity[p.PlayerId] = observers;
+                        }
+                        observers.Add(observerId);
+                    }
+                    else if (_observersByEntity.TryGetValue(p.PlayerId, out var existingObservers))
+                    {
+                        existingObservers.Remove(observerId);
+                        if (existingObservers.Count == 0) _observersByEntity.Remove(p.PlayerId);
+                    }
+                }
+
                 if (visibleNow) result.Add(p);
             }
 
             return result;
         }
 
-        /// <summary>实体注销——从所有观察者视野状态清除（防同 id 重登残留迟滞豁免）</summary>
+        /// <summary>实体注销——从所有观察者视野状态与反向索引清除（防同 id 重登残留迟滞豁免）</summary>
         public void RemoveEntity(long entityId)
         {
             foreach (var seen in _sightState.Values)
                 seen.Remove(entityId);
+            _observersByEntity.Remove(entityId);
         }
 
-        /// <summary>移除观察者全部视野状态（会话断开时由 Server3C 调用）</summary>
-        public void RemoveObserver(long observerId) => _sightState.Remove(observerId);
+        /// <summary>移除观察者全部视野状态与反向索引条目（会话断开时由 Server3C 调用）</summary>
+        public void RemoveObserver(long observerId)
+        {
+            _sightState.Remove(observerId);
+            var emptied = new List<long>();
+            foreach (var pair in _observersByEntity)
+            {
+                pair.Value.Remove(observerId);
+                if (pair.Value.Count == 0) emptied.Add(pair.Key);
+            }
+            foreach (var entityId in emptied)
+                _observersByEntity.Remove(entityId);
+        }
 
         private static int CellOf(float coord)
         {

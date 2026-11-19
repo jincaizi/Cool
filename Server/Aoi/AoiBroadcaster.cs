@@ -155,5 +155,11 @@ namespace KcpServer
         /// <summary>观察者当前视野内实体（P4 CastHandler 广播范围复用 AoiGrid 迟滞视野语义）</summary>
         public List<PlayerState> GetVisible(long observerId, EntityStore store)
             => _grid.GetVisible(observerId, store.All);
+
+        /// <summary>是否已有观察者视野状态（&gt;0 表示反向索引可用；首 tick 须回退暴力扫描）。</summary>
+        public bool HasSightState => _grid.TrackedObservers > 0;
+
+        /// <summary>能看到指定实体的观察者（AoiGrid 反向索引快照）。</summary>
+        public List<long> GetObserversOf(long entityId) => _grid.GetObserversOf(entityId);
     }
 }

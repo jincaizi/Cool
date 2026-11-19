@@ -409,10 +409,20 @@ namespace KcpServer
         /// <summary>观察者当前 AOI 可见实体（CastHandler 广播范围）</summary>
         public List<PlayerState> GetVisiblePlayers(long observerId) => _aoi.GetVisible(observerId, _entityStore);
 
-        /// <summary>能看到指定实体的在线观察者（P5 怪物 CastBroadcast 范围——AoiGrid 迟滞视野复用；
-        /// O(N²) 每施法一次（外层遍历 × 每观察者 GetVisible O(N)）——怪物规模小可接受；实体量大时换反向索引（注释留痕））</summary>
+        /// <summary>能看到指定实体的在线观察者（P5 怪物 CastBroadcast 范围——AoiGrid 迟滞视野复用）。
+        /// 有观察者快照时走 AoiGrid 反向索引 O(1) 反查并过滤无 session 观察者；尚无快照
+        /// （首 tick，SendNpcActionEvents/SendCombatStateUpdates 早于 BroadcastWorldSnapshot）
+        /// 保留旧暴力扫描兜底，避免漏发第一条 311。</summary>
         public List<long> GetObserversOf(long entityId)
         {
+            if (_aoi.HasSightState)
+            {
+                var indexed = _aoi.GetObserversOf(entityId);
+                indexed.RemoveAll(id => !_playerIdToSession.ContainsKey(id));
+                return indexed;
+            }
+
+            // 首 tick/尚无观察者快照：保留旧暴力路径，避免漏发第一条 311。
             var result = new List<long>();
             foreach (var observer in _entityStore.All)
             {
