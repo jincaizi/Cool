@@ -22,6 +22,7 @@
 | 03 | [B5 位移/跳跃预算 + PvP 控制](2026-11-18-elemental-sword-qi-03-displacement-pvp.md) | ✅ 已完成 | 10/10 任务；服务端 587/587；Unity 目标测试类通过（`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败，基线可复现，不计回归）；模块 README 已回写 |
 | 04 | [状态结算 + DoT + 表现](2026-11-19-elemental-sword-qi-04-status-dot-vfx.md) | ✅ 已完成 | 8/8 任务；服务端全部 654/654；Unity 目标 EditMode 类通过（`ElementalApplicationTests` 仅服务端存在；`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败，基线可复现）；PlayMode 五类回归完成（`MonsterWorldTests` 导航模式既有 Slime 巡逻卡死为已知导航债）；模块 README 已回写。在线 PvE/PvP 权威状态已完成；**离线单机共享运行时未接入，留给 Plan 06/backlog（2026-11-20 修正）** |
 | 05 | 三客户端验收 + 表现收口 | ✅ 已完成 | 6/6 任务；服务端 668/668（基线 654 → AOI 10 + 带宽 2 + 服务端预算 2；含最终审查补充的 NPC 目标反查用例）；Unity EditMode 目标类 `ElementVfxFallbackTests` 5/5、`SwordQiElementTintTests` 4/4、`StatusVFXSystemTests` 3/3、`NetworkConsumptionInjectionTests` 14/14、`ProtocolShapeGuardTests` 17/17（`RemoteEntityRegistryTests` 16/17，仅既有 `Bot_Radius` PPtr）；PlayMode 9/9（三客户端元素 1/1、三客户端战斗一致性 1/1、`MovementSyncTests` 4/4、`PlayerControlInertiaTests` 3/3，真实 Server3C:8000）；带宽 100 实体 ×15Hz×60s 平均 53.4 KB/s、100 实体同时 DoT 最坏 76.9 KB/s（预算 100 KB/s，未上调）；收包注入目标类合计 72/72；AOI 反查 N=1000 ≤1ms、索引与暴力逐项相等。**未新增战斗机制/协议字段；离线共享运行时与 Addressables 美术资源签收移至 Plan 06/backlog。设计规格中未执行的三端 DoT/末跳致死、麻痹取消前摇 `Cancelled` 链、状态结束时钟偏移、AOI 快速出入/复活版本连续、KCP/WS 延迟注入、断线重进旧包与模型未加载场景已登记到 Plan 06（见下），不得视为已验收** |
+| 06 | [验收缺口与稳定性](2026-11-20-elemental-sword-qi-06-acceptance-gaps.md) | ✅ 已完成 | 6/6 任务；服务端 **699/699**；EditMode `NetworkConsumptionInjectionTests` **24/24**；PlayMode `ThreeClientElementalAcceptanceTests` **3/3**、`PlayerControlInertiaTests` **4/4**（真实 Server3C:8000）。生产仅改 `CombatNetworkBridge` 的 LifeId 代次门。边界：移动 NpcBody 推挤只在测试 stub 下验收机制，生产推挤仍 backlog；三端末跳致死时刻为 Plan 07 gap；状态结束时钟偏移、KCP/WebSocket 传输层延迟注入、真实连接代次/旧位移预测仍为 backlog（见下） |
 
 **换装跟进（2026-11-16）**：简易武器背包、男女八把元素剑校准变体、权威确认对账与
 交互边界已完成，自动测试全绿；握姿/穿模/拖尾、DemoDay 交互冒烟与发布构建冒烟仍待人工验收。
@@ -35,7 +36,9 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
 否则程序化调色板”的判定顺序；生产 Addressables loader/Host 未接入）。
 **明确边界**：在线 PvE/PvP 权威状态与三客户端验收已完成；离线单机仍使用本地
 `StatusEffectManager` 的冰冻/灼烧（仅怪物、独立计时），四元素共享运行时、离线去重与
-元素 VFX 资源化属于 Plan 06/backlog。
+元素 VFX 资源化属于 backlog（**Plan 06 明确未包含**）。Plan 06 只补齐验收缺口
+（DoT、麻痹取消、消息注入、AOI 版本连续、移动 NpcBody 机制、ORCA `maxStep`），未新增战斗机制；
+未执行项、stub 边界与 Plan 07 gap 见下节。
 
 ## mainline 合并集成（2026-11-20）
 
@@ -96,37 +99,98 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
   `ElementPalette.ColorOf(elementId)`”；`ElementVfxFallbackTests` 5/5。未实际调用
   Addressables；生产 loader/Host 接入与美术资源签收属 Plan 06。
 
+## Plan 06 收口项结果（2026-11-20 完成）
+
+Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只改一处：任务 3 的
+`CombatNetworkBridge` `LifeId` 代次门（旧世代 `DamageResult`/`CastBroadcast` 丢弃），由失败断言驱动。
+
+- **三端 DoT 每跳 + 死亡投影**（任务 1）：`ThreeClientElementalAcceptanceTests` 3/3（真实
+  Server3C:8000）。`FireDot_Ticks_Are_Consistent_And_Death_Projection_Is_Consistent` 断言
+  A/B/C 按 `EventId` 逐条相等（`Damage/TargetRemainingHp/TargetLifeId/CombatVersion/EventSeq/CastId/SourcePlayerId`）、
+  3 跳、间隔 0.85–1.15s、`IsBlocked=false`、201 施加/移除各一次、死讯
+  `Dead/CombatVersion/LifeId` 三端严格相等、死后 1.6s 无 DoT。服务端末跳致死由
+  `DotDamageTests.Burn_Tick_That_Kills_Player_Clears_Statuses_And_Stops` 证明；
+  **三端同一次末跳致死的死亡时刻仍未验收，登记 Plan 07**（需服务器 HP 注入/测试钩子）。
+- **麻痹取消前摇三端 `Cancelled` 链**（任务 2）：`CastCancelDuringWindupTests` 3/3
+  （`EffectiveTick`=命中 tick、按 `CastId` 精确取消、已发射只停表现不终止结算）+
+  `ThreeClientElementalAcceptanceTests.Thunder_Cancels_Windup_Cast_On_All_Clients`
+  （三端同一 `CastId`/`EffectiveTick`、B 未发射且无命中、A 雷仍 2 条命中、旁观者 presenter 停止且不重播）。
+- **延迟/断线重进/模型未加载**（任务 3）：`NetworkConsumptionInjectionTests` **24/24**。
+  覆盖换装确认/施法交错、Stop 后迟到 Launch 不重建、旧 `LifeId` 伤害不扣血、旧投影不回退、
+  重复 `EventId` 只消费一次、换命旧包丢弃、模型未建时 318 缓存回放与 DoT 基线补齐不双扣。
+  边界：注入在桥层 `OnMessage`/`Update`，**KCP/WebSocket 传输层延迟注入未执行**；真正的跨会话
+  隔离仍靠宿主（新 playerId/新桥），桥只按 `LifeId` 识别同会话旧世代，旧位移预测不在桥职责内。
+- **AOI 快速出入/复活版本连续**（任务 4）：`AoiVersionContinuityTests` 6/6（Aoi 命名空间 58/58）。
+  80/90/91m 迟滞往返、死亡复活/Evade 到家重见基线逐项等于服务器状态、回池重生按新实体 id
+  （`LifeId=1/CombatVersion=0`，不承诺跨 id 单调）、观察者重进首帧完整投影、
+  旧 `LifeId` 的 `CombatStateUpdate` 出界后真正停止。
+- **移动 NpcBody + 位置上报/纠偏**（任务 5）：`PlayerControlInertiaTests` 4/4（真实
+  Server3C:8000）。2s 窗口相对 XZ 净变化 ≤0.1m（raw）、方向翻转 ≤1（0.25s 均值，0.03m 死区）、
+  raw 幅度 ≤0.15m、上报与权威差 ≤0.5m、纠偏数 ≤ 超预算包数、怪物停止后残余速度 ≤0.01m/s，
+  并以故意超预算传送做正向对照。**边界：推挤门槛 `IDamageable` 由测试本地 stub 满足，
+  只证明推挤/纠偏机制；生产 `NpcBodyCollider` 仍无该组件，`_pushVector` 对远程 NpcBody
+  的产品行为保持 backlog。**
+- **ORCA 减速 `maxStep` 邻居用例**（任务 6）：`MonsterStatusControlTests` 8/8。新增
+  `Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side`：冰减速
+  `SpeedScale=0.7` + 正前方 1.8m 静止怪物，断言实际步长 = `moveSpeed×0.7×dt`
+  （解恰好截断在缩放后的 `maxStep` 圆上；未缩放对照 = `moveSpeed×dt`），慢/快步长比 0.7，
+  避让横向分量同向（不反转）；无邻居对照组仍逐字返回期望位移。命令：
+  `bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterStatusControlTests"`。
+
+全量验证：`bash tools/test-server-inprocess.sh` → **699/699**；EditMode
+`NetworkConsumptionInjectionTests` **24/24**；PlayMode `ThreeClientElementalAcceptanceTests`
+**3/3**、`PlayerControlInertiaTests` **4/4**（真实 Server3C:8000）。Unity batchmode 副作用已还原，
+`TestResults/` 未提交。
+
 ## Plan 06 / backlog 登记（2026-11-20）
 
-以下项**不属于** Plan 01–05 已交付范围，登记到 Plan 06/backlog，不得写成已打通：
+以下项**不属于** Plan 01–05 已交付范围，登记到 Plan 06/backlog。Plan 06 已验收的项在条目内
+标注证据（汇总见上节）；**未标注的项仍未执行，不得写成已打通**。
 
-- **Plan 05 未执行的设计验收场景**（2026-11-20 登记；Plan 05 已交付的是子集，以下不得写成已验收）：
+- **Plan 05 未执行的设计验收场景**（2026-11-20 登记；Plan 05 已交付的是子集，Plan 06 验收状态
+  见每条标注，未标注者不得写成已验收）：
   - **三端 DoT/末跳致死**：三端每跳伤害/余血/`DamageKind=Dot` 一致（Plan 06 任务 1 验收）；
     受击者不被跳伤打断、观察者不播命中火花/受击硬直由 `DotDamageRoutingTests`（Plan 04）覆盖；
     **末跳致死**由服务端
     `DotDamageTests.Burn_Tick_That_Kills_Player_Clears_Statuses_And_Stops` 证明（`MaxHp=8`，
     一跳致死、只一条 DotHit、死后不再跳）；**三端同一次末跳致死的死亡时刻**在 720 HP 联机场景
     无法确定性构造（直伤 90×2/次、灼烧 8/跳、暴击 15%），需服务器 HP 注入/测试钩子，登记 Plan 07。
+    **Plan 06 任务 1 已完成**三端每跳/死亡投影验收：
+    `ThreeClientElementalAcceptanceTests.FireDot_Ticks_Are_Consistent_And_Death_Projection_Is_Consistent`
+    （三端 3/3）；**三端末跳死亡时刻仍为 Plan 07 gap，未验收。**
   - **麻痹取消前摇三端 `Cancelled` 链**：A 的雷剑气命中 B 进行中的前摇，三端按同一 `CastId` 记录
     `CastCancelBroadcast.EffectiveTick`；B/C 停止攻击动作，不生成未发射剑气与后续 `DamageResult`，
     已发射的独立投射物继续飞行；玩家路径断言 `RemoteCastPresenter`/`RemoteEntityAnimator.CancelAttack(CastId)`，
     怪物路径断言 `NpcAttackSchedule`/`NpcEntityAnimator` 停止且 `NpcActionEvent` 按 `(InstanceId, Revision)`
-    合并、`Phase=Cancelled` 生效（`design.md:167`）。
+    合并、`Phase=Cancelled` 生效（`design.md:167`）。**Plan 06 任务 2 已完成**：
+    `CastCancelDuringWindupTests` 3/3 + `ThreeClientElementalAcceptanceTests.Thunder_Cancels_Windup_Cast_On_All_Clients`
+    （三端 3/3；B 未发射且无命中、A 雷仍 2 条命中、旁观者 presenter 停止）。
   - **状态结束时钟偏移注入**：给两台客户端注入不同时钟偏移和渲染延迟，断言特效移除由同一条
     `CombatStateUpdate` 触发；权威移除晚于 `EndTick` 时保持到消息到达（`design.md:169`）。
+    **未执行**：Plan 06 任务列表未包含该项，仍为 backlog。
   - **AOI 快速出入/复活版本连续**：AOI 快速出入、死亡复活、Evade 到家与断线重进时，
     进入基线与后续 `CombatStateUpdate` 的 `CombatVersion`/`LifeId` 连续，旧版本增量不能复活
     旧状态或旧装备（`design.md:170`）。回池重生按生产语义是**新实体 id**（新实体 `LifeId=1`、
     `CombatVersion=0`）：验收旧 id 停止、新 id 全量基线，不承诺跨 id 的 `CombatVersion` 单调。
-  - **KCP/WebSocket 延迟注入**：重复/乱序已由 `NetworkConsumptionInjectionTests` 覆盖；延迟注入
-    （含 KCP 与 WebSocket 正常流程、换装确认/施法交错、发射晚于格挡结果、旧伤害晚于复活、
-    较新血量早于状态消息）未执行（`design.md:166`）。
+    **Plan 06 任务 4 已完成**：`AoiVersionContinuityTests` 6/6（Aoi 命名空间 58/58）。
+  - **KCP/WebSocket 延迟注入**：重复/乱序已由 `NetworkConsumptionInjectionTests` 覆盖；
+    消息级延迟/交错（换装确认/施法交错、发射晚于格挡结果、旧伤害晚于复活、较新血量早于状态消息、
+    延迟但同版本只消费一次）已由 **Plan 06 任务 3** 的 `NetworkConsumptionInjectionTests`（24/24）
+    在桥层 `OnMessage`/`Update` 覆盖；**KCP/WebSocket 传输层延迟注入未执行**（`design.md:166`）。
   - **断线重进旧包**：按新会话初始化，旧包、旧模型回调与旧位移预测均不生效（`design.md:166`）。
+    **Plan 06 任务 3 部分覆盖**：桥按 `LifeId` 丢弃同会话旧世代 `DamageResult`/`CastBroadcast`，
+    新会话隔离靠宿主新 playerId/新桥；**真正的连接代次与旧位移预测未在桥层验收**，仍为宿主级 backlog。
   - **收到状态时模型尚未加载**：模型加载完成前的状态投影/事件不得丢失或错挂（`design.md:166`）。
+    **Plan 06 任务 3 已完成**：视图未建时 318 缓存回放、DoT 由基线补齐且不双扣
+    （`NetworkConsumptionInjectionTests` 24/24）。
 - **移动 NpcBody + 位置上报/纠偏联测**（2026-11-20 登记）：Plan 05 的 `PlayerControlInertiaTests`
   只验证静态盒贴附的本地稳定性（往返幅度 0.0000m）；`design.md:144` 要求“碰撞推挤需要与服务端
   冻结纠偏联测，避免两边反复移动同一角色”。需构造会移动的怪物 `NpcBody` 与服务端位置上报/纠偏
-  同场运行，断言无持续往返纠偏。
+  同场运行，断言无持续往返纠偏。**Plan 06 任务 5 已完成机制验收**：`PlayerControlInertiaTests` 4/4
+  （真实 Server3C:8000；raw 净变化 ≤0.1m、翻转 ≤1、raw 幅度 ≤0.15m、上报差 ≤0.5m、
+  纠偏数 ≤ 超预算包数、停止后残余速度 ≤0.01m/s，并含超预算传送正向对照）。**边界：推挤门槛
+  `IDamageable` 由测试本地 stub 满足，只证明推挤/纠偏机制；生产 `NpcBodyCollider` 无该组件，
+  生产 NpcBody 推挤仍为 backlog。**
 - **离线单机四元素共享运行时**（原 Plan 04 前瞻误写为“Plan 05”，2026-11-20 修正）：
   服务端权威状态已完成，但离线仍用 `Skills/Effect/StatusEffectManager`（本地冰冻/灼烧，
   仅怪物、独立计时）。需把 `SyncCore.StatusRuntime` 接入离线怪物/玩家适配器（时钟、
@@ -141,6 +205,7 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
   以 `IDamageable` 为门槛，而 `NpcBodyCollider.BuildCollider` 在子物体只挂 `BoxCollider`，
   无该组件，因此贴身推离反馈对远程 `NpcBody` 不触发。若产品需要“被怪身体推开”，需给
   NpcBody 暴露可识别标记（非 `IDamageable` 语义）或在玩家侧按层 10 处理。
+  **Plan 06 任务 5 只证明 stub 下的推挤/纠偏机制；本条产品行为仍未修，保持 backlog。**
 - **Plan 04 final review 遗留项**：M2 同段尸体检定、M4 多 DoT 定序、M6 来源类型建模、
   M7 未用参数、M8 死 API、M10 死亡 tick、M11 非 ActionV1、M16 离线 provider、
   M17 ThunderDuration、M18 bot 控制、M19 断开/换模型陈旧表现（M9 `EventId` 去重已在
@@ -148,8 +213,12 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
 - **NpcAction 驱动的攻击变体/时间轴**（2026-11-20 登记）：`NpcActionEvent` 目前只负责
   阶段/取消，NPC 攻击起手仍由 `CastBroadcast → NpcAttackSchedule` 驱动；若后续需要
   `NpcAction` 直接驱动攻击变体/时间轴，需在 Plan 06 单独设计（Plan 05 未新增该机制）。
-- **ORCA 减速 `maxStep` 邻居用例**（M12 遗留）：`MonsterStatusControlTests` 目前只验证
-  无邻居期望位移；Plan 06 补邻居构造用例，验证 ORCA `maxStep` 同样按状态倍率缩放。
+- **ORCA 减速 `maxStep` 邻居用例**（M12 遗留，**Plan 06 任务 6 已完成**）：
+  `MonsterStatusControlTests` 8/8；新增 `Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side`
+  用冰减速 `SpeedScale=0.7` + 正前方 1.8m 静止怪物断言实际步长 = `moveSpeed×0.7×dt`
+  （未缩放对照 = `moveSpeed×dt`），慢/快步长比 0.7，且避让横向分量不反转；无邻居对照组仍按原期望位移。
+- **Plan 06 未执行项（2026-11-20 收口，仍不得写成已打通）**：状态结束时钟偏移注入、
+  KCP/WebSocket 传输层延迟注入、真实连接代次/旧位移预测隔离（宿主级）；三端同一次末跳致死时刻登记 Plan 07。
 - **已知环境/夹具失败（非 Plan 05 回归）**：`RemoteEntityRegistryTests.Bot_Radius`
   的 PPtr 环境失败（16/17，基线可复现）；`MonsterWorldTests` 导航模式 Slime 巡逻卡死
   （服务端导航债）；`PlayerJumpBodyCollisionTests` 在 batchmode 下 0/3（夹具自身

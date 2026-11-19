@@ -2,6 +2,7 @@ using Cool.Protocol;
 using Cool.SyncCore;
 using KcpServer;
 using KcpServer.Monster;
+using KcpServer.Movement;
 using Xunit;
 
 namespace KcpServer.Tests.Monster;
@@ -70,6 +71,84 @@ public class MonsterStatusControlTests
         //（ORCA 无邻居时期望位移逐字返回）。
         float step = Vector3.Distance(before, npc.Position);
         Assert.Equal(moveSpeed * 0.7f * MonsterModule.TickDeltaSeconds, step, 3);
+    }
+
+    // ---------- ORCA 邻居：maxStep 与期望位移同缩，避让方向不被缩放反转 ----------
+
+    private static void PrepareForMove(MonsterState state, Vector3 velocity)
+    {
+        state.Position = new Vector3(0f, 0f, 0f);
+        state.CurrentVelocity = velocity;
+        state.TargetId = null;
+    }
+
+    /// <summary>M12 遗留：冰减速不只缩期望位移，ORCA <c>maxStep</c> 也必须同缩。
+    /// 几何取"正前方 1.8m 静止怪物 + 斜线期望位移 + 上一 tick 全速侧移"：此时解算结果
+    /// 恰好被截断在 maxStep 圆上（半径 = speed×dt），慢/快两组的步长因此精确比较。
+    /// 几何按模板 1 的发布配置（moveSpeed=2.0、dt=0.066）调校；配置漂移时
+    /// "未缩放步长 = baseStep" 的截断断言会先红，需重算邻居距离。</summary>
+    [Fact]
+    public void Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side()
+    {
+        var store = new EntityStore();
+        long seed = MonsterModule.NpcIdSeed;
+        var avoidance = new AvoidanceSystem(store, _ => AvoidanceSystem.DefaultMonsterRadius);
+        var module = new MonsterModule(store, () => ++seed, avoidance: avoidance, actionV1: true);
+        long idA = module.SpawnMonster(1, new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, 0f));
+        var npc = store.GetPlayer(idA)!;
+        var state = module.GetState(idA)!;
+        var catalog = Catalog();
+        npc.ConfigureStatuses(catalog);
+        Assert.Equal(StatusApplyResult.Applied,
+            npc.Statuses!.Apply(SlowOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0, catalog));
+        Assert.Equal(0.7f, npc.ControlSpeedScale, 4);
+
+        module.Tick(0); // 生产路径：模块把权威 ControlSpeedScale 写进 MonsterState.SpeedScale
+        Assert.Equal(0.7f, state.SpeedScale, 4);
+
+        const float dt = MonsterModule.TickDeltaSeconds;
+        var mover = new SimpleMoveSystem(avoidance);
+        var direction = new Vector3(1f, 0f, 0.7f); // 斜线：ORCA 避让的横向分量应在 +Z 一侧
+        float baseStep = state.Config.moveSpeed * dt;
+        float scaledStep = baseStep * 0.7f;
+
+        // 无邻居对照组：快照里只有自己 ⇒ Solve 逐字返回期望位移（moveSpeed × SpeedScale × dt）。
+        PrepareForMove(state, default);
+        float controlStep = mover.MoveTowards(state, direction, dt);
+        Assert.Equal(scaledStep, controlStep, 3);
+
+        // 邻居 B：正前方 1.8m 的静止怪物（新实体，快照速度 0，参与互惠避让 α=0.5）。
+        long idB = module.SpawnMonster(1, new Vector3(1.8f, 0f, 0f), new Vector3(1.8f, 0f, 0f));
+        Assert.NotEqual(idA, idB);
+        avoidance.EnsureSnapshot(1);
+
+        // 上一 tick 的全速侧移必须非零：ORCA 半平面锚点 = v_self + α·u；v_self=0 时单邻居的
+        // 约束边界过原点，投影只会收缩，maxStep 圆（半径 = speed×dt）永远不收紧，测不到缩放。
+        // 取减速生效前上一 tick 的实际位移后，慢/快两组的解都恰好落在各自的 maxStep 圆上。
+        PrepareForMove(state, new Vector3(0f, 0f, baseStep));
+        float slowOrcaStep = mover.MoveTowards(state, direction, dt);
+        Vector3 slowOrcaVelocity = state.CurrentVelocity;
+        Assert.Equal(1, avoidance.LastNeighborCount); // B 确实进了解算器（不是被筛成空集后的假绿）
+        Assert.Equal(scaledStep, slowOrcaStep, 3);    // 实际 maxStep = baseStep × 0.7
+        Assert.True(slowOrcaVelocity.X > 0f, "avoidance keeps advancing toward the goal (+X)");
+        Assert.True(slowOrcaVelocity.Z > 0f, "avoidance side stays +Z under SpeedScale=0.7 (not inverted)");
+
+        // 同一几何、同一 v_self 的未减速对照。直接写 SpeedScale（模块每 tick 会从
+        // ControlSpeedScale 重写；这里只做 ORCA 几何对照，不再走状态运行时）。
+        PrepareForMove(state, new Vector3(0f, 0f, baseStep));
+        state.SpeedScale = 1f;
+        float fastOrcaStep = mover.MoveTowards(state, direction, dt);
+        Vector3 fastOrcaVelocity = state.CurrentVelocity;
+        Assert.Equal(1, avoidance.LastNeighborCount);
+        Assert.Equal(baseStep, fastOrcaStep, 3); // 未减速时恰好截断在基础 maxStep 圆上
+        Assert.True(fastOrcaVelocity.Z > 0f);
+
+        // 两组步长都随 SpeedScale 线性缩放：慢组实际步长 = 未减速组 × 0.7；
+        // 方向未被缩放反转（两个解同侧，单位方向点积 > 0.95）。
+        Assert.Equal(fastOrcaStep * 0.7f, slowOrcaStep, 3);
+        float dirDot = slowOrcaVelocity.X * fastOrcaVelocity.X + slowOrcaVelocity.Z * fastOrcaVelocity.Z;
+        dirDot /= slowOrcaStep * fastOrcaStep;
+        Assert.True(dirDot > 0.95f, "scaled ORCA direction must not flip (dot=" + dirDot.ToString("F3") + ")");
     }
 
     // ---------- 雷：ActionLock 冻结行为树，到期恢复 ----------

@@ -166,10 +166,12 @@ Plan 04 验收证据（服务端，全部在 654/654 内）：
   在 `DrainResolved` 压缩途中重入不越界、不覆盖/丢弃后续待判定施法（C1）。
 - DoT：`DotDamageTests`（9 项）与 `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、
   `DamageKind=Dot`、末跳只结算一次、到期/死亡清理。
-- 怪物控制：`MonsterStatusControlTests`（7 项）锁定减速对真实位移的缩放（无邻居期望位移
-  逐字验证；ORCA `maxStep` 同缩由代码同源保证，邻居构造用例留 Plan 06/backlog）、
-  麻痹打断与霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
-  `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
+- 怪物控制：`MonsterStatusControlTests`（**8 项**）锁定减速对真实位移的缩放（无邻居期望位移
+  逐字验证；`Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side`
+  用正前方 1.8m 静止怪物证明 ORCA `maxStep` 同缩——`SpeedScale=0.7` 时解恰好截断在
+  `moveSpeed×0.7×dt` 的 maxStep 圆上、未缩放对照为 `moveSpeed×dt`，慢/快步长比 0.7，
+  避让横向分量不因缩放反转）、麻痹打断与霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，
+  状态清除由 `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
 
 Plan 05 验收证据（2026-11-20；服务端项均在 667/667 内，Unity 结果另列）：
 
