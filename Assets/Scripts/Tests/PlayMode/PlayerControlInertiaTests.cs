@@ -415,17 +415,25 @@ namespace GameSys.PlayModeTests
         }
 
         /// <summary>
-        /// Plan 06 任务 5：移动 `NpcBody` + 位置上报/真实服务端纠偏联测。
+        /// Plan 06 任务 5：移动 `NpcBody` 推挤机制 + 位置上报/真实服务端纠偏联测。
         ///
         /// 设计文档要求碰撞推挤与冻结纠偏联测，避免两边反复移动同一角色。本夹具与上面的静态盒
         /// 用例不同：**启用真实 `Sys3CEntry`（推挤路径）**，`NpcBody` 以 1.5 m/s 沿 +X 移动 2s，
         /// 玩家经脚本化输入贴附挤压；同时经真实 `Server3C:8000` 以 15Hz 上报位置，
         /// `OnCorrectionNeeded → NetMovementPolicy.ApplyServerCorrection` 走生产纠偏落点。
         ///
+        /// **覆盖面边界**：生产 `NpcBodyCollider.BuildCollider` 只给子物体挂 `BoxCollider`，
+        /// 没有 `IDamageable`（`Sys3CEntry.OnControllerColliderHit` 的推离门槛），因此生产
+        /// NpcBody 今天**不会**触发 `_pushVector`（已登记 backlog）。本用例在移动盒上挂测试桩
+        /// `PushDamageableStub` 来启用推挤机制本身——验证的是"推挤 + 上报/纠偏"在真实管线下
+        /// 不会持续互相拉扯，**不是**"生产 NpcBody 会推挤"的验收。静态盒用例（Sys3CEntry 关闭）
+        /// 继续覆盖本地 CharacterController 对 NpcBody 层实体的稳定性。
+        ///
         /// 断言：
-        /// ① 2s 内相对偏移净变化 ≤0.1m、方向翻转 ≤1（指标在 0.25s 因果滑动平均上计算：
-        ///    接触推挤锯齿 ≤ `_pushForce`=0.08m/次、周期 ~20ms，属验收允许的接触噪声；
-        ///    真实纠偏环路是 ≥0.5s 尺度的位置摆动，平滑不会掩盖它）；
+        /// ① 2s 内**原始端点**相对偏移净变化 ≤0.1m；方向翻转 ≤1 在 0.25s 因果滑动平均上计数
+        ///    （原始推挤锯齿 ≤ `_pushForce`=0.08m/次、周期 ~20ms，属验收允许的接触噪声；
+        ///    真实纠偏环路是 ≥0.5s 尺度的位置摆动，平滑不会掩盖它）。平滑成立的前提是原始
+        ///    振荡有界：同时断言原始最大偏离 ≤0.15m（观测 0.099–0.102m，留 ~47% 余量）；
         /// ② 每条 ack 的"上报位置 vs 服务端权威目标" ≤0.5m（纠正阈值），且窗口内纠偏次数
         ///    不超过被服务端钳制的包数；
         /// ③ 怪物停止后玩家稳定、无残余推挤速度；
@@ -435,7 +443,7 @@ namespace GameSys.PlayModeTests
         /// 运行前置：本机 Server3C（`dotnet Server/bin/Debug/net8.0/Server3C.dll 8000`）。
         /// </summary>
         [UnityTest]
-        public IEnumerator test_moving_npc_body_push_with_server_correction_has_no_sustained_ping_pong()
+        public IEnumerator test_moving_npc_body_push_mechanics_with_server_correction_have_no_sustained_ping_pong()
         {
             // —— Arrange：启用真实 Sys3CEntry（推挤在 Update 内），脚本化"贴附输入" ——
             var input = _player.GetComponent<InputManager>();
@@ -453,11 +461,13 @@ namespace GameSys.PlayModeTests
                 recording, new RemoteEntityRegistry(_registryRoot.transform), "MovePushCorrection");
             _networkManager.ConnectAndLogin("127.0.0.1", 8000);
             float loginStart = Time.realtimeSinceStartup;
+            int loginFrames = 0;
             while (_networkManager.CurrentState != ClientNetworkManager.State.InWorld
-                   && Time.realtimeSinceStartup - loginStart < 10f)
+                   && Time.realtimeSinceStartup - loginStart < 10f && loginFrames < MaxFrames)
             {
                 _networkManager.Update(Time.deltaTime);
                 yield return null;
+                loginFrames++;
             }
             Assert.AreEqual(ClientNetworkManager.State.InWorld, _networkManager.CurrentState,
                 "前置：需要本机 Server3C（dotnet Server/bin/Debug/net8.0/Server3C.dll 8000）");
@@ -499,11 +509,14 @@ namespace GameSys.PlayModeTests
 
             scripted.Move = Vector3.right;
             float approach = 0f;
+            int approachFrames = 0;
             while (approach < 1f
-                   && Mathf.Abs(_player.transform.position.x - _body.transform.position.x) > 1.2f)
+                   && Mathf.Abs(_player.transform.position.x - _body.transform.position.x) > 1.2f
+                   && approachFrames < MaxFrames)
             {
                 approach += Time.deltaTime;
                 yield return null;
+                approachFrames++;
             }
             float contactGap = Mathf.Abs(_player.transform.position.x - _body.transform.position.x);
             Assert.LessOrEqual(contactGap, 1.2f,
@@ -515,7 +528,8 @@ namespace GameSys.PlayModeTests
             var relativeOffsets = new List<Vector3> { RelativeXzOffset() };
             var offsetTimes = new List<float> { 0f };
             float elapsed = 0f;
-            while (elapsed < MovingBodyWindowSeconds)
+            int windowFrames = 0;
+            while (elapsed < MovingBodyWindowSeconds && windowFrames < MaxFrames)
             {
                 float dt = Time.deltaTime;
                 _body.transform.position += Vector3.right * (MovingBodySpeed * dt);
@@ -526,34 +540,42 @@ namespace GameSys.PlayModeTests
                 if (_unityController.velocity.x < -0.1f) pushFrames++;
                 relativeOffsets.Add(RelativeXzOffset());
                 offsetTimes.Add(elapsed);
+                windowFrames++;
             }
             uint windowEndSeq = LatestRequestSequence(recording);
 
             // 松手并排空窗口内 ack（怪物停下，玩家不再贴附输入）。
             scripted.Move = Vector3.zero;
             float drain = 0f;
-            while (drain < 0.5f)
+            int drainFrames = 0;
+            while (drain < 0.5f && drainFrames < MaxFrames)
             {
                 _networkManager.Update(Time.deltaTime);
                 yield return null;
                 drain += Time.deltaTime;
+                drainFrames++;
             }
 
             // —— 断言 1：无持续往返 ——
-            // "持续往返/净变化"是纠偏环路尺度的现象（周期 ≥0.5s：服务端 15Hz 纠偏 + 本地 8/s 平滑）。
-            // 接触推挤锯齿（_pushForce=0.08m，周期 ~20ms）与偶发帧顿挫是高频噪声——用 0.25s 因果
-            // 滑动平均滤掉后，再以 0.03m 死区计数方向翻转；净变化取平滑信号的端点。
-            Vector3[] smoothed = MovingAverage(relativeOffsets, offsetTimes, 0.25f);
-            Vector3 net = smoothed[smoothed.Length - 1] - smoothed[0];
-            float netChange = new Vector2(net.x, net.z).magnitude;
+            // 净变化按验收字面用**原始端点**（不经平滑，避免端点混用带来的偏置）。
+            // 方向翻转在 0.25s 因果滑动平均上计数：接触推挤锯齿（_pushForce=0.08m，周期 ~20ms）
+            // 与偶发帧顿挫是高频噪声，真实纠偏环路是 ≥0.5s 尺度的位置摆动，平滑不会掩盖它。
+            // 平滑成立的前提是原始振荡有界，因此同时断言 rawAmplitude ≤0.15m（观测 0.099–0.102m）。
             Vector3 rawNet = relativeOffsets[relativeOffsets.Count - 1] - relativeOffsets[0];
+            float netChange = new Vector2(rawNet.x, rawNet.z).magnitude;
+            Vector3[] smoothed = MovingAverage(relativeOffsets, offsetTimes, 0.25f);
+            Vector3 smoothNet = smoothed[smoothed.Length - 1] - smoothed[0];
+            float smoothedNetChange = new Vector2(smoothNet.x, smoothNet.z).magnitude;
             int reversals = CountReversals(smoothed, 0.03f);
             float rawAmplitude = MaxExcursion(relativeOffsets);
             Assert.Greater(pushFrames, 0,
                 "前置：贴附挤压期间真实推挤路径必须触发（OnControllerColliderHit → ApplyPushVector）");
             Assert.LessOrEqual(netChange, NetOffsetChangeLimit,
-                "移动 NpcBody 下玩家相对 XZ 偏移净变化必须 ≤0.1m（net="
-                + netChange.ToString("F4") + "m raw=" + rawNet.magnitude.ToString("F4") + "m）");
+                "移动 NpcBody 下玩家相对 XZ 偏移净变化必须 ≤0.1m（rawNet="
+                + netChange.ToString("F4") + "m smoothNet=" + smoothedNetChange.ToString("F4") + "m）");
+            Assert.LessOrEqual(rawAmplitude, 0.15f,
+                "原始推挤振荡必须有界（平滑反翻转计数的前提；rawAmplitude="
+                + rawAmplitude.ToString("F3") + "m）");
             Assert.LessOrEqual(reversals, 1,
                 "移动 NpcBody 下不得出现持续往返（reversals=" + reversals
                 + " rawAmplitude=" + rawAmplitude.ToString("F3") + "m）");
@@ -593,11 +615,13 @@ namespace GameSys.PlayModeTests
             // —— 断言 3：怪物停止后稳定、无残余推挤速度 ——
             Vector3 settleStart = _player.transform.position;
             float settle = 0f;
-            while (settle < 0.3f)
+            int settleFrames = 0;
+            while (settle < 0.3f && settleFrames < MaxFrames)
             {
                 _networkManager.Update(Time.deltaTime);
                 yield return null;
                 settle += Time.deltaTime;
+                settleFrames++;
             }
             Vector3 settleDelta = _player.transform.position - settleStart;
             Vector3 settledVelocity = _unityController.velocity;
@@ -612,18 +636,22 @@ namespace GameSys.PlayModeTests
             int correctionsBeforeTeleport = corrections;
             _cc.Teleport(_player.transform.position + Vector3.forward * 1.5f);
             float correctionWait = 0f;
-            while (corrections == correctionsBeforeTeleport && correctionWait < 3f)
+            int correctionWaitFrames = 0;
+            while (corrections == correctionsBeforeTeleport && correctionWait < 3f
+                   && correctionWaitFrames < MaxFrames)
             {
                 _networkManager.Update(Time.deltaTime);
                 yield return null;
                 correctionWait += Time.deltaTime;
+                correctionWaitFrames++;
             }
             Assert.Greater(corrections, correctionsBeforeTeleport,
                 "正控：1.5m 超预算位移必须触发真实服务端纠偏（证明权威目标来自服务器）");
 
             Vector3 lastTarget = ToVector3(_networkManager.Reporter!.LastCorrectionTarget);
             float converge = 0f;
-            while (converge < 2f
+            int convergeFrames = 0;
+            while (converge < 2f && convergeFrames < MaxFrames
                    && new Vector2(_player.transform.position.x - lastTarget.x,
                        _player.transform.position.z - lastTarget.z).magnitude > 0.1f)
             {
@@ -631,6 +659,7 @@ namespace GameSys.PlayModeTests
                 _networkManager.Update(Time.deltaTime);
                 yield return null;
                 converge += Time.deltaTime;
+                convergeFrames++;
             }
             lastTarget = ToVector3(_networkManager.Reporter!.LastCorrectionTarget);
             float finalGap = new Vector2(_player.transform.position.x - lastTarget.x,
@@ -655,8 +684,8 @@ namespace GameSys.PlayModeTests
                 + " overBudget=" + totalOverBudget + "）");
 
             Debug.Log("[Inertia] moving body: pushFrames=" + pushFrames
-                      + " net=" + netChange.ToString("F4") + "m"
-                      + " rawNet=" + rawNet.magnitude.ToString("F4") + "m"
+                      + " netRaw=" + netChange.ToString("F4") + "m"
+                      + " netSmooth=" + smoothedNetChange.ToString("F4") + "m"
                       + " rawAmp=" + rawAmplitude.ToString("F3") + "m"
                       + " reversals=" + reversals
                       + " windowAcks=" + windowAcks
