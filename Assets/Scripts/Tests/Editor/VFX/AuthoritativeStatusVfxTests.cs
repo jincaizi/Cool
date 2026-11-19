@@ -5,6 +5,7 @@ using Cool.Protocol;
 using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Skills.Events;
+using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.VFX;
 using NUnit.Framework;
 using UnityEngine;
@@ -15,6 +16,8 @@ namespace GameSys.EditorTests
     {
         private readonly List<StatusEffectAppliedEvent> _applied = new List<StatusEffectAppliedEvent>();
         private readonly List<StatusEffectRemovedEvent> _removed = new List<StatusEffectRemovedEvent>();
+        /// <summary>应用/移除的到达顺序（"A:类型" / "R:类型"）——换根时断言 Removed 先于 Applied</summary>
+        private readonly List<string> _sequence = new List<string>();
 
         private GameObject _targetGo;
         private AuthoritativeStatusVfx _vfx;
@@ -37,6 +40,7 @@ namespace GameSys.EditorTests
         {
             _applied.Clear();
             _removed.Clear();
+            _sequence.Clear();
             _targetGo = new GameObject("StatusTarget");
             _vfx = new AuthoritativeStatusVfx();
             EventBus.Subscribe<StatusEffectAppliedEvent>(OnApplied);
@@ -62,8 +66,17 @@ namespace GameSys.EditorTests
             Object.DestroyImmediate(_material);
         }
 
-        private void OnApplied(StatusEffectAppliedEvent e) => _applied.Add(e);
-        private void OnRemoved(StatusEffectRemovedEvent e) => _removed.Add(e);
+        private void OnApplied(StatusEffectAppliedEvent e)
+        {
+            _applied.Add(e);
+            _sequence.Add("A:" + e.EffectType);
+        }
+
+        private void OnRemoved(StatusEffectRemovedEvent e)
+        {
+            _removed.Add(e);
+            _sequence.Add("R:" + e.EffectType);
+        }
 
         private static IList<StatusProjection> Projection(params (int EffectId, int GroupId)[] statuses)
         {
@@ -214,6 +227,112 @@ namespace GameSys.EditorTests
             finally
             {
                 Object.DestroyImmediate(otherGo);
+            }
+        }
+
+        [Test]
+        public void test_authoritative_status_vfx_replays_all_groups_when_target_changes()
+        {
+            // Arrange
+            var oldTarget = new GameObject("OldBody");
+            var newTarget = new GameObject("NewBody");
+            try
+            {
+                _vfx.Apply(7, oldTarget.transform, Projection((101, 1), (201, 2)));
+                Assert.AreEqual(2, _applied.Count);
+                _applied.Clear();
+                _removed.Clear();
+                _sequence.Clear();
+
+                // Act：同一实体换渲染根，状态集合不变（Proxy→Full / 本地角色重建）
+                _vfx.Apply(7, newTarget.transform, Projection((101, 1), (201, 2)));
+
+                // Assert：旧根全部先 Removed，新根再全部 Applied
+                Assert.AreEqual(2, _removed.Count, "旧根的两个组都要移除");
+                Assert.AreEqual(oldTarget.transform, _removed[0].Target);
+                Assert.AreEqual(oldTarget.transform, _removed[1].Target);
+                CollectionAssert.AreEquivalent(
+                    new[] { EffectType.Freeze, EffectType.Burn },
+                    new[] { _removed[0].EffectType, _removed[1].EffectType });
+
+                Assert.AreEqual(2, _applied.Count, "新根要重新应用两个组");
+                Assert.AreEqual(newTarget.transform, _applied[0].Target);
+                Assert.AreEqual(newTarget.transform, _applied[1].Target);
+                Assert.AreEqual(4, _sequence.Count);
+                StringAssert.StartsWith("R:", _sequence[0], "旧根 Removed 必须先于新根 Applied");
+                StringAssert.StartsWith("R:", _sequence[1]);
+                StringAssert.StartsWith("A:", _sequence[2]);
+                StringAssert.StartsWith("A:", _sequence[3]);
+
+                // Act：target 不变时重复投影不重复发
+                _vfx.Apply(7, newTarget.transform, Projection((101, 1), (201, 2)));
+
+                // Assert
+                Assert.AreEqual(2, _applied.Count, "target 相同的重复投影不得重复应用");
+                Assert.AreEqual(2, _removed.Count);
+            }
+            finally
+            {
+                Object.DestroyImmediate(oldTarget);
+                Object.DestroyImmediate(newTarget);
+            }
+        }
+
+        [Test]
+        public void test_remote_entity_registry_replays_statuses_when_tier_changes_render_root()
+        {
+            // Arrange：观察者在场 ⇒ 先建 Proxy；基线投影带状态
+            var root = new GameObject("StatusTierRoot");
+            var prefab = new GameObject("StatusTierAvatar");
+            prefab.AddComponent<Animator>();
+            var registry = new RemoteEntityRegistry(root.transform,
+                new[] { new AppearanceEntry { Id = 0, Full = prefab } });
+            registry.ObserverPositionProvider = () => Vector3.zero;
+            registry.TierPolicy.FullDistance = 300f;
+            registry.TierPolicy.MaxFull = 20;
+            var events = new List<(GameObject Target, IList<StatusProjection> Statuses)>();
+            registry.StatusesChanged += (_, target, statuses) => events.Add((target, statuses));
+            try
+            {
+                registry.ApplySnapshot(new EntitySnapshot
+                {
+                    PlayerId = 77,
+                    FieldMask = (ushort)(EntityFieldMask.Position
+                        | EntityFieldMask.Kind | EntityFieldMask.Combat),
+                    X = 10f, Y = 0f, Z = 0f,
+                    Kind = (byte)EntityKind.PlayerBot,
+                    Combat = new CombatProjection
+                    {
+                        LifeId = 1,
+                        CombatVersion = 1,
+                        Hp = 100f,
+                        MaxHp = 100f,
+                        Statuses = Projection((101, 1)),
+                    },
+                }, serverTicks: 1_000_000L);
+
+                var view = registry.GetView(77);
+                Assert.IsNotNull(view);
+                Assert.AreEqual(RemoteTier.Proxy, view!.Tier, "观察者在场 ⇒ 先建 Proxy");
+                Assert.AreEqual(1, events.Count, "基线投影发一次状态事件");
+                Assert.AreSame(view.ProxyRoot, events[0].Target, "首次应用目标是 Proxy 根");
+
+                // Act：近距离升 Full（换渲染根）
+                registry.UpdateRender(nowServerTicks: 1_000_000L, renderDelayTicks: 0L);
+
+                // Assert：用当前 Statuses 对新根重放一次
+                Assert.AreEqual(RemoteTier.Full, view.Tier, "近距离应升 Full");
+                Assert.AreEqual(2, events.Count, "换根后必须重放一次 StatusesChanged");
+                Assert.AreSame(view.FullRoot, events[1].Target, "重放目标是新的 Full 根");
+                Assert.AreEqual(1, events[1].Statuses.Count);
+                Assert.AreEqual(101, events[1].Statuses[0].EffectId);
+                Assert.AreEqual(1, events[1].Statuses[0].GroupId);
+            }
+            finally
+            {
+                registry.Clear();
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
             }
         }
 

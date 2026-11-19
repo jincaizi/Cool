@@ -73,7 +73,8 @@ namespace Hotfix.GameSystems.VFX
                 case EffectType.Freeze: state.FreezeCount++; break;
                 case EffectType.Burn: state.BurnCount++; break;
                 case EffectType.Stun: state.StunCount++; break;
-                default: state.VulnerableCount++; break;
+                case EffectType.Vulnerable: state.VulnerableCount++; break;
+                // IsTinted 已过滤其余类型；显式列举，未来新增类型不会被静默计成 Vulnerable
             }
         }
 
@@ -87,7 +88,9 @@ namespace Hotfix.GameSystems.VFX
                 case EffectType.Freeze: state.FreezeCount = Mathf.Max(0, state.FreezeCount - 1); break;
                 case EffectType.Burn: state.BurnCount = Mathf.Max(0, state.BurnCount - 1); break;
                 case EffectType.Stun: state.StunCount = Mathf.Max(0, state.StunCount - 1); break;
-                default: state.VulnerableCount = Mathf.Max(0, state.VulnerableCount - 1); break;
+                case EffectType.Vulnerable:
+                    state.VulnerableCount = Mathf.Max(0, state.VulnerableCount - 1);
+                    break;
             }
 
             if (state.FreezeCount == 0 && state.BurnCount == 0

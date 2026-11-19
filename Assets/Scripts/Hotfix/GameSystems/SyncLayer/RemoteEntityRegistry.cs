@@ -340,9 +340,20 @@ namespace Hotfix.GameSystems.SyncLayer
             UpdateLastKnownVitals(entityId, view.LifeId, view.CombatVersion, view.Hp, view.MaxHp,
                 view.Dead, view.IsDefending);
             if (statusesChanged)
-                StatusesChanged?.Invoke(entityId, view.GameObject, projection.Statuses);
+                StatusesChanged?.Invoke(entityId, StatusVfxTarget(view), projection.Statuses);
             if (projection.ActiveCast != null)
                 ActiveCastApplied?.Invoke(entityId, projection.ActiveCast);
+        }
+
+        /// <summary>
+        /// 状态表现目标根：当前**可见**的那一棵（Proxy↔Full 换根后 Renderer 集合不同——
+        /// StatusVFXSystem 首次事件时冻结 Renderer 集合，必须让下游按新根重新染色）。
+        /// </summary>
+        private static GameObject StatusVfxTarget(RemoteEntityView view)
+        {
+            if (view.FullRoot != null && view.FullRoot.activeSelf) return view.FullRoot;
+            if (view.ProxyRoot != null && view.ProxyRoot.activeSelf) return view.ProxyRoot;
+            return view.GameObject;
         }
 
         /// <summary>
@@ -576,7 +587,7 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 foreach (var kv in _views)
                     if (kv.Value.Kind != (byte)EntityKind.Npc)
-                        SetTier(kv.Value, RemoteTier.Full, kv.Key);   // 已 Full 的走早退
+                        SetTier(kv.Value, RemoteTier.Full, kv.Key, replayStatuses: true);   // 已 Full 的走早退
                 RecountTiers();
             }
 
@@ -612,7 +623,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
             for (int i = 0; i < _tierCandidates.Count; i++)
                 if (_views.TryGetValue(_tierCandidates[i].PlayerId, out var view))
-                    SetTier(view, _tierResults[i], _tierCandidates[i].PlayerId);
+                    SetTier(view, _tierResults[i], _tierCandidates[i].PlayerId, replayStatuses: true);
 
             RecountTiers();
         }
@@ -640,7 +651,10 @@ namespace Hotfix.GameSystems.SyncLayer
         /// **不销毁**（会再升回来）；升级时强制重写一次驱动参数（Animator 禁用即重置状态），
         /// 并重新归零 Attack/Hit/Defend 层权重（禁用重置含层权重——见 ResetLayerWeights）。
         /// </summary>
-        private void SetTier(RemoteEntityView view, RemoteTier tier, long entityId)
+        /// <param name="replayStatuses">换根后重放权威状态（Proxy↔Full 的 Renderer 集合不同：
+        /// StatusVFXSystem 首次事件时冻结 Renderer 集合，不重放会染在被隐藏的旧模型上）。</param>
+        private void SetTier(RemoteEntityView view, RemoteTier tier, long entityId,
+            bool replayStatuses = false)
         {
             if (view.Tier == tier && (tier == RemoteTier.Full ? view.FullRoot != null : view.ProxyRoot != null))
                 return;
@@ -698,6 +712,11 @@ namespace Hotfix.GameSystems.SyncLayer
                 view.ProxyRoot.SetActive(true);
                 view.FullRoot?.SetActive(false);
             }
+
+            // 换根完成：目标根已切换，状态列表未变也要让下游按新根重新应用一次
+            //（AuthoritativeStatusVfx 检测 target 变化 → 旧根全 Removed、新根全 Applied）。
+            if (replayStatuses)
+                StatusesChanged?.Invoke(entityId, StatusVfxTarget(view), view.Statuses);
         }
 
         /// <summary>

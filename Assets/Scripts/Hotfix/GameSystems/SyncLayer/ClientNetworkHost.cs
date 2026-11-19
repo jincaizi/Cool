@@ -112,6 +112,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private RemoteCastPresenter? _remoteCastPresenter;
         /// <summary>权威状态投影 → 染色事件（远端经 registry.StatusesChanged，本人经 311 本地分支）</summary>
         private AuthoritativeStatusVfx? _statusVfx;
+        /// <summary>最近一次本人 311 的状态列表——本地角色重建后对新 transform 重放（断开清空）</summary>
+        private IList<StatusProjection>? _localStatuses;
         private WeaponInventoryBaseline? _pendingWeaponBaseline;
         private bool _bagEquipSubscribed;
         private WeaponBagController? _weaponBagController;
@@ -236,6 +238,18 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
+        /// 本地角色重建/首次装配后按缓存重放本人状态（新身体需要重新染色）：
+        /// AuthoritativeStatusVfx 检测到 target 变化会先移除旧身体、再应用新身体。
+        /// </summary>
+        private void ReplayLocalStatuses()
+        {
+            if (_localStatuses == null || _localEntry == null || _statusVfx == null) return;
+            long entityId = _manager?.LocalPlayerId ?? 0;
+            if (entityId == 0) return;
+            _statusVfx.Apply(entityId, _localEntry.transform, _localStatuses);
+        }
+
+        /// <summary>
         /// 场景内首个本地 `Sys3CEntry`。**必须排除远程实体根之下的候选**：远程头像预制体上
         /// 挂着同一个 `Sys3CEntry`（`RemoteEntityAnimator.Awake` 只把它 `enabled = false`），
         /// 而 `FindObjectOfType` **会返回启用 GameObject 上的禁用组件**（2026-10-13 实测：
@@ -293,6 +307,7 @@ namespace Hotfix.GameSystems.SyncLayer
             ResetAttachment(preserveEquipment: true);
             _localEntry = entry;
             _entryLookedUp = true; // 已定位——Update 的重试逻辑直接装配新角色
+            ReplayLocalStatuses(); // 新身体重放权威状态（旧身体随之清染色）
 
             // DemoDay 直跑路径：模式在选人面板确认时才落盘（宿主 Start 读到的仍是旧值/单机）——
             // 玩家（重）生成即确认动作的副作用，此处补连接（正常流程 Start 已连，_connectRequested 守卫）
@@ -751,6 +766,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     Debug.LogWarning("[NetHost] 场景中无 Sys3CEntry——以观察者模式运行（仅渲染远程实体）");
                     return;
                 }
+                ReplayLocalStatuses(); // 首次定位到本地角色（状态可能先于角色到达）
             }
 
             if (_localEntry.CoreController == null)
@@ -1068,6 +1084,9 @@ namespace Hotfix.GameSystems.SyncLayer
                         projection.Control.ControlVersion);
                 if (projection.MaxHp > 0f)
                     _localEntry?.SetMaxHp(projection.MaxHp, fill: false);
+                // 缓存状态列表：本地角色重建后新身体不会再收到同一条投影（CombatVersion 已消费），
+                // 必须按缓存对新 transform 重放染色。
+                _localStatuses = projection.Statuses;
                 if (_localEntry != null)
                     _statusVfx?.Apply(update.EntityId, _localEntry.transform, projection.Statuses);
                 return;
@@ -1113,6 +1132,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 _weaponBagController?.Reset();
                 _connectionEquipment = null;
                 _connectionEquipSeq = 0;
+                _localStatuses = null;   // 断开：上一条连接的本人状态不得重放到新会话
             }
 
             // 远程施法表现：断线/本地角色重建都必须退订并清空跟踪表——
