@@ -83,17 +83,19 @@ public class MonsterStatusControlTests
     }
 
     /// <summary>M12 遗留：冰减速不只缩期望位移，ORCA <c>maxStep</c> 也必须同缩。
-    /// 几何取"正前方 1.8m 静止怪物 + 斜线期望位移 + 上一 tick 全速侧移"：此时解算结果
-    /// 恰好被截断在 maxStep 圆上（半径 = speed×dt），慢/快两组的步长因此精确比较。
-    /// 几何按模板 1 的发布配置（moveSpeed=2.0、dt=0.066）调校；配置漂移时
-    /// "未缩放步长 = baseStep" 的截断断言会先红，需重算邻居距离。</summary>
+    /// 几何取"X 轴正向 1.8m 静止怪物 + (1,0,0.7) 期望位移（与 A→B 约 35°）+
+    /// 构造的上一 tick 全速侧移 v_self=(0,0,baseStep)"：解出的速度被截断在 maxStep 圆上
+    /// （半径 = speed×dt），慢/快两组的步长因此精确比较。配置漂移的守卫是"解出朝向明显
+    /// 偏离期望方向"（约束生效时点积 ≈0.82；约束不生效时 <c>v_pref</c> 原样返回，点积 = 1.0）——
+    /// 只比较步长无法区分"被 maxStep 圆截断"与"没有约束"（后者步长也等于 speed×dt）。</summary>
     [Fact]
     public void Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side()
     {
         var store = new EntityStore();
         long seed = MonsterModule.NpcIdSeed;
-        var avoidance = new AvoidanceSystem(store, _ => AvoidanceSystem.DefaultMonsterRadius);
-        var module = new MonsterModule(store, () => ++seed, avoidance: avoidance, actionV1: true);
+        var module = new MonsterModule(store, () => ++seed, actionV1: true);
+        // 生产接线：半径表走模块的模板表（Server3C 注入点同源）。
+        var avoidance = new AvoidanceSystem(store, module.RadiusOfTemplate);
         long idA = module.SpawnMonster(1, new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, 0f));
         var npc = store.GetPlayer(idA)!;
         var state = module.GetState(idA)!;
@@ -113,18 +115,21 @@ public class MonsterStatusControlTests
         float scaledStep = baseStep * 0.7f;
 
         // 无邻居对照组：快照里只有自己 ⇒ Solve 逐字返回期望位移（moveSpeed × SpeedScale × dt）。
+        avoidance.EnsureSnapshot(0);
         PrepareForMove(state, default);
         float controlStep = mover.MoveTowards(state, direction, dt);
         Assert.Equal(scaledStep, controlStep, 3);
 
-        // 邻居 B：正前方 1.8m 的静止怪物（新实体，快照速度 0，参与互惠避让 α=0.5）。
+        // 邻居 B：X 轴正向 1.8m 处（期望方向 (1,0,0.7) 与 A→B 约 35°）。
+        // 新实体快照速度 0，参与互惠避让 α=0.5。
         long idB = module.SpawnMonster(1, new Vector3(1.8f, 0f, 0f), new Vector3(1.8f, 0f, 0f));
         Assert.NotEqual(idA, idB);
         avoidance.EnsureSnapshot(1);
 
-        // 上一 tick 的全速侧移必须非零：ORCA 半平面锚点 = v_self + α·u；v_self=0 时单邻居的
-        // 约束边界过原点，投影只会收缩，maxStep 圆（半径 = speed×dt）永远不收紧，测不到缩放。
-        // 取减速生效前上一 tick 的实际位移后，慢/快两组的解都恰好落在各自的 maxStep 圆上。
+        // v_self=(0,0,baseStep) 是测试为几何**构造**的上一 tick 速度（不是观测到的位移）：
+        // ORCA 半平面锚点 = v_self + α·u；v_self=0 时单邻居的约束边界过原点，投影只会收缩，
+        // maxStep 圆（半径 = speed×dt）永远不收紧，测不到缩放。取该非零 v_self 后，
+        // 慢/快两组的解都恰好落在各自的 maxStep 圆上。
         PrepareForMove(state, new Vector3(0f, 0f, baseStep));
         float slowOrcaStep = mover.MoveTowards(state, direction, dt);
         Vector3 slowOrcaVelocity = state.CurrentVelocity;
@@ -132,6 +137,14 @@ public class MonsterStatusControlTests
         Assert.Equal(scaledStep, slowOrcaStep, 3);    // 实际 maxStep = baseStep × 0.7
         Assert.True(slowOrcaVelocity.X > 0f, "avoidance keeps advancing toward the goal (+X)");
         Assert.True(slowOrcaVelocity.Z > 0f, "avoidance side stays +Z under SpeedScale=0.7 (not inverted)");
+
+        // 约束生效证明：被约束的解必须偏离期望方向。若 B 没有产生有效半平面（约束在 v_pref
+        // 处不被违反），LinearProgram2 原样返回 v_pref，朝向点积 = 1.0，这条断言立即红。
+        Vector3 preferredUnit = direction.Normalize();
+        float slowHeadingDot = (slowOrcaVelocity.X * preferredUnit.X
+            + slowOrcaVelocity.Z * preferredUnit.Z) / slowOrcaStep;
+        Assert.True(slowHeadingDot < 0.95f,
+            "neighbor constraint must bend the heading away from v_pref (dot=" + slowHeadingDot.ToString("F3") + ")");
 
         // 同一几何、同一 v_self 的未减速对照。直接写 SpeedScale（模块每 tick 会从
         // ControlSpeedScale 重写；这里只做 ORCA 几何对照，不再走状态运行时）。

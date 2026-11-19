@@ -20,8 +20,8 @@
 | 01 | 共享表、权威换装、普攻参数与剑气快照 | ✅ 已完成 | 50/50 步骤；服务端 512/512、Unity EditMode/PlayMode 相关测试全部通过；模块 README 已回写 |
 | 02 | [B1 取消 + NpcAction 全链 + B2 战斗投影/带宽](2026-11-17-elemental-sword-qi-02-cancel-projection.md) | ✅ 已完成 | Part A/B 全部完成并回归：取消/NpcAction、战斗投影、AOI 基线/条件字段、在途剑气补发与 100 KB/s 门禁；模块 README 已回写 |
 | 03 | [B5 位移/跳跃预算 + PvP 控制](2026-11-18-elemental-sword-qi-03-displacement-pvp.md) | ✅ 已完成 | 10/10 任务；服务端 587/587；Unity 目标测试类通过（`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败，基线可复现，不计回归）；模块 README 已回写 |
-| 04 | [状态结算 + DoT + 表现](2026-11-19-elemental-sword-qi-04-status-dot-vfx.md) | ✅ 已完成 | 8/8 任务；服务端全部 654/654；Unity 目标 EditMode 类通过（`ElementalApplicationTests` 仅服务端存在；`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败，基线可复现）；PlayMode 五类回归完成（`MonsterWorldTests` 导航模式既有 Slime 巡逻卡死为已知导航债）；模块 README 已回写。在线 PvE/PvP 权威状态已完成；**离线单机共享运行时未接入，留给 Plan 06/backlog（2026-11-20 修正）** |
-| 05 | 三客户端验收 + 表现收口 | ✅ 已完成 | 6/6 任务；服务端 668/668（基线 654 → AOI 10 + 带宽 2 + 服务端预算 2；含最终审查补充的 NPC 目标反查用例）；Unity EditMode 目标类 `ElementVfxFallbackTests` 5/5、`SwordQiElementTintTests` 4/4、`StatusVFXSystemTests` 3/3、`NetworkConsumptionInjectionTests` 14/14、`ProtocolShapeGuardTests` 17/17（`RemoteEntityRegistryTests` 16/17，仅既有 `Bot_Radius` PPtr）；PlayMode 9/9（三客户端元素 1/1、三客户端战斗一致性 1/1、`MovementSyncTests` 4/4、`PlayerControlInertiaTests` 3/3，真实 Server3C:8000）；带宽 100 实体 ×15Hz×60s 平均 53.4 KB/s、100 实体同时 DoT 最坏 76.9 KB/s（预算 100 KB/s，未上调）；收包注入目标类合计 72/72；AOI 反查 N=1000 ≤1ms、索引与暴力逐项相等。**未新增战斗机制/协议字段；离线共享运行时与 Addressables 美术资源签收移至 Plan 06/backlog。设计规格中未执行的三端 DoT/末跳致死、麻痹取消前摇 `Cancelled` 链、状态结束时钟偏移、AOI 快速出入/复活版本连续、KCP/WS 延迟注入、断线重进旧包与模型未加载场景已登记到 Plan 06（见下），不得视为已验收** |
+| 04 | [状态结算 + DoT + 表现](2026-11-19-elemental-sword-qi-04-status-dot-vfx.md) | ✅ 已完成 | 8/8 任务；服务端全部 654/654；Unity 目标 EditMode 类通过（`ElementalApplicationTests` 仅服务端存在；`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败，基线可复现）；PlayMode 五类回归完成（`MonsterWorldTests` 导航模式既有 Slime 巡逻卡死为已知导航债）；模块 README 已回写。在线 PvE/PvP 权威状态已完成；**离线单机共享运行时未接入，留给 backlog（Plan 06 未包含；2026-11-20 修正）** |
+| 05 | 三客户端验收 + 表现收口 | ✅ 已完成 | 6/6 任务；服务端 668/668（基线 654 → AOI 10 + 带宽 2 + 服务端预算 2；含最终审查补充的 NPC 目标反查用例）；Unity EditMode 目标类 `ElementVfxFallbackTests` 5/5、`SwordQiElementTintTests` 4/4、`StatusVFXSystemTests` 3/3、`NetworkConsumptionInjectionTests` 14/14、`ProtocolShapeGuardTests` 17/17（`RemoteEntityRegistryTests` 16/17，仅既有 `Bot_Radius` PPtr）；PlayMode 9/9（三客户端元素 1/1、三客户端战斗一致性 1/1、`MovementSyncTests` 4/4、`PlayerControlInertiaTests` 3/3，真实 Server3C:8000）；带宽 100 实体 ×15Hz×60s 平均 53.4 KB/s、100 实体同时 DoT 最坏 76.9 KB/s（预算 100 KB/s，未上调）；收包注入目标类合计 72/72；AOI 反查 N=1000 ≤1ms、索引与暴力逐项相等。**未新增战斗机制/协议字段；离线共享运行时与 Addressables 美术资源签收移至 backlog（Plan 06 未包含）。设计规格中未执行的三端 DoT/末跳致死、麻痹取消前摇 `Cancelled` 链、状态结束时钟偏移、AOI 快速出入/复活版本连续、KCP/WS 延迟注入、断线重进旧包与模型未加载场景已登记到 Plan 06 并在 Plan 06 收口（见下）：DoT/麻痹取消/AOI 版本连续/消息级注入已验收；状态结束时钟偏移、KCP/WS 传输层延迟、真实会话代次仍未执行；三端末跳致死时刻为 Plan 07 gap** |
 | 06 | [验收缺口与稳定性](2026-11-20-elemental-sword-qi-06-acceptance-gaps.md) | ✅ 已完成 | 6/6 任务；服务端 **699/699**；EditMode `NetworkConsumptionInjectionTests` **24/24**；PlayMode `ThreeClientElementalAcceptanceTests` **3/3**、`PlayerControlInertiaTests` **4/4**（真实 Server3C:8000）。生产仅改 `CombatNetworkBridge` 的 LifeId 代次门。边界：移动 NpcBody 推挤只在测试 stub 下验收机制，生产推挤仍 backlog；三端末跳致死时刻为 Plan 07 gap；状态结束时钟偏移、KCP/WebSocket 传输层延迟注入、真实连接代次/旧位移预测仍为 backlog（见下） |
 
 **换装跟进（2026-11-16）**：简易武器背包、男女八把元素剑校准变体、权威确认对账与
@@ -93,11 +93,11 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
   （空中麻痹 0.3s 位移 1.521m、落地累计 3.650m、地面麻痹 0；贴 `NpcBody` 往返幅度
   0.0000m、最大 z 0.410）；服务端 `PvpMovementBudgetTests` 9/9（空中锁定仅发放跳跃惯性
   6.0m = 6 m/s × 1.0s，普通预算为 0）。**只覆盖静态盒贴附的本地稳定性**；移动
-  `NpcBody` + 位置上报/纠偏联测登记到 Plan 06（见下）。
+  `NpcBody` + 位置上报/纠偏联测登记到 Plan 06，已完成机制验收（见下）。
 - **元素表现回退**（Plan 05 任务 6 完成）：`ElementVfxFallback.ResolveColor` 锁定
   “ViewKey 非空且 loader 命中资源 → `Color.white`（资源自带颜色，Host 实例化），否则
   `ElementPalette.ColorOf(elementId)`”；`ElementVfxFallbackTests` 5/5。未实际调用
-  Addressables；生产 loader/Host 接入与美术资源签收属 Plan 06。
+  Addressables；生产 loader/Host 接入与美术资源签收属 Plan 07/backlog。
 
 ## Plan 06 收口项结果（2026-11-20 完成）
 
@@ -132,9 +132,10 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   的产品行为保持 backlog。**
 - **ORCA 减速 `maxStep` 邻居用例**（任务 6）：`MonsterStatusControlTests` 8/8。新增
   `Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side`：冰减速
-  `SpeedScale=0.7` + 正前方 1.8m 静止怪物，断言实际步长 = `moveSpeed×0.7×dt`
-  （解恰好截断在缩放后的 `maxStep` 圆上；未缩放对照 = `moveSpeed×dt`），慢/快步长比 0.7，
-  避让横向分量同向（不反转）；无邻居对照组仍逐字返回期望位移。命令：
+  `SpeedScale=0.7` + X 轴正向 1.8m 静止怪物（期望方向 `(1,0,0.7)` 与之约 35°），断言实际步长
+  = `moveSpeed×0.7×dt`（解恰好截断在缩放后的 `maxStep` 圆上；未缩放对照 = `moveSpeed×dt`），
+  慢/快步长比 0.7，解出朝向偏离期望方向（点积 <0.95 ≈0.82，证明约束确实生效，而非 `v_pref`
+  原样返回）且避让横向分量同向（不反转）；无邻居对照组仍逐字返回期望位移。命令：
   `bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterStatusControlTests"`。
 
 全量验证：`bash tools/test-server-inprocess.sh` → **699/699**；EditMode
@@ -144,8 +145,8 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
 
 ## Plan 06 / backlog 登记（2026-11-20）
 
-以下项**不属于** Plan 01–05 已交付范围，登记到 Plan 06/backlog。Plan 06 已验收的项在条目内
-标注证据（汇总见上节）；**未标注的项仍未执行，不得写成已打通**。
+以下项**不属于** Plan 01–05 已交付范围，登记到 Plan 06/backlog（Plan 06 已收口：已验收项在
+条目内标注证据，汇总见上节；**未标注的项归 Plan 07/backlog，不得写成已打通**）。
 
 - **Plan 05 未执行的设计验收场景**（2026-11-20 登记；Plan 05 已交付的是子集，Plan 06 验收状态
   见每条标注，未标注者不得写成已验收）：
@@ -167,7 +168,7 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
     （三端 3/3；B 未发射且无命中、A 雷仍 2 条命中、旁观者 presenter 停止）。
   - **状态结束时钟偏移注入**：给两台客户端注入不同时钟偏移和渲染延迟，断言特效移除由同一条
     `CombatStateUpdate` 触发；权威移除晚于 `EndTick` 时保持到消息到达（`design.md:169`）。
-    **未执行**：Plan 06 任务列表未包含该项，仍为 backlog。
+    **未执行**：Plan 06 范围明确排除该项，仍为 Plan 07/backlog。
   - **AOI 快速出入/复活版本连续**：AOI 快速出入、死亡复活、Evade 到家与断线重进时，
     进入基线与后续 `CombatStateUpdate` 的 `CombatVersion`/`LifeId` 连续，旧版本增量不能复活
     旧状态或旧装备（`design.md:170`）。回池重生按生产语义是**新实体 id**（新实体 `LifeId=1`、
@@ -198,7 +199,7 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   效果组去重，本地灼烧进入同一易伤计算点、冰冻保留定身表现。验收：同表配置下离线四元素
   行为（减速/灼烧末跳/麻痹/易伤）与服务端 `StatusRuntimeTests` 断言一致。
 - **Addressables 元素资源、远端武器模型与美术签收**：`ElementVfxFallback` 只锁定键解析/
-  颜色回退的判定顺序，未接入 Addressables；需在 Plan 06 的 Host 侧实现生产 loader、
+  颜色回退的判定顺序，未接入 Addressables；需在 Plan 07/backlog 的 Host 侧实现生产 loader、
   填表 `ViewKey`，并完成四元素特效资源与远端武器模型的人工美术验收（远端武器模型目前
   仍只有本地换剑外观）。资源缺失时必须继续回退程序化颜色，不阻塞战斗。
 - **`_pushVector` 对远程 NpcBody 不生效**（Plan 05 任务 5 登记）：`Sys3CEntry.OnControllerColliderHit`
@@ -212,12 +213,13 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   Plan 05 任务 4 完成；M3 的 `StatusTickService.Tick` 列表缓冲复用仍未做，一并归入）。
 - **NpcAction 驱动的攻击变体/时间轴**（2026-11-20 登记）：`NpcActionEvent` 目前只负责
   阶段/取消，NPC 攻击起手仍由 `CastBroadcast → NpcAttackSchedule` 驱动；若后续需要
-  `NpcAction` 直接驱动攻击变体/时间轴，需在 Plan 06 单独设计（Plan 05 未新增该机制）。
+  `NpcAction` 直接驱动攻击变体/时间轴，需在 Plan 07/backlog 单独设计（Plan 05/06 均未新增该机制）。
 - **ORCA 减速 `maxStep` 邻居用例**（M12 遗留，**Plan 06 任务 6 已完成**）：
   `MonsterStatusControlTests` 8/8；新增 `Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side`
-  用冰减速 `SpeedScale=0.7` + 正前方 1.8m 静止怪物断言实际步长 = `moveSpeed×0.7×dt`
-  （未缩放对照 = `moveSpeed×dt`），慢/快步长比 0.7，且避让横向分量不反转；无邻居对照组仍按原期望位移。
-- **Plan 06 未执行项（2026-11-20 收口，仍不得写成已打通）**：状态结束时钟偏移注入、
+  用冰减速 `SpeedScale=0.7` + X 轴正向 1.8m 静止怪物（期望方向 `(1,0,0.7)` 与之约 35°）断言
+  实际步长 = `moveSpeed×0.7×dt`（未缩放对照 = `moveSpeed×dt`），慢/快步长比 0.7，解出朝向
+  偏离期望方向（点积 <0.95，约束确实生效）且避让横向分量不反转；无邻居对照组仍按原期望位移。
+- **未执行项（Plan 06 收口后的 Plan 07/backlog，仍不得写成已打通）**：状态结束时钟偏移注入、
   KCP/WebSocket 传输层延迟注入、真实连接代次/旧位移预测隔离（宿主级）；三端同一次末跳致死时刻登记 Plan 07。
 - **已知环境/夹具失败（非 Plan 05 回归）**：`RemoteEntityRegistryTests.Bot_Radius`
   的 PPtr 环境失败（16/17，基线可复现）；`MonsterWorldTests` 导航模式 Slime 巡逻卡死

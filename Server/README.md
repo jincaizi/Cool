@@ -141,11 +141,12 @@ bash tools/test-server.sh
   同次施法的后续命中才生效；PvE 用状态表 ×2.0，PvP 用共享
   `Pvp.WindVulnerabilityMultiplier = 1.28`（PvP 不放大灼烧）。
 
-状态：Plan 01–05 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
-PvP 基线、Plan 04 状态结算/DoT/元素表现、Plan 05 AOI 反查索引/三客户端/带宽/注入验收），
-服务端全量 **667/667**。Plan 05 未新增战斗机制或协议字段（`ProtocolVersion` 保持 1）。
-未启用：**离线单机共享状态运行时**（本地 `StatusEffectManager` 的冰冻/灼烧保持独立，
-四元素运行时留给 Plan 06/backlog）、Addressables 元素资源与远端武器模型（Plan 06/backlog）。
+状态：Plan 01–06 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
+PvP 基线、Plan 04 状态结算/DoT/元素表现、Plan 05 AOI 反查索引/三客户端/带宽/注入验收、
+Plan 06 验收缺口收口），服务端全量 **699/699**。Plan 05/06 未新增战斗机制或协议字段
+（`ProtocolVersion` 保持 1）。未启用：**离线单机共享状态运行时**（本地 `StatusEffectManager`
+的冰冻/灼烧保持独立，四元素运行时留给 backlog）、Addressables 元素资源与远端武器模型
+（backlog；Plan 06 明确未包含）。
 
 Plan 03 验收证据（可证伪）：
 
@@ -155,7 +156,7 @@ Plan 03 验收证据（可证伪）：
 - PvP：`LoginCombatBaselineTests` 断言 720 HP；`PveDamageScaleTests` 断言 NPC→720 HP
   玩家伤害 ×7.2，保持原 PvE TTK。
 
-Plan 04 验收证据（服务端，全部在 654/654 内）：
+Plan 04 验收证据（服务端；7 项基线在 654/654 内，怪物控制项另含 Plan 06 补充）：
 
 - 状态运行时：`StatusRuntimeTests`（11 项）锁定刷新/末跳/控制派生/PvP 免疫与 4s 不刷新；
   `ServerStatusManagerTests`（9 项）锁定控制 sink 与投影版本；`GameLoopOrderingTests`
@@ -166,12 +167,14 @@ Plan 04 验收证据（服务端，全部在 654/654 内）：
   在 `DrainResolved` 压缩途中重入不越界、不覆盖/丢弃后续待判定施法（C1）。
 - DoT：`DotDamageTests`（9 项）与 `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、
   `DamageKind=Dot`、末跳只结算一次、到期/死亡清理。
-- 怪物控制：`MonsterStatusControlTests`（**8 项**）锁定减速对真实位移的缩放（无邻居期望位移
-  逐字验证；`Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side`
-  用正前方 1.8m 静止怪物证明 ORCA `maxStep` 同缩——`SpeedScale=0.7` 时解恰好截断在
-  `moveSpeed×0.7×dt` 的 maxStep 圆上、未缩放对照为 `moveSpeed×dt`，慢/快步长比 0.7，
-  避让横向分量不因缩放反转）、麻痹打断与霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，
-  状态清除由 `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
+- 怪物控制：`MonsterStatusControlTests`（**8 项**；7 项属 Plan 04，ORCA 邻居用例为 Plan 06
+  任务 6）锁定减速对真实位移的缩放（无邻居期望位移逐字验证；
+  `Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side` 用 X 轴正向
+  1.8m 静止怪物（期望方向 `(1,0,0.7)` 与其约 35°）证明 ORCA `maxStep` 同缩——`SpeedScale=0.7`
+  时解恰好截断在 `moveSpeed×0.7×dt` 的 maxStep 圆上、未缩放对照为 `moveSpeed×dt`，慢/快步长比
+  0.7，解出朝向偏离期望方向（点积 <0.95，约束确实生效）且横向分量不因缩放反转）、
+  麻痹打断与霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
+  `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
 
 Plan 05 验收证据（2026-11-20；服务端项均在 667/667 内，Unity 结果另列）：
 
@@ -190,7 +193,7 @@ Plan 05 验收证据（2026-11-20；服务端项均在 667/667 内，Unity 结�
   既有的 `Bot_Radius` PPtr 环境失败；`MonsterWorldTests` 导航模式 Slime 巡逻卡死为
   服务端导航债；`PlayerJumpBodyCollisionTests` 在 batchmode 0/3（夹具自身 PPtr 伪报 +
   固定 180 帧落地等待不足）。backlog：`_pushVector` 对远程 `NpcBody` 不生效（`IDamageable`
-  门槛，见路线图 Plan 06 登记）。
+  门槛，见路线图 Plan 06/backlog 登记）。
 
 `CastCancelBroadcast`（317）、`CombatStateUpdate`（318）与 `NpcActionEvent`（2004，含 `LifeId`）
 已启用；取消/动作事件/投影统一按 `IsSameCombatScene`（相对 `ZoneId`，空值广播）过滤。
