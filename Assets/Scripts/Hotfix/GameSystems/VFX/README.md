@@ -13,6 +13,7 @@
 | `HitFlashVFX.cs` / `BodyTintRenderer.cs` / `PlayerBodyTint.cs` / `HitTintState.cs` | 受击闪白与染色 |
 | `StatusVFXSystem.cs` / `SkillFreezeEffector.cs` | 状态效果表现 |
 | `AuthoritativeStatusVfx.cs` | 权威状态投影 → 按组 diff 的表现事件（Plan 04） |
+| `ElementVfxFallback.cs` | 元素 VFX 键解析/颜色回退（Plan 05；生产 Addressables loader 留 Plan 06） |
 | `WeaponElementConfig.cs` / `WeaponMaterialProxy.cs` / `WeaponSurfaceShader.cs` | 武器元素与材质 |
 | `PlayerHealVFX.cs` | 治疗表现 |
 | `SkillWatcher.cs` | 技能事件观察 |

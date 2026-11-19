@@ -144,7 +144,7 @@ namespace Hotfix.GameSystems.Sys3C
         private int _shownSwordElement;
 
         /// <summary>当前实际应用的元素外观（0 = 原配剑）。ApplySwordView 更新；
-        /// 供后续离线/本地剑气元素 provider 读取（Plan 05 接入）。</summary>
+        /// 供后续离线/本地剑气元素 provider 读取（Plan 06/backlog 接入）。</summary>
         public int CurrentElementId { get; private set; }
 
         /// <summary>

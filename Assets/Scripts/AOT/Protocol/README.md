@@ -62,10 +62,11 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 
 ### 属性剑气 v1（2026-11-14）
 
-状态：Plan 01–04 已完成（Part A 取消/NpcAction；Part B 战斗投影/AOI 发送原因/带宽；
-Plan 03 位移/跳跃预算与 PvP 控制基线；Plan 04 状态结算/DoT/元素表现）。
-Plan 05 未开始，见路线图。`Statuses[]`、实际控制来源（状态运行时）与 `DamageKind=Dot`
-均已在 Plan 04 启用；协议本身没有新增消息，只是填充既有字段。
+状态：Plan 01–05 已完成（Part A 取消/NpcAction；Part B 战斗投影/AOI 发送原因/带宽；
+Plan 03 位移/跳跃预算与 PvP 控制基线；Plan 04 状态结算/DoT/元素表现；Plan 05 完成
+AOI 反查/三客户端/带宽/注入验收）。验收证据见路线图与 `Server/README.md`。
+`Statuses[]`、实际控制来源（状态运行时）与 `DamageKind=Dot`
+均已在 Plan 04 启用；Plan 05 未新增协议消息，`ProtocolVersion` 保持 1，只是填充既有字段。
 
 能力位 `ProtocolFeatures.ElementalSwordQiV1 = 1u << 2`。登录请求 tag9
 `ElementalCatalogFingerprint`（共享目录 SHA-256 小写十六进制）；登录响应 tag14 同指纹、

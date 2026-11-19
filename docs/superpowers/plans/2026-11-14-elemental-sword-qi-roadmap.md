@@ -84,9 +84,10 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
   目标、伤害修饰），复用 `ElementalCatalogDefinition` 四元素表；权威状态与本地旧状态按
   效果组去重，本地灼烧进入同一易伤计算点、冰冻保留定身表现。验收：同表配置下离线四元素
   行为（减速/灼烧末跳/麻痹/易伤）与服务端 `StatusRuntimeTests` 断言一致。
-- **Addressables 元素美术资源签收**：`ElementVfxFallback` 只锁定键解析/颜色回退的判定
-  顺序，未接入 Addressables；需在 Plan 06 的 Host 侧实现生产 loader、填表 `ViewKey`，
-  并完成四元素特效资源的人工美术验收。资源缺失时必须继续回退程序化颜色，不阻塞战斗。
+- **Addressables 元素资源、远端武器模型与美术签收**：`ElementVfxFallback` 只锁定键解析/
+  颜色回退的判定顺序，未接入 Addressables；需在 Plan 06 的 Host 侧实现生产 loader、
+  填表 `ViewKey`，并完成四元素特效资源与远端武器模型的人工美术验收（远端武器模型目前
+  仍只有本地换剑外观）。资源缺失时必须继续回退程序化颜色，不阻塞战斗。
 - **`_pushVector` 对远程 NpcBody 不生效**（Plan 05 任务 5 登记）：`Sys3CEntry.OnControllerColliderHit`
   以 `IDamageable` 为门槛，而 `NpcBodyCollider.BuildCollider` 在子物体只挂 `BoxCollider`，
   无该组件，因此贴身推离反馈对远程 `NpcBody` 不触发。若产品需要“被怪身体推开”，需给
@@ -95,6 +96,11 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
   M7 未用参数、M8 死 API、M10 死亡 tick、M11 非 ActionV1、M16 离线 provider、
   M17 ThunderDuration、M18 bot 控制、M19 断开/换模型陈旧表现（M9 `EventId` 去重已在
   Plan 05 任务 4 完成；M3 的 `StatusTickService.Tick` 列表缓冲复用仍未做，一并归入）。
+- **NpcAction 驱动的攻击变体/时间轴**（2026-11-20 登记）：`NpcActionEvent` 目前只负责
+  阶段/取消，NPC 攻击起手仍由 `CastBroadcast → NpcAttackSchedule` 驱动；若后续需要
+  `NpcAction` 直接驱动攻击变体/时间轴，需在 Plan 06 单独设计（Plan 05 未新增该机制）。
+- **ORCA 减速 `maxStep` 邻居用例**（M12 遗留）：`MonsterStatusControlTests` 目前只验证
+  无邻居期望位移；Plan 06 补邻居构造用例，验证 ORCA `maxStep` 同样按状态倍率缩放。
 - **已知环境/夹具失败（非 Plan 05 回归）**：`RemoteEntityRegistryTests.Bot_Radius`
   的 PPtr 环境失败（16/17，基线可复现）；`MonsterWorldTests` 导航模式 Slime 巡逻卡死
   （服务端导航债）；`PlayerJumpBodyCollisionTests` 在 batchmode 下 0/3（夹具自身

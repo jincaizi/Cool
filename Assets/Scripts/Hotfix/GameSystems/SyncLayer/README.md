@@ -98,7 +98,7 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   仍走同一条 `ProjectileLaunchBroadcast` 路径，按原始 `ServerTimestamp` 补飞行进度。
 - **与攻击起手的分工**：Plan 02 保留 `CastBroadcast` → `NpcAttackSchedule` 作为 NPC 攻击起手；
   `NpcActionEvent` 只负责阶段/取消（技能动作仅跟踪实例，`Cancelled` 时停止），避免同一次施法
-  挥两次。NpcAction 直接驱动攻击变体/时间轴留 Plan 05（Plan 04 未改这条分工）。
+  挥两次。NpcAction 直接驱动攻击变体/时间轴留 Plan 06/backlog（Plan 05 未接，Plan 04 未改这条分工）。
 
 ## 位移预算上报与控制消费（Plan 03，2026-11-18）
 
