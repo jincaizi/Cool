@@ -124,7 +124,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
         private static CombatStateUpdate CombatUpdate(long entityId, uint version, float hp,
             long weaponInstanceId, bool defending = false, bool dead = false,
-            uint lifeId = 1, IList<StatusProjection>? statuses = null, bool nullStatuses = false)
+            uint lifeId = 1, IList<StatusProjection>? statuses = null)
             => new CombatStateUpdate
             {
                 EntityId = entityId,
@@ -140,9 +140,8 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     {
                         WeaponInstanceId = weaponInstanceId, TemplateId = 90002, ElementId = 1
                     },
-                    // 默认保持一直以来的空列表语义；nullStatuses 单独保留 null 路径（
-                    // StatusesEqual/视图合并对 null 与空列表的处理不同）。
-                    Statuses = nullStatuses ? null! : statuses ?? new List<StatusProjection>()
+                    // 默认空列表；StatusesEqual 把 null 与空列表同样按 0 项处理，无需单独区分。
+                    Statuses = statuses ?? new List<StatusProjection>()
                 }
             };
 

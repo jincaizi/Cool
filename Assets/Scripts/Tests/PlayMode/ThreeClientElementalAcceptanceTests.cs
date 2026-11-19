@@ -23,9 +23,9 @@ namespace KcpNet.PlayModeTests
     /// ① A 的 CastBroadcast 必须携带雷元素（ElementId=3）且 CastConfirm 接受；
     /// ② A/B/C 收到的同一 HitEntry 的 CastId/EventSeq/CombatVersion/TargetRemainingHp 逐值相等
     ///    （挥击 + 剑气两个独立伤害实例，共两条命中）；
-    /// ③ B 本人的 311 与 C 应用后的远程视图都必须看到麻痹状态
+    /// ③ B 本人的 CombatStateUpdate（318）与 C 应用后的远程视图都必须看到麻痹状态
     ///    （Statuses 含 EffectId=301 且 SourceId=A、Control.ActionLock=true、ControlVersion>0）；
-    /// ④ 施加与清空两条 311 的 ServerTimestamp 差值必须落在 0.7–1.05s（0.8s ± 0.25s），
+    /// ④ 施加与清空两条 CombatStateUpdate（318）的 ServerTimestamp 差值必须落在 0.7–1.05s（0.8s ± 0.25s），
     ///    施加后约 0.65s 仍必须锁定（防“立即清空”也通过）；B/C 收到“无 301 且 ActionLock=false”
     ///    的投影，且 EffectId=301 的移除只发生一次（按 CombatVersion 递增）。
     ///
@@ -313,7 +313,7 @@ namespace KcpNet.PlayModeTests
                         + " C=" + cHits[i].TargetRemainingHp + ")");
             }
 
-            // B 本人 311：麻痹状态（来源必须是 A）+ 动作锁 + 控制版本推进。
+            // B 本人 CombatStateUpdate（318）：麻痹状态（来源必须是 A）+ 动作锁 + 控制版本推进。
             gate.SetStage("status-apply-b");
             CombatStateUpdate? bApply = null;
             if (!await WaitUntil(all, gate, () =>
@@ -328,7 +328,7 @@ namespace KcpNet.PlayModeTests
             if (bApply.Projection.Control!.ControlVersion == 0)
                 return (false, "status-apply: B Control.ControlVersion == 0");
 
-            // C 旁观收到的同一条 311，喂给 registry 后远程视图必须一致。
+            // C 旁观收到的同一条 CombatStateUpdate（318），喂给 registry 后远程视图必须一致。
             gate.SetStage("status-apply-c");
             CombatStateUpdate? cApply = null;
             if (!await WaitUntil(all, gate, () =>
@@ -404,7 +404,7 @@ namespace KcpNet.PlayModeTests
             if (cClear!.Projection.Control == null || cClear.Projection.Control.ActionLock)
                 return (false, "status-clear: C Control.ActionLock is not false");
 
-            // 0.8s（12 tick）持续时间：施加→清空两条 311 的 ServerTimestamp 间隔 0.7–1.05s。
+            // 0.8s（12 tick）持续时间：施加→清空两条 CombatStateUpdate（318）的 ServerTimestamp 间隔 0.7–1.05s。
             gate.SetStage("status-expiry-timing");
             double gapSeconds = (bClear.ServerTimestamp - bApply.ServerTimestamp)
                 / (double)TimeSpan.TicksPerSecond;
@@ -552,7 +552,7 @@ namespace KcpNet.PlayModeTests
                         + "s outside [0.850, 1.150]s at tick " + i);
             }
 
-            // EndTick 对齐：末跳必须落在施加投影 201 的 EndTick 上。施加 311 与施加同 tick
+            // EndTick 对齐：末跳必须落在施加投影 201 的 EndTick 上。施加 CombatStateUpdate（318）与施加同 tick
             // （tick 末发送），末跳在 EndTick 的 pre-tick；EndTick − 施加 tick = 服务的
             // ceil(DurationSeconds × 15Hz)，因此两端墙钟差必须等于该时长（±1 个服务端 tick）。
             var burnProjection = bApply.Projection.Statuses.First(s => s.EffectId == FireEffectId);
@@ -688,7 +688,7 @@ namespace KcpNet.PlayModeTests
             var deadOnA = deadA!;
             var deadOnB = deadB!;
             var deadOnC = deadC!;
-            // 三端死讯逐值一致（同一条 311 解码）。
+            // 三端死讯逐值一致：同一条 CombatStateUpdate（318）解码。
             if (!deadOnA.Projection.Dead || !deadOnB.Projection.Dead || !deadOnC.Projection.Dead)
                 return (false, "fire/death: Dead projection is not Dead=true on all clients");
             if (deadOnA.Projection.CombatVersion != deadOnB.Projection.CombatVersion
@@ -1026,7 +1026,7 @@ namespace KcpNet.PlayModeTests
 
             long bId = b.Manager.LocalPlayerId;
 
-            // 三客户端同出生点；等 C 的 AOI 看到 B（C 的 311/DamageResult 依赖观察者关系）。
+            // 三客户端同出生点；等 C 的 AOI 看到 B（C 的 CombatStateUpdate/DamageResult 依赖观察者关系）。
             gate.SetStage("aoi-c-sees-b");
             if (!await WaitUntil(all, gate, () => c.Registry.GetView(bId) != null, 15f))
                 return (false, "aoi: C never saw B (bId=" + bId + ")", 0, 0, null);
@@ -1335,7 +1335,7 @@ namespace KcpNet.PlayModeTests
             return false;
         }
 
-        /// <summary>311 识别：状态必须存在且来源是施法者 A（防把别人/客户端的同 ID 状态当成本次施加）。</summary>
+        /// <summary>CombatStateUpdate（318）识别：状态必须存在且来源是施法者 A（防把别人/客户端的同 ID 状态当成本次施加）。</summary>
         private static bool HasEffectFrom(CombatProjection projection, int effectId, long sourceId)
         {
             var statuses = projection.Statuses;
@@ -1394,7 +1394,7 @@ namespace KcpNet.PlayModeTests
         private static int CountThunderRemovals(Ctx ctx, long entityId)
             => CountEffectRemovals(ctx, entityId, ThunderEffectId);
 
-        /// <summary>失败诊断：CastBroadcast 的 CastId:ElementId、DamageResult 命中、B 实体 311 摘要。</summary>
+        /// <summary>失败诊断：CastBroadcast 的 CastId:ElementId、DamageResult 命中、B 实体 CombatStateUpdate（318）摘要。</summary>
         private static string Summarize(Ctx a, Ctx b, Ctx c, long bId)
         {
             var casts = a.Broadcasts.ToArray();
@@ -1405,8 +1405,8 @@ namespace KcpNet.PlayModeTests
                 + " dmg(B) A=" + DescribeHits(a, bId)
                 + " B=" + DescribeHits(b, bId)
                 + " C=" + DescribeHits(c, bId)
-                + " 311(B)=" + Describe(b, bId)
-                + " 311(C)=" + Describe(c, bId);
+                + " CombatStateUpdate(B)=" + Describe(b, bId)
+                + " CombatStateUpdate(C)=" + Describe(c, bId);
         }
 
         private static string DescribeHits(Ctx ctx, long targetId)
@@ -1428,7 +1428,7 @@ namespace KcpNet.PlayModeTests
                 + " hits(" + castId + ") A=" + DescribeAllHits(a, castId)
                 + " B=" + DescribeAllHits(b, castId)
                 + " C=" + DescribeAllHits(c, castId)
-                + " 311(B)=" + Describe(b, bId);
+                + " CombatStateUpdate(B)=" + Describe(b, bId);
 
         private static string DescribeCancels(Ctx ctx, ulong castId)
         {
@@ -1451,8 +1451,8 @@ namespace KcpNet.PlayModeTests
             => " | dot(A)=" + DescribeDots(a, bId)
                 + " dot(B)=" + DescribeDots(b, bId)
                 + " dot(C)=" + DescribeDots(c, bId)
-                + " 311(B)=" + Describe(b, bId)
-                + " 311(C)=" + Describe(c, bId);
+                + " CombatStateUpdate(B)=" + Describe(b, bId)
+                + " CombatStateUpdate(C)=" + Describe(c, bId);
 
         private static string DescribeDots(Ctx ctx, long targetId)
         {

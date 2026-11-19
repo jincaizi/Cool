@@ -176,7 +176,7 @@ Plan 04 验收证据（服务端；7 项基线在 654/654 内，怪物控制项�
   麻痹打断与霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
   `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
 
-Plan 05 验收证据（2026-11-20；服务端项均在 667/667 内，Unity 结果另列）：
+Plan 05 验收证据（2026-11-20；服务端项均在 668/668 内，Unity 结果另列）：
 
 - AOI 反查：`AoiReverseIndexTests`（9 项）锁定索引与暴力反查逐项相等、80/90m 迟滞、
   清理/重登不残留、格边界与权威传送陈旧边、N=1000 单次反查 ≤1ms（Debug 本机中位数）。
@@ -186,7 +186,7 @@ Plan 05 验收证据（2026-11-20；服务端项均在 667/667 内，Unity 结�
   `BandwidthBudgetBytesPerSec = 100_000` 未上调，并有状态/DoT 流下限防静默删除。
 - 移动预算：`PvpMovementBudgetTests` 9/9，其中本次新增 2 项：空中麻痹仅发放跳跃惯性
   （6 m/s × 1.0s = 6.0m）与无跳跃 `ActionLock` 普通预算为 0。
-- Unity（另列，不计入 667/667）：三客户端 PlayMode（真实 `Server3C:8000`）
+- Unity（另列，不计入 668/668）：三客户端 PlayMode（真实 `Server3C:8000`）
   `ThreeClientElementalAcceptanceTests` 1/1、`ThreeClientCombatConsistencyTests` 1/1；
   客户端收包注入目标类合计 72/72。
 - 已知失败（非 Plan 05 回归）：Unity `RemoteEntityRegistryTests` 16/17，唯一失败为

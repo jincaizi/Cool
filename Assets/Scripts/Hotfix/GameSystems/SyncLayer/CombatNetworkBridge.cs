@@ -227,8 +227,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 switch (message)
                 {
                     case CastBroadcast broadcast:
-                        // 旧世代迟到的施法（复活前/旧会话）：桥层丢弃，不得触发任何表现或排程。
-                        // CasterLifeId=0 = 旧服务端未分配，保持原有行为。
+                        // 旧世代迟到的施法（复活/换命，同会话内；跨会话由宿主隔离）：桥层丢弃，
+                        // 不得触发任何表现或排程。CasterLifeId=0 = 旧服务端未分配，保持原有行为。
                         var casterView = _registry.GetView(broadcast.CasterPlayerId);
                         if (broadcast.CasterLifeId != 0 && casterView != null
                             && casterView.LifeId != 0 && broadcast.CasterLifeId < casterView.LifeId)
@@ -240,6 +240,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     case DamageResult result:
                         // 整条命中全被判重或全为旧世代 = 该消息不消费（连观察事件也不触发——
                         // 宿主会用它消费下一发投射物视觉，重复/旧包会把下一发提前停掉）。
+                        // 新旧命中混杂的消息逐条过滤：仅当至少剩一条新命中，才触发一次 OnDamageResult。
                         if (ApplyDamageResult(result))
                             OnDamageResult?.Invoke(result);
                         break;
@@ -306,7 +307,7 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// 迟到命中是否属于目标的上一世代（复活/新会话之前）：<see cref="HitEntry.TargetLifeId"/>
+        /// 迟到命中是否属于目标的上一世代（复活/换命，同会话内；跨会话由宿主隔离）：<see cref="HitEntry.TargetLifeId"/>
         /// 小于目标当前代次。本地目标读宿主写入的 <see cref="ClientEquipmentState.LifeId"/>，
         /// 远程目标读视图 LifeId；任一侧为 0（未知/旧服务端）不判。
         /// </summary>
@@ -328,7 +329,8 @@ namespace Hotfix.GameSystems.SyncLayer
             bool anyNewHit = false;
             foreach (var hit in result.Hits)
             {
-                // 旧世代（复活前/旧会话）迟到的命中：在消费 EventId、触发事件或写视图之前丢弃。
+                // 旧世代（复活/换命，同会话内；跨会话由宿主隔离）迟到的命中：
+                // 在消费 EventId、触发事件或写视图之前丢弃。
                 // 本地目标的生命代次由宿主在 RespawnNotice 时写入装备摘要（Equipment.SetLifeId）；
                 // 远程目标对比视图当前 LifeId。TargetLifeId=0 = 旧服务端未分配，保持原行为。
                 if (IsStaleLife(hit, localId)) continue;

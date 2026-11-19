@@ -121,6 +121,9 @@ git commit -m "test(playmode): accept three-client dot ticks and death projectio
    `EffectiveTick == 命中 tick`、`Reason=Hit`。
 2. B 的 `PendingCast.Spent=true`，`ActiveCast=null`，后续 `DrainResolved` 不再产生 B 的
    `DamageResult`，也不生成 `ProjectileLaunchBroadcast`。
+
+   > **实际覆盖：** `PendingCast.Spent` 是私有字段，用例用行为证明——取消后 `DrainResolved`
+   > 不再产生 B 的 `DamageResult`/`ProjectileLaunchBroadcast`，且 `ActiveCast=null`。
 3. 若 B 已经发射（`Launched=true`），同一命中只发取消广播，不终止已发射投射物；
    后续段仍按既有规则结算（与 Plan 02 语义一致）。
 4. 连续两次 B 施法，只取消指定 `CastId`，另一个继续。
@@ -140,6 +143,9 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CastCancel"
 1. A/B/C 收到同一 `CastId` 的 `CastCancelBroadcast`，`EffectiveTick` 相等。
 2. B/C 的 `RemoteCastPresenter` 按 `CastId` 停止；B 的 `DamageResult` 不含 B 取消后的命中，
    也不含未发射剑气。
+
+   > **实际覆盖：** B 是本地施法者，`RemoteCastPresenter` 跳过本地玩家；本地停止由权威
+   > `CombatStateUpdate`（318，计划编号 311）→ `SkillCoordinator.InterruptCurrentSkill` 覆盖。
 3. A 的雷剑挥击+剑气仍按自己的 `CastId` 产生 2 条命中（与现有雷场景一致）。
 4. C 的 `RemoteEntityAnimator` 不再播 B 的攻击后续段。
 
@@ -184,6 +190,9 @@ git commit -m "test(combat): accept paralysis cancel during windup across three 
 
 模拟 `ClearDedupe` + 新连接代次，再投递旧会话的 `DamageResult`/`CastBroadcast`/`CombatStateUpdate`；
 断言全部丢弃，且旧模型回调/旧位移预测不生效（若桥不负责模型回调，断言桥层事件不触发）。
+
+> **实际覆盖：** 跨会话隔离属宿主（退订 adapter + 新 playerId + 新桥 + `registry.Clear`），
+> 桥不拥有会话代次；用例断言新桥不继承旧会话去重窗口、旧会话包不改写新实体/装备/本地血量。
 
 - [ ] **步骤 3：模型未加载**
 
