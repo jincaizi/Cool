@@ -15,7 +15,8 @@ namespace GameSys.PlayModeTests
     /// 手动步进 Update(MoveCommand)，用位移/序号数字断言：
     /// ① 空中麻痹保留起跳水平惯性、拒绝新起跳，落地即停、解锁恢复输入；
     /// ② 地面麻痹水平位移为 0 且拒绝起跳；
-    /// ③ 贴 NpcBody 持续挤压无往返抖动、不穿透、不超步行预算。
+    /// ③ 贴 NpcBody 持续挤压无往返抖动、不穿透、不超**本地**步行预算代理
+    /// （夹具内无服务器；服务端 tick 预算/纠偏由服务端 PvpMovementBudgetTests 覆盖）。
     /// </summary>
     public class PlayerControlInertiaTests
     {
@@ -118,9 +119,13 @@ namespace GameSys.PlayModeTests
                 frames++;
             }
             Vector3 preJumpVelocity = _unityController.velocity;
-            Vector3 jumpDir = new Vector3(preJumpVelocity.x, 0f, preJumpVelocity.z).normalized;
+            Vector3 preJumpHorizontal = new Vector3(preJumpVelocity.x, 0f, preJumpVelocity.z);
+            float jumpSpeed = preJumpHorizontal.magnitude;
+            Vector3 jumpDir = preJumpHorizontal.normalized;
             Assert.Greater(jumpDir.z, 0.9f,
                 "前置：起跳前应为 +Z 水平移动（velocity=" + preJumpVelocity + "）");
+            Assert.Greater(jumpSpeed, 0.5f,
+                "前置：起跳前应有水平速度（velocity=" + preJumpVelocity + "）");
 
             _cc.RequestJump();
             _cc.Update(Forward());
@@ -132,6 +137,8 @@ namespace GameSys.PlayModeTests
             _cc.SetStatusActionLock(true);
             uint seqAtLock = _cc.JumpSeq;
             Vector3 p0 = _player.transform.position;
+            // 锁定后只发一次新起跳请求（每帧发会刷屏 [JumpProbe]；锁拒绝的语义由这一次 + 地面用例覆盖）。
+            _cc.RequestJump();
 
             // 空中推进 0.3s（输入 Idle；麻痹下只允许起跳水平惯性）。
             elapsed = 0f;
@@ -142,7 +149,6 @@ namespace GameSys.PlayModeTests
                 yield return null;
                 elapsed += Time.deltaTime;
                 frames++;
-                _cc.RequestJump(); // 麻痹期间的新起跳请求必须被拒绝
             }
 
             Vector3 airDelta = _player.transform.position - p0;
@@ -153,9 +159,9 @@ namespace GameSys.PlayModeTests
                 "惯性方向应与起跳水平速度一致（delta=" + airHorizontal + " dir=" + jumpDir + "）");
 
             float airSpeed = airHorizontal.magnitude / Mathf.Max(elapsed, 1e-4f);
-            Assert.That(airSpeed, Is.InRange(CombatRules.WalkSpeed * 0.8f, CombatRules.WalkSpeed * 1.2f),
+            Assert.That(airSpeed, Is.InRange(jumpSpeed * 0.8f, jumpSpeed * 1.2f),
                 "惯性速度应保持起跳水平速度（measured=" + airSpeed.ToString("F2")
-                + " walk=" + CombatRules.WalkSpeed + "）");
+                + " jump=" + jumpSpeed.ToString("F2") + "）");
             Assert.AreEqual(seqAtLock, _cc.JumpSeq, "麻痹期间不得消费新起跳（JumpSeq 不应增加）");
             Debug.Log("[Inertia] air 0.3s displacement=" + airHorizontal.ToString("F3")
                       + " speed=" + airSpeed.ToString("F2")
@@ -174,6 +180,13 @@ namespace GameSys.PlayModeTests
             Assert.IsFalse(_cc.IsAirborne, "前置：应在 5s 内落地");
 
             Vector3 landPos = _player.transform.position;
+            Vector3 landDelta = landPos - p0;
+            Vector3 landHorizontal = new Vector3(landDelta.x, 0f, landDelta.z);
+            // 0.3s 窗口之后到落地仍在推进：落地时的累计水平位移必须显著大于窗口内位移。
+            Assert.Greater(landHorizontal.magnitude, airHorizontal.magnitude + 0.3f,
+                "落地前惯性必须继续（air=" + airHorizontal.magnitude.ToString("F3")
+                + "m land=" + landHorizontal.magnitude.ToString("F3") + "m）");
+
             elapsed = 0f;
             frames = 0;
             while (elapsed < 0.2f && frames < MaxFrames)
@@ -203,7 +216,8 @@ namespace GameSys.PlayModeTests
             float movedAfterUnlock = _player.transform.position.z - unlockPos.z;
             Assert.Greater(movedAfterUnlock, 0.2f,
                 "解锁后移动输入应恢复（moved=" + movedAfterUnlock.ToString("F2") + "m）");
-            Debug.Log("[Inertia] postLand displacement=" + postLandHorizontal.magnitude.ToString("F4")
+            Debug.Log("[Inertia] landDisplacement=" + landHorizontal.magnitude.ToString("F3")
+                      + " postLand displacement=" + postLandHorizontal.magnitude.ToString("F4")
                       + " unlockMoved=" + movedAfterUnlock.ToString("F3"));
         }
 
@@ -245,6 +259,12 @@ namespace GameSys.PlayModeTests
             CreateBody(new Vector3(0f, 1f, 1.5f)); // 近面 z=1.0；玩家胶囊半径 0.5
             yield return null;
 
+            // 夹具停用了 Sys3CEntry 的输入驱动，因此本用例只验收 CharacterController 对
+            // NpcBody 层（10）静态实体盒的推挤稳定性。生产路径的推离反馈
+            // （Sys3CEntry.OnControllerColliderHit）要求碰撞体上有 IDamageable，而远程视图的
+            // NpcBody 子物体只挂了 BoxCollider（无 IDamageable）⇒ 推离反馈对 NpcBody 实际不触发，
+            // 属生产行为/限制（已登记 backlog），不是本夹具证明稳定的“抖动债”。
+
             // 先向前压住盒体 1s（无阻挡会走 5m；实际约 0.4m 即被挡）。
             float elapsed = 0f;
             int frames = 0;
@@ -256,7 +276,8 @@ namespace GameSys.PlayModeTests
                 frames++;
             }
             Vector3 blocked = _player.transform.position;
-            Assert.LessOrEqual(blocked.z, 0.6f,
+            // 近面 z=1.0 − 胶囊半径 0.5 − skinWidth 0.09 → 期望停在 ~0.41；0.5 内即未穿透。
+            Assert.LessOrEqual(blocked.z, 0.5f,
                 "前置：应被 NpcBody 挡住（blocked z=" + blocked.z.ToString("F3") + "）");
 
             // 持续挤压 0.5s：记录位置往返幅度与水平位移。
@@ -282,10 +303,12 @@ namespace GameSys.PlayModeTests
 
             Assert.LessOrEqual(amplitude, 0.1f,
                 "贴 NpcBody 挤压不得持续抖动（amplitude=" + amplitude.ToString("F3") + "m）");
+            // 这是**本地输入预算代理**（步行速度 × 窗口时长）：夹具内没有服务器，也没有纠偏事件。
+            // 服务端 tick 预算与纠偏（含空中麻痹包）由 PvpMovementBudgetTests 单独覆盖。
             Assert.LessOrEqual(moved, CombatRules.WalkSpeed * window + 0.01f,
-                "挤压期间水平位移不得超过步行预算（moved=" + moved.ToString("F3")
+                "挤压期间水平位移不得超过本地步行预算代理（moved=" + moved.ToString("F3")
                 + "m walk=" + CombatRules.WalkSpeed + " window=" + window.ToString("F2") + "s）");
-            Assert.LessOrEqual(maxZ, 0.6f,
+            Assert.LessOrEqual(maxZ, 0.5f,
                 "不得穿透 NpcBody（maxZ=" + maxZ.ToString("F3") + "）");
             Debug.Log("[Inertia] push amplitude=" + amplitude.ToString("F4")
                       + " moved=" + moved.ToString("F4")
