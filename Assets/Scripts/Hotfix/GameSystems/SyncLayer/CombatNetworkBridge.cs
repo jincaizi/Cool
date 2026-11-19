@@ -227,6 +227,12 @@ namespace Hotfix.GameSystems.SyncLayer
                 switch (message)
                 {
                     case CastBroadcast broadcast:
+                        // 旧世代迟到的施法（复活前/旧会话）：桥层丢弃，不得触发任何表现或排程。
+                        // CasterLifeId=0 = 旧服务端未分配，保持原有行为。
+                        var casterView = _registry.GetView(broadcast.CasterPlayerId);
+                        if (broadcast.CasterLifeId != 0 && casterView != null
+                            && casterView.LifeId != 0 && broadcast.CasterLifeId < casterView.LifeId)
+                            break;
                         // 重复包不得触发下游任何表现（玩家攻击/怪物排程/施法特效/投射物）。
                         if (!MarkCastSeen(broadcast.CastId)) break;
                         OnCastBroadcast?.Invoke(broadcast);
@@ -299,6 +305,20 @@ namespace Hotfix.GameSystems.SyncLayer
             return true;
         }
 
+        /// <summary>
+        /// 迟到命中是否属于目标的上一世代（复活/新会话之前）：<see cref="HitEntry.TargetLifeId"/>
+        /// 小于目标当前代次。本地目标读宿主写入的 <see cref="ClientEquipmentState.LifeId"/>，
+        /// 远程目标读视图 LifeId；任一侧为 0（未知/旧服务端）不判。
+        /// </summary>
+        private bool IsStaleLife(HitEntry hit, long localId)
+        {
+            if (hit.TargetLifeId == 0) return false;
+            uint targetLifeId = hit.TargetPlayerId == localId
+                ? _equipment.LifeId
+                : _registry.GetView(hit.TargetPlayerId)?.LifeId ?? 0;
+            return targetLifeId != 0 && hit.TargetLifeId < targetLifeId;
+        }
+
         /// <summary>应用一条 DamageResult；返回是否含新的命中（整条全重复返回 false）。
         /// 无 hit 的消息没有可去重的命中，仍视为"需要交给上层"（旧服务端停点/空结果）。</summary>
         private bool ApplyDamageResult(DamageResult result)
@@ -307,6 +327,11 @@ namespace Hotfix.GameSystems.SyncLayer
             bool anyNewHit = false;
             foreach (var hit in result.Hits)
             {
+                // 旧世代（复活前/旧会话）迟到的命中：在消费 EventId、触发事件或写视图之前丢弃。
+                // 本地目标的生命代次由宿主在 RespawnNotice 时写入装备摘要（Equipment.SetLifeId）；
+                // 远程目标对比视图当前 LifeId。TargetLifeId=0 = 旧服务端未分配，保持原行为。
+                if (IsStaleLife(hit, localId)) continue;
+
                 // 传输层重试/重投的同一命中只生效一次：否则本地受击 FSM/飘字会二次触发，
                 // 远程红字/灰字会重影。旧服务端 EventId=0 保持不去重的既有行为。
                 // EventId 先登记、后判视图：视图未建时事件已被消费，后续同 EventId 的补包
