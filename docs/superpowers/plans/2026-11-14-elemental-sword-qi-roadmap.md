@@ -11,7 +11,7 @@
 | 02 | [B1 取消 + NpcAction 全链 + B2 战斗投影/带宽](2026-11-17-elemental-sword-qi-02-cancel-projection.md) | `CastCancelBroadcast`、`NpcActionEvent`、客户端动作存储、`CombatStateUpdate`/`CombatProjection`、血量 `LifeId`/`CombatVersion`、AOI 基线与在途剑气补发、带宽门禁 | 01 |
 | 03 | B5 位移/跳跃预算 + PvP 控制 | `LocomotionMode/JumpPhase/JumpSeq/VerticalVelocity/DisplacementSkillId/CastId`、服务端接收 tick 预算、Dash 活动窗、跳跃惯性、PvP HP/控制规则包 | 01、02 |
 | 04 | 状态结算 + DoT + 表现 | PvE/PvP 共用冰/火/雷/风状态运行时、同次挥砍和剑气只附加一次、同 tick 顺序、DoT 末跳、`DamageKind` 分流、元素 VFX | 01、02；PvP 端到端验收还需要 03 |
-| 05 | 三客户端验收 + 表现收口 | 三端一致性、带宽实测、麻痹惯性/推挤纠偏、KCP/WebSocket 注入延迟、Addressables 元素特效、AOI 观察者反查索引（`GetObserversOf` O(N²)） | 01–04 |
+| 05 | [三客户端验收 + 表现收口](2026-11-20-elemental-sword-qi-05-acceptance.md) | 三端一致性、带宽实测、麻痹惯性/推挤纠偏、KCP/WebSocket 注入延迟、元素表现回退、AOI 观察者反查索引（`GetObserversOf` O(N²)） | 01–04 |
 
 ## 当前状态（2026-11-19）
 
