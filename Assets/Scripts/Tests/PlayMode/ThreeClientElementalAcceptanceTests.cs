@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Cool.Protocol;
@@ -16,11 +17,13 @@ namespace KcpNet.PlayModeTests
     /// <summary>
     /// Plan 05 任务 2 三客户端元素一致性验收（A 装雷剑施法、B 受击本人、C 旁观）：
     /// ① A 的 CastBroadcast 必须携带雷元素（ElementId=3）且 CastConfirm 接受；
-    /// ② A/B/C 收到的同一 HitEntry 的 CastId/EventSeq/CombatVersion/TargetRemainingHp 逐值一致；
+    /// ② A/B/C 收到的同一 HitEntry 的 CastId/EventSeq/CombatVersion/TargetRemainingHp 逐值相等
+    ///    （挥击 + 剑气两个独立伤害实例，共两条命中）；
     /// ③ B 本人的 311 与 C 应用后的远程视图都必须看到麻痹状态
-    ///    （Statuses 含 EffectId=301、Control.ActionLock=true、ControlVersion>0）；
-    /// ④ 0.8s（12 tick）后 B/C 必须收到 Statuses 空、ActionLock=false 的投影，
-    ///    且 EffectId=301 的移除只发生一次（按 CombatVersion 递增）。
+    ///    （Statuses 含 EffectId=301 且 SourceId=A、Control.ActionLock=true、ControlVersion>0）；
+    /// ④ 施加与清空两条 311 的 ServerTimestamp 差值必须落在 0.7–1.05s（0.8s ± 0.25s），
+    ///    施加后约 0.65s 仍必须锁定（防“立即清空”也通过）；B/C 收到“无 301 且 ActionLock=false”
+    ///    的投影，且 EffectId=301 的移除只发生一次（按 CombatVersion 递增）。
     /// 三客户端同出生点，等待 C 的 AOI 先看到 B 再施法。
     /// 运行前需先启动：dotnet Server/bin/Debug/net8.0/Server3C.dll 8000
     /// </summary>
@@ -32,11 +35,25 @@ namespace KcpNet.PlayModeTests
         private const int ThunderElementId = 3;
         private const int ThunderEffectId = 301;
 
-        /// <summary>失败时报告当前阶段（协议等待无独立超时异常，只能靠外层 120s 兜底）。</summary>
-        private sealed class Stage
+        /// <summary>10002 的挥击与剑气是两个独立伤害实例，同一目标各结算一次。</summary>
+        private const int ExpectedHitsPerTarget = 2;
+
+        /// <summary>
+        /// 共享运行闸门：120s 总 deadline（内层等待全部受它约束）、取消标志与当前阶段。
+        /// 外层协程超时先 <see cref="Cancel"/>，等 RunAsync 退出后才 Dispose，
+        /// 避免后台任务继续 Pump 已释放的 manager。
+        /// </summary>
+        private sealed class RunGate
         {
-            public volatile string Name = "start";
-            public void Set(string name) => Name = name;
+            private readonly long _deadlineTicks =
+                DateTime.UtcNow.Ticks + TimeSpan.TicksPerSecond * 120;
+            private volatile bool _cancelled;
+            public volatile string Stage = "start";
+
+            public void SetStage(string name) => Stage = name;
+            public void Cancel() => _cancelled = true;
+            public bool Cancelled => _cancelled;
+            public bool DeadlineExpired => DateTime.UtcNow.Ticks >= _deadlineTicks;
         }
 
         private sealed class Ctx
@@ -59,9 +76,9 @@ namespace KcpNet.PlayModeTests
             var a = NewClient(root, "Elem_A");
             var b = NewClient(root, "Elem_B");
             var c = NewClient(root, "Elem_C");
-            var stage = new Stage();
+            var gate = new RunGate();
 
-            var task = RunAsync(a, b, c, stage);
+            var task = RunAsync(a, b, c, gate);
             float elapsed = 0f;
             while (!task.IsCompleted && elapsed < 120f)
             {
@@ -69,9 +86,21 @@ namespace KcpNet.PlayModeTests
                 yield return null;
             }
 
+            if (!task.IsCompleted)
+            {
+                // 先取消：内层等待每 ≤50ms 检查一次取消标志，退出后 RunAsync 不再触碰 Unity 对象。
+                gate.Cancel();
+                float grace = 0f;
+                while (!task.IsCompleted && grace < 1f)
+                {
+                    grace += Time.deltaTime;
+                    yield return null;
+                }
+            }
+
             try
             {
-                Assert.IsTrue(task.IsCompleted, "three-client elemental test timed out at stage " + stage.Name);
+                Assert.IsTrue(task.IsCompleted, "three-client elemental test timed out at stage " + gate.Stage);
                 var (ok, reason) = task.Result;
                 Assert.IsTrue(ok, reason);
             }
@@ -113,33 +142,34 @@ namespace KcpNet.PlayModeTests
             return ctx;
         }
 
-        private static async Task<(bool ok, string reason)> RunAsync(Ctx a, Ctx b, Ctx c, Stage stage)
+        private static async Task<(bool ok, string reason)> RunAsync(Ctx a, Ctx b, Ctx c, RunGate gate)
         {
             var all = new[] { a, b, c };
 
-            stage.Set("login-A");
+            gate.SetStage("login-A");
             a.Manager.ConnectAndLogin(Host, Port);
-            if (!await WaitInWorld(new[] { a }, a, 10f))
+            if (!await WaitInWorld(new[] { a }, gate, a, 10f))
                 return (false, "login-A: A failed to enter world");
+            long aId = a.Manager.LocalPlayerId;
 
-            stage.Set("login-B");
+            gate.SetStage("login-B");
             b.Manager.ConnectAndLogin(Host, Port);
-            if (!await WaitInWorld(new[] { a, b }, b, 10f))
+            if (!await WaitInWorld(new[] { a, b }, gate, b, 10f))
                 return (false, "login-B: B failed to enter world");
 
-            stage.Set("login-C");
+            gate.SetStage("login-C");
             c.Manager.ConnectAndLogin(Host, Port);
-            if (!await WaitInWorld(all, c, 10f))
+            if (!await WaitInWorld(all, gate, c, 10f))
                 return (false, "login-C: C failed to enter world");
 
             long bId = b.Manager.LocalPlayerId;
 
             // 三客户端同出生点；等 C 的 AOI 看到 B（C 的 311/DamageResult 依赖观察者关系）。
-            stage.Set("aoi-c-sees-b");
-            if (!await WaitUntil(all, () => c.Registry.GetView(bId) != null, 15f))
+            gate.SetStage("aoi-c-sees-b");
+            if (!await WaitUntil(all, gate, () => c.Registry.GetView(bId) != null, 15f))
                 return (false, "aoi: C never saw B (bId=" + bId + ")");
 
-            stage.Set("baseline");
+            gate.SetStage("baseline");
             var baseline = a.Manager.WeaponInventory;
             if (baseline == null)
                 return (false, "baseline: A has no weapon inventory (ElementalSwordQiV1 disabled?)");
@@ -155,7 +185,7 @@ namespace KcpNet.PlayModeTests
             if (thunder == null)
                 return (false, "baseline: A has no thunder (ElementId=3) weapon");
 
-            stage.Set("equip-request");
+            gate.SetStage("equip-request");
             a.Adapter.Send(MessageId.EquipWeaponRequest, new EquipWeaponRequest
             {
                 ClientEquipSeq = 1,
@@ -163,9 +193,9 @@ namespace KcpNet.PlayModeTests
                 KnownEquipmentRevision = baseline.EquipmentRevision
             });
 
-            stage.Set("equip-confirm");
+            gate.SetStage("equip-confirm");
             EquipWeaponConfirm? equipConfirm = null;
-            if (!await WaitUntil(all, () =>
+            if (!await WaitUntil(all, gate, () =>
                 {
                     equipConfirm = a.EquipConfirms.ToArray()
                         .FirstOrDefault(x => x.ClientEquipSeq == 1);
@@ -177,7 +207,7 @@ namespace KcpNet.PlayModeTests
             if (equipConfirm.ElementId != ThunderElementId)
                 return (false, "equip-confirm: ElementId=" + equipConfirm.ElementId + " != " + ThunderElementId);
 
-            stage.Set("cast-request");
+            gate.SetStage("cast-request");
             a.Adapter.Send(MessageId.CastRequest, new CastRequest
             {
                 SkillId = SkillId,
@@ -188,9 +218,9 @@ namespace KcpNet.PlayModeTests
                 CasterLifeId = baseline.LifeId
             });
 
-            stage.Set("cast-confirm");
+            gate.SetStage("cast-confirm");
             CastConfirm? castConfirm = null;
-            if (!await WaitUntil(all, () =>
+            if (!await WaitUntil(all, gate, () =>
                 {
                     castConfirm = a.Confirms.ToArray().FirstOrDefault(x => x.ClientCastSeq == 1);
                     return castConfirm != null;
@@ -202,9 +232,9 @@ namespace KcpNet.PlayModeTests
             if (castId == 0)
                 return (false, "cast-confirm: accepted but CastId=0");
 
-            stage.Set("cast-broadcast");
+            gate.SetStage("cast-broadcast");
             CastBroadcast? broadcast = null;
-            if (!await WaitUntil(all, () =>
+            if (!await WaitUntil(all, gate, () =>
                 {
                     broadcast = a.Broadcasts.ToArray().FirstOrDefault(x => x.CastId == castId);
                     return broadcast != null;
@@ -213,28 +243,35 @@ namespace KcpNet.PlayModeTests
             if (broadcast!.ElementId != ThunderElementId)
                 return (false, "cast-broadcast: ElementId=" + broadcast.ElementId + " != " + ThunderElementId);
 
-            stage.Set("damage-result");
+            gate.SetStage("damage-result");
             var aHits = new List<HitEntry>();
             var bHits = new List<HitEntry>();
             var cHits = new List<HitEntry>();
-            if (!await WaitUntil(all, () =>
+            if (!await WaitUntil(all, gate, () =>
                 {
                     aHits = HitsFor(a, castId, bId);
                     bHits = HitsFor(b, castId, bId);
                     cHits = HitsFor(c, castId, bId);
-                    return aHits.Count > 0 && bHits.Count > 0 && cHits.Count > 0;
+                    return aHits.Count >= ExpectedHitsPerTarget
+                        && bHits.Count >= ExpectedHitsPerTarget
+                        && cHits.Count >= ExpectedHitsPerTarget;
                 }, 15f))
-                return (false, "damage-result: caster/victim/observer did not all receive the HitEntry for B"
+                return (false, "damage-result: caster/victim/observer did not all receive "
+                    + ExpectedHitsPerTarget + " hits (swing + sword qi) for B"
                     + Summarize(a, b, c, bId));
 
-            // 同一 HitEntry 逐值一致（按 EventSeq 对齐；同一次施法可能有挥击 + 剑气两条）。
-            if (aHits.Count != bHits.Count || aHits.Count != cHits.Count)
-                return (false, "damage-result: hit counts differ A=" + aHits.Count
-                    + " B=" + bHits.Count + " C=" + cHits.Count);
+            // 同一 HitEntry 逐值一致（按 EventSeq 对齐；挥击 + 剑气两条命中都核对）。
+            if (aHits.Count != ExpectedHitsPerTarget || bHits.Count != ExpectedHitsPerTarget
+                || cHits.Count != ExpectedHitsPerTarget)
+                return (false, "damage-result: hit counts A=" + aHits.Count + " B=" + bHits.Count
+                    + " C=" + cHits.Count + " != " + ExpectedHitsPerTarget + " (swing + sword qi)"
+                    + Summarize(a, b, c, bId));
             for (int i = 0; i < aHits.Count; i++)
             {
                 if (aHits[i].CastId != bHits[i].CastId || aHits[i].CastId != cHits[i].CastId)
-                    return (false, "damage-result: CastId differs across clients at hit " + i);
+                    return (false, "damage-result: CastId differs across clients at hit " + i
+                        + " (A=" + aHits[i].CastId + " B=" + bHits[i].CastId
+                        + " C=" + cHits[i].CastId + ")");
                 if (aHits[i].EventSeq != bHits[i].EventSeq || aHits[i].EventSeq != cHits[i].EventSeq)
                     return (false, "damage-result: EventSeq differs across clients at hit " + i
                         + " (A=" + aHits[i].EventSeq + " B=" + bHits[i].EventSeq
@@ -244,96 +281,131 @@ namespace KcpNet.PlayModeTests
                     return (false, "damage-result: CombatVersion differs across clients at hit " + i
                         + " (A=" + aHits[i].CombatVersion + " B=" + bHits[i].CombatVersion
                         + " C=" + cHits[i].CombatVersion + ")");
-                if (Mathf.Abs(aHits[i].TargetRemainingHp - bHits[i].TargetRemainingHp) > 0.001f
-                    || Mathf.Abs(aHits[i].TargetRemainingHp - cHits[i].TargetRemainingHp) > 0.001f)
+                // 三端解码的是同一条消息，余血必须位级相等（不放宽容差）。
+                if (aHits[i].TargetRemainingHp != bHits[i].TargetRemainingHp
+                    || aHits[i].TargetRemainingHp != cHits[i].TargetRemainingHp)
                     return (false, "damage-result: TargetRemainingHp differs across clients at hit " + i
                         + " (A=" + aHits[i].TargetRemainingHp + " B=" + bHits[i].TargetRemainingHp
                         + " C=" + cHits[i].TargetRemainingHp + ")");
             }
 
-            // B 本人 311：麻痹状态 + 动作锁 + 控制版本推进。
-            stage.Set("status-apply-b");
+            // B 本人 311：麻痹状态（来源必须是 A）+ 动作锁 + 控制版本推进。
+            gate.SetStage("status-apply-b");
             CombatStateUpdate? bApply = null;
-            if (!await WaitUntil(all, () =>
+            if (!await WaitUntil(all, gate, () =>
                 {
-                    bApply = UpdatesFor(b, bId).FirstOrDefault(u => HasThunder(u.Projection));
+                    bApply = UpdatesFor(b, bId).FirstOrDefault(u => HasThunderFrom(u.Projection, aId));
                     return bApply != null;
                 }, 15f))
                 return (false, "status-apply: B received no CombatStateUpdate with EffectId="
-                    + ThunderEffectId + Summarize(a, b, c, bId));
+                    + ThunderEffectId + " from A(source=" + aId + ")" + Summarize(a, b, c, bId));
             if (bApply!.Projection.Control == null || !bApply.Projection.Control.ActionLock)
                 return (false, "status-apply: B Control.ActionLock is not true" + Summarize(a, b, c, bId));
             if (bApply.Projection.Control!.ControlVersion == 0)
                 return (false, "status-apply: B Control.ControlVersion == 0");
 
             // C 旁观收到的同一条 311，喂给 registry 后远程视图必须一致。
-            stage.Set("status-apply-c");
+            gate.SetStage("status-apply-c");
             CombatStateUpdate? cApply = null;
-            if (!await WaitUntil(all, () =>
+            if (!await WaitUntil(all, gate, () =>
                 {
-                    cApply = UpdatesFor(c, bId).FirstOrDefault(u => HasThunder(u.Projection));
+                    cApply = UpdatesFor(c, bId).FirstOrDefault(u => HasThunderFrom(u.Projection, aId));
                     return cApply != null;
                 }, 15f))
                 return (false, "status-apply: C received no CombatStateUpdate with EffectId="
-                    + ThunderEffectId + Summarize(a, b, c, bId));
-            if (cApply!.Projection.CombatVersion != bApply!.Projection.CombatVersion)
+                    + ThunderEffectId + " from A(source=" + aId + ")" + Summarize(a, b, c, bId));
+            if (cApply!.Projection.CombatVersion != bApply.Projection.CombatVersion)
                 return (false, "status-apply: C projection CombatVersion=" + cApply.Projection.CombatVersion
                     + " != B " + bApply.Projection.CombatVersion);
+            if (cApply.ServerTimestamp != bApply.ServerTimestamp)
+                return (false, "status-apply: C ServerTimestamp=" + cApply.ServerTimestamp
+                    + " != B " + bApply.ServerTimestamp);
 
-            stage.Set("status-view-c");
+            gate.SetStage("status-view-c");
             c.Registry.ApplyCombatStateUpdate(cApply);
             var applyView = c.Registry.GetView(bId);
             if (applyView == null)
                 return (false, "status-view: C has no view for B");
-            if (!HasThunder(applyView.Statuses))
-                return (false, "status-view: C view Statuses missing EffectId=" + ThunderEffectId);
+            if (!HasThunderFrom(applyView.Statuses, aId))
+                return (false, "status-view: C view Statuses missing EffectId=" + ThunderEffectId
+                    + " from A(source=" + aId + ")");
             if (applyView.Control == null || !applyView.Control.ActionLock)
                 return (false, "status-view: C view Control.ActionLock is not true");
 
-            // 0.8s = 12 tick（雷麻痹持续时间）+ 余量。
-            stage.Set("status-expiry-wait");
-            await WaitSeconds(all, 0.9f);
+            // 施加后约 0.65s 仍必须锁定（服务端 0.8s 到期；防“立即清空”也通过）。
+            // 同机验收：ServerTimestamp = DateTime.UtcNow.Ticks，可直接与本地墙钟比较。
+            gate.SetStage("status-still-locked");
+            long lockCheckTicks = bApply.ServerTimestamp + (long)(TimeSpan.TicksPerSecond * 0.65);
+            if (!await WaitUntilServerTicks(all, gate, lockCheckTicks))
+                return (false, "status-still-locked: gate closed before 0.65s after apply");
+            var bLatest = UpdatesFor(b, bId).LastOrDefault();
+            var cLatest = UpdatesFor(c, bId).LastOrDefault();
+            if (bLatest == null || !HasThunder(bLatest.Projection)
+                || bLatest.Projection.Control == null || !bLatest.Projection.Control.ActionLock)
+                return (false, "status-still-locked: B projection no longer locked 0.65s after apply"
+                    + Summarize(a, b, c, bId));
+            if (cLatest == null || !HasThunder(cLatest.Projection)
+                || cLatest.Projection.Control == null || !cLatest.Projection.Control.ActionLock)
+                return (false, "status-still-locked: C projection no longer locked 0.65s after apply"
+                    + Summarize(a, b, c, bId));
 
-            stage.Set("status-clear-b");
+            // 清空判定：无 301 且 ActionLock=false（不要求整个 Statuses 为空——B 可能带其他状态）。
+            gate.SetStage("status-clear-b");
             CombatStateUpdate? bClear = null;
-            if (!await WaitUntil(all, () =>
+            if (!await WaitUntil(all, gate, () =>
                 {
                     bClear = UpdatesFor(b, bId).FirstOrDefault(u =>
                         u.Projection.CombatVersion > bApply.Projection.CombatVersion
-                        && !HasThunder(u.Projection) && StatusCount(u.Projection) == 0);
+                        && !HasThunder(u.Projection)
+                        && u.Projection.Control != null && !u.Projection.Control.ActionLock);
                     return bClear != null;
                 }, 10f))
-                return (false, "status-clear: B received no cleared/unlocked projection after apply version "
+                return (false, "status-clear: B received no projection without 301 and unlocked after apply version "
                     + bApply.Projection.CombatVersion + Summarize(a, b, c, bId));
             if (bClear!.Projection.Control == null || bClear.Projection.Control.ActionLock)
                 return (false, "status-clear: B Control.ActionLock is not false");
 
-            stage.Set("status-clear-c");
+            gate.SetStage("status-clear-c");
             CombatStateUpdate? cClear = null;
-            if (!await WaitUntil(all, () =>
+            if (!await WaitUntil(all, gate, () =>
                 {
                     cClear = UpdatesFor(c, bId).FirstOrDefault(u =>
                         u.Projection.CombatVersion > cApply.Projection.CombatVersion
-                        && !HasThunder(u.Projection) && StatusCount(u.Projection) == 0);
+                        && !HasThunder(u.Projection)
+                        && u.Projection.Control != null && !u.Projection.Control.ActionLock);
                     return cClear != null;
                 }, 10f))
-                return (false, "status-clear: C received no cleared/unlocked projection after apply version "
+                return (false, "status-clear: C received no projection without 301 and unlocked after apply version "
                     + cApply.Projection.CombatVersion + Summarize(a, b, c, bId));
             if (cClear!.Projection.Control == null || cClear.Projection.Control.ActionLock)
                 return (false, "status-clear: C Control.ActionLock is not false");
+
+            // 0.8s（12 tick）持续时间：施加→清空两条 311 的 ServerTimestamp 间隔 0.7–1.05s。
+            gate.SetStage("status-expiry-timing");
+            double gapSeconds = (bClear.ServerTimestamp - bApply.ServerTimestamp)
+                / (double)TimeSpan.TicksPerSecond;
+            Debug.Log("[ElementalAcceptance] apply->clear ServerTimestamp gap="
+                + gapSeconds.ToString("F3", CultureInfo.InvariantCulture) + "s");
+            if (gapSeconds < 0.7 || gapSeconds > 1.05)
+                return (false, "expiry-timing: apply→clear ServerTimestamp gap "
+                    + gapSeconds.ToString("F3", CultureInfo.InvariantCulture)
+                    + "s outside [0.700, 1.050]s (apply=" + bApply.ServerTimestamp
+                    + " clear=" + bClear.ServerTimestamp + ")");
+            if (cApply!.ServerTimestamp != bApply.ServerTimestamp
+                || cClear.ServerTimestamp != bClear.ServerTimestamp)
+                return (false, "expiry-timing: C apply/clear timestamps differ from B's projection");
 
             c.Registry.ApplyCombatStateUpdate(cClear);
             var clearedView = c.Registry.GetView(bId);
             if (clearedView == null)
                 return (false, "status-clear: C view for B disappeared");
-            if (StatusCount(clearedView.Statuses) != 0)
-                return (false, "status-clear: C view Statuses not empty ("
-                    + StatusCount(clearedView.Statuses) + ")");
+            if (HasThunder(clearedView.Statuses))
+                return (false, "status-clear: C view Statuses still has EffectId=" + ThunderEffectId);
             if (clearedView.Control == null || clearedView.Control.ActionLock)
                 return (false, "status-clear: C view Control.ActionLock is not false");
 
             // 只发生一次 301 的移除，且移除版本必须大于施加版本（CombatVersion 递增）。
-            stage.Set("status-removal-count");
+            gate.SetStage("status-removal-count");
             if (bClear.Projection.CombatVersion <= bApply.Projection.CombatVersion)
                 return (false, "removal-count: B clear version not after apply version");
             if (cClear.Projection.CombatVersion <= cApply.Projection.CombatVersion)
@@ -400,9 +472,23 @@ namespace KcpNet.PlayModeTests
             return false;
         }
 
-        private static int StatusCount(CombatProjection projection) => projection.Statuses?.Count ?? 0;
+        /// <summary>311 识别：301 必须存在且来源是施法者 A（防把别人/客户端的 301 当成本次施加）。</summary>
+        private static bool HasThunderFrom(CombatProjection projection, long sourceId)
+        {
+            var statuses = projection.Statuses;
+            if (statuses == null) return false;
+            foreach (var status in statuses)
+                if (status.EffectId == ThunderEffectId) return status.SourceId == sourceId;
+            return false;
+        }
 
-        private static int StatusCount(IList<StatusProjection>? statuses) => statuses?.Count ?? 0;
+        private static bool HasThunderFrom(IList<StatusProjection>? statuses, long sourceId)
+        {
+            if (statuses == null) return false;
+            foreach (var status in statuses)
+                if (status.EffectId == ThunderEffectId) return status.SourceId == sourceId;
+            return false;
+        }
 
         private static int CountThunderApplications(Ctx ctx, long entityId)
         {
@@ -430,14 +516,30 @@ namespace KcpNet.PlayModeTests
             return count;
         }
 
-        /// <summary>失败诊断：各端 CastBroadcast 的 CastId:ElementId 与 B 实体 311 的版本/状态/控制摘要。</summary>
+        /// <summary>失败诊断：CastBroadcast 的 CastId:ElementId、DamageResult 命中、B 实体 311 摘要。</summary>
         private static string Summarize(Ctx a, Ctx b, Ctx c, long bId)
         {
             var casts = a.Broadcasts.ToArray();
             string castText = casts.Length == 0
                 ? "-"
                 : string.Join(" ", casts.Select(x => x.CastId + ":e" + x.ElementId));
-            return " | casts(A)=" + castText + " 311(B)=" + Describe(b, bId) + " 311(C)=" + Describe(c, bId);
+            return " | casts(A)=" + castText
+                + " dmg(B) A=" + DescribeHits(a, bId)
+                + " B=" + DescribeHits(b, bId)
+                + " C=" + DescribeHits(c, bId)
+                + " 311(B)=" + Describe(b, bId)
+                + " 311(C)=" + Describe(c, bId);
+        }
+
+        private static string DescribeHits(Ctx ctx, long targetId)
+        {
+            var parts = new List<string>();
+            foreach (var result in ctx.Damages.ToArray())
+                foreach (var hit in result.Hits)
+                    if (hit.TargetPlayerId == targetId)
+                        parts.Add(hit.CastId + ":e" + hit.EventSeq + ":v" + hit.CombatVersion
+                            + ":hp" + hit.TargetRemainingHp);
+            return "[" + string.Join(" ", parts) + "]";
         }
 
         private static string Describe(Ctx ctx, long entityId)
@@ -459,43 +561,44 @@ namespace KcpNet.PlayModeTests
                 ctxs[i].Manager.Update(0.05f);
         }
 
-        private static async Task<bool> WaitUntil(Ctx[] ctxs, Func<bool> condition, float seconds)
+        private static async Task<bool> WaitUntil(Ctx[] ctxs, RunGate gate, Func<bool> condition, float seconds)
         {
             float elapsed = 0f;
-            while (elapsed < seconds)
+            while (!gate.Cancelled && !gate.DeadlineExpired && elapsed < seconds)
             {
                 Pump(ctxs);
                 if (condition()) return true;
                 await Task.Delay(50);
                 elapsed += 0.05f;
             }
+            if (gate.Cancelled) return false;
             Pump(ctxs);
             return condition();
         }
 
-        private static async Task WaitSeconds(Ctx[] ctxs, float seconds)
+        /// <summary>泵到本地墙钟越过 targetTicks（同机验收：ServerTimestamp = DateTime.UtcNow.Ticks）。</summary>
+        private static async Task<bool> WaitUntilServerTicks(Ctx[] ctxs, RunGate gate, long targetTicks)
         {
-            float elapsed = 0f;
-            while (elapsed < seconds)
+            while (!gate.Cancelled && !gate.DeadlineExpired && DateTime.UtcNow.Ticks < targetTicks)
             {
                 Pump(ctxs);
-                await Task.Delay(50);
-                elapsed += 0.05f;
+                await Task.Delay(20);
             }
             Pump(ctxs);
+            return !gate.Cancelled && !gate.DeadlineExpired;
         }
 
-        private static async Task<bool> WaitInWorld(Ctx[] ctxs, Ctx target, float seconds)
+        private static async Task<bool> WaitInWorld(Ctx[] ctxs, RunGate gate, Ctx target, float seconds)
         {
             float elapsed = 0f;
-            while (elapsed < seconds)
+            while (!gate.Cancelled && !gate.DeadlineExpired && elapsed < seconds)
             {
                 Pump(ctxs);
                 if (target.Manager.CurrentState == ClientNetworkManager.State.InWorld) return true;
                 await Task.Delay(50);
                 elapsed += 0.05f;
             }
-            return target.Manager.CurrentState == ClientNetworkManager.State.InWorld;
+            return !gate.Cancelled && target.Manager.CurrentState == ClientNetworkManager.State.InWorld;
         }
     }
 }
