@@ -61,9 +61,27 @@ Hit 层只有 `Hit` / `DefendHit` / `Dizzy` 三态可达。`Knockback` / `Launch
 - **权威控制合并**：`LocalControlState.Apply(speedScale, actionLock, version)` 做版本门
   （`version < Version` 忽略）、倍率钳到 `[0,4]`（非有限按 0），并返回“由未锁变为锁”的边沿。
   `Sys3CEntry.ApplyAuthoritativeControl` 在边沿上清空输入缓冲、以 `Stun` 打断当前技能并 `StopDash`；
-  `ControlVersion` 供位置上报携带。状态运行时（谁在何时调用）属 Plan 04，当前只有服务端投影入口。
+  `ControlVersion` 供位置上报携带。Plan 04 起控制来源是服务端状态运行时：
+  冰把 `SpeedScale` 压到 0.7、雷把 `ActionLock` 置真，经 `CombatStateUpdate.ControlSummary`
+  下发并在本人 311 本地分支应用。
 - **跳跃序号**：`CharacterController.JumpSeq` 每次消费跳跃请求 +1，`MovementReporter` 据此只发一次
   `JumpPhase.Start`；跳跃起跳判定仍受 `StatusActionLock` 与接地证据门控。
+
+## 权威状态与 DoT 表现（Plan 04，2026-11-19）
+
+- **`ApplyDotDamage(damage, remainingHp)`**：本人灼烧跳的客户端入口。只把
+  `_currentHP` 对齐服务端权威余血（`Mathf.Max(0, remainingHp)`），并发
+  `PlayerDotDamageEvent` 飘字；**不**调用 `_fsmManager.HandleDamage`，不进格挡/击退/
+  HitFlash/震屏/命中火花（周期伤害不应每跳打断角色）。余血 ≤ 0 时走
+  `EvaluateLocalDeath`。
+- **速度合成与控制**：`CharacterController.ComposeMoveSpeed(baseSpeed, defending,
+  skillScale, statusScale) = base × (defending ? 0.4 : 1) × skill × status` 单点应用；
+  `StatusSpeedScale` 由 `ApplyAuthoritativeControl` 写入，不覆盖技能倍率。
+  `StatusActionLock` 拒绝新水平输入与起跳，空中保留起跳瞬间水平惯性到落地。
+- **`CurrentElementId`**：`Sys3CEntry` 暴露当前已确认武器的元素 ID（0 = 无元素），
+  供外层表现/离线剑气读取；Plan 04 的联机剑气染色直接读
+  `ProjectileLaunchBroadcast.ElementId`，**离线 `SkillExecutor` 尚未接这个 provider**
+  （留给 Plan 05）。
 
 ## 复活传送
 
@@ -169,7 +187,8 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
 
 ## 换剑外观
 
-状态：本地持剑模型切换已完成（2026-11-16 跟进）；元素 VFX 与状态表现留到 Plan 04。
+状态：本地持剑模型切换已完成（2026-11-16 跟进）；Plan 04 已接通权威状态染色与联机剑气
+元素色（见 [VFX](../VFX/README.md)）；离线元素表现与共享状态运行时留给 Plan 05。
 
 男女角色预制体分别绑定 `Assets/Prefabs/Character/WeaponViews/` 下的八个项目自有校准变体
 （Male/Female × Ice/Fire/Thunder/Wind）。变体根保持挂点局部恒等，视觉子对象是供应商 MoonSword

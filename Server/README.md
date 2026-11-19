@@ -46,7 +46,7 @@ bash tools/test-server.sh
   防御变化视为脏位立即推送。客户端据此更新远程 `Targetable` 与名牌血条。
   `Server.Tests/Aoi/BandwidthBudgetTests` 断言含新字段的全字段快照字节上限。
 
-## 属性剑气 v1（2026-11-14，Plan 01–02）
+## 属性剑气 v1（2026-11-14，Plan 01–04）
 
 - **共享目录**：启动从 `Config/elemental_catalog.json` 加载、`ElementalCatalogValidator` 校验并
   计算 SHA-256 指纹；缺表/校验失败时停用该功能（登录不发放武器）。客户端登录带指纹与
@@ -73,8 +73,9 @@ bash tools/test-server.sh
   静止实体每 4 tick `Keepalive`（只带位置/身份基础字段）。**Dead/Defending 每帧携带**
   （D-N2 状态语义），只有 Health 是条件字段，客户端按位沿用 last-known。
 - **战斗投影（Plan 02 Part B）**：AOI 基线快照带 `EntityFieldMask.Combat` 与完整
-  `CombatProjection`（`CombatProjectionBuilder`：HP/装备/活动施法；`Statuses` 暂空、`Control`
-  为默认值——控制注入入口属 Plan 03，实际来源由 Plan 04 状态运行时提供；`CombatVersion/LifeId`
+  `CombatProjection`（`CombatProjectionBuilder`：HP/装备/活动施法；Plan 04 起
+  `Statuses` 由 `ServerStatusManager.Runtime.Active` 按组映射、`Control` 取权威
+  `ControlSpeedScale/ControlActionLock/ControlVersion`；`CombatVersion/LifeId`
   同基线下发）。`PlayerState.CombatVersion` 在换装、受伤/
   死亡/复活、防御姿态变化与活动施法阶段推进时递增并置 `CombatDirty`；
   `Server3C.SendCombatStateUpdates` 每 tick 只对 dirty 实体发送 `CombatStateUpdate`（311），
@@ -116,15 +117,34 @@ bash tools/test-server.sh
   缩放——720 HP 会话 ×7.2，保持原 PvE TTK；玩家/bot 来源与打怪不缩放。
 - **控制注入入口**：`Server3C.ApplyPlayerControl(playerId, speedScale, actionLock)` 写权威控制
   状态，变化时递增 `ControlVersion` 并 bump `CombatVersion`（触发 311）；首次 `ActionLock` 取消
-  施法者未提交段（已发射剑气照飞）。动作锁期间 `CastHandler.Decide` 以 `control-lock` 拒绝新施法，
-  位置同步不发普通移动预算。**当前没有生产调用者——元素状态运行时未实现（Plan 04）**；
-  `ApplyPlayerControl` 是 Plan 04 的唯一注入入口，不要在别处直接写
-  `ControlSpeedScale/ControlActionLock`。
+  施法者未提交段（已发射剑气照飞）；NPC 首次 `ActionLock` 走
+  `MonsterModule.CancelAction`（霸体免打断）。动作锁期间 `CastHandler.Decide` 以
+  `control-lock` 拒绝新施法，位置同步不发普通移动预算。**Plan 04 起生产调用者 =
+  `ServerStatusManager` 的状态运行时**（冰/雷变化经 `Server3C.RegisterEntity` 注入的
+  control sink 调用）；不要在别处直接写 `ControlSpeedScale/ControlActionLock`。
+- **状态运行时（Plan 04）**：`PlayerState.ConfigureStatuses(catalog, sink)` 为每个权威实体
+  建 `ServerStatusManager`（薄包装 `SyncCore.StatusRuntime`）；应用/刷新/到期/DoT 末跳都会
+  `SyncControl` + `BumpCombatVersion`，因此 `CombatStateUpdate` 的 `Statuses[]` 与
+  `ControlSummary.SpeedScale/ActionLock` 随冰/雷实际变化。
+- **同 tick 顺序（Plan 04）**：`GameLoop` 在消费网络包**之前**跑 pre-tick：
+  解除到期修饰（风先失效）→ `StatusTickService` 结算到期灼烧跳（`DamageResult`，
+  `DamageKind=Dot`、`EventSeq/EventId/CombatVersion` 逐事件填充）→ 推进/移除 DoT →
+  再处理本 tick 输入与命中段。WS 会话的输入用 `GameLoop.EnqueueAfterPreTick` 排到 pre-tick
+  之后；KCP 队列保持原有顺序。
+- **DoT 与仇恨**：灼烧跳走 `StatusTickService`，收件人 = 来源 + 目标 + 双方观察者
+  （`CastHandler.BroadcastDotDamageAsync`）；PvE 读取风易伤（PvP 不放大灼烧）；
+  怪物每跳按 `damage × ThreatPerDamage` 计仇恨、不叠加 `ThreatFlat`；死亡立即清状态并
+  拒绝后续跳伤害。玩家 `MarkDead`/`TryRespawn` 与怪物 `ArriveHome`（Evade 到家）清状态。
+- **首个有效命中附加元素（Plan 04）**：只有玩家 `10002` 且武器 `ElementId > 0`；正伤害、
+  未格挡、目标存活才附加，按 `(TargetId, LifeId)` 每次施法只附加一次（挥砍先命中则剑气不再
+  附加，剑气先命中则由剑气附加）。风易伤在扣血前读取——本次命中不吃刚附加的倍率，
+  同次施法的后续命中才生效；PvE 用状态表 ×2.0，PvP 用共享
+  `Pvp.WindVulnerabilityMultiplier = 1.28`（PvP 不放大灼烧）。
 
-状态：Plan 01–03 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
-PvP 基线），服务端全量 595/595；Plan 04–05 未开始。
-未启用：元素状态结算/DoT 与 `Statuses[]` 内容、实际控制来源（`ApplyPlayerControl` 无生产调用）、
-元素 VFX 与远端武器模型（Plan 04/05）。
+状态：Plan 01–04 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
+PvP 基线、Plan 04 状态结算/DoT/元素表现），服务端全量 652/652；Plan 05 未开始。
+未启用：**离线单机共享状态运行时**（本地 `StatusEffectManager` 的冰冻/灼烧保持独立，
+四元素运行时留给 Plan 05）、元素 VFX 资源化与远端武器模型（Plan 05）。
 
 Plan 03 验收证据（可证伪）：
 
@@ -133,6 +153,18 @@ Plan 03 验收证据（可证伪）：
 - 跳跃：`JumpTrajectoryBudgetTests` 覆盖麻痹起跳拒绝、空中惯性按起跳水平速度发放。
 - PvP：`LoginCombatBaselineTests` 断言 720 HP；`PveDamageScaleTests` 断言 NPC→720 HP
   玩家伤害 ×7.2，保持原 PvE TTK。
+
+Plan 04 验收证据（服务端，全部在 652/652 内）：
+
+- 状态运行时：`StatusRuntimeTests`（8 项）锁定刷新/末跳/控制派生/PvP 免疫与 4s 不刷新；
+  `ServerStatusManagerTests`（7 项）锁定控制 sink 与投影版本；`GameLoopOrderingTests`
+  锁定 pre-tick 顺序与 WS 输入顺序。
+- 元素附加：`ElementalApplicationTests`（9 项）锁定同次施法每目标一次、挥砍/剑气先后、
+  格挡与死亡不附加、PvE/PvP 风倍率；`EventIdentityTests`（2 项）锁定事件序号。
+- DoT：`DotDamageTests`（7 项）与 `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、
+  `DamageKind=Dot`、末跳只结算一次、到期/死亡清理。
+- 怪物控制：`MonsterStatusControlTests`（6 项）锁定减速作用于真实移动/ORCA、麻痹打断与
+  霸体、Evade 到家清状态；`MonsterEvadeTests` 覆盖清状态后的仇恨/回巢。
 
 `CastCancelBroadcast`（310）、`CombatStateUpdate`（311）与 `NpcActionEvent`（2004，含 `LifeId`）
 已启用；取消/动作事件/投影统一按 `IsSameCombatScene`（相对 `ZoneId`，空值广播）过滤。

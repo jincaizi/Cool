@@ -11,12 +11,15 @@
 | `HitResolver.cs` | 服务端权威命中裁决；几何与客户端 `AttackShape` 对齐；锥形按目标半径扩展（圆-锥相交）；可选高度重叠过滤 |
 | `CombatRules.cs` | 投射物判定种类与参数（剑气 / 火球 / 落点圆）、旋转重复判定（`RepeatSpec`）、攻击高度带（`AttackHeightSpec`） |
 | `MovementBudgetMath.cs` | PvP 位移预算纯函数：接收 tick 差、普通/突进/跳跃惯性距离、水平钳制、跳跃抛物线 |
+| `Elemental/StatusRuntime.cs` | 权威状态运行时：应用/刷新/到期/DoT 时序、控制派生与易伤倍率（Plan 04） |
 | `Vec3.cs` | 共享向量 |
 
 ## 属性剑气共享目录（2026-11-14）
 
-状态：Plan 01–03 已完成（Plan 03 增加 `Displacements`/`Jump` 共享表与 `MovementBudgetMath`）；
-Plan 04–05 未开始。
+状态：Plan 01–04 已完成（Plan 03 增加 `Displacements`/`Jump` 共享表与 `MovementBudgetMath`；
+Plan 04 增加 `StatusRuntime`、状态时序与 PvP 规则）；Plan 05 未开始。
+离线单机**尚未接入**共享状态运行时（本地 `StatusEffectManager` 的冰冻/灼烧保持独立），
+四元素共享运行时留给 Plan 05；详见下文“离线边界”。
 
 `Elemental/` 是 Plan 01 的双端共享真值：
 
@@ -64,10 +67,57 @@ bash tools/unity-tests.sh EditMode ElementalCatalogTests
 
 `CombatRules.PveDamageBaselineHp = 100f`：`ScaleNpcDamageToPlayer(damage, target.MaxHp)`
 = `damage × target.MaxHp / 100`（`MaxHp ≤ 0`/非有限时原样返回）。NPC → 720 HP 玩家 = ×7.2，
-保持原 PvE TTK；Plan 04 的 DoT 必须复用同一函数。
+保持原 PvE TTK。Plan 04 的灼烧是玩家来源，每跳取状态表 `DamagePerTick`、不做 HP 基准缩放；
+若将来新增 NPC 来源 DoT，每跳仍须复用同一函数。
 
 验证：服务端 `MovementBudgetFormulaTests`（11 项）锁定上述公式与 fail-closed；
 Unity `MovementBudgetMathTests`（5 项）锁定双端同源编译下的同一批断言。
+
+## 权威状态运行时（Plan 04，2026-11-19）
+
+`Elemental/StatusRuntime.cs` 是双端共享的纯 C# 状态机（零 `UnityEngine`），
+服务端每个实体一份；Plan 04 只有服务端接线，离线单机尚未接入。
+
+| 类型 | 内容 |
+|---|---|
+| `StatusEffectKind` | `Slow=1` / `Burn=2` / `Paralyze=3` / `Vulnerable=4`（与 `StatusEffectDefinition.EffectKind` 同值） |
+| `StatusApplyResult` | `Ignored` / `Applied` / `Refreshed` |
+| `ActiveStatus` | `Definition`、`SourceId/SourceSkillId/SourceCastId`、`AppliedTick/EndTick/NextTick`、`PendingRemoval`、`IsPvpControl` |
+| `StatusRuntime` | `Configure(PvpCombatSettings)`、`Apply(...)`、`Remove`、`RemoveExpiredModifiers`、`CollectDueDots`、`AdvanceDot`、`RemoveExpiredDots`、`DeriveControl`、`IncomingDamageMultiplier`、`ClearAll`、`SecondsToTicks` |
+
+时序与规则（`CombatRules.TickRateHz = 15`，所有秒数 `SecondsToTicks` 向上取整并做
+饱和加法）：
+
+- 作用区间 `[ApplyTick, EndTick)`；灼烧按 `NextTick` 每间隔一跳，**允许在 `EndTick`
+  结算已排定的最后一跳**，随后移除。同 tick 顺序固定为：解除到期非 DoT（风先失效）
+  → 结算到期灼烧跳 → 处理输入/命中段；`RemoveExpiredDots` 兜底清理没有排定跳落在
+  `EndTick` 的 DoT（刷新错相/间隔不整除），必须在 `CollectDueDots`/`AdvanceDot` 之后调用。
+- 同 `StackGroupId` 最多一条、不同组可共存；重施刷新 `EndTick`，灼烧保留首次
+  `SourceId`，下一跳取原下一跳与新间隔跳中较早者（连续命中不推迟伤害）；
+  刷新会清 `PendingRemoval`。
+- PvP 控制规则：仅“玩家目标 + 玩家来源”的 `Paralyze` 记为 `IsPvpControl`；
+  移除时写入 `ControlImmunityUntilTick = tick + 0.5s`（免疫窗口内拒绝新麻痹）；
+  玩家对玩家的 `Vulnerable` 在 4 秒窗口内不刷新（窗口跨状态移除保存）。
+- `DeriveControl`：多个减速取最大 `SlowRatio`，`SpeedScale = clamp(1 − slow, 0, 1)`；
+  任一 `Paralyze` 置 `ActionLock=true`。
+- `IncomingDamageMultiplier(pvp, pvpMultiplier)`：PvE 使用状态表
+  `IncomingDamageMultiplier`（首版风 = 2.0），PvP 使用共享 `Pvp.WindVulnerabilityMultiplier`
+  （首版 1.28）；PvP 首版不放大灼烧（调用方按目标/来源选 `pvp` 并跳过灼烧）。
+- `ClearAll` 清空状态、控制免疫与易伤窗口；死亡、Evade 到家、复活/离场复用。
+
+首版默认表（`ElementalCatalogDefaults` / `Server/Config/elemental_catalog.json`）：
+冰 `101` 减速 30% / 2s；火 `201` 3s、每 1s 8 点；雷 `301` 0.8s；风 `401` 1.5s、
+PvE ×2、PvP ×1.28。`ElementalCatalogDefaults.FindStatus/FindElement` 供两端查表。
+
+验证：服务端与 Unity 各有一份 `StatusRuntimeTests`，锁定应用/刷新/末跳/控制派生与
+PvP 免疫/不刷新窗口。
+
+## 离线边界（Plan 05）
+
+Plan 04 只把 `StatusRuntime` 接到**服务端权威实体**（`ServerStatusManager` +
+`StatusTickService`）。离线单机仍使用 `Skills/Effect/StatusEffectManager` 的本地
+冰冻/灼烧（仅怪物、本地计时、独立效果组）：四元素共享运行时、离线去重与元素 VFX
+留给 Plan 05，不能把 Plan 04 的状态/DoT 文档理解为单机已打通。
 
 ## 约束
 
@@ -105,7 +155,8 @@ NPC CombatRules 接线由服务端从共享发布定义注册；玩家规则及�
 ## 测试
 
 `Assets/Scripts/Tests/Editor/SyncCore/`：`ClockSyncAlgorithmTests`、`MovementValidatorTests`、
-`PredictionReconcilerTests`、`HitResolverTests`、`CombatRulesTests`、`MovementBudgetMathTests`。
+`PredictionReconcilerTests`、`HitResolverTests`、`CombatRulesTests`、`MovementBudgetMathTests`、
+`StatusRuntimeTests`。
 
 ```bash
 bash tools/unity-tests.sh EditMode HitResolverTests

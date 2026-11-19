@@ -36,9 +36,10 @@
 
 ## 属性剑气 v1（2026-11-14）
 
-状态：Plan 01–03 已完成（Part A 取消广播/NpcAction；Part B 战斗投影版本合并、AOI 基线投影、
-`ActiveCast` 补播与在途剑气补发消费；Plan 03 位移上报、跳跃边沿与本人控制消费）。
-`Statuses[]` 内容与实际控制来源属 Plan 04；元素 VFX 与远端武器模型仍属 Plan 04/05。
+状态：Plan 01–04 已完成（Part A 取消广播/NpcAction；Part B 战斗投影版本合并、AOI 基线投影、
+`ActiveCast` 补播与在途剑气补发消费；Plan 03 位移上报、跳跃边沿与本人控制消费；
+Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
+元素 VFX 资源化与远端武器模型仍属 Plan 05。
 
 - **权威换装**：`ClientEquipmentState` 按 `EquipmentRevision` 应用 `EquipWeaponConfirm`；
   旧版本忽略。拒绝确认携带的较新摘要也会应用（恢复服务器当前装备）；登录基线可把版本 0
@@ -76,7 +77,7 @@
   新生命先入 64 条有界缓存等该世代基线更新视图后回放，相同版本视为幂等重放仍应用
   （基线与 `Health` 快照同版本）。HP/Dead/IsDefending 同步 `Targetable`/名牌/Animator；
   `Equipment`/`Control` 只存储（不替换远端模型、不改 3C）；`Statuses` 为空列表即清空旧状态
-  （内容属 Plan 04）。
+  （Plan 04 起内容为权威冰/火/雷/风，见下文“权威状态表现”）。
 - **AOI 基线投影**：`EntityFieldMask.Combat` 置位的基线快照走同一条 `ApplyProjection`；
   `EntitySnapshot.CombatVersion/LifeId` 随 `Health`/`Combat` 位下发。服务端每快照携带
   `Dead/Defending`，`Health` 是条件字段（Baseline / 血量翻转）——客户端仍按掩码位取值，
@@ -97,7 +98,7 @@
   仍走同一条 `ProjectileLaunchBroadcast` 路径，按原始 `ServerTimestamp` 补飞行进度。
 - **与攻击起手的分工**：Plan 02 保留 `CastBroadcast` → `NpcAttackSchedule` 作为 NPC 攻击起手；
   `NpcActionEvent` 只负责阶段/取消（技能动作仅跟踪实例，`Cancelled` 时停止），避免同一次施法
-  挥两次。NpcAction 直接驱动攻击变体/时间轴留 Plan 04/05。
+  挥两次。NpcAction 直接驱动攻击变体/时间轴留 Plan 05（Plan 04 未改这条分工）。
 
 ## 位移预算上报与控制消费（Plan 03，2026-11-18）
 
@@ -127,6 +128,30 @@
 
 回归：`MovementReporterFieldsTests`（字段逐项）、`CombatNetworkBridgeTests`（CastConfirm 记忆）、
 `ClientLocalControlRoutingTests`（本人/远端分流）。
+
+## 权威状态表现与 DoT 分流（Plan 04，2026-11-19）
+
+- **远端状态投影**：`RemoteEntityRegistry.ApplyProjection` 合并成功后，仅在 `Statuses`
+  列表变化时发 `StatusesChanged(entityId, target, statuses)`；`target` 是**当前可见渲染根**
+  （`StatusVfxTarget`：FullRoot → active ProxyRoot → view.GameObject）。分档切换后
+  `SetTier` 用新根对当前状态重放一次（初始建档由基线投影自带状态）。`ClientNetworkHost`
+  把事件交给 `VFX/AuthoritativeStatusVfx`，
+  由它按 `(EntityId, GroupId)` diff 后发 `StatusEffectAppliedEvent/RemovedEvent`；
+  重复投影零事件，同组换效果先移除再应用。
+- **本人状态**：311 的本人分支除 `Control`/`MaxHp` 外缓存 `projection.Statuses` 并对本地
+  角色根 `Apply`；本地角色重建（新 transform）后 `ReplayLocalStatuses()` 用缓存重放，
+  断开连接时清空缓存。渲染根变化（Proxy↔Full / 角色重建）由 `AuthoritativeStatusVfx`
+  先对旧根发 Removed、再对新根发 Applied，染色不会留在已隐藏/销毁的旧模型上。
+- **DoT 只走 Dot 通道**：`CombatNetworkBridge.ApplyDamageResult` 先判 `DamageKind.Dot`：
+  本人 → `onDotDamageToLocalPlayer` → `Sys3CEntry.ApplyDotDamage`（只对齐权威余血 +
+  `PlayerDotDamageEvent` 飘字）；远程 Npc → `MonsterDotDamageEvent`、远程玩家/bot →
+  `PlayerDotDamageEvent`，并同步 `Targetable` 余血/死亡。Dot 分支**不**调用 `PlayHit`、
+  不发 `BlockSucceededEvent`/`MonsterTakeDamageEvent`/`PlayerTakeDamageEvent`，
+  因此没有受击硬直、格挡、击退、命中火花、泛红或震屏；直接命中（缺省 `Direct=0`）路径不变。
+
+回归：`DotDamageRoutingTests`（7 项，本地/远程 DoT 事件隔离）、
+`AuthoritativeStatusVfxTests`（9 项，diff/换根重放）、`RemoteEntityRegistryTests`
+（`StatusesChanged` 与投影版本合并）。
 
 ## 联网复活
 
@@ -222,7 +247,8 @@ Editor：`Assets/Scripts/Tests/Editor/SyncLayer/`（`RemoteTierPolicyTests`、`R
 `RemoteEntityRegistryTests`、`NpcBodyColliderTests`、`AppearanceCatalogTests`、`TierQueryTests`、
 `NpcViewGameplayStripTests`、`MonsterBodyRadiusTests`、`RemoteEntityAnimatorContractTests`
 （真实 `Character3C.controller`：Hit/DefendHit/Death/Down/GetUp 状态与剪辑时长）、
-`MovementReporterFieldsTests`、`ClientLocalControlRoutingTests`、`CombatNetworkBridgeTests` 等）。
+`MovementReporterFieldsTests`、`ClientLocalControlRoutingTests`、`CombatNetworkBridgeTests`、
+`DotDamageRoutingTests` 等）。
 PlayMode：`RemoteRenderBranchTests`、`RemoteHitSnapshotPersistenceTests`（D6：`ActionState=0`
 快照不清受击表现）、`MovementSyncTests`、`CombatSyncTests`、`TwoClientWorldTests`、
 `ThreeClientCombatConsistencyTests`（A 打 B、C 旁观的 DamageResult 与 Targetable 余血一致性）。

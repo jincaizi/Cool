@@ -1,8 +1,8 @@
 # Server/Monster —— 服务端权威怪物
 
 `MonsterModule.cs` 在主循环线程独占运行（无锁），约 15Hz（66ms）。每 tick：
-状态/死亡 → 控制锁（P3 预留）→ 仇恨有效性 → 模式转移 → 模式行为 → 位置 flush →
-施法 drain → 判定 drain → 快照。
+状态/死亡 → 权威控制锁（Plan 04：减速倍率快照 + 麻痹跳过行为树）→ 仇恨有效性 →
+模式转移 → 模式行为 → 位置 flush → 施法 drain → 判定 drain → 快照。
 
 ## 文件
 
@@ -33,8 +33,9 @@
 - **PvE 伤害基准缩放（Plan 03，2026-11-18）**：NPC → 已登录玩家的**直接伤害**按
   `target.MaxHp / CombatRules.PveDamageBaselineHp`（基准 100 HP）缩放——元素会话 720 HP
   时 ×7.2，保持原 100 HP 下的 PvE TTK；玩家/bot 来源、以及打怪物的伤害不缩放。
-  唯一实现是 `CombatRules.ScaleNpcDamageToPlayer`；Plan 04 的灼烧/DoT 每跳必须复用同一函数，
-  另写一套缩放在 720 HP 会话会直接打穿 TTK。
+  唯一实现是 `CombatRules.ScaleNpcDamageToPlayer`。Plan 04 的灼烧跳是**玩家来源**：
+  每跳取状态表 `DamagePerTick`，PvE 再乘风易伤、PvP 不放大，不做 HP 基准缩放；
+  若将来新增 NPC 来源 DoT，每跳仍须复用同一缩放函数。
 
 ## 导航（P1）
 
@@ -114,6 +115,27 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 - `leashRadius` 默认 `detectionRadius + patrolRadius + 10`；`dropAggroRadius` 默认
   `leashRadius`。两者都可在配置里显式覆盖。
 
+## 权威状态控制（Plan 04，2026-11-19）
+
+- **减速作用于真实移动**：`PlayerState.ControlSpeedScale`（状态运行时派生，首版冰 = 0.7）
+  每 tick 写入 `MonsterState.SpeedScale`；`SimpleMoveSystem` 的期望位移 =
+  `moveSpeed × SpeedScale × dt`，**ORCA `maxStep` 用同一缩放后的期望位移**——
+  冰减速真正拖慢移动与避让步长，不只是快照数值。位置 flush 的 `Speed` 也用
+  `moveSpeed × ControlSpeedScale`（未减速时逐位等于 `moveSpeed`）。
+- **麻痹（雷）**：`ControlActionLock` 时整段跳过行为树（`m.Moving=false`，不移动、不施法），
+  与受击硬直同门；`Attack` 动作入口也复查锁。首次上锁经
+  `Server3C.ApplyPlayerControl → MonsterModule.CancelAction` 取消未提交前摇
+  （`NpcActionCancelReason.Hit`）；**霸体只免打断**：`MonsterActionRunner.IsArmored`
+  时动作照常跑完，麻痹状态仍会挂上并在动作结束后限制移动/施法。`IsArmored` 反映的是
+  最近一次 `TryBeginSkill` 计算的霸体（已知限制：技能之间不会主动刷新）。
+- **Evade 清状态**：`MonsterBrain.ArriveHome` 回满血时 `Statuses.ClearAll` +
+  `BumpCombatVersion`——脱战到家后冰/火/雷/风全部移除，控制派生恢复；Evade 途中保留状态
+  但不再产生仇恨。
+- **DoT 与受击分离**：灼烧跳走 `OnDamageTaken(kind: Dot)`，只更新 `LastHp` 并计入仇恨
+  （`damage × ThreatPerDamage`，不叠加 `ThreatFlat`），不写 `HitStartTick`、
+  `ActionState` 不进入 `Hit`、不触发受击硬直；直接伤害仍走 `OnDirectDamage`。
+  死亡（含 DoT 致死）由同一个 `ApplyDamage` 检测，进入 `Dead` 并清空仇恨。
+
 ## 配置
 
 `Server/Config/monster_config.json`；`bodyRadius` 是 ORCA 与客户端碰撞的半径真值，
@@ -159,8 +181,8 @@ bash tools/unity-tests.sh PlayMode MonsterWorldTests
 
 ## 已知限制
 
-- **P2 不含控制 / 击退 / 状态**（Stun/Freeze/Slow/Burn/Knockback 属 P3）；Evade 到家“清状态”
-  在 P2 无状态可清，P3 接入后需补状态清除与快照脏位。
+- **控制/状态覆盖范围**：Plan 04 已接入权威减速（冰）、麻痹（雷）/霸体免打断、灼烧 DoT
+  与 Evade 到家清状态；**击退/浮空等外部位移**仍属 backlog，怪物也没有元素专属动画/VFX。
 - **新技能无专属动画 / VFX**：50005/50006 只复用现有 Attack01/02 动画，没有专属施法/命中
   VFX（NPC 施法广播目前不驱动 VFX catalog）；`HitDelaySeconds` 仍是 0.35s 占位
   （未按动画判定帧实测，P3 前补齐）。

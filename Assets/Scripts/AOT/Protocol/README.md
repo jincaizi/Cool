@@ -62,9 +62,10 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 
 ### 属性剑气 v1（2026-11-14）
 
-状态：Plan 01–03 已完成（Part A 取消/NpcAction；Part B 战斗投影/AOI 发送原因/带宽；
-Plan 03 位移/跳跃预算与 PvP 控制基线）。Plan 04–05 未开始，见路线图。
-`Statuses[]` 内容、实际控制来源与 DoT 尚未启用（Plan 04）。
+状态：Plan 01–04 已完成（Part A 取消/NpcAction；Part B 战斗投影/AOI 发送原因/带宽；
+Plan 03 位移/跳跃预算与 PvP 控制基线；Plan 04 状态结算/DoT/元素表现）。
+Plan 05 未开始，见路线图。`Statuses[]`、实际控制来源（状态运行时）与 `DamageKind=Dot`
+均已在 Plan 04 启用；协议本身没有新增消息，只是填充既有字段。
 
 能力位 `ProtocolFeatures.ElementalSwordQiV1 = 1u << 2`。登录请求 tag9
 `ElementalCatalogFingerprint`（共享目录 SHA-256 小写十六进制）；登录响应 tag14 同指纹、
@@ -91,10 +92,12 @@ tag15 `WeaponInventoryBaseline`（`LifeId/EquipmentRevision/当前装备/IList<W
 DamagePerTick/IntervalTicks/IncomingDamageMultiplier`；`EquipmentSummary` 1–3
 `WeaponInstanceId/TemplateId/ElementId`；`ControlSummary` 1–3 `SpeedScale/ActionLock/
 ControlVersion`；`ActiveCastProjection` 1–4 `CastId/SkillId/Phase/EndTick`。
-Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实际状态属 Plan 04）。
-`Control` 取 `PlayerState.ControlSpeedScale/ControlActionLock/ControlVersion`（Plan 03 接线）；
-当前没有生产调用者（状态运行时属 Plan 04），因此运行时仍恒为
-`SpeedScale=1 / ActionLock=false / ControlVersion=0`。
+Plan 04 起：`Statuses` 由服务端状态运行时（`ServerStatusManager`）按组填充——
+冰/火/雷/风各占一组，`EffectId/GroupId/EndTick/SourceId` 与按类型参数
+（`SlowRatio`、`DamagePerTick/IntervalTicks`、`IncomingDamageMultiplier`）均为权威值；
+`Control` 取 `PlayerState.ControlSpeedScale/ControlActionLock/ControlVersion`，
+由 `Server3C.ApplyPlayerControl` 在状态变化时写入，冰使 `SpeedScale` 变 0.7、雷使
+`ActionLock=true`，`ControlVersion` 随之递增。本人 311 与 AOI 基线走同一份投影。
 
 追加字段（只加不删）：
 
@@ -102,7 +105,7 @@ Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实
 |---|---|---|---|
 | `CastRequest` | `ClientCastSeq` / `EquipmentRevision` / `CasterLifeId` | 8 / 9 / 10 | 幂等序号、装备版本与生命代次校验 |
 | `CastBroadcast` | `CastId` / `CasterLifeId` / `AttackSpeedMultiplier` / `ElementId` / `EquipmentRevision` | 15–19 | 权威施法标识与冻结的施法快照 |
-| `HitEntry` | `CastId` / `EventSeq` / `EventId` / `DamageKind` / `TargetLifeId` / `CombatVersion` | 8–13 | 命中归属与战斗投影（DoT 分支属 Plan 04） |
+| `HitEntry` | `CastId` / `EventSeq` / `EventId` / `DamageKind` / `TargetLifeId` / `CombatVersion` | 8–13 | 命中归属与战斗投影；Plan 04 起逐事件填充 `EventSeq/EventId/CombatVersion`，`DamageKind=Dot` 用于灼烧跳 |
 | `CancelCastRequest` | `CastId` | 2 | 非 0 只取消该次施法；0 = 取消该技能最新实例（兼容旧客户端） |
 | `NpcActionEvent` | `LifeId` | 4 | 怪物生命代次；与 `EntityId/InstanceId/Revision` 组成客户端合并键 |
 | `EntitySnapshot` | `LifeId` | 19 | 实体生命代次（NpcAction 合并键；随基线/Health 快照携带） |
@@ -113,8 +116,10 @@ Plan 02 只填 HP/死亡/防御/装备/活动施法：`Statuses` 恒为空（实
 同实例只接受更大的 `Revision`；生命代次不匹配的事件丢弃。取消事件与 `CastCancelBroadcast`
 同义——只停攻击表现，不回收已发射的剑气。
 
-`DamageKind`：`Direct=0`、`Dot=1`（DoT 分支属 Plan 04）。`HitEntry` 的
-`EventSeq/EventId/CombatVersion` 目前仍固定 0，等 DoT/状态运行时（Plan 04）启用。
+`DamageKind`：`Direct=0`、`Dot=1`（Plan 04 已启用）。`HitEntry` 的
+`EventSeq` 按目标单调、`EventId` 为服务端世界级去重序号、`CombatVersion` 为结算后版本，
+三者均由 Plan 04 的伤害/状态提交填充；灼烧跳与直接命中走同一条 `DamageResult` 通道，
+客户端按 `DamageKind` 选择表现（Dot 只对齐权威血量与飘字）。
 所有新消息已在 `MessageTypeRegistry` 注册；
 新增字段沿用 `IList<T>` 规则（`WeaponInventoryBaseline.Weapons` 不是 `List<T>`）。
 

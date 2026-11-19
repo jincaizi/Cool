@@ -29,8 +29,9 @@
 
 ## 属性剑气与攻速（2026-11-14）
 
-状态：Plan 01 与 Plan 03 已完成（Plan 03 接通共享突进行为与状态倍率）；元素状态/DoT 与
-元素 VFX（Plan 04）未开始。
+状态：Plan 01、03、04 已完成（Plan 03 接通共享突进行为与状态倍率；Plan 04 信号：剑气元素
+染色、`EffectType.Vulnerable` 与权威状态表现接线）。离线单机仍用本地
+`StatusEffectManager`（冰冻/灼烧），四元素共享运行时留给 Plan 05。
 
 - 普攻 10001/10002 的攻速来自已确认装备：`SkillCoordinator.AttackSpeedProvider` 注入倍率
   （0.25–4），`SkillExecutor.SetTimeScale` 驱动 `SkillStateMachine.ElapsedTime`，
@@ -54,6 +55,17 @@
   （冰减速等）；普通移动的 `Base × Defend × Skill × Status` 合成见
   [Sys3C](../Sys3C/README.md)。状态倍率由 `Sys3CEntry` 注入
   `() => CharacterController.StatusSpeedScale`。
+
+## 元素表现信号（Plan 04，2026-11-19）
+
+- `Effect/EffectData.cs` 的 `EffectType` 只追加 `Vulnerable`（末尾），既有枚举序列化值
+  不变；`StatusVFXSystem` 用显式 `case` 处理以免未来类型被静默归类。
+- `SwordQiSpawner.Spawn(..., int elementId = 0)` 透传给 `SwordQiProjectile`，由
+  `SwordQiElementTint` 按元素给拖尾/粒子/材质 `_Color` 上色（冰蓝白/火橙红/雷紫白/
+  风青白，0 = 原色）；联机剑气读 `ProjectileLaunchBroadcast.ElementId`。
+- 离线 `SkillExecutor.OnSwordQiFrame` **尚未传入** `Sys3CEntry.CurrentElementId`
+  （Plan 05）。本地 `SkillExecutor` 施加的 `EffectData` 仍走 `StatusEffectManager`，
+  与服务端权威 `StatusRuntime` 是两套（按效果组去重留给 Plan 05）。
 
 ## 测试
 

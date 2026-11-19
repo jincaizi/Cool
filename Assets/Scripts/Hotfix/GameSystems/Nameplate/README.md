@@ -14,7 +14,8 @@
 
 ## 事件来源
 
-- 伤害：`MonsterTakeDamageEvent` / `PlayerTakeDamageEvent` / `MonsterDotDamageEvent`
+- 伤害：`MonsterTakeDamageEvent` / `PlayerTakeDamageEvent` / `MonsterDotDamageEvent` /
+  `PlayerDotDamageEvent`
 - 格挡：`BlockSucceededEvent`（本地由 `Sys3CEntry` 发布，远程由 `SyncLayer/CombatNetworkBridge` 发布）
 - 精力环：`Stamina/StaminaRingRenderer` 由 `EntityDisplayManager` 持有，每帧读取 `StaminaSystem`
 
@@ -29,6 +30,16 @@
 - 血量来源是**服务端权威值**：快照 `Health` 掩码位或 `DamageResult.TargetRemainingHp`
   → `NetworkTargetable` → `INetworkLabelSink.UpdateHp`。bot 在 registry 侧就不注册名牌，
   所以不会出现「僵尸 bot 名牌」。
+
+## DoT 飘字（Plan 04）
+
+- `DamageKind=Dot` 的灼烧跳**只飘字、不触发受击反馈**：本地由
+  `Sys3CEntry.ApplyDotDamage` 发 `PlayerDotDamageEvent`，远程玩家/bot 由
+  `CombatNetworkBridge` 发同一事件，远程怪物发 `MonsterDotDamageEvent`；
+  `DisplayEventBridge` 分别订阅并只走 `FloatTextRenderer`。Dot 分支不发
+  `PlayerTakeDamageEvent`/`MonsterTakeDamageEvent`，所以不会带出命中火花、泛红、
+  震屏或顿帧。本地 `ApplyDotDamage` 在余血 ≤ 0 时不飘字（死亡优先，与直接致命伤一致）；
+  远程 Dot 的飘字由 `DisplayEventBridge` 照常显示，数值取自权威 `HitEntry`。
 
 ## UI 倍率
 
