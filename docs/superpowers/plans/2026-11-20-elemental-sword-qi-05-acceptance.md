@@ -266,8 +266,9 @@ git commit -m "test(aoi): budget status and dot replay for 60 seconds"
 `NetworkConsumptionInjectionTests`：
 - 同一 `DamageResult`（同一 `HitEntry.EventId`）投递两次：本地受击回调/飘字只执行一次；不同 EventId 执行两次。
 - `CombatStateUpdate` 版本 5 后投递版本 4：registry 丢弃 4；版本 5 的状态/装备不回退。
-- `ProjectileStopBroadcast` 先于 `ProjectileLaunchBroadcast`：launch 到达后仍只创建一个视觉并按停点结束；重复 launch/stop 幂等（复用 presenter 测试接缝）。
-- `CastBroadcast` 重复：同一 `CastId` 只安排一次攻击（registry/presenter 去重）。
+- `ProjectileStopBroadcast` 先于 `ProjectileLaunchBroadcast`：按既有语义缓存停点并跳过后续视觉（当前 presenter/README/既有测试一致）；重复 launch/stop 幂等。
+- `CastBroadcast` 重复：桥层按非零 `CastId` 有界去重，重复包不再触发 `OnCastBroadcast`（覆盖 NPC/玩家/投射物/CastVFX 全路径）；`ClearDedupe` 同清。
+- 整条 DamageResult 的 hit 全被判重时不再触发 `OnDamageResult`（避免重复火球消息消费下一发视觉）。
 - 正常 KCP/WebSocket：跑 `WebSocketClientAdapterTests`、`WebSocketServerSessionTests`，确认无改动回归。
 
 - [ ] **步骤 2：运行测试确认失败**
