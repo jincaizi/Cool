@@ -238,8 +238,8 @@ namespace Hotfix.GameSystems.SyncLayer
                         OnCastBroadcast?.Invoke(broadcast);
                         break;
                     case DamageResult result:
-                        // 整条命中全被判重 = 重复消息：连观察事件也不再触发（宿主会用它
-                        // 消费下一发投射物视觉——重复火球消息会把下一发提前停掉）。
+                        // 整条命中全被判重或全为旧世代 = 该消息不消费（连观察事件也不触发——
+                        // 宿主会用它消费下一发投射物视觉，重复/旧包会把下一发提前停掉）。
                         if (ApplyDamageResult(result))
                             OnDamageResult?.Invoke(result);
                         break;
@@ -319,8 +319,9 @@ namespace Hotfix.GameSystems.SyncLayer
             return targetLifeId != 0 && hit.TargetLifeId < targetLifeId;
         }
 
-        /// <summary>应用一条 DamageResult；返回是否含新的命中（整条全重复返回 false）。
-        /// 无 hit 的消息没有可去重的命中，仍视为"需要交给上层"（旧服务端停点/空结果）。</summary>
+        /// <summary>应用一条 DamageResult；返回是否含新的、当前世代的命中
+        /// （整条全重复或全为旧世代返回 false）。无 hit 的消息没有可去重的命中，
+        /// 仍视为"需要交给上层"（旧服务端停点/空结果）。</summary>
         private bool ApplyDamageResult(DamageResult result)
         {
             long localId = _localPlayerId();

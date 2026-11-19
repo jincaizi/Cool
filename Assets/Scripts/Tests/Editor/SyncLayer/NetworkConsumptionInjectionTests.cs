@@ -124,7 +124,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
 
         private static CombatStateUpdate CombatUpdate(long entityId, uint version, float hp,
             long weaponInstanceId, bool defending = false, bool dead = false,
-            uint lifeId = 1, IList<StatusProjection>? statuses = null)
+            uint lifeId = 1, IList<StatusProjection>? statuses = null, bool nullStatuses = false)
             => new CombatStateUpdate
             {
                 EntityId = entityId,
@@ -140,7 +140,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     {
                         WeaponInstanceId = weaponInstanceId, TemplateId = 90002, ElementId = 1
                     },
-                    Statuses = statuses ?? new List<StatusProjection>()
+                    // 默认保持一直以来的空列表语义；nullStatuses 单独保留 null 路径（
+                    // StatusesEqual/视图合并对 null 与空列表的处理不同）。
+                    Statuses = nullStatuses ? null! : statuses ?? new List<StatusProjection>()
                 }
             };
 
@@ -661,9 +663,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             // 施法确认（携带服务端冻结的装备版本 5）先到，版本 5 的换装确认延迟到达，
             // 旧版本 4 的换装确认再晚到后。乱序不得让旧装备回退，也不得改写施法确认的版本。
             var registry = new RemoteEntityRegistry(_root.transform);
-            CastConfirm? lastConfirm = null;
+            int castConfirms = 0;
             var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry);
-            bridge.OnCastConfirm += c => lastConfirm = c;
+            bridge.OnCastConfirm += _ => castConfirms++;
 
             bridge.OnMessage(MessageId.CastConfirm, new CastConfirm
             {
@@ -682,9 +684,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             });
             bridge.Update();
 
-            Assert.NotNull(lastConfirm);
-            Assert.AreEqual(5u, lastConfirm!.EquipmentRevision,
-                "施法确认必须保留服务端冻结的装备版本");
+            // CastConfirm 是原样转发（桥不改写任何字段，其 EquipmentRevision 只证明消息被
+            // 转发一次，不构成交错保护证据）；交错保护的价值在下面的版本门与出站基准。
+            Assert.AreEqual(1, castConfirms, "施法确认必须转发一次");
             Assert.AreEqual(5u, bridge.Equipment.Revision, "旧换装确认不得回退新装备");
             Assert.AreEqual(42L, bridge.Equipment.WeaponInstanceId);
             Assert.IsTrue(bridge.TryGetAcceptedCastId(10002, lifeId: 1, out ulong castId));
@@ -855,45 +857,40 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         // ------------------------------------------------------------------------------------
-        // ⑥ 断线重进旧包：宿主路径 = ClearDedupe/ClearEchoDedupe + registry.Clear +
-        //    新桥（不携带旧会话装备摘要）。桥没有会话代次字段，旧包靠生命代次（LifeId）门
-        //    在桥/registry 既有版本门上丢弃；位移预测属宿主（MovementReporter/SyncCore），
-        //    不在桥的职责内。
+        // ⑥ 换命（respawn / change-life）后的旧世代包。注意：这不是断线重连——重连会由
+        //    服务端分配新 playerId，跨会话隔离靠宿主（退订 adapter + 新桥 + registry.Clear，
+        //    见本段末尾的新会话用例）。桥没有会话代次字段，同一会话的换命靠 LifeId 门
+        //    丢弃旧包；位移预测属宿主（MovementReporter/SyncCore），不在桥的职责内。
         // ------------------------------------------------------------------------------------
 
         [Test]
-        public void test_reconnect_drops_old_generation_damage_and_cast()
+        public void test_respawn_drops_old_generation_damage_and_cast()
         {
-            // 旧会话：视图与桥都处于 LifeId=1
+            // 换命（复活，LifeId 1→2）：同一会话、同一实体 id，换命前的包迟到。
+            // RespawnNotice 由宿主消费（ApplyServerRespawn → Equipment.SetLifeId）；
+            // 桥层可见的新代次是 Equipment.LifeId，远程视图由新快照更新 LifeId。
             var registry = new RemoteEntityRegistry(_root.transform);
             registry.ApplySnapshot(PlayerSnapshot(2L), serverTicks: 1_000_000L);
             Assert.NotNull(registry.GetView(2L));
 
-            var oldBridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry);
-            // 宿主断线路径：DetachCombatBridge → ClearDedupe/ClearEchoDedupe；
-            // manager.Dispose → registry.Clear（视图/缓存/last-known 全清）
-            oldBridge.ClearDedupe();
-            oldBridge.ClearEchoDedupe();
-            registry.Clear();
-            Assert.AreEqual(0, registry.Count);
-
-            // 新会话：新桥（装备摘要不跨会话复用）+ 新生命代次 + 新基线视图
             int localCalls = 0, damageEvents = 0, castEvents = 0;
             var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry,
                 (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) => localCalls++);
             bridge.OnDamageResult += _ => damageEvents++;
             bridge.OnCastBroadcast += _ => castEvents++;
-            bridge.Equipment.SetLifeId(2);   // 登录基线/复活写入的新代次（宿主路径）
+
+            bridge.Equipment.SetLifeId(2);
             registry.ApplySnapshot(PlayerSnapshot(2L, lifeId: 2), serverTicks: 2_000_000L);
             var view = registry.GetView(2L);
             Assert.NotNull(view);
+            Assert.AreEqual(2u, view!.LifeId);
 
             int takeDamageEvents = 0;
             Action<PlayerTakeDamageEvent> handler = _ => takeDamageEvents++;
             EventBus.Subscribe(handler);
             try
             {
-                // 旧会话的包在新连接上重投：EventId/CastId 窗口已清空，生命代次门仍须挡住
+                // 换命前（LifeId=1）的包迟到：生命代次门必须挡住
                 bridge.OnMessage(MessageId.DamageResult, DirectHit(eventId: 9901, targetLifeId: 1));
                 bridge.OnMessage(MessageId.DamageResult,
                     DirectHit(eventId: 9902, targetId: 2L, targetLifeId: 1, remainingHp: 1f));
@@ -903,14 +900,14 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 });
                 bridge.Update();
 
-                Assert.AreEqual(0, localCalls, "旧世代命中不得走本地受击注入");
+                Assert.AreEqual(0, localCalls, "换命前命中不得走本地受击注入");
                 Assert.AreEqual(0, damageEvents, "旧世代命中不得触发 OnDamageResult");
                 Assert.AreEqual(0, castEvents, "旧世代施法广播不得触发桥层事件（NPC 排程/玩家表现）");
                 Assert.AreEqual(0, takeDamageEvents, "旧世代命中不得在远程视图上飘字");
-                Assert.AreEqual(1f, view!.Targetable.HPPercent, 0.001f,
-                    "旧世代命中不得回退新视图血条");
+                Assert.AreEqual(1f, view.Targetable.HPPercent, 0.001f,
+                    "旧世代命中不得回退新生命血条");
 
-                // 新世代的包（复用同一 ID 数值）必须正常生效：旧包不得占用新会话的去重窗口
+                // 新世代的包（复用同一 ID 数值）必须正常生效：旧包不得占用去重窗口
                 bridge.OnMessage(MessageId.DamageResult, DirectHit(eventId: 9901, targetLifeId: 2,
                     damage: 5f, remainingHp: 85f));
                 bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
@@ -930,10 +927,10 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
-        public void test_reconnect_old_projection_does_not_override_new_generation_view()
+        public void test_respawn_old_projection_does_not_override_new_life_view()
         {
-            // 旧会话（LifeId=1，版本 5）→ registry.Clear → 新会话基线（LifeId=2，版本 1）。
-            // 旧会话的高版本 318 迟到：registry 的 LifeId 门必须丢弃（版本高也不行）。
+            // 换命（LifeId 1→2）后，旧生命的高版本 318 迟到：registry 的 LifeId 门必须丢弃
+            //（版本高也不行）。同一会话、同一实体 id，不经过 registry.Clear。
             var registry = new RemoteEntityRegistry(_root.transform);
             registry.ApplySnapshot(new EntitySnapshot
             {
@@ -952,8 +949,11 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     }
                 }
             }, serverTicks: 1_000_000L);
-            registry.Clear();
+            var view = registry.GetView(2L);
+            Assert.NotNull(view);
+            Assert.AreEqual(1u, view!.LifeId);
 
+            // 换命后的新基线（LifeId=2）落在同一视图上
             registry.ApplySnapshot(new EntitySnapshot
             {
                 PlayerId = 2L,
@@ -971,21 +971,98 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     }
                 }
             }, serverTicks: 2_000_000L);
-            var view = registry.GetView(2L);
-            Assert.NotNull(view);
+            Assert.AreEqual(2u, view.LifeId);
+            Assert.AreEqual(720f, view.Hp, 0.001f);
 
             var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId, registry);
             bridge.OnCombatStateUpdate += registry.ApplyCombatStateUpdate;
 
             bridge.OnMessage(MessageId.CombatStateUpdate,
-                CombatUpdate(2L, version: 9, hp: 1f, weaponInstanceId: 7, defending: false, dead: true));
+                CombatUpdate(2L, version: 9, hp: 1f, weaponInstanceId: 7, defending: false,
+                    dead: true, lifeId: 1));
             bridge.Update();
 
-            Assert.AreEqual(2u, view!.LifeId, "旧会话投影不得改写新会话代次");
+            Assert.AreEqual(2u, view.LifeId, "换命前投影不得改写新生命代次");
             Assert.AreEqual(1u, view.CombatVersion, "即使版本更高，旧代次也必须丢弃");
-            Assert.AreEqual(720f, view.Hp, 0.001f, "旧会话血量不得覆盖新会话");
+            Assert.AreEqual(720f, view.Hp, 0.001f, "换命前血量不得覆盖新生命");
             Assert.IsFalse(view.Dead);
-            Assert.AreEqual(99L, view.Equipment!.WeaponInstanceId, "旧会话装备不得覆盖新会话");
+            Assert.AreEqual(99L, view.Equipment!.WeaponInstanceId, "换命前装备不得覆盖新生命");
+        }
+
+        [Test]
+        public void test_new_session_bridge_owns_fresh_equipment_and_dedupe_state()
+        {
+            // 真正的跨会话隔离在宿主：DetachCombatBridge 退订旧 adapter → 新登录分配新
+            // playerId → 新 CombatNetworkBridge + 新 Equipment + registry.Clear。
+            // 桥没有会话代次字段，不能独自识别"旧会话的包"；本用例只钉宿主重建后桥实际
+            // 拥有的状态：装备摘要/去重窗口从空开始，旧桥的消费记录不会带进新会话。
+            const long oldLocalId = 7L;
+            const long newLocalId = 70L;
+            const long oldEntityId = 2L;
+            const long newEntityId = 22L;
+
+            // 旧会话：桥消费过 EventId=9901 / CastId=990，随后宿主退订并丢弃旧桥
+            var oldRegistry = new RemoteEntityRegistry(_root.transform);
+            oldRegistry.ApplySnapshot(PlayerSnapshot(oldEntityId), serverTicks: 1_000_000L);
+            var oldBridge = new CombatNetworkBridge(_client, () => oldLocalId, oldRegistry);
+            oldBridge.OnMessage(MessageId.DamageResult,
+                DirectHit(eventId: 9901, targetId: oldEntityId, remainingHp: 1f));
+            oldBridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
+            {
+                CastId = 990, CasterPlayerId = oldEntityId, SkillId = 10002
+            });
+            oldBridge.Update();
+            oldBridge.ClearDedupe();
+            oldBridge.ClearEchoDedupe();
+            oldRegistry.Clear();
+
+            // 新会话：新 playerId、新 registry、新桥（装备摘要由登录基线初始化）
+            var registry = new RemoteEntityRegistry(_root.transform);
+            registry.ApplySnapshot(PlayerSnapshot(newEntityId), serverTicks: 2_000_000L);
+            var view = registry.GetView(newEntityId);
+            Assert.NotNull(view);
+            int localCalls = 0, castEvents = 0;
+            var bridge = new CombatNetworkBridge(_client, () => newLocalId, registry,
+                (targetId, damage, isCritical, dir, remainingHp, isBlocked, sourceIsPlayer) => localCalls++);
+            bridge.OnCastBroadcast += _ => castEvents++;
+            bridge.Equipment.InitializeFromBaseline(new WeaponInventoryBaseline
+            {
+                LifeId = 1, EquipmentRevision = 3, WeaponInstanceId = 99,
+                TemplateId = 90002, ElementId = 2
+            });
+
+            // 旧会话的包（旧 id / 旧 CastId）若真的到达新桥：桥无法识别它们属于旧会话，
+            // 但不得改写新会话的实体/装备/本地血量（隔离由宿主的新 playerId/新桥保证）。
+            bridge.OnMessage(MessageId.DamageResult,
+                DirectHit(eventId: 8801, targetId: oldEntityId, remainingHp: 1f));
+            bridge.OnMessage(MessageId.DamageResult,
+                DirectHit(eventId: 8802, targetId: oldLocalId, remainingHp: 1f));
+            bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
+            {
+                CastId = 880, CasterPlayerId = oldEntityId, SkillId = 10002
+            });
+            bridge.Update();
+
+            Assert.AreEqual(0, localCalls, "旧会话命中不得命中新会话的本地玩家（playerId 已换）");
+            Assert.AreEqual(1f, view!.Targetable.HPPercent, 0.001f,
+                "旧会话命中不得改写新会话实体血条");
+            Assert.AreEqual(3u, bridge.Equipment.Revision, "旧会话包不得改写新会话装备摘要");
+            Assert.AreEqual(99L, bridge.Equipment.WeaponInstanceId);
+            Assert.AreEqual(1, registry.Count, "旧会话包不得凭空创建视图");
+            Assert.AreEqual(1, castEvents,
+                "桥不能独自识别旧会话的施法广播（宿主隔离保证它不会到达）；无视图时下游 no-op");
+
+            // 旧桥消费过的 EventId/CastId 不得到新桥：新会话复用同值必须正常生效
+            bridge.OnMessage(MessageId.DamageResult,
+                DirectHit(eventId: 9901, targetId: newLocalId, remainingHp: 85f));
+            bridge.OnMessage(MessageId.CastBroadcast, new CastBroadcast
+            {
+                CastId = 990, CasterPlayerId = newEntityId, SkillId = 10002
+            });
+            bridge.Update();
+
+            Assert.AreEqual(1, localCalls, "新桥的去重窗口必须从空开始（不继承旧桥消费记录）");
+            Assert.AreEqual(2, castEvents, "新会话的施法广播必须照常触发");
         }
 
         // ------------------------------------------------------------------------------------

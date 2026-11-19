@@ -153,10 +153,13 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   （服务端跨重试唯一；0 = 旧服务端未分配，不去重）做有界去重（最近 1024 条）；
   `ClearDedupe()` 在断线/重建桥的路径清空窗口。同一命中的重投不会二次触发受击/飘字/
   权威余血写入。
-- **旧世代（LifeId）包丢弃**：`HitEntry.TargetLifeId` 小于目标当前代次（本地 = 宿主在
+- **换命（LifeId）旧世代包丢弃**：`HitEntry.TargetLifeId` 小于目标当前代次（本地 = 宿主在
   `RespawnNotice` 时写入的 `Equipment.SetLifeId`；远程 = 视图 `LifeId`）的命中在桥层丢弃，
-  复活后旧伤害不再扣血/飘字；`CastBroadcast.CasterLifeId` 小于施法者视图 `LifeId` 时不触发
-  `OnCastBroadcast`（玩家表现 / NPC 排程一并不发生）。字段为 0（旧服务端）时保持原行为。
+  复活/换命后旧伤害不再扣血/飘字；`CastBroadcast.CasterLifeId` 小于施法者视图 `LifeId` 时
+  不触发 `OnCastBroadcast`（玩家表现 / NPC 排程一并不发生）。字段为 0（旧服务端）时保持原行为。
+  **这只覆盖同一会话内的复活/换命**：跨会话隔离靠宿主（`DetachCombatBridge` 退订 adapter、
+  新登录分配新 `playerId`、新桥 + `registry.Clear`）；桥没有会话代次字段，无法独自识别
+  旧会话的包。
 - **无视图投影/DoT**：视图未建时 `CombatStateUpdate` 进 registry 有界缓存，基线建视图后
   回放（与基线同版本也应用——Health-only 基线可由缓存补齐装备/状态）；DoT 命中无视图时
   表现可丢（`EventId` 仍被消费，重投不再补），权威余血由后续基线补齐。
