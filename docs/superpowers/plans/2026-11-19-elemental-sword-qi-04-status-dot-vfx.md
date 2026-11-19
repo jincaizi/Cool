@@ -1049,6 +1049,7 @@ git commit -m "feat(client): route dot damage without hit reactions"
 - [ ] **步骤 1：写失败测试**
 
 - 权威状态列表变化时，`AuthoritativeStatusVfx` 对同一实体按 `(EntityId, GroupId)` 只保留一条，应用/移除各一次，不因每帧投影重复。
+- **同一实体换渲染根（Proxy→Full/Full→Proxy、本地角色重建）时必须重放**：旧根先发 Removed，新根再发 Applied；否则 `StatusVFXSystem` 缓存的 Renderer 集合会染在被隐藏的旧模型上。
 - 冰/火/雷/风映射到四种颜色；`StatusVFXSystem` 能对 `Stun`/`Vulnerable` 染色并在移除后清理。
 - `SwordQiSpawner.Spawn(..., elementId)` 后剑气带元素色；`ElementPalette.ColorOf(1..4)` 四种颜色不同；`elementId=0` 不染色。
 
@@ -1060,12 +1061,12 @@ git commit -m "feat(client): route dot damage without hit reactions"
 public event Action<long, GameObject, IList<StatusProjection>>? StatusesChanged;
 ```
 
-`ClientNetworkHost` 订阅并调用 `_statusVfx.Apply(entityId, view.GameObject.transform, statuses)`；本人 311 分支调用 `_statusVfx.Apply(localId, _localEntry.transform, projection.Statuses)`。
+`ClientNetworkHost` 订阅并调用 `_statusVfx.Apply(entityId, view.GameObject.transform, statuses)`；本人 311 分支调用 `_statusVfx.Apply(localId, _localEntry.transform, projection.Statuses)`。`RemoteEntityRegistry.SetTier` 换渲染根后必须用当前 `view.Statuses` 再发一次 `StatusesChanged`；`ClientNetworkHost` 缓存最近一次本人 `Statuses`，在本地角色重建/重新 attach 时对新 transform 重放，并在断开时清空。
 
-`AuthoritativeStatusVfx` 维护 `Dictionary<long, Dictionary<int, int>>`（entity→group→effectId），diff 后发 `StatusEffectAppliedEvent`/`StatusEffectRemovedEvent`：
+`AuthoritativeStatusVfx` 维护 `Dictionary<long, TargetState>`（target Transform + group→effectId）；`Apply` 发现同一 entity 的 target 变化时，先对旧 target 发全部 Removed，再对新 target 发 Applied，随后才做常规 diff。Diff 后发 `StatusEffectAppliedEvent`/`StatusEffectRemovedEvent`：
 
 ```csharp
-EffectType Map(int effectId) => effectId / 100 switch
+EffectType Map(int effectId) => (effectId / 100) switch
 {
     1 => EffectType.Freeze,    // 冰
     2 => EffectType.Burn,      // 火
@@ -1075,7 +1076,7 @@ EffectType Map(int effectId) => effectId / 100 switch
 };
 ```
 
-`EffectType` 追加 `Vulnerable`（末尾，不改既有值）。`StatusVFXSystem` 的 `OnApplied/OnRemoved` 接受 `Stun`/`Vulnerable`，颜色：冰蓝、火橙、雷紫、风青；同一实体同组只计数一次。
+`EffectType` 追加 `Vulnerable`（末尾，不改既有值）。`StatusVFXSystem` 的 `OnApplied/OnRemoved` 接受 `Stun`/`Vulnerable`，颜色：冰蓝、火橙、雷紫、风青；同一实体同组只计数一次；`default` 不计数（显式 `case Vulnerable`）。
 
 `SwordQiSpawner.Spawn` 增加 `int elementId = 0`，`SwordQiProjectile.OnSpawn` 保存并由 `SwordQiElementTint.Apply(elementId)` 设置 `TrailRenderer.startColor`/`ParticleSystem.startColor`/材质 `_Color`；`ElementPalette` 常量四种颜色。`RemoteCastPresenter` 传 `launch.ElementId`；`Sys3CEntry` 暴露 `CurrentElementId` 并在 `ApplySwordView` 更新；离线 `SkillExecutor` 通过注入的 `ElementIdProvider` 传本地元素（Plan 05 接离线状态时启用）。
 
