@@ -1,4 +1,5 @@
 using Cool.Protocol;
+using Cool.SyncCore;
 using KcpServer;
 using Xunit;
 
@@ -196,5 +197,75 @@ public class PvpMovementBudgetTests
 
         Assert.True(expired.Value.NeedsCorrection);
         Assert.Null(player.Displacement); // 到期即清，后续重复包不再命中旧窗口
+    }
+
+    [Fact]
+    public void ActionLock_Without_Jump_Has_Zero_Horizontal_Budget()
+    {
+        var handler = MovementBudgetTestHost.Create(out var player, out _);
+        player.ApplyControl(0f, true);
+
+        // 未锁定时首包普通预算 = 5 × 0.066 = 0.33m；0.01m 足以证明锁定后 normal 为 0。
+        var result = handler.ValidateAndApply(new PositionSyncRequest
+        {
+            X = 0.01f, Y = 0f, Z = 0f, Speed = 5f, Sequence = 1,
+            LifeId = player.LifeId, ClientControlVersion = player.ControlVersion
+        }, player, nowTick: 1);
+
+        Assert.True(result.Value.NeedsCorrection);
+        Assert.Equal(0f, result.Value.AuthoritativePosition.X, 4);
+    }
+
+    [Fact]
+    public void Air_ActionLock_Grants_Only_Jump_Inertia_Up_To_Max_Airtime()
+    {
+        var handler = MovementBudgetTestHost.Create(out var player, out _);
+        const float jumpSpeed = 6f;
+        float perTick = jumpSpeed / CombatRules.TickRateHz;                     // 0.4m / tick
+        float maxAirSeconds = 2f * ElementalCatalogDefaults.Jump.MaxRiseSeconds; // 1.0s
+
+        // 起跳包（未锁）：只记录起点与起跳水平速度，本 tick 不发放惯性。
+        var start = handler.ValidateAndApply(new PositionSyncRequest
+        {
+            X = 0f, Y = 0f, Z = 0f, Speed = jumpSpeed, Sequence = 1,
+            JumpPhase = PlayerJumpPhase.Start, JumpSeq = 1, LifeId = player.LifeId,
+            ClientControlVersion = player.ControlVersion
+        }, player, nowTick: 1);
+        Assert.False(start.Value.NeedsCorrection);
+        Assert.True(player.Movement.JumpActive);
+        Assert.Equal(jumpSpeed, player.Movement.JumpHorizontalSpeed, 4);
+
+        // 空中麻痹：normal 预算归零，只剩起跳水平速度 × dt 的惯性额度。
+        player.ApplyControl(0f, true);
+
+        // 起跳 tick 之后第 1..15 tick 发放（elapsed ≤ 2×MaxRiseSeconds），之后不再发放。
+        uint lastGrantTick = 1 + (uint)(maxAirSeconds * CombatRules.TickRateHz); // 16
+
+        float acceptedX = 0f;
+        for (uint tick = 2; tick <= lastGrantTick + 2; tick++)
+        {
+            // 每 tick 多要 0.05m：只有惯性额度（0.4）时必然被截断。
+            // 若 ActionLock 期间 normal 仍发放（5×1/15≈0.33），0.45 会通过——本断言即 normal=0 的证据。
+            var result = handler.ValidateAndApply(new PositionSyncRequest
+            {
+                X = acceptedX + perTick + 0.05f, Y = 0f, Z = 0f, Speed = jumpSpeed,
+                Sequence = tick, JumpPhase = PlayerJumpPhase.Air, JumpSeq = 1,
+                LifeId = player.LifeId, ClientControlVersion = player.ControlVersion
+            }, player, nowTick: tick);
+
+            Assert.True(result.Value.NeedsCorrection);
+            if (tick <= lastGrantTick) acceptedX += perTick; // 按起跳速度 × 1 tick 发放
+            Assert.Equal(acceptedX, result.Value.AuthoritativePosition.X, 3);
+        }
+
+        // 滞空结束后 JumpActive 关闭，再请求也只留在原位（normal 与惯性都为 0）。
+        Assert.False(player.Movement.JumpActive);
+
+        // 总水平位移 ≤ 起跳速度 × 最大滞空 + 1 tick 裕量（离散 tick 边界）。
+        Assert.True(acceptedX <= jumpSpeed * maxAirSeconds + perTick + 1e-3f,
+            $"total displacement {acceptedX:F3}m exceeds jumpSpeed×maxAir+1tick");
+        // 非空转：额度确实接近满额发放（15 tick × 0.4m = 6.0m = 6 × 1.0s）。
+        Assert.True(acceptedX >= jumpSpeed * maxAirSeconds - perTick,
+            $"total displacement {acceptedX:F3}m below expected jump inertia grant");
     }
 }
