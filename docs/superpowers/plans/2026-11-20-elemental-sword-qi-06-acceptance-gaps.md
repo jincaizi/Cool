@@ -213,7 +213,10 @@ git commit -m "test(sync): inject delayed, stale-session and missing-view messag
    退出后旧增量不再投递给 O。
 2. E 死亡→复活（`LifeId++`）→再次进入 O 的视野；新基线必须是新 `LifeId`，
    旧 `LifeId` 的 `CombatStateUpdate` 不得复活旧状态/旧装备。
-3. E Evade 到家/回池再生成；`CombatVersion` 单调，基线状态列表与服务器最终状态一致。
+3. E Evade 到家：`CombatVersion` 严格递增，基线状态列表与服务器最终状态一致。
+   回池重生按生产语义是**新实体 id**（`MonsterModule` 每次重生取新 id，新实体 `LifeId=1`、
+   `CombatVersion=0`）：断言旧 id 立即停止投递、新 id 首帧是完整基线；**不承诺跨实体 id
+   的 `CombatVersion` 单调**（客户端按实体 id 重建视图，旧 id 不得复活）。
 4. O 断线重进（`RemoveObserver` → `AddObserver`）；新会话首条基线是完整投影，
    不残留旧状态。
 

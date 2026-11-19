@@ -114,9 +114,10 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
     合并、`Phase=Cancelled` 生效（`design.md:167`）。
   - **状态结束时钟偏移注入**：给两台客户端注入不同时钟偏移和渲染延迟，断言特效移除由同一条
     `CombatStateUpdate` 触发；权威移除晚于 `EndTick` 时保持到消息到达（`design.md:169`）。
-  - **AOI 快速出入/复活版本连续**：AOI 快速出入、死亡复活、Evade 到家、回池与断线重进时，
+  - **AOI 快速出入/复活版本连续**：AOI 快速出入、死亡复活、Evade 到家与断线重进时，
     进入基线与后续 `CombatStateUpdate` 的 `CombatVersion`/`LifeId` 连续，旧版本增量不能复活
-    旧状态或旧装备（`design.md:170`）。
+    旧状态或旧装备（`design.md:170`）。回池重生按生产语义是**新实体 id**（新实体 `LifeId=1`、
+    `CombatVersion=0`）：验收旧 id 停止、新 id 全量基线，不承诺跨 id 的 `CombatVersion` 单调。
   - **KCP/WebSocket 延迟注入**：重复/乱序已由 `NetworkConsumptionInjectionTests` 覆盖；延迟注入
     （含 KCP 与 WebSocket 正常流程、换装确认/施法交错、发射晚于格挡结果、旧伤害晚于复活、
     较新血量早于状态消息）未执行（`design.md:166`）。
