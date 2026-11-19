@@ -4,8 +4,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Cool.Protocol;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.SyncLayer;
 using KcpNet;
 using NUnit.Framework;
@@ -32,6 +34,10 @@ namespace KcpNet.PlayModeTests
     /// （致死来源不限），A/B/C 的死讯投影 CombatVersion/LifeId 与致死 HitEntry 严格相等，
     /// 死后不再收到 B 的 DoT 命中。三端“末跳致死时刻”本身不在本用例范围（见方法注释）。
     ///
+    /// 麻痹取消场景（Plan 06 任务 2）：A 先起手雷、B 后起手 10002；A 的命中落在 B 的前摇里，
+    /// 三端收到同一 CastCancelBroadcast（同一 CastId/EffectiveTick/生命代次），B 的施法整组
+    /// 作废（无命中、无发射），A 的雷仍结算 2 条命中，旁观者 C 按 CastId 停掉攻击表现。
+    ///
     /// 三客户端同出生点，等待 C 的 AOI 先看到 B 再施法。
     /// 运行前需先启动：dotnet Server/bin/Debug/net8.0/Server3C.dll 8000
     /// </summary>
@@ -53,6 +59,9 @@ namespace KcpNet.PlayModeTests
 
         /// <summary>10002 的挥击与剑气是两个独立伤害实例，同一目标各结算一次。</summary>
         private const int ExpectedHitsPerTarget = 2;
+
+        /// <summary>10002 前摇 0.35s × 15Hz 向上取整 = 6 tick（攻速倍率 1 时）。</summary>
+        private const uint LightningWindupTicks = 6;
 
         /// <summary>
         /// 共享运行闸门：120s 总 deadline（内层等待全部受它约束）、取消标志与当前阶段。
@@ -83,6 +92,8 @@ namespace KcpNet.PlayModeTests
             public readonly ConcurrentQueue<EquipWeaponConfirm> EquipConfirms = new ConcurrentQueue<EquipWeaponConfirm>();
             public readonly ConcurrentQueue<DamageResult> Damages = new ConcurrentQueue<DamageResult>();
             public readonly ConcurrentQueue<CombatStateUpdate> CombatUpdates = new ConcurrentQueue<CombatStateUpdate>();
+            public readonly ConcurrentQueue<CastCancelBroadcast> Cancels = new ConcurrentQueue<CastCancelBroadcast>();
+            public readonly ConcurrentQueue<ProjectileLaunchBroadcast> Launches = new ConcurrentQueue<ProjectileLaunchBroadcast>();
         }
 
         [UnityTest]
@@ -100,6 +111,16 @@ namespace KcpNet.PlayModeTests
         [UnityTest]
         public IEnumerator FireDot_Ticks_Are_Consistent_And_Death_Projection_Is_Consistent()
             => RunScenario("ThreeClientFireRoot", "Fire", RunFireAsync);
+
+        /// <summary>
+        /// 麻痹取消前摇（Plan 06 任务 2）：A 先起手雷 10002（命中 tick = AcceptedTick + 6），
+        /// B 在 1–3 tick 后起手 10002（首段 = 自己 AcceptedTick + 6）——A 的判定必然落在
+        /// B 的前摇里。命中触发麻痹 → <c>ApplyPlayerControl(ActionLock)</c> → <c>CancelCaster(B)</c>，
+        /// B 的施法在发射前整组作废。断言见方法内注释。
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Thunder_Cancels_Windup_Cast_On_All_Clients()
+            => RunScenario("ThreeClientCancelRoot", "Cancel", RunThunderCancelAsync);
 
         /// <summary>
         /// 共用三客户端外壳：建场景根/三个 manager → 跑场景 → 120s 外层超时（先取消再等待）
@@ -172,6 +193,12 @@ namespace KcpNet.PlayModeTests
                         break;
                     case MessageId.CombatStateUpdate:
                         ctx.CombatUpdates.Enqueue((CombatStateUpdate)msg);
+                        break;
+                    case MessageId.CastCancelBroadcast:
+                        ctx.Cancels.Enqueue((CastCancelBroadcast)msg);
+                        break;
+                    case MessageId.ProjectileLaunchBroadcast:
+                        ctx.Launches.Enqueue((ProjectileLaunchBroadcast)msg);
                         break;
                 }
             };
@@ -734,6 +761,245 @@ namespace KcpNet.PlayModeTests
             return (true, "ok");
         }
 
+        /// <summary>
+        /// 麻痹取消前摇：A 先起手雷（等 A 的 CastConfirm 落定后再发 B 的请求 ⇒ 服务端
+        /// B.AcceptedTick &gt; A.AcceptedTick，A 的判定 tick（+6）必然早于 B 的首段（+6），
+        /// 即命中时 B 仍在 0.35s 前摇且未发射）。
+        ///
+        /// 断言：
+        /// ① A/B/C 收到同一 CastId（B 的施法）的 CastCancelBroadcast，逐字段一致
+        ///    （CasterLifeId=B 的生命代次、EffectiveTick=A 的命中 tick、Reason=Hit）；
+        /// ② B 的取消施法全程没有 DamageResult 命中、没有 ProjectileLaunchBroadcast；
+        /// ③ A 的雷仍按自己的 CastId 产生挥击 + 剑气 2 条命中（三端逐值一致）；
+        /// ④ 旁观者 C 的 RemoteCastPresenter 按 CastId 停掉已起手的攻击，后续投影不重播。
+        ///    （B 是本地施法者，RemoteCastPresenter 按设计跳过 localPlayerId——本地表现归
+        ///    SkillExecutor，B 端证据是接收到的取消消息本身。）
+        /// </summary>
+        private static async Task<(bool ok, string reason)> RunThunderCancelAsync(
+            Ctx a, Ctx b, Ctx c, RunGate gate)
+        {
+            var all = new[] { a, b, c };
+
+            var login = await LoginThreeAsync(a, b, c, gate);
+            if (!login.ok) return (false, login.reason);
+            long aId = login.aId;
+            long bId = login.bId;
+            var aInventory = login.inventory!;
+            var bInventory = b.Manager.WeaponInventory;
+            if (bInventory == null)
+                return (false, "baseline: B has no weapon inventory (ElementalSwordQiV1 disabled?)");
+
+            // 取消广播的收件人 = B + B 的 AOI 观察者；等 A/C 都看到 B 再起手。
+            gate.SetStage("cancel/aoi-a-sees-b");
+            if (!await WaitUntil(all, gate,
+                    () => a.Registry.GetView(bId) != null && c.Registry.GetView(bId) != null, 15f))
+                return (false, "cancel/aoi: A/C did not both see B (bId=" + bId + ")");
+
+            gate.SetStage("cancel/baseline");
+            if (FindWeapon(aInventory, ThunderElementId) == null)
+                return (false, "baseline: A has no thunder (ElementId=3) weapon");
+
+            var equip = await EquipElementAsync(all, a, gate, ThunderElementId, 1);
+            if (!equip.ok) return (false, equip.reason);
+            uint equipmentRevision = equip.confirm!.EquipmentRevision;
+
+            // A 先施法：确认到达客户端即证明服务端已完成 Decide（AcceptedTick 已落定），
+            // 之后再发 B 的请求 ⇒ B 的 AcceptedTick 必然更大。
+            gate.SetStage("cancel/a-cast");
+            var aCast = await CastAsync(all, a, gate, bId, 1, equipmentRevision,
+                aInventory.LifeId, "cancel/a-request", "cancel/a-confirm");
+            if (!aCast.ok) return (false, aCast.reason);
+            var aConfirm = aCast.confirm!;
+            if (!aConfirm.Accepted)
+                return (false, "cancel/a-confirm: rejected: " + aConfirm.RejectReason);
+            if (aConfirm.CastId == 0)
+                return (false, "cancel/a-confirm: accepted but CastId=0");
+            if (Math.Abs(aConfirm.AttackSpeedMultiplier - 1f) > 0.001f)
+                return (false, "cancel/timing: A attack speed "
+                    + aConfirm.AttackSpeedMultiplier.ToString("F3", CultureInfo.InvariantCulture)
+                    + " != 1; the +6 tick windup assumption no longer holds");
+
+            gate.SetStage("cancel/b-cast");
+            var bCast = await CastAsync(all, b, gate, aId, 1, bInventory.EquipmentRevision,
+                bInventory.LifeId, "cancel/b-request", "cancel/b-confirm");
+            if (!bCast.ok) return (false, bCast.reason);
+            var bConfirm = bCast.confirm!;
+            if (!bConfirm.Accepted)
+                return (false, "cancel/b-confirm: rejected: " + bConfirm.RejectReason);
+            if (bConfirm.CastId == 0)
+                return (false, "cancel/b-confirm: accepted but CastId=0");
+            if (Math.Abs(bConfirm.AttackSpeedMultiplier - 1f) > 0.001f)
+                return (false, "cancel/timing: B attack speed "
+                    + bConfirm.AttackSpeedMultiplier.ToString("F3", CultureInfo.InvariantCulture)
+                    + " != 1; the +6 tick windup assumption no longer holds");
+
+            // 用真实 AcceptedTick 校验时间关系（不靠 sleep）：
+            // A 命中 = A.AcceptedTick + 6；B 首段 = B.AcceptedTick + 6 必须更晚。
+            if (bConfirm.AcceptedTick <= aConfirm.AcceptedTick)
+                return (false, "cancel/tick-order: B AcceptedTick=" + bConfirm.AcceptedTick
+                    + " is not after A's " + aConfirm.AcceptedTick);
+            uint aHitTick = aConfirm.AcceptedTick + LightningWindupTicks;
+            if (bConfirm.AcceptedTick + LightningWindupTicks <= aHitTick)
+                return (false, "cancel/tick-order: B first stage tick "
+                    + (bConfirm.AcceptedTick + LightningWindupTicks)
+                    + " is not after A's hit tick " + aHitTick);
+
+            // A 的雷命中：三端各收到挥击 + 剑气两条命中（命中即触发麻痹取消）。
+            gate.SetStage("cancel/a-hits");
+            var aHitsOnA = new List<HitEntry>();
+            var aHitsOnB = new List<HitEntry>();
+            var aHitsOnC = new List<HitEntry>();
+            if (!await WaitUntil(all, gate, () =>
+                {
+                    aHitsOnA = HitsFor(a, aConfirm.CastId, bId);
+                    aHitsOnB = HitsFor(b, aConfirm.CastId, bId);
+                    aHitsOnC = HitsFor(c, aConfirm.CastId, bId);
+                    return aHitsOnA.Count >= ExpectedHitsPerTarget
+                        && aHitsOnB.Count >= ExpectedHitsPerTarget
+                        && aHitsOnC.Count >= ExpectedHitsPerTarget;
+                }, 15f))
+                return (false, "cancel/a-hits: A/B/C did not all receive "
+                    + ExpectedHitsPerTarget + " hits from A's cast "
+                    + SummarizeCancel(a, b, c, bId, bConfirm.CastId));
+            if (aHitsOnA.Count != ExpectedHitsPerTarget
+                || aHitsOnB.Count != ExpectedHitsPerTarget
+                || aHitsOnC.Count != ExpectedHitsPerTarget)
+                return (false, "cancel/a-hits: hit counts A=" + aHitsOnA.Count
+                    + " B=" + aHitsOnB.Count + " C=" + aHitsOnC.Count
+                    + " != " + ExpectedHitsPerTarget + SummarizeCancel(a, b, c, bId, bConfirm.CastId));
+
+            // ① 三端收到同一条取消：同一 CastId / 生命代次 / 生效 tick / 原因。
+            gate.SetStage("cancel/broadcast");
+            CastCancelBroadcast? cancelA = null;
+            CastCancelBroadcast? cancelB = null;
+            CastCancelBroadcast? cancelC = null;
+            if (!await WaitUntil(all, gate, () =>
+                {
+                    cancelA = a.Cancels.ToArray().FirstOrDefault(x => x.CastId == bConfirm.CastId);
+                    cancelB = b.Cancels.ToArray().FirstOrDefault(x => x.CastId == bConfirm.CastId);
+                    cancelC = c.Cancels.ToArray().FirstOrDefault(x => x.CastId == bConfirm.CastId);
+                    return cancelA != null && cancelB != null && cancelC != null;
+                }, 10f))
+                return (false, "cancel/broadcast: A/B/C did not all receive CastCancelBroadcast"
+                    + " for B's cast " + bConfirm.CastId
+                    + SummarizeCancel(a, b, c, bId, bConfirm.CastId));
+
+            foreach (var cancel in new[] { cancelA!, cancelB!, cancelC! })
+            {
+                if (cancel.CasterPlayerId != bId)
+                    return (false, "cancel/broadcast: CasterPlayerId=" + cancel.CasterPlayerId
+                        + " != B " + bId);
+                if (cancel.CasterLifeId != bInventory.LifeId)
+                    return (false, "cancel/broadcast: CasterLifeId=" + cancel.CasterLifeId
+                        + " != B LifeId " + bInventory.LifeId);
+                if (cancel.Reason != NpcActionCancelReason.Hit)
+                    return (false, "cancel/broadcast: Reason=" + cancel.Reason + " != Hit");
+                if (cancel.EffectiveTick != aHitTick)
+                    return (false, "cancel/broadcast: EffectiveTick=" + cancel.EffectiveTick
+                        + " != A hit tick " + aHitTick + " (A AcceptedTick="
+                        + aConfirm.AcceptedTick + ")");
+            }
+            if (cancelA!.EffectiveTick != cancelB!.EffectiveTick
+                || cancelA.EffectiveTick != cancelC!.EffectiveTick)
+                return (false, "cancel/broadcast: EffectiveTick differs across clients (A="
+                    + cancelA.EffectiveTick + " B=" + cancelB.EffectiveTick
+                    + " C=" + cancelC.EffectiveTick + ")");
+            Debug.Log("[ElementalAcceptance] cancel: A accepted=" + aConfirm.AcceptedTick
+                + " B accepted=" + bConfirm.AcceptedTick
+                + " A hit/cancel tick=" + cancelA.EffectiveTick
+                + " B first stage=" + (bConfirm.AcceptedTick + LightningWindupTicks));
+
+            // ② B 的施法在发射前被整组作废：等到“本来该发射”的 tick 之后，三端仍无
+            //    该 CastId 的 DamageResult 命中与 ProjectileLaunchBroadcast。
+            gate.SetStage("cancel/b-never-launched");
+            uint bFirstStageTick = bConfirm.AcceptedTick + LightningWindupTicks;
+            if (!await WaitUntilServerTick(all, gate, bFirstStageTick + 1))
+                return (false, "cancel/b-never-launched: three clients did not all reach"
+                    + " server tick " + (bFirstStageTick + 1));
+            await WaitSeconds(all, gate, 0.2f); // 有界观察窗：让在途消息落地（取消点已由 tick 断言钉死）
+            if (gate.Cancelled || gate.DeadlineExpired)
+                return (false, "cancel/b-never-launched: gate closed during observation window");
+
+            var bHitsOnA = AllHitsForCast(a, bConfirm.CastId);
+            var bHitsOnB = AllHitsForCast(b, bConfirm.CastId);
+            var bHitsOnC = AllHitsForCast(c, bConfirm.CastId);
+            if (bHitsOnA.Count != 0 || bHitsOnB.Count != 0 || bHitsOnC.Count != 0)
+                return (false, "cancel/b-never-launched: cancelled cast produced damage hits"
+                    + " (A=" + bHitsOnA.Count + " B=" + bHitsOnB.Count
+                    + " C=" + bHitsOnC.Count + ")"
+                    + SummarizeCancel(a, b, c, bId, bConfirm.CastId));
+            foreach (var ctx in all)
+            {
+                var launched = ctx.Launches.ToArray()
+                    .FirstOrDefault(x => x.CastId == bConfirm.CastId);
+                if (launched != null)
+                    return (false, "cancel/b-never-launched: cancelled cast produced"
+                        + " ProjectileLaunchBroadcast on a client (caster="
+                        + launched.CasterPlayerId + ")");
+            }
+
+            // ③ A 的雷剑不受影响：上面按 A 的 CastId 过滤后每端恰好 2 条（挥击 + 剑气）。
+
+            // ④ 旁观者 C 的 RemoteCastPresenter：先按 C 实际收到的 CastBroadcast 起手，
+            //    再喂取消——按 CastId 停掉攻击；后续任何 ActiveCast 投影都不得重播。
+            //    （PlayMode 程序集不能引用 UnityEditor.AssetDatabase，展示目录用运行期实例构造。）
+            gate.SetStage("cancel/presenter-c");
+            var view = c.Registry.GetView(bId);
+            if (view == null)
+                return (false, "cancel/presenter: C has no view for B");
+            var cAnimator = view.GameObject.AddComponent<RemoteEntityAnimator>();
+            view.Animator = cAnimator; // internal setter（InternalsVisibleTo KcpNet.PlayModeTests）
+
+            CastBroadcast? bBroadcast = null;
+            if (!await WaitUntil(all, gate, () =>
+                {
+                    bBroadcast = c.Broadcasts.ToArray()
+                        .FirstOrDefault(x => x.CastId == bConfirm.CastId);
+                    return bBroadcast != null;
+                }, 10f))
+                return (false, "cancel/presenter: C received no CastBroadcast for B's cast "
+                    + bConfirm.CastId);
+
+            var catalog = CreateRuntimeAttackCatalog(SkillId, out var skillData);
+            try
+            {
+                var presenter = new RemoteCastPresenter(c.Registry, c.Manager.LocalPlayerId,
+                    catalog, projectileFactory: (_, __, ___) => null);
+
+                // 真实到达顺序：CastBroadcast（起手）先于取消。
+                presenter.OnCastBroadcast(bBroadcast!);
+                if (cAnimator.AttackRemainingForTest <= 0f)
+                    return (false, "cancel/presenter: C did not present B's attack"
+                        + " from CastBroadcast " + bConfirm.CastId);
+                int startsAfterBroadcast = cAnimator.AttackStartsForTest;
+
+                presenter.OnCastCancel(cancelC);
+                if (cAnimator.AttackRemainingForTest != 0f)
+                    return (false, "cancel/presenter: C's attack is still playing after cancel"
+                        + " (remaining=" + cAnimator.AttackRemainingForTest
+                        + "s, CastId=" + bConfirm.CastId + ")");
+
+                // 服务端后续（含取消前的 Windup/Active/Recovery）投影不得让 C 重新起手。
+                foreach (var update in UpdatesFor(c, bId))
+                {
+                    if (update.Projection.ActiveCast == null) continue;
+                    presenter.OnActiveCast(bId, update.Projection.ActiveCast);
+                }
+                if (cAnimator.AttackStartsForTest != startsAfterBroadcast
+                    || cAnimator.AttackRemainingForTest != 0f)
+                    return (false, "cancel/presenter: C replayed B's attack after cancel"
+                        + " (starts=" + cAnimator.AttackStartsForTest + " expected "
+                        + startsAfterBroadcast + ", remaining=" + cAnimator.AttackRemainingForTest + ")");
+            }
+            finally
+            {
+                UnityEngine.Object.Destroy(catalog);
+                UnityEngine.Object.Destroy(skillData);
+            }
+
+            return (true, "ok");
+        }
+
         // —— 共用三客户端夹具（雷/火场景一致）：登录 → 换装 → 施法。——
 
         private static async Task<(bool ok, string reason, long aId, long bId,
@@ -815,11 +1081,11 @@ namespace KcpNet.PlayModeTests
         }
 
         private static async Task<(bool ok, string reason, CastConfirm? confirm)> CastAsync(
-            Ctx[] ctxs, Ctx a, RunGate gate, long targetId, uint clientCastSeq,
+            Ctx[] ctxs, Ctx caster, RunGate gate, long targetId, uint clientCastSeq,
             uint equipmentRevision, uint casterLifeId, string requestStage, string confirmStage)
         {
             gate.SetStage(requestStage);
-            a.Adapter.Send(MessageId.CastRequest, new CastRequest
+            caster.Adapter.Send(MessageId.CastRequest, new CastRequest
             {
                 SkillId = SkillId,
                 TargetPlayerId = targetId,
@@ -833,11 +1099,37 @@ namespace KcpNet.PlayModeTests
             CastConfirm? confirm = null;
             if (!await WaitUntil(ctxs, gate, () =>
                 {
-                    confirm = a.Confirms.ToArray().FirstOrDefault(x => x.ClientCastSeq == clientCastSeq);
+                    confirm = caster.Confirms.ToArray()
+                        .FirstOrDefault(x => x.ClientCastSeq == clientCastSeq);
                     return confirm != null;
                 }, 10f))
-                return (false, "cast-confirm: A received no CastConfirm seq=" + clientCastSeq, null);
+                return (false, "cast-confirm: caster received no CastConfirm seq="
+                    + clientCastSeq, null);
             return (true, string.Empty, confirm);
+        }
+
+        /// <summary>
+        /// PlayMode 程序集不能引用 UnityEditor.AssetDatabase（见 RemoteRenderBranchTests 注释）；
+        /// 用运行期实例 + 反射填私有序列化字段，构造只含该技能起手触发器的最小展示目录，
+        /// 让 RemoteCastPresenter 走真实的 TryGet → PlayAttack 路径。
+        /// </summary>
+        private static SkillPresentationCatalog CreateRuntimeAttackCatalog(int skillId,
+            out SkillData skillData)
+        {
+            var catalog = ScriptableObject.CreateInstance<SkillPresentationCatalog>();
+            var skill = ScriptableObject.CreateInstance<InstantSkillData>();
+            SetPrivateField(typeof(SkillData), skill, "_skillId", skillId);
+            SetPrivateField(typeof(SkillData), skill, "_animatorTrigger", "Attack");
+            SetPrivateField(typeof(SkillPresentationCatalog), catalog, "_skills", new[] { skill });
+            skillData = skill;
+            return catalog;
+        }
+
+        private static void SetPrivateField(Type type, object target, string name, object value)
+        {
+            var field = type.GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.IsNotNull(field, type.Name + "." + name + " (serialized field) not found");
+            field!.SetValue(target, value);
         }
 
         private static CombatStateUpdate? FindDeadProjection(Ctx ctx, long entityId)
@@ -1011,6 +1303,19 @@ namespace KcpNet.PlayModeTests
             return hits;
         }
 
+        /// <summary>某施法实例的全部命中（不限目标）——用于证明被取消的施法没有留下任何伤害。</summary>
+        private static List<HitEntry> AllHitsForCast(Ctx ctx, ulong castId)
+        {
+            var hits = new List<HitEntry>();
+            foreach (var result in ctx.Damages.ToArray())
+            {
+                if (result.Hits == null) continue;
+                foreach (var hit in result.Hits)
+                    if (hit.CastId == castId) hits.Add(hit);
+            }
+            return hits;
+        }
+
         /// <summary>某实体收到的完整投影，按 CombatVersion 递增（同版本重复投递不产生额外状态迁移）。</summary>
         private static List<CombatStateUpdate> UpdatesFor(Ctx ctx, long entityId)
         {
@@ -1115,6 +1420,32 @@ namespace KcpNet.PlayModeTests
             return "[" + string.Join(" ", parts) + "]";
         }
 
+        /// <summary>取消场景失败诊断：三端取消广播、该 CastId 的命中与 B 的完整投影摘要。</summary>
+        private static string SummarizeCancel(Ctx a, Ctx b, Ctx c, long bId, ulong castId)
+            => " | cancel(A)=" + DescribeCancels(a, castId)
+                + " cancel(B)=" + DescribeCancels(b, castId)
+                + " cancel(C)=" + DescribeCancels(c, castId)
+                + " hits(" + castId + ") A=" + DescribeAllHits(a, castId)
+                + " B=" + DescribeAllHits(b, castId)
+                + " C=" + DescribeAllHits(c, castId)
+                + " 311(B)=" + Describe(b, bId);
+
+        private static string DescribeCancels(Ctx ctx, ulong castId)
+        {
+            var parts = ctx.Cancels.ToArray()
+                .Where(x => x.CastId == castId)
+                .Select(x => "t" + x.EffectiveTick + ":life" + x.CasterLifeId + ":" + x.Reason);
+            return "[" + string.Join(" ", parts) + "]";
+        }
+
+        private static string DescribeAllHits(Ctx ctx, ulong castId)
+        {
+            var parts = AllHitsForCast(ctx, castId)
+                .Select(h => h.CastId + ":e" + h.EventSeq + ":v" + h.CombatVersion
+                    + ":hp" + h.TargetRemainingHp);
+            return "[" + string.Join(" ", parts) + "]";
+        }
+
         /// <summary>火场景失败诊断：三端 DoT 命中与 B 的完整投影摘要。</summary>
         private static string SummarizeFire(Ctx a, Ctx b, Ctx c, long bId)
             => " | dot(A)=" + DescribeDots(a, bId)
@@ -1193,6 +1524,29 @@ namespace KcpNet.PlayModeTests
             }
             Pump(ctxs);
             return !gate.Cancelled && !gate.DeadlineExpired;
+        }
+
+        /// <summary>泵到三端收到的服务器快照 tick 都越过 targetTick（证明该 tick 已被服务端处理）。</summary>
+        private static async Task<bool> WaitUntilServerTick(Ctx[] ctxs, RunGate gate, uint targetTick)
+        {
+            float elapsed = 0f;
+            while (!gate.Cancelled && !gate.DeadlineExpired && elapsed < 10f)
+            {
+                Pump(ctxs);
+                bool allPast = true;
+                for (int i = 0; i < ctxs.Length; i++)
+                {
+                    if (ctxs[i].Manager.ServerTick <= targetTick)
+                    {
+                        allPast = false;
+                        break;
+                    }
+                }
+                if (allPast) return true;
+                await Task.Delay(50);
+                elapsed += 0.05f;
+            }
+            return false;
         }
 
         private static async Task<bool> WaitInWorld(Ctx[] ctxs, RunGate gate, Ctx target, float seconds)
