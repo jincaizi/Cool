@@ -130,7 +130,8 @@ public class BandwidthBudgetTests
         var bytes = MessageCodec.EncodeToArray(MessageId.WorldSnapshot, baseline,
             MessageFlags.Reliable);
         // 2026-11-17 实测：基础投影 81B，补 ActiveCast 后 92B（含 5B 帧头）；
-        // 下限挡住投影被静默丢弃，上限挡住字段膨胀。
+        // 下限只兜住"整块 Combat 投影被静默丢弃"（兜不住投影内 Statuses 丢失——状态/DoT 流
+        // 由 Hundred_Entities_Status_And_Dot_60s 的流下限兜底），上限挡住字段膨胀。
         Assert.InRange(bytes.Length, 80, 300);
     }
 
@@ -155,57 +156,11 @@ public class BandwidthBudgetTests
 
         for (int tick = 0; tick < Ticks; tick++)
         {
-            int healthIndex = (tick / 15) % EntityCount;   // 每 15 tick 一个实体血量翻转
-            int combatIndex = (tick / 30) % EntityCount;   // 每 30 tick 一个实体带完整战斗投影
-            entities.Clear();
-
-            for (int i = 0; i < EntityCount; i++)
-            {
-                var entity = new EntitySnapshot
-                {
-                    PlayerId = i + 1,
-                    Tick = (uint)(tick + 1),
-                    X = i * 1.5f,
-                    Y = 0.5f,
-                    Z = -i * 1.25f,
-                    Rotation = (i * 17f) % 360f,
-                    Speed = 4.5f,
-                    Dead = i % 10 == 0,
-                    IsDefending = i % 7 == 0,
-                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
-                        | EntityFieldMask.Speed | EntityFieldMask.Dead
-                        | EntityFieldMask.Defending)
-                };
-
-                if (tick % 15 == 0 && i == healthIndex)
-                {
-                    entity.Hp = 720f - (tick % 150) * 3f;
-                    entity.MaxHp = 720f;
-                    entity.CombatVersion = (uint)(tick / 15 + 1);
-                    entity.LifeId = 1;
-                    entity.FieldMask |= (ushort)EntityFieldMask.Health;
-                }
-
-                if (tick % 30 == 0 && i == combatIndex)
-                {
-                    entity.CombatVersion = (uint)(tick / 30 + 1);
-                    entity.LifeId = 1;
-                    entity.Combat = BuildFullCombatProjection(entity.PlayerId, tick);
-                    entity.FieldMask |= (ushort)EntityFieldMask.Combat;
-                }
-
-                entities.Add(entity);
-            }
-
-            var snapshot = new WorldSnapshot
-            {
-                Tick = (uint)(tick + 1),
-                ServerTimestamp = 1_700_000_000_000_0000L + tick * 66_667L,
-                Entities = entities
-            };
+            var snapshot = BuildReplayWorldSnapshot(tick, entities);
             int tickBytes = MessageCodec.EncodeToArray(
                 MessageId.WorldSnapshot, snapshot, MessageFlags.Reliable).Length;
             int worldSnapshotBytes = tickBytes;
+            int healthIndex = (tick / 15) % EntityCount;   // 每 15 tick 一个实体血量翻转
 
             if (tick % 15 == 0)
             {
@@ -228,8 +183,14 @@ public class BandwidthBudgetTests
                 perTickMaxWorldSnapshot = worldSnapshotBytes;
         }
 
-        // 投影基线单实体（4 状态 + ActiveCast）沿用现有 [80, 300] 上下限：
-        // 下限挡住投影被静默丢弃，上限挡住字段膨胀。
+        // 状态/DoT 流下限：两条流合计仅占总字节约 0.44%，回放块整体消失时总字节/单 tick
+        // 断言都不会红——用实测值（311≈182B/条、DoT≈56B/条 × 60 条）留约 20% 余量兜底。
+        Assert.InRange(statusUpdateTotal, 60L * 150, 60L * 400);
+        Assert.InRange(damageResultTotal, 60L * 40, 60L * 120);
+
+        // 投影基线单实体沿用现有 [80, 300] 上下限。此 fixture 特意带 4 个 StatusProjection +
+        // ActiveCast：下限只兜住"整块 Combat 投影被丢弃"，兜不住投影内 Statuses 丢失——
+        // 状态/DoT 流另由上面的流下限兜底；上限挡住字段膨胀。
         var baseline = new WorldSnapshot
         {
             Tick = 1, ServerTimestamp = 1L,
@@ -257,10 +218,10 @@ public class BandwidthBudgetTests
 
         long budgetTotal = (long)(GlobalGameSettings.BandwidthBudgetBytesPerSec * 60f);
         double avgBytesPerSec = totalBytes / 60.0;
-        double kbps = avgBytesPerSec / 1000.0;
+        double kBps = avgBytesPerSec / 1000.0;
         _output.WriteLine("perTickMax=" + perTickMax + "B, totalBytes=" + totalBytes
-            + "B/60s, avg=" + avgBytesPerSec.ToString("F0") + "B/s, kbps="
-            + kbps.ToString("F1") + ", budget=" + GlobalGameSettings.BandwidthBudgetBytesPerSec
+            + "B/60s, avg=" + avgBytesPerSec.ToString("F0") + "B/s, kBps="
+            + kBps.ToString("F1") + ", budget=" + GlobalGameSettings.BandwidthBudgetBytesPerSec
             + "B/s, perTickMaxWorldSnapshot=" + perTickMaxWorldSnapshot
             + "B, statusUpdateTotal=" + statusUpdateTotal
             + "B, damageResultTotal=" + damageResultTotal + "B, baseline=" + baselineBytes + "B");
@@ -270,6 +231,124 @@ public class BandwidthBudgetTests
             + perTickMax + "B)");
         Assert.True(perTickMax <= 150 * 1024,
             "single tick " + perTickMax + "B exceeds 150KB cap");
+    }
+
+    [Fact]
+    public void Hundred_Entities_Simultaneous_Dot_60s_Stay_Under_100_KBps_Per_Observer()
+    {
+        // 最坏变体：100 实体同时中 DoT（每实体 1Hz 跳伤）。初稿口径"每 tick 100 条 311 +
+        // 100 条 DamageResult"实测单 tick ≈ 3.7KB 快照 + 100×(182+56)B ≈ 27.5KB，×15Hz
+        // ≈ 413KB/s，是 100KB/s 预算的 4 倍——每 tick 全量状态更新不是真实频率
+        // （DoT 的 IntervalTicks=15，即 1Hz）。故按"每 15 tick 一次 100 实体全量 DoT 跳伤"
+        // 降频回放（已记录降频原因）；预算不上调。
+        const int Ticks = 900;             // 15Hz × 60s
+        const int EntityCount = 100;
+        const int DotIntervalTicks = 15;   // = StatusProjection.IntervalTicks（1Hz）
+
+        long totalBytes = 0;
+        long statusUpdateTotal = 0;
+        long damageResultTotal = 0;
+        int perTickMax = 0;
+        var entities = new List<EntitySnapshot>(EntityCount);
+
+        for (int tick = 0; tick < Ticks; tick++)
+        {
+            var snapshot = BuildReplayWorldSnapshot(tick, entities);
+            int tickBytes = MessageCodec.EncodeToArray(
+                MessageId.WorldSnapshot, snapshot, MessageFlags.Reliable).Length;
+
+            if (tick % DotIntervalTicks == 0)
+            {
+                for (int i = 0; i < EntityCount; i++)
+                {
+                    long entityId = entities[i].PlayerId;
+                    int statusBytes = MessageCodec.EncodeToArray(
+                        MessageId.CombatStateUpdate, BuildCombatStateUpdate(entityId, tick),
+                        MessageFlags.Reliable).Length;
+                    statusUpdateTotal += statusBytes;
+                    tickBytes += statusBytes;
+
+                    int dotBytes = MessageCodec.EncodeToArray(
+                        MessageId.DamageResult, BuildDotDamageResult(entityId, tick),
+                        MessageFlags.Reliable).Length;
+                    damageResultTotal += dotBytes;
+                    tickBytes += dotBytes;
+                }
+            }
+
+            totalBytes += tickBytes;
+            if (tickBytes > perTickMax) perTickMax = tickBytes;
+        }
+
+        long budgetTotal = (long)(GlobalGameSettings.BandwidthBudgetBytesPerSec * 60f);
+        double avgBytesPerSec = totalBytes / 60.0;
+        double kBps = avgBytesPerSec / 1000.0;
+        _output.WriteLine("worstDot: perTickMax=" + perTickMax + "B, totalBytes=" + totalBytes
+            + "B/60s, avg=" + avgBytesPerSec.ToString("F0") + "B/s, kBps="
+            + kBps.ToString("F1") + ", budget=" + GlobalGameSettings.BandwidthBudgetBytesPerSec
+            + "B/s, statusUpdateTotal=" + statusUpdateTotal
+            + "B, damageResultTotal=" + damageResultTotal + "B");
+
+        Assert.True(totalBytes <= budgetTotal,
+            "worst-case 60s total " + totalBytes + "B exceeds budget " + budgetTotal
+            + "B (perTickMax=" + perTickMax + "B)");
+        Assert.True(perTickMax <= 150 * 1024,
+            "worst-case single tick " + perTickMax + "B exceeds 150KB cap");
+    }
+
+    /// <summary>每 tick 的 100 实体全字段快照（位置/旋转/速度/Dead/Defending）；每 15 tick 一个实体
+    /// 带 Health + CombatVersion/LifeId，每 30 tick 一个实体带完整 Combat 投影（回放两变体共用）</summary>
+    private static WorldSnapshot BuildReplayWorldSnapshot(int tick, List<EntitySnapshot> entities)
+    {
+        const int EntityCount = 100;
+        int healthIndex = (tick / 15) % EntityCount;   // 每 15 tick 一个实体血量翻转
+        int combatIndex = (tick / 30) % EntityCount;   // 每 30 tick 一个实体带完整战斗投影
+        entities.Clear();
+
+        for (int i = 0; i < EntityCount; i++)
+        {
+            var entity = new EntitySnapshot
+            {
+                PlayerId = i + 1,
+                Tick = (uint)(tick + 1),
+                X = i * 1.5f,
+                Y = 0.5f,
+                Z = -i * 1.25f,
+                Rotation = (i * 17f) % 360f,
+                Speed = 4.5f,
+                Dead = i % 10 == 0,
+                IsDefending = i % 7 == 0,
+                FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
+                    | EntityFieldMask.Speed | EntityFieldMask.Dead
+                    | EntityFieldMask.Defending)
+            };
+
+            if (tick % 15 == 0 && i == healthIndex)
+            {
+                entity.Hp = 720f - (tick % 150) * 3f;
+                entity.MaxHp = 720f;
+                entity.CombatVersion = (uint)(tick / 15 + 1);
+                entity.LifeId = 1;
+                entity.FieldMask |= (ushort)EntityFieldMask.Health;
+            }
+
+            if (tick % 30 == 0 && i == combatIndex)
+            {
+                entity.CombatVersion = (uint)(tick / 30 + 1);
+                entity.LifeId = 1;
+                entity.Combat = BuildFullCombatProjection(entity.PlayerId, tick);
+                entity.FieldMask |= (ushort)EntityFieldMask.Combat;
+            }
+
+            entities.Add(entity);
+        }
+
+        return new WorldSnapshot
+        {
+            Tick = (uint)(tick + 1),
+            ServerTimestamp = 1_700_000_000_000_0000L + tick * 66_667L,
+            Entities = entities
+        };
     }
 
     /// <summary>完整战斗投影：4 个状态 + 装备/控制/活动施法（状态/DoT 回放与投影基线共用）</summary>
