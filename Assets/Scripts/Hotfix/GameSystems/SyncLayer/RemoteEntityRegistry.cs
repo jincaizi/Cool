@@ -301,7 +301,7 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>
-        /// 单一 CombatVersion 原子合并（Plan 02 Part B；状态分版本合并留 Plan 04）：
+        /// 单一 CombatVersion 原子合并；字段级分版本不再承诺（2026-11-19）：
         ///  - 旧 LifeId 丢弃（上一世代迟到的投影）；
         ///  - 新 LifeId 先缓存（等该世代的基线快照建/更新视图）；
         ///  - 同 Life 下 CombatVersion 更小丢弃（相等视为幂等重放，基线同版本也要应用）。

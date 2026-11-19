@@ -66,7 +66,7 @@
 - 测试：`Server/Server.Tests/Elemental/StatusRuntimeTests.cs`（新建）
 - 测试：`Assets/Scripts/Tests/Editor/SyncCore/StatusRuntimeTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 服务端测试覆盖：应用/刷新/同组唯一、灼烧跳数/末跳、风到期先于灼烧、控制派生、PvP 免疫/不刷新、清除。关键用例：
 
@@ -236,14 +236,14 @@ private static void Advance(StatusRuntime runtime, uint tick)
 
 Unity 侧至少覆盖应用/刷新、灼烧末跳、控制派生（NUnit）。
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~StatusRuntimeTests"
 ```
 预期：`StatusRuntime` 不存在，编译失败。
 
-- [ ] **步骤 3：实现 `StatusRuntime`**
+- [x] **步骤 3：实现 `StatusRuntime`**
 
 ```csharp
 using System;
@@ -458,14 +458,14 @@ public static ElementDefinition? FindElement(int elementId)
 }
 ```
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~StatusRuntimeTests"
 ```
 预期：全部 PASS。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncCore/Elemental/StatusRuntime.cs \
@@ -489,20 +489,20 @@ git commit -m "feat(sync): add shared status runtime"
 - 测试：`Server/Server.Tests/Handler/ServerStatusManagerTests.cs`（新建）
 - 测试：`Server/Server.Tests/Aoi/CombatProjectionBuilderTests.cs`
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `GameLoopOrderingTests`：用一个假 loop 记录 `pre → packet → post` 顺序，断言同一 tick 内 pre 先于 handler、handler 先于 onTick；`TickCount` 在 onTick 后才递增。
 
 `ServerStatusManagerTests`：应用减速/麻痹后 `PlayerState.ControlSpeedScale/ActionLock/ControlVersion` 同步；移除/到期后恢复；`CombatDirty` 置位；`CombatProjectionBuilder` 的 `Statuses` 含 EffectId/GroupId/EndTick/SourceId/SlowRatio。
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~GameLoopOrderingTests"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~ServerStatusManagerTests"
 ```
 
-- [ ] **步骤 3：实现 GameLoop 预 tick**
+- [x] **步骤 3：实现 GameLoop 预 tick**
 
 `GameLoop` 构造函数追加 `Action<long>? onPreTick = null` 与 `ConcurrentQueue<Action> _postPreTickQueue`；LoopAsync：
 
@@ -529,7 +529,7 @@ try { _onTick?.Invoke(nextTick); } ...
 
 **同 tick 基准统一**：preTick 已把 `CurrentTick` 写成当前 tick，所有包 handler 直接用它。删除 `CastHandler.HandleCastAsync`/`HandleCancel` 里的 `_server.CurrentTick + 1`（改为 `_server.CurrentTick`），并更新 `Server3C.CurrentTick` / `CastHandler` 的旧 F17 注释（“包处理落后一个迭代”已不成立）。补一个包路径测试：`HandleCastAsync` 的 `CastConfirm.AcceptedTick` 必须等于 `Server3C.CurrentTick`，不是 +1。
 
-- [ ] **步骤 4：实现 `ServerStatusManager` 与 `PlayerState`**
+- [x] **步骤 4：实现 `ServerStatusManager` 与 `PlayerState`**
 
 `ServerStatusManager`：
 
@@ -633,7 +633,7 @@ Statuses = entity.Statuses == null ? new List<StatusProjection>() :
 
 `Server3C.RegisterEntity` call `player.ConfigureStatuses(_elementalCatalog)`；`MonsterModule` spawn call too (or Server3C after spawn). `PlayerState` statuses null for bots; configure in `EnableBots` maybe.
 
-- [ ] **步骤 5：运行测试**
+- [x] **步骤 5：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~GameLoopOrderingTests"
@@ -642,7 +642,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatProjectio
 ```
 预期：PASS；全量服务端回归。
 
-- [ ] **步骤 6：Commit**
+- [x] **步骤 6：Commit**
 
 ```bash
 git add Server/GameLoop.cs Server/Player/ServerStatusManager.cs Server/Player/PlayerState.cs \
@@ -662,7 +662,7 @@ git commit -m "feat(server): tick authoritative statuses before input"
 - 测试：`Server/Server.Tests/Combat/ElementalApplicationTests.cs`（新建）
 - 测试：`Server/Server.Tests/Combat/EventIdentityTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 覆盖：
 - 10002 挥砍先命中 → 附加一次；后续剑气不再附加（同一目标）。
@@ -671,14 +671,14 @@ git commit -m "feat(server): tick authoritative statuses before input"
 - 风同次施法首个命中附加后，后续段伤害读取新倍率；PvE 2.0，PvP 1.28。
 - `HitEntry.EventSeq` 按目标单调、`EventId` 唯一、`CombatVersion` 等于目标当前版本。
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~ElementalApplicationTests"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~EventIdentityTests"
 ```
 
-- [ ] **步骤 3：实现**
+- [x] **步骤 3：实现**
 
 `PendingCast` 追加：
 
@@ -736,7 +736,7 @@ resolution.Hits.Add(new HitEntry {
 
 `CombatResolver` 增加 `private ulong _nextEventId; public ulong AllocateEventId() => ++_nextEventId;`。`EventId` 全局唯一；`EventSeq` 每目标单调（复活后 `LifeId` 变，但 `NextEventSeq` 不重置——协议按 `(LifeId, EntityId)` 序列，复活后序号继续单调即可）。
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~ElementalApplicationTests"
@@ -744,7 +744,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~EventIdentityTe
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~CombatResolver"
 ```
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Handler/CastHandler.cs Server/Player/PlayerState.cs \
@@ -766,7 +766,7 @@ git commit -m "feat(server): apply elemental status on first valid hit"
 - 测试：`Server/Server.Tests/Combat/DotDamageTests.cs`（新建）
 - 测试：`Server/Server.Tests/Combat/DotTerminalTickTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 覆盖：
 - 灼烧按间隔掉血，`DamageKind=Dot`，每跳 `EventSeq/EventId/CombatVersion` 正确；目标死亡后不再跳。
@@ -776,14 +776,14 @@ git commit -m "feat(server): apply elemental status on first valid hit"
 - 玩家 DoT 死亡后清状态；复活清状态；Evade 到家清状态并回满血。
 - `DamageResult` 收件人 = 来源 + 目标 + 观察者，与直接伤害同规则。
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~DotDamageTests"
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~DotTerminalTickTests"
 ```
 
-- [ ] **步骤 3：实现 `StatusTickService`**
+- [x] **步骤 3：实现 `StatusTickService`**
 
 ```csharp
 public sealed class StatusTickService
@@ -858,7 +858,7 @@ public Task BroadcastDotDamageAsync(long sourceId, int skillId, HitEntry hit)
 
 `Server3C` 构造 `StatusTickService` 并在 preTick 中 `_statusService.Tick(tick)`（任务 2 的 preTick 钩子）。
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~DotDamageTests"
@@ -866,7 +866,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~DotTerminalTick
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterEvadeTests"
 ```
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Status/StatusTickService.cs Server/Server3C.cs Server/Handler/CastHandler.cs \
@@ -889,7 +889,7 @@ git commit -m "feat(server): tick burn damage and publish dot results"
 - 修改：`Server/Player/ServerStatusManager.cs` / `PlayerState.cs`（如需补装 sink）
 - 测试：`Server/Server.Tests/Monster/MonsterStatusControlTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 覆盖：
 - 冰减速后怪物**真实位移**与 `UpdatePosition.Speed` 都按 `Config.moveSpeed × SpeedScale`（不是只改广播；`SimpleMoveSystem.MoveTowards` 的期望位移与 ORCA `maxStep` 同缩）。
@@ -898,7 +898,7 @@ git commit -m "feat(server): tick burn damage and publish dot results"
 - **重生怪**（死亡展示到期/Evade 超时重生）也获得 control sink：麻痹首次生效会取消其未提交前摇。
 - 玩家 DoT/控制不受怪物霸体逻辑影响。
 
-- [ ] **步骤 2：实现**
+- [x] **步骤 2：实现**
 
 `MonsterState` 增加 `public float SpeedScale { get; set; } = 1f;`；`SimpleMoveSystem.MoveTowards` 用 `float speed = m.Config.moveSpeed * m.SpeedScale;`，期望位移与 ORCA `configuredLength/maxStep` 都用 `speed`（`SpeedScale=1` 时与旧表达式逐位一致）。
 
@@ -951,7 +951,7 @@ public void CancelAction(long npcId, NpcActionCancelReason reason, uint tick)
 
 `MonsterBrain.ArriveHome` 调 `entity.Statuses?.ClearAll(tick)`。
 
-- [ ] **步骤 3：运行测试**
+- [x] **步骤 3：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterStatusControlTests"
@@ -959,7 +959,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterActionRu
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~MonsterEvadeTests"
 ```
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add Server/Monster/MonsterModule.cs Server/Monster/MonsterBtActions.cs \
@@ -982,13 +982,13 @@ git commit -m "feat(server): apply status control to monsters"
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/DotDamageRoutingTests.cs`（新建）
 - 测试：`Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs`（补充）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 - 本地玩家收到 `DamageKind=Dot`：HP 变为 `TargetRemainingHp`、只发 `PlayerDotDamageEvent` 飘字，不触发受击 FSM/格挡/击退/命中火花/受击泛红。
 - 远程玩家/怪物 Dot：`Targetable` 血条更新 + 对应飘字事件；不调用 `PlayHit`、不发 `MonsterTakeDamageEvent`（避免命中特效/震屏），怪物改用 `MonsterDotDamageEvent`，玩家改用 `PlayerDotDamageEvent`。
 - 直接伤害（`DamageKind=Direct`）行为完全不变。
 
-- [ ] **步骤 2：实现**
+- [x] **步骤 2：实现**
 
 `CombatNetworkBridge` 构造增加可选 `Action<long, float, float>? onDotDamageToLocalPlayer`（目标 id、伤害、余血）。`ApplyDamageResult`：
 
@@ -1011,7 +1011,7 @@ if (hit.DamageKind == DamageKind.Dot)
 
 `ClientNetworkHost` 把 `onDotDamageToLocalPlayer` 接到 `Sys3CEntry.ApplyDotDamage(damage, remainingHp)`；后者只改 `_currentHP`、发 `PlayerDotDamageEvent` 飘字、必要时 `EvaluateLocalDeath`，不调用 `_fsmManager.HandleDamage`/格挡/击退/Flash。
 
-- [ ] **步骤 3：运行测试**
+- [x] **步骤 3：运行测试**
 
 ```bash
 bash tools/unity-tests.sh EditMode DotDamageRoutingTests
@@ -1019,7 +1019,7 @@ bash tools/unity-tests.sh EditMode CombatNetworkBridgeTests
 ```
 MCP 不可用则直接 batchmode（不加 `-quit`），还原 `Assets/Packages/**`/`.meta`/`ProjectSettings/**`。
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs \
@@ -1046,14 +1046,14 @@ git commit -m "feat(client): route dot damage without hit reactions"
 - 测试：`Assets/Scripts/Tests/Editor/VFX/AuthoritativeStatusVfxTests.cs`（新建）
 - 测试：`Assets/Scripts/Tests/Editor/Skills/SwordQiElementTintTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 - 权威状态列表变化时，`AuthoritativeStatusVfx` 对同一实体按 `(EntityId, GroupId)` 只保留一条，应用/移除各一次，不因每帧投影重复。
 - **同一实体换渲染根（Proxy→Full/Full→Proxy、本地角色重建）时必须重放**：旧根先发 Removed，新根再发 Applied；否则 `StatusVFXSystem` 缓存的 Renderer 集合会染在被隐藏的旧模型上。
 - 冰/火/雷/风映射到四种颜色；`StatusVFXSystem` 能对 `Stun`/`Vulnerable` 染色并在移除后清理。
 - `SwordQiSpawner.Spawn(..., elementId)` 后剑气带元素色；`ElementPalette.ColorOf(1..4)` 四种颜色不同；`elementId=0` 不染色。
 
-- [ ] **步骤 2：实现最小表现**
+- [x] **步骤 2：实现最小表现**
 
 `RemoteEntityRegistry` 在 `ApplyProjection` 成功且 `Statuses` 变化后发：
 
@@ -1080,7 +1080,7 @@ EffectType Map(int effectId) => (effectId / 100) switch
 
 `SwordQiSpawner.Spawn` 增加 `int elementId = 0`，`SwordQiProjectile.OnSpawn` 保存并由 `SwordQiElementTint.Apply(elementId)` 设置 `TrailRenderer.startColor`/`ParticleSystem.startColor`/材质 `_Color`；`ElementPalette` 常量四种颜色。`RemoteCastPresenter` 传 `launch.ElementId`；`Sys3CEntry` 暴露 `CurrentElementId` 并在 `ApplySwordView` 更新；离线 `SkillExecutor` 通过注入的 `ElementIdProvider` 传本地元素（Plan 05 接离线状态时启用）。
 
-- [ ] **步骤 3：运行测试**
+- [x] **步骤 3：运行测试**
 
 ```bash
 bash tools/unity-tests.sh EditMode AuthoritativeStatusVfxTests
@@ -1089,7 +1089,7 @@ bash tools/unity-tests.sh EditMode StatusVFXSystemTests
 ```
 MCP 不可用则直接 batchmode，还原副作用。
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityRegistry.cs \
@@ -1122,7 +1122,7 @@ git commit -m "feat(client): show authoritative statuses and elemental sword qi"
 - 修改：`docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md`
 - 修改：`docs/superpowers/specs/2026-11-14-elemental-sword-qi-design.md`
 
-- [ ] **步骤 1：全量回归**
+- [x] **步骤 1：全量回归**
 
 ```bash
 bash tools/test-server-inprocess.sh
@@ -1143,7 +1143,11 @@ bash tools/unity-tests.sh PlayMode MonsterWorldTests
 ```
 MCP 不可用则 batchmode；`RemoteEntityRegistryTests.Bot_Radius` 既有 PPtr 失败可登记，其他失败必须修。`MonsterWorldTests` 以类自身文档口径（`--monsters 4`）运行；导航模式既有 Slime 巡逻卡死属已知导航债，登记但不阻塞。
 
-- [ ] **步骤 2：回写文档**
+注：`ElementalApplicationTests` 仅存在于服务端（`Server/Server.Tests/Combat/ElementalApplicationTests.cs`，
+由 `tools/test-server-inprocess.sh` 运行）；Unity 侧无同名测试，上面两条 Unity 过滤命令对该类结果为 0 个测试
+（0 失败，不是跳过全量）。
+
+- [x] **步骤 2：回写文档**
 
 必须写清：
 - Plan 04 已完成：服务端权威四状态、同次施法一次、DoT 末跳、`DamageKind` 分流、客户端状态/剑气表现。
@@ -1153,7 +1157,7 @@ MCP 不可用则 batchmode；`RemoteEntityRegistryTests.Bot_Radius` 既有 PPtr 
 - 测试数字：服务端 xx/xx、Unity 目标类、已知 PPtr 失败。
 - 路线图/设计规格 Plan 04 ✅；Plan 05 未开始，并在 Plan 05 登记“离线共享状态运行时/三客户端验收/GetObserversOf O(N²)”。
 
-- [ ] **步骤 3：Commit**
+- [x] **步骤 3：Commit**
 
 ```bash
 git add Assets/Scripts/AOT/Protocol/README.md \

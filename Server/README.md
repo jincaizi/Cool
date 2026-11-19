@@ -142,7 +142,7 @@ bash tools/test-server.sh
   `Pvp.WindVulnerabilityMultiplier = 1.28`（PvP 不放大灼烧）。
 
 状态：Plan 01–04 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
-PvP 基线、Plan 04 状态结算/DoT/元素表现），服务端全量 652/652；Plan 05 未开始。
+PvP 基线、Plan 04 状态结算/DoT/元素表现），服务端全量 654/654；Plan 05 未开始。
 未启用：**离线单机共享状态运行时**（本地 `StatusEffectManager` 的冰冻/灼烧保持独立，
 四元素运行时留给 Plan 05）、元素 VFX 资源化与远端武器模型（Plan 05）。
 
@@ -154,16 +154,19 @@ Plan 03 验收证据（可证伪）：
 - PvP：`LoginCombatBaselineTests` 断言 720 HP；`PveDamageScaleTests` 断言 NPC→720 HP
   玩家伤害 ×7.2，保持原 PvE TTK。
 
-Plan 04 验收证据（服务端，全部在 652/652 内）：
+Plan 04 验收证据（服务端，全部在 654/654 内）：
 
 - 状态运行时：`StatusRuntimeTests`（11 项）锁定刷新/末跳/控制派生/PvP 免疫与 4s 不刷新；
   `ServerStatusManagerTests`（9 项）锁定控制 sink 与投影版本；`GameLoopOrderingTests`
   锁定 pre-tick 顺序与 WS 输入顺序。
 - 元素附加：`ElementalApplicationTests`（9 项）锁定同次施法每目标一次、挥砍/剑气先后、
   格挡与死亡不附加、PvE/PvP 风倍率；`EventIdentityTests`（2 项）锁定事件序号。
+- 取消重入：`CastCancelDuringDrainTests`（2 项）锁定状态附加 → 控制 sink → `CancelCaster`
+  在 `DrainResolved` 压缩途中重入不越界、不覆盖/丢弃后续待判定施法（C1）。
 - DoT：`DotDamageTests`（9 项）与 `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、
   `DamageKind=Dot`、末跳只结算一次、到期/死亡清理。
-- 怪物控制：`MonsterStatusControlTests`（7 项）锁定减速作用于真实移动/ORCA、麻痹打断与
+- 怪物控制：`MonsterStatusControlTests`（7 项）锁定减速对真实位移的缩放（无邻居期望位移
+  逐字验证；ORCA `maxStep` 同缩由代码同源与 Plan 05 压测验收覆盖）、麻痹打断与
   霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
   `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
 
