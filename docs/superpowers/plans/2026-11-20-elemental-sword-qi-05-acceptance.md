@@ -230,6 +230,8 @@ git commit -m "test(playmode): accept three-client elemental status"
   - 每观察者总字节 ≤ `GlobalGameSettings.BandwidthBudgetBytesPerSec * 60`。
   - 单 tick（含 WorldSnapshot + 311 + DamageResult）≤ 150 * 1024。
   - 投影基线单实体 ≤ 300B（沿用现有上下限）。
+  - 流下限（防“整块删除仍绿”）：`statusUpdateTotal` 落在 `60*150..60*400`、`damageResultTotal` 落在 `60*40..60*120`（按实测 182B/56B 留约 20% 余量）。
+  - 另加 100 实体同时中 DoT 的最坏变体（每 tick 100 条 311 + 100 条 DamageResult），断言仍 ≤100KB/s；若超限先降频并记录，不上调预算。
 - 输出 `perTickMax`, `totalBytes`, `kbps` 到测试输出（`ITestOutputHelper`）。
 
 - [ ] **步骤 2：运行测试**
