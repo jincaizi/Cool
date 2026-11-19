@@ -51,7 +51,7 @@ B 为 720 HP 的联机玩家，10002 每次直伤 90×2（暴击 15%），灼烧
 在 `ThreeClientElementalAcceptanceTests` 增加第二个 `[UnityTest]`，方法名：
 `FireDot_Ticks_Are_Consistent_And_Death_Projection_Is_Consistent`。
 
-复用 `NewClient` 与 `RunAsync` 的三客户端登录/装备模式，但 A 装备火剑（`ElementId=2`），施放 `10002` 命中 B。断言：
+复用 `NewClient` 与 `RunThunderAsync`/`RunFireAsync` 的三客户端登录/装备模式，但 A 装备火剑（`ElementId=2`），施放 `10002` 命中 B。断言：
 
 1. A/B/C 收到的 `DamageResult` 中，`DamageKind=Dot` 的命中按 `EventId` 一一对应，逐条严格相等：
    `Damage`、`TargetRemainingHp`、`TargetLifeId`、`CombatVersion`、`EventSeq`、`CastId`、`SourcePlayerId`。
@@ -91,7 +91,7 @@ bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~DotDamageTests"
 
 ```bash
 git add Assets/Scripts/Tests/PlayMode/ThreeClientElementalAcceptanceTests.cs
-git commit -m "test(playmode): accept three-client dot ticks and terminal death"
+git commit -m "test(playmode): accept three-client dot ticks and death projection"
 ```
 
 ---

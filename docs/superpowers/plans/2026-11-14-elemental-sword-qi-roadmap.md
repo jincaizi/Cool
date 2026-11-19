@@ -101,8 +101,9 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
 以下项**不属于** Plan 01–05 已交付范围，登记到 Plan 06/backlog，不得写成已打通：
 
 - **Plan 05 未执行的设计验收场景**（2026-11-20 登记；Plan 05 已交付的是子集，以下不得写成已验收）：
-  - **三端 DoT/末跳致死**：三端每跳伤害/余血/`DamageKind=Dot` 一致，受击者不被跳伤打断攻击，
-    观察者不播命中火花/受击硬直（Plan 06 任务 1 验收）；**末跳致死**由服务端
+  - **三端 DoT/末跳致死**：三端每跳伤害/余血/`DamageKind=Dot` 一致（Plan 06 任务 1 验收）；
+    受击者不被跳伤打断、观察者不播命中火花/受击硬直由 `DotDamageRoutingTests`（Plan 04）覆盖；
+    **末跳致死**由服务端
     `DotDamageTests.Burn_Tick_That_Kills_Player_Clears_Statuses_And_Stops` 证明（`MaxHp=8`，
     一跳致死、只一条 DotHit、死后不再跳）；**三端同一次末跳致死的死亡时刻**在 720 HP 联机场景
     无法确定性构造（直伤 90×2/次、灼烧 8/跳、暴击 15%），需服务器 HP 注入/测试钩子，登记 Plan 07。
