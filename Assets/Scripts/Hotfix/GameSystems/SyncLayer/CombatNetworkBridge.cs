@@ -284,6 +284,8 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 // 传输层重试/重投的同一命中只生效一次：否则本地受击 FSM/飘字会二次触发，
                 // 远程红字/灰字会重影。旧服务端 EventId=0 保持不去重的既有行为。
+                // EventId 先登记、后判视图：视图未建时事件已被消费，后续同 EventId 的补包
+                // 不再补表现；血量由后续快照/311 纠正（表现可丢，权威数值不丢）。
                 if (!MarkEventSeen(hit.EventId)) continue;
                 anyNewHit = true;
 

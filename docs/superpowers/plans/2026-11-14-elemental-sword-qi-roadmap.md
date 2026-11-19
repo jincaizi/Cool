@@ -11,7 +11,7 @@
 | 02 | [B1 取消 + NpcAction 全链 + B2 战斗投影/带宽](2026-11-17-elemental-sword-qi-02-cancel-projection.md) | `CastCancelBroadcast`、`NpcActionEvent`、客户端动作存储、`CombatStateUpdate`/`CombatProjection`、血量 `LifeId`/`CombatVersion`、AOI 基线与在途剑气补发、带宽门禁 | 01 |
 | 03 | B5 位移/跳跃预算 + PvP 控制 | `LocomotionMode/JumpPhase/JumpSeq/VerticalVelocity/DisplacementSkillId/CastId`、服务端接收 tick 预算、Dash 活动窗、跳跃惯性、PvP HP/控制规则包 | 01、02 |
 | 04 | 状态结算 + DoT + 表现 | PvE/PvP 共用冰/火/雷/风状态运行时、同次挥砍和剑气只附加一次、同 tick 顺序、DoT 末跳、`DamageKind` 分流、元素 VFX | 01、02；PvP 端到端验收还需要 03 |
-| 05 | [三客户端验收 + 表现收口](2026-11-20-elemental-sword-qi-05-acceptance.md) | 三端一致性、带宽实测、麻痹惯性/推挤纠偏、KCP/WebSocket 注入延迟、元素表现回退、AOI 观察者反查索引（`GetObserversOf` O(N²)） | 01–04 |
+| 05 | [三客户端验收 + 表现收口](2026-11-20-elemental-sword-qi-05-acceptance.md) | 三端一致性、带宽实测、麻痹惯性/推挤稳定性（静态盒）、KCP/WebSocket 收包注入（重复/乱序）、元素表现回退、AOI 观察者反查索引（`GetObserversOf` O(N²)） | 01–04 |
 
 ## 当前状态（2026-11-20）
 
@@ -21,7 +21,7 @@
 | 02 | [B1 取消 + NpcAction 全链 + B2 战斗投影/带宽](2026-11-17-elemental-sword-qi-02-cancel-projection.md) | ✅ 已完成 | Part A/B 全部完成并回归：取消/NpcAction、战斗投影、AOI 基线/条件字段、在途剑气补发与 100 KB/s 门禁；模块 README 已回写 |
 | 03 | [B5 位移/跳跃预算 + PvP 控制](2026-11-18-elemental-sword-qi-03-displacement-pvp.md) | ✅ 已完成 | 10/10 任务；服务端 587/587；Unity 目标测试类通过（`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败，基线可复现，不计回归）；模块 README 已回写 |
 | 04 | [状态结算 + DoT + 表现](2026-11-19-elemental-sword-qi-04-status-dot-vfx.md) | ✅ 已完成 | 8/8 任务；服务端全部 654/654；Unity 目标 EditMode 类通过（`ElementalApplicationTests` 仅服务端存在；`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败，基线可复现）；PlayMode 五类回归完成（`MonsterWorldTests` 导航模式既有 Slime 巡逻卡死为已知导航债）；模块 README 已回写。在线 PvE/PvP 权威状态已完成；**离线单机共享运行时未接入，留给 Plan 06/backlog（2026-11-20 修正）** |
-| 05 | 三客户端验收 + 表现收口 | ✅ 已完成 | 6/6 任务；服务端 667/667（基线 654 → AOI 9 + 带宽 2 + 服务端预算 2）；Unity EditMode 目标类 `ElementVfxFallbackTests` 5/5、`SwordQiElementTintTests` 4/4、`StatusVFXSystemTests` 3/3、`NetworkConsumptionInjectionTests` 14/14、`ProtocolShapeGuardTests` 17/17（`RemoteEntityRegistryTests` 16/17，仅既有 `Bot_Radius` PPtr）；PlayMode 9/9（三客户端元素 1/1、三客户端战斗一致性 1/1、`MovementSyncTests` 4/4、`PlayerControlInertiaTests` 3/3，真实 Server3C:8000）；带宽 100 实体 ×15Hz×60s 平均 53.4 KB/s、100 实体同时 DoT 最坏 76.9 KB/s（预算 100 KB/s，未上调）；收包注入目标类合计 72/72；AOI 反查 N=1000 ≤1ms、索引与暴力逐项相等。**未新增战斗机制/协议字段；离线共享运行时与 Addressables 美术资源签收移至 Plan 06/backlog** |
+| 05 | 三客户端验收 + 表现收口 | ✅ 已完成 | 6/6 任务；服务端 668/668（基线 654 → AOI 10 + 带宽 2 + 服务端预算 2；含最终审查补充的 NPC 目标反查用例）；Unity EditMode 目标类 `ElementVfxFallbackTests` 5/5、`SwordQiElementTintTests` 4/4、`StatusVFXSystemTests` 3/3、`NetworkConsumptionInjectionTests` 14/14、`ProtocolShapeGuardTests` 17/17（`RemoteEntityRegistryTests` 16/17，仅既有 `Bot_Radius` PPtr）；PlayMode 9/9（三客户端元素 1/1、三客户端战斗一致性 1/1、`MovementSyncTests` 4/4、`PlayerControlInertiaTests` 3/3，真实 Server3C:8000）；带宽 100 实体 ×15Hz×60s 平均 53.4 KB/s、100 实体同时 DoT 最坏 76.9 KB/s（预算 100 KB/s，未上调）；收包注入目标类合计 72/72；AOI 反查 N=1000 ≤1ms、索引与暴力逐项相等。**未新增战斗机制/协议字段；离线共享运行时与 Addressables 美术资源签收移至 Plan 06/backlog。设计规格中未执行的三端 DoT/末跳致死、麻痹取消前摇 `Cancelled` 链、状态结束时钟偏移、AOI 快速出入/复活版本连续、KCP/WS 延迟注入、断线重进旧包与模型未加载场景已登记到 Plan 06（见下），不得视为已验收** |
 
 **换装跟进（2026-11-16）**：简易武器背包、男女八把元素剑校准变体、权威确认对账与
 交互边界已完成，自动测试全绿；握姿/穿模/拖尾、DemoDay 交互冒烟与发布构建冒烟仍待人工验收。
@@ -31,7 +31,7 @@
 Plan 03 补齐位移/跳跃预算与 PvP 基线（720 HP、接收 tick 预算、突进窗口、控制投影消费）；
 Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`DamageKind` 分流与客户端
 状态/剑气表现。Plan 05 完成 AOI 观察者反查索引、三客户端元素一致性、带宽/注入验收、
-麻痹惯性/推挤纠偏与元素表现回退（`ElementVfxFallback` 只锁定“资源命中 → 资源自带颜色，
+麻痹惯性/推挤稳定性（静态盒）与元素表现回退（`ElementVfxFallback` 只锁定“资源命中 → 资源自带颜色，
 否则程序化调色板”的判定顺序；生产 Addressables loader/Host 未接入）。
 **明确边界**：在线 PvE/PvP 权威状态与三客户端验收已完成；离线单机仍使用本地
 `StatusEffectManager` 的冰冻/灼烧（仅怪物、独立计时），四元素共享运行时、离线去重与
@@ -49,9 +49,10 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
 - **AOI 观察者反查 O(N²)**（2026-11-18 登记，Plan 05 任务 1 完成）：`AoiGrid` 维护
   `entityId → 观察者` 反向索引，`GetObserversOf` 只扫观察者集合；`Server3C` 在索引路径
   按 `LeaveRadius`（90m）剔除陈旧边，首 tick 尚无观察者快照时保留暴力兜底。
-  `AoiReverseIndexTests` 9/9：随机 50 实体 × 30 tick 与暴力结果逐项相等、80/90m 迟滞、
+  `AoiReverseIndexTests` 9/9（任务交付时）：随机 50 实体 × 30 tick 与暴力结果逐项相等、80/90m 迟滞、
   `RemoveEntity`/`RemoveObserver` 清理、重登不残留；N=1000、100 观察者单次反查 ≤1ms
-  （Debug 本机中位数）。服务端全量 654 → 663。
+  （Debug 本机中位数）。服务端全量 654 → 663（AOI）→ 667（含带宽/预算）；最终审查补
+  1 个 NPC 目标反查用例后 668/668。
 - **三客户端元素验收**（2026-11-19 登记，Plan 05 任务 2 完成）：
   `ThreeClientElementalAcceptanceTests` 1/1（真实 Server3C:8000）——A 雷剑施法，A/B/C
   对齐同一 `HitEntry` 的 `CastId/EventSeq/CombatVersion/TargetRemainingHp`（严格相等），
@@ -65,10 +66,11 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
   `NetworkConsumptionInjectionTests` 14/14；加既有目标类合计 72/72。桥层按 `EventId`
   去重命中、按 `CastId` 去重 `CastBroadcast`，旧版本 `CombatStateUpdate` 丢弃，停点先到
   跳过补建视觉；`ClearDedupe` 在断线/重建路径清空窗口。
-- **麻痹空中惯性 / 推挤纠偏**（Plan 05 任务 5 完成）：`PlayerControlInertiaTests` 3/3
+- **麻痹空中惯性 / 推挤稳定性（静态盒）**（Plan 05 任务 5 完成）：`PlayerControlInertiaTests` 3/3
   （空中麻痹 0.3s 位移 1.521m、落地累计 3.650m、地面麻痹 0；贴 `NpcBody` 往返幅度
   0.0000m、最大 z 0.410）；服务端 `PvpMovementBudgetTests` 9/9（空中锁定仅发放跳跃惯性
-  6.0m = 6 m/s × 1.0s，普通预算为 0）。
+  6.0m = 6 m/s × 1.0s，普通预算为 0）。**只覆盖静态盒贴附的本地稳定性**；移动
+  `NpcBody` + 位置上报/纠偏联测登记到 Plan 06（见下）。
 - **元素表现回退**（Plan 05 任务 6 完成）：`ElementVfxFallback.ResolveColor` 锁定
   “ViewKey 非空且 loader 命中资源 → `Color.white`（资源自带颜色，Host 实例化），否则
   `ElementPalette.ColorOf(elementId)`”；`ElementVfxFallbackTests` 5/5。未实际调用
@@ -78,6 +80,28 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
 
 以下项**不属于** Plan 01–05 已交付范围，登记到 Plan 06/backlog，不得写成已打通：
 
+- **Plan 05 未执行的设计验收场景**（2026-11-20 登记；Plan 05 已交付的是子集，以下不得写成已验收）：
+  - **三端 DoT/末跳致死**：三端每跳伤害/余血/`DamageKind=Dot` 一致，受击者不被跳伤打断攻击，
+    观察者不播命中火花/受击硬直；最后一跳致死时三端死亡时刻一致（`design.md:168`）。
+  - **麻痹取消前摇三端 `Cancelled` 链**：A 的雷剑气命中 B 进行中的前摇，三端按同一 `CastId` 记录
+    `CastCancelBroadcast.EffectiveTick`；B/C 停止攻击动作，不生成未发射剑气与后续 `DamageResult`，
+    已发射的独立投射物继续飞行；玩家路径断言 `RemoteCastPresenter`/`RemoteEntityAnimator.CancelAttack(CastId)`，
+    怪物路径断言 `NpcAttackSchedule`/`NpcEntityAnimator` 停止且 `NpcActionEvent` 按 `(InstanceId, Revision)`
+    合并、`Phase=Cancelled` 生效（`design.md:167`）。
+  - **状态结束时钟偏移注入**：给两台客户端注入不同时钟偏移和渲染延迟，断言特效移除由同一条
+    `CombatStateUpdate` 触发；权威移除晚于 `EndTick` 时保持到消息到达（`design.md:169`）。
+  - **AOI 快速出入/复活版本连续**：AOI 快速出入、死亡复活、Evade 到家、回池与断线重进时，
+    进入基线与后续 `CombatStateUpdate` 的 `CombatVersion`/`LifeId` 连续，旧版本增量不能复活
+    旧状态或旧装备（`design.md:170`）。
+  - **KCP/WebSocket 延迟注入**：重复/乱序已由 `NetworkConsumptionInjectionTests` 覆盖；延迟注入
+    （含 KCP 与 WebSocket 正常流程、换装确认/施法交错、发射晚于格挡结果、旧伤害晚于复活、
+    较新血量早于状态消息）未执行（`design.md:166`）。
+  - **断线重进旧包**：按新会话初始化，旧包、旧模型回调与旧位移预测均不生效（`design.md:166`）。
+  - **收到状态时模型尚未加载**：模型加载完成前的状态投影/事件不得丢失或错挂（`design.md:166`）。
+- **移动 NpcBody + 位置上报/纠偏联测**（2026-11-20 登记）：Plan 05 的 `PlayerControlInertiaTests`
+  只验证静态盒贴附的本地稳定性（往返幅度 0.0000m）；`design.md:144` 要求“碰撞推挤需要与服务端
+  冻结纠偏联测，避免两边反复移动同一角色”。需构造会移动的怪物 `NpcBody` 与服务端位置上报/纠偏
+  同场运行，断言无持续往返纠偏。
 - **离线单机四元素共享运行时**（原 Plan 04 前瞻误写为“Plan 05”，2026-11-20 修正）：
   服务端权威状态已完成，但离线仍用 `Skills/Effect/StatusEffectManager`（本地冰冻/灼烧，
   仅怪物、独立计时）。需把 `SyncCore.StatusRuntime` 接入离线怪物/玩家适配器（时钟、

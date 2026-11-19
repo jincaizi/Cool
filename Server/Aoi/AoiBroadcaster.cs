@@ -159,7 +159,9 @@ namespace KcpServer
         /// <summary>是否已有观察者视野状态（&gt;0 表示反向索引可用；首 tick 须回退暴力扫描）。</summary>
         public bool HasSightState => _grid.TrackedObservers > 0;
 
-        /// <summary>能看到指定实体的观察者（AoiGrid 反向索引快照）。</summary>
+        /// <summary>能看到指定实体的观察者（AoiGrid 反向索引原始快照）。
+        /// 裸反查：不过滤无 session 的观察者、不按当前距离/半径剔除陈旧索引边——生产收件人
+        /// 请走 <c>Server3C.GetObserversOf</c>（首 tick 暴力兜底 + 会话/半径过滤）。</summary>
         public List<long> GetObserversOf(long entityId) => _grid.GetObserversOf(entityId);
     }
 }

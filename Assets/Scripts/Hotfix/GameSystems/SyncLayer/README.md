@@ -36,7 +36,8 @@
 
 ## 属性剑气 v1（2026-11-14）
 
-状态：Plan 01–04 已完成（Part A 取消广播/NpcAction；Part B 战斗投影版本合并、AOI 基线投影、
+状态：Plan 01–05 已完成（Plan 05：桥层 `EventId`/`CastId` 去重与消费层注入回归；
+Part A 取消广播/NpcAction；Part B 战斗投影版本合并、AOI 基线投影、
 `ActiveCast` 补播与在途剑气补发消费；Plan 03 位移上报、跳跃边沿与本人控制消费；
 Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
 元素 VFX 资源化与远端武器模型仍属 Plan 06/backlog（2026-11-20 修正，原写 Plan 05）。
