@@ -11,18 +11,18 @@
 | Plan 01：共享表、权威换装、普攻参数、`CastId`、发射/停点、场景隔离 | ✅ 已完成（服务端 512/512、Unity EditMode/PlayMode 相关测试通过） |
 | Plan 02：取消广播/NpcAction、战斗投影/带宽 | ✅ 已完成（Part A/B 全部完成；服务端 552/552、Unity 相关测试通过） |
 | Plan 03：位移/跳跃预算、PvP 控制 | ✅ 已完成（服务端 587/587；Unity 位移/跳跃/控制/协议目标测试类通过；`RemoteEntityRegistryTests.Bot_Radius` 为既有 PPtr 环境失败） |
-| Plan 04：状态结算/DoT/元素 VFX | ✅ 已完成（服务端 654/654；Unity 目标 EditMode 类通过，`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败；在线 PvE/PvP 权威状态、DoT、`DamageKind` 分流与状态/剑气表现已启用。**离线单机共享状态运行时未接入**，本地冰冻/灼烧保持独立，留给 Plan 05） |
-| Plan 05：三客户端验收/表现收口 | ❌ 未开始（已登记离线共享状态运行时、三客户端元素验收、`GetObserversOf` O(N²)） |
+| Plan 04：状态结算/DoT/元素 VFX | ✅ 已完成（服务端 654/654；Unity 目标 EditMode 类通过，`RemoteEntityRegistryTests` 仅既有 `Bot_Radius` PPtr 环境失败；在线 PvE/PvP 权威状态、DoT、`DamageKind` 分流与状态/剑气表现已启用。**离线单机共享状态运行时未接入**，本地冰冻/灼烧保持独立，留给 Plan 06/backlog） |
+| Plan 05：三客户端验收/表现收口 | 📝 计划已编写（2026-11-20），实现未开始；含三客户端验收、带宽、注入、AOI 反查 |
 | 简易武器背包与八把持剑模型（2026-11-16 跟进） | ✅ 代码与自动测试完成；视觉/交互/出包验收待人工 |
 
 下文“验收场景”是 01–05 的完整目标，不是当前已全部验证的结果。Plan 04 交付的是
 **在线权威路径**：服务端状态运行时 → `CombatStateUpdate`/`DamageResult` → 客户端表现；
-离线四元素、三客户端端到端与元素资源化仍属 Plan 05。
+三客户端端到端、带宽/注入验收与 AOI 反查属 Plan 05；离线四元素共享运行时与元素资源化移至 Plan 06/backlog。
 
 **2026-11-19 实施备注（血量/状态合并）**：Plan 04 实际采用**单一 `CombatVersion` 原子合并**
 ——`RemoteEntityRegistry.ApplyProjection` 对低版本投影直接丢弃，血量/死亡/状态/装备/控制
 随同一条完整投影整体应用。下文“血量与状态各自记录已应用版本”的字段级分版本合并
-**不再承诺**；若后续确有独立推进需求，可登记为 Plan 05 可选收口项。
+**不再承诺**；若后续确有独立推进需求，可登记为 Plan 06 可选收口项。
 
 ## 玩法规则
 
