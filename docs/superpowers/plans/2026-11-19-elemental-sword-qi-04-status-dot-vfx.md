@@ -1115,6 +1115,7 @@ git commit -m "feat(client): show authoritative statuses and elemental sword qi"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/VFX/README.md`
+- 修改：`Assets/Scripts/Hotfix/GameSystems/Nameplate/README.md`
 - 修改：`Assets/Scripts/Hotfix/GameSystems/Skills/README.md`
 - 修改：`Server/README.md`
 - 修改：`Server/Monster/README.md`
@@ -1133,8 +1134,14 @@ bash tools/unity-tests.sh EditMode SwordQiElementTintTests
 bash tools/unity-tests.sh EditMode StatusVFXSystemTests
 bash tools/unity-tests.sh EditMode RemoteEntityRegistryTests
 bash tools/unity-tests.sh EditMode ProtocolShapeGuardTests
+# PlayMode 回归（Plan 03 子集；GameLoop 预 tick/状态 tick/DoT 改动影响联网路径）
+bash tools/unity-tests.sh PlayMode MovementSyncTests
+bash tools/unity-tests.sh PlayMode BlockMitigationE2ETests
+bash tools/unity-tests.sh PlayMode TwoClientWorldTests
+bash tools/unity-tests.sh PlayMode ThreeClientCombatConsistencyTests
+bash tools/unity-tests.sh PlayMode MonsterWorldTests
 ```
-MCP 不可用则 batchmode；`RemoteEntityRegistryTests.Bot_Radius` 既有 PPtr 失败可登记，其他失败必须修。
+MCP 不可用则 batchmode；`RemoteEntityRegistryTests.Bot_Radius` 既有 PPtr 失败可登记，其他失败必须修。`MonsterWorldTests` 以类自身文档口径（`--monsters 4`）运行；导航模式既有 Slime 巡逻卡死属已知导航债，登记但不阻塞。
 
 - [ ] **步骤 2：回写文档**
 
@@ -1154,6 +1161,7 @@ git add Assets/Scripts/AOT/Protocol/README.md \
   Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md \
   Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md \
   Assets/Scripts/Hotfix/GameSystems/VFX/README.md \
+  Assets/Scripts/Hotfix/GameSystems/Nameplate/README.md \
   Assets/Scripts/Hotfix/GameSystems/Skills/README.md \
   Server/README.md Server/Monster/README.md \
   docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md \
