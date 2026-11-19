@@ -39,7 +39,7 @@
 状态：Plan 01–04 已完成（Part A 取消广播/NpcAction；Part B 战斗投影版本合并、AOI 基线投影、
 `ActiveCast` 补播与在途剑气补发消费；Plan 03 位移上报、跳跃边沿与本人控制消费；
 Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
-元素 VFX 资源化与远端武器模型仍属 Plan 05。
+元素 VFX 资源化与远端武器模型仍属 Plan 06/backlog（2026-11-20 修正，原写 Plan 05）。
 
 - **权威换装**：`ClientEquipmentState` 按 `EquipmentRevision` 应用 `EquipWeaponConfirm`；
   旧版本忽略。拒绝确认携带的较新摘要也会应用（恢复服务器当前装备）；登录基线可把版本 0

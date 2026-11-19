@@ -60,21 +60,21 @@
 - 修改：`Server/Server3C.cs`
 - 测试：`Server/Server.Tests/Aoi/AoiReverseIndexTests.cs`（新建）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 - 随机 50 实体、多个 tick 位置，逐个调用 `GetVisible` 后，`GetObserversOf(id)` 与暴力扫描（旧 `Server3C` 逻辑）结果集合逐项相等。
 - 迟滞：进入 80m 可见、80–90m 保持、>90m 移除；索引与 `GetVisible` 同步。
 - `RemoveEntity`/`RemoveObserver` 清理索引，重登同 id 不残留。
 - 性能：N=1000、100 个观察者，单次 `GetObserversOf` ≤1ms（Debug 本机，重复 100 次取中位数；仅作回归护栏）。
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~AoiReverseIndexTests"
 ```
 预期：`GetObserversOf` 不存在，编译失败。
 
-- [ ] **步骤 3：实现**
+- [x] **步骤 3：实现**
 
 `AoiGrid`：
 
@@ -142,7 +142,7 @@ public List<long> GetObserversOf(long entityId)
 }
 ```
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~AoiReverseIndexTests"
@@ -151,7 +151,7 @@ bash tools/test-server-inprocess.sh
 ```
 预期：全部 PASS；全量从 654 增加新用例。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Server/Aoi/AoiGrid.cs Server/Aoi/AoiBroadcaster.cs Server/Server3C.cs \
@@ -167,7 +167,7 @@ git commit -m "perf(aoi): index observers by entity"
 - 创建：`Assets/Scripts/Tests/PlayMode/ThreeClientElementalAcceptanceTests.cs`
 - 参考：`ThreeClientCombatConsistencyTests.cs` 的连接/等待模式
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 测试步骤：
 1. A/B/C 登录同一服务器（`127.0.0.1:8000`），等 C 的 registry 看到 B。
@@ -183,7 +183,7 @@ git commit -m "perf(aoi): index observers by entity"
    - 内层等待共用一个 120s deadline/取消标志；外层超时先 cancel，再等待 `RunAsync` 退出（≤1s），最后 Dispose，避免后台任务继续 Pump 已释放的 manager。
    - `HitEntry.TargetRemainingHp` 用严格相等；311 识别额外断言 `StatusProjection.SourceId == A.LocalPlayerId`。
 
-- [ ] **步骤 2：运行测试确认失败/超时**
+- [x] **步骤 2：运行测试确认失败/超时**
 
 先起服务端：
 ```bash
@@ -194,15 +194,15 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000
 `ThreeClientElementalAcceptanceTests`
 预期：测试存在但业务断言失败/超时（元素装备链尚未被该场景覆盖）。
 
-- [ ] **步骤 3：实现测试**
+- [x] **步骤 3：实现测试**
 
 使用 `KcpNetClientAdapter`/`ClientNetworkManager` 与现有 `ThreeClientCombatConsistencyTests` 的等待循环；`RemoteEntityRegistry` 只用于 C 的视图断言。所有等待必须有 `120s` 总超时与阶段字符串。
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 同一服务器下重跑；若失败，输出 A/B/C 三个客户端收到的 `CastBroadcast/DamageResult/CombatStateUpdate` 摘要（CastId、EffectId、ActionLock、版本），再判断是测试时序还是服务端缺陷。不得放宽断言。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Tests/PlayMode/ThreeClientElementalAcceptanceTests.cs
@@ -217,7 +217,7 @@ git commit -m "test(playmode): accept three-client elemental status"
 - 修改：`Server/Server.Tests/Aoi/BandwidthBudgetTests.cs`
 - 可选：`production/verify/plan05-bandwidth/report.md`（记录实测数字）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 新增 `Hundred_Entities_Status_And_Dot_60s_Stay_Under_100_KBps_Per_Observer`：
 - 构造 100 实体，1 个观察者；每个 tick（900 tick）为每实体构造 `EntitySnapshot`：
@@ -234,18 +234,18 @@ git commit -m "test(playmode): accept three-client elemental status"
   - 另加 100 实体同时中 DoT 的最坏变体（每 tick 100 条 311 + 100 条 DamageResult），断言仍 ≤100KB/s；若超限先降频并记录，不上调预算。
 - 输出 `perTickMax`, `totalBytes`, `kbps` 到测试输出（`ITestOutputHelper`）。
 
-- [ ] **步骤 2：运行测试**
+- [x] **步骤 2：运行测试**
 
 ```bash
 bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~BandwidthBudgetTests"
 ```
 预期：当前无状态/DoT 回放，测试失败或低于下限。
 
-- [ ] **步骤 3：实现/调参**
+- [x] **步骤 3：实现/调参**
 
 只改测试数据构造，不改预算常量。若超 100KB/s，先降测试中的近带实体数/保活频率并记录原因；不得上调预算。
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add Server/Server.Tests/Aoi/BandwidthBudgetTests.cs
@@ -261,7 +261,7 @@ git commit -m "test(aoi): budget status and dot replay for 60 seconds"
 - 创建：`Assets/Scripts/Tests/Editor/SyncLayer/NetworkConsumptionInjectionTests.cs`
 - 参考：`RemoteCastPresenterCastIdTests`、`CombatStateProjectionTests`、`WebSocketClientAdapterTests`
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `NetworkConsumptionInjectionTests`：
 - 同一 `DamageResult`（同一 `HitEntry.EventId`）投递两次：本地受击回调/飘字只执行一次；不同 EventId 执行两次。
@@ -271,14 +271,14 @@ git commit -m "test(aoi): budget status and dot replay for 60 seconds"
 - 整条 DamageResult 的 hit 全被判重时不再触发 `OnDamageResult`（避免重复火球消息消费下一发视觉）。
 - 正常 KCP/WebSocket：跑 `WebSocketClientAdapterTests`、`WebSocketServerSessionTests`，确认无改动回归。
 
-- [ ] **步骤 2：运行测试确认失败**
+- [x] **步骤 2：运行测试确认失败**
 
 ```bash
 bash tools/unity-tests.sh EditMode NetworkConsumptionInjectionTests
 ```
 MCP 不可用则 batchmode（300s 超时，XML 落盘即杀进程）；预期 `EventId` 去重用例失败（当前无去重）。
 
-- [ ] **步骤 3：实现**
+- [x] **步骤 3：实现**
 
 `CombatNetworkBridge` 增加有界去重：
 
@@ -300,7 +300,7 @@ private bool MarkEventSeen(ulong eventId)
 
 `ApplyDamageResult` 对每个 hit：`if (!MarkEventSeen(hit.EventId)) continue;`。清空条件：连接重置/新会话时清空（`ClientNetworkBridge` 可由宿主在 `Reset` 时清；本任务至少提供 `ClearDedupe` 并在断线路径调用，若没有则文档登记）。
 
-- [ ] **步骤 4：运行测试**
+- [x] **步骤 4：运行测试**
 
 ```bash
 bash tools/unity-tests.sh EditMode NetworkConsumptionInjectionTests
@@ -310,7 +310,7 @@ bash tools/unity-tests.sh EditMode CombatStateProjectionTests
 bash tools/unity-tests.sh EditMode WebSocketClientAdapterTests
 ```
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs \
@@ -327,25 +327,25 @@ git commit -m "test(sync): inject duplicate and reordered combat messages"
 - 参考：`PlayerJumpBodyCollisionTests`、`MovementSyncTests`
 - 可选：`Server/Server.Tests/Server/PvpMovementBudgetTests.cs` 补充空中麻痹包
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 - 本地 `CharacterController`：起跳后 `SetStatusActionLock(true)`，推进 0.3s；断言水平位移 > 0 且方向/速度保持起跳值，`JumpSeq` 不再增加；落地后位移停止；解锁后恢复输入。
 - 地面麻痹：按住移动 + 新跳跃请求；断言水平位移 0、`JumpSeq` 不变。
 - 推挤：贴 `NpcBody` 站立并用移动输入挤压 0.5s；断言位置往返幅度 ≤0.1m（无持续抖动），且服务端预算/纠偏不产生超预算位移。
 - 服务端：构造空中麻痹位置包，断言 `JumpInertiaDistance` 按起跳水平速度 × 剩余滞空时间发放，`ActionLock` 期间普通预算 0。
 
-- [ ] **步骤 2：运行测试**
+- [x] **步骤 2：运行测试**
 
 PlayMode（Unity MCP 不可用则 batchmode，300s 超时，XML 落盘即杀进程）：
 `PlayerControlInertiaTests`
 服务端：
 `bash tools/test-server-inprocess.sh --filter "FullyQualifiedName~PvpMovementBudgetTests"`
 
-- [ ] **步骤 3：实现/修正**
+- [x] **步骤 3：实现/修正**
 
 若客户端无空中水平惯性（`CharacterController` 已有 `_jumpStartHorizontalVelocity`），补测试夹具；若推挤抖动超限，优先修测试场景设置或记录为既有 `NpcBody` 债，不改服务端预算公式。
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add Assets/Scripts/Tests/PlayMode/PlayerControlInertiaTests.cs \
@@ -357,6 +357,8 @@ git commit -m "test(playmode): accept paralysis inertia and push correction"
 
 ### 任务 6：元素表现回退、文档与全量回归
 
+> 完成说明（2026-11-20）：本任务只新增 `ElementVfxFallback` 表现回退、测试与文档收口，**无新增战斗机制**、无协议字段、预算常量未上调。
+
 **文件：**
 - 创建：`Assets/Scripts/Hotfix/GameSystems/VFX/ElementVfxFallback.cs`
 - 测试：`Assets/Scripts/Tests/Editor/VFX/ElementVfxFallbackTests.cs`
@@ -365,14 +367,14 @@ git commit -m "test(playmode): accept paralysis inertia and push correction"
 - 修改：`Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md`（离线边界指向 Plan 06）
 - 修改：`Server/README.md`（验收数字）
 
-- [ ] **步骤 1：写失败测试**
+- [x] **步骤 1：写失败测试**
 
 `ElementVfxFallback`：
 - `ViewKey` 为空 → 回退到 `ElementPalette.ColorOf(elementId)`；四种元素颜色非白且互异；未知元素回退白。
 - 注入一个假 `Func<string, GameObject?>` loader：key 有资源返回资源；缺失返回 null → 回退颜色且不抛。
 - 不实际调用 Addressables（避免 `AsyncOperationHandle.Task` 违规）；生产用 Addressables 的宿主在 Plan 06 接入。
 
-- [ ] **步骤 2：实现**
+- [x] **步骤 2：实现**
 
 ```csharp
 public static class ElementVfxFallback
@@ -387,18 +389,18 @@ public static class ElementVfxFallback
 ```
 （Host 侧若加载资源则使用资源；否则用回退颜色；本任务只锁定判定顺序。）
 
-- [ ] **步骤 3：运行测试**
+- [x] **步骤 3：运行测试**
 
 `ElementVfxFallbackTests`、`SwordQiElementTintTests`、`StatusVFXSystemTests`；batchmode 超时/杀进程规则同上。
 
-- [ ] **步骤 4：文档与范围修正**
+- [x] **步骤 4：文档与范围修正**
 
 - 路线图 Plan 05 ✅（写明服务端 654+、PlayMode 三客户端、带宽、注入、AOI 基准）。
 - 设计规格 Plan 05 ✅。
 - **修正 Plan 04 文档中“离线共享运行时属 Plan 05”**：改为“Plan 06/backlog；Plan 05 不新增机制”。在路线图新增 Plan 06 登记项：离线单机四元素共享运行时、Addressables 美术资源签收、Plan 04 final review 的 M2/M4/M6–M11/M16–M19、`_pushVector` 对远程 NpcBody 不生效。
 - Server README 写验收数字与已知失败（Bot_Radius PPtr、MonsterWorld 导航模式导航债）。
 
-- [ ] **步骤 5：全量回归**
+- [x] **步骤 5：全量回归**
 
 ```bash
 bash tools/test-server-inprocess.sh
@@ -412,7 +414,7 @@ bash tools/unity-tests.sh PlayMode ThreeClientCombatConsistencyTests
 ```
 服务端/Unity 目标类全绿；已知 PPtr/导航债登记。三客户端测试需先起服务端（`dotnet Server/bin/Debug/net8.0/Server3C.dll 8000`）。
 
-- [ ] **步骤 6：Commit**
+- [x] **步骤 6：Commit**
 
 ```bash
 git add Assets/Scripts/Hotfix/GameSystems/VFX/ElementVfxFallback.cs \

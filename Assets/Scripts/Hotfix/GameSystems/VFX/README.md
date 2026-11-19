@@ -35,13 +35,17 @@
 - **剑气元素色**：`SwordQiElementTint`（`Skills/Runtime/SwordQi/SwordQiProjectile.cs`）
   在生成时按 `ElementId` 给拖尾/粒子 `startColor` 与材质 `_Color` 上色
   （冰蓝白、火橙红、雷紫白、风青白；`0` = 保留预制体原色）。联机剑气读
-  `ProjectileLaunchBroadcast.ElementId`；离线 `SkillExecutor` 的元素 provider 留 Plan 05。
-- 当前是程序化染色/简化特效，不依赖新增美术资源；`ViewKey` 的资源化留给 Plan 05。
+  `ProjectileLaunchBroadcast.ElementId`；离线 `SkillExecutor` 的元素 provider 留 Plan 06/backlog。
+- 当前是程序化染色/简化特效，不依赖新增美术资源；`ViewKey` 的资源化留给 Plan 06/backlog。
+- **`ElementVfxFallback`（Plan 05，2026-11-20）**：`ResolveColor(elementId, viewKey, loader)`
+  只锁定判定顺序——`ViewKey` 非空且注入的 loader 返回资源时用 `Color.white`
+  （资源自带颜色，Host 负责实例化）；否则回退 `ElementPalette.ColorOf(elementId)`。
+  不直接调用 Addressables；生产 loader/Host 接入与四元素资源签收属 Plan 06/backlog。
 
 ## 测试
 
 - Editor：`Assets/Scripts/Tests/Editor/VFX/`（`BodyTintRendererTests`、`HitTintStateTests`、`PlayerBodyTintTargetTests`、
-  `AuthoritativeStatusVfxTests`）、`StatusVFXSystemTests`；剑气染色在
+  `AuthoritativeStatusVfxTests`、`ElementVfxFallbackTests`）、`StatusVFXSystemTests`；剑气染色在
   `Assets/Scripts/Tests/Editor/Skills/SwordQiElementTintTests.cs`。
 - PlayMode：`BlockFeedbackSparkTests`、`PlayerHealVFXTests`、`PlayerBodyTintTests`。
 

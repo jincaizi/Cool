@@ -141,10 +141,11 @@ bash tools/test-server.sh
   同次施法的后续命中才生效；PvE 用状态表 ×2.0，PvP 用共享
   `Pvp.WindVulnerabilityMultiplier = 1.28`（PvP 不放大灼烧）。
 
-状态：Plan 01–04 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
-PvP 基线、Plan 04 状态结算/DoT/元素表现），服务端全量 654/654；Plan 05 未开始。
+状态：Plan 01–05 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
+PvP 基线、Plan 04 状态结算/DoT/元素表现、Plan 05 AOI 反查索引/三客户端/带宽/注入验收），
+服务端全量 **667/667**。Plan 05 未新增战斗机制或协议字段（`ProtocolVersion` 保持 1）。
 未启用：**离线单机共享状态运行时**（本地 `StatusEffectManager` 的冰冻/灼烧保持独立，
-四元素运行时留给 Plan 05）、元素 VFX 资源化与远端武器模型（Plan 05）。
+四元素运行时留给 Plan 06/backlog）、Addressables 元素资源与远端武器模型（Plan 06/backlog）。
 
 Plan 03 验收证据（可证伪）：
 
@@ -166,9 +167,27 @@ Plan 04 验收证据（服务端，全部在 654/654 内）：
 - DoT：`DotDamageTests`（9 项）与 `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、
   `DamageKind=Dot`、末跳只结算一次、到期/死亡清理。
 - 怪物控制：`MonsterStatusControlTests`（7 项）锁定减速对真实位移的缩放（无邻居期望位移
-  逐字验证；ORCA `maxStep` 同缩由代码同源与 Plan 05 压测验收覆盖）、麻痹打断与
-  霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
+  逐字验证；ORCA `maxStep` 同缩由代码同源保证，邻居构造用例留 Plan 06/backlog）、
+  麻痹打断与霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
   `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
+
+Plan 05 验收证据（服务端，全部在 667/667 内；2026-11-20）：
+
+- AOI 反查：`AoiReverseIndexTests`（9 项）锁定索引与暴力反查逐项相等、80/90m 迟滞、
+  清理/重登不残留、格边界与权威传送陈旧边、N=1000 单次反查 ≤1ms（Debug 本机中位数）。
+- 带宽：`BandwidthBudgetTests` 100 实体 ×15Hz×60s 常规回放平均 **53.4 KB/s**
+  （3,204,397 B/60s，单 tick 峰值 3,980 B，投影基线 227 B）；100 实体同时 DoT 最坏变体
+  **76.9 KB/s**（4,615,939 B/60s，单 tick 峰值 27,542 B）。预算
+  `BandwidthBudgetBytesPerSec = 100_000` 未上调，并有状态/DoT 流下限防静默删除。
+- 移动预算：`PvpMovementBudgetTests`（9 项）新增空中麻痹仅发放跳跃惯性
+  （6 m/s × 1.0s = 6.0m）与无跳跃 `ActionLock` 普通预算为 0。
+- 三客户端（Unity PlayMode，真实 `Server3C:8000`）：`ThreeClientElementalAcceptanceTests`
+  1/1、`ThreeClientCombatConsistencyTests` 1/1；客户端收包注入目标类合计 72/72。
+- 已知失败（非 Plan 05 回归）：Unity `RemoteEntityRegistryTests` 16/17，唯一失败为
+  既有的 `Bot_Radius` PPtr 环境失败；`MonsterWorldTests` 导航模式 Slime 巡逻卡死为
+  服务端导航债；`PlayerJumpBodyCollisionTests` 在 batchmode 0/3（夹具自身 PPtr 伪报 +
+  固定 180 帧落地等待不足）。backlog：`_pushVector` 对远程 `NpcBody` 不生效（`IDamageable`
+  门槛，见路线图 Plan 06 登记）。
 
 `CastCancelBroadcast`（310）、`CombatStateUpdate`（311）与 `NpcActionEvent`（2004，含 `LifeId`）
 已启用；取消/动作事件/投影统一按 `IsSameCombatScene`（相对 `ZoneId`，空值广播）过滤。

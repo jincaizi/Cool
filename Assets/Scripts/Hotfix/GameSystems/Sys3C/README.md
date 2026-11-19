@@ -81,7 +81,7 @@ Hit 层只有 `Hit` / `DefendHit` / `Dizzy` 三态可达。`Knockback` / `Launch
 - **`CurrentElementId`**：`Sys3CEntry` 暴露当前已确认武器的元素 ID（0 = 无元素），
   供外层表现/离线剑气读取；Plan 04 的联机剑气染色直接读
   `ProjectileLaunchBroadcast.ElementId`，**离线 `SkillExecutor` 尚未接这个 provider**
-  （留给 Plan 05）。
+  （留给 Plan 06/backlog）。
 
 ## 复活传送
 
@@ -188,7 +188,7 @@ bash tools/unity-tests.sh PlayMode MovementSyncTests
 ## 换剑外观
 
 状态：本地持剑模型切换已完成（2026-11-16 跟进）；Plan 04 已接通权威状态染色与联机剑气
-元素色（见 [VFX](../VFX/README.md)）；离线元素表现与共享状态运行时留给 Plan 05。
+元素色（见 [VFX](../VFX/README.md)）；离线元素表现与共享状态运行时留给 Plan 06/backlog。
 
 男女角色预制体分别绑定 `Assets/Prefabs/Character/WeaponViews/` 下的八个项目自有校准变体
 （Male/Female × Ice/Fire/Thunder/Wind）。变体根保持挂点局部恒等，视觉子对象是供应商 MoonSword

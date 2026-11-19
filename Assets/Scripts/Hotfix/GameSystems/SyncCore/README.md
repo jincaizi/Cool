@@ -16,10 +16,10 @@
 
 ## 属性剑气共享目录（2026-11-14）
 
-状态：Plan 01–04 已完成（Plan 03 增加 `Displacements`/`Jump` 共享表与 `MovementBudgetMath`；
-Plan 04 增加 `StatusRuntime`、状态时序与 PvP 规则）；Plan 05 未开始。
+状态：Plan 01–05 已完成（Plan 03 增加 `Displacements`/`Jump` 共享表与 `MovementBudgetMath`；
+Plan 04 增加 `StatusRuntime`、状态时序与 PvP 规则；Plan 05 完成 AOI/三客户端/带宽/注入验收）。
 离线单机**尚未接入**共享状态运行时（本地 `StatusEffectManager` 的冰冻/灼烧保持独立），
-四元素共享运行时留给 Plan 05；详见下文“离线边界”。
+四元素共享运行时留给 Plan 06/backlog；详见下文“离线边界”。
 
 `Elemental/` 是 Plan 01 的双端共享真值：
 
@@ -77,7 +77,7 @@ Unity `MovementBudgetMathTests`（5 项）锁定双端同源编译下的同一�
 
 `Elemental/StatusRuntime.cs` 是双端共享的纯 C# 状态机（零 `UnityEngine`），
 服务端每个已配置状态运行时的权威实体（登录玩家/怪物）一份；Plan 04 只有服务端接线，
-离线单机尚未接入。
+离线单机尚未接入（Plan 06/backlog）。
 
 | 类型 | 内容 |
 |---|---|
@@ -114,12 +114,13 @@ PvE ×2、PvP ×1.28。`ElementalCatalogDefaults.FindStatus/FindElement` 供两�
 验证：服务端与 Unity 各有一份 `StatusRuntimeTests`，锁定应用/刷新/末跳/控制派生与
 PvP 免疫/不刷新窗口。
 
-## 离线边界（Plan 05）
+## 离线边界（Plan 06/backlog）
 
 Plan 04 只把 `StatusRuntime` 接到**服务端权威实体**（`ServerStatusManager` +
 `StatusTickService`）。离线单机仍使用 `Skills/Effect/StatusEffectManager` 的本地
-冰冻/灼烧（仅怪物、本地计时、独立效果组）：四元素共享运行时、离线去重与元素 VFX
-留给 Plan 05，不能把 Plan 04 的状态/DoT 文档理解为单机已打通。
+冰冻/灼烧（仅怪物、本地计时、独立效果组）：四元素共享运行时、离线去重与 Addressables
+元素资源留给 Plan 06/backlog（原 Plan 04 文档误写为 Plan 05，2026-11-20 修正），
+不能把 Plan 04/05 的状态/DoT 文档理解为单机已打通。
 
 ## 约束
 

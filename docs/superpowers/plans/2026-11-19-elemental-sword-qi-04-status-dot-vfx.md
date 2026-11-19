@@ -4,7 +4,7 @@
 
 **目标：** 在 Plan 03 的权威位移/控制基础上，落地服务端权威的冰/火/雷/风状态运行时（含同次施法只附加一次、同 tick 顺序、灼烧末跳、`DamageKind` 分流），并让客户端按 `CombatStateUpdate.Statuses` 显示状态表现、按元素给剑气和状态染色。
 
-**架构：** `SyncCore` 新增纯 C# `StatusRuntime`（定义校验、同组刷新、DoT 时序、控制派生、PvP 易伤/免疫规则）；服务端 `PlayerState` 持有运行时，`CombatResolver` 在首个有效命中时附加元素，`StatusTickService` 在 **GameLoop 预 tick**（网络包之前）推进到期/灼烧；投影把 `Statuses` 填入 `CombatProjection`，客户端 `CombatNetworkBridge` 按 `DamageKind=Dot` 走纯血量/飘字通道，`RemoteEntityRegistry`/`Sys3CEntry` 把权威状态交给 VFX。离线单机共用同一套规则留到 Plan 05（见范围说明）。
+**架构：** `SyncCore` 新增纯 C# `StatusRuntime`（定义校验、同组刷新、DoT 时序、控制派生、PvP 易伤/免疫规则）；服务端 `PlayerState` 持有运行时，`CombatResolver` 在首个有效命中时附加元素，`StatusTickService` 在 **GameLoop 预 tick**（网络包之前）推进到期/灼烧；投影把 `Statuses` 填入 `CombatProjection`，客户端 `CombatNetworkBridge` 按 `DamageKind=Dot` 走纯血量/飘字通道，`RemoteEntityRegistry`/`Sys3CEntry` 把权威状态交给 VFX。离线单机共用同一套规则留到 Plan 06/backlog（2026-11-20 修正，原写 Plan 05；见范围说明）。
 
 **技术栈：** Unity 2022.3.25f1 / C# 9、.NET 8 服务端、protobuf-net 3.2.56、NUnit/xUnit。
 
@@ -19,7 +19,7 @@
 - 客户端权威状态表现（染色/循环特效）与剑气元素染色。
 
 **明确不在 Plan 04：**
-- **离线单机**的共享状态运行时（本地 `StatusEffectManager` 的冰冻/灼烧仍独立）；离线四元素与现有本地状态去重留给 Plan 05，README/路线图必须如实写。
+- **离线单机**的共享状态运行时（本地 `StatusEffectManager` 的冰冻/灼烧仍独立）；离线四元素与现有本地状态去重留给 Plan 06/backlog（2026-11-20 修正，原写 Plan 05），README/路线图必须如实写。
 - Addressables 美术资源接入与最终特效品质；本计划先做可测试的程序化染色/简化表现，资源键留空。
 - 三客户端带宽/延迟验收（Plan 05）。
 
@@ -1078,7 +1078,7 @@ EffectType Map(int effectId) => (effectId / 100) switch
 
 `EffectType` 追加 `Vulnerable`（末尾，不改既有值）。`StatusVFXSystem` 的 `OnApplied/OnRemoved` 接受 `Stun`/`Vulnerable`，颜色：冰蓝、火橙、雷紫、风青；同一实体同组只计数一次；`default` 不计数（显式 `case Vulnerable`）。
 
-`SwordQiSpawner.Spawn` 增加 `int elementId = 0`，`SwordQiProjectile.OnSpawn` 保存并由 `SwordQiElementTint.Apply(elementId)` 设置 `TrailRenderer.startColor`/`ParticleSystem.startColor`/材质 `_Color`；`ElementPalette` 常量四种颜色。`RemoteCastPresenter` 传 `launch.ElementId`；`Sys3CEntry` 暴露 `CurrentElementId` 并在 `ApplySwordView` 更新；离线 `SkillExecutor` 通过注入的 `ElementIdProvider` 传本地元素（Plan 05 接离线状态时启用）。
+`SwordQiSpawner.Spawn` 增加 `int elementId = 0`，`SwordQiProjectile.OnSpawn` 保存并由 `SwordQiElementTint.Apply(elementId)` 设置 `TrailRenderer.startColor`/`ParticleSystem.startColor`/材质 `_Color`；`ElementPalette` 常量四种颜色。`RemoteCastPresenter` 传 `launch.ElementId`；`Sys3CEntry` 暴露 `CurrentElementId` 并在 `ApplySwordView` 更新；离线 `SkillExecutor` 通过注入的 `ElementIdProvider` 传本地元素（Plan 06 接离线状态时启用）。
 
 - [x] **步骤 3：运行测试**
 
@@ -1151,11 +1151,11 @@ MCP 不可用则 batchmode；`RemoteEntityRegistryTests.Bot_Radius` 既有 PPtr 
 
 必须写清：
 - Plan 04 已完成：服务端权威四状态、同次施法一次、DoT 末跳、`DamageKind` 分流、客户端状态/剑气表现。
-- **离线单机未接入共享状态运行时**：本地 `StatusEffectManager` 的冰冻/灼烧保持独立；离线四元素与去重留给 Plan 05。这是本计划的明确边界，不能写成已打通。
+- **离线单机未接入共享状态运行时**：本地 `StatusEffectManager` 的冰冻/灼烧保持独立；离线四元素与去重留给 Plan 06/backlog（2026-11-20 修正，原写 Plan 05）。这是本计划的明确边界，不能写成已打通。
 - `Statuses` 已启用；`ApplyPlayerControl` 现在由状态运行时调用（不再是“无生产调用者”）。
 - `ControlSummary` 的 `SpeedScale/ActionLock` 现在会随冰/雷变化。
 - 测试数字：服务端 xx/xx、Unity 目标类、已知 PPtr 失败。
-- 路线图/设计规格 Plan 04 ✅；Plan 05 未开始，并在 Plan 05 登记“离线共享状态运行时/三客户端验收/GetObserversOf O(N²)”。
+- 路线图/设计规格 Plan 04 ✅；当时登记到 Plan 05 的“三客户端验收/GetObserversOf O(N²)”已在 Plan 05 完成（2026-11-20）；“离线共享状态运行时”改登记到 Plan 06/backlog。
 
 - [x] **步骤 3：Commit**
 
@@ -1180,7 +1180,7 @@ git commit -m "docs: record status runtime and dot scope"
 **1. 规格覆盖度**
 - 冰/火/雷/风四状态：任务 1/3/5/7；同次施法一次：任务 3；同 tick 顺序：任务 2/4；DoT 末跳：任务 1/4；`DamageKind` 分流：任务 6；元素 VFX：任务 7。
 - PvP 控制规则（0.5s 免疫/4s 不刷新/雷 0.8s）：任务 1/3；PvE/PvP 风倍率：任务 1/3/4。
-- 离线边界：明确留给 Plan 05，文档在任务 8 如实登记。
+- 离线边界：明确留给 Plan 06/backlog（2026-11-20 修正，原写 Plan 05），文档在任务 8 如实登记。
 - 协议：`Statuses`/`DamageKind`/`EventSeq` 已有字段，本计划只填充；不新增消息。
 
 **2. 占位符扫描**
