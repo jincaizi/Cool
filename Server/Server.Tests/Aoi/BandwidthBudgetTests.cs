@@ -3,11 +3,16 @@ using Cool.Protocol;
 using KcpServer;
 using KcpServer.Config;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace KcpServer.Tests;
 
 public class BandwidthBudgetTests
 {
+    private readonly ITestOutputHelper _output;
+
+    public BandwidthBudgetTests(ITestOutputHelper output) => _output = output;
+
     /// <summary>单实体全字段快照平均编码字节（含 WorldSnapshot 头）——门禁公式基线</summary>
     [Fact]
     public void Entity_FullField_Snapshot_Bytes_Measured()
@@ -127,5 +132,223 @@ public class BandwidthBudgetTests
         // 2026-11-17 实测：基础投影 81B，补 ActiveCast 后 92B（含 5B 帧头）；
         // 下限挡住投影被静默丢弃，上限挡住字段膨胀。
         Assert.InRange(bytes.Length, 80, 300);
+    }
+
+    [Fact]
+    public void Hundred_Entities_Status_And_Dot_60s_Stay_Under_100_KBps_Per_Observer()
+    {
+        // Plan 05 验收口径：100 实体全近带 15Hz 跑满 60s，叠加状态/DoT 可靠流。
+        // 回放内容（每 tick）：100 实体的全字段 EntitySnapshot（位置/旋转/速度/Dead/Defending）；
+        // 每 15 tick 抽一个实体带 Health + CombatVersion/LifeId（血量翻转），同 tick 再发一条
+        // CombatStateUpdate（4 状态）与一条 DamageResult（DoT HitEntry）；每 30 tick 抽一个实体带
+        // 完整 Combat 投影（4 StatusProjection + ActiveCast）。全部用 MessageCodec 实际编码累加。
+        // 预算不上调：超 100KB/s 就是超了，须降测试中的近带实体数/保活频率并记录原因。
+        const int Ticks = 900;       // 15Hz × 60s
+        const int EntityCount = 100;
+
+        long totalBytes = 0;
+        long statusUpdateTotal = 0;
+        long damageResultTotal = 0;
+        int perTickMax = 0;
+        int perTickMaxWorldSnapshot = 0;
+        var entities = new List<EntitySnapshot>(EntityCount);
+
+        for (int tick = 0; tick < Ticks; tick++)
+        {
+            int healthIndex = (tick / 15) % EntityCount;   // 每 15 tick 一个实体血量翻转
+            int combatIndex = (tick / 30) % EntityCount;   // 每 30 tick 一个实体带完整战斗投影
+            entities.Clear();
+
+            for (int i = 0; i < EntityCount; i++)
+            {
+                var entity = new EntitySnapshot
+                {
+                    PlayerId = i + 1,
+                    Tick = (uint)(tick + 1),
+                    X = i * 1.5f,
+                    Y = 0.5f,
+                    Z = -i * 1.25f,
+                    Rotation = (i * 17f) % 360f,
+                    Speed = 4.5f,
+                    Dead = i % 10 == 0,
+                    IsDefending = i % 7 == 0,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
+                        | EntityFieldMask.Speed | EntityFieldMask.Dead
+                        | EntityFieldMask.Defending)
+                };
+
+                if (tick % 15 == 0 && i == healthIndex)
+                {
+                    entity.Hp = 720f - (tick % 150) * 3f;
+                    entity.MaxHp = 720f;
+                    entity.CombatVersion = (uint)(tick / 15 + 1);
+                    entity.LifeId = 1;
+                    entity.FieldMask |= (ushort)EntityFieldMask.Health;
+                }
+
+                if (tick % 30 == 0 && i == combatIndex)
+                {
+                    entity.CombatVersion = (uint)(tick / 30 + 1);
+                    entity.LifeId = 1;
+                    entity.Combat = BuildFullCombatProjection(entity.PlayerId, tick);
+                    entity.FieldMask |= (ushort)EntityFieldMask.Combat;
+                }
+
+                entities.Add(entity);
+            }
+
+            var snapshot = new WorldSnapshot
+            {
+                Tick = (uint)(tick + 1),
+                ServerTimestamp = 1_700_000_000_000_0000L + tick * 66_667L,
+                Entities = entities
+            };
+            int tickBytes = MessageCodec.EncodeToArray(
+                MessageId.WorldSnapshot, snapshot, MessageFlags.Reliable).Length;
+            int worldSnapshotBytes = tickBytes;
+
+            if (tick % 15 == 0)
+            {
+                var statusUpdate = BuildCombatStateUpdate(entities[healthIndex].PlayerId, tick);
+                int statusBytes = MessageCodec.EncodeToArray(
+                    MessageId.CombatStateUpdate, statusUpdate, MessageFlags.Reliable).Length;
+                statusUpdateTotal += statusBytes;
+                tickBytes += statusBytes;
+
+                var dot = BuildDotDamageResult(entities[healthIndex].PlayerId, tick);
+                int dotBytes = MessageCodec.EncodeToArray(
+                    MessageId.DamageResult, dot, MessageFlags.Reliable).Length;
+                damageResultTotal += dotBytes;
+                tickBytes += dotBytes;
+            }
+
+            totalBytes += tickBytes;
+            if (tickBytes > perTickMax) perTickMax = tickBytes;
+            if (worldSnapshotBytes > perTickMaxWorldSnapshot)
+                perTickMaxWorldSnapshot = worldSnapshotBytes;
+        }
+
+        // 投影基线单实体（4 状态 + ActiveCast）沿用现有 [80, 300] 上下限：
+        // 下限挡住投影被静默丢弃，上限挡住字段膨胀。
+        var baseline = new WorldSnapshot
+        {
+            Tick = 1, ServerTimestamp = 1L,
+            Entities = new List<EntitySnapshot>
+            {
+                new EntitySnapshot
+                {
+                    PlayerId = 1,
+                    Tick = 1,
+                    X = 1f, Y = 0.5f, Z = 2f, Rotation = 90f, Speed = 4.5f,
+                    Dead = true, IsDefending = true,
+                    Hp = 680f, MaxHp = 720f,
+                    CombatVersion = 1, LifeId = 1,
+                    FieldMask = (ushort)(EntityFieldMask.Position | EntityFieldMask.Rotation
+                        | EntityFieldMask.Speed | EntityFieldMask.Dead
+                        | EntityFieldMask.Health | EntityFieldMask.Defending
+                        | EntityFieldMask.Combat),
+                    Combat = BuildFullCombatProjection(1, 0)
+                }
+            }
+        };
+        int baselineBytes = MessageCodec.EncodeToArray(
+            MessageId.WorldSnapshot, baseline, MessageFlags.Reliable).Length;
+        Assert.InRange(baselineBytes, 80, 300);
+
+        long budgetTotal = (long)(GlobalGameSettings.BandwidthBudgetBytesPerSec * 60f);
+        double avgBytesPerSec = totalBytes / 60.0;
+        double kbps = avgBytesPerSec / 1000.0;
+        _output.WriteLine("perTickMax=" + perTickMax + "B, totalBytes=" + totalBytes
+            + "B/60s, avg=" + avgBytesPerSec.ToString("F0") + "B/s, kbps="
+            + kbps.ToString("F1") + ", budget=" + GlobalGameSettings.BandwidthBudgetBytesPerSec
+            + "B/s, perTickMaxWorldSnapshot=" + perTickMaxWorldSnapshot
+            + "B, statusUpdateTotal=" + statusUpdateTotal
+            + "B, damageResultTotal=" + damageResultTotal + "B, baseline=" + baselineBytes + "B");
+
+        Assert.True(totalBytes <= budgetTotal,
+            "60s total " + totalBytes + "B exceeds budget " + budgetTotal + "B (perTickMax="
+            + perTickMax + "B)");
+        Assert.True(perTickMax <= 150 * 1024,
+            "single tick " + perTickMax + "B exceeds 150KB cap");
+    }
+
+    /// <summary>完整战斗投影：4 个状态 + 装备/控制/活动施法（状态/DoT 回放与投影基线共用）</summary>
+    private static CombatProjection BuildFullCombatProjection(long entityId, int tick)
+    {
+        var statuses = new List<StatusProjection>(4);
+        for (int s = 0; s < 4; s++)
+        {
+            statuses.Add(new StatusProjection
+            {
+                EffectId = 1001 + s,
+                GroupId = 1,
+                EndTick = (uint)(tick + 90 + s * 15),
+                SourceId = entityId,
+                SlowRatio = 0.7f,
+                DamagePerTick = 12.5f,
+                IntervalTicks = 15,
+                IncomingDamageMultiplier = 1.15f
+            });
+        }
+
+        return new CombatProjection
+        {
+            CombatVersion = (uint)(tick / 15 + 1),
+            LifeId = 1,
+            Hp = 680f,
+            MaxHp = 720f,
+            Dead = false,
+            IsDefending = true,
+            Statuses = statuses,
+            Equipment = new EquipmentSummary
+            {
+                WeaponInstanceId = 42, TemplateId = 90002, ElementId = 1
+            },
+            Control = new ControlSummary { SpeedScale = 0.7f, ControlVersion = 3 },
+            ActiveCast = new ActiveCastProjection
+            {
+                CastId = 9, SkillId = 10002,
+                Phase = NpcActionPhase.Windup, EndTick = (uint)(tick + 30)
+            }
+        };
+    }
+
+    /// <summary>消息 311：可靠完整投影（4 状态）</summary>
+    private static CombatStateUpdate BuildCombatStateUpdate(long entityId, int tick)
+    {
+        return new CombatStateUpdate
+        {
+            EntityId = entityId,
+            ServerTimestamp = 1_700_000_000_000_0000L + tick * 66_667L,
+            Projection = BuildFullCombatProjection(entityId, tick)
+        };
+    }
+
+    /// <summary>单条 DoT 跳伤（DamageKind.Dot）</summary>
+    private static DamageResult BuildDotDamageResult(long targetId, int tick)
+    {
+        return new DamageResult
+        {
+            SourcePlayerId = 1,
+            SkillId = 10002,
+            ServerTimestamp = 1_700_000_000_000_0000L + tick * 66_667L,
+            Hits = new List<HitEntry>
+            {
+                new HitEntry
+                {
+                    TargetPlayerId = targetId,
+                    Damage = 12.5f,
+                    TargetRemainingHp = 667.5f,
+                    HitX = 10f,
+                    HitZ = -20f,
+                    CastId = 9,
+                    EventSeq = (uint)(tick / 15 + 1),
+                    EventId = (ulong)(tick + 1),
+                    DamageKind = DamageKind.Dot,
+                    TargetLifeId = 1,
+                    CombatVersion = (uint)(tick / 15 + 1)
+                }
+            }
+        };
     }
 }
