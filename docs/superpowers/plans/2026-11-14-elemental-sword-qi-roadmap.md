@@ -181,7 +181,10 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
     （三端 3/3；B 未发射且无命中、A 雷仍 2 条命中、旁观者 presenter 停止）。
   - **状态结束时钟偏移注入**：给两台客户端注入不同时钟偏移和渲染延迟，断言特效移除由同一条
     `CombatStateUpdate` 触发；权威移除晚于 `EndTick` 时保持到消息到达（`design.md:169`）。
-    **未执行**：Plan 06 范围明确排除该项，仍为 Plan 07/backlog。
+    **Plan 07 任务 1 口径修正**：生产没有本地 `EndTick` 移除路径（`AuthoritativeStatusVfx`
+    只按 318 diff，`StatusVFXSystem.Update` 不读时间），时钟偏移注入没有被测对象。改为验收
+    “施加/移除只由 318 驱动、迟到 318 保持到到达、推进时间不自行移除”，并把消费端
+    `StatusVFXSystem` 纳入回路；时钟偏移本身不适用，不再伪造。
   - **AOI 快速出入/复活版本连续**：AOI 快速出入、死亡复活、Evade 到家与断线重进时，
     进入基线与后续 `CombatStateUpdate` 的 `CombatVersion`/`LifeId` 连续，旧版本增量不能复活
     旧状态或旧装备（`design.md:170`）。回池重生按生产语义是**新实体 id**（新实体 `LifeId=1`、

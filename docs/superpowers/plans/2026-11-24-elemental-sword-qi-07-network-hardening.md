@@ -35,49 +35,59 @@
 
 ---
 
-### 任务 1：状态结束时钟偏移注入
+### 任务 1：状态结束消息驱动契约（无本地时钟移除）
+
+**范围裁定（2026-11-24）：** 生产实现没有本地 `EndTick` 移除路径：`AuthoritativeStatusVfx`
+只按 318 列表 diff 发事件，`StatusVFXSystem.Update` 只处理目标销毁与染色，不读时间。
+因此“注入不同客户端时钟偏移”没有可影响的被测对象；真实风险是**未来加入本地计时移除**导致
+特效早于权威消息消失。本任务验收改为：证明施加/移除只由 318 驱动，迟到 318 保持到到达，
+并把消费端 `StatusVFXSystem` 纳入回路，推进时间也不得自行移除。时钟偏移本身不适用，不再伪造。
 
 **文件：**
-- 新建：`Assets/Scripts/Tests/PlayMode/StatusEndClockOffsetTests.cs`
+- 新建：`Assets/Scripts/Tests/PlayMode/StatusRemovalOnlyOnAuthoritativeProjectionTests.cs`
 - 可能修改：`Assets/Scripts/Hotfix/GameSystems/VFX/AuthoritativeStatusVfx.cs`、
+  `Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs`、
   `Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`
 
 - [ ] **步骤 1：写失败用例**
 
-构造两个客户端视图（可复用 `RemoteEntityRegistry` + `AuthoritativeStatusVfx` + `ClientNetworkHost` 的订阅路径），给它们注入不同的服务器时钟偏移/渲染延迟（例如 +0ms 与 +400ms）。投递同一条 `CombatStateUpdate(318)`：
+构造两个客户端视图（复用 `RemoteEntityRegistry` + `AuthoritativeStatusVfx` + `StatusVFXSystem`
+的生产订阅路径），投递 `CombatStateUpdate(318)`：
 
-1. 状态施加：两端都只在收到 318 后创建特效，本地 `EndTick` 早到不创建。
-2. 状态移除：权威 318 的 `EndTick` 已过但消息晚到 400ms；两端特效都必须保持到该 318 到达，移除事件只在到达时各触发一次。
-3. 把 318 的 `ServerTimestamp` 与本地时钟偏移打乱，断言移除时刻差 ≤1 个渲染帧，而不是各自按 `EndTick` 差 400ms。
+1. 施加：只在收到 318 后创建特效/染色；没有 318 时推进时间不创建。
+2. 移除：移除 318 晚到（例如 400ms）；`StatusVFXSystem` 在推进时间/Update 后仍保持染色/特效，
+   直到 318 到达才各移除一次。
+3. 两端移除时刻差只由消息到达差决定（≤排程差），不存在“本地 EndTick 各自消失”的分叉。
 4. 重复同版本 318 不重复施加/移除。
+5. 会话结束/AOI 退出等非 318 来源只允许走 `Remove(entityId)` 的全量清除，不得伪造单组移除。
 
-失败判据：当前没有时钟偏移注入用例；若实现按本地 `EndTick` 移除，第 2/3 条会红。
+失败判据：若 `StatusVFXSystem` 或 `AuthoritativeStatusVfx` 按本地时间/EndTick 移除，第 1/2 条会红。
+删除所有“注入时钟公式”与恒真反证断言——它们不属于被测路径。
 
 - [ ] **步骤 2：运行确认失败**
 
 ```bash
-# Unity MCP 指向主仓库，使用 batchmode
 UNITY_MCP_DISABLE=1 timeout 300 "/e/Unity/Editor/2022.3.25f1/Editor/Unity.exe" \
   -batchmode -nographics -projectPath "<worktree>" \
-  -runTests -testPlatform PlayMode -testFilter StatusEndClockOffsetTests \
+  -runTests -testPlatform PlayMode -testFilter StatusRemovalOnlyOnAuthoritativeProjectionTests \
   -testResults "<worktree>/TestResults/plan07/task1.xml" \
   -logFile "<worktree>/TestResults/plan07/task1.log"
 ```
 
 - [ ] **步骤 3：最小实现/修复**
 
-若 `AuthoritativeStatusVfx` 只按本地 `EndTick` 移除，改为以 318 状态列表 diff 为唯一移除源；本地 `EndTick` 只用于倒计时显示。不得新增协议字段。
+若 `StatusVFXSystem` 有时间移除，删掉该路径；移除唯一来源是 318 diff（自然结束）或
+`Remove(entityId)`（AOI/销毁全清）。不得新增协议字段或测试专用生产 API。
 
 - [ ] **步骤 4：运行通过**
 
-同一命令，预期 1/1 或按实际用例数全绿；同时跑 `StatusVFXSystemTests` 与 `AuthoritativeStatusVfxTests` 回归。
+同一命令全绿；同时跑 `StatusVFXSystemTests` 与 `AuthoritativeStatusVfxTests` 回归。
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add Assets/Scripts/Tests/PlayMode/StatusEndClockOffsetTests.cs \
-        Assets/Scripts/Hotfix/GameSystems/VFX/AuthoritativeStatusVfx.cs
-git commit -m "test(vfx): remove statuses only on authoritative update"
+git add Assets/Scripts/Tests/PlayMode/StatusRemovalOnlyOnAuthoritativeProjectionTests.cs
+git commit -m "test(vfx): keep statuses until authoritative projection"
 ```
 
 ---
