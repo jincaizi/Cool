@@ -93,19 +93,24 @@ git commit -m "test(vfx): keep statuses until authoritative projection"
 
 ---
 
-### 任务 2：KCP/WebSocket 传输层延迟注入
+### 任务 2：传输层延迟注入（装饰器夹具）
+
+**范围裁定（2026-11-24）：** 8000 端口正被用户主仓库的验收服务占用，测试不得停它，也不把
+真实服务器前置塞进本任务。KCP 与 WebSocket 的**正常流程**已由 `ElementalTwoClientTests`
+2/2 覆盖；本任务补的是传输消费层的延迟/重复/乱序，使用测试本地 `INetworkClient` 装饰器
+确定性地排程，不依赖真实 socket。
 
 **文件：**
-- 新建：`Assets/Scripts/Tests/PlayMode/TransportDelayInjectionTests.cs`
-- 可能修改：`Assets/Scripts/Tests/PlayMode/ElementalTwoClientTests.cs`（复用登录/装备/施法夹具）
+- 新建：`Assets/Scripts/Tests/Editor/SyncLayer/TransportDelayInjectionTests.cs`
+- 可能修改：`Assets/Scripts/Tests/PlayMode/ElementalTwoClientTests.cs`（仅注释指向本夹具）
 
-- [ ] **步骤 1：写延迟适配器**
+- [ ] **步骤 1：写延迟装饰器**
 
-实现测试本地 `DelayedNetworkClient : INetworkClient`，包装真实 `KcpNetClientAdapter` 与 `WebSocketClientAdapter`，把发送/接收消息放入可按 tick/时间释放的队列；支持延迟、重复、乱序三种注入。不得改生产传输层。
+实现测试本地 `DelayedNetworkClient : INetworkClient`，包装任意 `INetworkClient`（测试用
+fake client；不包装真实 socket），把发送/收到的消息放入可按测试时间释放的队列；支持延迟、
+重复、乱序三种注入。不得改生产传输层。
 
-- [ ] **步骤 2：写两组传输用例**
-
-对 KCP 与 WebSocket 各跑一遍：
+- [ ] **步骤 2：写五个用例**
 
 1. 换装确认延迟于施法确认：施法 `EquipmentRevision` 与装备版本门不回退。
 2. 发射晚于格挡结果：晚到 `ProjectileLaunchBroadcast` 不重建已停止视觉。
@@ -113,17 +118,24 @@ git commit -m "test(vfx): keep statuses until authoritative projection"
 4. 较新血量早于状态消息：旧 `CombatStateUpdate` 不回退新血量/状态。
 5. 延迟但同版本消息只消费一次。
 
-断言每个场景的桥层/视图事件次数与权威值，不用 sleep 排序。
+断言每个场景的桥层/视图事件次数与权威值，不用 sleep 排序；KCP/WS 正常流程引用
+`ElementalTwoClientTests` 既有证据，不重复造真实 socket。
 
 - [ ] **步骤 3：运行**
 
-真实 Server3C 需由测试自身在 8000 之外端口启动（不要杀用户主仓库服务）；若测试夹具只能 8000，先与用户确认再停主服务。预期 KCP/WS 两组全绿。
+```bash
+UNITY_MCP_DISABLE=1 timeout 300 "/e/Unity/Editor/2022.3.25f1/Editor/Unity.exe" \
+  -batchmode -nographics -projectPath "<worktree>" \
+  -runTests -testPlatform EditMode -testFilter TransportDelayInjectionTests \
+  -testResults "<worktree>/TestResults/plan07/task2.xml" \
+  -logFile "<worktree>/TestResults/plan07/task2.log"
+```
 
 - [ ] **步骤 4：Commit**
 
 ```bash
-git add Assets/Scripts/Tests/PlayMode/TransportDelayInjectionTests.cs
-git commit -m "test(net): inject kcp and websocket transport delay"
+git add Assets/Scripts/Tests/Editor/SyncLayer/TransportDelayInjectionTests.cs
+git commit -m "test(net): inject transport delay at the consumption layer"
 ```
 
 ---
