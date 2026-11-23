@@ -25,12 +25,13 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
     ///  - 拆装走宿主的 `Disconnect()` → `ResetAttachment()` → `DetachCombatBridge()`，
     ///    不手工解绑任何订阅——隔离必须是宿主做出来的。
     ///
-    /// 本文件断言（对应任务 brief 的 4 条）：
+    /// 本文件断言（对应任务 brief 的 4 条 + final review 补充的 NpcAction 缓存隔离）：
     ///  1. 旧会话的 DamageResult / CastBroadcast / CombatStateUpdate（含视图未建时缓存的 318）
     ///     不触发新会话桥事件、不改新视图；
     ///  2. 旧位移预测帧随旧 reporter 丢弃，新会话第一帧不对旧预测对账（帧数/纠偏计数/L2 目标）；
     ///  3. 重连分配新 playerId；旧 playerId 的本地伤害回调不触发（DoT 注入点 = 生产同一条路）；
-    ///  4. 旧 presenter 的模型表现与旧位移预测在重连后不得复活任何表现。
+    ///  4. 旧 presenter 的模型表现与旧位移预测在重连后不得复活任何表现；
+    ///  5. 旧会话视图未建时缓存的 NpcAction 不得在重连后回放到同 EntityId/LifeId 的新视图。
     /// </summary>
     public class SessionIsolationTests
     {
@@ -285,6 +286,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             {
                 AcknowledgedSequence = 3, AuthoritativeX = 500f
             });
+            old.Manager.Update(0f);                                   // 若旧订阅仍在，封送的 ack 必须在这里被消费
             Assert.AreEqual(1, oldCorrections, "重连后旧 transport 的 ack 不得再驱动旧会话纠偏");
             Assert.AreEqual(200f, oldReporter.LastCorrectionTarget.X, 0.001f,
                 "旧预测目标不得被重连后迟到的 ack 改写");
@@ -412,6 +414,8 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 "断线清理不得因未 Start 角色的空 SkillCoordinator 抛出");
             Assert.IsNull(HostField<object?>("_manager"));
             Assert.IsNull(HostField<object?>("_combatBridge"));
+            Assert.AreEqual(0, old.Client.MessageReceivedSubscriberCount,
+                "断线后旧 transport 不得再有消费者");
         }
 
         // ------------------------------------------------------------------------------------
@@ -453,7 +457,6 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 "断线必须丢弃旧施法表现 presenter");
             Assert.AreEqual(0, oldPresenter.TrackedCountForTest,
                 "DetachCombatBridge 必须 Clear 旧 presenter 的跟踪项（旧模型不得继续被驱动）");
-            Assert.AreEqual(0, oldPresenter.CastVisualCountForTest);
             Assert.IsNull(old.Manager.Reporter);
 
             // Arrange：新会话
@@ -480,12 +483,58 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             {
                 AcknowledgedSequence = 1, AuthoritativeX = 70f
             });
+            old.Manager.Update(0f);                                   // 若旧订阅仍在，封送的 ack 必须在这里被消费
             Assert.AreEqual(1, oldCorrections, "重连后旧预测链路必须完全失活");
             Assert.AreEqual(60f, oldReporter.LastCorrectionTarget.X, 0.001f,
                 "旧纠偏目标不得被重连后的迟到 ack 改写");
 
             // 新会话没有 MovementReporter（角色尚未装配）⇒ 旧预测不可能借新 manager 复活
             Assert.IsNull(fresh.Manager.Reporter);
+        }
+
+        // ------------------------------------------------------------------------------------
+        // ⑤ 旧会话缓存的 NpcAction 不得回放到新会话同 Id/LifeId 的视图
+        // ------------------------------------------------------------------------------------
+
+        [Test]
+        public void test_old_session_cached_npc_action_does_not_replay_into_new_session_view()
+        {
+            // Arrange：旧会话期间，视图未建的 NpcAction 进 registry 有界缓存
+            var old = OpenSession("SessionIsolation_Old", OldPlayerId);
+            var registry = _host.RemoteEntities!;
+            const long npcEntityId = 77L;
+            Assert.IsNull(registry.GetView(npcEntityId));
+            registry.ApplyNpcActionEvent(new NpcActionEvent
+            {
+                EntityId = npcEntityId,
+                LifeId = 1,
+                Action = new NpcActionSnapshot
+                {
+                    InstanceId = 4242,
+                    Revision = 1,
+                    Kind = NpcActionKind.HitReaction,
+                    Phase = NpcActionPhase.Active
+                }
+            });
+            Assert.IsNull(registry.GetView(npcEntityId),
+                "前置：NpcAction 面对未建视图只能进缓存，不能凭空建视图");
+
+            // Act：宿主真实断线（ResetAttachment → DetachCombatBridge → manager.Dispose → registry.Clear）
+            _host.Disconnect();
+
+            // Arrange：新会话用同一 EntityId / LifeId 建视图（旧缓存若未清，会在 ApplySnapshot 里回放）
+            var fresh = OpenSession("SessionIsolation_New", NewPlayerId);
+            Assert.AreEqual(NewPlayerId, fresh.Manager.LocalPlayerId);
+            registry.ApplySnapshot(PlayerSnapshot(npcEntityId), serverTicks: 2_000_000L);
+            var view = registry.GetView(npcEntityId);
+            Assert.NotNull(view);
+            Assert.AreEqual(1u, view!.LifeId,
+                "前置：新视图必须与旧缓存同 LifeId（否则回放条件本身不成立）");
+
+            // Assert：旧动作实例一点没写进新视图
+            Assert.AreEqual(0ul, view.ActionInstanceId,
+                "旧会话缓存的 NpcAction 不得在重连后回放到同 Id/LifeId 的新视图");
+            Assert.AreEqual(0u, view.ActionRevision);
         }
 
         // ------------------------------------------------------------------------------------

@@ -50,7 +50,7 @@
   `Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs`、
   `Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`
 
-- [ ] **步骤 1：写失败用例**
+- [x] **步骤 1：写失败用例**
 
 构造两个客户端视图（复用 `RemoteEntityRegistry` + `AuthoritativeStatusVfx` + `StatusVFXSystem`
 的生产订阅路径），投递 `CombatStateUpdate(318)`：
@@ -65,7 +65,7 @@
 失败判据：若 `StatusVFXSystem` 或 `AuthoritativeStatusVfx` 按本地时间/EndTick 移除，第 1/2 条会红。
 删除所有“注入时钟公式”与恒真反证断言——它们不属于被测路径。
 
-- [ ] **步骤 2：运行确认失败**
+- [x] **步骤 2：运行确认失败**
 
 ```bash
 UNITY_MCP_DISABLE=1 timeout 300 "/e/Unity/Editor/2022.3.25f1/Editor/Unity.exe" \
@@ -75,16 +75,16 @@ UNITY_MCP_DISABLE=1 timeout 300 "/e/Unity/Editor/2022.3.25f1/Editor/Unity.exe" \
   -logFile "<worktree>/TestResults/plan07/task1.log"
 ```
 
-- [ ] **步骤 3：最小实现/修复**
+- [x] **步骤 3：最小实现/修复**
 
 若 `StatusVFXSystem` 有时间移除，删掉该路径；移除唯一来源是 318 diff（自然结束）或
 `Remove(entityId)`（AOI/销毁全清）。不得新增协议字段或测试专用生产 API。
 
-- [ ] **步骤 4：运行通过**
+- [x] **步骤 4：运行通过**
 
 同一命令全绿；同时跑 `StatusVFXSystemTests` 与 `AuthoritativeStatusVfxTests` 回归。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add Assets/Scripts/Tests/PlayMode/StatusRemovalOnlyOnAuthoritativeProjectionTests.cs
@@ -104,13 +104,13 @@ git commit -m "test(vfx): keep statuses until authoritative projection"
 - 新建：`Assets/Scripts/Tests/Editor/SyncLayer/TransportDelayInjectionTests.cs`
 - 可能修改：`Assets/Scripts/Tests/PlayMode/ElementalTwoClientTests.cs`（仅注释指向本夹具）
 
-- [ ] **步骤 1：写延迟装饰器**
+- [x] **步骤 1：写延迟装饰器**
 
 实现测试本地 `DelayedNetworkClient : INetworkClient`，包装任意 `INetworkClient`（测试用
 fake client；不包装真实 socket），把发送/收到的消息放入可按测试时间释放的队列；支持延迟、
 重复、乱序三种注入。不得改生产传输层。
 
-- [ ] **步骤 2：写五个用例**
+- [x] **步骤 2：写五个用例**
 
 1. 换装确认延迟于施法确认：施法 `EquipmentRevision` 与装备版本门不回退。
 2. 发射晚于格挡结果：晚到 `ProjectileLaunchBroadcast` 不重建已停止视觉。
@@ -121,7 +121,7 @@ fake client；不包装真实 socket），把发送/收到的消息放入可按�
 断言每个场景的桥层/视图事件次数与权威值，不用 sleep 排序；KCP/WS 正常流程引用
 `ElementalTwoClientTests` 既有证据，不重复造真实 socket。
 
-- [ ] **步骤 3：运行**
+- [x] **步骤 3：运行**
 
 ```bash
 UNITY_MCP_DISABLE=1 timeout 300 "/e/Unity/Editor/2022.3.25f1/Editor/Unity.exe" \
@@ -131,7 +131,7 @@ UNITY_MCP_DISABLE=1 timeout 300 "/e/Unity/Editor/2022.3.25f1/Editor/Unity.exe" \
   -logFile "<worktree>/TestResults/plan07/task2.log"
 ```
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add Assets/Scripts/Tests/Editor/SyncLayer/TransportDelayInjectionTests.cs
@@ -147,7 +147,7 @@ git commit -m "test(net): inject transport delay at the consumption layer"
 - 可能修改：`Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs`、
   `MovementReporter.cs`、`PredictionReconciler.cs`
 
-- [ ] **步骤 1：写宿主级用例**
+- [x] **步骤 1：写宿主级用例**
 
 用真实 `ClientNetworkHost` 反射装配/拆装 `_combatBridge`、`_adapter`、`MovementReporter`：
 
@@ -160,7 +160,7 @@ git commit -m "test(net): inject transport delay at the consumption layer"
 
 断言事件计数、预测队列长度、`LastCorrectionTarget`、视图状态；不伪造新会话隔离。
 
-- [ ] **步骤 2：运行**
+- [x] **步骤 2：运行**
 
 ```bash
 # 若夹具不依赖真实服务器，可直接 EditMode；否则用 PlayMode + 测试自建服务器端口
@@ -168,7 +168,7 @@ git commit -m "test(net): inject transport delay at the consumption layer"
 
 预期新增用例全绿；若宿主缺少清理路径，修最小清理并点名断言。
 
-- [ ] **步骤 3：Commit**
+- [x] **步骤 3：Commit**
 
 ```bash
 git add Assets/Scripts/Tests/Editor/SyncLayer/SessionIsolationTests.cs
@@ -184,7 +184,7 @@ git commit -m "test(sync): isolate old session packets and predictions"
 - 按审计结果修改：`Server/Status/StatusTickService.cs`、`Server/Handler/CastHandler.cs`、
   `Assets/Scripts/Hotfix/GameSystems/SyncCore/Elemental/StatusRuntime.cs` 等
 
-- [ ] **步骤 1：逐项审计**
+- [x] **步骤 1：逐项审计**
 
 对 M2/M3/M4/M6/M7/M8/M10/M11/M16/M17/M18/M19 逐项给出：已由完整首发解决 / 可机械修复 / 仍需设计决策。至少验证：
 
@@ -193,22 +193,22 @@ git commit -m "test(sync): isolate old session packets and predictions"
 - M3 `StatusTickService.Tick` 列表缓冲复用：若仍每次分配，做最小复用并加分配/行为测试。
 - M7 未用参数、M8 死 API：只清理本次触碰路径，不做无关重构。
 
-- [ ] **步骤 2：修复可机械项**
+- [x] **步骤 2：修复可机械项**
 
 每项一个可证伪测试；不得借机重构未要求代码。
 
-- [ ] **步骤 3：更新文档**
+- [x] **步骤 3：更新文档**
 
 路线图把已完成项标注证据，仍需设计的项保留 Plan 08/backlog；不得把未做项写成已打通。
 
-- [ ] **步骤 4：全量验证**
+- [x] **步骤 4：全量验证**
 
 ```bash
 bash tools/test-server-inprocess.sh
 # Unity 目标类 + 本计划新增 PlayMode 类
 ```
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add docs/superpowers/plans/2026-11-14-elemental-sword-qi-roadmap.md <修复文件>

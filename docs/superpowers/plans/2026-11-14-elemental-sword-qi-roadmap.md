@@ -193,11 +193,16 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
     **Plan 06 任务 4 已完成**：`AoiVersionContinuityTests` 6/6（Aoi 命名空间 58/58）。
   - **KCP/WebSocket 延迟注入**：重复/乱序已由 `NetworkConsumptionInjectionTests` 覆盖；
     消息级延迟/交错（换装确认/施法交错、发射晚于格挡结果、旧伤害晚于复活、较新血量早于状态消息、
-    延迟但同版本只消费一次）已由 **Plan 06 任务 3** 的 `NetworkConsumptionInjectionTests`（24/24）
-    在桥层 `OnMessage`/`Update` 覆盖；**KCP/WebSocket 传输层延迟注入未执行**（`design.md:166`）。
+    延迟但同版本只消费一次）已由 **Plan 06 任务 3** 的 `NetworkConsumptionInjectionTests`
+    （当时 24/24）在桥层 `OnMessage`/`Update` 覆盖；**Plan 07 任务 2 完成消费层延迟/乱序注入**
+    （`TransportDelayInjectionTests` 5/5，测试本地 `DelayedNetworkClient` 装饰器包住 fake client，
+    不改生产传输层）；**真实 KCP/WebSocket 传输 socket 级延迟注入仍未执行**（`design.md:166`）。
   - **断线重进旧包**：按新会话初始化，旧包、旧模型回调与旧位移预测均不生效（`design.md:166`）。
-    **Plan 06 任务 3 部分覆盖**：桥按 `LifeId` 丢弃同会话旧世代 `DamageResult`/`CastBroadcast`，
-    新会话隔离靠宿主新 playerId/新桥；**真正的连接代次与旧位移预测未在桥层验收**，仍为宿主级 backlog。
+    **Plan 06 任务 3 部分覆盖**：桥按 `LifeId` 丢弃同会话旧世代 `DamageResult`/`CastBroadcast`。
+    **Plan 07 任务 3 完成宿主级会话隔离**：`SessionIsolationTests` 5/5（final review 补 NpcAction
+    缓存跨会话隔离用例）；真实 `ClientNetworkHost` 断线重连下旧包/旧位移预测/旧 presenter/
+    旧 playerId 均不生效，`registry.Clear()` 同步清空旧视图、战斗投影、NpcAction 缓存与
+    last-known vitals。
   - **收到状态时模型尚未加载**：模型加载完成前的状态投影/事件不得丢失或错挂（`design.md:166`）。
     **Plan 06 任务 3 已完成**：视图未建时 318 缓存回放、DoT 由基线补齐且不双扣
     （`NetworkConsumptionInjectionTests` 24/24）。
@@ -238,12 +243,26 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   用冰减速 `SpeedScale=0.7` + X 轴正向 1.8m 静止怪物（期望方向 `(1,0,0.7)` 与之约 35°）断言
   实际步长 = `moveSpeed×0.7×dt`（未缩放对照 = `moveSpeed×dt`），慢/快步长比 0.7，解出朝向
   偏离期望方向（点积 <0.95，约束确实生效）且避让横向分量不反转；无邻居对照组仍按原期望位移。
-- **未执行项（Plan 06 收口后的 Plan 07/backlog，仍不得写成已打通）**：状态结束时钟偏移注入、
-  KCP/WebSocket 传输层延迟注入、真实连接代次/旧位移预测隔离（宿主级）；三端同一次末跳致死时刻登记 Plan 07。
+- **未执行项（Plan 07 收口后的 Plan 08/backlog，仍不得写成已打通）**：真实 KCP/WebSocket
+  传输 socket 级延迟注入（消费层延迟/乱序已由 Plan 07 任务 2 覆盖，不是 socket 级）、
+  三端同一次末跳致死时刻。状态结束时钟偏移注入已由 Plan 07 任务 1 裁定不适用（生产无本地
+  `EndTick` 移除路径），宿主级会话隔离已由 Plan 07 任务 3 完成。
 - **已知环境/夹具失败（非 Plan 05 回归）**：`RemoteEntityRegistryTests.Bot_Radius`
   的 PPtr 环境失败（16/17，基线可复现）；`MonsterWorldTests` 导航模式 Slime 巡逻卡死
   （服务端导航债）；`PlayerJumpBodyCollisionTests` 在 batchmode 下 0/3（夹具自身
   PPtr 伪报 + 固定 180 帧落地等待不足，2026-11-20 复现，未修改该文件）。
+
+## Plan 07 任务 1–3：网络硬化（2026-11-24）
+
+| 任务 | 处置与证据 |
+|---|---|
+| 任务 1 状态结束消息驱动契约 | ✅ 范围裁定：生产无本地 `EndTick` 移除路径，时钟偏移注入不适用，不伪造；改为消息驱动契约（施加/移除只由 318 `Statuses` diff 触发、迟到 318 保持到到达、推进时间不自移除，`StatusVFXSystem` 纳入回路）。`StatusRemovalOnlyOnAuthoritativeProjectionTests` PlayMode 5/5；回归 `StatusVFXSystemTests` + `AuthoritativeStatusVfxTests` 12/12。提交 `53bd8d94`（文档 `166513bc`/`4bc9c07e`）。 |
+| 任务 2 传输消费层延迟/乱序注入 | ✅ 测试本地 `DelayedNetworkClient : INetworkClient` 装饰器包住 fake client（延迟/重复/乱序按测试时间释放，不改生产传输层）。`TransportDelayInjectionTests` 5/5（换装/施法交错、发射晚于终止、旧 `LifeId` 伤害晚于复活、旧 318 晚于新版本、延迟同版本只消费一次）。提交 `4eedbd4e`。**真实 KCP/WebSocket socket 级延迟注入仍未执行。** |
+| 任务 3 宿主级会话隔离 | ✅ 真实 `ClientNetworkHost` + 新 manager/新 playerId；旧包、旧位移预测、旧 presenter、旧 playerId 均不生效。`SessionIsolationTests` 5/5（final review 补 NpcAction 缓存跨会话隔离）；回归 36/36。生产最小修复 `ClearEchoRequest` 空守卫。提交 `a8cb8c8b` + `fix(sync): clear npc action caches on session reset`。 |
+
+最终审查修复（2026-11-24）：`RemoteEntityRegistry.Clear()` 补清 `_pendingNpcActions`/`_npcActions`
+（旧会话缓存不得回放到新会话同 Id/LifeId 视图）；复核 `SessionIsolationTests` 5/5、
+`NetworkConsumptionInjectionTests` 25/25、`TransportDelayInjectionTests` 5/5 全绿。
 
 ## Plan 07 任务 4：Plan 04 残余 M 项审计（2026-11-24）
 
@@ -263,12 +282,13 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
 | M16 离线 provider | ✅ 完整首发 `66812544` 已解决 | `OfflineMonsterStatuses` 把 `SyncCore.StatusRuntime` 接到单机时钟/怪物 DoT/表现事件；`OfflineWeaponCast` 冻结武器快照并按施法认领元素；`OfflineElementalWeaponTests`（EditMode，含四元素、无效命中不附加、麻痹/减速移动） |
 | M17 ThunderDuration | ✅ 完整首发 `66812544` 已解决 | `StatusRuntime.Apply`：PvP 控制取 `Pvp.ThunderDurationSeconds`，PvE 取 `def.DurationSeconds`；配置为 PvP 0.8 s / PvE 0.6 s（`Server/Config/elemental_catalog.json`、`ElementalCatalogDefaults.cs`）；`StatusRuntimeTests.Paralyze_Uses_Configured_Pvp_Duration_And_Pve_Status_Duration` 与 `Pve_Paralyze_Does_Not_Grant_Control_Immunity` |
 | M18 bot 控制 | ⏳ 仍需设计（Plan 08/backlog） | bot 是 `EntityKind.PlayerBot`：`BotRunner.Tick` 只按固定步长移动，不读 `ControlSpeedScale`/`ControlActionLock`；10002 会懒配置状态并向观察者投影，但对 bot 无实际控制效果。压测 bot 是否应受状态控制需产品裁定 |
-| M19 断开/换模型陈旧表现 | 换模型 ✅ Plan 04 已解；断开 ⏳ backlog | 换渲染根由 `AuthoritativeStatusVfx.Apply` 先对旧根发 Removed、再对新根重放（`test_authoritative_status_vfx_replays_all_groups_when_target_changes`、`test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`）；断开时 `ClientNetworkHost.ResetAttachment` 先摘 `ViewRemoved` 再 `Dispose`；下一次 `AttachConnectionCombat` 会整体替换 `_statusVfx`，断开窗口内实体表仅内存滞留——**无可见残留**，清理接 `Disconnect` 仍属设计取舍，保持 backlog |
+| M19 断开/换模型陈旧表现 | 换模型 ✅ Plan 04 已解；断开 ⏳ backlog | 换模型：`AuthoritativeStatusVfx.Apply` 在 target 变化时（Proxy↔Full 换根/本地角色重建）先对旧根 `EmitRemoved` 全部组、再对新根重放（`test_authoritative_status_vfx_replays_all_groups_when_target_changes`、`test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`）；`StatusVFXSystem.Update` 对已销毁 target（Unity fake-null）执行 `Clear()` 并移出实体表——**无可见残留**。`_statusVfx` 在 `ClientNetworkHost.Awake` 创建、仅在 `OnDestroy` 置空，断开窗口内实体表仅内存滞留；把清理接到 `Disconnect` 仍属设计取舍，保持 backlog |
 
 验证：`bash tools/test-server-inprocess.sh` → **707/707**；Unity EditMode 目标类
-**54/54**（`AuthoritativeStatusVfxTests` 9、`OfflineElementalWeaponTests` 8、
+**54/54**（Plan 07 任务 4 时点；final review 后 `SessionIsolationTests` 增至 5/5，目标类为
+**55/55**）。构成：`AuthoritativeStatusVfxTests` 9、`OfflineElementalWeaponTests` 8、
 `NetworkConsumptionInjectionTests` 25、`TransportDelayInjectionTests` 5、
-`SessionIsolationTests` 4、共享 `StatusRuntimeTests` 3）；PlayMode
+`SessionIsolationTests` 4→5、共享 `StatusRuntimeTests` 3；PlayMode
 `StatusRemovalOnlyOnAuthoritativeProjectionTests` **5/5**。`TestResults/` 未提交，
 batchmode 的 `Assets/Packages/**` 与 coverage 设置副作用已还原。
 

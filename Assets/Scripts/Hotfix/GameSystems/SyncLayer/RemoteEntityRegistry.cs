@@ -826,6 +826,8 @@ namespace Hotfix.GameSystems.SyncLayer
             _lastSampleTicks.Clear();
             _groundSamples.Clear(); // 与视图同生共死（换世界后地形可能不同）
             _pendingCombat.Clear(); // 换世界/断线：旧会话的战斗投影不得回放到新实体
+            _pendingNpcActions.Clear(); // 换世界/断线：旧会话的 NpcAction 缓存不得回放到新实体
+            _npcActions.Clear(); // 已消费归档同理——同 Id/LifeId 重连不继承旧动作实例
             _lastKnownVitals.Clear(); // 换世界/断线：上个会话的 vitals 不得回填到新实体
         }
 
