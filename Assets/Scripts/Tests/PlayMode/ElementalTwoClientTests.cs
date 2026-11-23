@@ -19,6 +19,8 @@ namespace KcpNet.PlayModeTests
     /// 登录取得武器基线 → 权威换装冰剑 → 在途换火剑并释放 10002 →
     /// 两端收到同一 CastId 的发射描述，且发射元素保留冰剑快照。
     /// 运行前需先启动：dotnet Server/bin/Debug/net8.0/Server3C.dll 8123
+    /// 延迟/重复/乱序的**消费层**防御见 EditMode `TransportDelayInjectionTests`
+    /// （测试本地 INetworkClient 装饰器确定性排程，不依赖真实 socket）。
     /// </summary>
     public class ElementalTwoClientTests
     {
