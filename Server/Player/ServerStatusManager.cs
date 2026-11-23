@@ -26,7 +26,7 @@ namespace KcpServer
         public void SetControlSink(System.Action<float, bool>? controlSink) => _controlSink = controlSink;
 
         public StatusApplyResult Apply(StatusEffectDefinition def, long sourceId, int skillId,
-            ulong castId, uint tick, ElementalCatalogDefinition catalog)
+            ulong castId, uint tick)
         {
             if ((StatusEffectKind)def.EffectKind == StatusEffectKind.Paralyze
                 && HasParalyzeImmunity?.Invoke() == true)

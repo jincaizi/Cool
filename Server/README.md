@@ -142,6 +142,8 @@ bash tools/test-server.sh
   （`CastHandler.BroadcastDotDamageAsync`）；PvE 读取风易伤（PvP 不放大灼烧）；
   怪物每跳按 `damage × ThreatPerDamage` 计仇恨、不叠加 `ThreatFlat`；死亡立即清状态并
   拒绝后续跳伤害。玩家 `MarkDead`/`TryRespawn` 与怪物 `ArriveHome`（Evade 到家）清状态。
+  pre-tick 逐实体复用 `_dueBuffer`（Plan 07 任务 4）；DoT 击杀以 pre-tick 结算 tick 起算
+  怪物死亡窗口/`DeathTick`（旧实现误用模块上一 tick）。
 - **首个有效命中附加元素（Plan 04）**：只有玩家 `10002` 且武器 `ElementId > 0`；正伤害、
   未格挡、目标存活才附加，按 `(TargetId, LifeId)` 每次施法只附加一次（挥砍先命中则剑气不再
   附加，剑气先命中则由剑气附加）。风易伤在扣血前读取——本次命中不吃刚附加的倍率，
@@ -171,8 +173,9 @@ Plan 04 验收证据（服务端；7 项基线在 654/654 内，怪物控制项�
   格挡与死亡不附加、PvE/PvP 风倍率；`EventIdentityTests`（2 项）锁定事件序号。
 - 取消重入：`CastCancelDuringDrainTests`（2 项）锁定状态附加 → 控制 sink → `CancelCaster`
   在 `DrainResolved` 压缩途中重入不越界、不覆盖/丢弃后续待判定施法（C1）。
-- DoT：`DotDamageTests`（9 项）与 `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、
-  `DamageKind=Dot`、末跳只结算一次、到期/死亡清理。
+- DoT：`DotDamageTests`（**11 项**；新增缓冲复用与 DoT 击杀结算 tick）与
+  `DotTerminalTickTests`（4 项）锁定每跳伤害/仇恨、`DamageKind=Dot`、末跳只结算一次、
+  到期/死亡清理。
 - 怪物控制：`MonsterStatusControlTests`（**8 项**；7 项属 Plan 04，ORCA 邻居用例为 Plan 06
   任务 6）锁定减速对真实位移的缩放（无邻居期望位移逐字验证；
   `Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side` 用 X 轴正向

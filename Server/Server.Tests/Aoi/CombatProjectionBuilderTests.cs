@@ -58,8 +58,8 @@ public class CombatProjectionBuilderTests
         player.ConfigureStatuses(catalog);
         var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
         var wind = catalog.Statuses.Find(s => s.EffectId == 401)!;
-        player.Statuses!.Apply(burn, sourceId: 2, skillId: 10002, castId: 7, tick: 0, catalog);
-        player.Statuses.Apply(wind, sourceId: 3, skillId: 10002, castId: 8, tick: 0, catalog);
+        player.Statuses!.Apply(burn, sourceId: 2, skillId: 10002, castId: 7, tick: 0);
+        player.Statuses.Apply(wind, sourceId: 3, skillId: 10002, castId: 8, tick: 0);
 
         var projection = CombatProjectionBuilder.Build(player, catalog);
 

@@ -1081,7 +1081,7 @@ namespace KcpServer
                             var def = _elementalCatalog.Statuses.Find(s => s.EffectId == effectId);
                             if (def != null)
                                 target.Statuses!.Apply(def, pending.CasterId, pending.Request.SkillId,
-                                    pending.CastId, tick, _elementalCatalog);
+                                    pending.CastId, tick);
                         }
                 }
             }

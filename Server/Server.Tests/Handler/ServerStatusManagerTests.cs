@@ -23,7 +23,7 @@ public class ServerStatusManagerTests
         player.CombatDirty = false;
 
         var result = player.Statuses!.Apply(slow, sourceId: 2, skillId: 10002,
-            castId: 7, tick: 0, catalog);
+            castId: 7, tick: 0);
 
         Assert.Equal(StatusApplyResult.Applied, result);
         Assert.Equal(0.7f, player.ControlSpeedScale, 4);
@@ -40,7 +40,7 @@ public class ServerStatusManagerTests
         var player = NewPlayer(catalog);
         var paralyze = catalog.Statuses.Find(s => s.EffectId == 301)!;
 
-        player.Statuses!.Apply(paralyze, sourceId: 2, skillId: 10002, castId: 7, tick: 0, catalog);
+        player.Statuses!.Apply(paralyze, sourceId: 2, skillId: 10002, castId: 7, tick: 0);
 
         Assert.Equal(1f, player.ControlSpeedScale, 4);
         Assert.True(player.ControlActionLock);
@@ -53,7 +53,7 @@ public class ServerStatusManagerTests
         var catalog = ElementalCatalogDefaults.Create();
         var player = NewPlayer(catalog);
         var slow = catalog.Statuses.Find(s => s.EffectId == 101)!;
-        player.Statuses!.Apply(slow, 2, 10002, 7, tick: 0, catalog);
+        player.Statuses!.Apply(slow, 2, 10002, 7, tick: 0);
         uint controlVersionAfterApply = player.ControlVersion;
         player.CombatDirty = false;
 
@@ -73,8 +73,8 @@ public class ServerStatusManagerTests
         var player = NewPlayer(catalog);
         var slow = catalog.Statuses.Find(s => s.EffectId == 101)!;
         var paralyze = catalog.Statuses.Find(s => s.EffectId == 301)!;
-        player.Statuses!.Apply(slow, 2, 10002, 7, tick: 0, catalog);
-        player.Statuses.Apply(paralyze, 2, 10002, 8, tick: 0, catalog);
+        player.Statuses!.Apply(slow, 2, 10002, 7, tick: 0);
+        player.Statuses.Apply(paralyze, 2, 10002, 8, tick: 0);
         uint controlVersionBeforeClear = player.ControlVersion;
         player.CombatDirty = false;
 
@@ -93,7 +93,7 @@ public class ServerStatusManagerTests
         var catalog = ElementalCatalogDefaults.Create();
         var player = NewPlayer(catalog);
         var slow = catalog.Statuses.Find(s => s.EffectId == 101)!;
-        player.Statuses!.Apply(slow, sourceId: 42, skillId: 10002, castId: 7, tick: 5, catalog);
+        player.Statuses!.Apply(slow, sourceId: 42, skillId: 10002, castId: 7, tick: 5);
 
         var projection = CombatProjectionBuilder.Build(player, catalog);
 
@@ -115,7 +115,7 @@ public class ServerStatusManagerTests
         player.ConfigureStatuses(catalog, (speed, locked) => sinkCalls.Add((speed, locked)));
         var slow = catalog.Statuses.Find(s => s.EffectId == 101)!;
 
-        player.Statuses!.Apply(slow, sourceId: 2, skillId: 10002, castId: 7, tick: 0, catalog);
+        player.Statuses!.Apply(slow, sourceId: 2, skillId: 10002, castId: 7, tick: 0);
 
         var applied = Assert.Single(sinkCalls);
         Assert.Equal(0.7f, applied.Speed, 4);
@@ -137,7 +137,7 @@ public class ServerStatusManagerTests
             player.ApplyControl(speed, locked);
         });
         var slow = catalog.Statuses.Find(s => s.EffectId == 101)!;
-        player.Statuses!.Apply(slow, sourceId: 2, skillId: 10002, castId: 7, tick: 0, catalog);
+        player.Statuses!.Apply(slow, sourceId: 2, skillId: 10002, castId: 7, tick: 0);
         Assert.Equal(0.7f, player.ControlSpeedScale, 4);
         sinkCalls.Clear();
 

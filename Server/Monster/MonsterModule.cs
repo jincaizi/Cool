@@ -339,6 +339,12 @@ namespace KcpServer.Monster
         /// **无异常轻量记账**：CombatResolver 在 ApplyHit 的 Hits.Add 之前同步调用，抛异常会中断
         /// 该次裁决剩余命中——这里只做字典查表 + 状态写入。</summary>
         public void OnDamageTaken(long npcId, long attackerId, float damage, MonsterDamageKind kind)
+            => OnDamageTaken(npcId, attackerId, damage, kind, _currentTick);
+
+        /// <summary>显式结算 tick：preTick 的 DoT 在模块 tick 之前结算，模块的
+        /// <see cref="_currentTick"/> 仍是上一 tick——死亡窗口必须按结算 tick 起算。</summary>
+        public void OnDamageTaken(long npcId, long attackerId, float damage, MonsterDamageKind kind,
+            uint tick)
         {
             if (_monsters.TryGetValue(npcId, out var state))
                 {
@@ -346,8 +352,8 @@ namespace KcpServer.Monster
                 if (state.ActionRunner != null && damage > 0) {
                     var entity = _store.GetPlayer(npcId);
                     if (entity != null) { state.LastHp = entity.Hp;
-                        if (!entity.IsAlive) state.ActionRunner.Die(_currentTick);
-                        else if (kind == MonsterDamageKind.Direct) state.ActionRunner.OnDirectDamage(_currentTick);
+                        if (!entity.IsAlive) state.ActionRunner.Die(tick);
+                        else if (kind == MonsterDamageKind.Direct) state.ActionRunner.OnDirectDamage(tick);
                     }
                 }
             }

@@ -18,6 +18,8 @@ namespace KcpServer
         private readonly CastHandler _cast;
         private readonly Func<MonsterModule?> _monsters;
         private readonly ElementalCatalogDefinition _catalog;
+        /// <summary>本 tick 到期 DoT 的复用缓冲（主循环线程独占）。</summary>
+        private readonly List<ActiveStatus> _dueBuffer = new List<ActiveStatus>();
 
         /// <param name="monsters">延迟查怪物模块：Server3C 构造顺序里 EnableMonsters 晚于本服务，
         /// 且未启用怪物时必须为空。</param>
@@ -35,12 +37,12 @@ namespace KcpServer
             var monsters = _monsters();
             foreach (var entity in _store.All)
             {
-                // 早退：无状态实体不分配缓冲/不遍历（缓冲复用留 Plan 06/backlog）。
+                // 早退：无状态实体不分配缓冲/不遍历。
                 if (entity.Statuses == null || entity.Statuses.Runtime.Count == 0) continue;
                 entity.Statuses.RemoveExpired(tick);
-                var due = new List<ActiveStatus>();
-                entity.Statuses.Runtime.CollectDueDots(tick, due);
-                foreach (var status in due)
+                _dueBuffer.Clear();
+                entity.Statuses.Runtime.CollectDueDots(tick, _dueBuffer);
+                foreach (var status in _dueBuffer)
                 {
                     if (!entity.IsAlive) { entity.Statuses.ClearAll(tick); break; }
                     // PvE（目标 NPC 或来源 NPC）吃状态表易伤倍率；PvP 玩家目标不放大灼烧。
@@ -50,7 +52,8 @@ namespace KcpServer
                     float damage = status.Definition.DamagePerTick * wind;
                     entity.ApplyDamage(damage);
                     if (entity.Kind == (byte)EntityKind.Npc)
-                        monsters?.OnDamageTaken(entity.PlayerId, status.SourceId, damage, MonsterDamageKind.Dot);
+                        monsters?.OnDamageTaken(entity.PlayerId, status.SourceId, damage,
+                            MonsterDamageKind.Dot, tick);
 
                     var hit = new HitEntry
                     {
@@ -68,6 +71,7 @@ namespace KcpServer
                     entity.Statuses.AdvanceDot(status, tick);
                     if (!entity.IsAlive) entity.Statuses.ClearAll(tick);
                 }
+                _dueBuffer.Clear();
                 entity.Statuses.RemoveExpiredDots(tick);
             }
         }

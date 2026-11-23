@@ -228,7 +228,8 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
 - **Plan 04 final review 遗留项**：M2 同段尸体检定、M4 多 DoT 定序、M6 来源类型建模、
   M7 未用参数、M8 死 API、M10 死亡 tick、M11 非 ActionV1、M16 离线 provider、
   M17 ThunderDuration、M18 bot 控制、M19 断开/换模型陈旧表现（M9 `EventId` 去重已在
-  Plan 05 任务 4 完成；M3 的 `StatusTickService.Tick` 列表缓冲复用仍未做，一并归入）。
+  Plan 05 任务 4 完成）。**Plan 07 任务 4 已逐项审计（2026-11-24）：M3/M7/M10 机械修复，
+  M16/M17 已由完整首发解决，其余保留设计/backlog；见下节。**
 - **NpcAction 驱动的攻击变体/时间轴**（2026-11-20 登记）：`NpcActionEvent` 目前只负责
   阶段/取消，NPC 攻击起手仍由 `CastBroadcast → NpcAttackSchedule` 驱动；若后续需要
   `NpcAction` 直接驱动攻击变体/时间轴，需在 Plan 07/backlog 单独设计（Plan 05/06 均未新增该机制）。
@@ -243,6 +244,33 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   的 PPtr 环境失败（16/17，基线可复现）；`MonsterWorldTests` 导航模式 Slime 巡逻卡死
   （服务端导航债）；`PlayerJumpBodyCollisionTests` 在 batchmode 下 0/3（夹具自身
   PPtr 伪报 + 固定 180 帧落地等待不足，2026-11-20 复现，未修改该文件）。
+
+## Plan 07 任务 4：Plan 04 残余 M 项审计（2026-11-24）
+
+逐项处置；**未做/仍需设计的项不得写成已打通**。服务端全量由 705 增至 **707/707**
+（新增 M3 缓冲复用、M10 死亡 tick 两个用例）。
+
+| M 项 | 处置 | 证据 |
+|---|---|---|
+| M2 同段尸体检定 | ✅ 已有守卫 + 测试（无需改动） | `CastHandler.ApplyHit` 在目标不存在或已死时直接返回（不生成 `HitEntry`、不附加状态）；`ElementalApplicationTests.Lethal_Swing_Does_Not_Apply_Element_To_Dead_Target` 断言 50 HP 目标被挥砍击杀后，同次施法的剑气段不再出伤（1 条命中、`EventSeq=1`、无状态） |
+| M3 `StatusTickService.Tick` 缓冲复用 | ✅ 机械修复（2026-11-24） | 每实体 `new List<ActiveStatus>()` 改为服务级 `_dueBuffer`，每实体前后 `Clear()`；`DotDamageTests.Tick_Reuses_Due_Buffer_Across_Entities_And_Ticks` 钉住“两实体 × 两 tick 伤害正确 + 同一缓冲实例 + 注入哨兵被清”，回退为每实体分配时该用例红（已实测） |
+| M4 多 DoT 定序 | ⏳ 仍需设计（Plan 08/backlog） | 当前状态表只有一种 DoT（201 火，`ElementalCatalogDefaults.cs`），`StatusRuntime._byGroup` 同组替换保证同目标最多一条灼烧；多 DoT 并存时的结算顺序（`Dictionary` 插入序不是契约）没有任何产品规则，未做投机排序 |
+| M6 来源类型建模 | ⏳ 仍需设计（Plan 08/backlog） | `ServerStatusManager.Apply` 对全部状态硬编码 `sourceIsPlayer: true`；`StatusTickService.IsNpcSource` 在 DoT 结算时实时查来源实体，来源离场即按玩家处理。需要先把来源种类快照进 `ActiveStatus`/协议语义（NPC→玩家的雷时长、免疫归属）再改 |
+| M7 未用参数 | ✅ 机械修复（2026-11-24） | 删除 `ServerStatusManager.Apply(..., ElementalCatalogDefinition catalog)` 的未用参数并同步调用点（生产 1 处、测试 5 文件）；编译与全量测试通过 |
+| M8 死 API | ⏳ 审计后无可证明未用的生产 API（Plan 08/backlog） | 复核 Plan 04 新增公开面：`StatusRuntime.Remove`/`ControlImmuneUntilTick`、`ActiveStatus.AppliedTick`、`ServerStatusManager.SyncControl` 均有内部或测试消费；缩窄可见性/移除测试观测面属设计取舍，未删 |
+| M10 死亡 tick | ✅ 机械修复（2026-11-24） | DoT 在 preTick 结算时 `MonsterModule._currentTick` 仍是上一 tick，旧实现 `Die(_currentTick)` 让怪物死亡窗口/`DeathTick` 早 66 ms；新增显式 tick 重载并由 `StatusTickService` 传结算 tick。`DotDamageTests.Dot_Kill_Uses_Settlement_Tick_For_Monster_Death_Window` 旧实现实测 `14 != 15` 红、修复后绿 |
+| M11 非 ActionV1 | ⏳ 仍需设计（Plan 08/backlog） | 生产 `Server3C.EnableMonsters` 恒 `actionV1: true`；非 ActionV1 宿主下 `MonsterModule.OnDamageTaken` 不更新 `LastHp`，DoT 掉血会在下一怪物 tick 被 `DetectHitOrDeath` 判成受击。是否支持该宿主形态未定，未改 |
+| M16 离线 provider | ✅ 完整首发 `66812544` 已解决 | `OfflineMonsterStatuses` 把 `SyncCore.StatusRuntime` 接到单机时钟/怪物 DoT/表现事件；`OfflineWeaponCast` 冻结武器快照并按施法认领元素；`OfflineElementalWeaponTests`（EditMode，含四元素、无效命中不附加、麻痹/减速移动） |
+| M17 ThunderDuration | ✅ 完整首发 `66812544` 已解决 | `StatusRuntime.Apply`：PvP 控制取 `Pvp.ThunderDurationSeconds`，PvE 取 `def.DurationSeconds`；配置为 PvP 0.8 s / PvE 0.6 s（`Server/Config/elemental_catalog.json`、`ElementalCatalogDefaults.cs`）；`StatusRuntimeTests.Paralyze_Uses_Configured_Pvp_Duration_And_Pve_Status_Duration` 与 `Pve_Paralyze_Does_Not_Grant_Control_Immunity` |
+| M18 bot 控制 | ⏳ 仍需设计（Plan 08/backlog） | bot 是 `EntityKind.PlayerBot`：`BotRunner.Tick` 只按固定步长移动，不读 `ControlSpeedScale`/`ControlActionLock`；10002 会懒配置状态并向观察者投影，但对 bot 无实际控制效果。压测 bot 是否应受状态控制需产品裁定 |
+| M19 断开/换模型陈旧表现 | 换模型 ✅ Plan 04 已解；断开 ⏳ backlog | 换渲染根由 `AuthoritativeStatusVfx.Apply` 先对旧根发 Removed、再对新根重放（`test_authoritative_status_vfx_replays_all_groups_when_target_changes`、`test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`）；断开时 `ClientNetworkHost.ResetAttachment` 先摘 `ViewRemoved` 再 `Dispose`，`_statusVfx` 的实体表只在宿主销毁时清空——**仅内存滞留、无可见残留**，保持 backlog |
+
+验证：`bash tools/test-server-inprocess.sh` → **707/707**；Unity EditMode 目标类
+**54/54**（`AuthoritativeStatusVfxTests` 9、`OfflineElementalWeaponTests` 8、
+`NetworkConsumptionInjectionTests` 25、`TransportDelayInjectionTests` 5、
+`SessionIsolationTests` 4、共享 `StatusRuntimeTests` 3）；PlayMode
+`StatusRemovalOnlyOnAuthoritativeProjectionTests` **5/5**。`TestResults/` 未提交，
+batchmode 的 `Assets/Packages/**` 与 coverage 设置副作用已还原。
 
 ## 每条计划的完成定义
 

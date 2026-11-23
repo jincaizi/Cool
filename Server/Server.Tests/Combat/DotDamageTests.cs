@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Cool.Protocol;
 using Cool.SyncCore;
@@ -28,7 +29,7 @@ public class DotDamageTests
         StatusEffectDefinition def, long sourceId, uint tick, ulong castId = BurnCastId)
     {
         target.ConfigureStatuses(catalog);
-        var result = target.Statuses!.Apply(def, sourceId, FireSkillId, castId, tick, catalog);
+        var result = target.Statuses!.Apply(def, sourceId, FireSkillId, castId, tick);
         Assert.NotEqual(StatusApplyResult.Ignored, result);
     }
 
@@ -107,6 +108,66 @@ public class DotDamageTests
         service.Tick(30);
         Assert.Single(h.DotHits());                        // 死后不再跳
         Assert.Empty(target.Statuses!.Runtime.Active);
+    }
+
+    [Fact]
+    public void Tick_Reuses_Due_Buffer_Across_Entities_And_Ticks()
+    {
+        using var h = new DotTestHarness();
+        var catalog = h.Catalog;
+        var first = h.Store.AddPlayer(2, "First");
+        first.SetMaxHp(100f);
+        Attach(first, catalog, BurnOf(catalog), sourceId: 1, tick: 0);
+        h.Bind(first.PlayerId, sessionId: 102);
+
+        var second = h.Store.AddPlayer(3, "Second");
+        second.SetMaxHp(100f);
+        Attach(second, catalog, BurnOf(catalog), sourceId: 1, tick: 0);
+        h.Bind(second.PlayerId, sessionId: 103);
+
+        var service = h.NewService();
+        var field = typeof(StatusTickService).GetField(
+            "_dueBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(field);
+        var buffer = (List<ActiveStatus>)field!.GetValue(service)!;
+
+        service.Tick(15);
+        Assert.Equal(2, h.DotHits().Count);     // 两个实体各一跳
+        Assert.Same(buffer, field.GetValue(service));
+        Assert.Empty(buffer);                   // 每实体处理后清空，不串到下一实体/下一 tick
+
+        // 哨兵：若实现改回每实体 new List，注入项不会被读取路径清掉。
+        buffer.Add(new ActiveStatus());
+        service.Tick(30);
+        Assert.Equal(4, h.DotHits().Count);
+        Assert.Same(buffer, field.GetValue(service));
+        Assert.Empty(buffer);
+        Assert.Equal(84f, first.Hp, 3);
+        Assert.Equal(84f, second.Hp, 3);
+    }
+
+    [Fact]
+    public void Dot_Kill_Uses_Settlement_Tick_For_Monster_Death_Window()
+    {
+        using var h = new DotTestHarness(monsters: true);
+        var catalog = h.Catalog;
+        long npcId = h.Monsters!.SpawnMonster(1,
+            new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, 0f));
+        var npc = h.Store.GetPlayer(npcId)!;
+        npc.SetMaxHp(8f);                        // 一跳（8）即死
+        var state = h.Monsters.GetState(npcId)!;
+        state.LastHp = npc.Hp;                   // SetMaxHp 的 HP 下降不算受击
+        Attach(npc, catalog, BurnOf(catalog), sourceId: 1, tick: 0);
+        h.Bind(npcId, sessionId: 102);
+
+        h.Monsters.Tick(14);                     // 主循环 onTick 14：模块当前 tick = 14
+        h.NewService().Tick(15);                 // preTick 15 结算 DoT 并击杀
+
+        Assert.False(npc.IsAlive);
+        Assert.Equal(15u, state.DeathTick);      // 旧实现用模块陈旧 tick 14
+        var action = state.ActionRunner!.Current;
+        Assert.Equal(NpcActionKind.Death, action.Kind);
+        Assert.Equal(15u, action.StartTick);
     }
 
     [Fact]

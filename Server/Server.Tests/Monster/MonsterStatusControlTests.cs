@@ -40,7 +40,7 @@ public class MonsterStatusControlTests
     private static void ApplyParalyze(Server3C server, PlayerState target, long sourceId, uint tick)
     {
         var catalog = server.ElementalCatalog;
-        var result = target.Statuses!.Apply(ParalyzeOf(catalog), sourceId, 10002, 7UL, tick, catalog);
+        var result = target.Statuses!.Apply(ParalyzeOf(catalog), sourceId, 10002, 7UL, tick);
         Assert.Equal(StatusApplyResult.Applied, result);
     }
 
@@ -55,7 +55,7 @@ public class MonsterStatusControlTests
         npc.ConfigureStatuses(catalog);
 
         Assert.Equal(StatusApplyResult.Applied,
-            npc.Statuses!.Apply(SlowOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0, catalog));
+            npc.Statuses!.Apply(SlowOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0));
         Assert.Equal(0.7f, npc.ControlSpeedScale, 4);
 
         float moveSpeed = module.GetState(id)!.Config.moveSpeed;
@@ -102,7 +102,7 @@ public class MonsterStatusControlTests
         var catalog = Catalog();
         npc.ConfigureStatuses(catalog);
         Assert.Equal(StatusApplyResult.Applied,
-            npc.Statuses!.Apply(SlowOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0, catalog));
+            npc.Statuses!.Apply(SlowOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0));
         Assert.Equal(0.7f, npc.ControlSpeedScale, 4);
 
         module.Tick(0); // 生产路径：模块把权威 ControlSpeedScale 写进 MonsterState.SpeedScale
@@ -179,7 +179,7 @@ public class MonsterStatusControlTests
         var catalog = Catalog();
         npc.ConfigureStatuses(catalog);
         Assert.Equal(StatusApplyResult.Applied,
-            npc.Statuses!.Apply(ParalyzeOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0, catalog));
+            npc.Statuses!.Apply(ParalyzeOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0));
         Assert.True(npc.ControlActionLock);
 
         // 0.6s = 9 tick：行为树整段跳过，不移动、不施法。
@@ -261,7 +261,7 @@ public class MonsterStatusControlTests
         var catalog = server.ElementalCatalog;
         uint version = boss.CombatVersion;
         Assert.Equal(StatusApplyResult.Ignored,
-            boss.Statuses!.Apply(ParalyzeOf(catalog), 1, 10002, 7UL, 0, catalog));
+            boss.Statuses!.Apply(ParalyzeOf(catalog), 1, 10002, 7UL, 0));
         Assert.False(boss.ControlActionLock);
         Assert.Empty(boss.Statuses.Runtime.Active);
         Assert.Equal(version, boss.CombatVersion);
@@ -325,7 +325,7 @@ public class MonsterStatusControlTests
         var state = module.GetState(id)!;
         var catalog = Catalog();
         npc.ConfigureStatuses(catalog);
-        npc.Statuses!.Apply(SlowOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0, catalog);
+        npc.Statuses!.Apply(SlowOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0);
         Assert.Equal(0.7f, npc.ControlSpeedScale, 4);
         npc.ApplyDamage(npc.MaxHp * 0.5f); // 先掉血，回满断言才有意义
 

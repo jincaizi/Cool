@@ -32,7 +32,7 @@ public class AoiVersionContinuityTests
         target.EquippedWeaponInstanceId = 42;
         target.EquippedWeaponTemplateId = ElementalCatalogDefaults.IceSwordTemplateId;
         var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
-        target.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0, catalog);
+        target.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0);
 
         var broadcaster = NewBroadcaster(catalog);
         var capture = CaptureOf(broadcaster);
@@ -109,7 +109,7 @@ public class AoiVersionContinuityTests
         target.EquippedWeaponInstanceId = 42;
         target.EquippedWeaponTemplateId = ElementalCatalogDefaults.IceSwordTemplateId;
         var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
-        target.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0, catalog);
+        target.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0);
         target.ApplyDamage(10f); // Hp 90
 
         var broadcaster = NewBroadcaster(catalog);
@@ -193,7 +193,7 @@ public class AoiVersionContinuityTests
         var state = module.GetState(npcId)!;
 
         var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
-        npc.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0, catalog);
+        npc.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0);
         npc.ApplyDamage(40f);
         state.Mode = MonsterMode.Evade;
         state.EvadeStartTick = 0;
@@ -254,7 +254,7 @@ public class AoiVersionContinuityTests
         var state = module.GetState(oldId)!;
 
         var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
-        oldNpc.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0, catalog);
+        oldNpc.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0);
         oldNpc.ApplyDamage(40f);
 
         var broadcaster = NewBroadcaster(catalog);
@@ -324,7 +324,7 @@ public class AoiVersionContinuityTests
         target.EquippedWeaponInstanceId = 42;
         target.EquippedWeaponTemplateId = ElementalCatalogDefaults.IceSwordTemplateId;
         var burn = catalog.Statuses.Find(s => s.EffectId == 201)!;
-        target.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0, catalog);
+        target.Statuses!.Apply(burn, sourceId: 1, skillId: 10002, castId: 7, tick: 0);
 
         var broadcaster = NewBroadcaster(catalog);
         var capture = CaptureOf(broadcaster);
