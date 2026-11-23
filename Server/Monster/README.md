@@ -134,7 +134,9 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
 - **DoT 与受击分离**：灼烧跳走 `OnDamageTaken(kind: Dot)`，只更新 `LastHp` 并计入仇恨
   （`damage × ThreatPerDamage`，不叠加 `ThreatFlat`），不写 `HitStartTick`、
   `ActionState` 不进入 `Hit`、不触发受击硬直；直接伤害仍走 `OnDirectDamage`。
-  死亡（含 DoT 致死）由同一个 `ApplyDamage` 检测，进入 `Dead` 并清空仇恨。
+  死亡（含 DoT 致死）由同一个 `ApplyDamage` 检测，进入 `Dead` 并清空仇恨。pre-tick
+  结算的 DoT 击杀使用显式 `OnDamageTaken(..., tick)` 重载，`DeathTick`/死亡窗口从结算
+  tick 起算；直接伤害仍用模块 `_currentTick`（同 tick，行为不变）。
 
 ## 配置
 
