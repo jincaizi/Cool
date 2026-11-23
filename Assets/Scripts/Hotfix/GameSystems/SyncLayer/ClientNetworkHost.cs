@@ -1203,7 +1203,9 @@ namespace Hotfix.GameSystems.SyncLayer
             _pendingEchoSkill = null;
             _pendingEchoRequestId = 0;
             _pendingEchoConnectionGeneration = 0;
-            _localEntry?.SkillCoordinator.CancelEchoRequest();
+            // 角色可能已生成但 Start 未跑（OnPlayerSpawned → Connect 的真实窗口）：
+            // 此时 SkillCoordinator 尚未建立，清理路径不得因此抛 NRE。
+            _localEntry?.SkillCoordinator?.CancelEchoRequest();
         }
 
         private void HandleSwordQiEchoState(SwordQiEchoState state)
