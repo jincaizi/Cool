@@ -28,6 +28,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly SkillData _skillData;
         private readonly SkillStateMachine _stateMachine;
         private readonly SkillInterruptionMatrix _interruptionMatrix;
+        private readonly OfflineWeaponCast _offlineWeaponCast;
+        private readonly DamageBlock _offlineDamage;
 
         // 目标检测
         private Vector3 _targetPosition;
@@ -61,6 +63,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
                                 _stateMachine.CurrentState != SkillSubState.Cooldown;
         public IEffectTarget Owner => _owner;
         public float ElapsedTime => _stateMachine.ElapsedTime;
+        public float AttackSpeed => _stateMachine.TimeScale;
 
         /// <summary>施放时的目标位置（输入上报的落点；联网上报 30001 落点用）</summary>
         public Vector3 TargetPosition => _targetPosition;
@@ -98,10 +101,18 @@ namespace Hotfix.GameSystems.Skills.Runtime
             IEffectTarget owner,
             SkillData data,
             SkillInterruptionMatrix interruptionMatrix = null)
+            : this(owner, data, interruptionMatrix, null)
+        {
+        }
+
+        internal SkillExecutor(IEffectTarget owner, SkillData data,
+            SkillInterruptionMatrix interruptionMatrix, OfflineWeaponCast offlineWeaponCast)
         {
             _owner = owner;
             _skillData = data;
             _interruptionMatrix = interruptionMatrix ?? new SkillInterruptionMatrix();
+            _offlineWeaponCast = offlineWeaponCast;
+            _offlineDamage = offlineWeaponCast != null ? data.Damage?.Clone() : null;
             _spinData = data as SpinSkillData;
             _projectileData = data as ProjectileSkillData;
             _stateMachine = new SkillStateMachine(data);
@@ -307,14 +318,15 @@ namespace Hotfix.GameSystems.Skills.Runtime
             }
 
             SkillDamageHelper.FillDamageContext(damage, _skillData.SkillId, frameIndex + 1, cfg.Effect, _owner.Stats);
-            damage.CalculatedDamage *= cfg.DamagePercent;
+            damage.CalculatedDamage *= _offlineWeaponCast?.DamageScale(swordQi: true) ?? cfg.DamagePercent;
 
             Vector3 origin = _owner.transform.position + _owner.transform.TransformDirection(cfg.SpawnOffset);
             Vector3 dir = _owner.transform.forward;
             dir.y = 0f;
             dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : _owner.transform.forward;
 
-            SwordQiSpawner.Spawn(cfg, damage, origin, dir);
+            int elementId = _offlineWeaponCast?.Weapon.ElementId ?? 0;
+            SwordQiSpawner.Spawn(cfg, damage, origin, dir, 0f, elementId, _offlineWeaponCast);
 
             EventBus.Emit(new SwordQiSpawnedEvent
             {
@@ -754,11 +766,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void ApplyDamage(IEffectTarget target, int frameIndex)
         {
-            var damageBlock = _skillData.Damage;
+            var damageBlock = _offlineDamage ?? _skillData.Damage;
             if (damageBlock == null) return;
 
             SkillDamageHelper.FillDamageContext(damageBlock, _skillData.SkillId, frameIndex + 1,
                                                 GetEffect(), _owner.Stats);
+            if (_offlineWeaponCast != null)
+                damageBlock.CalculatedDamage *= _offlineWeaponCast.DamageScale(swordQi: false);
 
             // 蓄力技能：释放瞬间按实际进度 × 曲线结算（修复原硬编码 1.5x 且 Execution 态取 0 的 bug）
             if (_skillData is ChargedSkillData)
@@ -770,7 +784,10 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (target is IDamageable damageable)
             {
                 Vector3 hitDir = (target.transform.position - _owner.transform.position).normalized;
-                damageable.TakeDamage(damageBlock, hitDir);
+                if (_offlineWeaponCast != null)
+                    _offlineWeaponCast.Hit(damageable, damageBlock, hitDir);
+                else
+                    damageable.TakeDamage(damageBlock, hitDir);
             }
             else
             {

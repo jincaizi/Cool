@@ -5,9 +5,9 @@ using UnityEngine;
 namespace Hotfix.GameSystems.VFX
 {
     /// <summary>
-    /// 元素 VFX 表现回退：ViewKey 命中资源时由 Host 实例化并使用资源自带颜色；
-    /// 否则回退到 <see cref="ElementPalette"/> 的程序化颜色。不直接调用 Addressables
-    /// （生产加载器由 Plan 06 的 Host 注入）。
+    /// 元素 VFX 的颜色选择规则。资源可用时保留资源自带颜色，
+    /// 其余情况使用 <see cref="ElementPalette"/>。游戏内的异步表现由
+    /// <see cref="ElementVfxAttachment"/> 管理。
     /// </summary>
     public static class ElementVfxFallback
     {

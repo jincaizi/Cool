@@ -17,6 +17,20 @@ namespace Hotfix.GameSystems.VFX
             public int StunCount;
             public int VulnerableCount;
             public float Phase;
+            public ElementVfxAttachment Visual;
+
+            public EffectType? DominantEffect
+                => FreezeCount > 0 ? EffectType.Freeze :
+                   StunCount > 0 ? EffectType.Stun :
+                   BurnCount > 0 ? EffectType.Burn :
+                   VulnerableCount > 0 ? EffectType.Vulnerable : (EffectType?)null;
+
+            public void Clear()
+            {
+                Visual?.Clear();
+                if (Target != null)
+                    Tint.Clear();
+            }
         }
 
         private static readonly Color FreezeColor = new Color(0.55f, 0.75f, 1f);
@@ -39,11 +53,7 @@ namespace Hotfix.GameSystems.VFX
             EventBus.Unsubscribe<StatusEffectRemovedEvent>(OnRemoved);
 
             foreach (var state in _tints.Values)
-            {
-                // 目标销毁后其 Renderer 一并销毁，此时 SetPropertyBlock 会抛 MissingReferenceException
-                if (state.Target != null)
-                    state.Tint.Clear();
-            }
+                state.Clear();
 
             _tints.Clear();
         }
@@ -58,14 +68,16 @@ namespace Hotfix.GameSystems.VFX
             if (e.Target == null) return;
             if (!IsTinted(e.EffectType)) return;
 
-            if (!_tints.TryGetValue(e.EntityId, out TargetTint state))
+            if (!_tints.TryGetValue(e.EntityId, out TargetTint state) || state.Target != e.Target)
             {
+                state?.Clear();
                 state = new TargetTint
                 {
                     Target = e.Target,
                     Tint = new BodyTintRenderer(e.Target.GetComponentsInChildren<Renderer>()),
+                    Visual = Application.isPlaying ? new ElementVfxAttachment() : null,
                 };
-                _tints.Add(e.EntityId, state);
+                _tints[e.EntityId] = state;
             }
 
             switch (e.EffectType)
@@ -76,12 +88,14 @@ namespace Hotfix.GameSystems.VFX
                 case EffectType.Vulnerable: state.VulnerableCount++; break;
                 // IsTinted 已过滤其余类型；显式列举，未来新增类型不会被静默计成 Vulnerable
             }
+            UpdateVisual(state);
         }
 
         private void OnRemoved(StatusEffectRemovedEvent e)
         {
             if (!IsTinted(e.EffectType)) return;
             if (!_tints.TryGetValue(e.EntityId, out TargetTint state)) return;
+            if (!ReferenceEquals(e.Target, null) && !ReferenceEquals(state.Target, e.Target)) return;
 
             switch (e.EffectType)
             {
@@ -93,13 +107,21 @@ namespace Hotfix.GameSystems.VFX
                     break;
             }
 
-            if (state.FreezeCount == 0 && state.BurnCount == 0
-                && state.StunCount == 0 && state.VulnerableCount == 0)
+            if (state.DominantEffect == null)
             {
-                if (state.Target != null)
-                    state.Tint.Clear();
+                state.Clear();
                 _tints.Remove(e.EntityId);
             }
+            else
+            {
+                UpdateVisual(state);
+            }
+        }
+
+        private static void UpdateVisual(TargetTint state)
+        {
+            if (state.DominantEffect is EffectType effect)
+                state.Visual?.Show(ElementVfxAssets.StatusKey(effect), state.Target);
         }
 
         private void Update()
@@ -115,12 +137,17 @@ namespace Hotfix.GameSystems.VFX
 
                 if (state.Target == null)
                 {
-                    // 目标 GameObject 销毁时 Renderer 已不存在，无需（也无法）清理染色
+                    state.Clear();
                     _dead.Add(pair.Key);
                     continue;
                 }
 
-                if (state.FreezeCount > 0)
+                if (state.Visual?.IsVisible == true)
+                {
+                    // Clear only if there was an active fallback tint.
+                    state.Tint.Apply(default, 0f, default, 0f);
+                }
+                else if (state.FreezeCount > 0)
                 {
                     state.Tint.Apply(FreezeColor, 0.5f, FreezeColor, 0f);
                 }

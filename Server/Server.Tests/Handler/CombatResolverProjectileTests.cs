@@ -57,6 +57,7 @@ public class CombatResolverProjectileTests
         // 目标在 2m：既在挥击锥（2.5m）内，也在剑气首段 [0,4] 的线上 ⇒ 两次结算、两个 HitEntry。
         // 删掉 ResolveStage 里的挥击实例（或把 KeepsSwing 改回 false）本条必红。
         var store = MakeStore(targetAt: (0f, 2f));
+        store.GetPlayer(2)!.SetMaxHp(500f);
         var resolver = new CombatResolver(store, new Random(1));
         var request = new CastRequest
         {
@@ -70,7 +71,7 @@ public class CombatResolverProjectileTests
 
         Assert.Equal(2, hits.Count);                          // 挥击 + 剑气
         Assert.All(hits, h => Assert.Equal(90f * (h.IsCritical ? 1.5f : 1f), h.Damage, 0.001f));
-        Assert.Equal(100f - hits[0].Damage - hits[1].Damage, store.GetPlayer(2)!.Hp, 0.001f);
+        Assert.Equal(500f - hits[0].Damage - hits[1].Damage, store.GetPlayer(2)!.Hp, 0.001f);
     }
 
     [Fact]

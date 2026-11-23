@@ -110,18 +110,12 @@ namespace KcpServer
             // Evade 超时重生都在模块内部直接 SpawnMonster，重生代次同样要接控制 sink，
             // 否则麻痹只冻结 BT、不取消进行中的前摇。控制变化走与玩家相同的唯一入口：
             // 首次 ActionLock 经 ApplyPlayerControl 的 NPC 分支进入 MonsterModule.CancelAction。
-            _monsterModule.OnMonsterSpawned = entity =>
-                entity.ConfigureStatuses(_elementalCatalog,
-                    (speed, locked) => ApplyPlayerControl(entity.PlayerId, speed, locked));
+            _monsterModule.OnMonsterSpawned = ConfigureMonsterStatuses;
             _monsterModule.SpawnDefaultLayout(count);
             // 已在场怪物补同款配置（ConfigureStatuses 的补装 sink 分支幂等）。
             foreach (var entity in _entityStore.All)
                 if (entity.Kind == (byte)EntityKind.Npc)
-                {
-                    long npcId = entity.PlayerId;
-                    entity.ConfigureStatuses(_elementalCatalog,
-                        (speed, locked) => ApplyPlayerControl(npcId, speed, locked));
-                }
+                    ConfigureMonsterStatuses(entity);
             _aoi.NpcActionProvider = id => _monsterModule?.GetActionSnapshot(id);
             _castHandler.SetNpcActionRunner(npcId => _monsterModule?.GetState(npcId)?.ActionRunner);
 
@@ -347,10 +341,21 @@ namespace KcpServer
             _playerIdToSession.TryRemove(playerId, out _);
         }
 
+        private void ConfigureMonsterStatuses(PlayerState entity)
+        {
+            long npcId = entity.PlayerId;
+            entity.ConfigureStatuses(_elementalCatalog,
+                (speed, locked) => ApplyPlayerControl(npcId, speed, locked));
+            entity.Statuses!.HasParalyzeImmunity =
+                () => _monsterModule?.GetState(npcId)?.ActionRunner?.HasWindupArmor == true;
+        }
+
         public PlayerState RegisterEntity(long playerId, string playerName,
             bool supportsAuthoritativeRespawn = false, uint features = 0, string zoneId = "")
         {
             var player = _entityStore.AddPlayer(playerId, playerName);
+            // 首次位置校验从地图出生点起算，和服务端复活使用同一坐标。
+            player.UpdatePosition(_respawnPosition, 0f, 0f, 0L, 0u);
             // Plan 04：登录实体持有权威状态运行时（延迟初始化，bot 不配置）。
             // 控制变化走 ApplyPlayerControl 唯一入口（首次 ActionLock 取消未提交施法、死亡拒绝写入）。
             player.ConfigureStatuses(_elementalCatalog,
@@ -385,7 +390,7 @@ namespace KcpServer
             {
                 if (player.Kind == (byte)EntityKind.Npc)
                 {
-                    // Plan 04：怪物控制走动作运行器（霸体在 CancelAction 内判定——首版只免打断）。
+                    // 怪物控制只取消可打断的前摇；雷免疫在状态进入运行时前判定。
                     _monsterModule?.CancelAction(playerId, NpcActionCancelReason.Hit, CurrentTick);
                 }
                 else

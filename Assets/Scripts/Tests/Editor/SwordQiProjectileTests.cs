@@ -110,6 +110,39 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void WaveUsesFlightDistanceAndRestartsWhenReused()
+        {
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/VFX/SwordQi.prefab");
+            var instance = Object.Instantiate(prefab);
+            _gos.Add(instance);
+            var projectile = instance.GetComponent<SwordQiProjectile>();
+            var renderer = instance.GetComponent<MeshRenderer>();
+            var config = CreateConfig();
+            var properties = new MaterialPropertyBlock();
+            int flight = Shader.PropertyToID("_WaveFlight");
+            int profile = Shader.PropertyToID("_Profile");
+            try
+            {
+                projectile.OnSpawn(config, null, Vector3.zero, Vector3.forward, null, 6f, 2);
+                renderer.GetPropertyBlock(properties);
+                Assert.AreEqual(new Vector4(0.5f, 6f, 1f, 0f), properties.GetVector(flight));
+                Assert.AreEqual(2f, properties.GetFloat(profile));
+
+                projectile.StopAtPoint(Vector3.forward * 7f);
+                projectile.Tick(0f);
+                renderer.GetPropertyBlock(properties);
+                Assert.That(properties.GetVector(flight).z, Is.InRange(0.01f, 0.99f));
+
+                projectile.Release();
+                projectile.OnSpawn(config, null, Vector3.zero, Vector3.forward, null);
+                renderer.GetPropertyBlock(properties);
+                Assert.AreEqual(new Vector4(0f, 0f, 1f, 0f), properties.GetVector(flight));
+                Assert.AreEqual(0f, properties.GetFloat(profile));
+            }
+            finally { Object.DestroyImmediate(config); }
+        }
+
+        [Test]
         public void test_sword_qi_projectile_hits_target_within_detect_radius()
         {
             // Arrange

@@ -79,6 +79,7 @@ namespace KcpServer
             ControlActionLock = false;
             ControlVersion++;
             Displacement = null;
+            _characterActions?.Clear();
             Movement.Reset();
             // Plan 04：死亡立即清状态（控制派生已重置，SyncControl 不会二次写入）。
             Statuses?.ClearAll((uint)tick);
@@ -159,6 +160,29 @@ namespace KcpServer
 
         /// <summary>当前活动施法投影（无 = null；主循环独占访问）。</summary>
         public ActiveCastProjection? ActiveCast { get; internal set; }
+
+        // 判定队列还会保留独立投射物，单独记录玩家角色动作的结束 tick。
+        private List<(ulong CastId, uint EndTick)>? _characterActions;
+
+        internal void RecordCharacterAction(ulong castId, uint tick, uint endTick)
+        {
+            if (Kind != (byte)EntityKind.Player || !NpcTickMath.IsBefore(tick, endTick)) return;
+            _characterActions ??= new List<(ulong, uint)>();
+            PruneCharacterActions(tick);
+            _characterActions.Add((castId, endTick));
+        }
+
+        internal bool HasCharacterAction(uint tick)
+        {
+            PruneCharacterActions(tick);
+            return _characterActions is { Count: > 0 } || IsInvulnerableAt(tick); // 20006 回荡窗口
+        }
+
+        internal void CancelCharacterAction(ulong castId)
+            => _characterActions?.RemoveAll(action => action.CastId == castId);
+
+        private void PruneCharacterActions(uint tick)
+            => _characterActions?.RemoveAll(action => !NpcTickMath.IsBefore(tick, action.EndTick));
 
         /// <summary>推进版本并标脏，供周期 CombatStateUpdate 发送。</summary>
         public void BumpCombatVersion()

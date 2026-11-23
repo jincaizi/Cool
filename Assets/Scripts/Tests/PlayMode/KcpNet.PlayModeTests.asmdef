@@ -3,11 +3,14 @@
     "rootNamespace": "KcpNet.PlayModeTests",
     "references": [
         "KcpNet",
+        "WebSocketNet",
         "Cool.Protocol",
         "GameSys",
+        "Core",
         "SyncCore",
         "DataDefinition",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -120,8 +120,11 @@ namespace Hotfix.GameSystems.Sys3C
             if (becameLocked)
             {
                 _skillCoordinator.ClearInputBuffer();
-                _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
-                _dashComponent.StopDash();
+                if (_skillCoordinator.CurrentSkill?.Data.CanBeInterruptedByDamage != false)
+                {
+                    _skillCoordinator.InterruptCurrentSkill(Skills.Definition.InterruptionSource.Stun);
+                    _dashComponent.StopDash();
+                }
             }
         }
 
@@ -197,6 +200,14 @@ namespace Hotfix.GameSystems.Sys3C
 
         /// <summary>本地攻击 Animator 攻速参数（0.25–4；禁止全局 Animator.speed）。</summary>
         public void SetAttackSpeed(float multiplier) => _attackHandler?.SetAttackSpeed(multiplier);
+
+        internal void FinishWeaponChange()
+        {
+            bool canAttack = !_isDead && _cc != null && !_cc.IsDefending
+                && !_cc.StatusActionLock && !_cc.StatusControllerAdapter.IsStunned
+                && !InputBlockGate.IsBlocked;
+            _skillCoordinator?.FinishWeaponChange(canAttack);
+        }
         public bool CanFireHeavy => _canFireHeavy;
 
         /// <summary>清除剑气就绪表现（失焦、关闭触控、释放绑定等无输入上下文的场景）。</summary>
@@ -457,7 +468,7 @@ namespace Hotfix.GameSystems.Sys3C
 
             // 死亡或防御期间不接受技能输入，同时清掉剑气就绪：
             // 避免金边残留，也避免解除防御/复活后补放一次重击。
-            if (_isDead || _inputManager.IsDefendHeld())
+            if (_isDead || _cc.StatusActionLock || _inputManager.IsDefendHeld())
             {
                 _canFireHeavy = false;
                 // 不可行动期间未消费的释放锁存必须清掉——否则解除防御/复活后
@@ -471,9 +482,10 @@ namespace Hotfix.GameSystems.Sys3C
             // P6 ⑦：死亡期间不接受任何战斗输入（起手技能/普攻/跳跃）。
             // 致死伤害路径已通过 InterruptCurrentSkill(Stun) 取消技能；这里再显式兜底，
             // 覆盖快速死亡帧与未来新增的 _isDead 路径，并让相机拉远条件立即转为 false。
-            if (_isDead)
+            if (_isDead || _cc.StatusActionLock)
             {
-                CancelAimingSkill();
+                if (_isDead || _skillCoordinator.CurrentSkill?.Data.CanBeInterruptedByDamage != false)
+                    CancelAimingSkill();
                 return;
             }
 
@@ -881,6 +893,9 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void HandleSkillActivated(SkillData skillData)
         {
+            if (skillData.SkillId == (int)SkillID.LightAttack || skillData.SkillId == (int)SkillID.HeavyAttack)
+                SetAttackSpeed(_skillCoordinator.CurrentSkill.AttackSpeed);
+
             // 连段时先清除旧的触发器，确保新触发器能正确被 Animator 消费
             if (!string.IsNullOrEmpty(_lastSkillTrigger))
             {

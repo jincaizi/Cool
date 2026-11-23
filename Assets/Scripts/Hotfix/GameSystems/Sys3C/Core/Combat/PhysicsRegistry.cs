@@ -49,6 +49,15 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
         {
             var results = new List<IDamageable>();
             var dedup = new HashSet<IDamageable>();
+            FindNearbyNonAlloc(center, radius, type, results, dedup);
+            return results;
+        }
+
+        internal void FindNearbyNonAlloc(Vector3 center, float radius, EntityType type,
+            List<IDamageable> results, HashSet<IDamageable> dedup)
+        {
+            results.Clear();
+            dedup.Clear();
 
             int mask = type == EntityType.Player ? _maskCharacter : _maskMonster;
 
@@ -77,8 +86,6 @@ namespace Hotfix.GameSystems.Sys3C.Core.Combat
                     }
                 }
             }
-
-            return results;
         }
     }
 }

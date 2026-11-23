@@ -56,6 +56,37 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void EquipPending_DefersLatestBasicAttackUntilConfirmation()
+        {
+            bool pending = true;
+            _coordinator.IsWeaponChangePending = () => pending;
+            var light = ScriptableObject.CreateInstance<InstantSkillData>();
+            var heavy = ScriptableObject.CreateInstance<InstantSkillData>();
+            try
+            {
+                TestHelpers.SetField(light, "_skillId", (int)SkillID.LightAttack);
+                TestHelpers.SetField(heavy, "_skillId", (int)SkillID.HeavyAttack);
+                _coordinator.RegisterSkill(light);
+                _coordinator.RegisterSkill(heavy);
+                var started = new List<int>();
+                _coordinator.OnSkillActivated += skill => started.Add(skill.SkillId);
+
+                _coordinator.HandleLightAttack();
+                _coordinator.HandleHeavyFire();
+                Assert.IsEmpty(started);
+
+                pending = false;
+                _coordinator.FinishWeaponChange(replay: true);
+                CollectionAssert.AreEqual(new[] { (int)SkillID.HeavyAttack }, started);
+            }
+            finally
+            {
+                Object.DestroyImmediate(light);
+                Object.DestroyImmediate(heavy);
+            }
+        }
+
+        [Test]
         public void HandleInput_SameSkillWhileSpinning_IsNotBuffered()
         {
             _coordinator.HandleInput(SkillInput.SkillToPosition(SpinId, Vector3.zero));

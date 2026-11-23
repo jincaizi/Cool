@@ -101,17 +101,10 @@ namespace Hotfix.GameSystems.Bag.UI
 
         private void Build()
         {
-            var canvasObject = new GameObject("WeaponBagCanvas", typeof(RectTransform));
-            canvasObject.transform.SetParent(transform, false);
-            var canvas = canvasObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 30;
-            var scaler = canvasObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(960, 540);
-            canvasObject.AddComponent<GraphicRaycaster>();
-
-            var root = (RectTransform)canvasObject.transform;
+            var root = (RectTransform)transform;
+            root.anchorMin = Vector2.zero;
+            root.anchorMax = Vector2.one;
+            root.offsetMin = root.offsetMax = Vector2.zero;
             var panel = new GameObject("Swords", typeof(RectTransform));
             _panel = (RectTransform)panel.transform;
             Place(_panel, root, new Vector2(-150, -72), new Vector2(280, 280));

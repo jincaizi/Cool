@@ -26,6 +26,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private StaminaSystem _stamina;
         private static readonly ElementalCatalogDefinition SharedAttackCatalog =
             ElementalCatalogDefaults.Create();
+        private ulong _nextOfflineCastId;
 
         // 当前正在执行的技能
         private SkillExecutor _currentSkill;
@@ -56,6 +57,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
         // 属性
         /// <summary>已确认装备的攻速倍率（联网宿主注入；null = 1）。只作用于普攻 10001/10002。</summary>
         public Func<float> AttackSpeedProvider { get; set; }
+
+        /// <summary>单机装备提供器。仅在接受普攻时读取，空值沿用原普攻。</summary>
+        public Func<WeaponDefinition> OfflineWeaponProvider { get; set; }
+
+        internal Func<bool> IsWeaponChangePending { get; set; }
+        private int _deferredBasicAttack;
 
         public SkillExecutor CurrentSkill => _currentSkill;
         public SkillSubState CurrentSubState => _currentSkill?.CurrentSubState ?? SkillSubState.None;
@@ -172,6 +179,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public void HandleInput(SkillInput input)
         {
+            if (DeferBasicAttack(input.SkillId)) return;
             if (IsEchoRequestPending) return;
 
             // R 同键取消特例：旋转期间再按同技能键 = 取消（必须位于冷却检查之前，
@@ -246,6 +254,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (IsEchoRequestPending) return;
 
             int skillId = (int)Definition.SkillID.LightAttack;
+            if (DeferBasicAttack(skillId)) return;
             if (!_skillDatabase.TryGetValue(skillId, out var skillData))
                 return;
 
@@ -276,6 +285,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (IsEchoRequestPending) return;
 
             int skillId = (int)Definition.SkillID.HeavyAttack;
+            if (DeferBasicAttack(skillId)) return;
             if (!_skillDatabase.TryGetValue(skillId, out var skillData))
                 return;
 
@@ -354,18 +364,23 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 }
             }
 
-            // 创建执行器
-            var executor = new SkillExecutor(_owner, skillData, _interruptionMatrix);
-
             // 普攻攻速：执行器状态机与 Animator AttackSpeed 使用同一冻结倍率。
             float attackSpeed = 1f;
-            if (skillId == 10001 || skillId == 10002)
+            bool isBasic = skillId == 10001 || skillId == 10002;
+            OfflineWeaponCast weaponCast = null;
+            if (isBasic)
             {
-                attackSpeed = AttackSpeedProvider != null
-                    ? Mathf.Clamp(AttackSpeedProvider(), 0.25f, 4f)
-                    : 1f;
-                executor.SetTimeScale(attackSpeed);
+                var weapon = OfflineWeaponProvider?.Invoke();
+                if (weapon != null)
+                {
+                    weaponCast = new OfflineWeaponCast(weapon, SharedAttackCatalog, skillId,
+                        _owner.transform.GetInstanceID(), ++_nextOfflineCastId);
+                }
+                attackSpeed = Mathf.Clamp(weaponCast?.Weapon.AttackSpeedMultiplier
+                    ?? AttackSpeedProvider?.Invoke() ?? 1f, 0.25f, 4f);
             }
+            var executor = new SkillExecutor(_owner, skillData, _interruptionMatrix, weaponCast);
+            if (isBasic) executor.SetTimeScale(attackSpeed);
 
             if (_dashComponent != null)
             {
@@ -396,7 +411,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (!SkillCastReporter.IsChargeable(skillData))
             {
                 // 普攻冷却与服务端同源：max(资产冷却, 共享接续窗) / 攻速。
-                float cooldown = skillId == 10001 || skillId == 10002
+                float cooldown = isBasic
                     ? BasicAttackCooldown(skillId, skillData.Cooldown, attackSpeed)
                     : skillData.Cooldown;
                 _cooldownManager.StartCooldown(skillId, cooldown);
@@ -534,6 +549,25 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public void ClearInputBuffer()
         {
             _inputBuffer.Clear();
+            _deferredBasicAttack = 0;
+        }
+
+        internal void FinishWeaponChange(bool replay)
+        {
+            int skillId = _deferredBasicAttack;
+            _deferredBasicAttack = 0;
+            if (!replay) return;
+            if (skillId == (int)SkillID.LightAttack) HandleLightAttack();
+            if (skillId == (int)SkillID.HeavyAttack) HandleHeavyFire();
+        }
+
+        private bool DeferBasicAttack(int skillId)
+        {
+            if (skillId != (int)SkillID.LightAttack && skillId != (int)SkillID.HeavyAttack)
+                return false;
+            if (IsWeaponChangePending?.Invoke() != true) return false;
+            _deferredBasicAttack = skillId;
+            return true;
         }
 
         private void ProcessInputBuffer()
@@ -542,6 +576,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             while (_inputBuffer.TryPeek(out var buffered))
             {
+                if (DeferBasicAttack(buffered.Input.SkillId))
+                {
+                    _inputBuffer.TryConsume(out _);
+                    continue;
+                }
                 // 检查冷却是否已好
                 if (!_cooldownManager.IsOnCooldown(buffered.Input.SkillId))
                 {

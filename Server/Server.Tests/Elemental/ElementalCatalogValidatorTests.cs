@@ -42,6 +42,17 @@ public class ElementalCatalogValidatorTests
     }
 
     [Fact]
+    public void Rejects_Invalid_Burn_Damage_And_Pvp_Thunder_Duration()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        catalog.Statuses.Find(s => s.EffectId == 201)!.DamagePerTick = float.NaN;
+        catalog.Pvp.ThunderDurationSeconds = 60.1f;
+        var errors = ElementalCatalogValidator.Validate(catalog);
+        Assert.Contains("status burn damage out of range", errors);
+        Assert.Contains("pvp settings out of range", errors);
+    }
+
+    [Fact]
     public void Shipped_Json_Matches_Defaults_And_Fingerprint()
     {
         string path = Path.Combine(AppContext.BaseDirectory, "Config", "elemental_catalog.json");

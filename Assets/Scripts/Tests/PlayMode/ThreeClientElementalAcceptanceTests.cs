@@ -62,6 +62,8 @@ namespace KcpNet.PlayModeTests
 
         /// <summary>10002 前摇 0.35s × 15Hz 向上取整 = 6 tick（攻速倍率 1 时）。</summary>
         private const uint LightningWindupTicks = 6;
+        private const int LightAttackSkillId = 10001;
+        private const uint LightAttackWindupTicks = 5;
 
         /// <summary>
         /// 共享运行闸门：120s 总 deadline（内层等待全部受它约束）、取消标志与当前阶段。
@@ -820,8 +822,10 @@ namespace KcpNet.PlayModeTests
                     + " != 1; the +6 tick windup assumption no longer holds");
 
             gate.SetStage("cancel/b-cast");
+            if (!await WaitUntilServerTick(new[] { b }, gate, aConfirm.AcceptedTick))
+                return (false, "cancel/timing: B did not receive the tick after A's acceptance");
             var bCast = await CastAsync(all, b, gate, aId, 1, bInventory.EquipmentRevision,
-                bInventory.LifeId, "cancel/b-request", "cancel/b-confirm");
+                bInventory.LifeId, "cancel/b-request", "cancel/b-confirm", LightAttackSkillId);
             if (!bCast.ok) return (false, bCast.reason);
             var bConfirm = bCast.confirm!;
             if (!bConfirm.Accepted)
@@ -831,18 +835,18 @@ namespace KcpNet.PlayModeTests
             if (Math.Abs(bConfirm.AttackSpeedMultiplier - 1f) > 0.001f)
                 return (false, "cancel/timing: B attack speed "
                     + bConfirm.AttackSpeedMultiplier.ToString("F3", CultureInfo.InvariantCulture)
-                    + " != 1; the +6 tick windup assumption no longer holds");
+                    + " != 1; the +5 tick windup assumption no longer holds");
 
             // 用真实 AcceptedTick 校验时间关系（不靠 sleep）：
-            // A 命中 = A.AcceptedTick + 6；B 首段 = B.AcceptedTick + 6 必须更晚。
+            // 雷命中时，B 的可中断轻击必须已经接受且仍在前摇。
             if (bConfirm.AcceptedTick <= aConfirm.AcceptedTick)
                 return (false, "cancel/tick-order: B AcceptedTick=" + bConfirm.AcceptedTick
                     + " is not after A's " + aConfirm.AcceptedTick);
             uint aHitTick = aConfirm.AcceptedTick + LightningWindupTicks;
-            if (bConfirm.AcceptedTick + LightningWindupTicks <= aHitTick)
+            if (bConfirm.AcceptedTick >= aHitTick || bConfirm.AcceptedTick + LightAttackWindupTicks <= aHitTick)
                 return (false, "cancel/tick-order: B first stage tick "
-                    + (bConfirm.AcceptedTick + LightningWindupTicks)
-                    + " is not after A's hit tick " + aHitTick);
+                    + (bConfirm.AcceptedTick + LightAttackWindupTicks)
+                    + ", B accepted=" + bConfirm.AcceptedTick + ", A hit tick=" + aHitTick);
 
             // A 的雷命中：三端各收到挥击 + 剑气两条命中（命中即触发麻痹取消）。
             gate.SetStage("cancel/a-hits");
@@ -907,12 +911,12 @@ namespace KcpNet.PlayModeTests
             Debug.Log("[ElementalAcceptance] cancel: A accepted=" + aConfirm.AcceptedTick
                 + " B accepted=" + bConfirm.AcceptedTick
                 + " A hit/cancel tick=" + cancelA.EffectiveTick
-                + " B first stage=" + (bConfirm.AcceptedTick + LightningWindupTicks));
+                + " B first stage=" + (bConfirm.AcceptedTick + LightAttackWindupTicks));
 
             // ② B 的施法在发射前被整组作废：等到“本来该发射”的 tick 之后，三端仍无
             //    该 CastId 的 DamageResult 命中与 ProjectileLaunchBroadcast。
             gate.SetStage("cancel/b-never-launched");
-            uint bFirstStageTick = bConfirm.AcceptedTick + LightningWindupTicks;
+            uint bFirstStageTick = bConfirm.AcceptedTick + LightAttackWindupTicks;
             if (!await WaitUntilServerTick(all, gate, bFirstStageTick + 1))
                 return (false, "cancel/b-never-launched: three clients did not all reach"
                     + " server tick " + (bFirstStageTick + 1));
@@ -960,7 +964,7 @@ namespace KcpNet.PlayModeTests
                 return (false, "cancel/presenter: C received no CastBroadcast for B's cast "
                     + bConfirm.CastId);
 
-            var catalog = CreateRuntimeAttackCatalog(SkillId, out var skillData);
+            var catalog = CreateRuntimeAttackCatalog(LightAttackSkillId, out var skillData);
             try
             {
                 var presenter = new RemoteCastPresenter(c.Registry, c.Manager.LocalPlayerId,
@@ -1082,14 +1086,15 @@ namespace KcpNet.PlayModeTests
 
         private static async Task<(bool ok, string reason, CastConfirm? confirm)> CastAsync(
             Ctx[] ctxs, Ctx caster, RunGate gate, long targetId, uint clientCastSeq,
-            uint equipmentRevision, uint casterLifeId, string requestStage, string confirmStage)
+            uint equipmentRevision, uint casterLifeId, string requestStage, string confirmStage,
+            int skillId = SkillId)
         {
             gate.SetStage(requestStage);
             caster.Adapter.Send(MessageId.CastRequest, new CastRequest
             {
-                SkillId = SkillId,
+                SkillId = skillId,
                 TargetPlayerId = targetId,
-                Shape = new HitShape { ShapeType = 0, Range = 2.5f, Angle = 120f },
+                Shape = new HitShape { ShapeType = 0, Range = skillId == LightAttackSkillId ? 2f : 2.5f, Angle = 120f },
                 ClientCastSeq = clientCastSeq,
                 EquipmentRevision = equipmentRevision,
                 CasterLifeId = casterLifeId

@@ -520,7 +520,7 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             if (data.SwordQi != null)
             {
-                var qi = SwordQiSpawner.Spawn(data.SwordQi, data.Damage?.Clone(), origin, forward,
+                var qi = SwordQiSpawner.Spawn(data.SwordQi, null, origin, forward,
                     startDistance, elementId);
                 return qi != null ? new SwordQiVisual(qi) : null;
             }

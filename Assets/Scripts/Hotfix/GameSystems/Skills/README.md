@@ -29,9 +29,11 @@
 
 ## 属性剑气与攻速（2026-11-14）
 
-状态：Plan 01、03、04 已完成（Plan 03 接通共享突进行为与状态倍率；Plan 04 信号：剑气元素
-染色、`EffectType.Vulnerable` 与权威状态表现接线）。离线单机仍用本地
-`StatusEffectManager`（冰冻/灼烧），四元素共享运行时留给 Plan 06/backlog（2026-11-20 修正，原写 Plan 05）。
+- 单机装备由 `SkillCoordinator.OfflineWeaponProvider` 提供。10001/10002 接受施法时冻结武器
+  元素、基础攻击、攻速和剑气倍率。挥击乘武器基础攻击相对默认铁剑的倍率，重击剑气
+  再乘共享剑气系数及武器剑气倍率。切换装备只影响下一次施法。
+- 仅 10002 的挥击和剑气附加武器元素。两者各自结算伤害，共用同一次施法的每目标附加记录。
+  首个有效且目标存活的命中占用记录。格挡、无效伤害和击杀均不附加元素。
 
 - 普攻 10001/10002 的攻速来自已确认装备：`SkillCoordinator.AttackSpeedProvider` 注入倍率
   （0.25–4），`SkillExecutor.SetTimeScale` 驱动 `SkillStateMachine.ElapsedTime`，
@@ -40,7 +42,10 @@
   `CharacterAttackHandler` / `RemoteEntityAnimator` 写 `AttackSpeed` 参数。
 - 联机启用属性剑气后，`NetworkSwordQiGate.SuppressLocalSpawn=true`：
   `SkillExecutor.OnSwordQiFrame` 不生成剑气视觉，由 `ProjectileLaunchBroadcast` 统一创建。
-  离线路径不变（`SwordQiSpawner` 仍支持 `startDistance` 供晚到补进度）。
+  单机由 `SkillExecutor` 生成并使用施法快照的元素。 `SwordQiSpawner` 仍支持
+  `startDistance` 供联网晚到补进度。
+- `SwordQiProjectile` 把已飞距离和停点余量写入波面材质参数。补进度、元素资源替换及回池
+  复用时，波面形态跟随本次飞行进度。命中和停止距离仍由弹体按原规则计算。
 
 ## 突进位移（Plan 03，2026-11-18）
 
@@ -63,15 +68,16 @@
 - `SwordQiSpawner.Spawn(..., int elementId = 0)` 透传给 `SwordQiProjectile`，由
   `SwordQiElementTint` 按元素给拖尾/粒子/材质 `_Color` 上色（冰蓝白/火橙红/雷紫白/
   风青白，0 = 原色）；联机剑气读 `ProjectileLaunchBroadcast.ElementId`。
-- 离线 `SkillExecutor.OnSwordQiFrame` **尚未传入** `Sys3CEntry.CurrentElementId`
-  （Plan 06/backlog）。本地 `SkillExecutor` 施加的 `EffectData` 仍走 `StatusEffectManager`，
-  与服务端权威 `StatusRuntime` 是两套（按效果组去重留给 Plan 06/backlog）。
+- 单机武器元素与联网共用 `StatusRuntime`；单机怪物的状态推进、实际移动倍率和伤害顺序
+  见 [Monster](../Monster/README.md)。独立技能资产中的 `EffectData` 继续由
+  `StatusEffectManager` 处理。
 
 ## 测试
 
 Editor：`SkillCoordinator*Tests`、`SkillExecutor*Tests`、`SkillStateMachine*Tests`、`SkillDataMeteorTests`、
 `SkillInterruptionMatrixSpinTests`、`StatusEffect*Tests`、`Fireball*Tests`、`Meteor*Tests`、`SwordQi*Tests`、
-`BurnEffectDataTests`、`ProjectileSkillDataTests`、`SkillPresentationCatalogTests`、`RemoteProjectileApiTests`。
+`BurnEffectDataTests`、`ProjectileSkillDataTests`、`SkillPresentationCatalogTests`、`RemoteProjectileApiTests`、
+`OfflineElementalWeaponTests`。
 突进回归在 Sys3C：`SkillDashComponentTests`（共享窗口距离/起手收尾/状态倍率）。
 
 ```bash

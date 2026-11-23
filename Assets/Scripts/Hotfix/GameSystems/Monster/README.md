@@ -11,6 +11,7 @@
 | `AI/` | `AIBrain`（唯一入口）→ `AIContext` + `AIStateMachine`；状态：Idle / Patrol / Chase / Attack / Hit / Defend / Taunt / Death |
 | `Damage/` | `DamagePipeline`、`DamageContext` / `DamageResult`、`IDamageModifier`、`DefendModifier` / `IFrameModifier` |
 | `MonsterEntity.cs` | 怪物实体，实现 `IDamageable` / `ITargetable` / `IEffectTarget`；`BodyRadius` 供表面距离选敌 |
+| `OfflineMonsterStatuses.cs` | 单机元素状态，接线共享运行时、本地战斗时钟、DoT 与状态表现 |
 | `MonsterStats.cs` / `MonsterConfig.cs` | 属性与配置 |
 | `MonsterMovement.cs` | 客户端移动 |
 | `MonsterSpawner.cs` / `SpawnLedger.cs` | 生成与生成账本（防重复生成）；`Active` / `SnapshotAlive()` 供单机剑气回荡选敌 |
@@ -31,6 +32,16 @@
 InstanceId, Revision)` 合并；攻击起手仍由 `CastBroadcast` → `NpcAttackSchedule` 驱动。
 事件只影响表现，本目录的本地 AI 不参与联网动作存储。
 
+## 单机武器元素
+
+- 10002 的首次有效挥击或剑气命中为存活目标附加状态，挥击与剑气共用施法级去重。
+- `OfflineMonsterStatuses` 用 Unity 游戏时间推进共享的 15 Hz 状态时钟。冰调整
+  `NavMeshAgent.speed`，雷暂停 AI 行动与移动 0.6s，蜘蛛的霸体前摇免疫麻痹、
+  普通受击打断和击退。
+- 风在直接伤害扣血前读取，首个附加命中按附加前的倍率结算。每个状态 tick 先清除
+  到期易伤，再结算灼烧。灼烧会结算一次已排定的末跳，直接扣血并发 DoT 飘字事件。
+- 死亡、禁用和复用时清除元素状态，发布对应的状态移除事件。
+
 ## 护栏
 
 - NPC 视图上不得挂 `IDamageable`（`NpcViewGameplayStripTests` 锁死）；本地技能不能命中断线上的 NPC 视图。
@@ -43,7 +54,7 @@ InstanceId, Revision)` 合并；攻击起手仍由 `CastBroadcast` → `NpcAttac
 ## 测试
 
 Editor：`MonsterConfigNumbersTests`、`MonsterEntityDotDamageTests`、`SpawnLedgerTests`、`StatusEffectWiringTests`、
-`AIBrainTargetValidityTests`。
+`AIBrainTargetValidityTests`、`OfflineElementalWeaponTests`。
 PlayMode：`MonsterWorldTests`、`AoiWorldTests`、`CombatSyncTests`。
 
 ```bash

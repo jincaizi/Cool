@@ -13,7 +13,8 @@
 | `HitFlashVFX.cs` / `BodyTintRenderer.cs` / `PlayerBodyTint.cs` / `HitTintState.cs` | 受击闪白与染色 |
 | `StatusVFXSystem.cs` / `SkillFreezeEffector.cs` | 状态效果表现 |
 | `AuthoritativeStatusVfx.cs` | 权威状态投影 → 按组 diff 的表现事件（Plan 04） |
-| `ElementVfxFallback.cs` | 元素 VFX 键解析/颜色回退（Plan 05；生产 Addressables loader 留 Plan 06） |
+| `ElementVfxAssets.cs` / `ElementVfxAttachment.cs` | 元素资源地址、异步加载和显示生命周期 |
+| `ElementVfxFallback.cs` | 资源命中优先的颜色回退规则 |
 | `WeaponElementConfig.cs` / `WeaponMaterialProxy.cs` / `WeaponSurfaceShader.cs` | 武器元素与材质 |
 | `PlayerHealVFX.cs` | 治疗表现 |
 | `SkillWatcher.cs` | 技能事件观察 |
@@ -21,7 +22,7 @@
 
 事件来源：`Skills/Events/` 与 `Skills/EventBus.cs`。格挡火花链路见 [Combat README](../Combat/README.md)。
 
-## 权威状态与元素表现（Plan 04，2026-11-19）
+## 剑气与状态的元素表现
 
 - **`AuthoritativeStatusVfx`**：纯逻辑类，由 `SyncLayer/ClientNetworkHost` 驱动。
   按 `(EntityId, GroupId)` 维护已应用状态表并 diff `CombatProjection.Statuses`：
@@ -30,19 +31,23 @@
   `2xx` 火 → `Burn`、`3xx` 雷 → `Stun`、`4xx` 风 → `Vulnerable`。
   实体换渲染根（Proxy↔Full / 本地角色重建）时先对旧根发全部 Removed、再对新根发
   Applied，染色不会留在旧模型。
-- **四色状态染色**：`StatusVFXSystem` 对四种权威状态做身体染色——
-  冰 `(0.55,0.75,1)`、雷 `(0.7,0.4,1)`、火 `(1,0.35,0.1)` 呼吸闪烁、风 `(0.3,1,0.9)`；
-  同实体多状态按 `Freeze > Stun > Burn > Vulnerable` 取优先级，计数归零后 `Clear`。
-  染色用 `BodyTintRenderer`（MaterialPropertyBlock），不污染共享材质。
-- **剑气元素色**：`SwordQiElementTint`（`Skills/Runtime/SwordQi/SwordQiProjectile.cs`）
-  在生成时按 `ElementId` 给拖尾/粒子 `startColor` 与材质 `_Color` 上色
-  （冰蓝白、火橙红、雷紫白、风青白；`0` = 保留预制体原色）。联机剑气读
-  `ProjectileLaunchBroadcast.ElementId`；离线 `SkillExecutor` 的元素 provider 留 Plan 06/backlog。
-- 当前是程序化染色/简化特效，不依赖新增美术资源；`ViewKey` 的资源化留给 Plan 06/backlog。
-- **`ElementVfxFallback`（Plan 05，2026-11-20）**：`ResolveColor(elementId, viewKey, loader)`
-  只锁定判定顺序——`ViewKey` 非空且注入的 loader 返回资源时用 `Color.white`
-  （资源自带颜色，Host 负责实例化）；否则回退 `ElementPalette.ColorOf(elementId)`。
-  不直接调用 Addressables；生产 loader/Host 接入与四元素资源签收属 Plan 06/backlog。
+- **状态表现**由 `StatusVFXSystem` 消费线上与离线的同一组状态事件。同实体多状态按
+  `Freeze > Stun > Burn > Vulnerable` 选择贴身特效。冰使用霜纹脚环，火用八帧小火循环，
+  雷用短促紫色电弧，风用青色流带。材质直接引用 `Assets/PreRes/SkillsCfg/Textures/` 的生成图。
+  异步加载期间和资源缺失时由 `BodyTintRenderer` 用
+  MaterialPropertyBlock 做身体染色。换渲染根、状态优先级切换、状态清空或退场时回收旧效果。
+- **剑气表现**在 `SwordQiProjectile.OnSpawn` 按施法冻结的 `ElementId` 读取共享表的
+  `SwordQiViewKey`。五个预制体共用 `SwordQiWave.asset` 的网格和 `SwordQiEnergy.shader`。
+  亮刃与尾缘属于同一片弯曲网格，沿全弧向后渐隐并在两翼收尖。材质根据飞行进度改变展开宽度、
+  尾缘长度及倾角。默认银白，冰有晶纹，火有起伏的焰纹，雷有折线电丝，风有柔和回流。
+  首帧回退使用同元素轮廓与染色。Addressables 实例继承当前飞行进度，再替换回退渲染器。
+- `ElementVfxAttachment` 通过 `Res.LoadAsync` 加载，仅活跃表现持有资源引用。回池、换根或
+  移除状态时取消待完成请求，迟到的资源仅归还引用。已生成的表现先隐藏再销毁，销毁后释放引用。
+- **资源登记**由编辑器 `ElementalVfxRegistration` 在导入后与 Player Build 前执行。四种元素
+  各登记 `swordqi/{ice,fire,thunder,wind}` 和 `status/{ice,fire,thunder,wind}`，对应
+  `Assets/Prefabs/VFX/Elemental/` 的八个纯表现预制体。Player Build 从本地
+  `Elemental VFX` 组构建和打包。可用菜单 **Cool → VFX → Register Elemental Addressables** 重新登记。
+
 ## 剑气回荡
 
 - `SwordQiEchoPresenter` 按 `SwordQiEchoState` 或共享 `SwordQiEchoContact` 时间表驱动本地/远端轨迹；
@@ -52,9 +57,10 @@
 ## 测试
 
 - Editor：`Assets/Scripts/Tests/Editor/VFX/`（`BodyTintRendererTests`、`HitTintStateTests`、`PlayerBodyTintTargetTests`、
-  `AuthoritativeStatusVfxTests`、`ElementVfxFallbackTests`）、`StatusVFXSystemTests`；剑气染色在
+  `AuthoritativeStatusVfxTests`、`ElementVfxFallbackTests`、`ElementVfxAttachmentTests`）、`StatusVFXSystemTests`；剑气染色在
   `Assets/Scripts/Tests/Editor/Skills/SwordQiElementTintTests.cs`。
-- PlayMode：`BlockFeedbackSparkTests`、`PlayerHealVFXTests`、`PlayerBodyTintTests`。
+- PlayMode：`ElementalAddressableLifecycleTests` 加载八个元素预制体并验证资源引用回收。
+  受击与治疗回归包括 `BlockFeedbackSparkTests`、`PlayerHealVFXTests`、`PlayerBodyTintTests`。
 
 ```bash
 bash tools/unity-tests.sh EditMode BodyTintRendererTests

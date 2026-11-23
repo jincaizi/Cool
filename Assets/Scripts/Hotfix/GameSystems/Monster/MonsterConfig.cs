@@ -100,6 +100,9 @@ namespace Hotfix.GameSystems.Monster
         [Tooltip("前摇时间（秒），在此时间后结算伤害。Windup duration before damage is dealt (seconds).")]
         public float AttackWindupTime = 0.2f;
 
+        [Tooltip("攻击前摇期间免受麻痹、普通受击打断和击退。")]
+        public bool ArmoredWindup;
+
         [Tooltip("后摇时间（秒），伤害结算后到状态可退出的时间。Recovery duration after damage before state can exit (seconds).")]
         public float AttackRecoveryTime = 0.3f;
 

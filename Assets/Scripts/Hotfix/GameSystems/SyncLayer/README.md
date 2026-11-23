@@ -4,7 +4,7 @@
 
 `ClientNetworkHost.cs` 是游戏内网络接线的唯一入口：创建 adapter / manager / 远端实体渲染根并每帧驱动。
 联网模式自动连接；登录进世界后装配本地角色，`MovementReporter` 上报，`NetMovementPolicy` 接管移动与平滑纠偏。
-单机模式零影响。
+单机模式不创建连接，武器背包和技能装备来源使用本地会话。
 
 设计与验收路线图：[network-sync-design.md](../../../../../docs/superpowers/specs/2026-08-27-network-sync-design.md)；
 接线步骤见 [p2-client-network-host.md](../../../../../docs/superpowers/guides/p2-client-network-host.md) 与
@@ -40,7 +40,7 @@
 Part A 取消广播/NpcAction；Part B 战斗投影版本合并、AOI 基线投影、
 `ActiveCast` 补播与在途剑气补发消费；Plan 03 位移上报、跳跃边沿与本人控制消费；
 Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
-元素 VFX 资源化与远端武器模型仍属 Plan 06/backlog（2026-11-20 修正，原写 Plan 05）。
+首发实现补齐远端武器模型和 Addressables 元素特效。角色重建保留连接级战斗桥、排队消息、换装及施法序号，断线时随连接释放。
 
 - **权威换装**：`ClientEquipmentState` 按 `EquipmentRevision` 应用 `EquipWeaponConfirm`；
   旧版本忽略。拒绝确认携带的较新摘要也会应用（恢复服务器当前装备）；登录基线可把版本 0
@@ -53,6 +53,7 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   `ServerTimestamp` 与服务器时钟补飞行进度，终止先到时缓存并跳过后续生成，
   重复发射/终止按 `CastId` 幂等。`ProjectileStopBroadcast` 只停指定 `CastId`；
   旧服务端（`HitEntry.CastId == 0`）仍走 `DamageResult.StopX/StopZ` 兼容路径。
+  远程创建的剑气不携带本地伤害数据，切换模式时仍只播放表现。
 - **不重影**：`NetworkSwordQiGate.SuppressLocalSpawn` 在启用能力位的联机客户端为 true，
   `SkillExecutor.OnSwordQiFrame` 不再创建本地剑气；离线/单机保持 false。
 - **场景**：`CombatSceneId` 使用登录 `ZoneId`；客户端忽略不同场景的发射/终止。
@@ -77,7 +78,7 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
   `ApplyProjection` 按 `LifeId` + 单一 `CombatVersion` 原子合并：旧生命/旧版本丢弃，
   新生命先入 64 条有界缓存等该世代基线更新视图后回放，相同版本视为幂等重放仍应用
   （基线与 `Health` 快照同版本）。HP/Dead/IsDefending 同步 `Targetable`/名牌/Animator；
-  `Equipment`/`Control` 只存储（不替换远端模型、不改 3C）；`Statuses` 为空列表即清空旧状态
+  `Equipment` 独立按生命代次和完整装备投影版本合并，避免较新的普通血量快照抢占换装版本。Full 头像复用男女右手剑模，进入 Full 或同代次视图重建时重放，Proxy 不实例化剑模。远端 `Control` 只存储。`Statuses` 为空列表即清空旧状态
   （Plan 04 起内容为权威冰/火/雷/风，见下文“权威状态表现”）。
 - **AOI 基线投影**：`EntityFieldMask.Combat` 置位的基线快照走同一条 `ApplyProjection`；
   `EntitySnapshot.CombatVersion/LifeId` 随 `Health`/`Combat` 位下发。服务端每快照携带

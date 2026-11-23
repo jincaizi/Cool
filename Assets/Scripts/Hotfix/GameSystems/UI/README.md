@@ -9,6 +9,8 @@
 - `Core/ReadinessGate.cs`：启动就绪门。
 - `Core/ScreenAdapter.cs`：屏幕适配。
 - `Const/UIConst.cs`：层定义唯一真值源（`Base` / `Main` / `Popup` / `Top` / `Guide`）。
+- 武器背包动态挂在 `Popup` 层，复用安全区和 Canvas 射线。按钮及展开区域接收点击，面板外仍由移动镜头区域处理。
+- WebGL 的触控覆盖参数与横屏模板使用同一模式。普通桌面画布保持设计宽高比，并为页脚留出空间，较矮的视口仍可显示整张画布。
 
 ## 面板
 

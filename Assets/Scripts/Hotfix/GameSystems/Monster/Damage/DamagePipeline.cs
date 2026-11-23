@@ -47,7 +47,7 @@ namespace Hotfix.GameSystems.Monster
         // Entry point called from MonsterEntity.TakeDamage.
         // Returns the merged result — caller uses HitReactLevel and ShouldKnockback
         // to drive AI state transitions.
-        public DamageResult Process(ref DamageContext ctx)
+        public DamageResult Process(ref DamageContext ctx, float incomingDamageMultiplier = 1f)
         {
             ctx.CurrentDamage = ctx.RawDamage;
 
@@ -88,6 +88,7 @@ namespace Hotfix.GameSystems.Monster
             if (_stats.IsDead)
                 return merged;
 
+            merged.FinalDamage *= incomingDamageMultiplier;
             _stats.ApplyDamage(merged.FinalDamage);
 
             return merged;

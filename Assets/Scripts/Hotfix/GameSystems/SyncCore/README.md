@@ -19,8 +19,7 @@
 
 状态：Plan 01–05 已完成（Plan 03 增加 `Displacements`/`Jump` 共享表与 `MovementBudgetMath`；
 Plan 04 增加 `StatusRuntime`、状态时序与 PvP 规则；Plan 05 完成 AOI/三客户端/带宽/注入验收）。
-离线单机**尚未接入**共享状态运行时（本地 `StatusEffectManager` 的冰冻/灼烧保持独立），
-四元素共享运行时留给 Plan 06/backlog；详见下文“离线边界”。
+离线怪物的属性剑气状态也使用共享运行时，详见下文“离线边界”。
 
 `Elemental/` 是 Plan 01 的双端共享真值：
 
@@ -77,8 +76,7 @@ Unity `MovementBudgetMathTests`（5 项）锁定双端同源编译下的同一�
 ## 权威状态运行时（Plan 04，2026-11-19）
 
 `Elemental/StatusRuntime.cs` 是双端共享的纯 C# 状态机（零 `UnityEngine`），
-服务端每个已配置状态运行时的权威实体（登录玩家/怪物）一份；Plan 04 只有服务端接线，
-离线单机尚未接入（Plan 06/backlog）。
+服务端的登录玩家和怪物，以及离线怪物各自持有一份状态运行时。
 
 | 类型 | 内容 |
 |---|---|
@@ -98,7 +96,8 @@ Unity `MovementBudgetMathTests`（5 项）锁定双端同源编译下的同一�
   `SourceId`，下一跳取原下一跳与新间隔跳中较早者（连续命中不推迟伤害）；
   刷新会清 `PendingRemoval`。
 - PvP 控制规则：仅“玩家目标 + 玩家来源”的 `Paralyze` 记为 `IsPvpControl`；
-  移除时写入 `ControlImmunityUntilTick = tick + 0.5s`（免疫窗口内拒绝新麻痹）；
+  时长取 `Pvp.ThunderDurationSeconds`，PvE 取状态表 `DurationSeconds`。
+  PvP 麻痹移除时写入 `ControlImmunityUntilTick = tick + 0.5s`（免疫窗口内拒绝新麻痹）；
   玩家对玩家的 `Vulnerable` 在 4 秒窗口内不刷新（窗口跨状态移除保存）。
 - `DeriveControl`：多个减速取最大 `SlowRatio`，`SpeedScale = clamp(1 − slow, 0, 1)`；
   任一 `Paralyze` 置 `ActionLock=true`。
@@ -109,19 +108,18 @@ Unity `MovementBudgetMathTests`（5 项）锁定双端同源编译下的同一�
   `MonsterBrain.ArriveHome`（Evade 到家）与 `StatusTickService` 的死亡路径。
 
 首版默认表（`ElementalCatalogDefaults` / `Server/Config/elemental_catalog.json`）：
-冰 `101` 减速 30% / 2s；火 `201` 3s、每 1s 8 点；雷 `301` 0.8s；风 `401` 1.5s、
+冰 `101` 减速 30% / 2s；火 `201` 3s、每 1s 8 点；雷 `301` PvE 0.6s / PvP 0.8s；
+风 `401` 1.5s、
 PvE ×2、PvP ×1.28。`ElementalCatalogDefaults.FindStatus/FindElement` 供两端查表。
 
 验证：服务端与 Unity 各有一份 `StatusRuntimeTests`，锁定应用/刷新/末跳/控制派生与
 PvP 免疫/不刷新窗口。
 
-## 离线边界（Plan 06/backlog）
+## 离线边界
 
-Plan 04 只把 `StatusRuntime` 接到**服务端权威实体**（`ServerStatusManager` +
-`StatusTickService`）。离线单机仍使用 `Skills/Effect/StatusEffectManager` 的本地
-冰冻/灼烧（仅怪物、本地计时、独立效果组）：四元素共享运行时、离线去重与 Addressables
-元素资源留给 Plan 06/backlog（原 Plan 04 文档误写为 Plan 05，2026-11-20 修正），
-不能把 Plan 04/05 的状态/DoT 文档理解为单机已打通。
+服务端由 `ServerStatusManager` 与 `StatusTickService` 推进。离线 `MonsterEntity` 通过
+`OfflineMonsterStatuses` 按同一顺序推进属性剑气的四种元素状态。离线剑气与挥击使用
+同一个施法快照，单个目标只在首个有效命中时附加元素；其他本地技能仍使用各自的状态入口。
 
 ## 约束
 

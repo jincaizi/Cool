@@ -9,13 +9,13 @@ namespace KcpServer.Tests;
 
 /// <summary>
 /// Plan 06 任务 2：麻痹取消玩家前摇的确定性用例。A 的雷 10002 判定命中 B 时，
-/// B 的 10002 尚未到首段（<c>Launched=false</c>）；状态附加 → 控制 sink（与
+/// B 的可打断 10001 尚未判定；状态附加 → 控制 sink（与
 /// <see cref="Server3C.ApplyPlayerControl"/> 玩家分支逐行同构）→ <c>CancelCaster(B)</c>。
 ///
 /// 怪物分支（<c>MonsterModule.CancelAction</c> / <c>NpcActionPhase.Cancelled</c>，
 /// 含霸体免打断与重生代次）已由 <c>MonsterStatusControlTests</c> 的
 /// `Paralyze_Cancels_Unarmored_Windup_Through_Host_Sink`、
-/// `Paralyze_Does_Not_Cancel_Armored_Windup_But_Status_Still_Attaches`、
+/// `Paralyze_Is_Ignored_During_Armored_Windup`、
 /// `Respawned_Monster_Gets_Control_Sink_And_Paralyze_Cancels_Windup` 覆盖，此处不再重复。
 /// </summary>
 public class CastCancelDuringWindupTests
@@ -90,10 +90,15 @@ public class CastCancelDuringWindupTests
     public void Hit_During_Windup_Cancels_Pending_Cast_With_Authoritative_Tick()
     {
         var world = new World();
-        // A 先决策（判定 = 0+6），B 后决策（首段 = 5+6）：A 的判定落在 B 的前摇里。
+        // A 先决策（判定 = 0+6），B 后决策（首段 = 5+5）：A 的判定落在 B 的前摇里。
         var aCast = world.Resolver.Decide(world.A.PlayerId, Lightning(world.B.PlayerId), tick: 0);
         Assert.True(aCast.Accepted);
-        var bCast = world.Resolver.Decide(world.B.PlayerId, Lightning(world.A.PlayerId), tick: 5);
+        var bCast = world.Resolver.Decide(world.B.PlayerId, new CastRequest
+        {
+            SkillId = 10001,
+            TargetPlayerId = world.A.PlayerId,
+            Shape = new HitShape { ShapeType = 0, Range = 2f, Angle = 120f }
+        }, tick: 5);
         Assert.True(bCast.Accepted);
 
         var before = world.DrainRange(0, 5);
@@ -133,46 +138,48 @@ public class CastCancelDuringWindupTests
     }
 
     [Fact]
-    public void Hit_After_Launch_Only_Stops_Presentation_And_Remaining_Stages_Resolve()
+    public void Armored_Heavy_Attack_Completes_While_Paralyzed()
     {
         var world = new World();
-        // B 先决策（首段 = 0+6，先发射），A 后决策（判定 = 2+6）：命中时 B 已 Launched。
-        var bCast = world.Resolver.Decide(world.B.PlayerId, Lightning(world.A.PlayerId), tick: 0);
+        Assert.True(world.Resolver.Decide(world.A.PlayerId, Lightning(world.B.PlayerId), tick: 0).Accepted);
+        var bCast = world.Resolver.Decide(world.B.PlayerId, Lightning(world.A.PlayerId), tick: 5);
         Assert.True(bCast.Accepted);
-        var aCast = world.Resolver.Decide(world.A.PlayerId, Lightning(world.B.PlayerId), tick: 2);
-        Assert.True(aCast.Accepted);
 
-        Assert.Empty(world.DrainRange(0, 5));
-
-        var launch = Assert.Single(world.Drain(LightningFirstStage));
-        Assert.Equal(bCast.CastId, launch.CastId);
-        Assert.NotNull(launch.Launch);
-        Assert.Equal(LightningFirstStage, launch.Launch!.LaunchTick);
-        Assert.Equal(2, launch.Hits.Count); // 挥击 + 剑气首段命中 A
+        world.DrainRange(0, LightningFirstStage);
+        Assert.True(world.B.ControlActionLock);
+        var paralyze = Assert.Single(world.B.Statuses!.Runtime.Active);
+        Assert.Equal(LightningFirstStage + 12, paralyze.EndTick);
         Assert.Empty(world.Cancels);
 
-        var hitTick = 2 + LightningFirstStage;
-        var hit = Assert.Single(world.Drain(hitTick));
-        Assert.Equal(aCast.CastId, hit.CastId);
-        Assert.NotEmpty(hit.Hits);
+        var stages = world.DrainRange(LightningFirstStage + 1, paralyze.EndTick)
+            .Where(r => r.CastId == bCast.CastId).ToList();
+        Assert.Equal(3, stages.Count);
+        Assert.NotNull(stages[0].Launch);
+        Assert.NotEmpty(stages[0].Hits);
+        Assert.All(stages, r => Assert.Null(r.Stop));
+        Assert.Empty(world.Cancels);
+    }
 
-        var cancel = Assert.Single(world.Cancels);
-        Assert.Equal(bCast.CastId, cancel.CastId);
-        Assert.Equal(world.B.LifeId, cancel.CasterLifeId);
-        Assert.Equal(hitTick, cancel.EffectiveTick);
-        Assert.Equal(NpcActionCancelReason.Hit, cancel.Reason);
+    [Fact]
+    public void Lightning_Keeps_A_Released_Fireball_On_Its_Original_Impact()
+    {
+        var world = new World();
+        var target = AddPlayer(world.Store, 3, z: 13.5f, rotation: 0f);
+        var fireball = world.Resolver.Decide(world.B.PlayerId, new CastRequest
+        {
+            SkillId = 20003,
+            ImpactZ = 13.5f
+        }, tick: 1);
+        Assert.True(fireball.Accepted);
+        Assert.True(world.Resolver.Decide(world.A.PlayerId, Lightning(world.B.PlayerId), tick: 0).Accepted);
 
-        // 已发射：取消只停表现——不写 Spent、不清活动施法、不发 Stop。
-        Assert.Equal(bCast.CastId, world.B.ActiveCast?.CastId);
-        Assert.Null(hit.Stop);
+        world.DrainRange(0, LightningFirstStage);
 
-        // 后续两段仍按既有时间轴结算（10 / 13），且全程没有权威终止。
-        var later = world.DrainRange(hitTick + 1, hitTick + 20);
-        var remaining = later.Where(r => r.CastId == bCast.CastId).ToList();
-        Assert.Equal(2, remaining.Count);
-        Assert.All(remaining, r => Assert.NotNull(r.Broadcast));
-        Assert.All(remaining, r => Assert.Null(r.Stop));
-        Assert.Single(world.Cancels);
+        Assert.True(world.B.ControlActionLock);
+        Assert.DoesNotContain(world.Cancels, cancel => cancel.CastId == fireball.CastId);
+        world.B.UpdatePosition(new Vector3(0f, 0f, -10f), 0f, 0f, 2L, 0U);
+        var explosion = Assert.Single(world.DrainRange(7, 20), r => r.CastId == fireball.CastId);
+        Assert.Equal(target.PlayerId, Assert.Single(explosion.Hits).TargetPlayerId);
     }
 
     [Fact]

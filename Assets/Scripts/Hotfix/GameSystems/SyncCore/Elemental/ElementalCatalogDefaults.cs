@@ -69,7 +69,7 @@ namespace Cool.SyncCore
             {
                 new StatusEffectDefinition { EffectId = 101, EffectKind = 1, StackGroupId = 1, DurationSeconds = 2f, SlowRatio = 0.3f },
                 new StatusEffectDefinition { EffectId = 201, EffectKind = 2, StackGroupId = 2, DurationSeconds = 3f, IntervalSeconds = 1f, DamagePerTick = 8f },
-                new StatusEffectDefinition { EffectId = 301, EffectKind = 3, StackGroupId = 3, DurationSeconds = 0.8f },
+                new StatusEffectDefinition { EffectId = 301, EffectKind = 3, StackGroupId = 3, DurationSeconds = 0.6f },
                 new StatusEffectDefinition { EffectId = 401, EffectKind = 4, StackGroupId = 4, DurationSeconds = 1.5f, IncomingDamageMultiplier = 2f },
             },
             AttackTimings = new List<AttackTimingDefinition>

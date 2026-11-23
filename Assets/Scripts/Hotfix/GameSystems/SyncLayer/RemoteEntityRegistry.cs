@@ -89,6 +89,8 @@ namespace Hotfix.GameSystems.SyncLayer
             public float MaxHp;
             public bool Dead;
             public bool IsDefending;
+            public EquipmentSummary? Equipment;
+            public uint? EquipmentVersion;
         }
 
         /// <summary>last-known 上限；超限整体清空（有界优先，宁可丢回填也不无界增长）</summary>
@@ -184,12 +186,29 @@ namespace Hotfix.GameSystems.SyncLayer
         /// </summary>
         public void ApplySnapshot(EntitySnapshot snapshot, long serverTicks)
         {
+            if (snapshot.LifeId != 0 && _lastKnownVitals.TryGetValue(snapshot.PlayerId, out var known)
+                && snapshot.LifeId < known.LifeId)
+                return;
+
             bool created = false;
             if (!_views.TryGetValue(snapshot.PlayerId, out var view))
             {
                 view = CreateView(snapshot.PlayerId, snapshot);
                 _views[snapshot.PlayerId] = view;
                 created = true;
+            }
+
+            if (snapshot.LifeId != 0 && view.LifeId != snapshot.LifeId)
+            {
+                if (snapshot.LifeId < view.LifeId) return;
+                if (view.LifeId != 0)
+                {
+                    view.CombatVersion = 0;
+                    view.Equipment = null;
+                    view.EquipmentVersion = null;
+                    ApplySwordView(view);
+                }
+                view.LifeId = snapshot.LifeId;
             }
 
             // P5：Npc 动作状态（占位期仅存储供测试/上层观察——动画表现随真实模型 backlog）。
@@ -208,7 +227,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 view.Hp = snapshot.Hp;
                 view.MaxHp = snapshot.MaxHp;
                 // 血量变化与战斗投影共用同一版本戳（服务端每次改血都递增）
-                if (snapshot.CombatVersion != 0) view.CombatVersion = snapshot.CombatVersion;
+                if (snapshot.CombatVersion > view.CombatVersion) view.CombatVersion = snapshot.CombatVersion;
             }
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Defending) != 0)
                 view.IsDefending = snapshot.IsDefending;
@@ -229,7 +248,6 @@ namespace Hotfix.GameSystems.SyncLayer
             if (view.Tier == RemoteTier.Full)
                 view.Animator?.SetDefending(view.IsDefending);
 
-            if (snapshot.LifeId != 0) view.LifeId = snapshot.LifeId;
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.NpcAction) != 0
                 && snapshot.NpcAction != null)
                 ApplyNpcAction(snapshot.PlayerId, view, snapshot.LifeId, snapshot.NpcAction);
@@ -305,8 +323,8 @@ namespace Hotfix.GameSystems.SyncLayer
         ///  - 旧 LifeId 丢弃（上一世代迟到的投影）；
         ///  - 新 LifeId 先缓存（等该世代的基线快照建/更新视图）；
         ///  - 同 Life 下 CombatVersion 更小丢弃（相等视为幂等重放，基线同版本也要应用）。
-        /// Equipment/Control 只存储（不替换远端模型、不改 3C），HP/Dead/IsDefending 同步
-        /// Targetable 与 Animator。Statuses 为空列表即清空旧状态。
+        /// HP/Dead/IsDefending 同步 Targetable 与 Animator，Statuses 为空列表即清空旧状态。
+        /// 装备版本只由带装备信息的完整投影推进。
         /// </summary>
         private void ApplyProjection(long entityId, RemoteEntityView view, CombatProjection projection)
         {
@@ -317,6 +335,19 @@ namespace Hotfix.GameSystems.SyncLayer
                 CacheCombatProjection(entityId, projection);
                 return;
             }
+
+            // A Health-only snapshot may arrive first and advance CombatVersion.
+            // It carries no equipment, so merge equipment against its own last full projection.
+            if (!view.EquipmentVersion.HasValue || projection.CombatVersion > view.EquipmentVersion.Value)
+            {
+                view.Equipment = projection.Equipment;
+                view.EquipmentVersion = projection.CombatVersion;
+                ApplySwordView(view);
+                var known = GetOrCreateLastKnownVitals(entityId);
+                if (view.LifeId != 0) known.LifeId = view.LifeId;
+                known.Equipment = view.Equipment;
+                known.EquipmentVersion = view.EquipmentVersion;
+            }
             if (projection.CombatVersion < view.CombatVersion) return;
 
             view.CombatVersion = projection.CombatVersion;
@@ -324,7 +355,6 @@ namespace Hotfix.GameSystems.SyncLayer
             view.MaxHp = projection.MaxHp;
             view.Dead = projection.Dead;
             view.IsDefending = projection.IsDefending;
-            view.Equipment = projection.Equipment;
             view.Control = projection.Control;
             bool statusesChanged = !StatusesEqual(view.Statuses, projection.Statuses);
             view.Statuses = projection.Statuses;
@@ -343,6 +373,12 @@ namespace Hotfix.GameSystems.SyncLayer
                 StatusesChanged?.Invoke(entityId, StatusVfxTarget(view), projection.Statuses);
             if (projection.ActiveCast != null)
                 ActiveCastApplied?.Invoke(entityId, projection.ActiveCast);
+        }
+
+        private static void ApplySwordView(RemoteEntityView view)
+        {
+            if (view.Tier == RemoteTier.Full)
+                view.Animator?.ApplySwordView(view.Equipment?.ElementId ?? 0);
         }
 
         /// <summary>
@@ -387,13 +423,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     | EntityFieldMask.Defending)) != 0;
             if (!carriesVitals && snapshot.LifeId == 0) return;
 
-            if (!_lastKnownVitals.TryGetValue(snapshot.PlayerId, out var known))
-            {
-                if (_lastKnownVitals.Count >= MaxLastKnownVitals)
-                    _lastKnownVitals.Clear();
-                known = new LastKnownVitals();
-                _lastKnownVitals[snapshot.PlayerId] = known;
-            }
+            var known = GetOrCreateLastKnownVitals(snapshot.PlayerId);
 
             // 新生代：旧世代的 HP/死亡/防御不得沿用（复活后不应仍显示死亡）。
             // 新世代的完整值由本快照随后的按位合并写入。
@@ -404,13 +434,15 @@ namespace Hotfix.GameSystems.SyncLayer
                 known.Dead = false;
                 known.IsDefending = false;
                 known.CombatVersion = 0;
+                known.Equipment = null;
+                known.EquipmentVersion = null;
             }
             if (snapshot.LifeId != 0) known.LifeId = snapshot.LifeId;
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Health) != 0)
             {
                 known.Hp = snapshot.Hp;
                 known.MaxHp = snapshot.MaxHp;
-                if (snapshot.CombatVersion != 0) known.CombatVersion = snapshot.CombatVersion;
+                if (snapshot.CombatVersion > known.CombatVersion) known.CombatVersion = snapshot.CombatVersion;
             }
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Dead) != 0)
                 known.Dead = snapshot.Dead;
@@ -422,6 +454,17 @@ namespace Hotfix.GameSystems.SyncLayer
         private void UpdateLastKnownVitals(long entityId, uint lifeId, uint combatVersion,
             float hp, float maxHp, bool dead, bool isDefending)
         {
+            var known = GetOrCreateLastKnownVitals(entityId);
+            if (lifeId != 0) known.LifeId = lifeId;
+            known.CombatVersion = combatVersion;
+            known.Hp = hp;
+            known.MaxHp = maxHp;
+            known.Dead = dead;
+            known.IsDefending = isDefending;
+        }
+
+        private LastKnownVitals GetOrCreateLastKnownVitals(long entityId)
+        {
             if (!_lastKnownVitals.TryGetValue(entityId, out var known))
             {
                 if (_lastKnownVitals.Count >= MaxLastKnownVitals)
@@ -429,12 +472,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 known = new LastKnownVitals();
                 _lastKnownVitals[entityId] = known;
             }
-            if (lifeId != 0) known.LifeId = lifeId;
-            known.CombatVersion = combatVersion;
-            known.Hp = hp;
-            known.MaxHp = maxHp;
-            known.Dead = dead;
-            known.IsDefending = isDefending;
+            return known;
         }
 
         /// <summary>
@@ -670,6 +708,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     view.FullRoot = avatar;
                     // AddComponent 同步跑 Awake：归零层权重、停掉 3C 装备，赶在同一个 Start/Update 之前
                     view.Animator = avatar.AddComponent<RemoteEntityAnimator>();
+                    view.Animator.PrepareAvatar();
                 }
                 if (view.FullRoot == null)
                 {
@@ -679,6 +718,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 }
                 view.FullRoot.SetActive(true);
                 view.ProxyRoot?.SetActive(false);
+                ApplySwordView(view);
                 view.Animator!.InvalidateDedup();
                 view.Animator!.ResetLayerWeights();
                 // 升档当场**回放锁存的状态**（规格 §5："升档：失效 _lastKey 并强制重写一次"）：
@@ -710,6 +750,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     view.ProxyRoot = proxy;
                 }
                 view.ProxyRoot.SetActive(true);
+                view.Animator?.ApplySwordView(0);
                 view.FullRoot?.SetActive(false);
             }
 
@@ -749,6 +790,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     _labelSink?.Unregister(playerId);   // 与注册同口径：bot 从未注册
                 view.Targetable.MarkRemoved();
                 ViewRemoved?.Invoke(playerId);
+                view.Animator?.ApplySwordView(0);
                 DestroyView(view.GameObject);
                 _interpolator.Remove(playerId); // 插值缓冲同步清理（防重连同 ID 残留旧样本）
                 _attacks.Clear(playerId); // 待播挥砍同步清理（视图没了，没人可驱动）
@@ -774,6 +816,7 @@ namespace Hotfix.GameSystems.SyncLayer
                     _labelSink?.Unregister(id);
                 view.Targetable.MarkRemoved();
                 ViewRemoved?.Invoke(id);
+                view.Animator?.ApplySwordView(0);
                 DestroyView(view.GameObject);
             }
             _views.Clear();
@@ -936,6 +979,12 @@ namespace Hotfix.GameSystems.SyncLayer
             // true，不会补 Health 基线）。快照带值优先；缺 Health/Dead/Defending 位时用同
             // LifeId 的 last-known 回填，避免以 Hp=0/MaxHp=0/Dead=false 建档。
             var lastKnown = FindLastKnownVitals(playerId, snapshot.LifeId);
+            if (lastKnown != null)
+            {
+                view.Equipment = lastKnown.Equipment;
+                view.EquipmentVersion = lastKnown.EquipmentVersion;
+                ApplySwordView(view);
+            }
             if ((snapshot.FieldMask & (ushort)EntityFieldMask.Health) != 0)
             {
                 view.Hp = snapshot.Hp;
@@ -1117,8 +1166,9 @@ namespace Hotfix.GameSystems.SyncLayer
         public uint LifeId { get; set; }
         /// <summary>服务端战斗投影版本（Combat 投影的单调版本戳）</summary>
         public uint CombatVersion { get; set; }
-        /// <summary>服务端权威装备摘要（只存储——远端模型不随它替换）</summary>
+        /// <summary>服务端权威装备摘要（Full 档由挂点应用）</summary>
         public EquipmentSummary? Equipment { get; set; }
+        internal uint? EquipmentVersion { get; set; }
         /// <summary>服务端权威控制摘要（只存储——不改 3C 行为）</summary>
         public ControlSummary? Control { get; set; }
         /// <summary>状态投影（与 CombatVersion 原子合并；空列表 = 清空旧状态）</summary>

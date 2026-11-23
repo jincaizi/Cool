@@ -57,5 +57,7 @@ namespace Hotfix.GameSystems.Monster
         public float LastKnockbackForce;
 
         public bool IsDead => Stats.IsDead;
+        public bool HasArmoredWindup => Config.ArmoredWindup && CurrentState == MonsterAIState.Attack
+            && StateTimer < Config.AttackWindupTime;
     }
 }

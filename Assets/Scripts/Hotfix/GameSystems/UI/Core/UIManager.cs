@@ -41,6 +41,9 @@ namespace Hotfix.GameSystems.UI
         /// </summary>
         public UniTask WhenReady() => _ready.WaitAsync();
 
+        internal RectTransform GetLayerRoot(LayerType layer)
+            => (RectTransform)_layers[(int)layer].transform;
+
         private void Awake()
         {
             if (Instance != null)

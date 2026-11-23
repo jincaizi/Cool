@@ -44,6 +44,15 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void test_canvas_uses_mobile_detection_and_fits_desktop_viewport()
+        {
+            string html = File.ReadAllText(TemplatePath);
+            StringAssert.Contains("if (window.CoolLandscape.mobile)", html);
+            StringAssert.Contains("100vw, calc((100vh - 44px) * ", html);
+            StringAssert.Contains("canvas.style.aspectRatio = designWidth + \" / \" + designHeight", html);
+        }
+
+        [Test]
         public void test_template_data_url_is_immutable_and_bundles_keep_default()
         {
             string html = File.ReadAllText(TemplatePath);

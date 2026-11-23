@@ -43,6 +43,7 @@ namespace Hotfix.GameSystems.VFX
 
             for (int i = 0; i < _renderers.Length; i++)
             {
+                if (_renderers[i] == null) continue;
                 Color c = Color.Lerp(_originals[i], lowColor, Mathf.Clamp01(lowAmount));
                 c = Color.Lerp(c, hitColor, Mathf.Clamp01(hitAmount));
                 _block.SetColor(ColorId, c);
@@ -54,7 +55,8 @@ namespace Hotfix.GameSystems.VFX
         public void Clear()
         {
             for (int i = 0; i < _renderers.Length; i++)
-                _renderers[i].SetPropertyBlock(null);
+                if (_renderers[i] != null)
+                    _renderers[i].SetPropertyBlock(null);
             _tinted = false;
         }
     }

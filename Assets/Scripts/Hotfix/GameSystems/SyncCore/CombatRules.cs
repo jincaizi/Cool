@@ -135,11 +135,12 @@ namespace Cool.SyncCore
 
         /// <summary>攻击体积垂直范围；null = 不做高度过滤（投射物/AOE 等未纳入本批的技能）。</summary>
         public AttackHeightSpec? AttackHeight { get; }
+        public bool CanBeInterruptedByDamage { get; }
 
         public SkillEntry(int skillId, int shapeType, float maxRange, float maxAreaRadius,
             float maxAngle, float cooldownSeconds, float baseDamage, float criticalRate,
             float hitDelaySeconds, ProjectileSpec? projectile = null, RepeatSpec? repeat = null,
-            AttackHeightSpec? attackHeight = null)
+            AttackHeightSpec? attackHeight = null, bool canBeInterruptedByDamage = true)
         {
             SkillId = skillId;
             ShapeType = shapeType;
@@ -153,6 +154,7 @@ namespace Cool.SyncCore
             Projectile = projectile;
             Repeat = repeat;
             AttackHeight = attackHeight;
+            CanBeInterruptedByDamage = canBeInterruptedByDamage;
         }
     }
 
@@ -206,12 +208,13 @@ namespace Cool.SyncCore
             // 10002：单机 BA_Heavy 的 0.35s 挥击（[0.35]）+ 剑气是两个独立伤害实例 ⇒ keepsSwing: true。
             // 高度只作用于挥击实例（ResolveSwing）；剑气走 ResolveLineAll，保持纯 XZ。
             // 属性剑气 v1：Speed 与共享目录/SwordQi_Heavy.asset 同值（18 m/s），供线性投射物与客户端一致。
-            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, totalFlightSeconds: 12f / 18f, keepsSwing: true, speed: 18f), attackHeight: GroundMelee),
+            [10002] = new SkillEntry(skillId: 10002, shapeType: 0, maxRange: 2.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 0.5f, baseDamage: 90f, criticalRate: 0.15f, hitDelaySeconds: 0.35f, projectile: new ProjectileSpec(ProjectileKind.LineAll, length: 12f, halfWidth: 2f, stages: 3, totalFlightSeconds: 12f / 18f, keepsSwing: true, speed: 18f), attackHeight: GroundMelee, canBeInterruptedByDamage: false),
             [20001] = new SkillEntry(skillId: 20001, shapeType: 0, maxRange: 3.5f, maxAreaRadius: 0f, maxAngle: 120f, cooldownSeconds: 6f, baseDamage: 120f, criticalRate: 0.2f, hitDelaySeconds: 0.30f),
             // 20002：单机 Spin_SkillR 时间轴 = 起手剪辑 0.2s（Attack04_Start_SwordAndShield，FBX 0–6 帧）
             // + 0.2s 首判间隔，之后每 0.2s 一段，MaxDuration 3s，每目标最多 5 段（资产值，2026-11-10 实测）。
             [20002] = new SkillEntry(skillId: 20002, shapeType: 1, maxRange: 2f, maxAreaRadius: 2.5f, maxAngle: 120f, cooldownSeconds: 5f, baseDamage: 160f, criticalRate: 0.25f, hitDelaySeconds: 0f,
-                repeat: new RepeatSpec(firstDelaySeconds: 0.4f, intervalSeconds: 0.2f, durationSeconds: 3f, maxHitsPerTarget: 5)),
+                repeat: new RepeatSpec(firstDelaySeconds: 0.4f, intervalSeconds: 0.2f, durationSeconds: 3f, maxHitsPerTarget: 5),
+                canBeInterruptedByDamage: false),
             // 2026-10-18：投射物/蓄力进表（翻转 D-P4-1）。形状上限必须容纳客户端真实形状。
             [20003] = new SkillEntry(20003, shapeType: 0, maxRange: 0f, maxAreaRadius: 0f, maxAngle: 0f,
                 cooldownSeconds: 3f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0f,

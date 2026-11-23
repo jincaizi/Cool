@@ -353,14 +353,12 @@ namespace KcpServer.Monster
             }
         }
 
-        /// <summary>宿主控制入口（Plan 04）：状态运行时首次 ActionLock 时取消未提交动作。
-        /// 霸体（<see cref="MonsterActionRunner.IsArmored"/>）首版只免打断——动作照常跑完，
-        /// 状态/伤害仍然生效。</summary>
+        /// <summary>首次 ActionLock 时取消尚未提交的可打断前摇。</summary>
         public void CancelAction(long npcId, NpcActionCancelReason reason, uint tick)
         {
-            if (!_monsters.TryGetValue(npcId, out var m) || m.ActionRunner == null) return;
-            if (m.ActionRunner.IsArmored) return;
-            m.ActionRunner.Cancel(reason, tick);
+            if (_monsters.TryGetValue(npcId, out var m)
+                && m.ActionRunner is { IsInWindup: true, HasWindupArmor: false } runner)
+                runner.Cancel(reason, tick);
         }
 
         /// <summary>嘲讽 API（v1 无玩家技能，仅单测）。</summary>

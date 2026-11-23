@@ -182,9 +182,9 @@ public class MonsterStatusControlTests
             npc.Statuses!.Apply(ParalyzeOf(catalog), sourceId: 1, skillId: 10002, castId: 7UL, tick: 0, catalog));
         Assert.True(npc.ControlActionLock);
 
-        // 0.8s = 12 tick：行为树整段跳过——不移动、不施法。
+        // 0.6s = 9 tick：行为树整段跳过，不移动、不施法。
         var frozenPosition = npc.Position;
-        for (uint t = 0; t < 12; t++)
+        for (uint t = 0; t < 9; t++)
         {
             module.Tick(t);
             Assert.Empty(module.DrainPendingCasts());
@@ -193,12 +193,12 @@ public class MonsterStatusControlTests
             Assert.Equal(frozenPosition.Z, npc.Position.Z);
         }
 
-        npc.Statuses.RemoveExpired(12); // 主循环 preTick 的到期清理
+        npc.Statuses.RemoveExpired(9); // 主循环 preTick 的到期清理
         Assert.False(npc.ControlActionLock);
         Assert.Equal(1f, npc.ControlSpeedScale, 4);
 
         bool casted = false;
-        for (uint t = 12; t < 20 && !casted; t++)
+        for (uint t = 9; t < 20 && !casted; t++)
         {
             module.Tick(t);
             casted = module.DrainPendingCasts().Count > 0;
@@ -244,7 +244,7 @@ public class MonsterStatusControlTests
     }
 
     [Fact]
-    public void Paralyze_Does_Not_Cancel_Armored_Windup_But_Status_Still_Attaches()
+    public void Paralyze_Is_Ignored_During_Armored_Windup()
     {
         using var server = new Server3C(new TestLogger());
         server.EnableMonsters(6);
@@ -258,11 +258,22 @@ public class MonsterStatusControlTests
         Assert.Equal(NpcActionPhase.Windup, runner.Current.Phase);
         Assert.True(runner.IsArmored); // 模板 4 的 Ai.DefaultWindupArmor
 
-        ApplyParalyze(server, boss, sourceId: 1, tick: 0);
+        var catalog = server.ElementalCatalog;
+        uint version = boss.CombatVersion;
+        Assert.Equal(StatusApplyResult.Ignored,
+            boss.Statuses!.Apply(ParalyzeOf(catalog), 1, 10002, 7UL, 0, catalog));
+        Assert.False(boss.ControlActionLock);
+        Assert.Empty(boss.Statuses.Runtime.Active);
+        Assert.Equal(version, boss.CombatVersion);
+        Assert.Equal(NpcActionPhase.Windup, runner.Current.Phase);
 
-        Assert.True(boss.ControlActionLock);                       // 状态仍挂上（同步控制）
-        Assert.Equal(1, boss.Statuses!.Runtime.Count);
-        Assert.Equal(NpcActionPhase.Windup, runner.Current.Phase); // 首版：霸体只免打断
+        // 当前一击进入 Active 后，没有继续免疫，也不会撤销已提交的判定。
+        uint activeTick = runner.Current.ActiveStartTick;
+        Assert.True(runner.TryCommitStage(runner.Current.InstanceId, activeTick));
+        ApplyParalyze(server, boss, sourceId: 1, tick: activeTick);
+        Assert.True(boss.ControlActionLock);
+        Assert.Equal(activeTick + 9u, Assert.Single(boss.Statuses.Runtime.Active).EndTick);
+        Assert.Equal(NpcActionPhase.Active, runner.Current.Phase);
     }
 
     // ---------- 重生代次：生成回调接 sink，麻痹仍能取消未提交前摇 ----------

@@ -71,6 +71,7 @@ MonoBehaviour:
     _statusDuration: 0
     _statusValue: 0
   AttackWindupTime: 0.2
+  ArmoredWindup: 1
   AttackRecoveryTime: 0.3
   HitReactDurations:
   - 0

@@ -272,7 +272,7 @@
       // the canvas DOM size and WebGL render target sizes yourself.
       // config.matchWebGLToCanvasSize = false;
 
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      if (window.CoolLandscape.mobile) {
         // Mobile device style: fill the whole browser client area with the game canvas.
         // viewport meta 已在 head 中静态声明，这里不再动态插入第二份。
         container.className = "unity-mobile";
@@ -291,10 +291,13 @@
 #endif
 
       } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-
-        canvas.style.width = "{{{ WIDTH }}}px";
-        canvas.style.height = "{{{ HEIGHT }}}px";
+        // Keep the whole play area visible above the desktop footer.
+        var designWidth = Number("{{{ WIDTH }}}");
+        var designHeight = Number("{{{ HEIGHT }}}");
+        var widthPerHeight = designWidth / designHeight;
+        canvas.style.width = "min(" + designWidth + "px, 100vw, calc((100vh - 44px) * " + widthPerHeight + "))";
+        canvas.style.height = "auto";
+        canvas.style.aspectRatio = designWidth + " / " + designHeight;
       }
 
 #if BACKGROUND_FILENAME

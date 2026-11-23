@@ -11,6 +11,8 @@ namespace Hotfix.GameSystems.Monster
 
         private Vector3 _knockbackVelocity;
         private float _knockbackTimer;
+        private float _statusSpeedScale = 1f;
+        private bool _resumeAfterControl;
 
         public bool HasReachedDestination =>
             !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.1f;
@@ -37,6 +39,28 @@ namespace Hotfix.GameSystems.Monster
             // before the new SetDestination overrides it.
             _agent.ResetPath();
             _agent.isStopped = false;
+        }
+
+        public void SetStatusSpeedScale(float speedScale)
+        {
+            if (_statusSpeedScale == speedScale) return;
+            _statusSpeedScale = speedScale;
+            _agent.speed = _config.MoveSpeed * speedScale;
+        }
+
+        public void SetActionLock(bool locked)
+        {
+            if (!_agent.isActiveAndEnabled || !_agent.isOnNavMesh) return;
+            if (locked)
+            {
+                _resumeAfterControl = !_agent.isStopped;
+                Stop();
+            }
+            else if (_resumeAfterControl)
+            {
+                _agent.isStopped = false;
+                _resumeAfterControl = false;
+            }
         }
 
         // Performance note: SetDestination is called every frame.

@@ -68,6 +68,38 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             UnityEngine.Object.DestroyImmediate(_root);
         }
 
+        [Test]
+        public void CharacterRebind_KeepsQueuedEquipConfirmationAndCastSequence()
+        {
+            var host = _root.AddComponent<ClientNetworkHost>();
+            var bridge = new CombatNetworkBridge(_client, () => LocalPlayerId,
+                new RemoteEntityRegistry(_root.transform));
+            const System.Reflection.BindingFlags flags =
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            var bridgeField = typeof(ClientNetworkHost).GetField("_combatBridge", flags);
+            var reset = typeof(ClientNetworkHost).GetMethod("ResetAttachment", flags);
+            bridgeField.SetValue(host, bridge);
+            var shape = new HitShape { ShapeType = 0, Range = 2f, Angle = 120f };
+            bridge.NotifySkillCast(10001, shape);
+            uint equipSeq = bridge.RequestEquip(42);
+            bridge.OnMessage(MessageId.EquipWeaponConfirm, new EquipWeaponConfirm
+            {
+                ClientEquipSeq = equipSeq, Accepted = true, EquipmentRevision = 1,
+                WeaponInstanceId = 42, TemplateId = 90002, ElementId = 1
+            });
+
+            reset.Invoke(host, new object[] { true });
+
+            var connectedBridge = (CombatNetworkBridge)bridgeField.GetValue(host);
+            Assert.AreSame(bridge, connectedBridge);
+            connectedBridge.Update();
+            connectedBridge.NotifySkillCast(10001, shape);
+            var request = (CastRequest)_client.Sent[_client.Sent.Count - 1].Message;
+            Assert.AreEqual(2u, request.ClientCastSeq);
+            Assert.AreEqual(1u, request.EquipmentRevision);
+            Assert.AreEqual(42L, connectedBridge.Equipment.WeaponInstanceId);
+        }
+
         private static DamageResult DirectHit(ulong eventId, long targetId = LocalPlayerId,
             float damage = 10f, float remainingHp = 90f, uint targetLifeId = 0)
             => new DamageResult

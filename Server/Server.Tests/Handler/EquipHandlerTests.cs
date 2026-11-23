@@ -95,6 +95,36 @@ public class EquipHandlerTests
     }
 
     [Fact]
+    public void Dead_Equip_Is_Rejected_And_Retry_After_Respawn_Requires_A_New_Seq()
+    {
+        var player = new PlayerState(1)
+        {
+            EquippedWeaponInstanceId = 42,
+            EquippedWeaponTemplateId = ElementalCatalogDefaults.IceSwordTemplateId,
+            EquipmentRevision = 2
+        };
+        player.WeaponInstanceTemplates[43] = ElementalCatalogDefaults.FireSwordTemplateId;
+        player.ApplyDamage(100f);
+        player.MarkDead(1);
+        var handler = CreateHandler();
+        var request = new EquipWeaponRequest { ClientEquipSeq = 7, WeaponInstanceId = 43, KnownEquipmentRevision = 2 };
+
+        var rejected = handler.ValidateAndApply(request, player, tick: 2);
+        Assert.False(rejected.Accepted);
+        Assert.Equal("caster-dead", rejected.RejectReason);
+        Assert.Equal(2u, rejected.EquipmentRevision);
+        Assert.Equal(42L, rejected.WeaponInstanceId);
+        Assert.Equal(ElementalCatalogDefaults.IceSwordTemplateId, rejected.TemplateId);
+        Assert.Equal(1, rejected.ElementId);
+
+        Assert.True(player.TryRespawn(123, 66));
+        Assert.Same(rejected, handler.ValidateAndApply(request, player, tick: 123));
+        request.ClientEquipSeq++;
+        Assert.True(handler.ValidateAndApply(request, player, tick: 123).Accepted);
+        Assert.Equal(3u, player.EquipmentRevision);
+    }
+
+    [Fact]
     public void Reject_Carries_Current_Element()
     {
         var player = new PlayerState(1);

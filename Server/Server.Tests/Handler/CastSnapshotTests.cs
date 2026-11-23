@@ -113,6 +113,7 @@ public class CastSnapshotTests
         var player = AddCaster(store);
         Equip(player, 10, ElementalCatalogDefaults.IceSwordTemplateId, 0);
         store.AddPlayer(2, "target").UpdatePosition(new Vector3(0f, 0f, 1.5f), 0f, 0f, 0L, 0U);
+        store.GetPlayer(2)!.SetMaxHp(500f);
 
         var catalog = Catalog(iceAttack: 1.5f, iceSpeed: 1.25f, iceQiMultiplier: 1f,
             fireAttack: 0.75f, fireSpeed: 0.8f);
@@ -172,28 +173,48 @@ public class CastSnapshotTests
     }
 
     [Fact]
-    public void Cast_Snapshot_Keeps_Original_Weapon_After_Equip_Change()
+    public void Equip_Is_Blocked_Through_Recovery_And_In_Flight_Hit_Keeps_Original_Weapon()
     {
         var store = new EntityStore();
         var player = AddCaster(store);
         Equip(player, 10, ElementalCatalogDefaults.IceSwordTemplateId, 0);
-        store.AddPlayer(2, "target").UpdatePosition(new Vector3(0f, 0f, 1.5f), 0f, 0f, 0L, 0U);
+        player.WeaponInstanceTemplates[11] = ElementalCatalogDefaults.FireSwordTemplateId;
+        var target = store.AddNpc(2, "target", 1, 1000f, new Vector3(0f, 0f, 10f));
 
         var catalog = Catalog(iceAttack: 1.5f, iceSpeed: 1f, iceQiMultiplier: 2f,
             fireAttack: 0.5f, fireSpeed: 1f);
         var resolver = new CombatResolver(store, new Random(1), catalog);
+        var equip = new EquipHandler(catalog);
 
-        Assert.True(resolver.Decide(1, Basic(10002, seq: 1, revision: 0, lifeId: player.LifeId), 0).Accepted);
-        // 在途换装：新的攻击力/剑气倍率不得影响已经接受的施法。
-        player.EquippedWeaponInstanceId = 11;
-        player.EquippedWeaponTemplateId = ElementalCatalogDefaults.FireSwordTemplateId;
-        player.EquipmentRevision = 1;
+        var cast = resolver.Decide(1, Basic(10002, seq: 1, revision: 0, lifeId: player.LifeId), 0);
+        Assert.True(cast.Accepted);
+        foreach (var (tick, seq) in new[] { (3u, 1u), (6u, 2u), (10u, 3u) })
+        {
+            resolver.DrainResolved(tick);
+            var blocked = equip.ValidateAndApply(new EquipWeaponRequest
+            {
+                ClientEquipSeq = seq, WeaponInstanceId = 11, KnownEquipmentRevision = 0
+            }, player, tick);
+            Assert.False(blocked.Accepted);
+            Assert.Equal("action-busy", blocked.RejectReason);
+            Assert.Equal(0u, blocked.EquipmentRevision);
+            Assert.Equal(10L, blocked.WeaponInstanceId);
+            Assert.Equal(1, blocked.ElementId);
+        }
 
-        var results = DrainTo(resolver, 6);
-        var hits = results.SelectMany(r => r.Hits).ToList();
-        Assert.Equal(2, hits.Count); // 挥击 + 首段剑气
-        Assert.True(MatchesBaseDamage(hits[0].Damage, 90f * 1.5f));            // 挥击不乘剑气倍率
-        Assert.True(MatchesBaseDamage(hits[1].Damage, 90f * 1.5f * 2f));       // 剑气乘 2.0
+        // 角色动作 11 tick 结束，剑气最后一段 13 tick 才到达目标。
+        var accepted = equip.ValidateAndApply(new EquipWeaponRequest
+        {
+            ClientEquipSeq = 4, WeaponInstanceId = 11, KnownEquipmentRevision = 0
+        }, player, tick: 11);
+        Assert.True(accepted.Accepted);
+        Assert.Equal(1u, accepted.EquipmentRevision);
+        Assert.Equal(2, accepted.ElementId);
+        Assert.Empty(resolver.DrainResolved(12));
+        var hit = Assert.Single(Assert.Single(resolver.DrainResolved(13)).Hits);
+        Assert.Equal(cast.CastId, hit.CastId);
+        Assert.True(MatchesBaseDamage(hit.Damage, 90f * 1.5f * 2f));
+        Assert.Equal(101, Assert.Single(target.Statuses!.Runtime.Active).EffectId);
     }
 
     [Fact]
@@ -203,6 +224,7 @@ public class CastSnapshotTests
         var player = AddCaster(store);
         Equip(player, 10, ElementalCatalogDefaults.IceSwordTemplateId, 0);
         store.AddPlayer(2, "target").UpdatePosition(new Vector3(0f, 0f, 1.5f), 0f, 0f, 0L, 0U);
+        store.GetPlayer(2)!.SetMaxHp(500f);
 
         var catalog = Catalog(iceAttack: 1.5f, iceSpeed: 1f, iceQiMultiplier: 1.5f,
             fireAttack: 1f, fireSpeed: 1f);
@@ -237,6 +259,29 @@ public class CastSnapshotTests
         Assert.True(replay.Replay);
         Assert.Equal(first.Confirm!.CastId, replay.Confirm!.CastId);
         Assert.Single(DrainTo(resolver, 6));
+    }
+
+    [Fact]
+    public void Older_Unseen_And_Evicted_Cast_Seqs_Cannot_Schedule_A_New_Cast()
+    {
+        var store = new EntityStore();
+        AddCaster(store);
+        var resolver = new CombatResolver(store);
+        for (uint seq = 2; seq <= 18; seq++)
+        {
+            Assert.True(resolver.Decide(1, Basic(seq: seq), 20 * seq).Accepted);
+            resolver.DrainResolved(20 * seq + 10);
+        }
+
+        foreach (uint seq in new[] { 1u, 2u })
+        {
+            var stale = resolver.Decide(1, Basic(seq: seq), 400);
+            Assert.False(stale.Accepted);
+            Assert.Equal("stale-seq", stale.Confirm!.RejectReason);
+            Assert.Equal(seq, stale.Confirm.ClientCastSeq);
+            Assert.Empty(resolver.DrainResolved(415));
+        }
+        Assert.True(resolver.Decide(1, Basic(seq: 19), 420).Accepted);
     }
 
     [Fact]

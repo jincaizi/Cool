@@ -3,6 +3,7 @@ using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.SyncLayer;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Core.Pool;
+using Hotfix.GameSystems.VFX;
 using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
@@ -13,16 +14,28 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
     /// </summary>
     public class SwordQiProjectile : MonoBehaviour
     {
+        private static readonly int WaveFlight = Shader.PropertyToID("_WaveFlight");
+        private static readonly int WaveProfile = Shader.PropertyToID("_Profile");
+        private const float FadeDistance = 2.1f;
+
+        [SerializeField] private MeshRenderer _waveRenderer;
+        private MeshRenderer _elementWaveRenderer;
+        private MaterialPropertyBlock _waveProperties;
         private SwordQiConfig _config;
         private DamageBlock _damage;
+        private OfflineWeaponCast _weaponCast;
         private Vector3 _direction;
         private float _traveled;
         private Vector3 _spawnPosition;
         private float _stopDistance;
         private readonly HashSet<int> _hitIds = new HashSet<int>();
+        private readonly List<IDamageable> _nearby = new List<IDamageable>();
+        private readonly HashSet<IDamageable> _nearbyDedup = new HashSet<IDamageable>();
         private bool _released;
         private ComponentPool<SwordQiProjectile> _pool;
         private SwordQiElementTint _tint;
+        private readonly ElementVfxAttachment _elementVisual = new ElementVfxAttachment();
+        private Renderer[] _fallbackRenderers;
 
         /// <summary>本次飞行的元素（0 = 无元素/默认外观）。</summary>
         public int ElementId { get; private set; }
@@ -30,9 +43,15 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
         public void OnSpawn(SwordQiConfig config, DamageBlock damage, Vector3 origin, Vector3 direction,
                             ComponentPool<SwordQiProjectile> pool, float startDistance = 0f,
                             int elementId = 0)
+            => OnSpawn(config, damage, origin, direction, pool, startDistance, elementId, null);
+
+        internal void OnSpawn(SwordQiConfig config, DamageBlock damage, Vector3 origin, Vector3 direction,
+                              ComponentPool<SwordQiProjectile> pool, float startDistance,
+                              int elementId, OfflineWeaponCast weaponCast)
         {
             _config = config;
             _damage = damage;
+            _weaponCast = weaponCast;
             _direction = direction;
             _pool = pool;
             _released = false;
@@ -44,10 +63,11 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
             if (_tint == null)
             {
                 // 池化实例只解析一次（MonoBehaviour 允许 GetComponent；本类是组件，不是普通类）
+                _fallbackRenderers = GetComponentsInChildren<Renderer>(true);
                 _tint = new SwordQiElementTint(
                     GetComponentsInChildren<TrailRenderer>(true),
                     GetComponentsInChildren<ParticleSystem>(true),
-                    GetComponentsInChildren<Renderer>(true));
+                    _fallbackRenderers);
             }
             _tint.Apply(elementId);
             Vector3 flatDir = direction;
@@ -55,12 +75,50 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
             flatDir = flatDir.sqrMagnitude > 0.0001f ? flatDir.normalized : direction;
             transform.position = origin + flatDir * _traveled;
             transform.rotation = Quaternion.LookRotation(flatDir);
+            UpdateWave();
             gameObject.SetActive(true);
+            ShowElementVisual();
         }
 
         public bool IsActive => !_released;
         public float StopDistance => _stopDistance;
         public float Traveled => _traveled;
+
+        private void OnEnable() => ShowElementVisual();
+
+        private void ShowElementVisual()
+        {
+            if (Application.isPlaying && isActiveAndEnabled && _config != null && !_released)
+                _elementVisual.Show(ElementVfxAssets.SwordQiKey(ElementId), transform, _fallbackRenderers,
+                    PrepareElementWave);
+        }
+
+        private void PrepareElementWave(GameObject instance)
+        {
+            _elementWaveRenderer = instance.GetComponentInChildren<MeshRenderer>();
+            UpdateWave();
+        }
+
+        private void UpdateWave()
+        {
+            var renderer = _elementWaveRenderer != null ? _elementWaveRenderer : _waveRenderer;
+            if (renderer == null) return;
+
+            float progress = Mathf.Clamp01(_traveled / Mathf.Max(_config.Range, 0.001f));
+            float remaining = Mathf.Clamp01((_stopDistance - _traveled) / FadeDistance);
+            _waveProperties ??= new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(_waveProperties);
+            _waveProperties.SetVector(WaveFlight, new Vector4(progress, _traveled, remaining, 0f));
+            if (renderer == _waveRenderer)
+                _waveProperties.SetFloat(WaveProfile, ElementId is >= 1 and <= 4 ? ElementId : 0);
+            renderer.SetPropertyBlock(_waveProperties);
+        }
+
+        private void OnDisable()
+        {
+            _elementVisual.Clear();
+            _elementWaveRenderer = null;
+        }
 
         private void Update()
         {
@@ -80,6 +138,8 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
 
             if (_traveled >= _stopDistance)
                 Release();
+            else
+                UpdateWave();
         }
 
         /// <summary>联机停点：让剑气飞到服务端给定的沿程距离后回池。
@@ -120,20 +180,26 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
 
         private void DetectAndDamage()
         {
-            if (NetworkModeService.Load() == NetworkMode.Online) return;   // 联网：伤害权在服务端
+            // 联机产物没有本地伤害块；即使在场景内换模式也只作表现。
+            if (_damage == null || NetworkModeService.Load() == NetworkMode.Online) return;
 
             // 固定目标类型：剑气为玩家攻击侧技能，只命中怪物
-            var targets = PhysicsRegistry.Instance.FindNearby(transform.position,
-                                                              _config.DetectRadius,
-                                                              EntityType.Monster);
-            foreach (var target in targets)
+            PhysicsRegistry.Instance.FindNearbyNonAlloc(transform.position, _config.DetectRadius,
+                EntityType.Monster, _nearby, _nearbyDedup);
+            foreach (var target in _nearby)
             {
+                if (!target.IsAlive) continue;
                 int id = target.Transform.GetInstanceID();
                 if (!_hitIds.Add(id)) continue;
 
                 Vector3 hitDir = (target.Transform.position - transform.position).normalized;
-                target.TakeDamage(_damage, hitDir);
+                if (_weaponCast != null)
+                    _weaponCast.Hit(target, _damage, hitDir);
+                else
+                    target.TakeDamage(_damage, hitDir);
             }
+            _nearby.Clear();
+            _nearbyDedup.Clear();
         }
 
         /// <summary>飞满射程/手动回收；幂等</summary>
@@ -141,6 +207,8 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
         {
             if (_released) return;
             _released = true;
+            _weaponCast = null;
+            _elementVisual.Clear();
             gameObject.SetActive(false);
             _pool?.Return(this);
         }
@@ -149,6 +217,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
         {
             // 场景销毁时置位，防止后续 Release 回池已销毁实例
             _released = true;
+            _elementVisual.Clear();
             _pool = null;
         }
     }

@@ -62,6 +62,8 @@ namespace Cool.SyncCore
                     errors.Add("status duration out of range");
                 if (s.EffectKind == 2 && (!Positive(s.IntervalSeconds) || s.IntervalSeconds > s.DurationSeconds))
                     errors.Add("status interval out of range");
+                if (s.EffectKind == 2 && !Positive(s.DamagePerTick))
+                    errors.Add("status burn damage out of range");
                 if (s.EffectKind == 1 && !InRange(s.SlowRatio, 0.01f, 0.99f))
                     errors.Add("status slow ratio out of range");
                 if (s.EffectKind == 4 && (!Positive(s.IncomingDamageMultiplier) || s.IncomingDamageMultiplier < 1f))
@@ -127,7 +129,7 @@ namespace Cool.SyncCore
             var p = catalog.Pvp;
             if (p == null || !Positive(p.PlayerMaxHp) || !Positive(p.WindVulnerabilityMultiplier)
                 || !Positive(p.ControlImmunitySeconds) || !Positive(p.SameGroupVulnerabilityNoRefreshSeconds)
-                || !Positive(p.ThunderDurationSeconds))
+                || !Positive(p.ThunderDurationSeconds) || p.ThunderDurationSeconds > 60f)
                 errors.Add("pvp settings out of range");
 
             return errors;

@@ -23,20 +23,36 @@ namespace KcpServer
             var player = playerId.HasValue ? server.GetEntity(playerId.Value) : null;
             if (player == null) return;
 
-            var confirm = ValidateAndApply(request, player);
+            var confirm = ValidateAndApply(request, player, server.CurrentTick);
             await server.SendToSessionAsync(session, MessageId.EquipWeaponConfirm, confirm);
         }
 
-        public EquipWeaponConfirm ValidateAndApply(EquipWeaponRequest request, PlayerState player)
+        public EquipWeaponConfirm ValidateAndApply(EquipWeaponRequest request, PlayerState player, uint tick = 0)
         {
             if (request.ClientEquipSeq != 0)
             {
                 if (player.RecentEquipConfirms.TryGetValue(request.ClientEquipSeq, out var cached))
                     return cached;
-                if (player.LastEquipSeq != 0 && request.ClientEquipSeq < player.LastEquipSeq)
+                if (request.ClientEquipSeq <= player.LastEquipSeq)
                     return Reject(request, player, "stale-seq");
             }
 
+            var confirm = Apply(request, player, tick);
+            if (request.ClientEquipSeq != 0)
+            {
+                player.LastEquipSeq = request.ClientEquipSeq;
+                player.RecentEquipConfirms[request.ClientEquipSeq] = confirm;
+                Prune(player);
+            }
+            return confirm;
+        }
+
+        private EquipWeaponConfirm Apply(EquipWeaponRequest request, PlayerState player, uint tick)
+        {
+            if (!player.IsAlive)
+                return Reject(request, player, "caster-dead");
+            if (player.HasCharacterAction(tick))
+                return Reject(request, player, "action-busy");
             if (!player.WeaponInstanceTemplates.TryGetValue(request.WeaponInstanceId, out int templateId))
                 return Reject(request, player, "not-owned");
             if (request.KnownEquipmentRevision != player.EquipmentRevision)
@@ -51,7 +67,7 @@ namespace KcpServer
             player.EquipmentRevision++;
             player.BumpCombatVersion();
 
-            var confirm = new EquipWeaponConfirm
+            return new EquipWeaponConfirm
             {
                 ClientEquipSeq = request.ClientEquipSeq,
                 Accepted = true,
@@ -61,13 +77,6 @@ namespace KcpServer
                 ElementId = weapon.ElementId
             };
 
-            if (request.ClientEquipSeq != 0)
-            {
-                player.LastEquipSeq = request.ClientEquipSeq;
-                player.RecentEquipConfirms[request.ClientEquipSeq] = confirm;
-                Prune(player);
-            }
-            return confirm;
         }
 
         public static WeaponInventoryBaseline BuildBaseline(PlayerState player,

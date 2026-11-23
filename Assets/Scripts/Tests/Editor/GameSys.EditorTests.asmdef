@@ -12,8 +12,10 @@
         "WebSocketNet",
         "Unity.TextMeshPro",
         "GameSys.EditorNavigation",
+        "GameSys.EditorElementalAddressables",
         "Core",
         "Unity.Addressables",
+        "Unity.Addressables.Editor",
         "Unity.ResourceManager"
     ],
     "includePlatforms": [

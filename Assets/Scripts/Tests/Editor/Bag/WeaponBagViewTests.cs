@@ -182,14 +182,14 @@ namespace GameSys.EditorTests
             harness.Controller.ApplyAuthoritative(IceId, 1, 1f);
             harness.Controller.TryRequest(FireId, 10f);
 
-            var outcome = harness.Controller.ApplyConfirm(Confirm(1, false, "weapon not owned"),
+            var outcome = harness.Controller.ApplyConfirm(Confirm(1, false, "not-owned"),
                 IceId, 1, 1f);
 
             Assert.AreEqual(WeaponEquipOutcome.Rejected, outcome);
             Assert.IsFalse(harness.Controller.HasPending);
             Assert.AreEqual(IceId, harness.Controller.EquippedInstanceId);
             StringAssert.Contains("换装失败", harness.Controller.DisplayStatus);
-            StringAssert.Contains("weapon not owned", harness.Controller.DisplayStatus);
+            StringAssert.Contains("武器不可用", harness.Controller.DisplayStatus);
         }
 
         [Test]
@@ -199,7 +199,7 @@ namespace GameSys.EditorTests
             harness.Controller.ApplyAuthoritative(IceId, 1, 1f);
             harness.Controller.TryRequest(FireId, 10f);
 
-            harness.Controller.ApplyConfirm(Confirm(1, false, ""), IceId, 1, 1f);
+            harness.Controller.ApplyConfirm(Confirm(1, false, "unrecognized-reason"), IceId, 1, 1f);
 
             Assert.AreEqual("换装失败", harness.Controller.DisplayStatus);
         }

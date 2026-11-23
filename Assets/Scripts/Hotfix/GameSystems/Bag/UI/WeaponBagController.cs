@@ -243,6 +243,13 @@ namespace Hotfix.GameSystems.Bag.UI
         }
 
         private static string BuildRejectStatus(string reason)
-            => string.IsNullOrWhiteSpace(reason) ? "换装失败" : "换装失败：" + reason;
+            => reason switch
+            {
+                "caster-dead" => "换装失败：角色已阵亡",
+                "action-busy" => "换装失败：角色动作尚未结束",
+                "stale-revision" or "stale-seq" => "换装失败：装备已更新，请重试",
+                "not-owned" or "unknown-template" => "换装失败：武器不可用",
+                _ => "换装失败"
+            };
     }
 }

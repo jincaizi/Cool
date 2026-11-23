@@ -138,16 +138,18 @@ public class ElementalApplicationTests
     [Fact]
     public void Lethal_Swing_Does_Not_Apply_Element_To_Dead_Target()
     {
-        // 50 HP 被挥砍（90）击杀：扣血后 IsAlive=false ⇒ 不附加；随后剑气命中尸体同样不附加。
+        // 50 HP 被挥砍（90）击杀：剑气首段虽已选中同一目标，也不再产生伤害事件。
         var store = new EntityStore();
         AddCaster(store);
         var target = AddNpcTarget(store, x: 0f, z: 2f, hp: 50f);
         var resolver = new CombatResolver(store, new Random(1));
 
         Assert.True(resolver.Decide(1, Heavy(), tick: 0).Accepted);
-        Drain(resolver, 1, 40);
+        var kill = Assert.Single(Drain(resolver, 1, 40));
 
         Assert.False(target.IsAlive);
+        Assert.Equal(50f - kill.Damage, target.Hp);
+        Assert.Equal(1u, target.NextEventSeq);
         AssertNoStatuses(target);
     }
 

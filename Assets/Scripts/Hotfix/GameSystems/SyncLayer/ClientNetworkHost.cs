@@ -35,7 +35,7 @@ namespace Hotfix.GameSystems.SyncLayer
     /// 按 templateId 取到的真模型（目录未命中/未接线则退化球体占位）。
     /// 本地角色被销毁重建（DemoDay 直跑时选人确认触发 PlayerSpawner 重建）经 PlayerSpawnedEvent 重装配。
     /// 接线步骤与边界见 docs/superpowers/guides/p2-client-network-host.md 与 network-playtest.md。
-    /// 单机模式零影响：选单机或只挂不 Connect 即可纯本地游玩。
+    /// 单机使用共享武器表发放本地背包并供技能读取装备，不建立连接。
     /// </summary>
     public sealed class ClientNetworkHost : MonoBehaviour
     {
@@ -118,8 +118,12 @@ namespace Hotfix.GameSystems.SyncLayer
         private WeaponInventoryBaseline? _pendingWeaponBaseline;
         private bool _bagEquipSubscribed;
         private WeaponBagController? _weaponBagController;
-        private ClientEquipmentState? _connectionEquipment;
-        private uint _connectionEquipSeq;
+        private ClientEquipmentState? _offlineEquipment;
+        private readonly Dictionary<long, WeaponDefinition> _offlineWeapons = new();
+        private bool _useOfflineWeapons;
+        private Sys3CEntry? _offlineWeaponOwner;
+
+        private ClientEquipmentState? CurrentEquipment => _combatBridge?.Equipment ?? _offlineEquipment;
         private int _weaponBagRenderedRevision = -1;
         private NetworkTargetSelector? _networkTargetSelector;
 
@@ -202,7 +206,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 isDead: () => _localEntry == null || _localEntry.IsDead,
                 isSkillActive: () => _localEntry != null && _localEntry.SkillCoordinator != null
                     && _localEntry.SkillCoordinator.IsSkillActive,
-                requestEquip: id => _combatBridge != null ? _combatBridge.RequestEquip(id) : 0u,
+                requestEquip: RequestWeapon,
                 applyAppearance: ApplySwordAppearance);
 
             // Inspector 的数组 → 查询表（registry 只吃表；空目录传 null = 球体降级，与未接线同一条路）
@@ -292,7 +296,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private void Start()
         {
             // 模式由选人面板选择并持久化（NetworkModeService）：联网 → 进世界自动连接；单机 → 完全不触网
-            if (NetworkModeService.Load() == NetworkMode.Online)
+            _useOfflineWeapons = NetworkModeService.Load() == NetworkMode.SinglePlayer;
+            if (!_useOfflineWeapons)
             {
                 Debug.Log($"[NetHost] 联网模式——连接 {NetworkModeService.LoadHost()}:{NetworkModeService.LoadPort()}");
                 Connect();
@@ -322,14 +327,12 @@ namespace Hotfix.GameSystems.SyncLayer
             var entry = e.PlayerAnimator.GetComponent<Sys3CEntry>();
             if (entry == null) return;
 
-            // 同一连接的装备摘要与在途序号跨角色重建保留；外观在重新装配后重放。
-            // 桥尚未装配（连续两次 spawn）时保留上次已保存的摘要，不能用 null 覆盖。
-            if (_combatBridge != null)
-            {
-                _connectionEquipment = _combatBridge.Equipment;
-                _connectionEquipSeq = _combatBridge.NextEquipSeq;
-            }
-            ResetAttachment(preserveEquipment: true);
+            bool offline = NetworkModeService.Load() == NetworkMode.SinglePlayer;
+            if ((offline && _connectRequested) || (!offline && _offlineEquipment != null))
+                Disconnect();
+            else
+                ResetAttachment(keepConnection: true);
+            _useOfflineWeapons = offline;
             _localEntry = entry;
             _entryLookedUp = true; // 已定位——Update 的重试逻辑直接装配新角色
             ReplayLocalStatuses(); // 新身体重放权威状态（旧身体随之清染色）
@@ -337,16 +340,15 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // DemoDay 直跑路径：模式在选人面板确认时才落盘（宿主 Start 读到的仍是旧值/单机）——
             // 玩家（重）生成即确认动作的副作用，此处补连接（正常流程 Start 已连，_connectRequested 守卫）
-            if (!_connectRequested && NetworkModeService.Load() == NetworkMode.Online)
+            if (!_connectRequested && !_useOfflineWeapons)
             {
                 Debug.Log($"[NetHost] 联网模式（选人确认）——连接 {NetworkModeService.LoadHost()}:{NetworkModeService.LoadPort()}");
                 Connect();
             }
         }
 
-        /// <summary>摘除本地角色装配（移动上报/纠偏订阅/战斗桥）——重装配前调用（幂等）。
-        /// preserveEquipment = 角色重建（同一连接），false = 断线/销毁。</summary>
-        private void ResetAttachment(bool preserveEquipment = false)
+        /// <summary>解绑角色；同一连接重建时保留消息队列、请求序号及远端表现。</summary>
+        private void ResetAttachment(bool keepConnection = false)
         {
             if (_manager != null)
             {
@@ -354,7 +356,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 if (_netPolicy != null)
                     _manager.OnCorrectionNeeded -= _netPolicy.ApplyServerCorrection;
             }
-            DetachCombatBridge(preserveEquipment);
+            DetachCombatBridge(keepConnection);
             DetachTargetSelector();
             _pendingTargetOwnerDeath = false;   // 旧装配的死亡通知不得跨会话作用到新 selector
             _netPolicy = null;
@@ -409,7 +411,15 @@ namespace Hotfix.GameSystems.SyncLayer
                 return;
             }
 
-            if (_manager == null) return;
+            if (_manager == null)
+            {
+                if (_useOfflineWeapons)
+                {
+                    TryAttachOfflineWeapons();
+                    TickWeaponBag();
+                }
+                return;
+            }
 
             // 每帧驱动：时钟采样/快照封送/纠偏响应/上报节流/插值渲染（manager 内部编排）
             _manager.Update(Time.deltaTime);
@@ -420,7 +430,7 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_inWorld && !_attachFailed)
                 TryAttachLocalCharacter();
 
-            _combatBridge?.Update();
+            if (_netPolicy != null) _combatBridge?.Update();
             TickWeaponBag();
             TickEchoRequest();
 
@@ -858,57 +868,19 @@ namespace Hotfix.GameSystems.SyncLayer
                 });
             _manager.OnCorrectionNeeded += _netPolicy.ApplyServerCorrection;
 
-            // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链
-            // （blocked = 服务端格挡裁决 → 本地走格挡受击表现，见 Sys3CEntry.ApplyServerDamage；
-            //  sourceIsPlayer = DamageResult.SourceKind → 宿主区分玩家来源闪屏与怪物攻击；
-            //  DoT = DamageKind.Dot → 只对齐权威血量 + 飘字，见 Sys3CEntry.ApplyDotDamage）
-            bool hasPreservedEquipment = _connectionEquipment != null;
-            _combatBridge = new CombatNetworkBridge(_adapter!, () => _manager!.LocalPlayerId, _remoteEntities!,
-                onDamageToLocalPlayer: (targetId, dmg, crit, dir, remainingHp, blocked, sourceIsPlayer) =>
-                    _localEntry.ApplyServerDamage(dmg, dir, remainingHp, blocked, sourceIsPlayer),
-                onDotDamageToLocalPlayer: (targetId, dmg, remainingHp) =>
-                    _localEntry.ApplyDotDamage(dmg, remainingHp),
-                equipment: _connectionEquipment, nextEquipSeq: _connectionEquipSeq);
-            _connectionEquipment = null;
-            _connectionEquipSeq = 0;
-            _adapter!.MessageReceived += _combatBridge.OnMessage;
-            if (!hasPreservedEquipment && _pendingWeaponBaseline != null)
-                _combatBridge.Equipment.InitializeFromBaseline(_pendingWeaponBaseline);
-            _pendingWeaponBaseline = null;
-            _combatBridge.OnEquipResult += HandleEquipResult;
-            if (!_bagEquipSubscribed)
-            {
-                BagManager.Instance.OnEquipRequested += HandleBagEquipRequested;
-                _bagEquipSubscribed = true;
-            }
+            if (_combatBridge == null) AttachConnectionCombat();
             ApplyEquipmentState();
-            _localEntry.SkillCoordinator.AttackSpeedProvider = () =>
-                _combatBridge != null ? _combatBridge.Equipment.AttackSpeedMultiplier : 1f;
+            _localEntry.SkillCoordinator.AttackSpeedProvider = () => _combatBridge?.Equipment.AttackSpeedMultiplier ?? 1f;
+            _localEntry.SkillCoordinator.IsWeaponChangePending = () => _weaponBagController?.HasPending == true;
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
             _localEntry.SkillCoordinator.OnChargeReleased += OnLocalChargeReleased;
             _localEntry.SkillCoordinator.OnSkillCancelled += OnLocalSkillCancelled;
-            bool echoEnabled = (_manager!.EnabledFeatures & ProtocolFeatures.SwordQiEcho) != 0;
+            bool echoEnabled = (_manager.EnabledFeatures & ProtocolFeatures.SwordQiEcho) != 0;
             if (echoEnabled)
                 _localEntry.SkillCoordinator.OnEchoRequested += HandleEchoRequested;
             var localInput = _localEntry.GetComponent<InputManager>();
             if (localInput != null) localInput.SetSwordQiEchoEnabled(echoEnabled);
-            // T12 乙-3：服务端判死 → 提示 + 回选人（重登即复活）
             _localEntry.OnServerDeath += HandleLocalPlayerDeath;
-
-            // 远程施法表现（玩家类）。localPlayerId 取登录后由服务端分配的 id——
-            // presenter 用它跳过本地施法者（本地由 SkillExecutor 播放）。
-            _remoteCastPresenter = new RemoteCastPresenter(
-                _remoteEntities!, _manager!.LocalPlayerId, _skillCatalog,
-                sceneIdProvider: () => _manager?.ZoneId ?? "",
-                serverNowTicksProvider: () => _manager?.ServerNowTicks() ?? 0,
-                serverTickProvider: () => _manager?.ServerTick ?? 0);
-            _combatBridge.OnDamageResult += HandleRemoteDamageResult;
-            _combatBridge.OnProjectileLaunch += _remoteCastPresenter.OnProjectileLaunch;
-            _combatBridge.OnProjectileStop += _remoteCastPresenter.OnProjectileStop;
-            _combatBridge.OnCastCancel += HandleCastCancel;
-            _combatBridge.OnNpcAction += HandleNpcAction;
-            _combatBridge.OnCombatStateUpdate += HandleCombatStateUpdate;
-            _remoteEntities!.ViewRemoved += _remoteCastPresenter.ClearForEntity;
 
             // 启用属性剑气后关闭本地剑气生成：视觉统一由服务端发射描述创建。
             NetworkSwordQiGate.SuppressLocalSpawn =
@@ -919,18 +891,6 @@ namespace Hotfix.GameSystems.SyncLayer
                 // 权威余血仍由 DamageResult/RespawnNotice 驱动。
                 _localEntry.SetMaxHp(ElementalCatalogDefaults.Create().Pvp.PlayerMaxHp, fill: true);
             }
-
-            // 施法广播除日志外还要**路由**：NPC 由 registry 按发布者时间戳 + skillId 排成 renderAt 处的挥砍，
-            // 玩家类交给 presenter 立即播攻击/施法表现（本回调已在主线程——CombatNetworkBridge.Update
-            // 消费，见该类线程模型）。两条支路各自按 Kind 过滤，互不干扰。
-            _combatBridge.OnCastBroadcast += b =>
-            {
-                Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
-                _remoteCastPresenter?.OnCastBroadcast(b);
-                _remoteEntities!.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp, b.SkillId);
-            };
-            _combatBridge.OnLineProjectileStopped += HandleLineProjectileStopped;
-            _combatBridge.OnSwordQiEchoState += HandleSwordQiEchoState;
 
             // 任务 10：目标锁定（T/移动端按钮）。只在联网装配时创建——单机零影响。
             // UI 绑定照 CharacterAttackHandler.SelectTarget；UIManager 未就绪时回调内 ?. 静默跳过。
@@ -984,10 +944,136 @@ namespace Hotfix.GameSystems.SyncLayer
             Debug.Log("[NetHost] 本地角色已接入移动上报（repoter + NetMovementPolicy）");
         }
 
+        private void AttachConnectionCombat()
+        {
+            _combatBridge = new CombatNetworkBridge(_adapter!, () => _manager!.LocalPlayerId, _remoteEntities!,
+                onDamageToLocalPlayer: (targetId, damage, crit, direction, hp, blocked, sourceIsPlayer) =>
+                    _localEntry?.ApplyServerDamage(damage, direction, hp, blocked, sourceIsPlayer),
+                onDotDamageToLocalPlayer: (targetId, damage, hp) =>
+                    _localEntry?.ApplyDotDamage(damage, hp));
+            _adapter!.MessageReceived += _combatBridge.OnMessage;
+            if (_pendingWeaponBaseline != null)
+                _combatBridge.Equipment.InitializeFromBaseline(_pendingWeaponBaseline);
+            _pendingWeaponBaseline = null;
+            _combatBridge.OnEquipResult += HandleEquipResult;
+            _combatBridge.OnCastConfirm += HandleCastConfirm;
+            SubscribeWeaponBag();
+
+            // 远程施法表现（玩家类）。localPlayerId 取登录后由服务端分配的 id——
+            // presenter 用它跳过本地施法者（本地由 SkillExecutor 播放）。
+            _remoteCastPresenter = new RemoteCastPresenter(
+                _remoteEntities!, _manager!.LocalPlayerId, _skillCatalog,
+                sceneIdProvider: () => _manager?.ZoneId ?? "",
+                serverNowTicksProvider: () => _manager?.ServerNowTicks() ?? 0,
+                serverTickProvider: () => _manager?.ServerTick ?? 0);
+            _combatBridge.OnDamageResult += HandleRemoteDamageResult;
+            _combatBridge.OnProjectileLaunch += _remoteCastPresenter.OnProjectileLaunch;
+            _combatBridge.OnProjectileStop += _remoteCastPresenter.OnProjectileStop;
+            _combatBridge.OnCastCancel += HandleCastCancel;
+            _combatBridge.OnNpcAction += HandleNpcAction;
+            _combatBridge.OnCombatStateUpdate += HandleCombatStateUpdate;
+            _remoteEntities!.ViewRemoved += _remoteCastPresenter.ClearForEntity;
+
+            // 施法广播除日志外还要**路由**：NPC 由 registry 按发布者时间戳 + skillId 排成 renderAt 处的挥砍，
+            // 玩家类交给 presenter 立即播攻击/施法表现（本回调已在主线程——CombatNetworkBridge.Update
+            // 消费，见该类线程模型）。两条支路各自按 Kind 过滤，互不干扰。
+            _combatBridge.OnCastBroadcast += b =>
+            {
+                Debug.Log($"[NetHost] cast broadcast: caster={b.CasterPlayerId} skill={b.SkillId}");
+                _remoteCastPresenter?.OnCastBroadcast(b);
+                _remoteEntities!.ScheduleAttack(b.CasterPlayerId, b.ServerTimestamp, b.SkillId);
+            };
+            _combatBridge.OnLineProjectileStopped += HandleLineProjectileStopped;
+            _combatBridge.OnSwordQiEchoState += HandleSwordQiEchoState;
+
+        }
+
+        private void SubscribeWeaponBag()
+        {
+            if (_bagEquipSubscribed) return;
+            BagManager.Instance.OnEquipRequested += HandleBagEquipRequested;
+            _bagEquipSubscribed = true;
+        }
+
+        private void TryAttachOfflineWeapons()
+        {
+            if (_localEntry == null || _localEntry.SkillCoordinator == null || _offlineWeaponOwner == _localEntry)
+                return;
+
+            if (_offlineEquipment == null)
+            {
+                var catalog = ElementalCatalogDefaults.Create();
+                var baseline = new WeaponInventoryBaseline { TemplateId = catalog.DefaultWeaponTemplateId };
+                foreach (int templateId in catalog.StartingWeaponTemplateIds)
+                {
+                    var weapon = catalog.Weapons.Find(entry => entry.TemplateId == templateId);
+                    if (weapon == null) continue;
+                    long instanceId = baseline.Weapons.Count + 1L;
+                    _offlineWeapons.Add(instanceId, weapon);
+                    baseline.Weapons.Add(new WeaponInstanceSummary
+                    {
+                        InstanceId = instanceId, TemplateId = templateId, ElementId = weapon.ElementId
+                    });
+                    if (templateId == baseline.TemplateId)
+                    {
+                        baseline.WeaponInstanceId = instanceId;
+                        baseline.ElementId = weapon.ElementId;
+                    }
+                }
+                _offlineEquipment = new ClientEquipmentState(catalog);
+                _offlineEquipment.InitializeFromBaseline(baseline);
+                BagManager.Instance.ApplyServerWeapons(baseline.Weapons);
+                SubscribeWeaponBag();
+            }
+
+            _offlineWeaponOwner = _localEntry;
+            _localEntry.SkillCoordinator.OfflineWeaponProvider = () =>
+                _offlineEquipment != null
+                && _offlineWeapons.TryGetValue(_offlineEquipment.WeaponInstanceId, out var weapon) ? weapon : null;
+            ApplyEquipmentState();
+        }
+
+        private uint RequestWeapon(long instanceId)
+        {
+            if (_combatBridge != null) return _combatBridge.RequestEquip(instanceId);
+            if (_offlineEquipment == null || !_offlineWeapons.ContainsKey(instanceId)) return 0;
+            return _offlineEquipment.Revision + 1u;
+        }
+
+        private void HandleCastConfirm(CastConfirm confirm)
+        {
+            var equipment = _combatBridge?.Equipment;
+            if (equipment == null || confirm.Accepted || confirm.RejectReason != "stale-equipment"
+                || confirm.CasterLifeId != equipment.LifeId || confirm.WeaponInstanceId == 0) return;
+            if (equipment.TryApply(new EquipWeaponConfirm
+                {
+                    EquipmentRevision = confirm.EquipmentRevision,
+                    WeaponInstanceId = confirm.WeaponInstanceId,
+                    TemplateId = confirm.TemplateId,
+                    ElementId = confirm.ElementId
+                }))
+                ApplyEquipmentState();
+        }
+
         private void HandleBagEquipRequested(ItemData item)
         {
             if (_weaponBagController == null || item == null) return;
-            _weaponBagController.TryRequest(item.InstanceId, Time.unscaledTime);
+            if (_weaponBagController.TryRequest(item.InstanceId, Time.unscaledTime)
+                && _offlineEquipment != null && _offlineWeapons.TryGetValue(item.InstanceId, out var weapon))
+            {
+                uint revision = _offlineEquipment.Revision + 1u;
+                var confirm = new EquipWeaponConfirm
+                {
+                    ClientEquipSeq = revision,
+                    EquipmentRevision = revision,
+                    Accepted = true,
+                    WeaponInstanceId = item.InstanceId,
+                    TemplateId = weapon.TemplateId,
+                    ElementId = weapon.ElementId
+                };
+                _offlineEquipment.TryApply(confirm);
+                HandleEquipResult(confirm);
+            }
             RefreshWeaponBag();
         }
 
@@ -996,12 +1082,14 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void RefreshWeaponBag()
         {
-            if (_weaponBagFont == null || _weaponBagController == null || _combatBridge == null) return;
+            if (_weaponBagFont == null || _weaponBagController == null
+                || CurrentEquipment?.HasEquipment != true || UIManager.Instance == null) return;
             if (_weaponBagRenderedRevision == _weaponBagController.Revision) return;
             if (_weaponBag == null)
             {
-                _weaponBag = new GameObject("WeaponBag").AddComponent<WeaponBagView>();
-                _weaponBag.transform.SetParent(transform, false);
+                var bagObject = new GameObject("WeaponBag", typeof(RectTransform));
+                bagObject.transform.SetParent(UIManager.Instance.GetLayerRoot(LayerType.Popup), false);
+                _weaponBag = bagObject.AddComponent<WeaponBagView>();
             }
             _weaponBagRenderedRevision = _weaponBagController.Revision;
             _weaponBag.Refresh(BagManager.Instance.Data,
@@ -1013,28 +1101,33 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private void HandleEquipResult(EquipWeaponConfirm confirm)
         {
-            if (_weaponBagController == null || _combatBridge == null) return;
+            var equipment = CurrentEquipment;
+            if (_weaponBagController == null || equipment == null) return;
             if (!confirm.Accepted)
                 Debug.LogWarning("[NetHost] equip rejected: " + confirm.RejectReason
                     + " rev=" + confirm.EquipmentRevision);
-            var equipment = _combatBridge.Equipment;
-            _weaponBagController.ApplyConfirm(confirm, equipment.WeaponInstanceId,
+            var outcome = _weaponBagController.ApplyConfirm(confirm, equipment.WeaponInstanceId,
                 equipment.ElementId, equipment.AttackSpeedMultiplier);
+            if (outcome != WeaponEquipOutcome.Stale && _localEntry != null)
+                _localEntry.FinishWeaponChange();
             RefreshWeaponBag();
         }
 
         private void TickWeaponBag()
         {
-            if (_weaponBagController == null || _combatBridge == null) return;
+            if (_weaponBagController == null || CurrentEquipment == null) return;
+            bool wasPending = _weaponBagController.HasPending;
             _weaponBagController.Tick(Time.unscaledTime);
+            if (wasPending && !_weaponBagController.HasPending)
+                _localEntry?.SkillCoordinator?.FinishWeaponChange(replay: false);
             RefreshWeaponBag();
         }
 
         private void ApplyEquipmentState()
         {
-            if (_weaponBagController == null || _combatBridge == null) return;
-            var equipment = _combatBridge.Equipment;
-            if (equipment.HasEquipment)
+            if (_weaponBagController == null) return;
+            var equipment = CurrentEquipment;
+            if (equipment?.HasEquipment == true)
                 _weaponBagController.ApplyAuthoritative(equipment.WeaponInstanceId,
                     equipment.ElementId, equipment.AttackSpeedMultiplier, force: true);
             else
@@ -1045,10 +1138,9 @@ namespace Hotfix.GameSystems.SyncLayer
 
         private WeaponAppearanceResult ApplySwordAppearance(int elementId, float attackSpeed)
         {
-            if (_localEntry == null || _combatBridge == null) return WeaponAppearanceResult.Unavailable;
-            if (!_combatBridge.Equipment.HasEquipment) return WeaponAppearanceResult.Unavailable;
+            if (_localEntry == null || CurrentEquipment?.HasEquipment != true)
+                return WeaponAppearanceResult.Unavailable;
 
-            _localEntry.SetAttackSpeed(attackSpeed);
             bool applied = _localEntry.ApplySwordView(elementId);
             if (elementId == 0) return WeaponAppearanceResult.Applied;
             return applied ? WeaponAppearanceResult.Applied : WeaponAppearanceResult.Missing;
@@ -1102,7 +1194,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // 超时释放本地等待/施法锁，但保留请求归属记录以接住迟到接受。
             _echoRequestPending = false;
-            _localEntry?.SkillCoordinator.CancelEchoRequest();
+            _localEntry?.SkillCoordinator?.CancelEchoRequest();
         }
 
         private void ClearEchoRequest()
@@ -1361,83 +1453,59 @@ namespace Hotfix.GameSystems.SyncLayer
             }
         }
 
-        /// <summary>
-        /// 摘除战斗桥订阅（adapter 消息 + 本地技能事件）。Disconnect 与 OnDestroy 共用——
-        /// 宿主被销毁而本地 Sys3CEntry 存活时，避免桥对已销毁宿主留下悬空委托。
-        /// </summary>
-        private void DetachCombatBridge(bool preserveEquipment = false)
+        /// <summary>先解绑角色，断线时再释放连接级消息与视图。</summary>
+        private void DetachCombatBridge(bool keepConnection = false)
         {
-            // T12 乙-3：死亡回调也不能漏摘（它挂在本地角色上，宿主可能比角色活得久）——
-            // 放在早退守卫**之前**，没有战斗桥时同样要解开
             if (_localEntry != null)
+            {
                 _localEntry.OnServerDeath -= HandleLocalPlayerDeath;
-
-            _weaponBagRenderedRevision = -1;
-            if (!preserveEquipment)
-            {
-                _weaponBagController?.Reset();
-                _connectionEquipment = null;
-                _connectionEquipSeq = 0;
-                _localStatuses = null;   // 断开：上一条连接的本人状态不得重放到新会话
-            }
-
-            // 远程施法表现：断线/本地角色重建都必须退订并清空跟踪表——
-            // 旧 presenter 的 ViewRemoved 委托若留在 registry 上，新会话会调进已丢弃的跟踪表。
-            if (_remoteEntities != null && _remoteCastPresenter != null)
-                _remoteEntities.ViewRemoved -= _remoteCastPresenter.ClearForEntity;
-            if (_combatBridge != null)
-            {
-                _combatBridge.OnDamageResult -= HandleRemoteDamageResult;
-                _combatBridge.OnCastCancel -= HandleCastCancel;
-                _combatBridge.OnNpcAction -= HandleNpcAction;
-                _combatBridge.OnCombatStateUpdate -= HandleCombatStateUpdate;
-                _combatBridge.OnSwordQiEchoState -= HandleSwordQiEchoState;
-                if (_remoteCastPresenter != null)
+                var coordinator = _localEntry.SkillCoordinator;
+                if (coordinator != null)
                 {
-                    _combatBridge.OnProjectileLaunch -= _remoteCastPresenter.OnProjectileLaunch;
-                    _combatBridge.OnProjectileStop -= _remoteCastPresenter.OnProjectileStop;
+                    coordinator.OnSkillActivated -= OnLocalSkillCast;
+                    coordinator.OnChargeReleased -= OnLocalChargeReleased;
+                    coordinator.OnSkillCancelled -= OnLocalSkillCancelled;
+                    coordinator.OnEchoRequested -= HandleEchoRequested;
+                    coordinator.AttackSpeedProvider = null;
+                    coordinator.OfflineWeaponProvider = null;
+                    coordinator.IsWeaponChangePending = null;
+                    coordinator.FinishWeaponChange(replay: false);
                 }
             }
-            _combatBridge?.ClearEchoDedupe();
-            _remoteCastPresenter?.Clear();
-            _remoteCastPresenter = null;
-            foreach (var instance in _remoteEchoPresenters.Values)
-                instance.Presenter.Stop();
-            _remoteEchoPresenters.Clear();
+            _offlineWeaponOwner = null;
             _localEchoPresenter?.Stop();
             _localEchoPresenter = null;
             ClearEchoRequest();
-            NetworkSwordQiGate.SuppressLocalSpawn = false;
+            if (keepConnection) return;
 
+            _weaponBagRenderedRevision = -1;
+            _weaponBagController?.Reset();
+            _offlineEquipment = null;
+            _offlineWeapons.Clear();
+            _localStatuses = null;
+            NetworkSwordQiGate.SuppressLocalSpawn = false;
             if (_weaponBag != null)
             {
                 _weaponBag.gameObject.SetActive(false);
                 Destroy(_weaponBag.gameObject);
                 _weaponBag = null;
             }
-
             if (_bagEquipSubscribed)
             {
                 BagManager.Instance.OnEquipRequested -= HandleBagEquipRequested;
                 _bagEquipSubscribed = false;
             }
-            if (_combatBridge != null)
-                _combatBridge.OnEquipResult -= HandleEquipResult;
-            if (_localEntry != null)
-                _localEntry.SkillCoordinator.AttackSpeedProvider = null;
 
-            if (_combatBridge == null || _adapter == null) return;
-            _adapter.MessageReceived -= _combatBridge.OnMessage;
-            if (_localEntry != null)
-            {
-                _localEntry.SkillCoordinator.OnSkillActivated -= OnLocalSkillCast;
-                _localEntry.SkillCoordinator.OnChargeReleased -= OnLocalChargeReleased;
-                _localEntry.SkillCoordinator.OnSkillCancelled -= OnLocalSkillCancelled;
-                _localEntry.SkillCoordinator.OnEchoRequested -= HandleEchoRequested;
-            }
-            _combatBridge.OnLineProjectileStopped -= HandleLineProjectileStopped;
-            _combatBridge.ClearDedupe();   // 断线/重建：新会话不得沿用旧连接的 EventId/CastId 窗口
+            if (_combatBridge != null && _adapter != null)
+                _adapter.MessageReceived -= _combatBridge.OnMessage;
             _combatBridge = null;
+            if (_remoteEntities != null && _remoteCastPresenter != null)
+                _remoteEntities.ViewRemoved -= _remoteCastPresenter.ClearForEntity;
+            _remoteCastPresenter?.Clear();
+            _remoteCastPresenter = null;
+            foreach (var instance in _remoteEchoPresenters.Values)
+                instance.Presenter.Stop();
+            _remoteEchoPresenters.Clear();
         }
 
         /// <summary>

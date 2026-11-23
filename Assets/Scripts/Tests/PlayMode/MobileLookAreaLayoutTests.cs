@@ -1,10 +1,16 @@
 using System.Collections;
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DataDefinition;
+using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.SyncLayer;
+using Hotfix.GameSystems.Sys3C.Character;
+using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.UI;
 using Hotfix.GameSystems.Sys3C.Input;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -64,6 +70,64 @@ namespace KcpNet.PlayModeTests
             var child = root.transform.Find(name);
             Assert.IsNotNull(child, "MobileUiRoot 下缺少 " + name);
             return child;
+        }
+
+        [UnityTest]
+        public IEnumerator test_mobile_weapon_bag_receives_touches_and_equips_offline()
+        {
+            var ui = UIManager.Instance;
+            Assert.NotNull(ui);
+            yield return ui.WhenReady().ToCoroutine();
+            yield return ui.CloseAsync<CharacterSelectPanel>().ToCoroutine();
+            var input = Object.FindObjectOfType<MobileInputBinder>();
+            Assert.NotNull(input);
+            input.TouchOverride = TouchOverride.ForceTouch;
+            yield return null;
+            Assert.IsTrue(Find("LookArea").gameObject.activeInHierarchy);
+
+            var bag = GameObject.Find("WeaponBag");
+            Assert.NotNull(bag, "单机角色就绪后要有可换剑的背包");
+            Assert.AreSame(ui.GetLayerRoot(LayerType.Popup), bag.transform.parent);
+            var entry = bag.transform.Find("背包").GetComponent<Button>();
+            AssertButtonReceivesTouch(entry);
+            entry.onClick.Invoke();
+            yield return null;
+
+            var panel = bag.transform.Find("Swords");
+            var names = new[] { "默认剑", "冰剑", "火剑", "雷剑", "风剑" };
+            foreach (var gender in new[] { CharacterGender.Male, CharacterGender.Female })
+            {
+                EventBus.Emit(new CharacterSelectedEvent(gender));
+                yield return null;
+                yield return null;
+                Assert.AreEqual(5, panel.GetComponentsInChildren<Button>().Length);
+                foreach (var row in panel.GetComponentsInChildren<Button>())
+                    AssertButtonReceivesTouch(row);
+
+                for (int index = 1; index <= names.Length; index++)
+                {
+                    int elementId = index % names.Length;
+                    var sword = panel.Find(names[elementId]).GetComponent<Button>();
+                    sword.onClick.Invoke();
+                    yield return null;
+                    Assert.AreEqual(elementId, input.BoundEntry.CurrentElementId, gender + " " + names[elementId]);
+                    Assert.AreEqual(elementId, input.BoundEntry.SkillCoordinator.OfflineWeaponProvider().ElementId);
+                }
+            }
+        }
+
+        private static void AssertButtonReceivesTouch(Button button)
+        {
+            Canvas.ForceUpdateCanvases();
+            var rect = (RectTransform)button.transform;
+            var pointer = new PointerEventData(EventSystem.current)
+            {
+                position = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center))
+            };
+            var hits = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointer, hits);
+            Assert.IsNotEmpty(hits, button.name);
+            Assert.AreSame(button, hits[0].gameObject.GetComponentInParent<Button>(), button.name);
         }
 
         [UnityTest]

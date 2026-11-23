@@ -10,6 +10,7 @@ using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Skills.Effect;
+using Hotfix.GameSystems.Skills.Runtime;
 using Hotfix.GameSystems.Nameplate;
 
 namespace Hotfix.GameSystems.Monster
@@ -38,11 +39,14 @@ namespace Hotfix.GameSystems.Monster
         private Collider _collider;
 
         private readonly StatusControllerAdapter _statusController = new();
+        private OfflineMonsterStatuses _elementalStatuses;
+        private uint _life;
         private bool _wasStunned;
+        private bool IsStunned => _statusController.IsStunned || _elementalStatuses?.ActionLock == true;
 
         // _stats 由 Init 建立：npc 视图（联网模式的怪物表现）从不调 Init，所以这里必须判空 ——
         // 否则视图会被判成「活着」而选进目标集合。同文件 ITargetable 的 HP 系列本来就在判空。
-        bool IDamageable.IsAlive => _stats != null && !_stats.IsDead;
+        bool IDamageable.IsAlive => this != null && isActiveAndEnabled && _stats != null && !_stats.IsDead;
         Transform IDamageable.Transform => transform;
 
         public event Action OnDeathComplete;
@@ -70,12 +74,13 @@ namespace Hotfix.GameSystems.Monster
         private void OnDisable()
         {
             EventBus.UnsubscribeTargeted<KnockbackEvent>(GetInstanceID(), OnKnockback);
+            ClearElementalStatuses();
         }
 
         private void OnKnockback(KnockbackEvent e)
         {
             if (_stats == null || _stats.IsDead) return;
-            if (_statusController.IsStunned) return;
+            if (IsStunned || _ctx?.HasArmoredWindup == true) return;
             _movement.ApplyKnockback(e.Direction, e.Force);
         }
 
@@ -84,6 +89,8 @@ namespace Hotfix.GameSystems.Monster
             // P6 ⑤：池化复用的对象会带着上一轮的订阅——必须清空，
             // 否则 MonsterSpawner 每次生成 += 会累积成多处理器。
             OnDeathComplete = null;
+            ClearElementalStatuses();
+            ++_life;
 
             _config = config;
             _spawnPoint = spawnPoint;
@@ -176,25 +183,39 @@ namespace Hotfix.GameSystems.Monster
         {
             if (_stats == null || _stats.IsDead || _brain == null) return;
 
-            bool stunned = _statusController.IsStunned;
+            _elementalStatuses?.AdvanceTo(OfflineMonsterStatuses.LocalTick);
+            if (_stats.IsDead) return;
+            SyncStatusControl();
+
+            if (!IsStunned)
+                _brain.Update(Time.deltaTime);
+        }
+
+        private void SyncStatusControl()
+        {
+            _movement?.SetStatusSpeedScale(_elementalStatuses?.SpeedScale ?? 1f);
+            bool stunned = IsStunned;
             if (stunned != _wasStunned)
             {
                 if (Animator != null)
                     Animator.speed = stunned ? 0f : 1f;
 
-                if (stunned)
-                    _movement?.Stop();
-
+                _movement?.SetActionLock(stunned);
                 _wasStunned = stunned;
             }
+        }
 
-            if (!stunned)
-                _brain.Update(Time.deltaTime);
+        private void ClearElementalStatuses()
+        {
+            if (_elementalStatuses == null) return;
+            _elementalStatuses.Clear();
+            SyncStatusControl();
         }
 
         // Safety net: unsubscribe even if OnDisable is skipped (e.g., DestroyImmediate in editor)
         private void OnDestroy()
         {
+            ClearElementalStatuses();
             EventBus.UnsubscribeTargeted<KnockbackEvent>(GetInstanceID(), OnKnockback);
             EntityDisplayManager.Instance?.Unregister(GetInstanceID());
             PhysicsRegistry.Instance?.Unregister(this);
@@ -206,11 +227,23 @@ namespace Hotfix.GameSystems.Monster
             => ((IDamageable)this).TakeDamage(data, hitDirection, HitContact.None);
 
         void IDamageable.TakeDamage(DamageBlock data, Vector3 hitDirection, HitContact contact)
+            => TakeDamage(data, hitDirection, contact, null);
+
+        internal void TakeOfflineWeaponDamage(DamageBlock data, Vector3 hitDirection, OfflineWeaponCast cast)
+            => TakeDamage(data, hitDirection, HitContact.None, cast);
+
+        private void TakeDamage(DamageBlock data, Vector3 hitDirection, HitContact contact,
+            OfflineWeaponCast weaponCast)
         {
             // 未 Init（npc 视图）⇒ 本轮伤害与它无关，安静返回。**这条守卫不能省**：视图的剥离是
             // 「先禁再销毁」，销毁帧末才生效，而 `enabled = false` 挡不住接口调用 —— 创建帧内
             // 仍可能被同帧判定命中（与 StripCollider 注释里那条窗口同类）。
-            if (_stats == null || _stats.IsDead) return;
+            if (this == null || !isActiveAndEnabled || _stats == null || _stats.IsDead) return;
+            uint tick = OfflineMonsterStatuses.LocalTick;
+            _elementalStatuses?.AdvanceTo(tick);
+            if (_stats.IsDead) return;
+            SyncStatusControl();
+            bool armoredWindup = _ctx?.HasArmoredWindup == true;
 
             // None → 方向重建（无碰撞箱路径也能拿真实部位）
             HitContact resolved = contact.HasContact || _collider == null
@@ -229,18 +262,28 @@ namespace Hotfix.GameSystems.Monster
                 Contact = resolved,
             };
 
-            var result = _damagePipeline.Process(ref ctx);
+            var result = _damagePipeline.Process(ref ctx, _elementalStatuses?.IncomingDamageMultiplier ?? 1f);
 
-            if (!_statusController.IsStunned)
-                _brain.OnDamageReceived(result, hitDirection);
+            if (!IsStunned && !armoredWindup)
+                _brain?.OnDamageReceived(result, hitDirection);
 
             EmitDamageEvents(myId, data, hitDirection, result, resolved);
 
-            if (result.ShouldKnockback && data.KnockbackForce > 0)
+            if (!armoredWindup && result.ShouldKnockback && data.KnockbackForce > 0)
             {
                 float force = data.KnockbackForce * HitZoneClassifier.KnockbackMultiplier(resolved.Part);
                 EventBus.TargetedEmit(myId, new KnockbackEvent(myId, hitDirection, force));
             }
+
+            // 部分格挡仍扣血，但同样拒绝元素附加。只有首个有效存活命中占用该施法的附加名额。
+            if (weaponCast == null || result.WasBlocked || ctx.BlockCount > 0
+                || !(result.FinalDamage > 0f) || _stats.IsDead)
+                return;
+            var element = weaponCast.ClaimElement(myId, _life);
+            if (element == null) return;
+            _elementalStatuses ??= new OfflineMonsterStatuses(transform, myId, ApplyDotDamage);
+            _elementalStatuses.Apply(element, weaponCast, tick, armoredWindup);
+            SyncStatusControl();
         }
 
         private void EmitDamageEvents(int entityId, DamageBlock data, Vector3 hitDirection,
@@ -268,6 +311,7 @@ namespace Hotfix.GameSystems.Monster
 
         private void HandleDeath()
         {
+            ClearElementalStatuses();
             if (Animator != null) Animator.speed = 1f;
             _wasStunned = false;
 
@@ -394,7 +438,13 @@ namespace Hotfix.GameSystems.Monster
 
         void IEffectTarget.ApplyDamageOverTime(float amount)
         {
-            if (_stats == null || _stats.IsDead || amount <= 0f) return;
+            _elementalStatuses?.AdvanceTo(OfflineMonsterStatuses.LocalTick);
+            ApplyDotDamage(amount * (_elementalStatuses?.IncomingDamageMultiplier ?? 1f));
+        }
+
+        private void ApplyDotDamage(float amount)
+        {
+            if (this == null || !isActiveAndEnabled || _stats == null || _stats.IsDead || amount <= 0f) return;
 
             _stats.ApplyDamage(amount);          // 纯扣血，绕过防御
 

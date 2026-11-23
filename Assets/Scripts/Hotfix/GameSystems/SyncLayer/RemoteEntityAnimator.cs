@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Hotfix.GameSystems.Sys3C;
 using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.FSM;
@@ -99,9 +100,15 @@ namespace Hotfix.GameSystems.SyncLayer
         private bool _deathDurationNeedsCalibration;
 
         private int _lastLocomotionKey = int.MinValue;   // 去重：参数没变不重写
+        private Sys3CEntry? _swordView;
+        private bool _avatarPrepared;
 
-        private void Awake()
+        private void Awake() => PrepareAvatar();
+
+        internal void PrepareAvatar()
         {
+            if (_avatarPrepared) return;
+            _avatarPrepared = true;
             ResolveAnimator();
 
             // 远程实体是"别人权威状态的视图"——本地行为一条都不许跑。
@@ -114,8 +121,12 @@ namespace Hotfix.GameSystems.SyncLayer
             //   · 根上的 `UnityEngine.CharacterController` 会把本地玩家挡在远程角色身上。
             // 停用发生在同一帧的 Start/Update 之前（Instantiate 后同步执行），所以上面这些一个都不会跑。
             foreach (var behaviour in GetComponentsInChildren<MonoBehaviour>(true))
+            {
+                if (behaviour is Sys3CEntry entry)
+                    _swordView = entry;
                 if (behaviour != this)
                     behaviour.enabled = false;
+            }
 
             // 碰撞体同理：远程位置由快照插值写，不能让 Unity 物理在里面插一脚
             foreach (var c in GetComponentsInChildren<Collider>(true))
@@ -123,6 +134,13 @@ namespace Hotfix.GameSystems.SyncLayer
 
             // 归零 Attack / Hit / Defend 层权重（原因见 ResetLayerWeights 的注释）
             ResetLayerWeights();
+        }
+
+        // ApplySwordView only swaps the serialized visual under the sword socket.
+        internal void ApplySwordView(int elementId)
+        {
+            if (_swordView != null)
+                _swordView.ApplySwordView(elementId);
         }
 
         private void OnEnable()

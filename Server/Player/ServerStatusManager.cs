@@ -10,6 +10,7 @@ namespace KcpServer
     {
         private readonly PlayerState _owner;
         private System.Action<float, bool>? _controlSink;
+        internal System.Func<bool>? HasParalyzeImmunity { get; set; }
         public StatusRuntime Runtime { get; } = new();
 
         public ServerStatusManager(PlayerState owner, ElementalCatalogDefinition catalog,
@@ -27,6 +28,10 @@ namespace KcpServer
         public StatusApplyResult Apply(StatusEffectDefinition def, long sourceId, int skillId,
             ulong castId, uint tick, ElementalCatalogDefinition catalog)
         {
+            if ((StatusEffectKind)def.EffectKind == StatusEffectKind.Paralyze
+                && HasParalyzeImmunity?.Invoke() == true)
+                return StatusApplyResult.Ignored;
+
             var result = Runtime.Apply(def, sourceId, skillId, castId, tick,
                 _owner.Kind == (byte)EntityKind.Player, sourceIsPlayer: true);
             if (result != StatusApplyResult.Ignored)

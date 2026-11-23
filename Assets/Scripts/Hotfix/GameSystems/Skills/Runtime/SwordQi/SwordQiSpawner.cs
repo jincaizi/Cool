@@ -26,6 +26,10 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
 
         public static SwordQiProjectile Spawn(SwordQiConfig config, DamageBlock damage, Vector3 origin,
             Vector3 direction, float startDistance = 0f, int elementId = 0)
+            => Spawn(config, damage, origin, direction, startDistance, elementId, null);
+
+        internal static SwordQiProjectile Spawn(SwordQiConfig config, DamageBlock damage, Vector3 origin,
+            Vector3 direction, float startDistance, int elementId, OfflineWeaponCast weaponCast)
         {
             if (config == null || config.Prefab == null)
             {
@@ -58,9 +62,9 @@ namespace Hotfix.GameSystems.Skills.Runtime.SwordQi
                 _pool = new ComponentPool<SwordQiProjectile>(prefabComp, _root, PrewarmCount);
             }
 
-            var qi = _pool.Get();
-            qi.OnSpawn(config, damage, origin, direction, _pool, startDistance, elementId);
             PruneActive();
+            var qi = _pool.Get();
+            qi.OnSpawn(config, damage, origin, direction, _pool, startDistance, elementId, weaponCast);
             _active.Add(qi);
             return qi;
         }

@@ -29,18 +29,22 @@ namespace Cool.SyncCore
     {
         private readonly Dictionary<int, ActiveStatus> _byEffect = new();
         private readonly Dictionary<int, ActiveStatus> _byGroup = new();
+        private readonly List<int> _expired = new();
         private uint _controlImmunityTicks;
         private uint _vulnerabilityNoRefreshTicks;
+        private uint _pvpThunderTicks;
         private uint? _lastVulnerableAppliedTick;
 
         public IEnumerable<ActiveStatus> Active => _byEffect.Values;
         public int Count => _byEffect.Count;
+        public bool Contains(int effectId) => _byEffect.ContainsKey(effectId);
         public uint ControlImmuneUntilTick { get; private set; }
 
         public void Configure(PvpCombatSettings pvp)
         {
             _controlImmunityTicks = SecondsToTicks(pvp.ControlImmunitySeconds);
             _vulnerabilityNoRefreshTicks = SecondsToTicks(pvp.SameGroupVulnerabilityNoRefreshSeconds);
+            _pvpThunderTicks = SecondsToTicks(pvp.ThunderDurationSeconds);
         }
 
         public StatusApplyResult Apply(StatusEffectDefinition def, long sourceId, int skillId,
@@ -48,7 +52,8 @@ namespace Cool.SyncCore
         {
             if (def == null) return StatusApplyResult.Ignored;
             var kind = (StatusEffectKind)def.EffectKind;
-            uint duration = SecondsToTicks(def.DurationSeconds);
+            bool isPvpControl = kind == StatusEffectKind.Paralyze && targetIsPlayer && sourceIsPlayer;
+            uint duration = isPvpControl ? _pvpThunderTicks : SecondsToTicks(def.DurationSeconds);
             if (duration == 0) return StatusApplyResult.Ignored;
 
             if (kind == StatusEffectKind.Paralyze && tick < ControlImmuneUntilTick)
@@ -70,8 +75,7 @@ namespace Cool.SyncCore
                     existing.Definition = def;
                     existing.EndTick = AddTicks(tick, duration);
                     existing.PendingRemoval = false;
-                    existing.IsPvpControl = kind == StatusEffectKind.Paralyze
-                        && targetIsPlayer && sourceIsPlayer;
+                    existing.IsPvpControl = isPvpControl;
                     if (existing.IsDot)
                     {
                         uint next = AddTicks(tick, SecondsToTicks(def.IntervalSeconds));
@@ -96,7 +100,7 @@ namespace Cool.SyncCore
                 AppliedTick = tick, EndTick = AddTicks(tick, duration),
                 NextTick = kind == StatusEffectKind.Burn
                     ? AddTicks(tick, SecondsToTicks(def.IntervalSeconds)) : 0u,
-                IsPvpControl = kind == StatusEffectKind.Paralyze && targetIsPlayer && sourceIsPlayer
+                IsPvpControl = isPvpControl
             };
             _byEffect[def.EffectId] = status;
             _byGroup[def.StackGroupId] = status;
@@ -116,11 +120,7 @@ namespace Cool.SyncCore
 
         public int RemoveExpiredModifiers(uint tick)
         {
-            var expired = new List<int>();
-            foreach (var s in _byEffect.Values)
-                if (!s.IsDot && tick >= s.EndTick) expired.Add(s.EffectId);
-            foreach (var id in expired) Remove(id, tick);
-            return expired.Count;
+            return RemoveExpired(tick, isDot: false);
         }
 
         public void CollectDueDots(uint tick, List<ActiveStatus> due)
@@ -136,11 +136,16 @@ namespace Cool.SyncCore
         /// <summary>没有排定跳落在 EndTick 时（刷新错相/间隔不整除）到期移除；必须在 CollectDueDots/AdvanceDot 之后调用。</summary>
         public int RemoveExpiredDots(uint tick)
         {
-            var expired = new List<int>();
+            return RemoveExpired(tick, isDot: true);
+        }
+
+        private int RemoveExpired(uint tick, bool isDot)
+        {
+            _expired.Clear();
             foreach (var s in _byEffect.Values)
-                if (s.IsDot && tick >= s.EndTick) expired.Add(s.EffectId);
-            foreach (var id in expired) Remove(id, tick);
-            return expired.Count;
+                if (s.IsDot == isDot && tick >= s.EndTick) _expired.Add(s.EffectId);
+            foreach (var id in _expired) Remove(id, tick);
+            return _expired.Count;
         }
 
         public void AdvanceDot(ActiveStatus status, uint tick)
@@ -184,7 +189,8 @@ namespace Cool.SyncCore
 
         public static uint SecondsToTicks(float seconds)
             => seconds <= 0f || float.IsNaN(seconds) || float.IsInfinity(seconds)
-                ? 0u : (uint)Math.Ceiling(seconds * CombatRules.TickRateHz);
+                // Keep the product in single precision so 0.6s is exactly 9 ticks on Unity Mono.
+                ? 0u : (uint)MathF.Ceiling(seconds * CombatRules.TickRateHz);
 
         private static uint AddTicks(uint tick, uint delta)
             => delta > uint.MaxValue - tick ? uint.MaxValue : tick + delta;

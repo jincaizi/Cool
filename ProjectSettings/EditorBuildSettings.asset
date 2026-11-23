@@ -11,4 +11,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
     guid: 304a5748b784bc241be3c08d67013b21
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 0418ac4f02abbfc458f09a8d5f3151dd, type: 2}

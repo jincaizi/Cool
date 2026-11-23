@@ -122,12 +122,12 @@ dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
   `moveSpeed × SpeedScale × dt`，**ORCA `maxStep` 用同一缩放后的期望位移**——
   冰减速真正拖慢移动与避让步长，不只是快照数值。位置 flush 的 `Speed` 也用
   `moveSpeed × ControlSpeedScale`（未减速时逐位等于 `moveSpeed`）。
-- **麻痹（雷）**：`ControlActionLock` 时整段跳过行为树（`m.Moving=false`，不移动、不施法），
+- **麻痹（雷）**：PvE 默认 0.6s。NPC 技能前摇有霸体时，状态运行时忽略本次麻痹并保留动作。
+  状态生效后 `ControlActionLock` 跳过行为树（`m.Moving=false`，不移动、不施法），
   与受击硬直同门；`Attack` 动作入口也复查锁。首次上锁经
-  `Server3C.ApplyPlayerControl → MonsterModule.CancelAction` 取消未提交前摇
-  （`NpcActionCancelReason.Hit`）；**霸体只免打断**：`MonsterActionRunner.IsArmored`
-  时动作照常跑完，麻痹状态仍会挂上并在动作结束后限制移动/施法。`IsArmored` 反映的是
-  最近一次 `TryBeginSkill` 计算的霸体（已知限制：技能之间不会主动刷新）。
+  `Server3C.ApplyPlayerControl → MonsterModule.CancelAction` 取消可打断的未提交前摇
+  （`NpcActionCancelReason.Hit`）。`MonsterActionRunner.HasWindupArmor` 同时检查当前技能
+  阶段与本次 `TryBeginSkill` 计算的霸体。
 - **Evade 清状态**：`MonsterBrain.ArriveHome` 回满血时 `Statuses.ClearAll` +
   `BumpCombatVersion`——脱战到家后冰/火/雷/风全部移除，控制派生恢复；Evade 途中保留状态
   但不再产生仇恨。

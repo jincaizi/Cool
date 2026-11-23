@@ -19,7 +19,7 @@
   "Statuses": [
     { "EffectId": 101, "EffectKind": 1, "StackGroupId": 1, "DurationSeconds": 2.0, "IntervalSeconds": 0.0, "DamagePerTick": 0.0, "SlowRatio": 0.3, "IncomingDamageMultiplier": 1.0, "ViewKey": "" },
     { "EffectId": 201, "EffectKind": 2, "StackGroupId": 2, "DurationSeconds": 3.0, "IntervalSeconds": 1.0, "DamagePerTick": 8.0, "SlowRatio": 0.0, "IncomingDamageMultiplier": 1.0, "ViewKey": "" },
-    { "EffectId": 301, "EffectKind": 3, "StackGroupId": 3, "DurationSeconds": 0.8, "IntervalSeconds": 0.0, "DamagePerTick": 0.0, "SlowRatio": 0.0, "IncomingDamageMultiplier": 1.0, "ViewKey": "" },
+    { "EffectId": 301, "EffectKind": 3, "StackGroupId": 3, "DurationSeconds": 0.6, "IntervalSeconds": 0.0, "DamagePerTick": 0.0, "SlowRatio": 0.0, "IncomingDamageMultiplier": 1.0, "ViewKey": "" },
     { "EffectId": 401, "EffectKind": 4, "StackGroupId": 4, "DurationSeconds": 1.5, "IntervalSeconds": 0.0, "DamagePerTick": 0.0, "SlowRatio": 0.0, "IncomingDamageMultiplier": 2.0, "ViewKey": "" }
   ],
   "AttackTimings": [

@@ -29,7 +29,7 @@ bash tools/test-server.sh
 
 ## 多人战斗一致性
 
-- **权威复活落点**：`Config/maps.json` 的 `playerSpawn` 提供地图复活坐标，默认地图为 DemoDay。
+- **权威出生与复活落点**：`Config/maps.json` 的 `playerSpawn` 同时初始化登录实体的位置、首次位移校验的基准和复活坐标，默认地图为 DemoDay。
   支持该能力的玩家到点复活时，主循环同时更新 HP、位置、速度、防御和移动校验基准，
   再发送 `RespawnNotice`。位置同步丢弃死亡期间和复活 tick 不匹配的请求，
   首个新请求按一个上报周期的移动预算校验。
@@ -52,14 +52,19 @@ bash tools/test-server.sh
   计算 SHA-256 指纹；缺表/校验失败时停用该功能（登录不发放武器）。客户端登录带指纹与
   `ProtocolFeatures.ElementalSwordQiV1`，不匹配则拒绝登录。
 - **权威换装**：`LoginHandler` 按目录初始清单发放会话内武器实例并装备默认剑；
-  `EquipHandler` 校验归属/版本、按 `ClientEquipSeq` 幂等，确认/拒绝都带当前装备摘要。
+  `EquipHandler` 校验归属、装备版本及玩家动作时限。死亡或角色仍在前摇、判定、收招时，
+  分别返回 `caster-dead`、`action-busy` 并附装备摘要。动作时限由施法快照派生，
+  动作结束即可换装，飞行中的投射物沿用施法时的武器属性。相同 `ClientEquipSeq`
+  重试复用最近的原结论，过旧序号返回 `stale-seq`。
   `PlayerState` 持有 `WeaponInstanceTemplates / EquipmentRevision / LifeId`。
 - **施法身份**：`CombatResolver.Decide` 用世界级单调 `ulong CastId`（玩家与 NPC 共用），
   冻结 `WeaponCastSnapshot`（攻击力/攻速/元素/装备版本），校验 `ClientCastSeq /
-  EquipmentRevision / CasterLifeId`；重复序号只回原 `CastConfirm`，不重排判定。
+  EquipmentRevision / CasterLifeId`。最近的重复序号只回原 `CastConfirm`，过旧且无缓存的
+  序号返回 `stale-seq`。旧客户端的零序号沿用原施法路径。
   普攻首判/接续/冷却按共享时序与攻速换算 tick，`NextAllowedAttackTick` 在施法时固定。
 - **伤害**：普攻基础伤害乘武器 `BaseAttack / 默认武器 BaseAttack`；剑气分支另乘共享
-  `SwordQiDamageCoefficient` 与武器 `SwordQiDamageMultiplier`。挥击与剑气各自独立结算。
+  `SwordQiDamageCoefficient` 与武器 `SwordQiDamageMultiplier`。挥击与剑气各自独立结算，
+  每次提交伤害前复查目标存活，因此同段挥击击杀后，剑气继续飞过并命中后方合法目标。
 - **发射/停点**：首个 LineAll 段发布 `ProjectileLaunchBroadcast`（与判定同一 XZ 原点/朝向，
   12m / 18m/s / 3 段）；格挡、死亡/离场发布 `ProjectileStopBroadcast`，按 `CastId`
   只停指定一发。发射收件人记录在 `CastHandler`，终止时并上已通知会话。
@@ -117,8 +122,10 @@ bash tools/test-server.sh
   缩放——720 HP 会话 ×7.2，保持原 PvE TTK；玩家/bot 来源与打怪不缩放。
 - **控制注入入口**：`Server3C.ApplyPlayerControl(playerId, speedScale, actionLock)` 写权威控制
   状态，变化时递增 `ControlVersion` 并 bump `CombatVersion`（触发 318）；首次 `ActionLock` 取消
-  施法者未提交段（已发射剑气照飞）；NPC 首次 `ActionLock` 走
-  `MonsterModule.CancelAction`（霸体免打断）。动作锁期间 `CastHandler.Decide` 以
+  可打断的未提交施法，已发射的剑气和火球继续飞行。玩家霸体技能（10002、20002）保留判定，
+  照常附加 PvP 麻痹。NPC 前摇霸体在状态应用前免疫麻痹，普通前摇由
+  `MonsterModule.CancelAction` 取消。麻痹 PvE 默认 0.6s，PvP 读取目录
+  `Pvp.ThunderDurationSeconds`（默认 0.8s）。动作锁期间 `CastHandler.Decide` 以
   `control-lock` 拒绝新施法，位置同步不发普通移动预算。**Plan 04 起生产调用者 =
   `ServerStatusManager` 的状态运行时**（冰/雷变化经 `Server3C.RegisterEntity` 注入的
   control sink 调用）；不要在别处直接写 `ControlSpeedScale/ControlActionLock`。
@@ -143,10 +150,9 @@ bash tools/test-server.sh
 
 状态：Plan 01–06 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
 PvP 基线、Plan 04 状态结算/DoT/元素表现、Plan 05 AOI 反查索引/三客户端/带宽/注入验收、
-Plan 06 验收缺口收口），服务端全量 **699/699**。Plan 05/06 未新增战斗机制或协议字段
-（`ProtocolVersion` 保持 1）。未启用：**离线单机共享状态运行时**（本地 `StatusEffectManager`
-的冰冻/灼烧保持独立，四元素运行时留给 backlog）、Addressables 元素资源与远端武器模型
-（backlog；Plan 06 明确未包含）。
+Plan 06 验收缺口收口）。属性剑气发布收口补充权威换装、过期施法序号、死亡与雷打断回归，
+并接通离线怪物的[共享状态运行时](../Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md)。
+`ProtocolVersion` 保持 1。
 
 Plan 03 验收证据（可证伪）：
 
@@ -173,7 +179,7 @@ Plan 04 验收证据（服务端；7 项基线在 654/654 内，怪物控制项�
   1.8m 静止怪物（期望方向 `(1,0,0.7)` 与其约 35°）证明 ORCA `maxStep` 同缩——`SpeedScale=0.7`
   时解恰好截断在 `moveSpeed×0.7×dt` 的 maxStep 圆上、未缩放对照为 `moveSpeed×dt`，慢/快步长比
   0.7，解出朝向偏离期望方向（点积 <0.95，约束确实生效）且横向分量不因缩放反转）、
-  麻痹打断与霸体；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
+  麻痹打断与怪物前摇霸体免疫；`MonsterEvadeTests` 覆盖 Evade 仇恨清空/回巢，状态清除由
   `MonsterStatusControlTests` / `DotDamageTests` 覆盖。
 
 Plan 05 验收证据（2026-11-20；服务端项均在 668/668 内，Unity 结果另列）：

@@ -200,11 +200,8 @@ public class CombatResolverSwordQiBlockTests
         Assert.True(resolver.Decide(Caster, SwordQi(), 0).Accepted);
         var results = DrainTo(resolver, 40);
         var hits = results.SelectMany(r => r.Hits).ToList();
-        var defenderHits = hits.Where(h => h.TargetPlayerId == Defender).ToList();
-
-        Assert.Equal(2, defenderHits.Count);            // 挥击 + 线形
-        Assert.True(defenderHits[0].IsBlocked);         // 挥击先结算且格挡
-        Assert.False(defenderHits[1].IsBlocked);        // 线形对死者不再格挡
+        var killingSwing = Assert.Single(hits, h => h.TargetPlayerId == Defender);
+        Assert.True(killingSwing.IsBlocked);
         Assert.Contains(hits, h => h.TargetPlayerId == TargetNpc);
         Assert.DoesNotContain(results, r => r.ProjectileStopped);
     }

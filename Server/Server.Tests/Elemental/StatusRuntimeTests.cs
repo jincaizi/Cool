@@ -148,6 +148,24 @@ public class StatusRuntimeTests
     }
 
     [Fact]
+    public void Paralyze_Uses_Configured_Pvp_Duration_And_Pve_Status_Duration()
+    {
+        var catalog = ElementalCatalogDefaults.Create();
+        var thunder = catalog.Statuses.Find(s => s.EffectId == 301)!;
+        Assert.Equal(0.8f, catalog.Pvp.ThunderDurationSeconds);
+        catalog.Pvp.ThunderDurationSeconds = 1.2f;
+        var pvp = new StatusRuntime();
+        var pve = new StatusRuntime();
+        pvp.Configure(catalog.Pvp);
+        pve.Configure(catalog.Pvp);
+
+        Assert.Equal(StatusApplyResult.Applied, pvp.Apply(thunder, 1, 10002, 7, 20, true, true));
+        Assert.Equal(StatusApplyResult.Applied, pve.Apply(thunder, 1, 10002, 7, 20, false, true));
+        Assert.Equal(38u, Assert.Single(pvp.Active).EndTick);
+        Assert.Equal(29u, Assert.Single(pve.Active).EndTick);
+    }
+
+    [Fact]
     public void Pve_Paralyze_Does_Not_Grant_Control_Immunity()
     {
         var catalog = ElementalCatalogDefaults.Create();

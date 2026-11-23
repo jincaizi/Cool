@@ -123,6 +123,8 @@ namespace KcpServer
             public ulong CastId;
             public WeaponCastSnapshot Weapon;
             public bool Launched;
+            public bool ReleasedOnRequest;
+            public bool CanBeInterruptedByDamage;
             public bool CancelBroadcast;
             public string SceneId = "";
 
@@ -220,6 +222,8 @@ namespace KcpServer
                 resolution.Replay = true;
                 return resolution;
             }
+            if (request.ClientCastSeq != 0 && request.ClientCastSeq <= caster.LastCastSeq)
+                return Reject(resolution, caster, request, "stale-seq");
 
             if (!caster.IsAlive) return Reject(resolution, caster, request, "caster-dead");
             if (caster.ControlActionLock) return Reject(resolution, caster, request, "control-lock");
@@ -257,11 +261,13 @@ namespace KcpServer
             var weapon = ResolveWeapon(caster);
             float attackSpeed = isBasic ? weapon.AttackSpeedMultiplier : 1f;
             var timing = FindTiming(request.SkillId);
-            uint firstTick = isBasic && timing != null
-                ? tick + SecondsToTicks(timing.WindupSeconds / attackSpeed)
-                : tick + CombatRules.HitDelayTicks(entry)
-                    + CombatRules.ProjectileTravelTicks(entry.Projectile,
-                        caster.Position.X, caster.Position.Z, request.ImpactX, request.ImpactZ);
+            uint releaseDelay = isBasic && timing != null
+                ? SecondsToTicks(timing.WindupSeconds / attackSpeed)
+                : CombatRules.HitDelayTicks(entry);
+            uint firstTick = tick + releaseDelay + CombatRules.ProjectileTravelTicks(entry.Projectile,
+                caster.Position.X, caster.Position.Z, request.ImpactX, request.ImpactZ);
+            bool releasedOnRequest = releaseDelay == 0u
+                && entry.Projectile is { Kind: ProjectileKind.CircleAtPoint, Speed: > 0f };
 
             var runner = caster.Kind == (byte)EntityKind.Npc ? NpcActionRunner?.Invoke(casterId) : null;
             if (runner != null) {
@@ -323,20 +329,35 @@ namespace KcpServer
 
             // D-1/D-2：判定帧延迟由服务端表自持——判定发生在
             // tick + HitDelayTicks + ProjectileTravelTicks（CircleAtPoint 飞行延迟，见上方 firstTick）
-            _pending.Add(new PendingCast(casterId, request, resolution.Broadcast, resolution.IsNpcCaster,
+            var pending = new PendingCast(casterId, request, resolution.Broadcast, resolution.IsNpcCaster,
                 entry.Projectile, entry.Repeat, charge, firstTick)
             {
                 Runner = runner,
                 InstanceId = runner?.Current.InstanceId ?? 0,
                 CastId = castId,
                 Weapon = weapon,
+                ReleasedOnRequest = releasedOnRequest,
+                CanBeInterruptedByDamage = entry.CanBeInterruptedByDamage,
                 SceneId = caster.ZoneId
-            });
-            if (runner != null) { _pending[_pending.Count-1].StageTicks = runner.StageTicks(); resolution.Broadcast.NpcAction = runner.Current; }
+            };
+            _pending.Add(pending);
+            if (runner != null) { pending.StageTicks = runner.StageTicks(); resolution.Broadcast.NpcAction = runner.Current; }
+            if (!releasedOnRequest)
+            {
+                uint actionTicks = releaseDelay + 1;
+                if (isBasic && timing != null)
+                    actionTicks = Math.Max(actionTicks, SecondsToTicks(
+                        (timing.WindupSeconds + timing.ActiveSeconds + timing.RecoverySeconds) / attackSpeed));
+                else if (entry.Repeat.HasValue)
+                    actionTicks = pending.StageTicks[^1] - tick + 1;
+                else if (displacement != null)
+                    actionTicks = Math.Max(actionTicks, SecondsToTicks(displacement.DashDuration));
+                caster.RecordCharacterAction(castId, tick, tick + actionTicks);
+            }
 
             // 属性剑气 v1：活动施法投影从 Windup 开始（EndTick = 最后一段判定 tick）。
             if (casterState != null)
-                SetActiveCast(casterState, _pending[_pending.Count - 1], NpcActionPhase.Windup);
+                SetActiveCast(casterState, pending, NpcActionPhase.Windup);
             return resolution;
         }
 
@@ -434,7 +455,7 @@ namespace KcpServer
 
         private static void CacheConfirm(PlayerState caster, CastRequest request, CastConfirm confirm)
         {
-            if (request.ClientCastSeq == 0) return;
+            if (request.ClientCastSeq == 0 || request.ClientCastSeq <= caster.LastCastSeq) return;
             caster.LastCastSeq = request.ClientCastSeq;
             caster.RecentCastConfirms[request.ClientCastSeq] = confirm;
             if (caster.RecentCastConfirms.Count <= 16) return;
@@ -568,7 +589,9 @@ namespace KcpServer
                     // 后续段继续结算（B3：旋转死亡/换命后不得残留伤害实例）。
                     if (resolution == null)
                     {
-                        ClearActiveCast(_store.GetPlayer(pending.CasterId), pending.CastId);
+                        var caster = _store.GetPlayer(pending.CasterId);
+                        caster?.CancelCharacterAction(pending.CastId);
+                        ClearActiveCast(caster, pending.CastId);
                         // 已发射的剑气：向已收到发射描述的会话补一条权威终止。
                         if (pending.Launched)
                         {
@@ -725,7 +748,10 @@ namespace KcpServer
                 if (pending.Spent) continue; // 已取消/已结算，等 DrainResolved 压缩
                 if (pending.CasterId != casterId || pending.Request.SkillId != skillId) continue;
                 if (castId != 0 && pending.CastId != castId) continue;
+                if (pending.ReleasedOnRequest) continue;
 
+                var caster = _store.GetPlayer(casterId);
+                caster?.CancelCharacterAction(pending.CastId);
                 if (pending.Launched)
                 {
                     if (pending.CancelBroadcast) break; // 最新实例已取消，重复取消幂等
@@ -737,7 +763,7 @@ namespace KcpServer
                     // DrainResolved 单遍压缩途中重入（C1）。标 Spent 由压缩在本次/下一 tick 丢弃；
                     // 已写入压缩目标的 Spent 项多留一 tick 无害。
                     pending.Spent = true;
-                    ClearActiveCast(_store.GetPlayer(casterId), pending.CastId);
+                    ClearActiveCast(caster, pending.CastId);
                 }
 
                 cancels.Add(new CastCancelBroadcast
@@ -761,6 +787,12 @@ namespace KcpServer
                 var pending = _pending[i];
                 if (pending.Spent) continue; // 已取消/已结算，等 DrainResolved 压缩
                 if (pending.CasterId != casterId) continue;
+                if (reason == NpcActionCancelReason.Hit
+                    && (pending.ReleasedOnRequest || !pending.CanBeInterruptedByDamage))
+                    continue;
+
+                var caster = _store.GetPlayer(casterId);
+                caster?.CancelCharacterAction(pending.CastId);
                 if (pending.Launched)
                 {
                     if (pending.CancelBroadcast) continue;
@@ -770,7 +802,7 @@ namespace KcpServer
                 {
                     // 同 CancelPending：重入安全——不在 DrainResolved 迭代中改 _pending。
                     pending.Spent = true;
-                    ClearActiveCast(_store.GetPlayer(casterId), pending.CastId);
+                    ClearActiveCast(caster, pending.CastId);
                 }
                 cancels.Add(new CastCancelBroadcast
                 {
@@ -984,7 +1016,7 @@ namespace KcpServer
             CastResolution resolution, PendingCast? pending = null, bool isProjectile = false)
         {
             var target = _store.GetPlayer(targetId);
-            if (target == null) return false;
+            if (target == null || !target.IsAlive) return false;
             if (target.IsInvulnerableAt(tick)) return false;
 
             // 掷骰顺序不变：暴击照常掷，格挡只在最后乘倍率（确定性可复现——固定种子的
@@ -1010,8 +1042,7 @@ namespace KcpServer
             // **信任面（诚实登记）**：IsDefending 由客户端上报、yaw 来自客户端上报的位置同步——
             // 服务端只做姿态 + 几何判断，与既有"客户端权威位置 + 服务端部分校验"同一哲学，
             // 不是防作弊闸门（位置校验的边界就是本裁决的边界）。
-            bool blocked = target.IsAlive
-                && target.IsDefending
+            bool blocked = target.IsDefending
                 && CombatRules.IsBlocked(target.Rotation,
                     attackerPos.X - target.Position.X,
                     attackerPos.Z - target.Position.Z);
