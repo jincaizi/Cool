@@ -152,7 +152,9 @@ git commit -m "test(net): inject transport delay at the consumption layer"
 用真实 `ClientNetworkHost` 反射装配/拆装 `_combatBridge`、`_adapter`、`MovementReporter`：
 
 1. 旧会话的 `DamageResult`/`CastBroadcast`/`CombatStateUpdate` 在新会话不得触发桥事件或改新视图。
-2. 旧会话的预测帧在 `DetachCombatBridge`/重连后清空；新会话第一帧不对旧预测做对账。
+2. 旧会话的 reporter/reconciler 实例在重连后被丢弃，新会话新建空实例；旧 `seq` 的 ack
+   不得对新预测做对账（生产不调用 `PredictionReconciler.Clear()`，隔离靠丢弃旧实例 +
+   新实例空队列，测试按此断言）。
 3. 新会话使用新 `playerId`；旧 `LocalPlayerId` 的本地伤害回调不触发。
 4. 旧模型回调/旧位移预测在重连后不得复活旧表现。
 

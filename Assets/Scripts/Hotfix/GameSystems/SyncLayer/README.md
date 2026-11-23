@@ -280,7 +280,7 @@ Editor：`Assets/Scripts/Tests/Editor/SyncLayer/`（`RemoteTierPolicyTests`、`R
 `NpcViewGameplayStripTests`、`MonsterBodyRadiusTests`、`RemoteEntityAnimatorContractTests`
 （真实 `Character3C.controller`：Hit/DefendHit/Death/Down/GetUp 状态与剪辑时长）、
 `MovementReporterFieldsTests`、`ClientLocalControlRoutingTests`、`CombatNetworkBridgeTests`、
-`DotDamageRoutingTests` 等）。
+`DotDamageRoutingTests`、`SessionIsolationTests`（旧会话包/预测/presenter 在重连后不得复活）等）。
 PlayMode：`RemoteRenderBranchTests`、`RemoteHitSnapshotPersistenceTests`（D6：`ActionState=0`
 快照不清受击表现）、`MovementSyncTests`、`CombatSyncTests`、`TwoClientWorldTests`、
 `ThreeClientCombatConsistencyTests`（A 打 B、C 旁观的 DamageResult 与 Targetable 余血一致性）。
