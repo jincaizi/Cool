@@ -206,15 +206,16 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   `IDamageable` 由测试本地 stub 满足，只证明推挤/纠偏机制；生产 `NpcBodyCollider` 无该组件，
   生产 NpcBody 推挤仍为 backlog。**
 - **离线单机四元素共享运行时**（原 Plan 04 前瞻误写为“Plan 05”，2026-11-20 修正）：
-  服务端权威状态已完成，但离线仍用 `Skills/Effect/StatusEffectManager`（本地冰冻/灼烧，
-  仅怪物、独立计时）。需把 `SyncCore.StatusRuntime` 接入离线怪物/玩家适配器（时钟、
-  目标、伤害修饰），复用 `ElementalCatalogDefinition` 四元素表；权威状态与本地旧状态按
-  效果组去重，本地灼烧进入同一易伤计算点、冰冻保留定身表现。验收：同表配置下离线四元素
-  行为（减速/灼烧末跳/麻痹/易伤）与服务端 `StatusRuntimeTests` 断言一致。
-- **Addressables 元素资源、远端武器模型与美术签收**：`ElementVfxFallback` 只锁定键解析/
-  颜色回退的判定顺序，未接入 Addressables；需在 Plan 07/backlog 的 Host 侧实现生产 loader、
-  填表 `ViewKey`，并完成四元素特效资源与远端武器模型的人工美术验收（远端武器模型目前
-  仍只有本地换剑外观）。资源缺失时必须继续回退程序化颜色，不阻塞战斗。
+  **完整首发已完成（`66812544`）**：`OfflineMonsterStatuses`/`OfflineWeaponCast` 把
+  `SyncCore.StatusRuntime` 接入离线怪物/玩家适配器，复用 `ElementalCatalogDefinition`
+  四元素表、同一施法元素快照与本地怪物生命周期；`OfflineElementalWeaponTests` 4/4
+  （EditMode）。离线四元素仍以共享状态规则为准，旧 `StatusEffectManager` 不作为权威。
+- **Addressables 元素资源、远端武器模型与美术签收**：
+  **完整首发已完成（`66812544`）**：新增 `AddressableAssetsData/Elemental VFX` 组、
+  `ElementVfxAssets` 生产 loader、八个元素/状态键（冰/火/雷/风各一剑气+一状态）与
+  `ElementVfxAttachment` 回退接线；资源不可用时继续回退程序化颜色。远端 Full 在 AOI 重建/
+  升档恢复对应角色预制体的持剑外观（`RemoteEquipmentVisualTests` 男/女 2/2）。
+  美术人工签收证据见“完整首发范围”节的 WebGL/Android 实包记录；未在此重复声明自动验收。
 - **`_pushVector` 对远程 NpcBody 不生效**（Plan 05 任务 5 登记）：`Sys3CEntry.OnControllerColliderHit`
   以 `IDamageable` 为门槛，而 `NpcBodyCollider.BuildCollider` 在子物体只挂 `BoxCollider`，
   无该组件，因此贴身推离反馈对远程 `NpcBody` 不触发。若产品需要“被怪身体推开”，需给
