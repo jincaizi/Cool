@@ -17,8 +17,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
     /// Plan 08 任务 1：echo 最后应用状态必须随连接代次复位。
     ///
     /// 缺口：`ClearEchoRequest` 只清请求字段，`_lastAppliedEchoCastId/_lastAppliedEchoStartTick/
-    /// _endedEchoCastId` 跨会话残留。服务器重启后 StartTick 从新值域重新计时（如 500 → 1），
-    /// 旧状态会把新 Started 永久判旧；旧 Ended 也会压制新会话同 CastId 的 Started。
+    /// _lastAppliedEchoRequestId/_endedEchoCastId` 跨会话残留。服务器重启后 StartTick 从新值域
+    /// 重新计时（如 500 → 1），旧状态会把新 Started 永久判旧；旧 Ended 也会压制新会话同
+    /// CastId 的 Started；旧请求号（k≥2）还会把新会话重新发放的 RequestId=1 在分派前丢弃。
     ///
     /// 装配复用 SessionIsolationTests 的宿主反射夹具：真实 <see cref="ClientNetworkHost"/> +
     /// 测试 transport（无 socket），`LoginResponse` 走 manager 真实 dispatcher 分配 playerId，
@@ -134,6 +135,10 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             Assert.AreEqual(OldCastId, HostField<ulong>("_lastAppliedEchoCastId"),
                 "前置：旧会话 Started 必须经真实桥路径应用一次");
             Assert.AreEqual(OldStartTick, HostField<uint>("_lastAppliedEchoStartTick"));
+            // 旧会话真实记录 Ended，让断线后的 `_endedEchoCastId == 0` 断言可证伪
+            Deliver(old.Client, Ended(OldPlayerId, OldCastId));
+            Assert.AreEqual(OldCastId, HostField<ulong>("_endedEchoCastId"),
+                "前置：旧会话 Ended 必须记录到去重窗口");
 
             // Act：宿主真实断线路径（ResetAttachment → DetachCombatBridge → ClearEchoRequest）
             _host.Disconnect();
@@ -221,6 +226,48 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         // ------------------------------------------------------------------------------------
+        // ④ 旧会话已应用的高请求号不得永久判旧新会话的低请求号
+        //    （Connect() 每次把 _nextEchoRequestId 归零，请求号从 1 重新发放）
+        // ------------------------------------------------------------------------------------
+
+        [Test]
+        public void test_echo_session_reset_clears_applied_request_id()
+        {
+            // Arrange：旧会话应用 RequestId=5 的 Started
+            var old = OpenSession("EchoReset_Old", OldPlayerId);
+            Deliver(old.Client, Started(OldPlayerId, OldCastId, OldStartTick, requestId: 5ul));
+            Assert.AreEqual(OldCastId, HostField<ulong>("_lastAppliedEchoCastId"),
+                "前置：旧会话 Started 必须经真实桥路径应用一次");
+            Assert.AreEqual(5ul, HostField<ulong>("_lastAppliedEchoRequestId"),
+                "前置：旧会话必须记录已应用的请求号");
+
+            // Act：宿主真实断线路径
+            _host.Disconnect();
+
+            // Assert：请求号门同样随会话复位
+            Assert.AreEqual(0ul, HostField<ulong>("_lastAppliedEchoRequestId"),
+                "断线必须复位最后应用的请求号");
+
+            // Arrange：新会话请求号从 1 重新发放（小于旧会话的 5）
+            var fresh = OpenSession("EchoReset_New", NewPlayerId);
+
+            // Act：Started(RequestId=1) 不得在分派前被旧 5 丢弃
+            Deliver(fresh.Client, Started(NewPlayerId, NewCastId, NewStartTick, requestId: 1ul));
+
+            // Assert
+            Assert.AreEqual(NewCastId, HostField<ulong>("_lastAppliedEchoCastId"),
+                "低请求号的 Started 不得被旧请求号门永久丢弃");
+            Assert.AreEqual(NewStartTick, HostField<uint>("_lastAppliedEchoStartTick"));
+            Assert.AreEqual(1ul, HostField<ulong>("_lastAppliedEchoRequestId"),
+                "新会话必须记录自己的请求号");
+
+            // Ended 也走同一 stale-request 门：RequestId=1 不得被旧 5 丢弃
+            Deliver(fresh.Client, Ended(NewPlayerId, NewCastId, requestId: 1ul));
+            Assert.AreEqual(NewCastId, HostField<ulong>("_endedEchoCastId"),
+                "低请求号的 Ended 不得被旧请求号门永久丢弃");
+        }
+
+        // ------------------------------------------------------------------------------------
         // 会话夹具（SessionIsolationTests 同款）
         // ------------------------------------------------------------------------------------
 
@@ -282,12 +329,14 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         /// Started 状态。ServerTimestamp 取 10 秒前 ⇒ 权威窗口已过去：宿主只对齐冷却、
         /// 不建 SkillExecutor/presenter（本测试只钉单调门，不钉表现）。
         /// </summary>
-        private static SwordQiEchoState Started(long casterId, ulong castId, uint startTick)
+        private static SwordQiEchoState Started(long casterId, ulong castId, uint startTick,
+            ulong requestId = 0)
             => new SwordQiEchoState
             {
                 Phase = SwordQiEchoPhase.Started,
                 CasterId = casterId,
                 CastId = castId,
+                RequestId = requestId,
                 EchoBindingId = 1,
                 StartTick = startTick,
                 EndTick = startTick + EchoWindowTicks,
@@ -295,12 +344,13 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                 ServerTimestamp = DateTime.UtcNow.Ticks - 10L * TimeSpan.TicksPerSecond
             };
 
-        private static SwordQiEchoState Ended(long casterId, ulong castId)
+        private static SwordQiEchoState Ended(long casterId, ulong castId, ulong requestId = 0)
             => new SwordQiEchoState
             {
                 Phase = SwordQiEchoPhase.Ended,
                 CasterId = casterId,
                 CastId = castId,
+                RequestId = requestId,
                 EchoBindingId = 1
             };
     }
