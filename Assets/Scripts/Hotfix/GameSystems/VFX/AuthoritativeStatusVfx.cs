@@ -111,6 +111,20 @@ namespace Hotfix.GameSystems.VFX
                 EmitRemoved(entityId, state.Target, pair.Value);
         }
 
+        /// <summary>
+        /// 断开/换会话：清空全部实体投影，每个活动组各发一次移除事件（表现层随之清染色）。
+        /// 仅用于会话结束——角色重建保留连接，换根由 <see cref="Apply"/> 的 target diff 处理。
+        /// </summary>
+        public void Clear()
+        {
+            foreach (var pair in _entities)
+            {
+                foreach (var group in pair.Value.Groups)
+                    EmitRemoved(pair.Key, pair.Value.Target, group.Value);
+            }
+            _entities.Clear();
+        }
+
         private static void EmitApplied(long entityId, Transform target, int effectId)
         {
             EventBus.Emit(new StatusEffectAppliedEvent

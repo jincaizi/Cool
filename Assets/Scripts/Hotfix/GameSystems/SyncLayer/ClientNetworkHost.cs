@@ -622,6 +622,9 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             HideNetStats();
             ResetAttachment();
+            // 会话结束：旧投影表/染色不得跨会话（同 id 的新会话视图会因旧 target 差异收到
+            // 陈旧的 Removed）。角色重建走 ResetAttachment(keepConnection:true)，不在这里清。
+            _statusVfx?.Clear();
             if (_manager != null)
             {
                 _manager.Names.OnNameChanged -= HandlePlayerNameChanged;
