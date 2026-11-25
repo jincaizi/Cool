@@ -110,5 +110,35 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             _manager.Update(0f);
             Assert.AreEqual(1, corrections, "本次复活后的正常纠偏仍应生效");
         }
+
+        [Test]
+        public void Knockback_Position_Replaces_Old_Prediction_And_Is_Acknowledged_Once()
+        {
+            var position = new Vec3(1f, 0f, 0f);
+            _manager.AttachMovementReporter(() => position, () => 0f, () => 0f);
+            _client.Emit(MessageId.LoginResponse, new LoginResponse { Success = true, ServerTickRateMs = 66 });
+            _manager.Reporter.Report();
+            int pushes = 0;
+            int corrections = 0;
+            _manager.OnForcedPosition += point =>
+            {
+                pushes++;
+                position = new Vec3(point.x, point.y, point.z);
+            };
+            _manager.OnCorrectionNeeded += (_, _) => corrections++;
+            var push = new PositionSyncResponse { MovementRevision = 2u, AuthoritativeX = 4.6f };
+
+            _client.Emit(MessageId.PositionSyncResponse, push);
+            _client.Emit(MessageId.PositionSyncResponse, push);
+            _client.Emit(MessageId.PositionSyncResponse,
+                new PositionSyncResponse { MovementRevision = 1u, AcknowledgedSequence = 1u, AuthoritativeX = 2f });
+            _manager.Update(0f);
+
+            Assert.AreEqual(1, pushes);
+            Assert.Zero(corrections);
+            var report = (PositionSyncRequest)_client.Sent.FindLast(entry => entry.id == MessageId.PositionSyncRequest).msg;
+            Assert.AreEqual(2u, report.MovementRevision);
+            Assert.AreEqual(4.6f, report.X);
+        }
     }
 }

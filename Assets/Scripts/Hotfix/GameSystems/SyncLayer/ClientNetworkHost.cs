@@ -115,6 +115,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private ulong _nextEchoRequestId;
         private SwordQiEchoSkillData? _pendingEchoSkill;
         private ulong _pendingEchoRequestId;
+        private SwordQiEchoAction _pendingEchoAction;
         private long _pendingEchoConnectionGeneration;
         private float _pendingEchoDeadline;
         private bool _echoRequestPending;
@@ -122,12 +123,14 @@ namespace Hotfix.GameSystems.SyncLayer
         private uint _lastAppliedEchoStartTick;
         private ulong _lastAppliedEchoRequestId;
         private ulong _endedEchoCastId;
+        private ulong _predictedEchoExpiry;
         private SwordQiEchoPresenter? _localEchoPresenter;
 
         private sealed class RemoteEchoInstance
         {
             public long CasterId;
             public SwordQiEchoPresenter Presenter = null!;
+            public SwordQiEchoPhase Phase;
         }
 
         private readonly Dictionary<ulong, RemoteEchoInstance> _remoteEchoPresenters =
@@ -290,7 +293,10 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 _manager.DetachMovementReporter();
                 if (_netPolicy != null)
+                {
                     _manager.OnCorrectionNeeded -= _netPolicy.ApplyServerCorrection;
+                    _manager.OnForcedPosition -= _netPolicy.ApplyForcedPosition;
+                }
             }
             DetachCombatBridge();
             DetachTargetSelector();
@@ -366,6 +372,8 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 _pendingTargetOwnerDeath = false;
                 if (_networkTargetSelector != null) _networkTargetSelector.SetOwnerAlive(false);
+                _localEchoPresenter?.Stop();
+                ClearEchoRequest();
             }
 
             // 目标锁定：T/按钮切换 + 每帧有效性（manager.Update 之后——用本帧渲染位姿判定）
@@ -422,6 +430,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _manager.OnError += HandleError;
             // N5：服务端复活——被复活者本人唯一的"你活了"信号（本地玩家不在自己的 AOI 快照里）
             _manager.OnServerRespawn += HandleServerRespawn;
+            _manager.OnVisibleSwordQiEcho += HandleRemoteSwordQiEchoState;
             _manager.ConnectAndLogin(resolvedHost, resolvedPort);
         }
 
@@ -761,6 +770,7 @@ namespace Hotfix.GameSystems.SyncLayer
                 },
                 defendStateProvider: () => controller.IsDefending);
             _manager.OnCorrectionNeeded += _netPolicy.ApplyServerCorrection;
+            _manager.OnForcedPosition += _netPolicy.ApplyForcedPosition;
 
             // P4 战斗桥：技能激活 → CastRequest；CastBroadcast/DamageResult → 表现/伤害挂现有事件链
             // （blocked = 服务端格挡裁决 → 本地走格挡受击表现，见 Sys3CEntry.ApplyServerDamage；
@@ -772,7 +782,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _localEntry.SkillCoordinator.OnSkillActivated += OnLocalSkillCast;
             _localEntry.SkillCoordinator.OnChargeReleased += OnLocalChargeReleased;
             _localEntry.SkillCoordinator.OnSkillCancelled += OnLocalSkillCancelled;
-            bool echoEnabled = (_manager!.EnabledFeatures & ProtocolFeatures.SwordQiEcho) != 0;
+            bool echoEnabled = (_manager!.EnabledFeatures & ProtocolFeatures.SwordQiEchoRecast) != 0;
             if (echoEnabled)
                 _localEntry.SkillCoordinator.OnEchoRequested += HandleEchoRequested;
             var localInput = _localEntry.GetComponent<InputManager>();
@@ -785,6 +795,7 @@ namespace Hotfix.GameSystems.SyncLayer
             _remoteCastPresenter = new RemoteCastPresenter(
                 _remoteEntities!, _manager!.LocalPlayerId, _skillCatalog);
             _combatBridge.OnDamageResult += HandleRemoteDamageResult;
+            _combatBridge.OnSwordQiEchoContact += HandleSwordQiEchoContact;
             _remoteEntities!.ViewRemoved += _remoteCastPresenter.ClearForEntity;
 
             // 施法广播除日志外还要**路由**：NPC 由 registry 按发布者时间戳 + skillId 排成 renderAt 处的挥砍，
@@ -877,7 +888,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleEchoRequested(SwordQiEchoSkillData data)
         {
             if (_combatBridge == null || _manager == null || _localEntry == null
-                || (_manager.EnabledFeatures & ProtocolFeatures.SwordQiEcho) == 0)
+                || (_manager.EnabledFeatures & ProtocolFeatures.SwordQiEchoRecast) == 0)
             {
                 _localEntry?.SkillCoordinator.CancelEchoRequest();
                 return;
@@ -889,17 +900,40 @@ namespace Hotfix.GameSystems.SyncLayer
             _pendingEchoRequestId = _nextEchoRequestId;
             _pendingEchoConnectionGeneration = _echoConnectionGeneration;
             _pendingEchoDeadline = Time.unscaledTime + data.ConfirmationTimeoutSeconds;
-            SkillCastReporter.ReportEchoRequest(_combatBridge, data, _nextEchoRequestId, _echoBindingId);
+            var coordinator = _localEntry.SkillCoordinator;
+            ulong preparedId = coordinator.EchoPreparedCastId;
+            _pendingEchoAction = preparedId == 0 ? SwordQiEchoAction.Prepare : SwordQiEchoAction.Release;
+            SkillCastReporter.ReportEchoRequest(_combatBridge, data, _nextEchoRequestId, _echoBindingId,
+                _pendingEchoAction, preparedId);
         }
 
         private void TickEchoRequest()
         {
+            // 角色重生成时 OnPlayerSpawned 先设置 _localEntry，Sys3CEntry.Start 才创建 SkillCoordinator——
+            // 这个窗口里 Update 仍会跑到这里，必须判空（否则每帧 NullReferenceException）。
+            var coordinator = _localEntry != null ? _localEntry.SkillCoordinator : null;
+            if (coordinator != null)
+            {
+                ulong preparedId = coordinator.EchoPreparedCastId;
+                if (preparedId != 0 && preparedId != _predictedEchoExpiry
+                    && coordinator.GetEchoPreparation().Remaining <= 0f)
+                {
+                    _predictedEchoExpiry = preparedId;
+                    if (coordinator.GetSkillData((int)SkillID.SwordQiEcho) is SwordQiEchoSkillData data)
+                        coordinator.ApplyAuthoritativeCooldown(data.SkillId, data.Cooldown, 0f);
+                }
+            }
             if (!_echoRequestPending) return;
             if (Time.unscaledTime < _pendingEchoDeadline) return;
 
             // 超时释放本地等待/施法锁，但保留请求归属记录以接住迟到接受。
             _echoRequestPending = false;
-            _localEntry?.SkillCoordinator.CancelEchoRequest();
+            coordinator?.CancelEchoRequest();
+            if (_pendingEchoAction == SwordQiEchoAction.Prepare)
+            {
+                coordinator?.ClearEchoPreparation();
+                _localEchoPresenter?.Stop();
+            }
         }
 
         private void ClearEchoRequest()
@@ -908,7 +942,11 @@ namespace Hotfix.GameSystems.SyncLayer
             _pendingEchoSkill = null;
             _pendingEchoRequestId = 0;
             _pendingEchoConnectionGeneration = 0;
-            _localEntry?.SkillCoordinator.CancelEchoRequest();
+            _pendingEchoAction = SwordQiEchoAction.Legacy;
+            _predictedEchoExpiry = 0;
+            var coordinator = _localEntry != null ? _localEntry.SkillCoordinator : null;
+            coordinator?.CancelEchoRequest();
+            coordinator?.ClearEchoPreparation();
         }
 
         private void HandleSwordQiEchoState(SwordQiEchoState state)
@@ -920,6 +958,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 return;
             }
             if (_localEntry == null) return;
+            // 同上：新角色 Start 前 coordinator 还不存在，晚到的 Echo 回包直接丢给新的一轮。
+            if (_localEntry.SkillCoordinator == null) return;
             if (state.EchoBindingId != 0 && state.EchoBindingId != _echoBindingId) return;
             if (_echoRequestPending
                 && _pendingEchoConnectionGeneration != _echoConnectionGeneration) return;
@@ -930,10 +970,15 @@ namespace Hotfix.GameSystems.SyncLayer
                 case SwordQiEchoPhase.Rejected:
                     HandleEchoRejected(state);
                     break;
+                case SwordQiEchoPhase.Prepared:
+                    HandleEchoPrepared(state);
+                    break;
                 case SwordQiEchoPhase.Started:
                     HandleEchoStarted(state);
                     break;
                 case SwordQiEchoPhase.Ended:
+                case SwordQiEchoPhase.Expired:
+                case SwordQiEchoPhase.Completed:
                     HandleEchoEnded(state);
                     break;
             }
@@ -947,7 +992,49 @@ namespace Hotfix.GameSystems.SyncLayer
             _pendingEchoSkill = null;
             _pendingEchoRequestId = 0;
             _localEntry?.SkillCoordinator.CancelEchoRequest();
+            if (_pendingEchoAction == SwordQiEchoAction.Prepare)
+            {
+                _localEntry?.SkillCoordinator.ClearEchoPreparation();
+                _localEchoPresenter?.Stop();
+            }
+            if (state.RejectReason == "no-target")
+                _localEntry?.SkillCoordinator.NotifyEchoNoTarget();
         }
+
+        private void HandleEchoPrepared(SwordQiEchoState state)
+        {
+            if (_localEntry.IsDead || state.CastId == 0 || state.CastId == _endedEchoCastId
+                || state.CastId == _lastAppliedEchoCastId || state.RequestId != _pendingEchoRequestId)
+                return;
+
+            var data = _pendingEchoSkill;
+            if (data == null) return;
+            double elapsed = EchoElapsed(state);
+            float duration = unchecked(state.EndTick - state.StartTick) / CombatRules.TickRateHz;
+            var coordinator = _localEntry.SkillCoordinator;
+            _echoRequestPending = false;
+            _pendingEchoSkill = null;
+            _pendingEchoRequestId = 0;
+            coordinator.CancelEchoRequest();
+            coordinator.SetEchoPreparation(state.CastId, duration, elapsed, EchoVisualClock);
+            GetLocalEchoPresenter().Play(_localEntry.transform, state, elapsed, EchoVisualClock, data.SwordVfx);
+            coordinator.TryReleaseQueuedEcho();
+        }
+
+        private SwordQiEchoPresenter GetLocalEchoPresenter()
+        {
+            if (_localEchoPresenter == null)
+                _localEchoPresenter = _localEntry.GetComponent<SwordQiEchoPresenter>();
+            if (_localEchoPresenter == null)
+                _localEchoPresenter = _localEntry.gameObject.AddComponent<SwordQiEchoPresenter>();
+            return _localEchoPresenter;
+        }
+
+        private double EchoElapsed(SwordQiEchoState state)
+            => Math.Max(0d, (_manager!.ServerNowTicks() - state.ServerTimestamp) / (double)TimeSpan.TicksPerSecond);
+
+        private double EchoVisualClock()
+            => (_manager?.ServerNowTicks() ?? DateTime.UtcNow.Ticks) / (double)TimeSpan.TicksPerSecond;
 
         private void HandleEchoStarted(SwordQiEchoState state)
         {
@@ -971,31 +1058,34 @@ namespace Hotfix.GameSystems.SyncLayer
                 ?? _localEntry.SkillCoordinator.GetSkillData((int)SkillID.SwordQiEcho) as SwordQiEchoSkillData;
             if (data == null) return;
 
-            long nowServer = _manager.ServerNowTicks();
             double durationSeconds = (state.EndTick - state.StartTick) / (double)CombatRules.TickRateHz;
-            double elapsedSeconds = Math.Max(0d,
-                (nowServer - state.ServerTimestamp) / (double)TimeSpan.TicksPerSecond);
+            double elapsedSeconds = EchoElapsed(state);
             double remainingSeconds = durationSeconds - elapsedSeconds;
             float cooldownTotal = state.CooldownTicks / CombatRules.TickRateHz;
             float cooldownElapsed = (float)Math.Min(cooldownTotal, elapsedSeconds);
 
-            if (remainingSeconds > 0d)
+            _localEntry.SkillCoordinator.ClearEchoPreparation();
+            if (remainingSeconds > 0d && !_localEntry.IsDead)
             {
-                double endLocal = Time.time + remainingSeconds;
+                double endLocal = state.ServerTimestamp / (double)TimeSpan.TicksPerSecond + durationSeconds;
                 bool committed = _localEntry.SkillCoordinator.CommitEchoRequest(
-                    data, endLocal, cooldownTotal, cooldownElapsed, () => (double)Time.time);
+                    data, endLocal, cooldownTotal, cooldownElapsed, EchoVisualClock);
                 if (committed)
                 {
-                    _localEchoPresenter = _localEntry.GetComponent<SwordQiEchoPresenter>();
-                    if (_localEchoPresenter == null)
-                        _localEchoPresenter = _localEntry.gameObject.AddComponent<SwordQiEchoPresenter>();
-                    _localEchoPresenter.Play(_localEntry.transform, state, elapsedSeconds, () => (double)Time.time);
+                    GetLocalEchoPresenter().Play(_localEntry.transform, state, elapsedSeconds, EchoVisualClock,
+                        data.SwordVfx);
                 }
             }
             else
             {
+                _localEntry.SkillCoordinator.CancelEchoRequest();
                 _localEntry.SkillCoordinator.ApplyAuthoritativeCooldown(
                     data.SkillId, cooldownTotal, cooldownElapsed);
+                double visualTail = SwordQiEchoRules.FinishOrbitDelaySeconds + SwordQiEchoRules.DissolveSeconds;
+                if (!_localEntry.IsDead && remainingSeconds > -visualTail)
+                    GetLocalEchoPresenter().Play(_localEntry.transform, state, elapsedSeconds, EchoVisualClock, data.SwordVfx);
+                else
+                    _localEchoPresenter?.Stop();
             }
 
             _lastAppliedEchoCastId = state.CastId;
@@ -1011,14 +1101,28 @@ namespace Hotfix.GameSystems.SyncLayer
             if (state.CastId != 0 && state.CastId == _endedEchoCastId) return;
             _endedEchoCastId = state.CastId;
 
+            var coordinator = _localEntry.SkillCoordinator;
+            bool matchesPreparation = state.CastId != 0 && state.CastId == coordinator.EchoPreparedCastId;
+            bool matchesRequest = state.RequestId != 0 && state.RequestId == _pendingEchoRequestId;
+            if (matchesPreparation || matchesRequest)
+            {
+                coordinator.ClearEchoPreparation();
+                if (state.Phase == SwordQiEchoPhase.Expired && state.CastId != _predictedEchoExpiry)
+                    coordinator.ApplyAuthoritativeCooldown((int)SkillID.SwordQiEcho,
+                        state.CooldownTicks / CombatRules.TickRateHz, (float)EchoElapsed(state));
+                if (state.Phase == SwordQiEchoPhase.Ended)
+                    _localEchoPresenter?.Stop();
+            }
+
             if (state.CastId != 0 && state.CastId == _lastAppliedEchoCastId)
             {
                 if (_localEntry.SkillCoordinator.CurrentSkill?.Data is SwordQiEchoSkillData)
                     _localEntry.SkillCoordinator.CurrentSkill.ForceComplete();
-                _localEchoPresenter?.Stop();
+                if (state.Phase != SwordQiEchoPhase.Completed)
+                    _localEchoPresenter?.Stop();
             }
 
-            if (state.RequestId != 0 && state.RequestId == _pendingEchoRequestId)
+            if (matchesRequest || matchesPreparation)
             {
                 _echoRequestPending = false;
                 _pendingEchoSkill = null;
@@ -1038,36 +1142,43 @@ namespace Hotfix.GameSystems.SyncLayer
         private void HandleRemoteSwordQiEchoState(SwordQiEchoState state)
         {
             if (state.Phase == SwordQiEchoPhase.Rejected) return;
-            if (state.Phase == SwordQiEchoPhase.Ended)
+            if (state.Phase == SwordQiEchoPhase.Ended || state.Phase == SwordQiEchoPhase.Expired
+                || state.Phase == SwordQiEchoPhase.Completed)
             {
                 if (_remoteEchoPresenters.TryGetValue(state.CastId, out var ended))
                 {
-                    ended.Presenter.Stop();
+                    if (state.Phase == SwordQiEchoPhase.Ended)
+                        ended.Presenter.Stop();
                     _remoteEchoPresenters.Remove(state.CastId);
                 }
                 return;
             }
 
-            if (state.Phase != SwordQiEchoPhase.Started) return;
-            if (_remoteEchoPresenters.ContainsKey(state.CastId)) return;
+            if (state.Phase != SwordQiEchoPhase.Started && state.Phase != SwordQiEchoPhase.Prepared) return;
+            if (_remoteEchoPresenters.TryGetValue(state.CastId, out var existing)
+                && (existing.Phase == SwordQiEchoPhase.Started || state.Phase == SwordQiEchoPhase.Prepared)) return;
 
             var view = _remoteEntities?.GetView(state.CasterId);
-            if (view == null) return;
+            if (view == null || view.Dead) return;
 
-            long nowServer = _manager!.ServerNowTicks();
-            double elapsedSeconds = Math.Max(0d,
-                (nowServer - state.ServerTimestamp) / (double)TimeSpan.TicksPerSecond);
+            double elapsedSeconds = EchoElapsed(state);
             double durationSeconds = (state.EndTick - state.StartTick) / (double)CombatRules.TickRateHz;
-            if (elapsedSeconds >= durationSeconds) return;
+            double tail = SwordQiEchoRules.DissolveSeconds
+                + (state.Phase == SwordQiEchoPhase.Started ? SwordQiEchoRules.FinishOrbitDelaySeconds : 0d);
+            if (elapsedSeconds >= durationSeconds + tail) return;
 
             var presenter = view.GameObject.GetComponent<SwordQiEchoPresenter>();
             if (presenter == null)
                 presenter = view.GameObject.AddComponent<SwordQiEchoPresenter>();
-            presenter.Play(view.GameObject.transform, state, elapsedSeconds, () => (double)Time.time);
+            var data = GetEchoPresentation();
+            presenter.Play(view.GameObject.transform, state, elapsedSeconds, EchoVisualClock, data?.SwordVfx);
+            if (state.Phase == SwordQiEchoPhase.Started && data != null && elapsedSeconds < durationSeconds)
+                view.Animator?.PlayAttack(data.AnimatorTrigger, (float)(durationSeconds - elapsedSeconds));
             _remoteEchoPresenters[state.CastId] = new RemoteEchoInstance
             {
                 CasterId = state.CasterId,
-                Presenter = presenter
+                Presenter = presenter,
+                Phase = state.Phase
             };
         }
 
@@ -1094,6 +1205,25 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>远程 DamageResult → 投射物视觉停点/爆炸（本地施法者由 presenter 自行跳过）</summary>
         private void HandleRemoteDamageResult(DamageResult result)
             => _remoteCastPresenter?.OnDamageResult(result);
+
+        private SwordQiEchoSkillData? GetEchoPresentation()
+        {
+            if (_skillCatalog != null && _skillCatalog.TryGet((int)SkillID.SwordQiEcho, out var data))
+                return data as SwordQiEchoSkillData;
+            return null;
+        }
+
+        private void HandleSwordQiEchoContact(HitEntry hit)
+        {
+            var visual = GetEchoPresentation()?.ContactVfx;
+            if (visual == null) return;
+            Transform? target = hit.TargetPlayerId == _manager?.LocalPlayerId
+                ? _localEntry?.transform
+                : _remoteEntities?.GetView(hit.TargetPlayerId)?.GameObject.transform;
+            if (target == null) return;
+            SwordQiEchoPresenter.PlayContact(visual,
+                new Vector3(hit.HitX, target.position.y + 1.05f, hit.HitZ));
+        }
 
         /// <summary>
         /// 摘除目标锁定（断线 / 本地角色重建 / 宿主销毁共用）：先退订 AOI 视图移除，
@@ -1130,6 +1260,8 @@ namespace Hotfix.GameSystems.SyncLayer
             if (_combatBridge != null)
                 _combatBridge.OnDamageResult -= HandleRemoteDamageResult;
             if (_combatBridge != null)
+                _combatBridge.OnSwordQiEchoContact -= HandleSwordQiEchoContact;
+            if (_combatBridge != null)
                 _combatBridge.OnSwordQiEchoState -= HandleSwordQiEchoState;
             _combatBridge?.ClearEchoDedupe();
             _remoteCastPresenter?.Clear();
@@ -1143,12 +1275,13 @@ namespace Hotfix.GameSystems.SyncLayer
 
             if (_combatBridge == null || _adapter == null) return;
             _adapter.MessageReceived -= _combatBridge.OnMessage;
-            if (_localEntry != null)
+            var coordinator = _localEntry != null ? _localEntry.SkillCoordinator : null;
+            if (coordinator != null)
             {
-                _localEntry.SkillCoordinator.OnSkillActivated -= OnLocalSkillCast;
-                _localEntry.SkillCoordinator.OnChargeReleased -= OnLocalChargeReleased;
-                _localEntry.SkillCoordinator.OnSkillCancelled -= OnLocalSkillCancelled;
-                _localEntry.SkillCoordinator.OnEchoRequested -= HandleEchoRequested;
+                coordinator.OnSkillActivated -= OnLocalSkillCast;
+                coordinator.OnChargeReleased -= OnLocalChargeReleased;
+                coordinator.OnSkillCancelled -= OnLocalSkillCancelled;
+                coordinator.OnEchoRequested -= HandleEchoRequested;
             }
             _combatBridge.OnLineProjectileStopped -= HandleLineProjectileStopped;
             _combatBridge = null;
@@ -1202,6 +1335,7 @@ namespace Hotfix.GameSystems.SyncLayer
             {
                 _manager.OnEnterWorld -= HandleEnterWorld;
                 _manager.OnServerRespawn -= HandleServerRespawn;
+                _manager.OnVisibleSwordQiEcho -= HandleRemoteSwordQiEchoState;
                 _manager.Names.OnNameChanged -= HandlePlayerNameChanged;
                 _manager.Dispose();
                 _manager = null;

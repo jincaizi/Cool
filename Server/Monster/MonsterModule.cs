@@ -82,14 +82,27 @@ namespace KcpServer.Monster
         /// 槽位距 **DemoDay 玩家出生点 (-15,0,-30)**（DemoDay.unity 的 PlayerSpawner._spawnPoint 实测；
         /// y 与感知判定无关——TargetDetector 只算 XZ——故注释里 y 取 0）须 > 感知半径 + 巡逻半径，
         /// 否则怪物走完巡逻圈就能感知到原地不动的玩家——原点只是 e2e 观察者的位置，按原点推算会漏判：
-        ///   [0] Wolf(t2)       (-30,0,0)    33.5m（> 15+10 = 25）
-        ///   [1] Slime(t1)      (0,0,-20)    18.0m（> 8+5 = 13）
-        ///   [2] Slime(t1)      (0,0,-35)    15.8m（> 8+5 = 13）
-        ///   [3] Wolf(t2)       (10,0,-15)   29.2m（> 15+10 = 25）
-        ///   [4] DogKnight(t3)  (10,0,15)    51.5m（> 18+6 = 24）
-        ///   [5] SpiderBoss(t4) (18.333,0,18.389) 58.8m（> 25+12 = 37）
-        /// 守备：MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn（全六槽位，几何）
-        /// 与 Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster（挂机 3 分钟零施法，行为）。
+        ///   [0]  Wolf(t2)       (-30,0,0)          33.5m（> 15+10 = 25）
+        ///   [1]  Slime(t1)      (0,0,-20)          18.0m（> 8+5 = 13）
+        ///   [2]  Slime(t1)      (0,0,-35)          15.8m（> 8+5 = 13）
+        ///   [3]  Wolf(t2)       (10,0,-15)         29.2m（> 15+10 = 25）
+        ///   [4]  DogKnight(t3)  (10,0,15)          51.5m（> 18+6 = 24）
+        ///   [5]  SpiderBoss(t4) (18.333,0,18.389)  58.8m（> 25+12 = 37）
+        /// 2026-11-23 演示配比（联网 WebGL）：`--monsters 15` = 6 Slime / 5 Wolf（客户端 template 2 渲染为
+        /// 刺背龟）/ 3 DogKnight / 1 SpiderBoss。**前六槽位保持不变**（e2e 夹具 `--monsters 4/6` 依赖槽位
+        /// 顺序与类型），新增 [6]–[14] 九个槽位补足配比：
+        ///   [6]  Slime(t1)      (-3,0,-19)         16.3m（> 13）
+        ///   [7]  Slime(t1)      (8,0,-35)          23.5m（> 13）
+        ///   [8]  Slime(t1)      (0,0,-25)          15.8m（> 13）
+        ///   [9]  Slime(t1)      (9,0,-40)          26.0m（> 13）
+        ///   [10] Wolf(t2)       (15,0,-15)         33.5m（> 25）
+        ///   [11] Wolf(t2)       (14,0,-20)         30.7m（> 25）
+        ///   [12] Wolf(t2)       (12,0,-10)         33.6m（> 25）
+        ///   [13] DogKnight(t3)  (7,0,18)           52.8m（> 24）
+        ///   [14] DogKnight(t3)  (8,0,22)           56.9m（> 24）
+        /// 守备：MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn（全 15 槽位，几何）
+        /// 与 Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster（挂机 3 分钟零施法，行为）；
+        /// DemoDayNavBinTests 校验全部槽位落在发布的 navbin 上。
         ///（实测教训：DogKnight 初版 (0,0,-20) 距旧出生点仅 11.0m < 感知 18m → 12 分钟内 8/8 次进世界
         ///  打死挂机玩家。旧出生点下 [0] Wolf 是唯一按设计违反本规则的槽位，10-13 搬迁后达标。）
         /// **e2e 夹具（观察者在原点）语义已变，别照旧表读**：旧 [0] Wolf (12,0,0) 距原点 12m ≤ 15m
@@ -104,12 +117,21 @@ namespace KcpServer.Monster
         {
             var layout = new (int TemplateId, Vector3 Position)[]
             {
-                (2, new Vector3(-30f, 0f, 0f)),     // Wolf：距出生点 33.5m（>25）
-                (1, new Vector3(0f, 0f, -20f)),     // Slime：18.0m（>13）
-                (1, new Vector3(0f, 0f, -35f)),     // Slime：15.8m（>13）
-                (2, new Vector3(10f, 0f, -15f)),    // Wolf：29.2m（>25）
-                (3, new Vector3(10f, 0f, 15f)),     // DogKnight：51.5m（>24）
-                (4, new Vector3(18.333f, 0f, 18.389f)), // SpiderBoss：58.8m（>37）
+                (2, new Vector3(-30f, 0f, 0f)),     // [0] Wolf/TurtleShell：距出生点 33.5m（>25）
+                (1, new Vector3(0f, 0f, -20f)),     // [1] Slime：18.0m（>13）
+                (1, new Vector3(0f, 0f, -35f)),     // [2] Slime：15.8m（>13）
+                (2, new Vector3(10f, 0f, -15f)),    // [3] Wolf/TurtleShell：29.2m（>25）
+                (3, new Vector3(10f, 0f, 15f)),     // [4] DogKnight：51.5m（>24）
+                (4, new Vector3(18.333f, 0f, 18.389f)), // [5] SpiderBoss：58.8m（>37）
+                (1, new Vector3(-3f, 0f, -19f)),    // [6] Slime：16.3m（>13）
+                (1, new Vector3(8f, 0f, -35f)),     // [7] Slime：23.5m（>13）
+                (1, new Vector3(0f, 0f, -25f)),     // [8] Slime：15.8m（>13）
+                (1, new Vector3(9f, 0f, -40f)),     // [9] Slime：26.0m（>13）
+                (2, new Vector3(15f, 0f, -15f)),    // [10] Wolf/TurtleShell：33.5m（>25）
+                (2, new Vector3(14f, 0f, -20f)),    // [11] Wolf/TurtleShell：30.7m（>25）
+                (2, new Vector3(12f, 0f, -10f)),    // [12] Wolf/TurtleShell：33.6m（>25）
+                (3, new Vector3(7f, 0f, 18f)),      // [13] DogKnight：52.8m（>24）
+                (3, new Vector3(8f, 0f, 22f)),      // [14] DogKnight：56.9m（>24）
             };
             for (int i = 0; i < count; i++)
             {
@@ -346,6 +368,13 @@ namespace KcpServer.Monster
         {
             if (_monsters.TryGetValue(npcId, out var state))
                 _brain.Taunt(state, playerId, durationTicks, tick);
+        }
+
+        public void OnPushed(long npcId, Vector3 position)
+        {
+            if (!_monsters.TryGetValue(npcId, out var state)) return;
+            state.Position = position;
+            state.Follower?.Reset();
         }
 
         /// <summary>入队攻击施法（BT Attack 动作调用；Server3C 每 tick drain 后裁决+广播——T3）</summary>

@@ -50,5 +50,11 @@ namespace Hotfix.GameSystems.Sys3C.Network
         }
 
         public void ClearServerCorrection() => _correcting = false;
+
+        public void ApplyForcedPosition(Vector3 position)
+        {
+            ClearServerCorrection();
+            _controller.Teleport(position);
+        }
     }
 }

@@ -139,11 +139,41 @@ public class SwordQiEchoProtocolTests
         Assert.Equal(1u << 2, ProtocolFeatures.SwordQiEcho);
         Assert.Equal(8, GetProtoTag(typeof(CastRequest), "EchoRequestId"));
         Assert.Equal(9, GetProtoTag(typeof(CastRequest), "EchoBindingId"));
+        Assert.Equal(10, GetProtoTag(typeof(CastRequest), "EchoAction"));
+        Assert.Equal(11, GetProtoTag(typeof(CastRequest), "EchoPreparedCastId"));
+        Assert.Equal(19, GetProtoTag(typeof(SwordQiEchoState), "OrbitStartedTimestamp"));
+        Assert.Equal(18, GetProtoTag(typeof(EntitySnapshot), "SwordQiEcho"));
         Assert.Equal(9, GetProtoTag(typeof(DamageResult), "EchoCastId"));
 
         var contacts = typeof(SwordQiEchoState).GetProperty("Contacts");
         Assert.NotNull(contacts);
         Assert.Equal(typeof(IList<SwordQiEchoContactMessage>), contacts!.PropertyType);
+    }
+
+    [Fact]
+    public void Prepared_State_RoundTrips_Inside_First_Visibility_Snapshot()
+    {
+        var packet = new WorldSnapshot
+        {
+            Entities = new List<EntitySnapshot>
+            {
+                new EntitySnapshot
+                {
+                    PlayerId = 7,
+                    SwordQiEcho = new SwordQiEchoState
+                    {
+                        Phase = SwordQiEchoPhase.Prepared, CastId = 42, CasterId = 7,
+                        OrbitStartedTimestamp = 123456L, StartTick = 11, EndTick = 86
+                    },
+                },
+            },
+        };
+        var (_, got) = MessageCodec.Decode(MessageCodec.EncodeToArray(MessageId.WorldSnapshot, packet));
+        var state = Assert.Single(Assert.IsType<WorldSnapshot>(got).Entities).SwordQiEcho!;
+        Assert.Equal(SwordQiEchoPhase.Prepared, state.Phase);
+        Assert.Equal(42UL, state.CastId);
+        Assert.Equal(123456L, state.OrbitStartedTimestamp);
+        Assert.Equal(75u, state.EndTick - state.StartTick);
     }
 
     private static int GetProtoTag(System.Type type, string propertyName)

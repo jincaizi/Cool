@@ -11,6 +11,10 @@ bash tools/test-server.sh
 > 用 `dotnet <dll>` 而不是 `dotnet run`：本机 `dotnet run` 的 apphost 会让
 > `HttpListener.Start` 抛「句柄无效」；普通环境两者等价。
 
+Unity 内也可用菜单 **Tools/Server/Start** 启动（默认 `8000 --monsters 15 --map demoday`：
+6 Slime / 5 Wolf→刺背龟 / 3 DogKnight / 1 SpiderBoss），
+**Tools/Server/Stop** 停止由编辑器启动的进程；参数改 `Assets/Scripts/Editor/Server/ServerLauncher.cs` 顶部常量。
+
 `Program.cs` 解析端口与压测参数：`--bots N`、`--no-avoid`、`--probe`、
 `--monsters N`、`--map <id>`、`--no-nav`。
 
@@ -64,12 +68,19 @@ bash tools/test-server.sh
   `RepeatHitCounts` 每目标独立计数，**不走** `GroupHitIds` 的每施法一次去重。
 - 施法者死亡/移除，或收到 `CancelCastRequest`，丢弃未到期段；复活后不会继续结算旧旋转。
 
+## 蓄力炎爆（20004）
+
+- 接受施法时锁定服务端施法者为爆心，供广播、范围、格挡方向与击退共用。半径随蓄力从 4m 增至 6m。
+- 未格挡的存活目标沿径向推开，开放地面理论位移从 2.4m 增至 3.6m。开启地图导航时限制到直线可达边界。
+- NPC 位移同步到怪物模块与快照。支持击退能力的玩家由位置同步响应收取权威落位，
+  在收到对应新代次前，服务端保持权威位置。
+
 ## 剑气回荡（20006，2026-11-18）
 
-- `CombatResolver.Decide` 对 20006 走专用分支：跳过客户端形状校验（客户端发零形状），按
-  `SwordQiEchoRules.Spec` 选最近 8 个同区目标；空名单返回 `no-target` 且不记冷却。接受时
-  在决策 tick 记录 12s 冷却、提交 `[StartTick, EndTick)` 无敌窗口，并锁定目标的
-  `PlayerState` 对象身份与 `CombatLifeId`。
+- 具备二次释放能力的客户端先按 Prepare 布剑，服务器建立 75 tick 待发窗口。待发无敌与攻击均处于关闭状态。
+  Release 必须匹配实例及角色代次，按出手时位置选最近 8 个同区目标。空名单返回 `no-target` 并保留待发。
+- 成功出击或倒计时到期记录 12 秒冷却。出击提交 `[StartTick, EndTick)` 无敌窗口，
+  并锁定目标的 `PlayerState` 对象身份与 `CombatLifeId`。战斗窗口结束后表现层完成回旋与淡出。
 - 首次接触时间表由 `SwordQiEchoRules.BuildContacts` 生成；`DrainResolved` 先处理普通
   pending，再按固定顺序处理 Echo。到点重查存活、同区、圆心/半径与生命代次；失效跳过、
   不补排期。即使全部目标失效，施法与无敌仍持续到原定 `EndTick`。
@@ -81,6 +92,8 @@ bash tools/test-server.sh
 - 登录握手把 `SupportedFeatures` 写入权威 `PlayerState.Features`，`LoginResponse.EnabledFeatures`
   回显协商结果；`SwordQiEchoState` 只发给同区且已协商 `ProtocolFeatures.SwordQiEcho` 的收件人。
   `EntityStore.AddNpc` 将 NPC `ZoneId` 固定为 `Global`。
+- 新协议的待发、飞行及收束沿用同一实例 ID 与环绕起始时刻。处于表现窗口内的施法者首次进入观察者视野时，
+  AOI 快照携带该阶段的权威表现数据。
 - 测试：`Server.Tests/Combat/SwordQiEchoCombatTests`（无敌边界、换命、格挡方向、区域/能力过滤）、
   `Server.Tests/Protocol/SwordQiEchoProtocolTests`（往返、tag 钉死、旧字段缺省）。
 

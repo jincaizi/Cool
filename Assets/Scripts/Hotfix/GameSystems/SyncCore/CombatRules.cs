@@ -160,6 +160,14 @@ namespace Cool.SyncCore
     {
         public const float CritMultiplier = 1.5f;
         public const float TickRateHz = 15f;
+        public const int ChargeBlastSkillId = 20004;
+        public const float ChargeBlastRadius = 4f;
+        public const float ChargeBlastMaxScale = 1.5f;
+        public const float ChargeBlastBasePushSpeed = 8f;
+        public const float ChargeBlastPushTime = 0.30f;
+
+        public static float ChargeBlastPushScale(float progress)
+            => 1f + (ChargeBlastMaxScale - 1f) * ClampChargeProgress(progress);
 
         /// <summary>玩家受击体积高度（米，脚底起算）；B1 高度重叠判定用。</summary>
         public const float PlayerBodyHeight = 1.8f;
@@ -200,11 +208,12 @@ namespace Cool.SyncCore
                 cooldownSeconds: 3f, baseDamage: 20f, criticalRate: 0f, hitDelaySeconds: 0f,
                 projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint,
                     radius: 1.5f, maxImpactDistance: 15f, speed: 18f)),
-            [20004] = new SkillEntry(20004, shapeType: 1, maxRange: 2f, maxAreaRadius: 2f, maxAngle: 120f,
+            [ChargeBlastSkillId] = new SkillEntry(ChargeBlastSkillId, shapeType: 1, maxRange: 2f,
+                maxAreaRadius: ChargeBlastRadius, maxAngle: 120f,
                 cooldownSeconds: 6f, baseDamage: 40f, criticalRate: 0f, hitDelaySeconds: 0f,
-                projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint, radius: 2f,
+                projectile: new ProjectileSpec(ProjectileKind.CircleAtPoint, radius: ChargeBlastRadius,
                     maxImpactDistance: 30f, chargeScales: true,
-                    chargeAreaMaxScale: 1.5f, chargeDamageMaxScale: 1.5f)),
+                    chargeAreaMaxScale: ChargeBlastMaxScale, chargeDamageMaxScale: 1.5f)),
             // 20006：剑气回荡。基础伤害/暴击 = 10001 的 2.0 倍（SwordQiEchoRules.DefaultDamage 守护）。
             // 圆形半径与接触时间表由 20006 专用分支读取 SwordQiEchoRules.Spec；客户端发零形状，服务端跳过 ValidateShape。
             [20006] = new SkillEntry(20006, shapeType: 1, maxRange: 0f, maxAreaRadius: 12f, maxAngle: 0f,

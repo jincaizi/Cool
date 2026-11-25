@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DataDefinition;
 using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Skills.Events;
 using Hotfix.GameSystems.Stamina;
 using Hotfix.GameSystems.Sys3C.Core.Events;
 
@@ -71,12 +72,20 @@ namespace Hotfix.GameSystems.Nameplate
         {
             _eventBridge?.Enable();
             EventBus.Subscribe<LocalPlayerHitByPlayerEvent>(OnLocalPlayerHitByPlayer);
+            EventBus.Subscribe<SwordQiEchoNoTargetEvent>(OnSwordQiEchoNoTarget);
         }
 
         private void OnDisable()
         {
             _eventBridge?.Disable();
             EventBus.Unsubscribe<LocalPlayerHitByPlayerEvent>(OnLocalPlayerHitByPlayer);
+            EventBus.Unsubscribe<SwordQiEchoNoTargetEvent>(OnSwordQiEchoNoTarget);
+        }
+
+        private void OnSwordQiEchoNoTarget(SwordQiEchoNoTargetEvent message)
+        {
+            if (_skillNameSettings != null)
+                _floatText.ShowFloatingText(message.Position, _skillNameSettings, "未发现可攻击目标");
         }
 
         private void OnLocalPlayerHitByPlayer(LocalPlayerHitByPlayerEvent e)

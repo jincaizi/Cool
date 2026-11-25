@@ -39,6 +39,12 @@
 - 联网复活在主线程应用服务端落点。先清空旧预测帧和平滑纠偏，再传送并上报。
   位置响应的复活 tick 必须匹配当前周期，迟到的纠偏不会跨复活生效。
 
+## 联网击退
+
+- 服务端裁决炎爆击退后提高目标的移动代次。下一条位置响应给出权威落位，
+  客户端在主线程清空旧预测和纠偏，再应用位移并回报新代次。
+- 同一生命内仅应用较新的代次。复活时双方复位代次，旧生命的位置包按复活 tick 丢弃。
+
 ## 默认联网与玩家名
 
 - `NetworkModeService.Load()`：无 `net.mode` 存档时默认 `Online`；已有存档（含 `SinglePlayer`）
@@ -93,8 +99,8 @@
   `NpcAttackSchedule.VariantOf(serverTicks)` 的时间戳桶变体，保证旧服务端/未来技能仍能播放。
 - **投射物对齐**：`RemoteCastPresenter` 在 `CastBroadcast` 到达即播攻击动画与施放 VFX
   （不等 `DamageResult`，否则零命中延迟技能会先看到受击）；火球在 `DamageResult.HitX/HitZ`
-  爆炸，被格挡的剑气在 `StopX/StopZ` 停住；20004（蓄力爆发）与 30001（陨石）直接在服务端
-  落点生成释放/陨石表现。本地施法者与 NPC 由各自执行器负责，这里一律跳过。
+  爆炸，被格挡的剑气在 `StopX/StopZ` 停住。20004 的释放光圈从服务端爆心上方 0.74m 扩张，
+  30001 在服务端落点生成陨石表现。本地施法者与 NPC 由各自执行器负责，这里一律跳过。
 - **目标锁定**：`T` 键 / 移动端「切换目标」按钮经 `InputManager.IsTargetSwitchPressed()` /
   `SetTargetSwitchPressedFromUI()` 进入 `NetworkTargetSelector.Tick`；候选为视野内 Player/Npc，
   `AcquireRange=15m`、`DropRange=20m` 迟滞；目标死亡、出 AOI 或超距自动清锁并解绑面板/选中环。
@@ -111,11 +117,11 @@
 - **远程火球按广播落点飞行/爆炸**：`RemoteCastPresenter.OnCastBroadcast` 只在
   `ProjectileSkillData.HoldToAim` 时把 `CastBroadcast.ImpactX/Y/Z` 记为投射物终点；
   `DamageResult` 到达后用该终点 `ExplodeAt`（不退回受击者位置），与服务端落点圆判定同源。
-  20004 / 30001 等落点类技能直接在广播落点生成释放/陨石表现。
+  炎爆按广播爆心抬高释放光圈，陨石使用广播落点。
 
 ## 剑气回荡确认（2026-11-18）
 
-- 宿主只在握手 `EnabledFeatures` 含 `ProtocolFeatures.SwordQiEcho` 时订阅
+- 宿主只在握手 `EnabledFeatures` 含 `ProtocolFeatures.SwordQiEchoRecast` 时订阅
   `SkillCoordinator.OnEchoRequested`；否则 `InputManager.SetSwordQiEchoEnabled(false)` 关闭键盘/触控入口。
 - 请求归属由 `ClientNetworkHost` 持有：`EchoRequestId` 会话内递增、`EchoBindingId` 角色重绑递增、
   连接代次变化清空。`CombatNetworkBridge.NotifyEchoCast` 发 CastRequest；3 秒超时释放施法锁但保留
@@ -123,6 +129,11 @@
 - `SwordQiEchoState` 与 `CastBroadcast/DamageResult` 同走 `CombatNetworkBridge` 主线程队列。
   Started 按 `(StartTick, CastId)` 比较；Ended 锁存；过期 Started 只对齐冷却。
   `DamageResult.EchoCastId` 在 HP/表现消费前按 `(EchoCastId, TargetPlayerId)` 去重，窗口 64 个实例。
+- 本地确认与远端观战都从技能资产取得回荡飞剑预制体；命中裂光只消费去重后的有效伤害。
+- 服务端提供 Prepare/Release 同实例状态。客户端从权威环绕起点、释放坐标与接触时间表推进。
+  新进入视野的玩家从首次实体快照取得当前表演，读取快照后再创建飞剑，接上正在播放的进度。
+  炎爆远端释放使用广播中的落点和蓄力进度。
+- 远端 Full 角色保留纯表现的 `DefendHaloVfx`，由防御和死亡快照驱动。R 武器拖尾走现有远端攻击表现窗口，降档清除尾迹。
 - 本地施法者把 `SwordQiEchoPresenter` 挂在本地角色上；远端施法者挂在 `RemoteEntityView.GameObject`，
   视图移除/断线时 Stop 并清实例表。`RemoteCastPresenter` 继续只处理普通 `CastBroadcast`。
 

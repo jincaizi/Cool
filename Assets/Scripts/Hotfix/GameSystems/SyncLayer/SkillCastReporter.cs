@@ -1,3 +1,4 @@
+using Cool.Protocol;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
 using UnityEngine;
@@ -23,8 +24,7 @@ namespace Hotfix.GameSystems.SyncLayer
                || (data is ProjectileSkillData projectile && projectile.MaxChargeTime > 0f);
 
         /// <summary>
-        /// 激活时上报：非蓄力技能立即发；30001 带落点（零值兜底与 SkillExecutor.SpawnMeteor
-        /// 逐字一致：施法者位置 + 前向 × 12）。
+        /// 激活时上报：非蓄力技能立即发；30001 与本地执行器共用落点和地面采样。
         /// </summary>
         public static void ReportActivation(CombatNetworkBridge bridge, SkillData data,
             Vector3 targetPosition, Transform owner, long targetId = 0)
@@ -34,12 +34,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
             Vector3? impactPoint = null;
             if (data.SkillId == (int)SkillID.Ultimate)
-            {
-                Vector3 point = targetPosition;
-                if (point.sqrMagnitude < 0.0001f)
-                    point = owner.position + owner.forward * 12f;
-                impactPoint = point;
-            }
+                impactPoint = Hotfix.GameSystems.Skills.Runtime.Meteor.MeteorStrike.ResolveAimPoint(targetPosition, owner);
 
             // 激活上报不传落点：10002 由服务端沿施法者朝向做线形判定；
             // 20003（HoldToAim）是蓄力技能，激活即早退，落点在释放时经 ReportChargeRelease 上报。
@@ -58,10 +53,11 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>剑气回荡请求：由宿主在请求阶段发送；激活上报不重复发。</summary>
         public static void ReportEchoRequest(CombatNetworkBridge bridge, SwordQiEchoSkillData data,
-            ulong requestId, ulong bindingId)
+            ulong requestId, ulong bindingId, SwordQiEchoAction action = SwordQiEchoAction.Legacy,
+            ulong preparedCastId = 0)
         {
             if (bridge == null || data == null) return;
-            bridge.NotifyEchoCast(data.SkillId, requestId, bindingId);
+            bridge.NotifyEchoCast(data.SkillId, requestId, bindingId, action, preparedCastId);
         }
 
         /// <summary>释放时上报：可蓄力技能发一次（落点 + 进度）；取消蓄力不会走到这里</summary>

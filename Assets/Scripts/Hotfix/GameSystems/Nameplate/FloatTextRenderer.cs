@@ -192,6 +192,7 @@ namespace Hotfix.GameSystems.Nameplate
             go.transform.SetParent(_canvasTransform, false);
             var tmp = go.AddComponent<TextMeshProUGUI>();
             tmp.raycastTarget = false;
+            tmp.enableWordWrapping = false;
             tmp.alignment = TextAlignmentOptions.Center;
             go.SetActive(active);
             return tmp;

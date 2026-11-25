@@ -185,14 +185,12 @@ public class CombatResolverProjectileTests
     [Fact]
     public void ChargeBlast_Scales_Radius_And_Damage_By_Charge()
     {
-        // 目标距施法者 10m；落点 = 目标位置 ⇒ 40 × 1.5（满蓄力、无暴击）= 60
-        // Shape 必须带客户端真实形状（20004 资产 _targetType=1 / _range=2 / _areaRadius=2 /
-        // _angle=120）——ValidateShape 会拒绝全零默认形状（brief 原用例漏写，见任务报告偏差 1）
-        var resolver = new CombatResolver(MakeStore(targetAt: (0f, 10f)), new Random(1));
+        // 目标在距离施法者 5.5m 处，满蓄力半径 6m，伤害 40 × 1.5。
+        var resolver = new CombatResolver(MakeStore(targetAt: (0f, 5.5f)), new Random(1));
         var charge = new CastRequest
         {
-            SkillId = 20004, ImpactX = 0f, ImpactY = 0f, ImpactZ = 10f, ChargeProgress = 1f,
-            Shape = new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2f, Angle = 120f }
+            SkillId = 20004, ChargeProgress = 1f,
+            Shape = new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 4f, Angle = 120f }
         };
         Assert.True(resolver.Decide(1, charge, tick: 0).Accepted);
 
@@ -204,27 +202,26 @@ public class CombatResolverProjectileTests
     [Fact]
     public void ChargeBlast_Radius_Scales_With_Charge()
     {
-        // 目标 (0,5)、落点 (0,2.5)：目标距爆点 2.5m。
-        // ChargeProgress=0 ⇒ 半径 2（2.5 > 2，打不到）；=1 ⇒ 半径 2 × 1.5 = 3（打得到）。
-        var shape = new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2f, Angle = 120f };
+        // 目标距爆心 5m，低蓄力 4m 打不到，满蓄力 6m 可命中。
+        var shape = new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 4f, Angle = 120f };
 
         var missResolver = new CombatResolver(MakeStore(targetAt: (0f, 5f)), new Random(1));
         var miss = new CastRequest
         {
-            SkillId = 20004, ImpactX = 0f, ImpactY = 0f, ImpactZ = 2.5f, ChargeProgress = 0f, Shape = shape
+            SkillId = 20004, ChargeProgress = 0f, Shape = shape
         };
         Assert.True(missResolver.Decide(1, miss, tick: 0).Accepted);
         var missHitIds = Drain(missResolver, 20).SelectMany(r => r.Hits).Select(h => h.TargetPlayerId).ToList();
-        Assert.DoesNotContain(2L, missHitIds);   // 半径 2 够不到 2.5m
+        Assert.DoesNotContain(2L, missHitIds);
 
         var hitResolver = new CombatResolver(MakeStore(targetAt: (0f, 5f)), new Random(1));
         var hit = new CastRequest
         {
-            SkillId = 20004, ImpactX = 0f, ImpactY = 0f, ImpactZ = 2.5f, ChargeProgress = 1f, Shape = shape
+            SkillId = 20004, ChargeProgress = 1f, Shape = shape
         };
         Assert.True(hitResolver.Decide(1, hit, tick: 0).Accepted);
         var hitHitIds = Drain(hitResolver, 20).SelectMany(r => r.Hits).Select(h => h.TargetPlayerId).ToList();
-        Assert.Contains(2L, hitHitIds);          // 半径 3 够得到 2.5m
+        Assert.Contains(2L, hitHitIds);
     }
 
     [Fact]

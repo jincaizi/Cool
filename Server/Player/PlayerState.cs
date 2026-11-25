@@ -17,6 +17,7 @@ namespace KcpServer
         public uint LastReceivedSequence { get; internal set; }
         internal bool SupportsAuthoritativeRespawn { get; set; }
         internal uint? RespawnTick { get; set; }
+        internal uint MovementRevision { get; set; }
 
         /// <summary>登录协商位（ProtocolFeatures；剑气回荡等能力的收件人过滤依据）。</summary>
         public uint Features { get; internal set; }

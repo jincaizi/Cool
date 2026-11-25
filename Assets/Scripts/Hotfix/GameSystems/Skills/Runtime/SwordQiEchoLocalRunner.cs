@@ -27,29 +27,51 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private readonly SkillCoordinator _coordinator;
         private readonly Transform _owner;
         private readonly Func<float> _critRoll;
+        private readonly Func<double> _now;
         private readonly List<RuntimeContact> _contacts = new List<RuntimeContact>();
         private Vec3 _origin;
         private double _startTime;
         private double _endTime;
         private bool _active;
+        private SwordQiEchoSkillData? _prepared;
         private SwordQiEchoPresenter? _presenter;
+        private GameObject? _contactVfx;
 
-        public bool IsInvulnerable => _active && Time.time < _endTime;
+        public bool IsInvulnerable => _active && _now() < _endTime;
 
         public SwordQiEchoLocalRunner(SkillCoordinator coordinator, Transform owner,
-            Func<float>? critRoll = null)
+            Func<float>? critRoll = null, Func<double>? now = null)
         {
             _coordinator = coordinator;
             _owner = owner;
             _critRoll = critRoll ?? (() => UnityEngine.Random.value);
+            _now = now ?? (() => Time.timeAsDouble);
         }
 
-        /// <summary>本地选敌；零目标返回 false（不冷却、不动画）。</summary>
+        /// <summary>第一次布剑，第二次按当前位置选敌。无目标时保留剩余待发时间。</summary>
         public bool TryCast(SwordQiEchoSkillData data)
         {
             if (data == null || _active) return false;
+            if (_prepared == null)
+            {
+                _prepared = data;
+                _coordinator.SetEchoPreparation(1, SwordQiEchoRules.PrepareSeconds, 0d, _now);
+                if (_presenter == null)
+                    _presenter = _owner.GetComponent<SwordQiEchoPresenter>();
+                if (_presenter == null)
+                    _presenter = _owner.gameObject.AddComponent<SwordQiEchoPresenter>();
+                _presenter.Prepare(_owner, SwordQiEchoRules.Spec.SwordCount, SwordQiEchoRules.PrepareSeconds,
+                    now: _now, swordPrefab: data.SwordVfx);
+                return true;
+            }
+            if (ExpirePreparation()) return false;
+
             var spawner = MonsterSpawner.Active;
-            if (spawner == null) return false;
+            if (spawner == null)
+            {
+                _coordinator.NotifyEchoNoTarget();
+                return false;
+            }
 
             var origin = new Vec3(_owner.position.x, _owner.position.y, _owner.position.z);
             var monsters = spawner.SnapshotAlive();
@@ -67,16 +89,23 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             var targets = SwordQiEchoRules.SelectTargets(origin, SwordQiEchoRules.Spec.Radius,
                 SwordQiEchoRules.Spec.MaxTargets, candidates);
-            if (targets.Count == 0) return false;
-
-            double endTime = Time.time + SwordQiEchoRules.Spec.DurationSeconds;
-            if (!_coordinator.StartOfflineEcho(data, endTime, () => (double)Time.time))
+            if (targets.Count == 0)
+            {
+                _coordinator.NotifyEchoNoTarget();
                 return false;
+            }
+
+            double now = _now();
+            double endTime = now + SwordQiEchoRules.Spec.DurationSeconds;
+            if (!_coordinator.StartOfflineEcho(data, endTime, _now))
+                return false;
+            _prepared = null;
+            _coordinator.ClearEchoPreparation();
 
             uint durationTicks = (uint)Math.Ceiling(
                 SwordQiEchoRules.Spec.DurationSeconds * CombatRules.TickRateHz);
             var scheduled = SwordQiEchoRules.BuildContacts(origin, targets,
-                SwordQiEchoRules.Spec.SwordCount, durationTicks);
+                SwordQiEchoRules.Spec.SwordCount, durationTicks, (ulong)UnityEngine.Random.Range(1, int.MaxValue));
 
             _contacts.Clear();
             foreach (var contact in scheduled)
@@ -89,30 +118,22 @@ namespace Hotfix.GameSystems.Skills.Runtime
                     OffsetTicks = contact.OffsetTicks
                 });
             }
-            if (_contacts.Count == 0) return false;
-
             _origin = origin;
-            _startTime = Time.time;
+            _startTime = now;
             _endTime = endTime;
             _active = true;
 
-            _presenter = _owner.GetComponent<SwordQiEchoPresenter>();
-            if (_presenter == null)
-                _presenter = _owner.gameObject.AddComponent<SwordQiEchoPresenter>();
-            _presenter.Play(_owner, scheduled, SwordQiEchoRules.Spec.DurationSeconds);
+            _contactVfx = data.ContactVfx;
+            _presenter?.Launch(_owner, scheduled, SwordQiEchoRules.Spec.DurationSeconds,
+                SwordQiEchoRules.Spec.SwordCount, now: _now, swordPrefab: data.SwordVfx);
             return true;
         }
 
         public void Update()
         {
+            ExpirePreparation();
             if (!_active) return;
-            double now = Time.time;
-            if (now >= _endTime)
-            {
-                _active = false;
-                _presenter?.Stop();
-                return;
-            }
+            double now = _now();
 
             foreach (var contact in _contacts)
             {
@@ -140,15 +161,34 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 block.CalculatedDamage = damage;
                 block.SkillId = (int)SkillID.SwordQiEcho;
 
-                Vector3 direction = position - _owner.position;
+                Vector3 direction = position - new Vector3(_origin.X, _origin.Y, _origin.Z);
                 if (direction.sqrMagnitude < 0.0001f) direction = _owner.forward;
+                var targetable = (ITargetable)target;
+                int hpBefore = targetable.CurrentHP;
                 ((IDamageable)target).TakeDamage(block, direction.normalized, HitContact.None);
+                if (target != null && targetable.CurrentHP < hpBefore)
+                    SwordQiEchoPresenter.PlayContact(_contactVfx, position + Vector3.up * 1.05f);
             }
+            if (now >= _endTime) _active = false;
+        }
+
+        private bool ExpirePreparation()
+        {
+            if (_prepared == null || _coordinator.GetEchoPreparation().Remaining > 0f) return false;
+            var data = _prepared;
+            _prepared = null;
+            _coordinator.ClearEchoPreparation();
+            _coordinator.ApplyAuthoritativeCooldown(data.SkillId, data.Cooldown, 0f);
+            return true;
         }
 
         public void Cancel()
         {
             _active = false;
+            _prepared = null;
+            _coordinator.ClearEchoPreparation();
+            _contacts.Clear();
+            _contactVfx = null;
             _presenter?.Stop();
         }
     }

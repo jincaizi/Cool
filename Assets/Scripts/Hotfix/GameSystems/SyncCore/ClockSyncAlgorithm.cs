@@ -26,6 +26,7 @@ namespace Cool.SyncCore
 
         /// <summary>是否已收敛（窗口填满）</summary>
         public bool HasConverged => _samples.Count >= _windowSize;
+        public bool HasSample => _samples.Count > 0;
 
         public ClockSyncAlgorithm(int windowSize = 8)
         {

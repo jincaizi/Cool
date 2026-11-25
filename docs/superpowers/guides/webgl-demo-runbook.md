@@ -26,7 +26,7 @@
 * `ProjectSettings` 里 `webGLThreadsSupport: 0` ⇒ **不用 `SharedArrayBuffer`** ⇒
   不需要跨源隔离（COOP/COEP）⇒ **不需要 HTTPS**。于是明文 `http://` + `ws://` 直接可用，
   浏览器不会因为"HTTPS 页面连 ws://"而拦截 —— 因为页面本身就是 http。
-* **ICP 备案针对的是「域名 + 大陆服务器 + 80/443」**。裸 IP + 非标端口（8080/8000）不在此列。
+* 短时演示可直接用公网 IP。腾讯云将仅通过公网 IP 直接访问测试列为可暂不备案的场景。 [腾讯云备案说明](https://cloud.tencent.com/document/api/243/19630)
 * 代价要如实说：**没有 TLS，流量明文**，且**没有鉴权**（知道 IP 的人都能连）。
   这是演示形态的刻意取舍（见 `webgl-demo-boundaries.md` 第 ⑥ 条）。
 
@@ -48,6 +48,52 @@
 ---
 
 ## 2. 在开发机上：出包 + 打包
+
+在 Unity 中执行 `Cool → Build → WebGL`，等 WebGL 构建成功后，双击 `production/deploy/webgl-demo/deploy-webgl.cmd`。入口已配置当前演示服务器的公网 IPv4 `101.43.181.45`。需要指定别的实例时，在仓库根目录运行以下命令。
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\production\deploy\webgl-demo\deploy-webgl.ps1 -Server 101.43.181.45
+```
+
+脚本调用 Git Bash 和 .NET SDK 生成服务端，并将当前 WebGL 产物、服务端和启动脚本打成 `production/deploy/webgl-demo/dist/CoolWebGL-*.zip`。直接回车保留本地 ZIP。输入 `y` 后等待上传、校验、解压、后台启动和公网检查，看到 `Deployment complete` 后即可使用打印出的演示链接。自动化调用可加 `-Upload Always`，只打包可加 `-Upload Never`。
+
+### 首次使用自动同步
+
+1. 在腾讯云实例防火墙放行 **TCP 22**，来源填开发机的公网出口 IP。放行 **TCP 8080 和 8000**，来源应覆盖面试官及执行发布检查的开发机。 [腾讯云实例防火墙](https://cloud.tencent.com/document/product/1207/44577/)
+
+2. 通过远程桌面，在云服务器的管理员 PowerShell 安装并启动 OpenSSH Server。若已安装，可直接启动服务。最后一行显示首次连接时要核对的主机密钥指纹。 [Microsoft OpenSSH 安装指南](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?pivots=windows-server-2022&tabs=powershell)
+
+```powershell
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+Set-Service -Name sshd -StartupType Automatic
+Start-Service sshd
+ssh-keygen -lf "$env:ProgramData\ssh\ssh_host_ed25519_key.pub"
+```
+
+3. 在开发机生成 OpenSSH 密钥（已有 `id_ed25519` 就复用），复制 `.pub` 公钥。为私钥设置了口令时，先用 `ssh-agent` 加载它，日常发布就可以在确认上传后直接等待。 [Microsoft 密钥登录说明](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement)
+
+```powershell
+ssh-keygen -t ed25519
+Get-Content "$env:USERPROFILE\.ssh\id_ed25519.pub" | Set-Clipboard
+```
+
+4. 在云端管理员 PowerShell 执行下面的命令，在提示时粘贴公钥文本。
+
+```powershell
+$key = (Read-Host 'Paste the ssh-ed25519 public key').Trim()
+if ($key -notmatch '^ssh-ed25519 [A-Za-z0-9+/=]+( .*)?$') { throw 'Invalid public key' }
+$keys = Join-Path $env:ProgramData 'ssh\administrators_authorized_keys'
+if (!(Test-Path -LiteralPath $keys) -or $key -notin (Get-Content -LiteralPath $keys)) {
+    Add-Content -LiteralPath $keys -Value $key -Encoding Ascii
+}
+icacls.exe $keys /inheritance:r /grant:r '*S-1-5-32-544:F' '*S-1-5-18:F'
+```
+
+5. 在开发机执行 `ssh -o HostKeyAlgorithms=ssh-ed25519 Administrator@101.43.181.45 exit`，指纹与第 2 步一致时接受。再执行 `ssh -o BatchMode=yes -o StrictHostKeyChecking=yes Administrator@101.43.181.45 exit` 确认发布可免交互登录。
+
+如果之前用 `start-demo.cmd` 手动启动过演示，首次自动发布前关闭那两个窗口。自动发布会配置 Windows 入站规则和监听权限，把版本解压到 `C:\CoolDemo\releases\`，通过 `CoolDemo-WebGL-Site` 和 `CoolDemo-WebGL-Game` 两个计划任务启动，SSH 断开后服务继续运行。若云端启动检查失败，脚本会尝试恢复之前的计划任务。仍可通过远程桌面复制 ZIP，使用下文的手动启动流程。
+
+### 用 Git Bash 单独生成 dist
 
 ```bash
 # 2.1 出 WebGL 包（Unity 菜单 Cool/Build/WebGL，或批处理调用
@@ -91,7 +137,7 @@ webgl-demo/
 
 ---
 
-## 3. 云服务器上，一次性准备（**需人类在云服务器上执行**）
+## 3. 手动部署时的云服务器准备
 
 ### 3.1 跑 `setup-once.cmd`（**右键 → 以管理员身份运行**）
 
@@ -122,14 +168,14 @@ webgl-demo/
 
 ---
 
-## 4. 演示当天（**需人类在云服务器上执行**）
+## 4. 演示当天
 
-### 4.1 起服务
+### 4.1 手动起服务
 
 双击 `start-demo.cmd`。它会开两个窗口：
 
 * `静态站点 8080` → `StaticServer.exe --root dist\site --port 8080 --prefix http://+:8080/`
-* `游戏服务端 8000` → `Server3C.exe 8000 --monsters 6 --bots 100 --ws-prefix http://+:8000/`
+* `游戏服务端 8000` → `Server3C.exe 8000 --monsters 15 --bots 100 --ws-prefix http://+:8000/`
 
 看到这两行才算起来了：
 
@@ -138,13 +184,14 @@ StaticServer listening on http://+:8080/
 Server3C is running on port 8000
 ```
 
-`--bots 100` 是 AOI 那条声称面要的规模。`--monsters 6` 是为了让两只新怪（DogKnight / SpiderBoss）出现在演示里——
+`--bots 100` 是 AOI 那条声称面要的规模。`--monsters 15` 是 2026-11-23 起的演示配比：
+6 Slime / 5 Wolf（客户端 template 2 渲染为刺背龟）/ 3 DogKnight / 1 SpiderBoss——
 **它只管场上有几只、看得到哪些，不管安全**（安全与数量无关）。出生点自 2026-10-17 第三次搬迁后是
 **(-15, 0.3, -30)**（历史：08-27 原点系 → 10-13 湖东岸 (10,0.21,-40) → 现在是这里，布局同批收紧收进陆地），
-对全部六只怪都安全：**站在出生点不动不会被任何怪发现**（几何：每个槽位距出生点 > 感知+巡逻，最小余量
-[2] Slime +2.8m；行为侧 = 挂机 3 分钟零施法/0 伤害的用例）。但这只管出生点——**离出生点最近的怪是
-(0,0,-35) 的 [2] Slime：朝它走出约 3m 就进它的感知圈被追**（[0] Wolf 现在距出生点 33.5m，巡逻圈够不着），
-想活着就**动起来或打回去**（这是设计意图）；阵亡 = 回选人界面重登（重登即满血）。
+对全部 15 只怪都安全：**站在出生点不动不会被任何怪发现**（几何：每个槽位距出生点 > 感知+巡逻，最小余量
+[2] Slime +2.8m；新增 9 个槽位距出生点 19.9m 起；行为侧 = 挂机 3 分钟零施法/0 伤害的用例）。但这只管出生点——
+**离出生点最近的怪是 (0,0,-35) 的 [2] Slime：朝它走出约 3m 就进它的感知圈被追**（[0] Wolf 现在距出生点 33.5m，
+巡逻圈够不着），想活着就**动起来或打回去**（这是设计意图）；阵亡 = 回选人界面重登（重登即满血）。
 详见 `webgl-demo-boundaries.md` 的"演示操作建议"。
 
 > 顺带一条 2026-10-17 实测（与新布局无关、但与 `--bots` 有关）：**40 个 bot 的人群会把怪挡在半路**——

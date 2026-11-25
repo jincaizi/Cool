@@ -111330,3 +111330,3097 @@ a7bc6de3 docs: add versioning and webgl cache implementation plan
 84539ec1 docs: add versioning and webgl cache design
 ---
 
+## Session End: 20261111_122350
+### Commits
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+---
+
+## Session End: 20261111_182040
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_183303
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_183501
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_183530
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_184035
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_184118
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_184229
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_184551
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_184603
+### Commits
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_190646
+### Commits
+00a2dc5f chore(release): bump version to 0.1.2
+0b4f420d fix(ui): enable WebGL mobile keyboard for text fields
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_191431
+### Commits
+523fee79 chore(release): bump version to 0.1.3
+00b2a25c fix(ui): open mobile keyboard for TMP fields on WebGL
+00a2dc5f chore(release): bump version to 0.1.2
+0b4f420d fix(ui): enable WebGL mobile keyboard for text fields
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_193902
+### Commits
+7bdf0dc3 chore(release): bump version to 0.1.4
+a9d519d9 feat(ui): upgrade TMP to 3.2 and drop WebGL keyboard bridge
+523fee79 chore(release): bump version to 0.1.3
+00b2a25c fix(ui): open mobile keyboard for TMP fields on WebGL
+00a2dc5f chore(release): bump version to 0.1.2
+0b4f420d fix(ui): enable WebGL mobile keyboard for text fields
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_195043
+### Commits
+7bdf0dc3 chore(release): bump version to 0.1.4
+a9d519d9 feat(ui): upgrade TMP to 3.2 and drop WebGL keyboard bridge
+523fee79 chore(release): bump version to 0.1.3
+00b2a25c fix(ui): open mobile keyboard for TMP fields on WebGL
+00a2dc5f chore(release): bump version to 0.1.2
+0b4f420d fix(ui): enable WebGL mobile keyboard for text fields
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/session-logs/session-log.md
+---
+
+## Session End: 20261111_195129
+### Commits
+7bdf0dc3 chore(release): bump version to 0.1.4
+a9d519d9 feat(ui): upgrade TMP to 3.2 and drop WebGL keyboard bridge
+523fee79 chore(release): bump version to 0.1.3
+00b2a25c fix(ui): open mobile keyboard for TMP fields on WebGL
+00a2dc5f chore(release): bump version to 0.1.2
+0b4f420d fix(ui): enable WebGL mobile keyboard for text fields
+90a7d2d9 chore(release): bump version to 0.1.1
+2d318b8c feat(camera): zoom out during fireball aim (task 4/5)
+df78e9ea feat(camera): add aim zoom distance to third-person camera (task 3/5)
+5210f34b fix(input): ignore synthesized mouse look while touching (task 2/5)
+6708602b feat(ui): slow down touch look sensitivity (task 1/5)
+5f5bd677 chore: record session end log
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_130819
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_132133
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_132234
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_132322
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_132340
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_132346
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_132409
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_132530
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261114_143406
+### Uncommitted Changes
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261118_015849
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261118_020618
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261118_023528
+### Commits
+fc5cb040 perf(server): avoid per-tick empty echo ended allocation
+32b66ac8 feat(vfx): add sword qi echo presenter and animator state (task 4)
+e0354e51 feat(client): add sword qi echo input, offline runner and confirmation (task 3)
+4be0c2eb feat(server): add authoritative sword qi echo cast and protocol (task 2)
+d4ca62e3 feat(sync-core): add sword qi echo rules and contact schedule (task 1)
+d95ba790 docs(sword-qi-echo): revise spec and plan after second review
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/session-log.md
+---
+
+## Session End: 20261120_123251
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Server/README.md
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261123_125117
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261123_125234
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261123_125620
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261123_125923
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261123_134527
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Monster/MonsterModuleTests.cs
+Server/Server.Tests/Navigation/DemoDayNavBinTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/network-playtest.md
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/deploy/webgl-demo/start-game-server.cmd
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261124_013059
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/SwordQiEchoState.cs
+Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Events/SkillVFXEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/ClockSyncAlgorithm.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncCore/SwordQiEchoRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClockSyncDriver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/MobileSkillBarPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/MobileSkillButton.cs
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/MobileSkillButtonTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SwordQiEchoSkillTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/Editor/VFX/SwordQiEchoPresenterTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Aoi/AoiBroadcaster.cs
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Handler/SwordQiEchoCast.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/SwordQiEchoCombatTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Monster/MonsterModuleTests.cs
+Server/Server.Tests/Navigation/DemoDayNavBinTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Protocol/SwordQiEchoProtocolTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/network-playtest.md
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/deploy/webgl-demo/start-game-server.cmd
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261124_013136
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/SwordQiEchoState.cs
+Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Events/SkillVFXEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/ClockSyncAlgorithm.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncCore/SwordQiEchoRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClockSyncDriver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/MobileSkillBarPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/MobileSkillButton.cs
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/MobileSkillButtonTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SwordQiEchoSkillTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/Editor/VFX/SwordQiEchoPresenterTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Aoi/AoiBroadcaster.cs
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Handler/SwordQiEchoCast.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/SwordQiEchoCombatTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Monster/MonsterModuleTests.cs
+Server/Server.Tests/Navigation/DemoDayNavBinTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Protocol/SwordQiEchoProtocolTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/network-playtest.md
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/deploy/webgl-demo/start-game-server.cmd
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261124_013151
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/SwordQiEchoState.cs
+Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Events/SkillVFXEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/ClockSyncAlgorithm.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncCore/SwordQiEchoRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClockSyncDriver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/MobileSkillBarPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/MobileSkillButton.cs
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/MobileSkillButtonTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SwordQiEchoSkillTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/Editor/VFX/SwordQiEchoPresenterTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Aoi/AoiBroadcaster.cs
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Handler/SwordQiEchoCast.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/SwordQiEchoCombatTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Monster/MonsterModuleTests.cs
+Server/Server.Tests/Navigation/DemoDayNavBinTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Protocol/SwordQiEchoProtocolTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/network-playtest.md
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/deploy/webgl-demo/start-game-server.cmd
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261124_013202
+### Uncommitted Changes
+Assets/Hovl Studio.meta
+Assets/Hovl Studio/Magic sword.meta
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity
+Assets/Hovl Studio/Magic sword/Demo MagicSwords.unity.meta
+Assets/Hovl Studio/Magic sword/Materials.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Ice.mat.meta
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat
+Assets/Hovl Studio/Magic sword/Materials/MagicSword_Iron.mat.meta
+Assets/Hovl Studio/Magic sword/Models.meta
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx
+Assets/Hovl Studio/Magic sword/Models/MagicSword.fbx.meta
+Assets/Hovl Studio/Magic sword/Prefabs.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Ice.prefab.meta
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab
+Assets/Hovl Studio/Magic sword/Prefabs/MagicSword_Iron.prefab.meta
+Assets/Hovl Studio/Magic sword/Textures.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_AO.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/MagicSword_Normal.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Albedo.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Emission.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_MetallicSmoothness.png.meta
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png
+Assets/Hovl Studio/Magic sword/Textures/Set2/MagicSword_Normal.png.meta
+Assets/Hovl Studio/MoonSword.meta
+Assets/Hovl Studio/MoonSword/Materials.meta
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Circle135bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Flash20cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 1.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 2.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 3.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 4.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 5.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat
+Assets/Hovl Studio/MoonSword/Materials/MoonSword 6.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Point12cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat
+Assets/Hovl Studio/MoonSword/Materials/Smoke3cg.mat.meta
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat
+Assets/Hovl Studio/MoonSword/Materials/Trail21bcg.mat.meta
+Assets/Hovl Studio/MoonSword/Models.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx
+Assets/Hovl Studio/MoonSword/Models/MoonSword2.fbx.meta
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx
+Assets/Hovl Studio/MoonSword/Models/Twist.fbx.meta
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity
+Assets/Hovl Studio/MoonSword/MoonSword demo.unity.meta
+Assets/Hovl Studio/MoonSword/Prefabs.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 1b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 2b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 3b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 4b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 5b.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6.prefab.meta
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab
+Assets/Hovl Studio/MoonSword/Prefabs/MoonSword 6b.prefab.meta
+Assets/Hovl Studio/MoonSword/Textures.meta
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png
+Assets/Hovl Studio/MoonSword/Textures/Circle135.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png
+Assets/Hovl Studio/MoonSword/Textures/Flash20.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_AO.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword1_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword2_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword3_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Height.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_MetallicSmoothness.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword4_Normal.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword5_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Albedo.png.meta
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png
+Assets/Hovl Studio/MoonSword/Textures/MoonSword6_Emission.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Point12.png
+Assets/Hovl Studio/MoonSword/Textures/Point12.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png
+Assets/Hovl Studio/MoonSword/Textures/Smoke3.png.meta
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png
+Assets/Hovl Studio/MoonSword/Textures/Trail21.png.meta
+Assets/Plugins/NuGet/.nuget-installed.json
+Assets/Plugins/NuGet/McpPlugin.Common.dll
+Assets/Plugins/NuGet/McpPlugin.dll
+Assets/Plugins/NuGet/R3.dll
+Assets/Plugins/NuGet/ReflectorNet.dll
+Assets/Plugins/NuGet/Rql.Contracts.dll
+Assets/Plugins/NuGet/Rql.Execution.dll
+Assets/Plugins/NuGet/Rql.Parser.dll
+Assets/PreRes/Font/ZhunYuan SDF.asset
+Assets/PreRes/Skills/Explosion_Charge.prefab
+Assets/PreRes/Skills/Explosion_Fireball.prefab
+Assets/PreRes/Skills/Explosion_Meteor.prefab
+Assets/PreRes/Skills/MeteorStrike.prefab
+Assets/PreRes/SkillsCfg/ChargeFire_SkillR.asset
+Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset
+Assets/PreRes/SkillsCfg/SwordQiEchoWhite.prefab
+Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset
+Assets/Prefabs/Character/FemalePlayer.prefab
+Assets/RpgDuo/Prefab/MaleCharacterPBR.prefab
+Assets/Scripts/AOT/Protocol/Messages/Combat.cs
+Assets/Scripts/AOT/Protocol/Messages/NpcAction.cs
+Assets/Scripts/AOT/Protocol/Messages/PositionSync.cs
+Assets/Scripts/AOT/Protocol/Messages/SwordQiEchoState.cs
+Assets/Scripts/AOT/Protocol/Messages/WorldSnapshot.cs
+Assets/Scripts/AOT/Protocol/README.md
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterEntity.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/MonsterMovement.cs
+Assets/Scripts/Hotfix/GameSystems/Monster/README.md
+Assets/Scripts/Hotfix/GameSystems/Nameplate/EntityDisplayManager.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/FloatTextRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/Nameplate/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/ChargedSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Data/SwordQiEchoSkillData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Effect/EffectData.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Events/SkillVFXEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/README.md
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/Meteor/MeteorStrike.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillCoordinator.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SkillExecutor.cs
+Assets/Scripts/Hotfix/GameSystems/Skills/Runtime/SwordQiEchoLocalRunner.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/ClockSyncAlgorithm.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/CombatRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncCore/SwordQiEchoRules.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkHost.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClientNetworkManager.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/ClockSyncDriver.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/CombatNetworkBridge.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/MovementReporter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/README.md
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteCastPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/RemoteEntityAnimator.cs
+Assets/Scripts/Hotfix/GameSystems/SyncLayer/SkillCastReporter.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Core/Events/DamageEvents.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Network/NetMovementPolicy.cs
+Assets/Scripts/Hotfix/GameSystems/Sys3C/README.md
+Assets/Scripts/Hotfix/GameSystems/Sys3C/Sys3CEntry.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/MobileSkillBarPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/UI/Mobile/MobileSkillButton.cs
+Assets/Scripts/Hotfix/GameSystems/UI/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/README.md
+Assets/Scripts/Hotfix/GameSystems/VFX/StatusVFXSystem.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/SwordQiEchoPresenter.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponTrailRenderer.cs
+Assets/Scripts/Hotfix/GameSystems/VFX/WeaponVFXController.cs
+Assets/Scripts/Tests/Editor/MeteorStrikeTests.cs
+Assets/Scripts/Tests/Editor/MobileSkillButtonTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorChargeTests.cs
+Assets/Scripts/Tests/Editor/SkillExecutorMeteorTests.cs
+Assets/Scripts/Tests/Editor/Skills/SkillPresentationCatalogTests.cs
+Assets/Scripts/Tests/Editor/StatusVFXSystemTests.cs
+Assets/Scripts/Tests/Editor/SwordQiEchoSkillTests.cs
+Assets/Scripts/Tests/Editor/SyncCore/CombatRulesTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/ClientRespawnNoticeTests.cs
+Assets/Scripts/Tests/Editor/SyncLayer/CombatNetworkBridgeTests.cs
+Assets/Scripts/Tests/Editor/VFX/SwordQiEchoPresenterTests.cs
+Assets/Scripts/Tests/PlayMode/SwordQiEchoPresentationTests.cs
+Assets/SimpleLowPolyNature/Scenes/DemoDay.unity
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectSettings.asset
+Server/Aoi/AoiBroadcaster.cs
+Server/Handler/CastHandler.cs
+Server/Handler/LoginHandler.cs
+Server/Handler/PositionSyncHandler.cs
+Server/Handler/SwordQiEchoCast.cs
+Server/Monster/MonsterModule.cs
+Server/Monster/README.md
+Server/Navigation/NavigationService.cs
+Server/Navigation/README.md
+Server/Player/PlayerState.cs
+Server/README.md
+Server/Server.Tests/Combat/CastResolutionSchedulingTests.cs
+Server/Server.Tests/Combat/SwordQiEchoCombatTests.cs
+Server/Server.Tests/Handler/CombatResolverProjectileTests.cs
+Server/Server.Tests/Monster/MonsterModuleTests.cs
+Server/Server.Tests/Navigation/DemoDayNavBinTests.cs
+Server/Server.Tests/Navigation/NavigationServiceTests.cs
+Server/Server.Tests/Protocol/CodecRoundtripTests.cs
+Server/Server.Tests/Protocol/SwordQiEchoProtocolTests.cs
+Server/Server.Tests/Server/PositionSyncEntityStoreTests.cs
+Server/Server.Tests/SyncCore/CombatRulesTests.cs
+Server/Server3C.cs
+docs/superpowers/guides/network-playtest.md
+docs/superpowers/guides/webgl-demo-runbook.md
+production/deploy/webgl-demo/publish-server.sh
+production/deploy/webgl-demo/start-game-server.cmd
+production/session-logs/agent-audit.log
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+

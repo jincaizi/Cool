@@ -12,7 +12,7 @@ dotnet build E:/CodeForJob/Cool/Server/Server3C.csproj
 # HttpListener.Start 抛「句柄无效」（见 Server/README.md）；下面的 dll 路径按上面的 build 输出。
 
 # 联网 + 服务器怪物（推荐联调用）
-dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
+dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 15 --map demoday
 
 # 纯联网（无服务器怪物，怪物走本地 MonsterSpawner）
 dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000
@@ -54,7 +54,7 @@ dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --bots 100
 ```
 
 - `状态`：`未连接` → `Connecting` → `LoggingIn` → **`InWorld`**（成功）
-- `远程实体`：服务器 AOI 视野内的实体数（视距 80m，按 XZ 距离判）。出生点 2026-10-17 第三次搬迁到 **(-15,0.3,-30)**（历史：10-13 湖东岸 (10,0,-40)），布局同批收紧后六槽位**全在出生点 80m 内**（最远 [5] SpiderBoss 58.8m）⇒ `--monsters 4` 稳定 **4**、`--monsters 6` 稳定 **6**，不再有 80m 边缘进出波动。（旧读数留档：10-13~10-17 期间 `--monsters 4` 曾看到 **3↔4、6 曾看到 5↔6** 波动——那是旧槽位 [3] Wolf (0,0,40) 距旧出生点 80.6m、恰在视距边缘外 0.6m，那些坐标已不存在；别再按"波动是正常"读这条。）
+- `远程实体`：服务器 AOI 视野内的实体数（视距 80m，按 XZ 距离判）。出生点 2026-10-17 第三次搬迁到 **(-15,0.3,-30)**（历史：10-13 湖东岸 (10,0,-40)），布局同批收紧后前六槽位**全在出生点 80m 内**（最远 [5] SpiderBoss 58.8m）；2026-11-23 扩到 15 槽位后仍全在 80m 内 ⇒ `--monsters 4` 稳定 **4**、`--monsters 15` 稳定 **15**（6 Slime / 5 Wolf→刺背龟 / 3 DogKnight / 1 SpiderBoss），不再有 80m 边缘进出波动。（旧读数留档：10-13~10-17 期间 `--monsters 4` 曾看到 **3↔4、6 曾看到 5↔6** 波动——那是旧槽位 [3] Wolf (0,0,40) 距旧出生点 80.6m、恰在视距边缘外 0.6m，那些坐标已不存在；别再按"波动是正常"读这条。）
 - 控制台应出现（关键日志）：
   - `[NetHost] 联网模式——连接 127.0.0.1:8000`
   - `[NetHost] 本地 MonsterSpawner 已禁用：SlimeSpawner` / `TurtleShellSpawner`
@@ -63,7 +63,7 @@ dotnet E:/CodeForJob/Cool/Server/bin/Debug/net8.0/Server3C.dll 8000 --bots 100
 
 ### 实机体验要点
 
-- **开局没有任何怪会仇恨**：出生点 **(-15,0,−30)**（2026-10-17 第三次搬迁；历史：10-13 湖东岸 (10,0,−40)、更早 (10,0,−15.52)）到六只怪的「感知半径 + 巡逻半径」**全有余量**（最近的是 (0,0,-35) 的 **[2] Slime**：15.8m > 8+5，余量 +2.8m）——站着不动 3 分钟无伤。**但朝 (0,0,-35) 走约 3m** 就会进它的感知圈被追（[0] Wolf 现在在 (-30,0,0)、距出生点 33.5m，已不是最近的那只）
+- **开局没有任何怪会仇恨**：出生点 **(-15,0,−30)**（2026-10-17 第三次搬迁；历史：10-13 湖东岸 (10,0,−40)、更早 (10,0,−15.52)）到全部 15 只怪的「感知半径 + 巡逻半径」**全有余量**（最近的是 (0,0,-35) 的 **[2] Slime**：15.8m > 8+5，余量 +2.8m；2026-11-23 新增的 9 个槽位距出生点 19.9m 起）——站着不动 3 分钟无伤。**但朝 (0,0,-35) 走约 3m** 就会进它的感知圈被追（[0] Wolf 现在在 (-30,0,0)、距出生点 33.5m，已不是最近的那只）
 - 远程玩家（真人 + bot）与怪物都是**真模型**：走各自的外观/模型目录（DemoDay 里玩家 = `_playerAvatarPrefab`，怪物配了 templateId 3/4 = DogKnight / SpiderBoss）；目录未命中/未接线才退化为胶囊/球体占位。**60m 外或超每帧预算的远档是代理**（未配 `Proxy` 预制体时是胶囊）——左下角浮层第二行的 `Full= / Proxy= / Q=` 就是这件事的读数
 - 单客户端看不到其他玩家——用 `--bots 100` 服务器或第二客户端（见 `p1-dual-client-dev.md`）验证远程玩家链
 

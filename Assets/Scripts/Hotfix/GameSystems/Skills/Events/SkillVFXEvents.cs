@@ -2,6 +2,11 @@ using UnityEngine;
 
 namespace Hotfix.GameSystems.Skills.Events
 {
+    public struct SwordQiEchoNoTargetEvent : IEvent
+    {
+        public Vector3 Position;
+    }
+
     public struct SkillChargingStartedEvent : IEvent
     {
         public int SkillId;

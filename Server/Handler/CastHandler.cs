@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Cool.Protocol;
 using Cool.SyncCore;
+using KcpServer.Navigation;
 
 namespace KcpServer
 {
@@ -32,6 +33,8 @@ namespace KcpServer
         /// <summary>NPC 受玩家伤害回调（参数：npcId, attackerId, 实际伤害）。
         /// 在 ApplyHit 扣血后调用；格挡分支传减伤后的伤害。null = 不归属（测试/无怪物宿主）。</summary>
         public Action<long, long, float>? NpcDamaged { get; set; }
+        public Action<long, Vector3>? NpcPushed { get; set; }
+        public NavigationService? ChargePushNavigation { get; set; }
 
         /// <summary>服务端认可的地面高度（B1 高度限幅）：参数 = 客户端上报位置，返回 navmesh 地面 Y。
         /// null = 无导航宿主，高度直接用客户端自报值（不额外钳制）。只作用于非 NPC 实体。</summary>
@@ -159,6 +162,7 @@ namespace KcpServer
             // D-3：冷却记录在决策（空挥也冷却，D-P4-5）
             caster.RecordCast(request.SkillId, tick);
 
+            bool chargeBlast = request.SkillId == CombatRules.ChargeBlastSkillId;
             resolution.Accepted = true;
             resolution.IsNpcCaster = caster.Kind == (byte)EntityKind.Npc;
             resolution.Broadcast = new CastBroadcast
@@ -172,10 +176,10 @@ namespace KcpServer
                 CasterRotation = caster.Rotation,
                 Shape = request.Shape,
                 ServerTimestamp = ServerClock.NowTicks(),
-                ImpactX = request.ImpactX,
-                ImpactY = request.ImpactY,
-                ImpactZ = request.ImpactZ,
-                ChargeProgress = request.ChargeProgress
+                ImpactX = chargeBlast ? caster.Position.X : request.ImpactX,
+                ImpactY = chargeBlast ? caster.Position.Y : request.ImpactY,
+                ImpactZ = chargeBlast ? caster.Position.Z : request.ImpactZ,
+                ChargeProgress = chargeBlast ? charge : request.ChargeProgress
             };
             // D-1/D-2：判定帧延迟由服务端表自持——判定发生在
             // tick + HitDelayTicks + ProjectileTravelTicks（CircleAtPoint 飞行延迟，见上方 firstTick）
@@ -191,10 +195,40 @@ namespace KcpServer
             var resolution = new CastResolution();
             if (caster.Kind != (byte)EntityKind.Player)
                 return Reject(resolution, "not-player");
+            bool recast = (caster.Features & ProtocolFeatures.SwordQiEchoRecast) != 0;
+            bool twoStageRequest = request.EchoAction != SwordQiEchoAction.Legacy;
+            if (recast != twoStageRequest)
+                return Reject(resolution, "echo-version");
             if (!caster.IsCastReady(request.SkillId, tick, CombatRules.CooldownTicks(entry)))
                 return Reject(resolution, "cooldown");
 
             var origin = new Vec3(caster.Position.X, ResolveCombatHeight(caster), caster.Position.Z);
+            var prepared = recast
+                ? _echoCasts.Find(cast => cast.CasterId == caster.PlayerId && cast.Preparing
+                    && cast.CasterLifeId == caster.CombatLifeId)
+                : null;
+            if (request.EchoAction == SwordQiEchoAction.Prepare)
+            {
+                if (prepared != null)
+                {
+                    if (prepared.BindingId != request.EchoBindingId
+                        || unchecked((int)(tick - prepared.EndTick)) >= 0)
+                        return Reject(resolution, "already-prepared");
+                    prepared.RequestId = request.EchoRequestId;
+                    return AcceptEcho(resolution, prepared);
+                }
+                var cast = CreateEchoCast(caster, request, entry);
+                cast.Preparing = true;
+                SetEchoTimeline(cast, request, tick, origin,
+                    (uint)Math.Ceiling(SwordQiEchoRules.PrepareSeconds * CombatRules.TickRateHz));
+                _echoCasts.Add(cast);
+                return AcceptEcho(resolution, cast);
+            }
+            if (recast && (request.EchoAction != SwordQiEchoAction.Release || prepared == null
+                || prepared.CastId != request.EchoPreparedCastId || prepared.BindingId != request.EchoBindingId
+                || unchecked((int)(tick - prepared.EndTick)) >= 0))
+                return Reject(resolution, "not-prepared");
+
             var targets = SwordQiEchoRules.SelectTargets(origin, SwordQiEchoRules.Spec.Radius,
                 SwordQiEchoRules.Spec.MaxTargets, BuildEchoCandidates(caster));
             if (targets.Count == 0)
@@ -203,44 +237,16 @@ namespace KcpServer
             uint durationTicks = (uint)Math.Ceiling(
                 SwordQiEchoRules.Spec.DurationSeconds * CombatRules.TickRateHz);
             if (durationTicks < 2) return Reject(resolution, "bad-duration");
-            uint endTick = tick + durationTicks;
-
+            var launch = prepared ?? CreateEchoCast(caster, request, entry);
+            ulong seed = recast ? unchecked(launch.CastId * 0x9e3779b97f4a7c15UL) : 0;
             var contacts = SwordQiEchoRules.BuildContacts(origin, targets,
-                SwordQiEchoRules.Spec.SwordCount, durationTicks);
-            var cast = new SwordQiEchoCast
-            {
-                CasterId = caster.PlayerId,
-                Caster = caster,
-                CasterLifeId = caster.CombatLifeId,
-                ZoneId = caster.ZoneId,
-                CastId = ++_nextEchoCastId,
-                RequestId = request.EchoRequestId,
-                BindingId = request.EchoBindingId,
-                StartTick = tick,
-                EndTick = endTick,
-                CooldownTicks = CombatRules.CooldownTicks(entry),
-                Origin = origin,
-                Rotation = caster.Rotation,
-                BaseDamage = SwordQiEchoRules.DefaultDamage,
-                CriticalRate = entry.CriticalRate,
-                Broadcast = new CastBroadcast
-                {
-                    SkillId = request.SkillId,
-                    CasterPlayerId = caster.PlayerId,
-                    CasterX = origin.X,
-                    CasterY = origin.Y,
-                    CasterZ = origin.Z,
-                    CasterRotation = caster.Rotation,
-                    Shape = request.Shape,
-                    ServerTimestamp = ServerClock.NowTicks()
-                }
-            };
+                SwordQiEchoRules.Spec.SwordCount, durationTicks, seed);
 
             foreach (var contact in contacts)
             {
                 var target = _store.GetPlayer(contact.TargetId);
                 if (target == null) continue;
-                cast.Contacts.Add(new SwordQiEchoCast.Contact
+                launch.Contacts.Add(new SwordQiEchoCast.Contact
                 {
                     TargetId = target.PlayerId,
                     Target = target,
@@ -251,15 +257,58 @@ namespace KcpServer
                 });
             }
 
-            if (cast.Contacts.Count == 0)
+            if (launch.Contacts.Count == 0)
                 return Reject(resolution, "no-target");
 
+            launch.Preparing = false;
+            SetEchoTimeline(launch, request, tick, origin, durationTicks);
             caster.RecordCast(request.SkillId, tick);
-            caster.SetInvulnerable(tick, endTick);
-            _echoCasts.Add(cast);
+            caster.SetInvulnerable(tick, launch.EndTick);
+            if (prepared == null) _echoCasts.Add(launch);
+            return AcceptEcho(resolution, launch);
+        }
 
+        private SwordQiEchoCast CreateEchoCast(PlayerState caster, CastRequest request, SkillEntry entry)
+            => new SwordQiEchoCast
+            {
+                CasterId = caster.PlayerId,
+                Caster = caster,
+                CasterLifeId = caster.CombatLifeId,
+                ZoneId = caster.ZoneId,
+                CastId = ++_nextEchoCastId,
+                BindingId = request.EchoBindingId,
+                TwoStage = request.EchoAction != SwordQiEchoAction.Legacy,
+                CooldownTicks = CombatRules.CooldownTicks(entry),
+                BaseDamage = SwordQiEchoRules.DefaultDamage,
+                CriticalRate = entry.CriticalRate
+            };
+
+        private static void SetEchoTimeline(SwordQiEchoCast cast, CastRequest request, uint tick,
+            Vec3 origin, uint duration)
+        {
+            cast.RequestId = request.EchoRequestId;
+            cast.StartTick = tick;
+            cast.EndTick = tick + duration;
+            cast.Origin = origin;
+            cast.Rotation = cast.Caster.Rotation;
+            cast.Broadcast = new CastBroadcast
+            {
+                SkillId = request.SkillId,
+                CasterPlayerId = cast.CasterId,
+                CasterX = origin.X,
+                CasterY = origin.Y,
+                CasterZ = origin.Z,
+                CasterRotation = cast.Rotation,
+                Shape = request.Shape,
+                ServerTimestamp = ServerClock.NowTicks()
+            };
+            if (cast.OrbitStartedTimestamp == 0)
+                cast.OrbitStartedTimestamp = cast.Broadcast.ServerTimestamp;
+        }
+
+        private static CastResolution AcceptEcho(CastResolution resolution, SwordQiEchoCast cast)
+        {
             resolution.Accepted = true;
-            resolution.IsNpcCaster = false;
             resolution.Broadcast = cast.Broadcast;
             resolution.Echo = cast;
             return resolution;
@@ -332,6 +381,18 @@ namespace KcpServer
                     continue;
                 }
 
+                if (cast.Preparing)
+                {
+                    if (unchecked((int)(tick - cast.EndTick)) >= 0)
+                    {
+                        cast.Caster.RecordCast(SwordQiEchoSkillId, cast.EndTick);
+                        cast.EndPhase = SwordQiEchoPhase.Expired;
+                        EndEchoCast(cast);
+                    }
+                    else _echoCasts[write++] = cast;
+                    continue;
+                }
+
                 foreach (var contact in cast.Contacts)
                 {
                     if (contact.Resolved) continue;
@@ -366,6 +427,7 @@ namespace KcpServer
                 // 即使全部目标都已失效/结算，施法与无敌仍持续到原定 EndTick（规格 §无敌与联机时序）。
                 if (tick >= cast.EndTick)
                 {
+                    if (cast.TwoStage) cast.EndPhase = SwordQiEchoPhase.Completed;
                     EndEchoCast(cast);
                     continue;
                 }
@@ -379,7 +441,7 @@ namespace KcpServer
         private void EndEchoCast(SwordQiEchoCast cast)
         {
             var caster = _store.GetPlayer(cast.CasterId);
-            if (caster != null && ReferenceEquals(caster, cast.Caster)
+            if (!cast.Preparing && caster != null && ReferenceEquals(caster, cast.Caster)
                 && caster.CombatLifeId == cast.CasterLifeId)
                 caster.ClearInvulnerability();
             _endedEchoCasts.Add(cast);
@@ -430,8 +492,10 @@ namespace KcpServer
             if (caster == null || !caster.IsAlive) return null;   // 施法者已死：整组丢弃
             if (!CombatRules.TryGet(pending.Request.SkillId, out var entry)) return null; // 决策已校验，防御分支
 
-            var candidates = BuildCandidates(pending);            // 原 ResolveHits 里的候选构造，抽成方法
+            bool chargeBlast = pending.Request.SkillId == CombatRules.ChargeBlastSkillId;
+            var candidates = BuildCandidates(pending, chargeBlast ? CombatZone(caster) : null);
             var casterPos = new Vec3(caster.Position.X, ResolveCombatHeight(caster), caster.Position.Z);
+            var impact = new Vec3(pending.Broadcast.ImpactX, pending.Broadcast.ImpactY, pending.Broadcast.ImpactZ);
             var spec = pending.Projectile;
             List<long> hitIds;
             List<long>? swingHitIds = null;
@@ -463,8 +527,7 @@ namespace KcpServer
                         spec.HalfWidth, pending.GroupHitIds, candidates),
                     ProjectileKind.LineNearestSplash => ResolveNearestStage(pending, spec, stage, candidates),
                     ProjectileKind.CircleAtPoint => HitResolver.ResolveCircle(
-                        new Vec3(pending.Request.ImpactX, pending.Request.ImpactY, pending.Request.ImpactZ),
-                        ScaledRadius(spec, pending.Charge), candidates),
+                        impact, ScaledRadius(spec, pending.Charge), candidates),
                     _ => new List<long>(),
                 };
             }
@@ -498,7 +561,7 @@ namespace KcpServer
 
             var lineAttackerPos = spec != null && spec.Kind == ProjectileKind.LineAll
                 ? pending.Origin
-                : casterPos;
+                : chargeBlast ? impact : casterPos;
 
             foreach (var targetId in hitIds)
             {
@@ -617,19 +680,55 @@ namespace KcpServer
                 HitX = target.Position.X,
                 HitZ = target.Position.Z
             });
+            if (!blocked && target.IsAlive && resolution.Broadcast?.SkillId == CombatRules.ChargeBlastSkillId)
+                PushFromChargeBlast(target, attackerPos, resolution.Broadcast.CasterRotation, charge);
             return blocked;
+        }
+
+        private void PushFromChargeBlast(PlayerState target, Vec3 center, float yaw, float charge)
+        {
+            bool player = target.Kind == (byte)EntityKind.Player;
+            if (player && (target.Features & ProtocolFeatures.AuthoritativeKnockback) == 0) return;
+
+            Vector3 start = target.Position;
+            float dx = start.X - center.X;
+            float dz = start.Z - center.Z;
+            float length = MathF.Sqrt(dx * dx + dz * dz);
+            if (length < 0.001f)
+            {
+                float radians = yaw * MathF.PI / 180f;
+                dx = MathF.Sin(radians);
+                dz = MathF.Cos(radians);
+                length = 1f;
+            }
+
+            float distance = CombatRules.ChargeBlastBasePushSpeed * CombatRules.ChargeBlastPushTime
+                * CombatRules.ChargeBlastPushScale(charge);
+            var displacement = new Vector3(dx * distance / length, 0f, dz * distance / length);
+            Vector3 end = ChargePushNavigation == null
+                ? start + displacement
+                : ChargePushNavigation.ClampDisplacement(start, displacement,
+                    Math.Clamp(target.BodyRadius * 0.4f, 0.1f, 0.65f));
+            if (MathF.Abs(end.X - start.X) + MathF.Abs(end.Z - start.Z) < 0.05f) return;
+
+            target.UpdatePosition(end, target.Rotation, 0f, target.LastUpdateTimestamp, target.LastReceivedSequence);
+            if (player)
+                target.MovementRevision++;
+            else if (target.Kind == (byte)EntityKind.Npc)
+                NpcPushed?.Invoke(target.PlayerId, end);
         }
 
         /// <summary>候选（P4：全部在线实体 − caster；P5 D-P5-3 扩展）：
         ///  玩家施法 → 玩家 + 怪物（PvE 挥击自动目标按锥内最近者自然命中怪物——
         ///    跨界误伤玩家 backlog 项落地；bot 压测实体同 P4 语义不排除）
         ///  怪物施法 → 仅已登录玩家（怪物互不打；bot 不可被怪物命中——**这条过滤不是死代码**）</summary>
-        private List<CombatCandidate> BuildCandidates(PendingCast pending)
+        private List<CombatCandidate> BuildCandidates(PendingCast pending, string? zoneId)
         {
             var candidates = new List<CombatCandidate>();
             foreach (var p in _store.All)
             {
                 if (p.PlayerId == pending.CasterId) continue;
+                if (zoneId != null && CombatZone(p) != zoneId) continue;
                 if (pending.IsNpcCaster && (p.Kind != (byte)EntityKind.Player || !p.IsLoggedIn)) continue;
                 candidates.Add(new CombatCandidate(p.PlayerId,
                     new Vec3(p.Position.X, ResolveCombatHeight(p), p.Position.Z), p.IsAlive,
@@ -637,6 +736,9 @@ namespace KcpServer
             }
             return candidates;
         }
+
+        private static string CombatZone(PlayerState player)
+            => string.IsNullOrEmpty(player.ZoneId) ? "Global" : player.ZoneId;
 
         /// <summary>B1：非 NPC 实体的判定高度——以客户端自报 Y 为候选，有 navmesh 地面时
         /// 钳到 [地面−1m, 地面+MaxJumpHeight]；NPC 位置是服务端权威，不钳制。</summary>
@@ -704,6 +806,8 @@ namespace KcpServer
         {
             public ulong LastRequestId;
             public SwordQiEchoState? LastResponse;
+            public SwordQiEchoState? VisualState;
+            public HashSet<long>? VisualRecipients;
             public ulong LastCastId;
         }
 
@@ -727,6 +831,12 @@ namespace KcpServer
         /// <summary>接线 NPC 受击归属（Server3C 在 EnableMonsters 后调用；null = 关闭）。</summary>
         public void SetNpcDamageObserver(Action<long, long, float>? observer)
             => _resolver.NpcDamaged = observer;
+
+        public void SetChargePush(Action<long, Vector3> npcPushed, NavigationService? navigation)
+        {
+            _resolver.NpcPushed = npcPushed;
+            _resolver.ChargePushNavigation = navigation;
+        }
 
         /// <summary>接线 B1 地面高度（Server3C 在 EnableMonsters 后调用；null = 不钳制客户端 Y）。</summary>
         public void SetGroundHeight(Func<Vec3, float?>? groundHeight)
@@ -892,6 +1002,8 @@ namespace KcpServer
             var started = BuildStarted(cast);
             record.LastRequestId = request.EchoRequestId;
             record.LastResponse = started;
+            record.VisualState = cast.TwoStage ? started : null;
+            record.VisualRecipients = cast.TwoStage ? cast.Recipients : null;
             record.LastCastId = cast.CastId;
             cast.Recipients.UnionWith(CollectEchoRecipients(cast));
             await BroadcastEchoStateAsync(cast.Recipients, started);
@@ -919,14 +1031,18 @@ namespace KcpServer
             var ended = BuildEnded(cast);
             if (_echoRequests.TryGetValue(cast.CasterId, out var record)
                 && record.LastCastId == cast.CastId)
+            {
+                ended.RequestId = record.LastRequestId;
                 record.LastResponse = ended;
+                if (cast.EndPhase == SwordQiEchoPhase.Ended) record.VisualState = null;
+            }
             _ = BroadcastEchoStateAsync(cast.Recipients, ended);
         }
 
         private static SwordQiEchoState BuildStarted(SwordQiEchoCast cast)
         {
-            var state = BuildBase(cast, SwordQiEchoPhase.Started);
-            state.ServerTimestamp = ServerClock.NowTicks();
+            var state = BuildBase(cast, cast.Preparing ? SwordQiEchoPhase.Prepared : SwordQiEchoPhase.Started);
+            state.ServerTimestamp = cast.Broadcast.ServerTimestamp;
             foreach (var contact in cast.Contacts)
             {
                 state.Contacts.Add(new SwordQiEchoContactMessage
@@ -944,7 +1060,7 @@ namespace KcpServer
 
         private static SwordQiEchoState BuildEnded(SwordQiEchoCast cast)
         {
-            var state = BuildBase(cast, SwordQiEchoPhase.Ended);
+            var state = BuildBase(cast, cast.EndPhase);
             state.ServerTimestamp = ServerClock.NowTicks();
             return state;
         }
@@ -977,8 +1093,31 @@ namespace KcpServer
                 Rotation = cast.Rotation,
                 Radius = SwordQiEchoRules.Spec.Radius,
                 SwordCount = SwordQiEchoRules.Spec.SwordCount,
-                OvershootMeters = SwordQiEchoRules.Spec.OvershootMeters
+                OvershootMeters = SwordQiEchoRules.Spec.OvershootMeters,
+                OrbitStartedTimestamp = cast.OrbitStartedTimestamp
             };
+
+        internal SwordQiEchoState? GetEchoVisualReplay(PlayerState observer, long casterId)
+        {
+            if ((observer.Features & ProtocolFeatures.SwordQiEchoRecast) == 0) return null;
+            if (!_echoRequests.TryGetValue(casterId, out var record) || record.VisualState is not { } state)
+                return null;
+            var caster = _server.GetEntity(casterId);
+            if (caster == null || !caster.IsAlive || caster.ZoneId != observer.ZoneId) return null;
+
+            double duration = unchecked(state.EndTick - state.StartTick) / (double)CombatRules.TickRateHz;
+            double elapsed = (ServerClock.NowTicks() - state.ServerTimestamp) / (double)TimeSpan.TicksPerSecond;
+            double tail = SwordQiEchoRules.DissolveSeconds
+                + (state.Phase == SwordQiEchoPhase.Started ? SwordQiEchoRules.FinishOrbitDelaySeconds : 0d);
+            if (elapsed < duration + tail)
+            {
+                record.VisualRecipients?.Add(observer.PlayerId);
+                return state;
+            }
+            record.VisualState = null;
+            record.VisualRecipients = null;
+            return null;
+        }
 
         private HashSet<long> CollectEchoRecipients(SwordQiEchoCast cast)
         {
@@ -988,7 +1127,11 @@ namespace KcpServer
             var recipients = CollectDamageRecipients(targetIds, cast.CasterId, npcCaster: false,
                 id => _server.GetObserversOf(id),
                 id => _server.GetVisiblePlayers(id));
-            return FilterEchoRecipients(recipients, id => _server.GetEntity(id), cast.ZoneId);
+            var matching = FilterEchoRecipients(recipients, id => _server.GetEntity(id), cast.ZoneId);
+            if (cast.TwoStage)
+                matching.RemoveWhere(id => ((_server.GetEntity(id)?.Features ?? 0u)
+                    & ProtocolFeatures.SwordQiEchoRecast) == 0);
+            return matching;
         }
 
         /// <summary>同区 + 已协商 SwordQiEcho 的收件人过滤（纯函数，便于单测）。</summary>

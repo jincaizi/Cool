@@ -43,6 +43,7 @@
 - `IsPointNavigable` 的 clearance 封顶 2.5m（覆盖 Boss 1.74×1.1）；三角面级 clearance 仍按 8m 计算。
 - `TryProject` 返回**点级** clearance（到最近边界边的精确距离），巡逻点判断可站立空间用它。
 - `HasLineOfSight` 沿线段每 0.25m 采样，要求点在图内且 clearance ≥ `bodyRadius`。
+- `ClampDisplacement` 用投影与线段可达性限制炎爆击退的水平位移，保留目标离地高度。
 - 预算拒绝返回 `FailReason="budget"`，调用方下 tick 立刻重试；真正的失败由
   `PathFollower` 退避 30 tick。单条查询被预算中止时，已完成的门缓存仍保留，重试会更快。
 

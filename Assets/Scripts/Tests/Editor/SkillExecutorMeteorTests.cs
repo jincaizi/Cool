@@ -191,7 +191,7 @@ namespace GameSys.EditorTests
             TestHelpers.SetField(data, "_damage", DamageBlock.CreateDefault(100f, 0f));
             TestHelpers.SetField(data, "_meteor", CreateConfig(prefab));
             _ownerGo = new GameObject("MeteorOwner");
-            _ownerGo.transform.position = Vector3.zero;
+            _ownerGo.transform.position = new Vector3(280f, 0f, 280f);
             _ownerGo.transform.rotation = Quaternion.identity;
             var owner = new TestHelpers.FakeTarget(_ownerGo.transform);
             var executor = new SkillExecutor(owner, data);
@@ -202,7 +202,7 @@ namespace GameSys.EditorTests
             // Assert（落点 = 面向前方 12m）
             var strike = FindActiveStrike();
             Assert.IsNotNull(strike, "应生成 1 个活跃预警");
-            Assert.AreEqual(new Vector3(0f, 0f, 12f), strike.transform.position);
+            Assert.AreEqual(new Vector3(280f, 0f, 292f), strike.transform.position);
         }
     }
 }

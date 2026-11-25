@@ -11,6 +11,7 @@ using Hotfix.GameSystems.Sys3C.Core.Events;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Skills.Effect;
 using Hotfix.GameSystems.Nameplate;
+using Cool.SyncCore;
 
 namespace Hotfix.GameSystems.Monster
 {
@@ -76,7 +77,7 @@ namespace Hotfix.GameSystems.Monster
         {
             if (_stats == null || _stats.IsDead) return;
             if (_statusController.IsStunned) return;
-            _movement.ApplyKnockback(e.Direction, e.Force);
+            _movement.ApplyKnockback(e.Direction, e.Force, e.FollowNavigation);
         }
 
         public void Init(MonsterConfig config, Vector3 spawnPoint)
@@ -239,7 +240,8 @@ namespace Hotfix.GameSystems.Monster
             if (result.ShouldKnockback && data.KnockbackForce > 0)
             {
                 float force = data.KnockbackForce * HitZoneClassifier.KnockbackMultiplier(resolved.Part);
-                EventBus.TargetedEmit(myId, new KnockbackEvent(myId, hitDirection, force));
+                EventBus.TargetedEmit(myId, new KnockbackEvent(myId, hitDirection, force,
+                    followNavigation: data.SkillId == CombatRules.ChargeBlastSkillId));
             }
         }
 

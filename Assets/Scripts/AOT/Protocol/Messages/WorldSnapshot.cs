@@ -100,6 +100,7 @@ namespace Cool.Protocol
         [ProtoMember(15)] public bool IsDefending { get; set; }
         [ProtoMember(16)] public NpcActionSnapshot? NpcAction { get; set; }
         [ProtoMember(17)] public IList<NpcActionSnapshot> NpcActionHistory { get; set; } = new List<NpcActionSnapshot>();
+        [ProtoMember(18)] public SwordQiEchoState? SwordQiEcho { get; set; }
     }
 
     /// <summary>

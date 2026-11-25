@@ -49,6 +49,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
         public event Action<SwordQiEchoSkillData>? OnEchoOfflineRequested;
 
         public bool IsEchoRequestPending { get; private set; }
+        internal ulong EchoPreparedCastId { get; private set; }
+        private Func<double>? _echoPreparationClock;
+        private double _echoPreparedUntil;
+        private float _echoPreparationDuration;
+        private bool _echoReleaseQueued;
 
         // 属性
         public SkillExecutor CurrentSkill => _currentSkill;
@@ -166,7 +171,12 @@ namespace Hotfix.GameSystems.Skills.Runtime
         /// </summary>
         public void HandleInput(SkillInput input)
         {
-            if (IsEchoRequestPending) return;
+            if (IsEchoRequestPending)
+            {
+                if (input.SkillId == (int)SkillID.SwordQiEcho && EchoPreparedCastId == 0)
+                    _echoReleaseQueued = true;
+                return;
+            }
 
             // R 同键取消特例：旋转期间再按同技能键 = 取消（必须位于冷却检查之前，
             // 因为旋转中技能自身处于冷却；永不入缓冲，防延迟重施放）
@@ -646,7 +656,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             if (_cooldownManager.IsOnCooldown(data.SkillId)) return;
             if (!HasEnoughResources(data)) return;
 
-            if (_currentSkill != null && _currentSkill.IsActive)
+            if (EchoPreparedCastId == 0 && _currentSkill != null && _currentSkill.IsActive)
             {
                 if (_currentSkill.CurrentSubState == SkillSubState.Charging)
                     CancelCharge(_currentSkill.SkillId);
@@ -675,6 +685,41 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             IsEchoRequestPending = false;
         }
+
+        internal (float Remaining, float Duration) GetEchoPreparation()
+        {
+            if (_echoPreparationClock == null) return default;
+            return ((float)Math.Max(0d, _echoPreparedUntil - _echoPreparationClock()), _echoPreparationDuration);
+        }
+
+        internal void SetEchoPreparation(ulong castId, float duration, double elapsed, Func<double> clock)
+        {
+            EchoPreparedCastId = castId;
+            _echoPreparationClock = clock;
+            _echoPreparationDuration = duration;
+            _echoPreparedUntil = clock() + duration - elapsed;
+        }
+
+        internal void ClearEchoPreparation()
+        {
+            EchoPreparedCastId = 0;
+            _echoPreparationClock = null;
+            _echoReleaseQueued = false;
+        }
+
+        internal void TryReleaseQueuedEcho()
+        {
+            if (!_echoReleaseQueued) return;
+            _echoReleaseQueued = false;
+            if (GetEchoPreparation().Remaining > 0f)
+                HandleInput(SkillInput.SkillToPosition((int)SkillID.SwordQiEcho, _owner.transform.position));
+        }
+
+        internal void NotifyEchoNoTarget()
+            => EventBus.Emit(new Events.SwordQiEchoNoTargetEvent
+            {
+                Position = _owner.transform.position + Vector3.up * 1.75f
+            });
 
         /// <summary>有效 Started：仅剩余窗口 > 0 时提交；冷却按权威已过时间对齐。</summary>
         public bool CommitEchoRequest(SwordQiEchoSkillData data, double endTimeSeconds,
@@ -707,6 +752,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             Func<double> nowSeconds)
         {
             CancelEchoRequest();
+            EndConflictingActionForEcho();
             return StartEchoInternal(data, endTimeSeconds, data.Cooldown, 0f, nowSeconds);
         }
 

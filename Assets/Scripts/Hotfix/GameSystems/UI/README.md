@@ -75,6 +75,9 @@ bash tools/unity-tests.sh PlayMode UIBootstrapTests
 - 普攻为中心按钮；内弧逆时针排列防御、跳跃、Q、R，外弧逆时针排列火球（1）、炎爆（2）、陨石（3）。
 - 六个技能按钮（Q/R/火球/炎爆/陨石/剑气回荡）由 `MobileSkillButton` 显示顺时针径向冷却和向上取整的秒数；
   蓄力技能额外显示径向蓄力环。剑气回荡按钮 SkillId=20006，键盘 4，坐标与 KeyLabel 在 DemoDay 场景。
+- DemoDay 的剑气回荡与蓄力炎爆 `Icon` 子物体使用 `SkillsCfg/Textures/` 的专属图标。
+- 剑气回荡进入待发时，按钮的径向倒计时层使用 `SkillIconSwordQiEchoPrepared` 金色飞剑图，
+  随剩余时间收起。中央数字向上取整。出击或超时后隐藏金色遮罩并显示技能冷却。
 - `MobileSkillBarPresenter` 从当前本地角色读取冷却、蓄力和剑气就绪真值。剑气可释放时普攻图标变暖金色并显示金框。
 - UI 停用、WebGL 失焦、关闭触控模式或角色解绑时必须清除普攻及蓄力 held 状态，并取消攻击按住（不合成释放）、复位剑气金边，避免返回页面后自动施放。
 

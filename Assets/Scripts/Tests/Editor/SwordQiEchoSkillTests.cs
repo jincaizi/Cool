@@ -1,6 +1,9 @@
 using Hotfix.GameSystems.Skills.Data;
+using Hotfix.GameSystems.Skills;
+using Hotfix.GameSystems.Skills.Events;
 using Hotfix.GameSystems.Skills.Definition;
 using Hotfix.GameSystems.Skills.Runtime;
+using Hotfix.GameSystems.VFX;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -132,6 +135,48 @@ namespace GameSys.EditorTests
             Assert.IsTrue(coordinator.CommitEchoRequest(echo, 2d, 12f, 0f, () => now));
             Assert.IsInstanceOf<SwordQiEchoSkillData>(coordinator.CurrentSkill.Data);
             Assert.AreEqual(SkillSubState.Execution, coordinator.CurrentSubState);
+        }
+
+        [Test]
+        public void OfflinePreparation_EmptyReleaseWarnsAndTimeoutStartsCooldown()
+        {
+            _ownerGo.transform.position = new Vector3(500f, 0f, 500f);
+            var data = CreateEchoData();
+            var coordinator = new SkillCoordinator(new TestHelpers.FakeTarget(_ownerGo.transform));
+            coordinator.RegisterSkill(data);
+            double clock = 10d;
+            var runner = new SwordQiEchoLocalRunner(coordinator, _ownerGo.transform, now: () => clock);
+            coordinator.OnEchoOfflineRequested += skill => runner.TryCast(skill);
+            int warnings = 0;
+            void OnNoTarget(SwordQiEchoNoTargetEvent message) => warnings++;
+            EventBus.Subscribe<SwordQiEchoNoTargetEvent>(OnNoTarget);
+            try
+            {
+                var input = SkillInput.SkillToPosition(data.SkillId, Vector3.zero);
+                coordinator.HandleInput(input);
+                Assert.AreEqual(5f, coordinator.GetEchoPreparation().Remaining, 0.001f);
+                Assert.AreEqual(4, _ownerGo.GetComponent<SwordQiEchoPresenter>().ActiveSwordCount);
+                Assert.Zero(warnings);
+                Assert.IsFalse(coordinator.GetCooldownInfo(data.SkillId).IsOnCooldown);
+
+                clock = 12.5d;
+                coordinator.HandleInput(input);
+                Assert.AreEqual(1, warnings);
+                Assert.AreEqual(2.5f, coordinator.GetEchoPreparation().Remaining, 0.001f);
+                Assert.IsFalse(runner.IsInvulnerable);
+
+                clock = 15d;
+                runner.Update();
+                Assert.Zero(coordinator.GetEchoPreparation().Remaining);
+                Assert.IsTrue(coordinator.GetCooldownInfo(data.SkillId).IsOnCooldown);
+                Assert.IsNull(coordinator.CurrentSkill);
+            }
+            finally
+            {
+                EventBus.Unsubscribe<SwordQiEchoNoTargetEvent>(OnNoTarget);
+                runner.Cancel();
+                Object.DestroyImmediate(data);
+            }
         }
     }
 }

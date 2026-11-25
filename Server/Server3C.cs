@@ -91,6 +91,7 @@ namespace KcpServer
             MonsterModule damageModule = _monsterModule;
             _castHandler.SetNpcDamageObserver((npcId, attackerId, damage) =>
                 damageModule.OnDamageTaken(npcId, attackerId, damage, MonsterDamageKind.Direct));
+            _castHandler.SetChargePush(damageModule.OnPushed, navigation);
 
             // 判定帧 LOS（spec §4.5）：怪物起手后玩家躲墙 → 这一刀不结算。
             // 2026-11-04：攻击视线与身体体型解耦，统一用 0.25m 武器探针；无导航宿主保持 null（旧语义）。
@@ -141,6 +142,7 @@ namespace KcpServer
             _echoHandler = new EchoHandler(this, _logger);
             _clockSyncHandler = new ClockSyncHandler(this, _logger);
             _castHandler = new CastHandler(this, _logger, new CombatResolver(_entityStore));
+            _aoi.EchoOnEntry = _castHandler.GetEchoVisualReplay;
 
             // 避让系统在 EnableMonsters 之前就可能建（--bots 单独跑）；模板表由模块在启用时补上，
             // 所以半径解析走**延迟查**（闭包读字段，调用时模块已就位）；未启用怪物时也走不到 Npc 分支
@@ -406,6 +408,7 @@ namespace KcpServer
                 p.UpdatePosition(spawn, p.Rotation, 0f, 0L, p.LastReceivedSequence);
                 p.IsDefending = false;
                 p.RespawnTick = tick;
+                p.MovementRevision = 0;
             }
 
             return true;

@@ -8,12 +8,19 @@ namespace Hotfix.GameSystems.VFX
 {
     public class StatusVFXSystem : MonoBehaviour
     {
+        [SerializeField] private GameObject _freezeVisual;
+        [SerializeField] private GameObject _burnVisual;
+        [SerializeField] private GameObject _stunVisual;
+        [SerializeField] private GameObject _vulnerableVisual;
+
         private sealed class TargetTint
         {
             public Transform Target;
             public BodyTintRenderer Tint;
-            public int FreezeCount;
-            public int BurnCount;
+            public readonly int[] Counts = new int[4];
+            public readonly GameObject[] Visuals = new GameObject[4];
+            public int ActiveTypes;
+            public bool HasTint;
             public float Phase;
         }
 
@@ -35,11 +42,7 @@ namespace Hotfix.GameSystems.VFX
             EventBus.Unsubscribe<StatusEffectRemovedEvent>(OnRemoved);
 
             foreach (var state in _tints.Values)
-            {
-                // 目标销毁后其 Renderer 一并销毁，此时 SetPropertyBlock 会抛 MissingReferenceException
-                if (state.Target != null)
-                    state.Tint.Clear();
-            }
+                Clear(state);
 
             _tints.Clear();
         }
@@ -47,40 +50,45 @@ namespace Hotfix.GameSystems.VFX
         private void OnApplied(StatusEffectAppliedEvent e)
         {
             if (e.Target == null) return;
-            if (e.EffectType != EffectType.Freeze && e.EffectType != EffectType.Burn) return;
+            int type = VisualIndex(e.EffectType);
+            if (type < 0) return;
 
-            if (!_tints.TryGetValue(e.EntityId, out TargetTint state))
+            if (!_tints.TryGetValue(e.EntityId, out TargetTint state) || state.Target != e.Target)
             {
+                if (state != null) Clear(state);
                 state = new TargetTint
                 {
                     Target = e.Target,
                     Tint = new BodyTintRenderer(e.Target.GetComponentsInChildren<Renderer>()),
                 };
-                _tints.Add(e.EntityId, state);
+                _tints[e.EntityId] = state;
             }
 
-            if (e.EffectType == EffectType.Freeze)
-                state.FreezeCount++;
-            else
-                state.BurnCount++;
+            if (state.Counts[type]++ != 0) return;
+            state.ActiveTypes++;
+            var prefab = type switch
+            {
+                0 => _freezeVisual,
+                1 => _burnVisual,
+                2 => _stunVisual,
+                _ => _vulnerableVisual
+            };
+            if (prefab != null)
+                state.Visuals[type] = Instantiate(prefab, state.Target, false);
         }
 
         private void OnRemoved(StatusEffectRemovedEvent e)
         {
-            if (e.EffectType != EffectType.Freeze && e.EffectType != EffectType.Burn) return;
-            if (!_tints.TryGetValue(e.EntityId, out TargetTint state)) return;
+            int type = VisualIndex(e.EffectType);
+            if (type < 0 || !_tints.TryGetValue(e.EntityId, out TargetTint state)) return;
+            if (e.Target != null && e.Target != state.Target) return;
+            if (state.Counts[type] == 0 || --state.Counts[type] != 0) return;
 
-            if (e.EffectType == EffectType.Freeze)
-                state.FreezeCount = Mathf.Max(0, state.FreezeCount - 1);
-            else
-                state.BurnCount = Mathf.Max(0, state.BurnCount - 1);
-
-            if (state.FreezeCount == 0 && state.BurnCount == 0)
-            {
-                if (state.Target != null)
-                    state.Tint.Clear();
-                _tints.Remove(e.EntityId);
-            }
+            RemoveVisual(state.Visuals[type]);
+            state.Visuals[type] = null;
+            if (--state.ActiveTypes != 0) return;
+            Clear(state);
+            _tints.Remove(e.EntityId);
         }
 
         private void Update()
@@ -94,31 +102,59 @@ namespace Hotfix.GameSystems.VFX
             {
                 TargetTint state = pair.Value;
 
-                if (state.Target == null)
+                if (state.Target == null || !state.Target.gameObject.activeInHierarchy)
                 {
-                    // 目标 GameObject 销毁时 Renderer 已不存在，无需（也无法）清理染色
+                    Clear(state);
                     _dead.Add(pair.Key);
                     continue;
                 }
 
-                if (state.FreezeCount > 0)
+                if (state.Counts[0] > 0)
                 {
                     state.Tint.Apply(FreezeColor, 0.5f, FreezeColor, 0f);
+                    state.HasTint = true;
                 }
-                else if (state.BurnCount > 0)
+                else if (state.Counts[1] > 0)
                 {
                     state.Phase += dt * Mathf.PI * 4f;
                     float amount = 0.12f + 0.18f * (0.5f + 0.5f * Mathf.Sin(state.Phase));
                     state.Tint.Apply(BurnColor, amount, BurnColor, 0f);
+                    state.HasTint = true;
                 }
-                else
+                else if (state.HasTint)
                 {
                     state.Tint.Clear();
+                    state.HasTint = false;
                 }
             }
 
             for (int i = 0; i < _dead.Count; i++)
                 _tints.Remove(_dead[i]);
+        }
+
+        private static int VisualIndex(EffectType type) => type switch
+        {
+            EffectType.Freeze => 0,
+            EffectType.Burn => 1,
+            EffectType.Stun => 2,
+            EffectType.Vulnerable => 3,
+            _ => -1
+        };
+
+        private static void Clear(TargetTint state)
+        {
+            if (state.Target != null && state.HasTint)
+                state.Tint.Clear();
+            foreach (var visual in state.Visuals)
+                RemoveVisual(visual);
+        }
+
+        private static void RemoveVisual(GameObject visual)
+        {
+            if (visual == null) return;
+            visual.SetActive(false);
+            if (Application.isPlaying) Destroy(visual);
+            else DestroyImmediate(visual);
         }
     }
 }

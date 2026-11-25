@@ -11,6 +11,7 @@ namespace Hotfix.GameSystems.Monster
 
         private Vector3 _knockbackVelocity;
         private float _knockbackTimer;
+        private bool _followKnockbackNavigation;
 
         public bool HasReachedDestination =>
             !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.1f;
@@ -76,11 +77,12 @@ namespace Hotfix.GameSystems.Monster
 
         // ===== Knockback =====
 
-        public void ApplyKnockback(Vector3 direction, float force)
+        public void ApplyKnockback(Vector3 direction, float force, bool followNavigation = false)
         {
             if (force <= 0) return;
             _knockbackVelocity = direction.normalized * force;
             _knockbackTimer = _config.KnockbackDecay;
+            _followKnockbackNavigation = followNavigation;
         }
 
         public Vector3 GetKnockbackDisplacement()
@@ -101,7 +103,21 @@ namespace Hotfix.GameSystems.Monster
                 ? deltaTime / _config.KnockbackDecay
                 : deltaTime / 0.5f;
             _knockbackVelocity = Vector3.Lerp(_knockbackVelocity, Vector3.zero, t);
-            _self.position += _knockbackVelocity * deltaTime;
+            Vector3 displacement = _knockbackVelocity * deltaTime;
+            if (_followKnockbackNavigation && _agent.enabled && _agent.isOnNavMesh)
+            {
+                Vector3 origin = _agent.nextPosition;
+                if (_agent.Raycast(origin + displacement, out var obstacle))
+                {
+                    displacement = (obstacle.position - origin) * 0.95f;
+                    _knockbackTimer = 0f;
+                }
+                _agent.Move(displacement);
+            }
+            else
+            {
+                _self.position += displacement;
+            }
         }
 
         public void ResetKnockback()

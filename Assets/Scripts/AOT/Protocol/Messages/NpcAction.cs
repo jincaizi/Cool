@@ -7,6 +7,8 @@ namespace Cool.Protocol
         public const uint NpcActionTimelineV1 = 1u;
         public const uint AuthoritativeRespawn = 1u << 1;
         public const uint SwordQiEcho = 1u << 2;
+        public const uint AuthoritativeKnockback = 1u << 3;
+        public const uint SwordQiEchoRecast = 1u << 4;
     }
 
     public enum NpcActionKind : byte { Idle = 0, Move = 1, Skill = 2, HitReaction = 3, Death = 4 }

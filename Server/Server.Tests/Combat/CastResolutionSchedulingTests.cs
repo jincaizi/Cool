@@ -135,6 +135,51 @@ public class CastResolutionSchedulingTests
         Assert.Single(one.Hits);
     }
 
+    [Theory]
+    [InlineData(0f, 3.8f, 2.4f)]
+    [InlineData(1f, 5.8f, 3.6f)]
+    public void ChargeBlast_Pushes_From_Accepted_Caster_Center(float charge, float targetZ, float expectedPush)
+    {
+        var (store, resolver, casterId, targetId) = World(targetZ);
+        var target = store.GetPlayer(targetId)!;
+        target.Features = ProtocolFeatures.AuthoritativeKnockback;
+        var decision = resolver.Decide(casterId, new CastRequest
+        {
+            SkillId = CombatRules.ChargeBlastSkillId,
+            Shape = new HitShape { ShapeType = 1, AreaRadius = 4f, Angle = 120f },
+            ChargeProgress = charge,
+            ImpactZ = 14f
+        }, 4);
+        Assert.True(decision.Accepted);
+        Assert.Equal(0f, decision.Broadcast!.ImpactZ);
+        store.GetPlayer(casterId)!.UpdatePosition(new Vector3(0, 0, 9), 0, 0, 1L, 1U);
+
+        var hit = Assert.Single(Assert.Single(resolver.DrainResolved(4)).Hits);
+        Assert.Equal(targetZ, hit.HitZ, 3);
+        Assert.Equal(targetZ + expectedPush, target.Position.Z, 3);
+        Assert.Equal(1u, target.MovementRevision);
+    }
+
+    [Fact]
+    public void Blocking_ChargeBlast_Prevents_Displacement()
+    {
+        var (store, resolver, casterId, targetId) = World(2f);
+        var target = store.GetPlayer(targetId)!;
+        target.Features = ProtocolFeatures.AuthoritativeKnockback;
+        target.IsDefending = true;
+        target.Rotation = 180f;
+
+        resolver.Decide(casterId, new CastRequest
+        {
+            SkillId = CombatRules.ChargeBlastSkillId,
+            Shape = new HitShape { ShapeType = 1, AreaRadius = 4f, Angle = 120f }
+        }, 4);
+
+        Assert.True(Assert.Single(Assert.Single(resolver.DrainResolved(4)).Hits).IsBlocked);
+        Assert.Equal(2f, target.Position.Z);
+        Assert.Equal(0u, target.MovementRevision);
+    }
+
     [Fact]
     public void Judgment_Lands_Exactly_On_DecideTick_Plus_HitDelay_Ticks()
     {

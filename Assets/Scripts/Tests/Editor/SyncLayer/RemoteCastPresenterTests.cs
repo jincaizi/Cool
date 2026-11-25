@@ -388,7 +388,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
         }
 
         [Test]
-        public void OnCastBroadcast_ChargeBlast_Spawns_ReleaseVfx_At_Server_Impact()
+        public void OnCastBroadcast_ChargeBlast_Centers_ReleaseVfx_Above_Server_Impact()
         {
             var root = new GameObject("RemoteCastReleaseVfxRoot");
             try
@@ -420,9 +420,9 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
                     ImpactX = 3f, ImpactY = 0.25f, ImpactZ = 7f
                 });
 
-                Assert.AreEqual(1, calls, "20004 必须在服务端落点生成 ReleaseVFX");
+                Assert.AreEqual(1, calls, "20004 必须在广播爆心上方生成 ReleaseVFX");
                 Assert.NotNull(capturedPrefab, "ChargeFire_SkillR.asset 应配置 ReleaseVFX");
-                Assert.AreEqual(new Vector3(3f, 0.25f, 7f), capturedPosition);
+                Assert.AreEqual(new Vector3(3f, 0.25f + 0.74f, 7f), capturedPosition);
             }
             finally
             {

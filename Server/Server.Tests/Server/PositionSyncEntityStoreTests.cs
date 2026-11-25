@@ -46,6 +46,29 @@ public class PositionSyncEntityStoreTests
     }
 
     [Fact]
+    public void Stale_Movement_Revision_Cannot_Overwrite_Knockback()
+    {
+        var store = new EntityStore();
+        var player = store.AddPlayer(1, "A");
+        player.Features = ProtocolFeatures.AuthoritativeKnockback;
+        player.MovementRevision = 2;
+        player.UpdatePosition(new Vector3(3f, 0f, 0f), 0f, 0f, 1L, 1u);
+        var handler = new PositionSyncHandler(new Server3C(new TestLogger()), new TestLogger(), store);
+        var request = new PositionSyncRequest { X = 0f, Timestamp = 10_000_001L, Sequence = 2u, MovementRevision = 1u };
+
+        var correction = handler.ValidateAndApply(request, player)!.Value;
+        Assert.True(correction.NeedsCorrection);
+        Assert.Equal(3f, correction.AuthoritativePosition.X);
+        Assert.Equal(1u, player.LastReceivedSequence);
+        Assert.Equal(3f, player.Position.X);
+
+        request.X = 3.2f;
+        request.MovementRevision = 2;
+        handler.ValidateAndApply(request, player);
+        Assert.Equal(3.2f, player.Position.X, 3);
+    }
+
+    [Fact]
     public void NanRotation_Request_Falls_Back_To_Last_Known_Rotation()
     {
         // 守卫回退：NaN 旋转请求不得进 store（防 NaN 经快照广播扩散）——

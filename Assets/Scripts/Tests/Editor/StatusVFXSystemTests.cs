@@ -152,5 +152,34 @@ namespace GameSys.EditorTests
             }));
             Assert.AreEqual(0, tints.Count);
         }
+
+        [Test]
+        public void VulnerableUsesOneVisualUntilLastRemoval()
+        {
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/PreRes/Skills/ElementWindVisual.prefab");
+            Assert.IsNotNull(prefab);
+            TestHelpers.SetField(_system, "_vulnerableVisual", prefab);
+            int id = _targetGo.GetInstanceID();
+            var applied = new StatusEffectAppliedEvent
+            {
+                EntityId = id, Target = _targetGo.transform, EffectType = EffectType.Vulnerable
+            };
+            var apply = typeof(StatusVFXSystem).GetMethod("OnApplied", BindingFlags.NonPublic | BindingFlags.Instance);
+            var remove = typeof(StatusVFXSystem).GetMethod("OnRemoved", BindingFlags.NonPublic | BindingFlags.Instance);
+            apply.Invoke(_system, new object[] { applied });
+            apply.Invoke(_system, new object[] { applied });
+            Assert.AreEqual(1, _targetGo.transform.childCount);
+            Assert.AreEqual("ElementWindRibbons", _targetGo.GetComponentInChildren<ParticleSystemRenderer>()
+                .sharedMaterial.mainTexture.name);
+            var removed = new StatusEffectRemovedEvent
+            {
+                EntityId = id, Target = _targetGo.transform, EffectType = EffectType.Vulnerable
+            };
+            remove.Invoke(_system, new object[] { removed });
+            Assert.AreEqual(1, _targetGo.transform.childCount);
+            remove.Invoke(_system, new object[] { removed });
+            Assert.AreEqual(0, _targetGo.transform.childCount);
+        }
     }
 }

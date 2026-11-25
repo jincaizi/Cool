@@ -44,6 +44,7 @@ namespace Cool.Protocol
         public bool IsDefending { get; set; }
 
         [ProtoMember(9)] public uint? RespawnTick { get; set; }
+        [ProtoMember(10)] public uint MovementRevision { get; set; }
     }
 
     /// <summary>位置同步响应（含权威纠偏数据）</summary>
@@ -79,5 +80,6 @@ namespace Cool.Protocol
         public bool HasPositionCorrection { get; set; }
 
         [ProtoMember(8)] public uint? RespawnTick { get; set; }
+        [ProtoMember(9)] public uint MovementRevision { get; set; }
     }
 }

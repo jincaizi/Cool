@@ -30,6 +30,14 @@ namespace Hotfix.GameSystems.UI
                 {
                     var button = _skillButtons[i];
                     if (button == null) continue;
+                    if (button.SkillId == (int)SkillID.SwordQiEcho)
+                    {
+                        var preparation = coordinator.GetEchoPreparation();
+                        button.RenderEchoPreparation(preparation.Remaining, preparation.Duration);
+                        if (preparation.Remaining <= 0f)
+                            button.RenderCooldown(coordinator.GetCooldownInfo(button.SkillId));
+                        continue;
+                    }
                     button.RenderCooldown(coordinator.GetCooldownInfo(button.SkillId));
                     float charge = 0f;
                     bool holdToAim = false;

@@ -16,6 +16,7 @@
 
 - 伤害：`MonsterTakeDamageEvent` / `PlayerTakeDamageEvent` / `MonsterDotDamageEvent`
 - 格挡：`BlockSucceededEvent`（本地由 `Sys3CEntry` 发布，远程由 `SyncLayer/CombatNetworkBridge` 发布）
+- 剑气回荡空放由本地协调器发出 `SwordQiEchoNoTargetEvent`，在操作者头顶显示「未发现可攻击目标」。
 - 精力环：`Stamina/StaminaRingRenderer` 由 `EntityDisplayManager` 持有，每帧读取 `StaminaSystem`
 
 ## 远程玩家血条（label sink）

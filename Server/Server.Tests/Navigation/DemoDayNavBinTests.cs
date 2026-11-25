@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Linq;
+using Cool.Protocol;
 using KcpServer;
 using KcpServer.Config;
 using KcpServer.Monster;
@@ -10,6 +12,7 @@ namespace KcpServer.Tests.Navigation;
 
 public class DemoDayNavBinTests
 {
+    // 与 MonsterModule.SpawnDefaultLayout 的 15 槽位一一对应；前 6 个是既有 e2e 夹具。
     private static readonly Vector3[] Spawns =
     {
         new(-30f, 0f, 0f),
@@ -17,7 +20,16 @@ public class DemoDayNavBinTests
         new(0f, 0f, -35f),
         new(10f, 0f, -15f),
         new(10f, 0f, 15f),
-        new(18.333f, 0f, 18.389f)
+        new(18.333f, 0f, 18.389f),
+        new(-3f, 0f, -19f),
+        new(8f, 0f, -35f),
+        new(0f, 0f, -25f),
+        new(9f, 0f, -40f),
+        new(15f, 0f, -15f),
+        new(14f, 0f, -20f),
+        new(12f, 0f, -10f),
+        new(7f, 0f, 18f),
+        new(8f, 0f, 22f)
     };
 
     private static string NavBinPath => Path.Combine(AppContext.BaseDirectory, "Config", "nav", "demoday.navbin");
@@ -48,6 +60,27 @@ public class DemoDayNavBinTests
         Assert.True(graph.FindNearestPoint(Spawns[5], 1f, out _, out _, out int bossTriangle));
         Assert.True(graph.GetClearance(bossTriangle) >= 1.74f,
             $"SpiderBoss spawn triangle clearance={graph.GetClearance(bossTriangle):F2} < 1.74");
+    }
+
+    /// <summary>`SpawnDefaultLayout(15)` 走真实 navbin：每个槽位都能投影（≤0.5m），且配比正确。
+    /// 这是服务端启动路径的离线替身——任一槽位不在 navmesh 上，生产会在 SpawnMonster 里 fail fast。</summary>
+    [Fact]
+    public void Demo_Composition_Spawns_All_Slots_On_Shipped_NavBin()
+    {
+        string mapsPath = Path.Combine(AppContext.BaseDirectory, "Config", "maps.json");
+        NavigationService navigation = NavigationService.LoadFromConfig(mapsPath, "demoday", AppContext.BaseDirectory);
+
+        var store = new EntityStore();
+        long seed = MonsterModule.NpcIdSeed;
+        var module = new MonsterModule(store, () => ++seed, navigation: navigation);
+        module.SpawnDefaultLayout(15);
+
+        Assert.Equal(15, module.Count);
+        var npcs = store.All.Where(e => e.Kind == (byte)EntityKind.Npc).ToList();
+        Assert.Equal(6, npcs.Count(e => e.TemplateId == 1));
+        Assert.Equal(5, npcs.Count(e => e.TemplateId == 2));
+        Assert.Equal(3, npcs.Count(e => e.TemplateId == 3));
+        Assert.Equal(1, npcs.Count(e => e.TemplateId == 4));
     }
 
     [Fact]

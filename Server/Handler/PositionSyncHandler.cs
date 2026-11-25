@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Cool.Protocol;
 using Cool.SyncCore;
 
 namespace KcpServer
@@ -28,6 +29,10 @@ namespace KcpServer
         {
             if (player.SupportsAuthoritativeRespawn && (!player.IsAlive || request.RespawnTick != player.RespawnTick))
                 return null;
+            if ((player.Features & ProtocolFeatures.AuthoritativeKnockback) != 0
+                && player.MovementRevision != request.MovementRevision)
+                return new MoveValidationResult(true,
+                    new Vec3(player.Position.X, player.Position.Y, player.Position.Z), player.Rotation, player.Speed);
 
             // 第一帧以一个上报周期校验位移，避免把死亡等待时间算进移动预算。
             bool firstReportAfterRespawn = player.RespawnTick.HasValue && player.LastUpdateTimestamp == 0L;
@@ -90,6 +95,7 @@ namespace KcpServer
                 ServerTimestamp = DateTime.UtcNow.Ticks,
                 HasPositionCorrection = result.NeedsCorrection,
                 RespawnTick = player.RespawnTick,
+                MovementRevision = player.MovementRevision,
                 AuthoritativeX = result.AuthoritativePosition.X,
                 AuthoritativeY = result.AuthoritativePosition.Y,
                 AuthoritativeZ = result.AuthoritativePosition.Z,

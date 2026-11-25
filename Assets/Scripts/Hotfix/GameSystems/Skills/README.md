@@ -41,15 +41,25 @@ bash tools/unity-tests.sh EditMode SkillExecutorMeteorTests
 
 ## 剑气回荡（20006，2026-11-18）
 
-- `SwordQiEchoSkillData` 只承载 `ConfirmationTimeoutSeconds`；半径/目标上限/剑气数/伤害倍率在共享
+- `SwordQiEchoSkillData` 承载确认超时、飞剑预制体和命中裂光引用；半径/目标上限/剑气数/伤害倍率在共享
   `SyncCore.SwordQiEchoRules.Spec`。资产 `_skillType=Instant`、`_canBeInterruptedByMovement=false`。
-- `SkillCoordinator` 两阶段：联网时发 `OnEchoRequested`（宿主负责 requestId/bindingId 与发送），
-  单机发 `OnEchoOfflineRequested`（`SwordQiEchoLocalRunner` 选敌并提交）。待确认期间锁新主动施法；
-  `CommitEchoRequest` 接迟到有效接受并结束冲突动作，`ApplyAuthoritativeCooldown` 只对齐冷却。
-- `SkillStateMachine.StartEcho(endTime, now)` 让 Execution 按权威时刻完成，剪辑长度只影响表现；
-  `CanMove`/`CanRotate` 为真，`IsAnimationCompletionIgnored` 为真。
-- `SkillCastReporter.ReportActivation` 跳过 20006；`CombatNetworkBridge.NotifyEchoCast` 发送带
-  `EchoRequestId/EchoBindingId` 的 CastRequest。
+- 第一次按键布置 4 把飞剑并打开 5 秒待发窗口。角色可以移动，待发本身不扣血也不授予无敌。
+  第二次按键按施法者当时的位置选取 12 米内最近的 8 个目标。无目标时飘字，保留剩余待发时间。
+- 成功出击或待发超时时开始 12 秒冷却。出击保留 2 秒战斗窗口，结束后由表现层独立回旋收束。
+- 联网请求携带阶段、序号、角色绑定代次以及准备实例 ID。单机由 `SwordQiEchoLocalRunner` 驱动同一规则，
+  按接触点进入本地伤害。待发确认前的重复按键最多缓存一次释放。
+
+## 蓄力炎爆（20004）
+
+- `ChargedSkillData.ChargeVfx` 随本地角色进入蓄力时启动，释放、完成和打断时清理。
+  20004 在释放时记录施法者位置，供本地圆形判定和上报中心共用。
+  释放光圈从该位置上方 0.74m 的躯干中心向外扩张，光圈留在出手位置。
+  半径随蓄力从 4m 增至 6m，单机命中沿爆心向外水平击退，初始推力从 8m/s 增至 12m/s。
+
+## 陨石术（30001）
+
+- 陨石的本地执行和施法上报共用地面采样。旁观端在广播落点处生成陨石时也采样地面。
+  预警贴花沿地面法线放置，下坠给岩体预留离地间隙，落地冲击略高于地表。
 
 ## 移动端显示契约
 
@@ -59,6 +69,9 @@ bash tools/unity-tests.sh EditMode SkillExecutorMeteorTests
 - R 的再次按下继续进入现有“旋转中同键取消”分支，移动按钮不得绕过 `InputManager` 直接施放。
 
 ## 火球地面瞄准（HoldToAim）
+
+- 本地和远端使用同一个 `Fireball` 飞行预制体。池中取出的弹体在重新定位后清空旧拖尾。
+  火焰、地环和余烬由火球的 `ReleaseVFX` 在实际落点播放。
 
 - 20003（`Fireball_SkillQ`）的 `ProjectileSkillData`：`HoldToAim=true`、`MinAimDistance=2`、
   `CanMoveWhileCharging=false`；按住不会自动释放，`Charging` 一直持续到松手。

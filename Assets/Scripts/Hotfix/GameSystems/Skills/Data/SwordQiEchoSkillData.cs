@@ -11,8 +11,12 @@ namespace Hotfix.GameSystems.Skills.Data
     {
         [Tooltip("等待服务端确认的上限（秒）；资产可调")]
         [SerializeField] private float _confirmationTimeoutSeconds = 3f;
+        [SerializeField] private GameObject _swordVfx;
+        [SerializeField] private GameObject _contactVfx;
 
         public float ConfirmationTimeoutSeconds => _confirmationTimeoutSeconds;
+        public GameObject SwordVfx => _swordVfx;
+        public GameObject ContactVfx => _contactVfx;
 
         private void OnValidate()
         {

@@ -47,6 +47,8 @@ namespace Cool.Protocol
 
         /// <summary>剑气回荡角色绑定代次（角色重绑递增；服务端原样回显）。</summary>
         [ProtoMember(9)] public ulong EchoBindingId { get; set; }
+        [ProtoMember(10)] public SwordQiEchoAction EchoAction { get; set; }
+        [ProtoMember(11)] public ulong EchoPreparedCastId { get; set; }
     }
 
     /// <summary>取消施法（客户端 → 服务器）。B3：旋转（20002）取消后必须丢弃未到期的

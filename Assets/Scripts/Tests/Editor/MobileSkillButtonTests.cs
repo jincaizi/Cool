@@ -74,6 +74,30 @@ namespace GameSys.EditorTests
             Assert.IsFalse(_charge.gameObject.activeSelf);
         }
 
+        [Test]
+        public void EchoPreparation_Fills_The_Overlay_And_Hands_Back_To_Cooldown()
+        {
+            var prepared = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/PreRes/SkillsCfg/Textures/SkillIconSwordQiEchoPrepared.png");
+            Assert.IsNotNull(prepared);
+            _charge.sprite = prepared;
+            _charge.type = Image.Type.Filled;
+            _charge.fillMethod = Image.FillMethod.Radial360;
+
+            _button.RenderEchoPreparation(2.2f, 5f);
+            Assert.AreEqual("3", _text.text);
+            Assert.AreEqual(0.44f, _charge.fillAmount, 0.001f);
+            Assert.AreSame(prepared, _charge.sprite);
+            Assert.IsTrue(_charge.gameObject.activeSelf);
+            Assert.IsFalse(_cooldown.gameObject.activeSelf);
+
+            _button.RenderEchoPreparation(0f, 0f);
+            _button.RenderCooldown(new CooldownInfo { IsOnCooldown = true, Remaining = 12f, Total = 12f });
+            Assert.AreEqual("12", _text.text);
+            Assert.IsTrue(_cooldown.gameObject.activeSelf);
+            Assert.IsFalse(_charge.gameObject.activeSelf);
+        }
+
         private void SetField(string name, object value)
         {
             typeof(MobileSkillButton).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)

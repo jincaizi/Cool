@@ -47,6 +47,21 @@ public class MonsterModuleTests
         Assert.Equal(150f, wolf.Hp);
     }
 
+    /// <summary>2026-11-23 演示配比：`--monsters 15` 必须正好是 6 Slime / 5 Wolf（客户端 template 2
+    /// 渲染为刺背龟）/ 3 DogKnight / 1 SpiderBoss。前六槽位是既有 e2e 夹具，新增槽位只补数量。</summary>
+    [Fact]
+    public void Demo_Composition_15_Matches_Requested_Counts()
+    {
+        var (store, module) = Create(15);
+
+        Assert.Equal(15, module.Count);
+        var npcs = store.All.Where(e => e.Kind == (byte)EntityKind.Npc).ToList();
+        Assert.Equal(6, npcs.Count(e => e.TemplateId == 1)); // Slime
+        Assert.Equal(5, npcs.Count(e => e.TemplateId == 2)); // Wolf → 客户端 TurtleShell
+        Assert.Equal(3, npcs.Count(e => e.TemplateId == 3)); // DogKnight
+        Assert.Equal(1, npcs.Count(e => e.TemplateId == 4)); // SpiderBoss
+    }
+
     [Fact]
     public void Tick_With_No_Players_Patrols_Monsters()
     {
@@ -328,9 +343,9 @@ public class MonsterModuleTests
 
     /// <summary>挂机安全：每个槽位距出生点须 > 该模板「感知半径 + 巡逻半径」——否则怪物走完巡逻圈
     /// 就能感知到站在原地不动的玩家。半径从构建输出目录的 monster_config.json 读，不在测试里抄数字。
-    /// **全六槽位**（2026-10-13 起）：出生点搬到湖东岸后 [0] Wolf 也满足该规则了——旧出生点下它的
-    /// 巡逻圈最近点只有约 5.9m（&lt; 检测 15m），是按设计违反本规则的唯一槽位，当时只能排除它。
-    /// 2026-10-17 第三次搬迁（出生点 + 布局同批改）后仍全六槽位达标，最小余量 [2] Slime +2.8m。
+    /// **全 15 槽位**（2026-10-13 起；2026-11-23 扩到演示配比）：出生点搬到湖东岸后 [0] Wolf 也满足
+    /// 该规则了——旧出生点下它的巡逻圈最近点只有约 5.9m（&lt; 检测 15m），是按设计违反本规则的唯一槽位，
+    /// 当时只能排除它。2026-10-17 第三次搬迁（出生点 + 布局同批改）后仍全槽位达标，最小余量 [2] Slime +2.8m。
     /// 实测教训：DogKnight 初版 (0,0,-20) 距出生点仅 11.0m < 感知 18m → 12 分钟内 8/8 次进世界打死挂机玩家。</summary>
     [Theory]
     [InlineData(0)] // Wolf(t2)
@@ -339,6 +354,15 @@ public class MonsterModuleTests
     [InlineData(3)] // Wolf(t2)
     [InlineData(4)] // DogKnight(t3)
     [InlineData(5)] // SpiderBoss(t4)
+    [InlineData(6)] // Slime(t1)
+    [InlineData(7)] // Slime(t1)
+    [InlineData(8)] // Slime(t1)
+    [InlineData(9)] // Slime(t1)
+    [InlineData(10)] // Wolf(t2)
+    [InlineData(11)] // Wolf(t2)
+    [InlineData(12)] // Wolf(t2)
+    [InlineData(13)] // DogKnight(t3)
+    [InlineData(14)] // DogKnight(t3)
     public void New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn(int slot)
     {
         var (store, _) = Create(slot + 1);
@@ -356,15 +380,16 @@ public class MonsterModuleTests
             $"槽位 [{slot}] 模板 {npc.TemplateId} 距出生点 {dist:F1}m ≤ 感知+巡逻 {reach}m——挂机玩家会被它开局追杀");
     }
 
-    /// <summary>上面那条几何断言的行为侧（活体实测的廉价替身，2026-10-12；2026-10-13 扩到全六槽位）：
-    /// 玩家长时间挂着不动，**任何**怪一次施法都不该发起——从感知、行为树到入队整条链上验一遍，不只看距离。
+    /// <summary>上面那条几何断言的行为侧（活体实测的廉价替身，2026-10-12；2026-10-13 扩到全六槽位；
+    /// 2026-11-23 扩到演示配比全 15 只）：玩家长时间挂着不动，**任何**怪一次施法都不该发起——
+    /// 从感知、行为树到入队整条链上验一遍，不只看距离。
     /// 2700 tick = 3 分钟（与 2026-10-13 的挂机活体验证同窗口；Wolf 巡逻一圈约 16s，够走 11 圈）。
     /// 出生点搬到湖东岸前，槽位 [0] Wolf 会主动来（旧点下它按设计违反几何规则），当时只能盯 50003/50004。
     /// 伤害裁决不在本模块（Server3C drain 后才掷骰），故这里玩家不掉血、施法队列是本模块唯一出口。</summary>
     [Fact]
     public void Idle_Player_At_Demo_Spawn_Sees_No_Cast_From_Any_Monster()
     {
-        var (store, module) = Create(6);
+        var (store, module) = Create(15);
         LoginPlayer(store, 1, DemoSpawnPosition); // 站着不动 3 分钟
 
         var castSkills = new List<int>();
@@ -374,7 +399,7 @@ public class MonsterModuleTests
             foreach (var (_, request) in module.DrainPendingCasts()) castSkills.Add(request.SkillId);
         }
 
-        Assert.Equal(6, module.Count); // 六只都在场——防"没生成所以没施法"的假绿
+        Assert.Equal(15, module.Count); // 15 只都在场——防"没生成所以没施法"的假绿
         Assert.Empty(castSkills);
     }
 

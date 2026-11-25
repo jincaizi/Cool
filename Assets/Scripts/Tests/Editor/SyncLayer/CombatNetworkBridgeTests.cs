@@ -117,6 +117,8 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             var bridge = new CombatNetworkBridge(_client, () => 1L, registry,
                 (targetId, damage, critical, direction, remainingHp, blocked, sourceIsPlayer) =>
                     received.Add(targetId));
+            int contacts = 0;
+            bridge.OnSwordQiEchoContact += _ => contacts++;
 
             var result = new DamageResult
             {
@@ -133,6 +135,7 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             bridge.OnMessage(MessageId.DamageResult, result);
             bridge.Update();
             Assert.AreEqual(1, received.Count, "同实例同目标重复结果只消费一次");
+            Assert.AreEqual(1, contacts, "重复结果只播放一次裂光");
 
             bridge.OnMessage(MessageId.DamageResult, new DamageResult
             {
@@ -146,6 +149,16 @@ namespace Hotfix.GameSystems.Tests.SyncLayer
             });
             bridge.Update();
             Assert.AreEqual(2, received.Count, "不同 EchoCastId 必须各自消费");
+            Assert.AreEqual(2, contacts);
+
+            bridge.OnMessage(MessageId.DamageResult, new DamageResult
+            {
+                SkillId = 20006, EchoCastId = 44UL,
+                Hits = new List<HitEntry> { new HitEntry { TargetPlayerId = 1L, Damage = 20f, IsBlocked = true } }
+            });
+            bridge.Update();
+            Assert.AreEqual(3, received.Count);
+            Assert.AreEqual(2, contacts, "格挡仍走伤害链，裂光留给有效命中");
         }
 
         [Test]

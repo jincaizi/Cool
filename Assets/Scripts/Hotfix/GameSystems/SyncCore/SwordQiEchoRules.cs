@@ -67,6 +67,10 @@ namespace Cool.SyncCore
     public static class SwordQiEchoRules
     {
         public static readonly SwordQiEchoSpec Spec = SwordQiEchoSpec.Default;
+        public const float PrepareSeconds = 5f;
+        public const float ReturnSeconds = 0.46f;
+        public const float DissolveSeconds = 0.72f;
+        public const float FinishOrbitDelaySeconds = 0.15f;
 
         /// <summary>普攻首段 10001 的权威基础伤害 × 配置倍率（首版 50 × 2 = 100）。</summary>
         public static float DefaultDamage
@@ -120,7 +124,7 @@ namespace Cool.SyncCore
         /// 轮次公式：offset = clamp(round((0.2 + roundIndex × 0.6 / max(1, rounds − 1)) × durationTicks), 1, durationTicks − 1)。
         /// </summary>
         public static List<SwordQiEchoContact> BuildContacts(Vec3 origin,
-            IReadOnlyList<CombatCandidate> targets, int swordCount, uint durationTicks)
+            IReadOnlyList<CombatCandidate> targets, int swordCount, uint durationTicks, ulong routeSeed = 0)
         {
             if (targets == null) throw new ArgumentNullException(nameof(targets));
             if (swordCount <= 0) throw new ArgumentOutOfRangeException(nameof(swordCount));
@@ -156,11 +160,26 @@ namespace Cool.SyncCore
                 offsets[round] = offset;
             }
 
+            // 按圆周安排目标，再随机映射到可见的飞剑位。未分配到目标的剑继续环绕。
+            var swordOrder = new int[swordCount];
+            for (int i = 0; i < swordOrder.Length; i++) swordOrder[i] = i;
+            if (routeSeed != 0)
+            {
+                for (int i = swordOrder.Length - 1; i > 0; i--)
+                {
+                    routeSeed ^= routeSeed << 13;
+                    routeSeed ^= routeSeed >> 7;
+                    routeSeed ^= routeSeed << 17;
+                    int j = (int)(routeSeed % (ulong)(i + 1));
+                    (swordOrder[i], swordOrder[j]) = (swordOrder[j], swordOrder[i]);
+                }
+            }
+
             for (int i = 0; i < sorted.Count; i++)
             {
                 contacts.Add(new SwordQiEchoContact(
                     sorted[i].Id,
-                    swordIndex: i % swordCount,
+                    swordIndex: swordOrder[i % swordCount],
                     offsetTicks: offsets[i / swordCount],
                     position: sorted[i].Position));
             }

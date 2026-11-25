@@ -15,7 +15,7 @@ MonoBehaviour:
   _skillId: 20006
   _skillName: "\u5251\u6C14\u56DE\u8361"
   _description: "\u77ED\u6682\u65E0\u654C\uFF0C\u6570\u9053\u5251\u6C14\u4EA4\u9519\u7A7F\u8FC7\u9644\u8FD1\u654C\u4EBA"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 796ea954e343e9b45a5e518f5dab5e06, type: 3}
   _skillType: 1
   _quality: 1
   _manaCost: 0
@@ -48,3 +48,5 @@ MonoBehaviour:
   _swordQi: {fileID: 0}
   _meteor: {fileID: 0}
   _confirmationTimeoutSeconds: 3
+  _swordVfx: {fileID: 1495778426187589966, guid: cdb462940b3a3b44e8c760d12ea91a70, type: 3}
+  _contactVfx: {fileID: 7888624147904373078, guid: 705bbb1e196b7684ba19f2f54400a388, type: 3}

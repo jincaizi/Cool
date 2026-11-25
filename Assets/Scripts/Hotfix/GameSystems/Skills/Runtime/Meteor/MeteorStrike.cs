@@ -12,6 +12,15 @@ namespace Hotfix.GameSystems.Skills.Runtime.Meteor
     /// </summary>
     public class MeteorStrike : MonoBehaviour
     {
+        [SerializeField] private Transform _warningVisual;
+        [SerializeField] private Transform _fallingVisual;
+        private static readonly Vector3 FallOffset = new Vector3(3.1f, 6.4f, -2.7f);
+        private static readonly RaycastHit[] GroundHits = new RaycastHit[16];
+        private const int GroundMask = Physics.DefaultRaycastLayers & ~((1 << 9) | (1 << 10));
+        private const float SurfaceOffset = 0.06f;
+        // 岩体是 1.7m 的屏幕朝向粒子，按半径预留高度。
+        private const float BodyClearance = 0.9f;
+
         private MeteorConfig _config;
         private DamageBlock _damage;
         private Vector3 _impactPoint;
@@ -28,12 +37,20 @@ namespace Hotfix.GameSystems.Skills.Runtime.Meteor
         {
             _config = config;
             _damage = damage;
-            _impactPoint = impactPoint;
+            _impactPoint = GroundPoint(impactPoint, out var groundNormal);
             _pool = pool;
             _exploded = false;
             _elapsed = 0f;
             _hitIds.Clear();
-            transform.position = impactPoint;
+            transform.position = _impactPoint;
+            if (_warningVisual != null)
+            {
+                _warningVisual.SetPositionAndRotation(_impactPoint + groundNormal * SurfaceOffset,
+                    Quaternion.FromToRotation(Vector3.up, groundNormal) * Quaternion.Euler(90f, 0f, 0f));
+                _warningVisual.localScale = Vector3.one * (config.ExplosionRadius * 2.2f);
+            }
+            if (_fallingVisual != null)
+                _fallingVisual.gameObject.SetActive(false);
             gameObject.SetActive(true);
         }
 
@@ -50,6 +67,62 @@ namespace Hotfix.GameSystems.Skills.Runtime.Meteor
             _elapsed += deltaTime;
             if (_elapsed >= _config.WarnDuration)
                 Explode();
+            else
+                UpdateFallingVisual();
+        }
+
+        private void UpdateFallingVisual()
+        {
+            if (_fallingVisual == null) return;
+            float progress = Mathf.Clamp01((_elapsed / _config.WarnDuration - 0.44f) / 0.56f);
+            if (progress <= 0f) return;
+
+            Vector3 end = _impactPoint + Vector3.up * BodyClearance;
+            Vector3 position = end + FallOffset * (1f - progress * progress);
+            if (TryGetGround(position, out var surface))
+                position.y = Mathf.Max(position.y, surface.point.y + BodyClearance / surface.normal.y);
+            _fallingVisual.SetPositionAndRotation(position, Quaternion.LookRotation(-FallOffset));
+            if (!_fallingVisual.gameObject.activeSelf)
+                _fallingVisual.gameObject.SetActive(true);
+        }
+
+        internal static Vector3 ResolveAimPoint(Vector3 targetPosition, Transform caster)
+        {
+            Vector3 requested = targetPosition.sqrMagnitude > 0.0001f
+                ? targetPosition
+                : caster.position + caster.forward * 12f;
+            return GroundPoint(requested, out _);
+        }
+
+        private static Vector3 GroundPoint(Vector3 requested, out Vector3 normal)
+        {
+            if (TryGetGround(requested, out var ground))
+            {
+                normal = ground.normal;
+                return ground.point;
+            }
+            normal = Vector3.up;
+            return requested;
+        }
+
+        private static bool TryGetGround(Vector3 point, out RaycastHit ground)
+        {
+            int count = Physics.RaycastNonAlloc(point + Vector3.up * 4f, Vector3.down, GroundHits,
+                24f, GroundMask, QueryTriggerInteraction.Ignore);
+            ground = default;
+            float closest = float.PositiveInfinity;
+            for (int i = 0; i < count; i++)
+            {
+                var hit = GroundHits[i];
+                if (hit.normal.y < 0.45f || hit.collider is CharacterController
+                    || hit.collider.GetComponentInParent<ITargetable>() != null)
+                    continue;
+                float distance = Mathf.Abs(hit.point.y - point.y);
+                if (distance >= closest) continue;
+                closest = distance;
+                ground = hit;
+            }
+            return ground.collider != null;
         }
 
         private void Explode()
@@ -77,7 +150,8 @@ namespace Hotfix.GameSystems.Skills.Runtime.Meteor
 
             if (_config.ImpactVFX != null)
             {
-                var vfx = Object.Instantiate(_config.ImpactVFX, _impactPoint, Quaternion.identity);
+                var vfx = Object.Instantiate(_config.ImpactVFX,
+                    _impactPoint + Vector3.up * SurfaceOffset, Quaternion.identity);
                 Destroy(vfx, 1.5f);
             }
 

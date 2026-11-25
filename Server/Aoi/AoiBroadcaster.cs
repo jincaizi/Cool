@@ -19,6 +19,7 @@ namespace KcpServer
 
         /// <summary>每发一个实体快照回调（Server3C 注入：写入该 observer 的 WorldSnapshot.Entities）</summary>
         public System.Action<long, EntitySnapshot>? OnEntityBroadcast { get; set; }
+        public System.Func<PlayerState, long, SwordQiEchoState?>? EchoOnEntry { get; set; }
 
         /// <summary>累计发送实体数（Server3C 每 tick 增量；日志统计用——T7）</summary>
         public long TotalEntitySends;
@@ -79,6 +80,8 @@ namespace KcpServer
                         IsDefending = entity.IsDefending,
                         Tick = tick
                     };
+                    if (previous == null || !previous.Contains(entity.PlayerId))
+                        snap.SwordQiEcho = EchoOnEntry?.Invoke(observer, entity.PlayerId);
                     result.Add(snap);
                     OnEntityBroadcast?.Invoke(entity.PlayerId, snap);
                 }
