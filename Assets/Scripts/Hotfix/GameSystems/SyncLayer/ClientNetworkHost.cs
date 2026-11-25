@@ -1203,6 +1203,12 @@ namespace Hotfix.GameSystems.SyncLayer
             _pendingEchoSkill = null;
             _pendingEchoRequestId = 0;
             _pendingEchoConnectionGeneration = 0;
+            // 会话复位（Connect/Disconnect 共用本方法）：最后应用/结束去重门必须归零。
+            // 服务器重启后 StartTick 从新值域重新计时（如 500 → 1），旧门会把新 Started
+            // 永久判旧、旧 Ended 也会压制新会话同 CastId 的 Started（Plan 08）。
+            _lastAppliedEchoCastId = 0;
+            _lastAppliedEchoStartTick = 0;
+            _endedEchoCastId = 0;
             // 角色可能已生成但 Start 未跑（OnPlayerSpawned → Connect 的真实窗口）：
             // 此时 SkillCoordinator 尚未建立，清理路径不得因此抛 NRE。
             _localEntry?.SkillCoordinator?.CancelEchoRequest();
