@@ -244,11 +244,11 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   用冰减速 `SpeedScale=0.7` + X 轴正向 1.8m 静止怪物（期望方向 `(1,0,0.7)` 与之约 35°）断言
   实际步长 = `moveSpeed×0.7×dt`（未缩放对照 = `moveSpeed×dt`），慢/快步长比 0.7，解出朝向
   偏离期望方向（点积 <0.95，约束确实生效）且避让横向分量不反转；无邻居对照组仍按原期望位移。
-- **未执行项（Plan 08 收口后的 Plan 09/backlog，仍不得写成已打通）**：真实 KCP/WebSocket
-  传输 socket 级延迟注入（消费层延迟/乱序已由 Plan 07 任务 2 覆盖，不是 socket 级）、
-  三端同一次末跳致死时刻、生产 `NpcBody` 推挤、`NpcAction` 攻击变体、M4/M6/M8/M11/M18。
-  Plan 07 已完成状态结束消息驱动契约与宿主级会话隔离；Plan 08 已完成 echo 会话复位与
-  M19 断开清理；状态结束时钟偏移注入仍为不适用（生产无本地 `EndTick` 移除路径）。
+- **未执行项（Plan 09 Block，见下节）**：真实 KCP/WebSocket 传输 socket 级延迟注入
+  （消费层延迟/乱序已由 Plan 07 任务 2 覆盖，不是 socket 级）、三端同一次末跳致死时刻、
+  生产 `NpcBody` 推挤、`NpcAction` 攻击变体、M4/M6/M8/M11/M18。Plan 07 已完成状态结束
+  消息驱动契约与宿主级会话隔离；Plan 08 已完成 echo 会话复位与 M19 断开清理；
+  状态结束时钟偏移注入仍为不适用（生产无本地 `EndTick` 移除路径）。
 - **已知环境/夹具失败（非 Plan 05 回归）**：`RemoteEntityRegistryTests.Bot_Radius`
   的 PPtr 环境失败（16/17，基线可复现）；`MonsterWorldTests` 导航模式 Slime 巡逻卡死
   （服务端导航债）；`PlayerJumpBodyCollisionTests` 在 batchmode 下 0/3（夹具自身
@@ -272,6 +272,23 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
 |---|---|
 | 任务 1 Echo 最后应用状态跨会话复位 | ✅ `ClientNetworkHost.ClearEchoRequest()` 在 `Connect`/`Disconnect`（以及角色重绑路径）复位 `_lastAppliedEchoCastId/_lastAppliedEchoStartTick/_endedEchoCastId/_lastAppliedEchoRequestId`。服务器重启后的低 `StartTick`/`RequestId=1` 回包不再被旧会话永久判旧；同会话 `(StartTick, CastId)` 单调语义不变。`EchoSessionResetTests` 4/4（含 RequestId=5 → 断线 → 新 RequestId=1 红→绿），回归 `SessionIsolationTests` + `SwordQiEchoPresenterTests` 8/8。提交 `0edd7239` + `50754869`。 |
 | 任务 2 断开清空状态 VFX（M19 断开侧） | ✅ `AuthoritativeStatusVfx.Clear()` 对每个活动组发一次 `StatusEffectRemovedEvent` 并清表；只在 `ClientNetworkHost.Disconnect()`（`ResetAttachment` 之后、`manager.Dispose()` 之前）调用，角色重建不清。`StatusVfxDisconnectCleanupTests` 2/2（真实 host 断开 + registry/EventBus/StatusVFXSystem；旧染色清空、新会话同 id 无残留、角色重建保留），回归 12/12。提交 `d561ad3c`。 |
+
+## Plan 09 Block（2026-11-26，暂不实现）
+
+以下项在 Plan 08 收口后整体列入 **Block**，等产品/设计决策或测试钩子就绪后再排期。
+Block 不等于已完成，不得写成已打通。
+
+| 项 | Block 原因 |
+|---|---|
+| 真实 KCP/WebSocket socket 级延迟注入 | 工程可做，但需测试自建 8123 服务与真实 adapter 延迟包装；当前不排期 |
+| 三端同一次末跳致死时刻 | 需要服务器 HP 注入/测试钩子；当前 720 HP 数值下无法确定性构造末跳唯一死因 |
+| 生产 `NpcBody` 推挤 | 产品决策：怪物身体是否应推开玩家；当前 `_pushVector` 对远程 NpcBody 不生效 |
+| `NpcAction` 攻击变体/时间轴 | 设计决策：是否由 `NpcAction` 替代 `CastBroadcast → NpcAttackSchedule` |
+| M4 多 DoT 定序 | 规则未定义（当前只有火 DoT 201，同组替换保证不并存） |
+| M6 来源类型建模 | 工程可做，但需要先定义来源种类快照与协议语义；暂缓 |
+| M8 死 API | 审计后无可证明未用的生产 API，待明确目标后再处理 |
+| M11 非 ActionV1 | 是否支持非 ActionV1 宿主形态未定 |
+| M18 bot 控制 | 产品决策：压测 bot 是否应受冰/雷控制 |
 
 ## Plan 07 任务 4：Plan 04 残余 M 项审计（2026-11-24）
 
