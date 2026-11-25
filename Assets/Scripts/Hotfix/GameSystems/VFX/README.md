@@ -31,6 +31,9 @@
   `2xx` 火 → `Burn`、`3xx` 雷 → `Stun`、`4xx` 风 → `Vulnerable`。
   实体换渲染根（Proxy↔Full / 本地角色重建）时先对旧根发全部 Removed、再对新根发
   Applied，染色不会留在旧模型。
+  **断开清理**：`ClientNetworkHost.Disconnect()` 在 `ResetAttachment` 之后、
+  `manager.Dispose()` 销毁视图之前调用 `Clear()`，对每个活动组各发一次 Removed 并清表；
+  该路径只用于会话结束，角色重建不调用（换根仍走 `Apply` 的 target diff）。
 - **状态表现**由 `StatusVFXSystem` 消费线上与离线的同一组状态事件。同实体多状态按
   `Freeze > Stun > Burn > Vulnerable` 选择贴身特效。冰使用霜纹脚环，火用八帧小火循环，
   雷用短促紫色电弧，风用青色流带。材质直接引用 `Assets/PreRes/SkillsCfg/Textures/` 的生成图。

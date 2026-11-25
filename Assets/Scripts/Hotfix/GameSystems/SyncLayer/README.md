@@ -262,6 +262,10 @@ Plan 04 权威状态投影消费、远端/本人状态染色与 DoT 分流）。
 - `SwordQiEchoState` 与 `CastBroadcast/DamageResult` 同走 `CombatNetworkBridge` 主线程队列。
   Started 按 `(StartTick, CastId)` 比较；Ended 锁存；过期 Started 只对齐冷却。
   `DamageResult.EchoCastId` 在 HP/表现消费前按 `(EchoCastId, TargetPlayerId)` 去重，窗口 64 个实例。
+- **会话复位**：`Connect`/`Disconnect`（以及角色重绑）走 `ClearEchoRequest()`，同时把
+  `_lastAppliedEchoCastId/_lastAppliedEchoStartTick/_endedEchoCastId/_lastAppliedEchoRequestId`
+  归零。服务器重启后新会话的 `StartTick=1`/`RequestId=1` 不再被旧会话门永久判旧；
+  同会话内的 `(StartTick, CastId)` 单调与 Ended 锁存语义不变。
 - 本地施法者把 `SwordQiEchoPresenter` 挂在本地角色上；远端施法者挂在 `RemoteEntityView.GameObject`，
   视图移除/断线时 Stop 并清实例表。`RemoteCastPresenter` 继续只处理普通 `CastBroadcast`。
 

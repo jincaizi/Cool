@@ -243,10 +243,11 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   用冰减速 `SpeedScale=0.7` + X 轴正向 1.8m 静止怪物（期望方向 `(1,0,0.7)` 与之约 35°）断言
   实际步长 = `moveSpeed×0.7×dt`（未缩放对照 = `moveSpeed×dt`），慢/快步长比 0.7，解出朝向
   偏离期望方向（点积 <0.95，约束确实生效）且避让横向分量不反转；无邻居对照组仍按原期望位移。
-- **未执行项（Plan 07 收口后的 Plan 08/backlog，仍不得写成已打通）**：真实 KCP/WebSocket
+- **未执行项（Plan 08 收口后的 Plan 09/backlog，仍不得写成已打通）**：真实 KCP/WebSocket
   传输 socket 级延迟注入（消费层延迟/乱序已由 Plan 07 任务 2 覆盖，不是 socket 级）、
-  三端同一次末跳致死时刻。状态结束时钟偏移注入已由 Plan 07 任务 1 裁定不适用（生产无本地
-  `EndTick` 移除路径），宿主级会话隔离已由 Plan 07 任务 3 完成。
+  三端同一次末跳致死时刻、生产 `NpcBody` 推挤、`NpcAction` 攻击变体、M4/M6/M8/M11/M18。
+  Plan 07 已完成状态结束消息驱动契约与宿主级会话隔离；Plan 08 已完成 echo 会话复位与
+  M19 断开清理；状态结束时钟偏移注入仍为不适用（生产无本地 `EndTick` 移除路径）。
 - **已知环境/夹具失败（非 Plan 05 回归）**：`RemoteEntityRegistryTests.Bot_Radius`
   的 PPtr 环境失败（16/17，基线可复现）；`MonsterWorldTests` 导航模式 Slime 巡逻卡死
   （服务端导航债）；`PlayerJumpBodyCollisionTests` 在 batchmode 下 0/3（夹具自身
@@ -263,6 +264,13 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
 最终审查修复（2026-11-24）：`RemoteEntityRegistry.Clear()` 补清 `_pendingNpcActions`/`_npcActions`
 （旧会话缓存不得回放到新会话同 Id/LifeId 视图）；复核 `SessionIsolationTests` 5/5、
 `NetworkConsumptionInjectionTests` 25/25、`TransportDelayInjectionTests` 5/5 全绿。
+
+## Plan 08：会话复位与断开清理（2026-11-26）
+
+| 任务 | 处置与证据 |
+|---|---|
+| 任务 1 Echo 最后应用状态跨会话复位 | ✅ `ClientNetworkHost.ClearEchoRequest()` 在 `Connect`/`Disconnect`（以及角色重绑路径）复位 `_lastAppliedEchoCastId/_lastAppliedEchoStartTick/_endedEchoCastId/_lastAppliedEchoRequestId`。服务器重启后的低 `StartTick`/`RequestId=1` 回包不再被旧会话永久判旧；同会话 `(StartTick, CastId)` 单调语义不变。`EchoSessionResetTests` 4/4（含 RequestId=5 → 断线 → 新 RequestId=1 红→绿），回归 `SessionIsolationTests` + `SwordQiEchoPresenterTests` 8/8。提交 `0edd7239` + `50754869`。 |
+| 任务 2 断开清空状态 VFX（M19 断开侧） | ✅ `AuthoritativeStatusVfx.Clear()` 对每个活动组发一次 `StatusEffectRemovedEvent` 并清表；只在 `ClientNetworkHost.Disconnect()`（`ResetAttachment` 之后、`manager.Dispose()` 之前）调用，角色重建不清。`StatusVfxDisconnectCleanupTests` 2/2（真实 host 断开 + registry/EventBus/StatusVFXSystem；旧染色清空、新会话同 id 无残留、角色重建保留），回归 12/12。提交 `d561ad3c`。 |
 
 ## Plan 07 任务 4：Plan 04 残余 M 项审计（2026-11-24）
 
@@ -282,7 +290,7 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
 | M16 离线 provider | ✅ 完整首发 `66812544` 已解决 | `OfflineMonsterStatuses` 把 `SyncCore.StatusRuntime` 接到单机时钟/怪物 DoT/表现事件；`OfflineWeaponCast` 冻结武器快照并按施法认领元素；`OfflineElementalWeaponTests`（EditMode，含四元素、无效命中不附加、麻痹/减速移动） |
 | M17 ThunderDuration | ✅ 完整首发 `66812544` 已解决 | `StatusRuntime.Apply`：PvP 控制取 `Pvp.ThunderDurationSeconds`，PvE 取 `def.DurationSeconds`；配置为 PvP 0.8 s / PvE 0.6 s（`Server/Config/elemental_catalog.json`、`ElementalCatalogDefaults.cs`）；`StatusRuntimeTests.Paralyze_Uses_Configured_Pvp_Duration_And_Pve_Status_Duration` 与 `Pve_Paralyze_Does_Not_Grant_Control_Immunity` |
 | M18 bot 控制 | ⏳ 仍需设计（Plan 08/backlog） | bot 是 `EntityKind.PlayerBot`：`BotRunner.Tick` 只按固定步长移动，不读 `ControlSpeedScale`/`ControlActionLock`；10002 会懒配置状态并向观察者投影，但对 bot 无实际控制效果。压测 bot 是否应受状态控制需产品裁定 |
-| M19 断开/换模型陈旧表现 | 换模型 ✅ Plan 04 已解；断开 ⏳ backlog | 换模型：`AuthoritativeStatusVfx.Apply` 在 target 变化时（Proxy↔Full 换根/本地角色重建）先对旧根 `EmitRemoved` 全部组、再对新根重放（`test_authoritative_status_vfx_replays_all_groups_when_target_changes`、`test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`）；`StatusVFXSystem.Update` 对已销毁 target（Unity fake-null）执行 `Clear()` 并移出实体表——**无可见残留**。`_statusVfx` 在 `ClientNetworkHost.Awake` 创建、仅在 `OnDestroy` 置空，断开窗口内实体表仅内存滞留；把清理接到 `Disconnect` 仍属设计取舍，保持 backlog |
+| M19 断开/换模型陈旧表现 | ✅ Plan 04 换模型 + Plan 08 断开清理 | 换模型：`AuthoritativeStatusVfx.Apply` 在 target 变化时（Proxy↔Full 换根/本地角色重建）先对旧根 `EmitRemoved` 全部组、再对新根重放（`test_authoritative_status_vfx_replays_all_groups_when_target_changes`、`test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`）。断开：Plan 08 任务 2 的 `AuthoritativeStatusVfx.Clear()` 在 `ClientNetworkHost.Disconnect()`（`ResetAttachment` 之后、`manager.Dispose()` 之前）发全部 Removed 并清表；`StatusVfxDisconnectCleanupTests` 2/2，新会话同 id 无残留，角色重建路径不清 |
 
 验证：`bash tools/test-server-inprocess.sh` → **707/707**；Unity EditMode 目标类
 **54/54**（Plan 07 任务 4 时点；final review 后 `SessionIsolationTests` 增至 5/5，目标类为
