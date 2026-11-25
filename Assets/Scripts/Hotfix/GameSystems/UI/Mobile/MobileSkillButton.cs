@@ -56,6 +56,19 @@ namespace Hotfix.GameSystems.UI
             _chargeFill.gameObject.SetActive(visible);
         }
 
+        internal void RenderEchoPreparation(float remaining, float duration)
+        {
+            bool preparing = remaining > 0f && duration > 0f;
+            RenderCharge(preparing ? remaining / duration : 0f);
+            if (!preparing) return;
+            if (_cooldownFill != null) _cooldownFill.gameObject.SetActive(false);
+            if (_countdownText != null)
+            {
+                _countdownText.SetText("{0}", Mathf.CeilToInt(remaining));
+                _countdownText.gameObject.SetActive(true);
+            }
+        }
+
         private void OnDisable()
         {
             ReleaseHeldSkill();

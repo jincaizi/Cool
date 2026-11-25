@@ -15,7 +15,7 @@ MonoBehaviour:
   _skillId: 20004
   _skillName: "\u84C4\u529B\u708E\u7206"
   _description: 
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 004077641a99cd1459255352b820680e, type: 3}
   _skillType: 2
   _quality: 1
   _manaCost: 0
@@ -51,6 +51,7 @@ MonoBehaviour:
   _releaseToFire: 1
   _minChargeTime: 0.3
   _maxChargeTime: 2
+  _chargeVfx: {fileID: 1423319747636978917, guid: ea5707d96b9749147ba3f02d3cd67883, type: 3}
   _chargeDamageCurve:
     serializedVersion: 2
     m_Curve:
@@ -109,7 +110,7 @@ MonoBehaviour:
     _angleEnd: 90
     _innerRadius: 0.5
     _innerAngle: 60
-    _areaRadius: 2
+    _areaRadius: 4
     _width: 1
     _stopAtFirst: 0
     _targetMask:
@@ -119,7 +120,7 @@ MonoBehaviour:
     - 0
   _effect:
     _applyEffects: []
-    _knockbackForce: 0
+    _knockbackForce: 8
     _launchForce: 0
     _stunDuration: 0
     _statusType: 0
@@ -132,3 +133,6 @@ MonoBehaviour:
     _hitStopDuration: 0
     _showCastingBar: 1
     _castingBarColor: {r: 0, g: 0, b: 1, a: 1}
+  references:
+    version: 2
+    RefIds: []

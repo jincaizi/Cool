@@ -13,6 +13,8 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
     /// </summary>
     public class FireballProjectile : MonoBehaviour
     {
+        [SerializeField] private TrailRenderer _flightTrail;
+
         /// <summary>命中检测半径（米）</summary>
         private const float DetectRadius = 0.6f;
 
@@ -76,6 +78,7 @@ namespace Hotfix.GameSystems.Skills.Runtime.Projectile
             }
 
             gameObject.SetActive(true);
+            if (_flightTrail != null) _flightTrail.Clear();
         }
 
         private void Update()

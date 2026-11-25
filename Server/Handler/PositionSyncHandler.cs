@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Cool.Protocol;
 using Cool.SyncCore;
 
 namespace KcpServer
@@ -37,6 +38,10 @@ namespace KcpServer
         {
             if (player.SupportsAuthoritativeRespawn && (!player.IsAlive || request.RespawnTick != player.RespawnTick))
                 return null;
+            if ((player.Features & ProtocolFeatures.AuthoritativeKnockback) != 0
+                && player.MovementRevision != request.MovementRevision)
+                return new MoveValidationResult(true,
+                    new Vec3(player.Position.X, player.Position.Y, player.Position.Z), player.Rotation, player.Speed);
 
             if (player.StrictMovementBudget)
                 return ValidateWithBudget(request, player, nowTick);
@@ -257,6 +262,7 @@ namespace KcpServer
                 HasPositionCorrection = result.NeedsCorrection,
                 RespawnTick = player.RespawnTick,
                 ControlVersion = player.ControlVersion,
+                MovementRevision = player.MovementRevision,
                 AuthoritativeX = result.AuthoritativePosition.X,
                 AuthoritativeY = result.AuthoritativePosition.Y,
                 AuthoritativeZ = result.AuthoritativePosition.Z,

@@ -4,6 +4,7 @@ using Hotfix.GameSystems.Sys3C.Animation;
 using Hotfix.GameSystems.Sys3C.Character;
 using Hotfix.GameSystems.Sys3C.FSM;
 using UnityEngine;
+using Hotfix.GameSystems.VFX;
 
 namespace Hotfix.GameSystems.SyncLayer
 {
@@ -102,6 +103,8 @@ namespace Hotfix.GameSystems.SyncLayer
         private int _lastLocomotionKey = int.MinValue;   // 去重：参数没变不重写
         private Sys3CEntry? _swordView;
         private bool _avatarPrepared;
+        private DefendHaloVfx? _defendHalo;
+        private WeaponVFXController? _weaponVfx;
 
         private void Awake() => PrepareAvatar();
 
@@ -122,10 +125,18 @@ namespace Hotfix.GameSystems.SyncLayer
             // 停用发生在同一帧的 Start/Update 之前（Instantiate 后同步执行），所以上面这些一个都不会跑。
             foreach (var behaviour in GetComponentsInChildren<MonoBehaviour>(true))
             {
+                if (behaviour == null || behaviour == this) continue;
                 if (behaviour is Sys3CEntry entry)
                     _swordView = entry;
-                if (behaviour != this)
-                    behaviour.enabled = false;
+                if (behaviour is DefendHaloVfx halo)
+                {
+                    _defendHalo = halo;
+                    halo.SetRemoteHeld(false);
+                    continue;   // 保留启用：远程格挡光环由 SetRemoteHeld 驱动，停用则永远不显示
+                }
+                if (behaviour is WeaponVFXController weapon)
+                    _weaponVfx = weapon;
+                behaviour.enabled = false;
             }
 
             // 碰撞体同理：远程位置由快照插值写，不能让 Unity 物理在里面插一脚
@@ -155,6 +166,7 @@ namespace Hotfix.GameSystems.SyncLayer
             // 短暂表现不跨禁用存活；死亡阶段/防守状态是状态，保留给 Reapply。
             _hitRemaining = 0f;
             _attackRemaining = 0f;
+            _weaponVfx?.SetRemoteTrail(false, clear: true);
         }
 
         private void Update()
@@ -362,6 +374,9 @@ namespace Hotfix.GameSystems.SyncLayer
         /// </summary>
         private void RefreshLayers()
         {
+            _defendHalo?.SetRemoteHeld(_defending && !_dead);
+            _weaponVfx?.SetRemoteTrail(
+                !_dead && _hitRemaining <= 0f && _attackRemaining > 0f && _attackTrigger == "SkillR");
             if (_deathPhase == DeathPhase.Falling)
                 WriteHitOnly(HitState.Death);
             else if (_deathPhase == DeathPhase.Down)

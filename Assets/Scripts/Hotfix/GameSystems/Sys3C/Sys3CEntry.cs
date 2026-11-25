@@ -1197,6 +1197,7 @@ namespace Hotfix.GameSystems.Sys3C
             if (_isDead) return;
             if (_currentHP > 0f) return;
 
+            _swordQiEchoLocal?.Cancel();
             _cc.TryExitDefend();
             _fsmManager.ExitDefend();
 
@@ -1298,6 +1299,7 @@ namespace Hotfix.GameSystems.Sys3C
 
         private void OnDestroy()
         {
+            _swordQiEchoLocal?.Cancel();
             // 注册表按 Animator 实例存回调（实例 ID 可能被后续对象复用）——
             // 放在所有提前 return 之前，保证角色销毁时条目一定被清掉。
             Hotfix.GameSystems.Sys3C.Animation.StateBehaviours.AnimationCallbackRegistry.Unregister(Animator);

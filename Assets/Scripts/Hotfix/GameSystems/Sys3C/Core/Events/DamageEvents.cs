@@ -132,12 +132,14 @@ namespace Hotfix.GameSystems.Sys3C.Core.Events
         public int EntityId;
         public Vector3 Direction;
         public float Force;
+        public bool FollowNavigation;
 
-        public KnockbackEvent(int entityId, Vector3 direction, float force)
+        public KnockbackEvent(int entityId, Vector3 direction, float force, bool followNavigation = false)
         {
             EntityId = entityId;
             Direction = direction;
             Force = force;
+            FollowNavigation = followNavigation;
         }
     }
 

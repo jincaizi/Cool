@@ -124,6 +124,7 @@ namespace KcpServer
             MonsterModule damageModule = _monsterModule;
             _castHandler.SetNpcDamageObserver((npcId, attackerId, damage) =>
                 damageModule.OnDamageTaken(npcId, attackerId, damage, MonsterDamageKind.Direct));
+            _castHandler.SetChargePush(damageModule.OnPushed, navigation);
 
             // 判定帧 LOS（spec §4.5）：怪物起手后玩家躲墙 → 这一刀不结算。
             // 2026-11-04：攻击视线与身体体型解耦，统一用 0.25m 武器探针；无导航宿主保持 null（旧语义）。
@@ -181,7 +182,6 @@ namespace KcpServer
             _positionSyncHandler = new PositionSyncHandler(this, _logger, _entityStore);
             _echoHandler = new EchoHandler(this, _logger);
             _clockSyncHandler = new ClockSyncHandler(this, _logger);
-
             // 属性剑气：缺表/校验失败时停用该功能（登录仍可用，但不发放武器、不协商能力位）。
             _elementalCatalog = elementalCatalog ?? ElementalCatalogDefaults.Create();
             var catalogErrors = ElementalCatalogValidator.Validate(_elementalCatalog);
@@ -193,6 +193,8 @@ namespace KcpServer
             _equipHandler = new EquipHandler(_elementalCatalog);
             _castHandler = new CastHandler(this, _logger,
                 new CombatResolver(_entityStore, null, _elementalCatalog));
+            // WIP 战斗整改：AOI 进入时补发仍有效的回荡实例。
+            _aoi.EchoOnEntry = _castHandler.GetEchoVisualReplay;
             // 怪物模块在 EnableMonsters 才出现——用延迟查闭包，未启用怪物时为空。
             _statusTickService = new StatusTickService(_entityStore, _castHandler,
                 () => _monsterModule, _elementalCatalog);
@@ -563,6 +565,7 @@ namespace KcpServer
                 p.UpdatePosition(spawn, p.Rotation, 0f, 0L, p.LastReceivedSequence);
                 p.IsDefending = false;
                 p.RespawnTick = tick;
+                p.MovementRevision = 0;
             }
 
             return true;

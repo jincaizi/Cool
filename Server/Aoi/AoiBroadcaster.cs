@@ -21,6 +21,7 @@ namespace KcpServer
 
         /// <summary>每发一个实体快照回调（Server3C 注入：写入该 observer 的 WorldSnapshot.Entities）</summary>
         public System.Action<long, EntitySnapshot>? OnEntityBroadcast { get; set; }
+        public System.Func<PlayerState, long, SwordQiEchoState?>? EchoOnEntry { get; set; }
 
         /// <summary>基线快照回调（参数：observerId, entityId）。只在 Baseline（首帧/重见）触发，
         /// Changed/Keepalive 不触发——Server3C 接线到 CastHandler.ResendActiveProjectiles
@@ -104,6 +105,9 @@ namespace KcpServer
                     snap.Hp = entity.Hp;
                     snap.MaxHp = entity.MaxHp;
                 }
+                // WIP 战斗整改：观察者首次看到该实体时补发仍有效的回荡实例。
+                if (previous == null || !previous.Contains(entity.PlayerId))
+                    snap.SwordQiEcho = EchoOnEntry?.Invoke(observer, entity.PlayerId);
                 if ((mask & EntityFieldMask.Health) != 0 || (mask & EntityFieldMask.Combat) != 0)
                 {
                     snap.CombatVersion = entity.CombatVersion;

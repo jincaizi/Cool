@@ -55,6 +55,69 @@ public class SwordQiEchoCombatTests
         => resolutions.SelectMany(r => r.Hits).ToList();
 
     [Fact]
+    public void Recast_Selects_At_Release_And_Keeps_The_Original_Orbit()
+    {
+        var store = new EntityStore();
+        var resolver = new CombatResolver(store, new Random(1));
+        var caster = Player(store, 1, 0, 0,
+            features: ProtocolFeatures.SwordQiEcho | ProtocolFeatures.SwordQiEchoRecast);
+        var request = EchoRequest();
+        request.EchoAction = SwordQiEchoAction.Prepare;
+        var waiting = resolver.Decide(1, request, 100).Echo!;
+        Assert.True(waiting.Preparing);
+        Assert.Empty(waiting.Contacts);
+        Assert.Equal(75u, waiting.EndTick - waiting.StartTick);
+        Assert.False(caster.IsInvulnerableAt(110));
+        Assert.Empty(Hits(resolver.DrainResolved(110)));
+        long orbitStart = waiting.OrbitStartedTimestamp;
+
+        request = EchoRequest(2);
+        request.EchoAction = SwordQiEchoAction.Release;
+        request.EchoPreparedCastId = waiting.CastId;
+        Assert.Equal("no-target", resolver.Decide(1, request, 115).RejectReason);
+        Assert.True(waiting.Preparing);
+
+        caster.UpdatePosition(new Vector3(30, 0, 0), 0, 0, 20L, 2u);
+        for (int index = 0; index < 10; index++) Npc(store, 10 + index, 30f, 1f + index);
+        request.EchoRequestId = 3;
+        var flight = resolver.Decide(1, request, 120).Echo!;
+        Assert.Same(waiting, flight);
+        Assert.False(flight.Preparing);
+        Assert.Equal(orbitStart, flight.OrbitStartedTimestamp);
+        Assert.Equal(30f, flight.Origin.X);
+        Assert.Equal(Enumerable.Range(10, 8).Select(id => (long)id),
+            flight.Contacts.Select(contact => contact.TargetId).OrderBy(id => id));
+        Assert.Equal(4, flight.Contacts.Select(contact => contact.SwordIndex).Distinct().Count());
+        Assert.All(flight.Contacts.GroupBy(contact => contact.SwordIndex), route => Assert.Equal(2, route.Count()));
+        Assert.True(caster.IsInvulnerableAt(120));
+        Assert.Equal(4, Hits(resolver.DrainResolved(126)).Count);
+        Assert.Equal(4, Hits(resolver.DrainResolved(144)).Count);
+        resolver.DrainResolved(150);
+        Assert.Equal(SwordQiEchoPhase.Completed, Assert.Single(resolver.DrainEndedEchoCasts()).EndPhase);
+    }
+
+    [Fact]
+    public void Expired_Preparation_Starts_Cooldown_Without_Attacking()
+    {
+        var store = new EntityStore();
+        var resolver = new CombatResolver(store, new Random(2));
+        var caster = Player(store, 1, 0, 0,
+            features: ProtocolFeatures.SwordQiEcho | ProtocolFeatures.SwordQiEchoRecast);
+        var target = Npc(store, 2, 1, 0);
+        var request = EchoRequest();
+        request.EchoAction = SwordQiEchoAction.Prepare;
+        var prepared = resolver.Decide(1, request, 100).Echo!;
+        Assert.Empty(resolver.DrainResolved(prepared.EndTick - 1));
+        Assert.False(resolver.HasEndedEchoCasts);
+        Assert.Empty(resolver.DrainResolved(prepared.EndTick));
+        Assert.Equal(1000f, target.Hp);
+        Assert.False(caster.IsInvulnerableAt(prepared.EndTick));
+        Assert.Equal(SwordQiEchoPhase.Expired, Assert.Single(resolver.DrainEndedEchoCasts()).EndPhase);
+        Assert.Equal("cooldown", resolver.Decide(1, request, prepared.EndTick + prepared.CooldownTicks - 1).RejectReason);
+        Assert.True(resolver.Decide(1, request, prepared.EndTick + prepared.CooldownTicks).Accepted);
+    }
+
+    [Fact]
     public void EmptyCast_DoesNotRecordCooldownOrInvulnerability()
     {
         var store = new EntityStore();

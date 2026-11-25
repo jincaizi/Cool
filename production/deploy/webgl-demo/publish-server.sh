@@ -60,7 +60,5 @@ cp -r "$SITE_SRC/." "$SITE_OUT/"
 
 echo
 echo "完成。dist/ 的内容："
-du -sh "$DIST" "$SERVER_OUT" "$SITE_OUT"
+du -sh "$SERVER_OUT" "$SITE_OUT"
 echo
-echo "下一步：把整个 production/deploy/webgl-demo/ 文件夹拷贝到云服务器，"
-echo "然后照 docs/superpowers/guides/webgl-demo-runbook.md 执行。"

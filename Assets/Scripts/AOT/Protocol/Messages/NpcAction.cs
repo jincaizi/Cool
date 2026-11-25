@@ -8,13 +8,18 @@ namespace Cool.Protocol
         public const uint AuthoritativeRespawn = 1u << 1;
         /// <summary>剑气回荡（mainline 2026-11-18）：服务端回显施法与接触时间表。</summary>
         public const uint SwordQiEcho = 1u << 2;
-
         /// <summary>属性剑气 v1：权威换装、施法确认与按 CastId 的发射/终止。
         /// 合并剑气回荡后从 1u&lt;&lt;2 顺延到 1u&lt;&lt;4，避免能力位冲突。</summary>
         public const uint ElementalSwordQiV1 = 1u << 4;
 
         /// <summary>PvP 位移预算 v1：位置包携带运动/跳跃/突进/控制版本字段。</summary>
         public const uint PvpMovementBudgetV1 = 1u << 3;
+
+        /// <summary>WIP 战斗整改：权威击退能力位（与属性剑气冲突后顺延到 bit5）。</summary>
+        public const uint AuthoritativeKnockback = 1u << 5;
+
+        /// <summary>WIP 战斗整改：剑气回荡二次释放能力位（顺延到 bit6）。</summary>
+        public const uint SwordQiEchoRecast = 1u << 6;
     }
 
     public enum NpcActionKind : byte { Idle = 0, Move = 1, Skill = 2, HitReaction = 3, Death = 4 }

@@ -8,28 +8,39 @@ namespace Hotfix.GameSystems.VFX
 {
     public class StatusVFXSystem : MonoBehaviour
     {
+        [SerializeField] private GameObject _freezeVisual;
+        [SerializeField] private GameObject _burnVisual;
+        [SerializeField] private GameObject _stunVisual;
+        [SerializeField] private GameObject _vulnerableVisual;
+
         private sealed class TargetTint
         {
             public Transform Target;
             public BodyTintRenderer Tint;
-            public int FreezeCount;
-            public int BurnCount;
-            public int StunCount;
-            public int VulnerableCount;
+            public readonly int[] Counts = new int[4];
+            public readonly GameObject[] Visuals = new GameObject[4];
+            public int ActiveTypes;
+            public bool HasTint;
             public float Phase;
             public ElementVfxAttachment Visual;
 
             public EffectType? DominantEffect
-                => FreezeCount > 0 ? EffectType.Freeze :
-                   StunCount > 0 ? EffectType.Stun :
-                   BurnCount > 0 ? EffectType.Burn :
-                   VulnerableCount > 0 ? EffectType.Vulnerable : (EffectType?)null;
+                => Counts[VisualIndex(EffectType.Freeze)] > 0 ? EffectType.Freeze :
+                   Counts[VisualIndex(EffectType.Stun)] > 0 ? EffectType.Stun :
+                   Counts[VisualIndex(EffectType.Burn)] > 0 ? EffectType.Burn :
+                   Counts[VisualIndex(EffectType.Vulnerable)] > 0 ? EffectType.Vulnerable : (EffectType?)null;
 
             public void Clear()
             {
                 Visual?.Clear();
-                if (Target != null)
+                if (Target != null && HasTint)
                     Tint.Clear();
+                HasTint = false;
+                for (int i = 0; i < Visuals.Length; i++)
+                {
+                    RemoveVisual(Visuals[i]);
+                    Visuals[i] = null;
+                }
             }
         }
 
@@ -58,15 +69,11 @@ namespace Hotfix.GameSystems.VFX
             _tints.Clear();
         }
 
-        /// <summary>冰/火/雷/风四状态参与染色；其余类型不进表。</summary>
-        private static bool IsTinted(EffectType type)
-            => type is EffectType.Freeze or EffectType.Burn
-                or EffectType.Stun or EffectType.Vulnerable;
-
         private void OnApplied(StatusEffectAppliedEvent e)
         {
             if (e.Target == null) return;
-            if (!IsTinted(e.EffectType)) return;
+            int type = VisualIndex(e.EffectType);
+            if (type < 0) return;
 
             if (!_tints.TryGetValue(e.EntityId, out TargetTint state) || state.Target != e.Target)
             {
@@ -80,34 +87,37 @@ namespace Hotfix.GameSystems.VFX
                 _tints[e.EntityId] = state;
             }
 
-            switch (e.EffectType)
+            if (state.Counts[type]++ == 0)
             {
-                case EffectType.Freeze: state.FreezeCount++; break;
-                case EffectType.Burn: state.BurnCount++; break;
-                case EffectType.Stun: state.StunCount++; break;
-                case EffectType.Vulnerable: state.VulnerableCount++; break;
-                // IsTinted 已过滤其余类型；显式列举，未来新增类型不会被静默计成 Vulnerable
+                state.ActiveTypes++;
+                var prefab = type switch
+                {
+                    0 => _freezeVisual,
+                    1 => _burnVisual,
+                    2 => _stunVisual,
+                    _ => _vulnerableVisual
+                };
+                if (prefab != null)
+                    state.Visuals[type] = Instantiate(prefab, state.Target, false);
             }
             UpdateVisual(state);
         }
 
         private void OnRemoved(StatusEffectRemovedEvent e)
         {
-            if (!IsTinted(e.EffectType)) return;
-            if (!_tints.TryGetValue(e.EntityId, out TargetTint state)) return;
-            if (!ReferenceEquals(e.Target, null) && !ReferenceEquals(state.Target, e.Target)) return;
+            int type = VisualIndex(e.EffectType);
+            if (type < 0 || !_tints.TryGetValue(e.EntityId, out TargetTint state)) return;
+            if (e.Target != null && e.Target != state.Target) return;
+            if (state.Counts[type] == 0) return;
 
-            switch (e.EffectType)
+            if (--state.Counts[type] == 0)
             {
-                case EffectType.Freeze: state.FreezeCount = Mathf.Max(0, state.FreezeCount - 1); break;
-                case EffectType.Burn: state.BurnCount = Mathf.Max(0, state.BurnCount - 1); break;
-                case EffectType.Stun: state.StunCount = Mathf.Max(0, state.StunCount - 1); break;
-                case EffectType.Vulnerable:
-                    state.VulnerableCount = Mathf.Max(0, state.VulnerableCount - 1);
-                    break;
+                RemoveVisual(state.Visuals[type]);
+                state.Visuals[type] = null;
+                state.ActiveTypes--;
             }
 
-            if (state.DominantEffect == null)
+            if (state.ActiveTypes == 0)
             {
                 state.Clear();
                 _tints.Remove(e.EntityId);
@@ -135,7 +145,7 @@ namespace Hotfix.GameSystems.VFX
             {
                 TargetTint state = pair.Value;
 
-                if (state.Target == null)
+                if (state.Target == null || !state.Target.gameObject.activeInHierarchy)
                 {
                     state.Clear();
                     _dead.Add(pair.Key);
@@ -146,33 +156,57 @@ namespace Hotfix.GameSystems.VFX
                 {
                     // Clear only if there was an active fallback tint.
                     state.Tint.Apply(default, 0f, default, 0f);
+                    state.HasTint = false;
                 }
-                else if (state.FreezeCount > 0)
+                else if (state.Counts[VisualIndex(EffectType.Freeze)] > 0)
                 {
                     state.Tint.Apply(FreezeColor, 0.5f, FreezeColor, 0f);
+                    state.HasTint = true;
                 }
-                else if (state.StunCount > 0)
+                else if (state.Counts[VisualIndex(EffectType.Stun)] > 0)
                 {
                     state.Tint.Apply(StunColor, 0.5f, StunColor, 0f);
+                    state.HasTint = true;
                 }
-                else if (state.BurnCount > 0)
+                else if (state.Counts[VisualIndex(EffectType.Burn)] > 0)
                 {
                     state.Phase += dt * Mathf.PI * 4f;
                     float amount = 0.12f + 0.18f * (0.5f + 0.5f * Mathf.Sin(state.Phase));
                     state.Tint.Apply(BurnColor, amount, BurnColor, 0f);
+                    state.HasTint = true;
                 }
-                else if (state.VulnerableCount > 0)
+                else if (state.Counts[VisualIndex(EffectType.Vulnerable)] > 0)
                 {
                     state.Tint.Apply(VulnerableColor, 0.4f, VulnerableColor, 0f);
+                    state.HasTint = true;
                 }
-                else
+                else if (state.HasTint)
                 {
                     state.Tint.Clear();
+                    state.HasTint = false;
                 }
             }
 
             for (int i = 0; i < _dead.Count; i++)
                 _tints.Remove(_dead[i]);
+        }
+
+        /// <summary>冰/火/雷/风四状态参与染色与预制体特效；其余类型不进表。</summary>
+        private static int VisualIndex(EffectType type) => type switch
+        {
+            EffectType.Freeze => 0,
+            EffectType.Burn => 1,
+            EffectType.Stun => 2,
+            EffectType.Vulnerable => 3,
+            _ => -1
+        };
+
+        private static void RemoveVisual(GameObject visual)
+        {
+            if (visual == null) return;
+            visual.SetActive(false);
+            if (Application.isPlaying) Destroy(visual);
+            else DestroyImmediate(visual);
         }
     }
 }

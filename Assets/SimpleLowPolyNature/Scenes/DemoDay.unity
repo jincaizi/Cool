@@ -7589,7 +7589,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 98941d8ee3d9c1d419b60d888940953f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 796ea954e343e9b45a5e518f5dab5e06, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -9198,7 +9198,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6174eb7b3452381418d8508950f68608, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 004077641a99cd1459255352b820680e, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -9574,6 +9574,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91af3e03af353b04c9bd1a48c281a019, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _freezeVisual: {fileID: 7572147115947344155, guid: 8be291607fe9e73409cfac203638cb05, type: 3}
+  _burnVisual: {fileID: 7002023356434769821, guid: f29842e5f808a30449398f3b528f05c3, type: 3}
+  _stunVisual: {fileID: 1078932310207027799, guid: a60c1ca0869099f41904e65290f6ceca, type: 3}
+  _vulnerableVisual: {fileID: 1028297366645641609, guid: 2bcb5dae82e4d7a47bb68265b8f873ec, type: 3}
 --- !u!114 &952436230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10561,13 +10565,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Groups:
   - Config: {fileID: 11400000, guid: 071183ac8b66e97428f74d84b1e18acf, type: 2}
-    Count: 11
+    Count: 6
     SpawnRadius: 18
   - Config: {fileID: 11400000, guid: f5e15c082287de345a8cd42c2144ea3f, type: 2}
-    Count: 8
+    Count: 5
     SpawnRadius: 8
   - Config: {fileID: 11400000, guid: 5fdf5fe6121943c88423e68941d40e19, type: 2}
-    Count: 1
+    Count: 3
     SpawnRadius: 3
   - Config: {fileID: 11400000, guid: 0e90c69aa4234f75a80f8a114fb141ec, type: 2}
     Count: 1
@@ -11893,14 +11897,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.72, b: 0.18, a: 0.95}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 501c09f6dd5d8f04a9a1d8db2e990c99, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0024a9ee73f71664fbe3972333e00627, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -15173,7 +15177,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Groups:
   - Config: {fileID: 11400000, guid: f5e15c082287de345a8cd42c2144ea3f, type: 2}
-    Count: 1
+    Count: 0
     SpawnRadius: 2
   RespawnDelay: 30
 --- !u!4 &1461526081

@@ -31,6 +31,10 @@ namespace KcpServer
         public uint StartTick;
         public uint EndTick;
         public uint CooldownTicks;
+        public long OrbitStartedTimestamp;
+        public bool TwoStage;
+        public bool Preparing;
+        public SwordQiEchoPhase EndPhase = SwordQiEchoPhase.Ended;
         public Vec3 Origin;
         public float Rotation;
         public float BaseDamage;

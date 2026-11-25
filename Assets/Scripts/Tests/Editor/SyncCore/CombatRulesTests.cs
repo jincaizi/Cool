@@ -201,12 +201,12 @@ namespace Hotfix.GameSystems.Tests.SyncCore
             Assert.IsTrue(CombatRules.TryGet(20003, out var fireball));
             Assert.IsTrue(CombatRules.ValidateShape(new HitShape { ShapeType = 0 }, fireball));
 
-            // 20004：资产 _targetType=1 / _range=2 / _areaRadius=2 / _angle=120
+            // 20004：资产 _targetType=1 / _range=2 / _areaRadius=4 / _angle=120
             Assert.IsTrue(CombatRules.TryGet(20004, out var charge));
             Assert.IsTrue(CombatRules.ValidateShape(
-                new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2f, Angle = 120f }, charge));
+                new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 4f, Angle = 120f }, charge));
             Assert.IsFalse(CombatRules.ValidateShape(
-                new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 2.01f, Angle = 120f }, charge),
+                new HitShape { ShapeType = 1, Range = 2f, AreaRadius = 4.01f, Angle = 120f }, charge),
                 "放大 AOE 半径必须被拒");
 
             // 30001：资产 _targetType=0 / _range=2 / _angle=120

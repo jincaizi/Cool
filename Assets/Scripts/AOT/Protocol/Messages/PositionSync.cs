@@ -44,7 +44,6 @@ namespace Cool.Protocol
         public bool IsDefending { get; set; }
 
         [ProtoMember(9)] public uint? RespawnTick { get; set; }
-
         /// <summary>水平运动模式（Plan 03；缺省 0 = Walk，旧客户端不会发送）。</summary>
         [ProtoMember(10)] public LocomotionMode LocomotionMode { get; set; }
 
@@ -68,6 +67,9 @@ namespace Cool.Protocol
 
         /// <summary>生命代次；非 0 且与服务端不一致时整包丢弃。</summary>
         [ProtoMember(17)] public uint LifeId { get; set; }
+
+        /// <summary>WIP 战斗整改：移动代次（与 Plan 03 tag 冲突后顺延到 18）。</summary>
+        [ProtoMember(18)] public uint MovementRevision { get; set; }
     }
 
     /// <summary>位置同步响应（含权威纠偏数据）</summary>
@@ -103,8 +105,10 @@ namespace Cool.Protocol
         public bool HasPositionCorrection { get; set; }
 
         [ProtoMember(8)] public uint? RespawnTick { get; set; }
-
         /// <summary>服务端当前控制版本（客户端据此识别旧输入；解除以 CombatStateUpdate 为准）。</summary>
         [ProtoMember(9)] public uint ControlVersion { get; set; }
+
+        /// <summary>WIP 战斗整改：服务端确认的移动代次（顺延到 10）。</summary>
+        [ProtoMember(10)] public uint MovementRevision { get; set; }
     }
 }

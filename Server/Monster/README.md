@@ -27,6 +27,7 @@
 - 死亡展示 `DeathDisplayTicks = 30`（约 2s）后移除；`RespawnTicks = 450`（约 30s）后以新 id 满血重生。
 - NPC id 段从 `NpcIdSeed = 2_000_000` 开始。
 - 断线持续运转：状态全在 `EntityStore` 与本模块，零 per-session 依赖。
+- 炎爆命中后的权威击退写入怪物运行位置，并清理原导航路径，后续 AI 从新位置恢复。
 - **命中按目标表面距离**：玩家施法命中 NPC 时 `CombatCandidate.Radius` 取 `PlayerState.BodyRadius`，
   `HitResolver` 用 `max(0, 中心距 - 半径)` 比较射程 / 面积，并按表面距离取最近；玩家与 bot
   半径为 0，PvP 行为不变；锥形方向同样按目标半径扩展（圆-锥相交），半径 0 时逐值不变。
@@ -47,9 +48,14 @@
 
 ```bash
 dotnet build Server/Server3C.csproj
-dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 4 --map demoday
-# 启动日志：Navigation: map=demoday / Monster mode: 4 monsters spawned
+dotnet Server/bin/Debug/net8.0/Server3C.dll 8000 --monsters 15 --map demoday
+# 启动日志：Navigation: map=demoday / Monster mode: 15 monsters spawned
 ```
+
+`--monsters 15` 是 2026-11-23 起的演示配比：6 Slime / 5 Wolf（客户端 template 2 渲染为刺背龟）/
+3 DogKnight / 1 SpiderBoss。`SpawnDefaultLayout` 的前六槽位保持原布局（`--monsters 4/6` 的 e2e 夹具依赖
+槽位顺序与类型），[6]–[14] 为新增槽位；全部 15 个槽位都满足出生点挂机安全距离（见
+`MonsterModuleTests.New_Layout_Slots_Stay_Out_Of_Reach_Of_Demo_Spawn`）。
 
 - `Server/Navigation/`：三角面图 A* + 漏斗，按 `navRadius`（`NavigationRadiusOf`）校验路径（硬 / 软 clearance）；
   `NavigationService` 每 tick 16 次 + 25ms 双预算（单条查询内部也带 deadline），预算拒绝下
@@ -198,8 +204,8 @@ bash tools/unity-tests.sh PlayMode MonsterWorldTests
   失败（岩石上挥不到）。原始 `HasLineOfSight` 语义不变（要求 clearance ≥ 传入半径）；
   0.5ms/query 性能目标未达成（P1 §11 记录）。
 - bot 不走 navmesh（`--bots` 仍走 ORCA 愿望位移），只影响怪物。
-- 原点观察者 + 6 怪 e2e 未验收：SpiderBoss 巡逻圈最近 14.0m < 检测 25m，
-  可能主动感知原点观察者；`MonsterWorldTests` 用 `--monsters 4`（不含 SpiderBoss）。
+- 原点观察者 + 15 怪 e2e 未验收：SpiderBoss 巡逻圈最近 14.0m < 检测 25m，
+  可能主动感知原点观察者；`MonsterWorldTests` 仍用 `--monsters 4`（不含 SpiderBoss）。
 
 ## 相关
 

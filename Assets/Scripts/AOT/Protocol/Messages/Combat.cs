@@ -47,7 +47,6 @@ namespace Cool.Protocol
 
         /// <summary>剑气回荡角色绑定代次（角色重绑递增；服务端原样回显）。</summary>
         [ProtoMember(9)] public ulong EchoBindingId { get; set; }
-
         // 属性剑气 v1 的 tag 在合并剑气回荡（8/9）后顺延到 10–12。
         /// <summary>客户端施法序号（同一序号重试只返回原结论；0 = 旧客户端，不做幂等缓存）</summary>
         [ProtoMember(10)] public uint ClientCastSeq { get; set; }
@@ -57,6 +56,10 @@ namespace Cool.Protocol
 
         /// <summary>客户端当前生命代次（0 = 旧客户端，跳过代次校验）</summary>
         [ProtoMember(12)] public uint CasterLifeId { get; set; }
+
+        // WIP 战斗整改（二次回荡）：与属性剑气 tag 冲突后顺延到 13/14。
+        [ProtoMember(13)] public SwordQiEchoAction EchoAction { get; set; }
+        [ProtoMember(14)] public ulong EchoPreparedCastId { get; set; }
     }
 
     /// <summary>取消施法（客户端 → 服务器）。B3：旋转（20002）取消后必须丢弃未到期的

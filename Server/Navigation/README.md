@@ -46,6 +46,7 @@
   未命中返回 false 并回填输入 Y）。位置同步的跳跃接地/Y 夹取与施法判定共用这一个查询；
   不要用 `TryProject` 的 `projected.Y` 当地面高度（它是 XZ-only，Y 恒等于输入值）。
 - `HasLineOfSight` 沿线段每 0.25m 采样，要求点在图内且 clearance ≥ `bodyRadius`。
+- `ClampDisplacement` 用投影与线段可达性限制炎爆击退的水平位移，保留目标离地高度。
 - 预算拒绝返回 `FailReason="budget"`，调用方下 tick 立刻重试；真正的失败由
   `PathFollower` 退避 30 tick。单条查询被预算中止时，已完成的门缓存仍保留，重试会更快。
 

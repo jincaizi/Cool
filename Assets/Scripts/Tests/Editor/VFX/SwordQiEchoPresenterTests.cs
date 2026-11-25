@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
+using Cool.Protocol;
 using Cool.SyncCore;
 using Hotfix.GameSystems.VFX;
 using NUnit.Framework;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace GameSys.EditorTests
 {
@@ -97,6 +100,61 @@ namespace GameSys.EditorTests
                 Assert.Less(Vector3.Distance(_presenter.SwordPosition(sword), expected), 0.01f,
                     "第二轮接触点应按剑气编号到达");
             }
+        }
+
+        [Test]
+        public void SharedRelease_PutsEarlyAndLateClientsOnTheSamePath_ThenDissolves()
+        {
+            var lateRoot = new GameObject("Late echo client");
+            try
+            {
+                var late = lateRoot.AddComponent<SwordQiEchoPresenter>();
+                double clock = 100d;
+                _presenter.Prepare(_owner.transform, 4, 5d, now: () => clock);
+                _presenter.Tick(100.9d);
+                for (int i = 0; i < 4; i++)
+                    Assert.That(_presenter.SwordPosition(i).y, Is.InRange(0.58f, 0.66f));
+                var state = new SwordQiEchoState
+                {
+                    Phase = SwordQiEchoPhase.Started,
+                    SwordCount = 4, StartTick = 15, EndTick = 45,
+                    OrbitStartedTimestamp = 100 * TimeSpan.TicksPerSecond,
+                    ServerTimestamp = 101 * TimeSpan.TicksPerSecond,
+                    Contacts = new List<SwordQiEchoContactMessage>
+                    {
+                        new SwordQiEchoContactMessage { TargetId = 10, SwordIndex = 2, OffsetTicks = 6, Z = 8f },
+                        new SwordQiEchoContactMessage { TargetId = 11, SwordIndex = 2, OffsetTicks = 24, X = 8f, Z = 4f },
+                    },
+                };
+                clock = 101.08d;
+                _presenter.Play(_owner.transform, state, clock - 101d, () => clock);
+                _presenter.Tick(101.41d);
+                clock = 101.85d;
+                late.Play(_owner.transform, state, clock - 101d, () => clock);
+                _presenter.Tick(clock);
+                for (int i = 0; i < 4; i++)
+                {
+                    Assert.That(Vector3.Distance(_presenter.SwordPosition(i), late.SwordPosition(i)), Is.LessThan(0.001f));
+                    Assert.That(Quaternion.Angle(_root.transform.GetChild(i).rotation,
+                        lateRoot.transform.GetChild(i).rotation), Is.LessThan(0.1f));
+                }
+                Assert.That(_presenter.SwordPosition(0).magnitude, Is.LessThan(2.2f));
+
+                _owner.transform.position = new Vector3(4f, 0f, -2f);
+                _presenter.Tick(103.13d);
+                var orbit = _presenter.SwordPosition(2) - _owner.transform.position;
+                Assert.That(new Vector2(orbit.x, orbit.z).magnitude, Is.EqualTo(1.5f).Within(0.05f));
+                Assert.That(orbit.y, Is.InRange(0.58f, 0.66f));
+                _presenter.Tick(103.60d);
+                var collapsed = _presenter.SwordPosition(2) - _owner.transform.position;
+                Assert.That(new Vector2(collapsed.x, collapsed.z).magnitude, Is.LessThan(0.8f));
+                var block = new MaterialPropertyBlock();
+                _root.transform.GetChild(2).GetComponent<TrailRenderer>().GetPropertyBlock(block);
+                Assert.That(block.GetColor("_Color").a, Is.LessThan(0.6f));
+                _presenter.Tick(103.90d);
+                Assert.Zero(_presenter.ActiveSwordCount);
+            }
+            finally { Object.DestroyImmediate(lateRoot); }
         }
     }
 }

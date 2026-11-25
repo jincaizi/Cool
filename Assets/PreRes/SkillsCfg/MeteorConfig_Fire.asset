@@ -25,3 +25,6 @@ MonoBehaviour:
     _statusType: 0
     _statusDuration: 0
     _statusValue: 0
+  references:
+    version: 2
+    RefIds: []

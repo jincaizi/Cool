@@ -115,13 +115,44 @@ namespace GameSys.EditorTests
         }
 
         [Test]
+        public void GroundedImpactKeepsTheFallingRockAboveSlopedTerrain()
+        {
+            var floor = NewGo("Meteor regression ground");
+            floor.transform.SetPositionAndRotation(new Vector3(280f, 3f, 280f), Quaternion.Euler(18f, 0f, 0f));
+            var collider = floor.AddComponent<BoxCollider>();
+            collider.size = new Vector3(20f, 1f, 20f);
+            var body = NewGo("Meteor regression NPC body");
+            body.layer = 10;
+            body.transform.position = floor.transform.position + Vector3.up * 1.3f;
+            body.AddComponent<BoxCollider>();
+            Physics.SyncTransforms();
+
+            var config = UnityEditor.AssetDatabase.LoadAssetAtPath<MeteorConfig>(
+                "Assets/PreRes/SkillsCfg/MeteorConfig_Fire.asset");
+            var instance = Object.Instantiate(config.Prefab);
+            _gos.Add(instance);
+            var meteor = instance.GetComponent<MeteorStrike>();
+            Vector3 requested = floor.transform.position - Vector3.up * 1.5f;
+            meteor.OnSpawn(config, DamageBlock.CreateDefault(60f), requested, null);
+
+            Assert.That(instance.transform.position.y, Is.InRange(3.50f, 3.55f));
+            Vector3 normal = floor.transform.up;
+            Assert.That(Vector3.Dot(instance.transform.Find("WarnDecal").forward, -normal), Is.GreaterThan(0.99f));
+            meteor.Tick(config.WarnDuration - 0.001f);
+            var rock = instance.transform.Find("Falling/Body");
+            float rockClearance = Vector3.Dot(rock.position - instance.transform.position, normal);
+            Assert.That(rockClearance, Is.GreaterThan(0.85f));
+        }
+
+        [Test]
         public void test_meteor_explosion_center_is_one_meter_above_impact()
         {
             // 目标在落点正上方 4.1m：无 +1m 偏移时 4.1 > 4 不中；有偏移时距中心 3.1 < 4 必中——判别脚踝高度偏移
+            var impact = new Vector3(280f, 0f, 280f);
             var target = new FakeDamageable(NewGo("Target").transform);
-            target.Transform.position = new Vector3(0f, 4.1f, 0f);
+            target.Transform.position = impact + Vector3.up * 4.1f;
             Register(target);
-            var strike = CreateStrike(CreateConfig(0.8f, 4f), Vector3.zero);
+            var strike = CreateStrike(CreateConfig(0.8f, 4f), impact);
 
             // Act
             strike.Tick(0.9f);

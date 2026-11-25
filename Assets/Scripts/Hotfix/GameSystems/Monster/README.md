@@ -47,6 +47,7 @@ InstanceId, Revision)` 合并；攻击起手仍由 `CastBroadcast` → `NpcAttac
 - NPC 视图上不得挂 `IDamageable`（`NpcViewGameplayStripTests` 锁死）；本地技能不能命中断线上的 NPC 视图。
 - 联网模式下客户端 `MonsterSpawner` 必须保持禁用。
 - 怪物配置数值有编辑期断言（`MonsterConfigNumbersTests`）。
+- 单机怪物被炎爆命中时沿爆心方向受推，位移沿 NavMesh 推进，到导航边界停止。
 - 本地 AI 每帧校验目标（`AIBrain.TryFindTarget` → `ShouldDropTarget`）：Transform 销毁 /
   `IDamageable` 死亡 / 超出 `LeaveRange` 立即清空 `Target` 与 `TargetEntity`；攻击结算跳过
   已死亡目标（`MonsterAttackState.ResolveDamage`），不得对尸体继续攻击。

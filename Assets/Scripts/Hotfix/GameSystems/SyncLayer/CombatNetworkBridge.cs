@@ -69,6 +69,7 @@ namespace Hotfix.GameSystems.SyncLayer
 
         /// <summary>收到剑气回荡状态（Started/Rejected/Ended；主线程）。</summary>
         public event Action<SwordQiEchoState>? OnSwordQiEchoState;
+        internal event Action<HitEntry>? OnSwordQiEchoContact;
 
         /// <summary>本机施放的 LineAll 剑气被格挡吸收（旧服务端兼容；新服务端走 ProjectileStopBroadcast）</summary>
         public event Action<Vector3>? OnLineProjectileStopped;
@@ -156,7 +157,8 @@ namespace Hotfix.GameSystems.SyncLayer
         }
 
         /// <summary>剑气回荡请求（会话内递增 requestId + 角色绑定代次）。</summary>
-        public void NotifyEchoCast(int skillId, ulong requestId, ulong bindingId)
+        public void NotifyEchoCast(int skillId, ulong requestId, ulong bindingId,
+            SwordQiEchoAction action = SwordQiEchoAction.Legacy, ulong preparedCastId = 0)
         {
             if (!Cool.SyncCore.CombatRules.IsSynced(skillId)) return;
             _client.Send(MessageId.CastRequest, new CastRequest
@@ -164,6 +166,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 SkillId = skillId,
                 EchoRequestId = requestId,
                 EchoBindingId = bindingId,
+                EchoAction = action,
+                EchoPreparedCastId = preparedCastId,
                 Shape = new HitShape(),
             });
         }
@@ -348,6 +352,8 @@ namespace Hotfix.GameSystems.SyncLayer
                     if (IsDuplicateEchoHit(result.EchoCastId, hit.TargetPlayerId))
                         continue;
                     RememberEchoHit(result.EchoCastId, hit.TargetPlayerId);
+                    if (hit.Damage > 0f && !hit.IsBlocked)
+                        OnSwordQiEchoContact?.Invoke(hit);
                 }
 
                 anyNewHit = true;

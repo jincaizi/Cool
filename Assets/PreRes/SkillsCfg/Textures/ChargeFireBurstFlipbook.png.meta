@@ -1,12 +1,12 @@
 fileFormatVersion: 2
-guid: 28f88f045418818468a9f34d8add6c0e
+guid: 0ee0d3668e187e34f89c16293a2d8e4c
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -37,24 +37,24 @@ TextureImporter:
     filterMode: 1
     aniso: 1
     mipBias: 0
-    wrapU: 0
-    wrapV: 0
-    wrapW: 0
-  nPOTScale: 1
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 0
+  spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 1
+  spriteGenerateFallbackPhysicsShape: 0
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationDetail: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -69,7 +69,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -121,7 +121,343 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_00
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 772
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24064df61279f3410800000000000000
+      internalID: 1459050974157234242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_01
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 772
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a06eaea5428608170800000000000000
+      internalID: 8178651428658275850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_02
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 772
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cde3eeeef910c3c90800000000000000
+      internalID: -7188869118770135332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_03
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 772
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c7aad19a6316c1f0800000000000000
+      internalID: -1025110516745721914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_04
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 516
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c25d28141426f1e30800000000000000
+      internalID: 4476404587041051948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_05
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 516
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d182cfd28c6c2d30800000000000000
+      internalID: 4408017444644487634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_06
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 516
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 857be8c882c60b940800000000000000
+      internalID: 5309862882082469720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_07
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 516
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d7e24efcadf5b390800000000000000
+      internalID: -7803051859907516457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_08
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 260
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c2947ebc29722be0800000000000000
+      internalID: -1503506092507491648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_09
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 260
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5daa8d06f6d829af0800000000000000
+      internalID: -391094708122113323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_10
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 260
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70db2aa86c697c040800000000000000
+      internalID: 4667865318266420487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_11
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 260
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e18fa7c860d7bad90800000000000000
+      internalID: -7085432121657198562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_12
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 4
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95cfd995faf953750800000000000000
+      internalID: 6284104430537014361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_13
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 4
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52434289aa1872260800000000000000
+      internalID: 7072764309505586213
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_14
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 4
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34933b566774f35b0800000000000000
+      internalID: -5386508055473866429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChargeFireBurstFlipbook_15
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 4
+        width: 248
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10f7f95ad63bab640800000000000000
+      internalID: 5096583211834638081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -132,7 +468,23 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ChargeFireBurstFlipbook_00: 1459050974157234242
+      ChargeFireBurstFlipbook_01: 8178651428658275850
+      ChargeFireBurstFlipbook_02: -7188869118770135332
+      ChargeFireBurstFlipbook_03: -1025110516745721914
+      ChargeFireBurstFlipbook_04: 4476404587041051948
+      ChargeFireBurstFlipbook_05: 4408017444644487634
+      ChargeFireBurstFlipbook_06: 5309862882082469720
+      ChargeFireBurstFlipbook_07: -7803051859907516457
+      ChargeFireBurstFlipbook_08: -1503506092507491648
+      ChargeFireBurstFlipbook_09: -391094708122113323
+      ChargeFireBurstFlipbook_10: 4667865318266420487
+      ChargeFireBurstFlipbook_11: -7085432121657198562
+      ChargeFireBurstFlipbook_12: 6284104430537014361
+      ChargeFireBurstFlipbook_13: 7072764309505586213
+      ChargeFireBurstFlipbook_14: -5386508055473866429
+      ChargeFireBurstFlipbook_15: 5096583211834638081
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -157,5 +157,13 @@ namespace Hotfix.GameSystems.VFX
                 OnEnterIdle();
             }
         }
+
+        internal void SetRemoteTrail(bool emitting, bool clear = false)
+        {
+            if (_trailRenderer == null || _elementConfig == null) return;
+            if (emitting) _trailRenderer.Init(_elementConfig);
+            _trailRenderer.SetEmitting(emitting);
+            if (clear) _trailRenderer.ClearHistory();
+        }
     }
 }

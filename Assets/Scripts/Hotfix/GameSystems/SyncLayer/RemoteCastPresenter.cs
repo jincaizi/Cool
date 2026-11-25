@@ -4,6 +4,7 @@ using Cool.Protocol;
 using Cool.SyncCore;
 using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.Skills.Definition;
+using Hotfix.GameSystems.Skills.Runtime;
 using Hotfix.GameSystems.Skills.Runtime.Meteor;
 using Hotfix.GameSystems.Skills.Runtime.Projectile;
 using Hotfix.GameSystems.Skills.Runtime.SwordQi;
@@ -207,9 +208,17 @@ namespace Hotfix.GameSystems.SyncLayer
             }
 
             // 落点类技能没有飞行体：在服务端给定的落点直接生成表现
-            if (data is ChargedSkillData && presentation?.ReleaseVFX != null)
-                (_releaseVfxSpawner ?? DefaultVfxSpawner)(
-                    presentation.ReleaseVFX, impact, Quaternion.identity);
+            if (data is ChargedSkillData charged && presentation?.ReleaseVFX != null)
+            {
+                Vector3 releaseOrigin = SkillExecutor.GetChargedReleaseVfxOrigin(data.SkillId, impact);
+                if (_releaseVfxSpawner != null)
+                    _releaseVfxSpawner(presentation.ReleaseVFX, releaseOrigin, Quaternion.identity);
+                else if (data.SkillId == (int)SkillID.ChargeBlast)
+                    SkillExecutor.SpawnChargedReleaseVfx(presentation.ReleaseVFX, releaseOrigin,
+                        charged.GetAreaScaleForCharge(Mathf.Clamp01(broadcast.ChargeProgress)));
+                else
+                    DefaultVfxSpawner(presentation.ReleaseVFX, impact, Quaternion.identity);
+            }
             if (data.Meteor != null)
                 (_meteorSpawner ?? MeteorSpawner.Spawn)(
                     data.Meteor, data.Damage?.Clone(), impact);

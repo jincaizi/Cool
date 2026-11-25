@@ -53,6 +53,12 @@ Unity 客户端（asmdef `Cool.Protocol`）与服务器（`Server/Server3C.cspro
 | `CastBroadcast` | `ImpactX` / `ImpactY` / `ImpactZ` | 10 / 11 / 12 | 服务端裁决的落点（火球爆炸、陨石落点） |
 | `CastBroadcast` | `ChargeProgress` | 13 | 蓄力进度 [0,1]（20004 半径/伤害缩放、20003 表现） |
 
+### 炎爆击退
+
+登录能力位 `ProtocolFeatures.AuthoritativeKnockback = 1u << 3`。服务器每次击退更新该玩家的
+移动代次，`PositionSyncResponse` 追加 tag 9 `MovementRevision`，客户端在
+`PositionSyncRequest` tag 10 回传。首个代次为 0，复活时双方复位。旧客户端仍接收伤害。
+
 ### 取消施法（2026-11-10）
 
 `MessageId.CancelCastRequest = 304`（客户端 → 服务器）：tag1 `SkillId`，tag2 可选 `CastId`。
@@ -161,6 +167,12 @@ tag14 `DisplacementSkillId`、tag15 `CastId`、tag16 `ClientControlVersion`、ta
 `SwordQiEchoState` 的接触列表必须声明为 `IList<T>`（IL2CPP tuple 探测约束）。
 开始/结束按 `(连接代次, CastId)` 去重；伤害按 `(连接代次, EchoCastId, TargetPlayerId)` 去重。
 视觉结束后保留有界接收窗口（首版 2s / 64 个 `EchoCastId`）。
+
+二次释放由能力位 `SwordQiEchoRecast = 1u << 4` 协商。客户端用 `CastRequest.EchoAction`（tag 10）
+区分 Prepare 和 Release，`EchoPreparedCastId`（tag 11）引用待发实例。
+`SwordQiEchoState.Phase` 追加 Prepared、Expired 和 Completed（4、5、6），
+tag 19 `OrbitStartedTimestamp` 在整个实例中保持相同。新观察者的首帧 `EntitySnapshot`
+可携带 tag 18 `SwordQiEcho`，在创建实体视图后从当前进度播放。
 
 ## 双端一致性校验（人工/CI 各跑一次）
 

@@ -22,6 +22,9 @@ namespace Hotfix.GameSystems.Skills.Data
         [SerializeField] private float _maxChargeTime = 2f;
         public float MaxChargeTime => _maxChargeTime;
 
+        [SerializeField] private GameObject _chargeVfx;
+        public GameObject ChargeVfx => _chargeVfx;
+
         [Tooltip("蓄力时间上的伤害倍率曲线")]
         [SerializeField] private AnimationCurve _chargeDamageCurve = AnimationCurve.Linear(0f, 1f, 1f, 2f);
         public AnimationCurve ChargeDamageCurve => _chargeDamageCurve;

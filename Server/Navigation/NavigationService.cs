@@ -129,5 +129,40 @@ namespace KcpServer.Navigation
 
         public bool HasLineOfSight(Vector3 from, Vector3 to, float bodyRadius)
             => _graph.HasLineOfSight(from, to, bodyRadius);
+
+        /// <summary>沿水平位移寻找直线上最远的可达点，保留目标原来的离地高度。</summary>
+        public Vector3 ClampDisplacement(Vector3 position, Vector3 displacement, float clearance)
+        {
+            if (!TryProject(position, 4f, out var start, out var startClearance)
+                || !SameHorizontalPoint(start, position))
+                return position;
+
+            float requiredClearance = Math.Min(clearance, startClearance);
+            float accepted = 0f;
+            float rejected = 1f;
+            Vector3 lastGround = start;
+            for (int i = 0; i < 7; i++)
+            {
+                float fraction = i == 0 ? 1f : (accepted + rejected) * 0.5f;
+                Vector3 probe = start + displacement * fraction;
+                if (TryProject(probe, 1.2f, out var ground, out _)
+                    && SameHorizontalPoint(probe, ground)
+                    && HasLineOfSight(start, ground, requiredClearance))
+                {
+                    accepted = fraction;
+                    lastGround = ground;
+                    if (i == 0) break;
+                }
+                else
+                {
+                    rejected = fraction;
+                }
+            }
+
+            return new Vector3(lastGround.X, lastGround.Y + position.Y - start.Y, lastGround.Z);
+        }
+
+        private static bool SameHorizontalPoint(Vector3 a, Vector3 b)
+            => MathF.Abs(a.X - b.X) < 0.04f && MathF.Abs(a.Z - b.Z) < 0.04f;
     }
 }

@@ -20,6 +20,7 @@ namespace Hotfix.GameSystems.SyncLayer
         public long SmoothedOffsetTicks => _algorithm.SmoothedOffsetTicks;
 
         public bool HasConverged => _algorithm.HasConverged;
+        public bool HasSample => _algorithm.HasSample;
 
         public ClockSyncDriver(Action<ClockSyncRequest> sendRequest)
         {

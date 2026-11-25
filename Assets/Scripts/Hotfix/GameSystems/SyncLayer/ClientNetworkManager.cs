@@ -34,6 +34,7 @@ namespace Hotfix.GameSystems.SyncLayer
             new System.Collections.Concurrent.ConcurrentQueue<PositionSyncResponse>();
         private MovementReporter? _reporter;
         private uint? _respawnTick;
+        private long _loginClockOffset;
 
         public State CurrentState { get; private set; } = State.Disconnected;
         public long LocalPlayerId { get; private set; }
@@ -51,8 +52,14 @@ namespace Hotfix.GameSystems.SyncLayer
         /// <summary>登录装备基线（仅属性剑气能力开启时非空）。</summary>
         public WeaponInventoryBaseline? WeaponInventory { get; private set; }
 
-        /// <summary>服务器同步时钟当前值（ticks，DateTime 基准）；晚到发射/剑气回荡按它补进度。</summary>
-        public long ServerNowTicks() => _clockSync.ToServerTime(System.DateTime.UtcNow.Ticks);
+        /// <summary>服务器同步时钟当前值（ticks，DateTime 基准）；晚到发射/剑气回荡按它补进度。
+        /// 首个时钟样本到达前退回登录响应携带的服务器时间偏移（见 OnLoginResponse）。</summary>
+        public long ServerNowTicks()
+        {
+            long now = DateTime.UtcNow.Ticks;
+            return _clockSync.HasSample ? _clockSync.ToServerTime(now)
+                : now + System.Threading.Interlocked.Read(ref _loginClockOffset);
+        }
         /// <summary>
         /// 时钟平滑偏移（ticks）——暴露 smoothed offset（T6 抖动实测读）；
         /// 插值渲染实际经 ToServerTime（时钟算法的 min-filter offset）驱动，
@@ -71,6 +78,8 @@ namespace Hotfix.GameSystems.SyncLayer
         public event Action<string>? OnDisconnected;
         public event Action<string>? OnError;
         public event Action<Vector3, Quaternion>? OnCorrectionNeeded;
+        public event Action<Vector3>? OnForcedPosition;
+        public event Action<SwordQiEchoState>? OnVisibleSwordQiEcho;
 
         /// <summary>
         /// 服务端复活（血量 = **服务端权威**，客户端直接采信、不自行判活——D-N4/D-5）。
@@ -187,7 +196,9 @@ namespace Hotfix.GameSystems.SyncLayer
                 SupportedFeatures = ProtocolFeatures.AuthoritativeRespawn
                                    | ProtocolFeatures.ElementalSwordQiV1
                                    | ProtocolFeatures.PvpMovementBudgetV1
-                                   | ProtocolFeatures.SwordQiEcho,
+                                   | ProtocolFeatures.SwordQiEcho
+                                   | ProtocolFeatures.AuthoritativeKnockback
+                                   | ProtocolFeatures.SwordQiEchoRecast,
                 ElementalCatalogFingerprint = ElementalCatalogHasher.Compute(
                     ElementalCatalogDefaults.Create())
             });
@@ -208,6 +219,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 {
                     if (entity.PlayerId == LocalPlayerId) continue; // 本地玩家跳过
                     _remoteEntities.ApplySnapshot(entity, snapshot.ServerTimestamp);
+                    if (entity.SwordQiEcho != null)
+                        OnVisibleSwordQiEcho?.Invoke(entity.SwordQiEcho);
                 }
             }
 
@@ -260,6 +273,8 @@ namespace Hotfix.GameSystems.SyncLayer
             WeaponInventory = (EnabledFeatures & ProtocolFeatures.ElementalSwordQiV1) != 0
                 ? response.WeaponInventory
                 : null;
+            if (response.ServerTimestamp > 0)
+                System.Threading.Interlocked.Exchange(ref _loginClockOffset, response.ServerTimestamp - DateTime.UtcNow.Ticks);
             SpawnPosition = new Vector3(response.SpawnX, response.SpawnY, response.SpawnZ);
             CurrentState = State.InWorld;
 
@@ -299,12 +314,16 @@ namespace Hotfix.GameSystems.SyncLayer
         {
             while (_pendingResponses.TryDequeue(out var response))
             {
-                if (_reporter != null && _reporter.OnResponse(response))
+                if (_reporter == null) continue;
+                var position = new Vector3(response.AuthoritativeX, response.AuthoritativeY, response.AuthoritativeZ);
+                if (_reporter.TryAcceptForcedPosition(response))
+                {
+                    OnForcedPosition?.Invoke(position);
+                }
+                else if (_reporter.OnResponse(response))
                 {
                     // 需要纠偏 → 上层经 NetMovementPolicy.ApplyServerCorrection 执行平滑拉回
-                    OnCorrectionNeeded?.Invoke(
-                        new Vector3(response.AuthoritativeX, response.AuthoritativeY, response.AuthoritativeZ),
-                        Quaternion.Euler(0f, response.AuthoritativeRotation, 0f));
+                    OnCorrectionNeeded?.Invoke(position, Quaternion.Euler(0f, response.AuthoritativeRotation, 0f));
                 }
             }
         }

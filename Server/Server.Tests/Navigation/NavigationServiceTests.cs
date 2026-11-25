@@ -110,6 +110,18 @@ public class NavigationServiceTests
     }
 
     [Fact]
+    public void ChargeBlast_Displacement_Stops_Before_A_Wall_And_Preserves_Height()
+    {
+        var service = new NavigationService(NavMeshFixture.Grid(10, 10, (x, _) => x != 5), "test");
+        var start = new Vector3(3f, 0.5f, 4.5f);
+        var end = service.ClampDisplacement(start, new Vector3(3.6f, 0, 0), 0.25f);
+
+        Assert.InRange(end.X, 4.6f, 4.77f);
+        Assert.Equal(start.Y, end.Y, 3);
+        Assert.Equal(start.Z, end.Z, 3);
+    }
+
+    [Fact]
     public void LoadMaps_With_Null_Array_Returns_Empty_List()
     {
         string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".json");

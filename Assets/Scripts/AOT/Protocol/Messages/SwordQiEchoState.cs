@@ -9,6 +9,16 @@ namespace Cool.Protocol
         Rejected = 1,
         Started = 2,
         Ended = 3,
+        Prepared = 4,
+        Expired = 5,
+        Completed = 6,
+    }
+
+    public enum SwordQiEchoAction
+    {
+        Legacy = 0,
+        Prepare = 1,
+        Release = 2,
     }
 
     /// <summary>首次接触时间表中的一条：目标、负责剑气、相对施法起点的 tick 与位置快照。</summary>
@@ -50,5 +60,6 @@ namespace Cool.Protocol
         [ProtoMember(17)] public float OvershootMeters { get; set; }
         [ProtoMember(18)] public IList<SwordQiEchoContactMessage> Contacts { get; set; }
             = new List<SwordQiEchoContactMessage>();
+        [ProtoMember(19)] public long OrbitStartedTimestamp { get; set; }
     }
 }

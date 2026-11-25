@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cool.SyncCore;
+using Hotfix.GameSystems.Skills.Data;
 using Hotfix.GameSystems.VFX;
 using NUnit.Framework;
 using UnityEngine;
@@ -92,5 +93,34 @@ namespace KcpNet.PlayModeTests
             Assert.AreEqual(4, _presenter.ActiveSwordCount);
             _presenter.Stop();
         }
+
+#if UNITY_EDITOR
+        [Test]
+        public void GeneratedEchoVisual_UsesFourTexturedRoutesAndReusesThem()
+        {
+            var data = UnityEditor.AssetDatabase.LoadAssetAtPath<SwordQiEchoSkillData>(
+                "Assets/PreRes/SkillsCfg/SwordQiEcho_Skill4.asset");
+            var contacts = new List<SwordQiEchoContact>
+            {
+                new SwordQiEchoContact(10L, 0, 8, new Vec3(2f, 0f, 2f))
+            };
+            _presenter.Play(_owner.transform, contacts, 2f, now: () => 0d, swordPrefab: data.SwordVfx);
+            var trails = _root.GetComponentsInChildren<TrailRenderer>();
+            Assert.AreEqual(4, trails.Length);
+            Assert.AreEqual(4, _root.GetComponentsInChildren<MeshRenderer>().Length);
+            foreach (var trail in trails)
+            {
+                Assert.IsTrue(trail.emitting);
+                Assert.AreEqual("SwordQiEchoTrail", trail.sharedMaterial.mainTexture.name);
+            }
+            _presenter.Stop();
+            Assert.AreEqual(0, _root.GetComponentsInChildren<TrailRenderer>().Length);
+            Assert.AreEqual(4, _root.GetComponentsInChildren<TrailRenderer>(true).Length);
+            foreach (var trail in trails) Assert.AreEqual(0, trail.positionCount);
+
+            _presenter.Play(_owner.transform, contacts, 2f, now: () => 0d, swordPrefab: data.SwordVfx);
+            CollectionAssert.AreEquivalent(trails, _root.GetComponentsInChildren<TrailRenderer>());
+        }
+#endif
     }
 }

@@ -108,7 +108,6 @@ namespace Cool.Protocol
         [ProtoMember(15)] public bool IsDefending { get; set; }
         [ProtoMember(16)] public NpcActionSnapshot? NpcAction { get; set; }
         [ProtoMember(17)] public IList<NpcActionSnapshot> NpcActionHistory { get; set; } = new List<NpcActionSnapshot>();
-
         /// <summary>实体生命代次（NpcAction 合并键；Part A 随每次 AOI 快照携带，Part B 收窄为基线/Health 快照）</summary>
         [ProtoMember(19)] public uint LifeId { get; set; }
 
@@ -117,6 +116,9 @@ namespace Cool.Protocol
 
         /// <summary>战斗投影（仅基线快照与 FieldMask.Combat 置位时有效）</summary>
         [ProtoMember(20)] public CombatProjection? Combat { get; set; }
+
+        /// <summary>WIP 战斗整改：AOI 进入时的剑气回荡基线（与 CombatVersion tag 冲突后顺延到 21）。</summary>
+        [ProtoMember(21)] public SwordQiEchoState? SwordQiEcho { get; set; }
     }
 
     /// <summary>

@@ -43,6 +43,7 @@ namespace Hotfix.GameSystems.SyncLayer
         private uint? _respawnTick;
         private uint _lastReportedJumpSeq;
         private bool _wasAirborne;
+        private uint _movementRevision;
 
         /// <summary>最近一次上报的服务器时钟（纠偏用）</summary>
         public long LastServerTimestamp { get; private set; }
@@ -67,6 +68,7 @@ namespace Hotfix.GameSystems.SyncLayer
         public void ResetForRespawn(uint? tick)
         {
             _respawnTick = tick;
+            _movementRevision = 0;
             _reconciler.Clear();
             _timer = 0f;
             // 复活后跳跃边沿从零重建：否则沿用死亡前的 JumpSeq 会把复活后第一次起跳
@@ -116,7 +118,8 @@ namespace Hotfix.GameSystems.SyncLayer
                 DisplacementSkillId = state.DisplacementSkillId,
                 CastId = state.CastId,
                 ClientControlVersion = state.ControlVersion,
-                LifeId = state.LifeId
+                LifeId = state.LifeId,
+                MovementRevision = _movementRevision
             });
         }
 
@@ -138,10 +141,24 @@ namespace Hotfix.GameSystems.SyncLayer
             return _wasAirborne || state.Airborne ? PlayerJumpPhase.Air : PlayerJumpPhase.None;
         }
 
+        internal bool TryAcceptForcedPosition(PositionSyncResponse response)
+        {
+            if (response.RespawnTick != _respawnTick
+                || unchecked((int)(response.MovementRevision - _movementRevision)) <= 0)
+                return false;
+
+            _movementRevision = response.MovementRevision;
+            LastServerTimestamp = response.ServerTimestamp;
+            _reconciler.Clear();
+            _timer = 0f;
+            return true;
+        }
+
         /// <summary>收到 PositionSyncResponse 时调用——返回是否需要纠偏（超阈值）</summary>
         public bool OnResponse(PositionSyncResponse response)
         {
-            if (response.RespawnTick != _respawnTick) return false;
+            if (response.RespawnTick != _respawnTick || response.MovementRevision != _movementRevision)
+                return false;
 
             LastServerTimestamp = response.ServerTimestamp;
             LastServerControlVersion = response.ControlVersion;

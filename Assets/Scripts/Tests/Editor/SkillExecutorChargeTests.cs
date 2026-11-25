@@ -46,6 +46,7 @@ namespace GameSys.EditorTests
             public bool IsAlive => true;
             public int HitCount { get; private set; }
             public DamageBlock LastDamage;
+            public Vector3 LastDirection;
             public Transform Transform => transform;
             public IEffectStats Stats => null;
             public IShieldSystem ShieldSystem => null;
@@ -53,7 +54,7 @@ namespace GameSys.EditorTests
             public IStatusController StatusController => null;
             public void Heal(float amount) { }
             public void ApplyDamageOverTime(float amount) { }
-            public void TakeDamage(DamageBlock d, Vector3 dir) { HitCount++; LastDamage = d; }
+            public void TakeDamage(DamageBlock d, Vector3 dir) { HitCount++; LastDamage = d; LastDirection = dir; }
             public void TakeDamage(DamageBlock d, Vector3 dir, HitContact c) { TakeDamage(d, dir); }
         }
 
@@ -135,6 +136,57 @@ namespace GameSys.EditorTests
             machine.Now = at;
             executor.Update(0.01f);
             Assert.AreEqual(SkillSubState.Charging, executor.CurrentSubState);
+        }
+
+        [Test]
+        public void ChargeBlastKeepsCasterCenterCapturedAtRelease()
+        {
+            var data = CreateChargedData();
+            try
+            {
+                TestHelpers.SetField(data, "_skillId", (int)SkillID.ChargeBlast);
+                var executor = CreateExecutor(data);
+                var machine = (FakeTimeMachine)TestHelpers.GetField(executor, "_stateMachine");
+                DriveToCharging(executor, machine);
+                executor.SetTargetPosition(new Vector3(30f, 0f, 30f));
+                var releaseCenter = new Vector3(2f, 0.4f, -3f);
+                _ownerGo.transform.position = releaseCenter;
+                Assert.IsTrue(executor.Release());
+                _ownerGo.transform.position += Vector3.right;
+                Assert.AreEqual(releaseCenter, executor.ReportedImpactPoint);
+            }
+            finally { Object.DestroyImmediate(data); }
+        }
+
+        [Test]
+        public void FullChargePushesHorizontallyAwayFromTheReleaseCenter()
+        {
+            var data = CreateChargedData();
+            try
+            {
+                TestHelpers.SetField(data, "_skillId", (int)SkillID.ChargeBlast);
+                TestHelpers.SetField(data.Shape, "_areaRadius", 4f);
+                TestHelpers.SetField(data, "_chargeAreaCurve", AnimationCurve.Linear(0f, 1f, 1f, 1.5f));
+                var effect = new EffectBlock();
+                TestHelpers.SetField(effect, "_knockbackForce", 8f);
+                TestHelpers.SetField(data, "_effect", effect);
+                var executor = CreateExecutor(data);
+                var machine = (FakeTimeMachine)TestHelpers.GetField(executor, "_stateMachine");
+                DriveToCharging(executor, machine);
+                machine.Now = 2.15f;
+                executor.Update(0.01f);
+                _ownerGo.transform.position = Vector3.right * 10f;
+                var target = NewTarget("Charge target", new Vector3(5.6f, 0.6f, 0f));
+                Physics.SyncTransforms();
+
+                RaiseHitboxFrame(executor, 0);
+
+                Assert.AreEqual(1, target.HitCount);
+                Assert.AreEqual(12f, target.LastDamage.KnockbackForce, 0.001f);
+                Assert.AreEqual(Vector3.right, target.LastDirection);
+                Assert.AreEqual(0f, data.Damage.KnockbackForce);
+            }
+            finally { Object.DestroyImmediate(data); }
         }
 
         /// <summary>物理命中假目标：带 SphereCollider 与 FakeHitTarget 组件（AOE 物理检测用）</summary>

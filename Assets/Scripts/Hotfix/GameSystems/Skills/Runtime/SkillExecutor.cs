@@ -9,6 +9,7 @@ using Hotfix.GameSystems.Skills;
 using Hotfix.GameSystems.Skills.Runtime.Meteor;
 using Hotfix.GameSystems.Skills.Runtime.Projectile;
 using Hotfix.GameSystems.Skills.Runtime.SwordQi;
+using Cool.SyncCore;
 using Hotfix.GameSystems.Sys3C.Core.Combat;
 using Hotfix.GameSystems.Sys3C.Input;
 
@@ -19,6 +20,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
     /// </summary>
     public class SkillExecutor
     {
+        private const float ChargeBlastVisualHeight = 0.74f;
+
         public static bool EnableVFX = false;
         private static bool _warnedMissingStatusManager;
         private static readonly Collider[] s_HitBuffer = new Collider[32];
@@ -41,6 +44,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         private IDashComponent _dashComponent;
         private bool _wasFullCharge;
         private float _chargeProgressAtRelease;
+        private Vector3? _chargeReleaseCenter;
+        private GameObject _chargeVisual;
         private DamageBlock _lastDamageBlock;
         private readonly SpinSkillData _spinData;
         private SpinHitTracker _spinHitTracker;
@@ -80,6 +85,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             get
             {
+                if (_skillData.SkillId == (int)SkillID.ChargeBlast)
+                    return _chargeReleaseCenter ?? _owner.transform.position;
                 if (_projectileData != null && _projectileData.HoldToAim)
                 {
                     Vector3 ownerPosition = _owner.transform.position;
@@ -169,6 +176,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             _projectileSpawned = false; // 每次施放复位（连击链多次施放）
             _meteorSpawned = false; // 每次施放复位（连击链多次施放）
             _chargeProgressAtRelease = 0f; // 防御性复位（防未来直接进入 Execution 的路径读到旧值）
+            _chargeReleaseCenter = null;
             bool started = _stateMachine.TryStart();
             if (started && _skillData is ChargedSkillData)
             {
@@ -214,10 +222,13 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             if (CurrentSubState == SkillSubState.Charging)
             {
+                float progress = GetChargeProgress();
+                if (_chargeVisual != null)
+                    _chargeVisual.transform.localScale = Vector3.one * Mathf.Lerp(0.68f, 1f, progress);
                 EventBus.Emit(new SkillChargeTickEvent
                 {
                     SkillId = _skillData.SkillId,
-                    Progress = GetChargeProgress()
+                    Progress = progress
                 });
             }
         }
@@ -417,10 +428,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
             SkillDamageHelper.FillDamageContext(damage, _skillData.SkillId, 1, cfg.Effect ?? GetEffect(), _owner.Stats);
             damage.CalculatedDamage *= cfg.DamagePercent;
 
-            Vector3 impact = _targetPosition;
-            if (impact.sqrMagnitude < 0.0001f)
-                impact = _owner.transform.position + _owner.transform.forward * 12f;
-
+            Vector3 impact = MeteorStrike.ResolveAimPoint(_targetPosition, _owner.transform);
             MeteorSpawner.Spawn(cfg, damage, impact);
 
             EventBus.Emit(new MeteorSpawnedEvent
@@ -569,6 +577,21 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
         private void OnStateChanged(SkillSubState newState)
         {
+            if (_skillData is ChargedSkillData charged)
+            {
+                if (_chargeVisual != null)
+                {
+                    _chargeVisual.SetActive(false);
+                    UnityEngine.Object.Destroy(_chargeVisual);
+                    _chargeVisual = null;
+                }
+                if (newState == SkillSubState.Charging && charged.ChargeVfx != null)
+                {
+                    _chargeVisual = UnityEngine.Object.Instantiate(charged.ChargeVfx, _owner.transform, false);
+                    _chargeVisual.transform.localScale = Vector3.one * 0.68f;
+                }
+            }
+
             if (newState == SkillSubState.Spinning && _spinData != null)
             {
                 EventBus.Emit(new SkillChargingStartedEvent { SkillId = _skillData.SkillId });
@@ -576,6 +599,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
 
             if (newState == SkillSubState.Execution && _skillData is ChargedSkillData)
             {
+                if (_skillData.SkillId == (int)SkillID.ChargeBlast)
+                    _chargeReleaseCenter = _owner.transform.position;
                 // 记录释放瞬间进度与满蓄力标记（判定帧结算与 SkillHitTargetEvent 使用）
                 _chargeProgressAtRelease = _stateMachine.ChargeProgressAtRelease;
                 _wasFullCharge = _chargeProgressAtRelease >= 1f;
@@ -590,8 +615,11 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 var pres = GetPresentation();
                 if (pres?.ReleaseVFX != null)
                 {
-                    var vfx = UnityEngine.Object.Instantiate(pres.ReleaseVFX, _owner.transform.position, Quaternion.identity);
-                    UnityEngine.Object.Destroy(vfx, 1.5f);
+                    float scale = _skillData.SkillId == (int)SkillID.ChargeBlast
+                        ? ((ChargedSkillData)_skillData).GetAreaScaleForCharge(_chargeProgressAtRelease)
+                        : 1f;
+                    Vector3 point = _chargeReleaseCenter ?? _owner.transform.position;
+                    SpawnChargedReleaseVfx(pres.ReleaseVFX, GetChargedReleaseVfxOrigin(SkillId, point), scale);
                 }
             }
 
@@ -621,6 +649,20 @@ namespace Hotfix.GameSystems.Skills.Runtime
                 _meteorSpawned = true;
                 SpawnMeteor();
             }
+        }
+
+        internal static Vector3 GetChargedReleaseVfxOrigin(int skillId, Vector3 point)
+        {
+            if (skillId == (int)SkillID.ChargeBlast)
+                point.y += ChargeBlastVisualHeight;
+            return point;
+        }
+
+        internal static void SpawnChargedReleaseVfx(GameObject prefab, Vector3 point, float areaScale)
+        {
+            var effect = UnityEngine.Object.Instantiate(prefab, point, Quaternion.identity);
+            effect.transform.localScale *= areaScale;
+            UnityEngine.Object.Destroy(effect, 1.5f);
         }
 
         private ShapeBlock GetShape()
@@ -721,9 +763,7 @@ namespace Hotfix.GameSystems.Skills.Runtime
         {
             // When no target is locked, center the AOE on the owner (for self-centered skills like spin attacks).
             // When a target IS locked, center on the target.
-            Vector3 center = _targetCharacter != null
-                ? _targetCharacter.transform.position
-                : _owner.transform.position;
+            Vector3 center = _chargeReleaseCenter ?? TargetPositionOrOwner;
 
             // 蓄力技能：Execution 阶段按释放进度放大 AOE 半径
             float radius = shape.AreaRadius;
@@ -769,6 +809,8 @@ namespace Hotfix.GameSystems.Skills.Runtime
             var damageBlock = _offlineDamage ?? _skillData.Damage;
             if (damageBlock == null) return;
 
+            if (_chargeReleaseCenter.HasValue)
+                damageBlock = damageBlock.Clone();
             SkillDamageHelper.FillDamageContext(damageBlock, _skillData.SkillId, frameIndex + 1,
                                                 GetEffect(), _owner.Stats);
             if (_offlineWeaponCast != null)
@@ -777,17 +819,26 @@ namespace Hotfix.GameSystems.Skills.Runtime
             // 蓄力技能：释放瞬间按实际进度 × 曲线结算（修复原硬编码 1.5x 且 Execution 态取 0 的 bug）
             if (_skillData is ChargedSkillData)
                 damageBlock.CalculatedDamage *= GetDamageScaleForCharge(_chargeProgressAtRelease);
+            if (_chargeReleaseCenter.HasValue)
+                damageBlock.KnockbackForce *= CombatRules.ChargeBlastPushScale(_chargeProgressAtRelease);
 
             _lastDamageBlock = damageBlock;
 
             // Route through IDamageable for unified feedback path
             if (target is IDamageable damageable)
             {
-                Vector3 hitDir = (target.transform.position - _owner.transform.position).normalized;
+                Vector3 direction = target.transform.position - (_chargeReleaseCenter ?? _owner.transform.position);
+                if (_chargeReleaseCenter.HasValue)
+                {
+                    direction.y = 0f;
+                    if (direction.sqrMagnitude < 0.0001f)
+                        direction = Vector3.ProjectOnPlane(_owner.transform.forward, Vector3.up);
+                }
+                direction = direction.normalized;
                 if (_offlineWeaponCast != null)
-                    _offlineWeaponCast.Hit(damageable, damageBlock, hitDir);
+                    _offlineWeaponCast.Hit(damageable, damageBlock, direction);
                 else
-                    damageable.TakeDamage(damageBlock, hitDir);
+                    damageable.TakeDamage(damageBlock, direction);
             }
             else
             {
