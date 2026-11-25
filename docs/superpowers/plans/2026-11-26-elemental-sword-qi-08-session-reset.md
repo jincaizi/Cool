@@ -1,6 +1,6 @@
 # 属性剑气 Plan 08：会话复位与断开清理实现计划
 
-> **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [x]`）语法来跟踪进度。
+> **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [ ]`）语法来跟踪进度。
 
 **目标：** 关闭完整首发/Plan 07 收口后仍登记的两个会话复位缺口：echo 最后应用状态跨服务器重启残留、断开时状态 VFX 实体表滞留；并做 backlog 收口。
 
@@ -65,7 +65,7 @@ UNITY_MCP_DISABLE=1 timeout 300 "/e/Unity/Editor/2022.3.25f1/Editor/Unity.exe" \
 
 - [x] **步骤 3：最小修复**
 
-在 `Connect`/`Disconnect` 的会话复位路径（`ClearEchoRequest` 或紧邻调用点）把 `_lastAppliedEchoCastId=0`、`_lastAppliedEchoStartTick=0`、`_endedEchoCastId=0`。不得改变同会话 `IsNewerEchoState` 的 `(StartTick, CastId)` 语义。
+在 `Connect`/`Disconnect` 的会话复位路径（`ClearEchoRequest` 或紧邻调用点）把 `_lastAppliedEchoCastId=0`、`_lastAppliedEchoStartTick=0`、`_endedEchoCastId=0`。fix round 1 增补：`_lastAppliedEchoRequestId=0`（请求号门同样跨会话残留）。不得改变同会话 `IsNewerEchoState` 的 `(StartTick, CastId)` 语义。
 
 - [x] **步骤 4：运行通过**
 

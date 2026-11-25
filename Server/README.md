@@ -152,7 +152,7 @@ bash tools/test-server.sh
 
 状态：Plan 01–08 已完成（Part A 取消/NpcAction、Part B 战斗投影/带宽、Plan 03 位移/跳跃预算与
 PvP 基线、Plan 04 状态结算/DoT/元素表现、Plan 05 AOI 反查索引/三客户端/带宽/注入验收、
-Plan 06 验收缺口收口、Plan 07 网络硬化与残余 M 项审计、Plan 08 会话复位与断开清理）。属性剑气发布收口补充权威换装、过期施法序号、死亡与雷打断回归，
+Plan 06 验收缺口收口、Plan 07 网络硬化与残余 M 项审计、Plan 08（客户端）会话复位与断开清理）。属性剑气发布收口补充权威换装、过期施法序号、死亡与雷打断回归，
 并接通离线怪物的[共享状态运行时](../Assets/Scripts/Hotfix/GameSystems/SyncCore/README.md)。
 `ProtocolVersion` 保持 1。
 

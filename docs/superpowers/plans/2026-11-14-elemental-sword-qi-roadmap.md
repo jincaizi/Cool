@@ -110,7 +110,7 @@ Plan 04 补齐服务端权威四状态（冰/火/雷/风）、DoT 末跳、`Dama
 - **元素表现回退**（Plan 05 任务 6 完成）：`ElementVfxFallback.ResolveColor` 锁定
   “ViewKey 非空且 loader 命中资源 → `Color.white`（资源自带颜色，Host 实例化），否则
   `ElementPalette.ColorOf(elementId)`”；`ElementVfxFallbackTests` 5/5。未实际调用
-  Addressables；生产 loader/Host 接入与美术资源签收属 Plan 07/backlog。
+  Addressables；生产 loader/Host 接入与美术资源签收已由完整首发 `66812544` 完成。
 
 ## Plan 06 收口项结果（2026-11-20 完成）
 
@@ -159,7 +159,7 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
 ## Plan 06 / backlog 登记（2026-11-20）
 
 以下项**不属于** Plan 01–05 已交付范围，登记到 Plan 06/backlog（Plan 06 已收口：已验收项在
-条目内标注证据，汇总见上节；**未标注的项归 Plan 07/backlog，不得写成已打通**）。
+条目内标注证据，汇总见上节；**未标注的项归 Plan 09/backlog，不得写成已打通**）。
 
 - **Plan 05 未执行的设计验收场景**（2026-11-20 登记；Plan 05 已交付的是子集，Plan 06 验收状态
   见每条标注，未标注者不得写成已验收）：
@@ -234,10 +234,11 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
   M7 未用参数、M8 死 API、M10 死亡 tick、M11 非 ActionV1、M16 离线 provider、
   M17 ThunderDuration、M18 bot 控制、M19 断开/换模型陈旧表现（M9 `EventId` 去重已在
   Plan 05 任务 4 完成）。**Plan 07 任务 4 已逐项审计（2026-11-24）：M3/M7/M10 机械修复，
-  M16/M17 已由完整首发解决，其余保留设计/backlog；见下节。**
+  M16/M17 已由完整首发解决；M19 断开侧已由 Plan 08 任务 2 解决；M4/M6/M8/M11/M18
+  保留 Plan 09/backlog；见下节。**
 - **NpcAction 驱动的攻击变体/时间轴**（2026-11-20 登记）：`NpcActionEvent` 目前只负责
   阶段/取消，NPC 攻击起手仍由 `CastBroadcast → NpcAttackSchedule` 驱动；若后续需要
-  `NpcAction` 直接驱动攻击变体/时间轴，需在 Plan 07/backlog 单独设计（Plan 05/06 均未新增该机制）。
+  `NpcAction` 直接驱动攻击变体/时间轴，需在 Plan 09/backlog 单独设计（Plan 05/06 均未新增该机制）。
 - **ORCA 减速 `maxStep` 邻居用例**（M12 遗留，**Plan 06 任务 6 已完成**）：
   `MonsterStatusControlTests` 8/8；新增 `Slow_Scales_Orca_MaxStep_With_Monster_Neighbor_And_Keeps_Avoidance_Side`
   用冰减速 `SpeedScale=0.7` + X 轴正向 1.8m 静止怪物（期望方向 `(1,0,0.7)` 与之约 35°）断言
@@ -281,15 +282,15 @@ Plan 06 六个任务全部完成；服务端全量 **699/699**。生产代码只
 |---|---|---|
 | M2 同段尸体检定 | ✅ 已有守卫 + 测试（无需改动） | `CastHandler.ApplyHit` 在目标不存在或已死时直接返回（不生成 `HitEntry`、不附加状态）；`ElementalApplicationTests.Lethal_Swing_Does_Not_Apply_Element_To_Dead_Target` 断言 50 HP 目标被挥砍击杀后，同次施法的剑气段不再出伤（1 条命中、`EventSeq=1`、无状态） |
 | M3 `StatusTickService.Tick` 缓冲复用 | ✅ 机械修复（2026-11-24） | 每实体 `new List<ActiveStatus>()` 改为服务级 `_dueBuffer`，每实体前后 `Clear()`；`DotDamageTests.Tick_Reuses_Due_Buffer_Across_Entities_And_Ticks` 钉住“两实体 × 两 tick 伤害正确 + 同一缓冲实例 + 注入哨兵被清”，回退为每实体分配时该用例红（已实测） |
-| M4 多 DoT 定序 | ⏳ 仍需设计（Plan 08/backlog） | 当前状态表只有一种 DoT（201 火，`ElementalCatalogDefaults.cs`），`StatusRuntime._byGroup` 同组替换保证同目标最多一条灼烧；多 DoT 并存时的结算顺序（`Dictionary` 插入序不是契约）没有任何产品规则，未做投机排序 |
-| M6 来源类型建模 | ⏳ 仍需设计（Plan 08/backlog） | `ServerStatusManager.Apply` 对全部状态硬编码 `sourceIsPlayer: true`；`StatusTickService.IsNpcSource` 在 DoT 结算时实时查来源实体，来源离场即按玩家处理。需要先把来源种类快照进 `ActiveStatus`/协议语义（NPC→玩家的雷时长、免疫归属）再改 |
+| M4 多 DoT 定序 | ⏳ 仍需设计（Plan 09/backlog） | 当前状态表只有一种 DoT（201 火，`ElementalCatalogDefaults.cs`），`StatusRuntime._byGroup` 同组替换保证同目标最多一条灼烧；多 DoT 并存时的结算顺序（`Dictionary` 插入序不是契约）没有任何产品规则，未做投机排序 |
+| M6 来源类型建模 | ⏳ 仍需设计（Plan 09/backlog） | `ServerStatusManager.Apply` 对全部状态硬编码 `sourceIsPlayer: true`；`StatusTickService.IsNpcSource` 在 DoT 结算时实时查来源实体，来源离场即按玩家处理。需要先把来源种类快照进 `ActiveStatus`/协议语义（NPC→玩家的雷时长、免疫归属）再改 |
 | M7 未用参数 | ✅ 机械修复（2026-11-24） | 删除 `ServerStatusManager.Apply(..., ElementalCatalogDefinition catalog)` 的未用参数并同步调用点（生产 1 处、测试 5 文件）；编译与全量测试通过 |
-| M8 死 API | ⏳ 审计后无可证明未用的生产 API（Plan 08/backlog） | 复核 Plan 04 新增公开面：`StatusRuntime.Remove`/`ControlImmuneUntilTick`、`ActiveStatus.AppliedTick`、`ServerStatusManager.SyncControl` 均有内部或测试消费；缩窄可见性/移除测试观测面属设计取舍，未删 |
+| M8 死 API | ⏳ 审计后无可证明未用的生产 API（Plan 09/backlog） | 复核 Plan 04 新增公开面：`StatusRuntime.Remove`/`ControlImmuneUntilTick`、`ActiveStatus.AppliedTick`、`ServerStatusManager.SyncControl` 均有内部或测试消费；缩窄可见性/移除测试观测面属设计取舍，未删 |
 | M10 死亡 tick | ✅ 机械修复（2026-11-24） | DoT 在 preTick 结算时 `MonsterModule._currentTick` 仍是上一 tick，旧实现 `Die(_currentTick)` 让怪物死亡窗口/`DeathTick` 早 66 ms；新增显式 tick 重载并由 `StatusTickService` 传结算 tick。`DotDamageTests.Dot_Kill_Uses_Settlement_Tick_For_Monster_Death_Window` 旧实现实测 `14 != 15` 红、修复后绿 |
-| M11 非 ActionV1 | ⏳ 仍需设计（Plan 08/backlog） | 生产 `Server3C.EnableMonsters` 恒 `actionV1: true`；非 ActionV1 宿主下 `MonsterModule.OnDamageTaken` 不更新 `LastHp`，DoT 掉血会在下一怪物 tick 被 `DetectHitOrDeath` 判成受击。是否支持该宿主形态未定，未改 |
+| M11 非 ActionV1 | ⏳ 仍需设计（Plan 09/backlog） | 生产 `Server3C.EnableMonsters` 恒 `actionV1: true`；非 ActionV1 宿主下 `MonsterModule.OnDamageTaken` 不更新 `LastHp`，DoT 掉血会在下一怪物 tick 被 `DetectHitOrDeath` 判成受击。是否支持该宿主形态未定，未改 |
 | M16 离线 provider | ✅ 完整首发 `66812544` 已解决 | `OfflineMonsterStatuses` 把 `SyncCore.StatusRuntime` 接到单机时钟/怪物 DoT/表现事件；`OfflineWeaponCast` 冻结武器快照并按施法认领元素；`OfflineElementalWeaponTests`（EditMode，含四元素、无效命中不附加、麻痹/减速移动） |
 | M17 ThunderDuration | ✅ 完整首发 `66812544` 已解决 | `StatusRuntime.Apply`：PvP 控制取 `Pvp.ThunderDurationSeconds`，PvE 取 `def.DurationSeconds`；配置为 PvP 0.8 s / PvE 0.6 s（`Server/Config/elemental_catalog.json`、`ElementalCatalogDefaults.cs`）；`StatusRuntimeTests.Paralyze_Uses_Configured_Pvp_Duration_And_Pve_Status_Duration` 与 `Pve_Paralyze_Does_Not_Grant_Control_Immunity` |
-| M18 bot 控制 | ⏳ 仍需设计（Plan 08/backlog） | bot 是 `EntityKind.PlayerBot`：`BotRunner.Tick` 只按固定步长移动，不读 `ControlSpeedScale`/`ControlActionLock`；10002 会懒配置状态并向观察者投影，但对 bot 无实际控制效果。压测 bot 是否应受状态控制需产品裁定 |
+| M18 bot 控制 | ⏳ 仍需设计（Plan 09/backlog） | bot 是 `EntityKind.PlayerBot`：`BotRunner.Tick` 只按固定步长移动，不读 `ControlSpeedScale`/`ControlActionLock`；10002 会懒配置状态并向观察者投影，但对 bot 无实际控制效果。压测 bot 是否应受状态控制需产品裁定 |
 | M19 断开/换模型陈旧表现 | ✅ Plan 04 换模型 + Plan 08 断开清理 | 换模型：`AuthoritativeStatusVfx.Apply` 在 target 变化时（Proxy↔Full 换根/本地角色重建）先对旧根 `EmitRemoved` 全部组、再对新根重放（`test_authoritative_status_vfx_replays_all_groups_when_target_changes`、`test_remote_entity_registry_replays_statuses_when_tier_changes_render_root`）。断开：Plan 08 任务 2 的 `AuthoritativeStatusVfx.Clear()` 在 `ClientNetworkHost.Disconnect()`（`ResetAttachment` 之后、`manager.Dispose()` 之前）发全部 Removed 并清表；`StatusVfxDisconnectCleanupTests` 2/2，新会话同 id 无残留，角色重建路径不清 |
 
 验证：`bash tools/test-server-inprocess.sh` → **707/707**；Unity EditMode 目标类
